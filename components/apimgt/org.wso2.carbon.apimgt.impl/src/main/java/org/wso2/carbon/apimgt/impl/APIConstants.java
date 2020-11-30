@@ -232,6 +232,8 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORES_LOCATION =
             APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
 
+    public static final String EXTERNAL_API_DEVPORTAL_URL_REGEX = "^./devportal$";
+
     public static final String GA_CONFIGURATION_LOCATION = APIMGT_REGISTRY_LOCATION + "/statistics/ga-config.xml";
 
     public static final String GA_CONF_KEY = "ga-config-key";
@@ -524,6 +526,7 @@ public final class APIConstants {
     public static final String LC_CHECK_ITEM_NAME = "name:";
     public static final String LC_CHECK_ITEM_VALUE = "value:";
     public static final String LC_CHECK_ITEM_ORDER = "order:";
+    public static final String LC_PUBLISH_LC_STATE = "Publish";
 
     public static final String SUPER_TENANT_DOMAIN = "carbon.super";
     public static final String TENANT_PREFIX = "/t/";
@@ -579,8 +582,12 @@ public final class APIConstants {
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
+    public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
 
-    public static String DELEM_COLON = ":";
+    public static final String DELEM_COLON = ":";
+    public static final String DELEM_COMMA = ",";
+    public static final String DELEM_UNDERSCORE = "_";
+    public static final String CHAR_ASTERIX = "*";
 
     public static class TokenStatus {
 
@@ -793,6 +800,7 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
+    public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
     public static final String IDENTITY_PROVIDER = "IdentityProvider.";
     public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
@@ -1098,6 +1106,7 @@ public final class APIConstants {
         public static final String APPLICATION_KEY_MAPPINGS = "/application-key-mappings";
         public static final String APPLICATION_POLICIES = "/application-policies";
         public static final String API_POLICIES = "/api-policies";
+        public static final String GLOBAL_POLICIES = "/global-policies";
         public static final String SUBSCRIPTION_POLICIES = "/subscription-policies";
         public static final String SCOPES = "/scopes";
 
@@ -1636,12 +1645,15 @@ public final class APIConstants {
     public static final String TEMPLATE_KEY_STATE = "keyTemplateState";
 
     public static final String THROTTLE_POLICY_DEFAULT = "_default";
+    public static final String THROTTLE_POLICY_CONDITION = "_condition_";
 
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";
     public static final String TIME_UNIT_HOUR = "hour";
     public static final String TIME_UNIT_DAY = "day";
+
+    public static final String SUBSCRIPTION_TIERS = "availableTiers";
 
     public static final String DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN = "50PerMin";
     public static final String DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN = "20PerMin";
@@ -1774,6 +1786,7 @@ public final class APIConstants {
         public static final String ENABLE_HEADER_CONDITIONS = "EnableHeaderConditions";
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
+        public static final String SKIP_REDEPLOYING_POLICIES = "SkipRedeployingPolicies";
         public static final String ENABLED = "Enabled";
         public static final String IS_THROTTLED = "isThrottled";
         public static final String THROTTLE_KEY = "throttleKey";
@@ -1797,6 +1810,8 @@ public final class APIConstants {
         public static final String DESCRIPTION = "Description";
         public static final String DEFAULT = "Default";
         public static final String NAME = "Name";
+        public static final String TOOLTIP = "Tooltip";
+        public static final String TYPE = "Type";
     }
 
     public static final String REGISTRY_ARTIFACT_SEARCH_DESC_ORDER = "DES";
@@ -1890,6 +1905,7 @@ public final class APIConstants {
         public static final String PERMITTED_REFERER = "permittedReferer";
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+        public static final String AUTHORIZED_USER_TYPE = "aut";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -1914,7 +1930,7 @@ public final class APIConstants {
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
-    public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+    public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;:%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
@@ -2309,6 +2325,11 @@ public final class APIConstants {
         public static final String SANDBOX_TOKEN_ENDPOINT = "sandbox_token_endpoint";
         public static final String PRODUCTION_REVOKE_ENDPOINT = "production_revoke_endpoint";
         public static final String SANDBOX_REVOKE_ENDPOINT = "sandbox_revoke_endpoint";
+        public static final String APPLICATION_ACCESS_TOKEN_EXPIRY_TIME = "application_access_token_expiry_time";
+        public static final String USER_ACCESS_TOKEN_EXPIRY_TIME = "user_access_token_expiry_time";
+        public static final String REFRESH_TOKEN_EXPIRY_TIME = "refresh_token_expiry_time";
+        public static final String ID_TOKEN_EXPIRY_TIME = "id_token_expiry_time";
+        public static final String NOT_APPLICABLE_VALUE = "N/A";
 
         public static class KeyManagerEvent {
 
@@ -2428,7 +2449,8 @@ public final class APIConstants {
     public enum PolicyType {
         API,
         APPLICATION,
-        SUBSCRIPTION
+        SUBSCRIPTION,
+        GLOBAL
     }
 
     public static class NotificationEvent {

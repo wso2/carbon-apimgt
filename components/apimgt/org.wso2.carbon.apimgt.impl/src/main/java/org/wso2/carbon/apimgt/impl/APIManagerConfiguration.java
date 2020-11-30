@@ -488,6 +488,10 @@ public class APIManagerConfiguration {
                             jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE, attribute.getText());
                         } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.DESCRIPTION)) {
                             jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.TOOLTIP)) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.TOOLTIP, attribute.getText());
+                         }else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.TYPE)) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.TYPE, attribute.getText());
                         } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.DEFAULT) &&
                                 isRequired) {
                             jsonObject.put(APIConstants.ApplicationAttributes.DEFAULT, attribute.getText());
@@ -849,6 +853,14 @@ public class APIManagerConfiguration {
             if (enableQueryParamElement != null) {
                 throttleProperties.setEnableQueryParamConditions(JavaUtils.isTrueExplicitly(enableQueryParamElement
                         .getText()));
+            }
+            // Check skip redeploy throttle policies
+            OMElement skipRedeployingPoliciesElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .SKIP_REDEPLOYING_POLICIES));
+            if (skipRedeployingPoliciesElement != null) {
+                throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
+                        .getText().split(APIConstants.DELEM_COMMA));
             }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement

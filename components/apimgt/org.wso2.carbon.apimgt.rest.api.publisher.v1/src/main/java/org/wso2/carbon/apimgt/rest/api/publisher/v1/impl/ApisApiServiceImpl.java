@@ -42,6 +42,7 @@ import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -110,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
@@ -118,9 +120,11 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.CertificateMappingUtil;
@@ -168,6 +172,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.GraphqlQueryAnalysisMappingUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -1109,7 +1114,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+                                new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
                         String inputLine;
                         StringBuilder responseString = new StringBuilder();
 
@@ -1124,7 +1129,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         Integer numErrors = Integer.valueOf(
                                 (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
                                         .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
-                        String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
+                        String decodedReport = new String(Base64Utils.decode(report), StandardCharsets.UTF_8);
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
@@ -1163,7 +1168,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Set the property to be attached in the body of the request
         // Attach API Definition to property called specfile to be sent in the request
         JSONObject jsonBody = new JSONObject();
-        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes("UTF-8")));
+        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         // Logic for HTTP Request
         String putUrl = baseUrl + "/" + auditUuid;
         URL updateApiUrl = new URL(putUrl);
@@ -1223,7 +1228,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
         httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
         outputStream = httpConn.getOutputStream();
-        writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
+        writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
         // Name property
         writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
                 .append("Content-Disposition: form-data; name=\"name\"")
@@ -1254,7 +1259,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug("HTTP status " + status);
             }
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+                    new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
             String inputLine;
             StringBuilder responseString = new StringBuilder();
 
@@ -1620,8 +1625,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdClientCertificatesPost(InputStream certificateInputStream,
-                                                    Attachment certificateDetail, String alias, String apiId, String tier, MessageContext messageContext) {
+        public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
@@ -1835,8 +1839,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document as DTO
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-                                                            InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String ifMatch,
+                InputStream inputStream, Attachment fileDetail, String inlineContent,
                                                             MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -2476,8 +2480,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String type, String apiId, String mediationPolicyId,
-                                                                   InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String apiId, String mediationPolicyId,
+                                String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                                          String inlineContent, MessageContext messageContext) {
 
         InputStream contentStream = null;
         APIIdentifier apiIdentifier;
@@ -2605,8 +2610,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated mediation DTO as response
      */
     @Override
-    public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream,
-            Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext)
+    public Response apisApiIdMediationPoliciesPost(String apiId, String type, String ifMatch, InputStream
+            fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext)
             throws APIManagementException {
 
         String fileName = "";
@@ -3062,11 +3067,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
+            String updatedDefinition = RestApiPublisherUtils.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
@@ -3096,8 +3098,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
-            Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdSwaggerPut(String apiId, String ifMatch, String apiDefinition, String url,
+                                InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -3454,8 +3456,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Definition validation response
      */
     @Override
-    public Response validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-          Boolean returnContent, MessageContext messageContext) {
+    public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream,
+                                              Attachment fileDetail, MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
@@ -3482,6 +3484,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                             String additionalProperties, MessageContext messageContext) {
+
+        // validate 'additionalProperties' json
+        if (StringUtils.isBlank(additionalProperties)) {
+            RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
+        }
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
@@ -3879,8 +3886,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
      */
     @Override
-    public Response updateWSDLOfAPI(String apiId, InputStream fileInputStream, Attachment fileDetail, String url,
-           String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                    String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -3902,7 +3909,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
-            String ifMatch, MessageContext messageContext) {
+                                            String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -3929,7 +3936,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //todo: check if API's tiers are properly set before Publishing
-            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action);
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId);
@@ -3964,9 +3971,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
-            if (defaultVersion) {
-                api.setAsDefaultVersion(true);
-            }
+            api.setAsDefaultVersion(true);
+
             //creates the new version
             apiProvider.createNewAPIVersion(api, newVersion);
 
@@ -4013,27 +4019,41 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
-                                  Boolean preserveStatus, MessageContext messageContext)
-            throws APIManagementException {
-        ExportApiUtil exportApiUtil = new ExportApiUtil();
-        if (apiId == null) {
+                                  Boolean preserveStatus, MessageContext messageContext) {
+        APIIdentifier apiIdentifier;
+        APIDTO apiDtoToReturn;
 
-            return exportApiUtil.exportApiOrApiProductByParams(name, version, providerName, format, preserveStatus, RestApiConstants.RESOURCE_API);
-        } else {
-            try {
+        //If not specified status is preserved by default
+        preserveStatus = preserveStatus == null || preserveStatus;
+
+        // Default export format is YAML
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String userName = RestApiUtil.getLoggedInUsername();
+
+            // apiId == null means the path from the API Controller
+            if (apiId == null) {
+                // Validate API name, version and provider before exporting
+                String provider = ExportUtils.validateExportParams(name, version, providerName);
+                apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                apiDtoToReturn = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
+            } else {
                 String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                return exportApiUtil.exportApiById(apiIdentifier, preserveStatus, format);
-            } catch (APIManagementException e) {
-                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-                } else if (isAuthorizationFailure(e)) {
-                    RestApiUtil.handleAuthorizationFailure(
-                            "Authorization failure while exporting the  API " + apiId, e, log);
-                } else {
-                    RestApiUtil.handleInternalServerError("Error while exporting the API " + apiId, e, log);
-                }
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                apiDtoToReturn = getAPIByID(apiId);
             }
+
+            File file = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, exportFormat,
+                    preserveStatus);
+            return Response.ok(file)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                            + file.getName() + "\"")
+                    .build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;
     }
@@ -4049,9 +4069,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with GraphQL API
      */
     @Override
-    public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
-                                                String additionalProperties, String ifMatch,
-                                                MessageContext messageContext) {
+    public Response apisImportGraphqlSchemaPost(String ifMatch, String type, InputStream fileInputStream,
+                                Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
         String schema = "";
 
@@ -4534,8 +4553,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.debug("Proxy configured, hence routing through configured proxy");
             String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
             String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
-            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-                    new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
+            HostConfiguration hostConfiguration = client.getHostConfiguration();
+            hostConfiguration.setProxy(proxyHost, Integer.parseInt(proxyPort));
+            client.setHostConfiguration(hostConfiguration);
         }
         try {
             int statusCode = client.executeMethod(method);

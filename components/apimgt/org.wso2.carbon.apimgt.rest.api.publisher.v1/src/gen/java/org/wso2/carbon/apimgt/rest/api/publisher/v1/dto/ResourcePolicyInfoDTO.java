@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -65,7 +70,7 @@ public class ResourcePolicyInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "A string that represents the resource path of the api for the related resource policy")
+  @ApiModelProperty(example = "checkPhoneNumber", value = "A string that represents the resource path of the api for the related resource policy")
   @JsonProperty("resourcePath")
   public String getResourcePath() {
     return resourcePath;

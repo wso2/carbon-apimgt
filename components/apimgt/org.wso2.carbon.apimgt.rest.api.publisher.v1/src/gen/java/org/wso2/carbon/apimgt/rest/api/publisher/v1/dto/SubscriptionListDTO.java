@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
@@ -14,13 +16,16 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class SubscriptionListDTO   {
   
     private Integer count = null;
-    private List<SubscriptionDTO> list = new ArrayList<>();
+    private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
     private PaginationDTO pagination = null;
 
   /**
@@ -50,6 +55,7 @@ public class SubscriptionListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<SubscriptionDTO> getList() {
     return list;
@@ -67,6 +73,7 @@ public class SubscriptionListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("pagination")
   public PaginationDTO getPagination() {
     return pagination;

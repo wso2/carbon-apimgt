@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/external-stores")
 
 @Api(description = "the external-stores API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ExternalStoresApi  {
@@ -38,16 +38,16 @@ ExternalStoresApiService delegate = new ExternalStoresApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve external store list to publish an API", notes = "Retrieve external stores list configured to publish an API ", response = ExternalStoreDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve External Stores List to Publish an API", notes = "Retrieve external stores list configured to publish an API ", response = ExternalStoreDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "External Stores" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. External Stores list returned ", response = ExternalStoreDTO.class),
-        @ApiResponse(code = 500, message = "Error retrieving external stores", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAllExternalStores() throws APIManagementException{
         return delegate.getAllExternalStores(securityContext);
     }

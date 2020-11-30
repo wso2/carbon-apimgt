@@ -91,6 +91,7 @@ export default {
             leftMenuActive: '#254061',
             drawer: '#1a1f2f',
             activeMenuItem: '#254061',
+            divider: '#000000',
         },
     },
     typography: {
@@ -170,7 +171,7 @@ export default {
                 },
             },
         },
-        // lifeCycleImage: APP_CONTEXT + '/public/app/images/logo.png',
+        // lifeCycleImage: '/site/public/images/logo.svg',
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
         adminRole: 'admin',
         commentsLimit: 5,
@@ -181,8 +182,10 @@ export default {
         },
         warningColor: '#ffc439',
         title: {
-            prefix: '[Devportal]',
+            prefix: '[Publisher]',
             sufix: '- WSO2 APIM',
         },
+        buttonText: '#FF7300',
+        buttonBorder: '#FCA574',
     },
 };

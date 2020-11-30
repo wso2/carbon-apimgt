@@ -41,6 +41,8 @@ const config = {
     devtool: 'source-map',
     resolve: {
         alias: {
+            OverrideData: path.resolve(__dirname, 'override/src/app/data/'),
+            OverrideComponents: path.resolve(__dirname, 'override/src/app/components/'),
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
@@ -51,6 +53,8 @@ const config = {
         },
         extensions: ['.mjs','.js', '.jsx'],
     },
+    node: { fs: 'empty' },
+    
     module: {
         rules: [
             {

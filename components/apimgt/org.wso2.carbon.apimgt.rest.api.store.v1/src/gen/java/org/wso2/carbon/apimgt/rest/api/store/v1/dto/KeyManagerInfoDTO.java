@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.KeyManagerApplicationConfigurationDTO;
@@ -13,6 +15,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -24,7 +29,7 @@ public class KeyManagerInfoDTO   {
     private String displayName = null;
     private String description = null;
     private Boolean enabled = null;
-    private List<String> availableGrantTypes = new ArrayList<>();
+    private List<String> availableGrantTypes = new ArrayList<String>();
     private String tokenEndpoint = null;
     private String revokeEndpoint = null;
     private String userInfoEndpoint = null;
@@ -33,7 +38,7 @@ public class KeyManagerInfoDTO   {
     private Boolean enableTokenHashing = false;
     private Boolean enableOAuthAppCreation = true;
     private Boolean enableMapOAuthConsumerApps = false;
-    private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<>();
+    private List<KeyManagerApplicationConfigurationDTO> applicationConfiguration = new ArrayList<KeyManagerApplicationConfigurationDTO>();
     private Object additionalProperties = null;
 
   /**
@@ -61,7 +66,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "WSO2 IS", required = true, value = "")
+  @ApiModelProperty(example = "Resident Key Manager", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -79,7 +84,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "IS", required = true, value = "")
+  @ApiModelProperty(example = "default", required = true, value = "")
   @JsonProperty("type")
   @NotNull
   public String getType() {
@@ -98,7 +103,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "Keymanager1", value = "display name of Keymanager ")
+  @ApiModelProperty(example = "Resident Key Manager", value = "display name of Keymanager ")
   @JsonProperty("displayName")
   public String getDisplayName() {
     return displayName;
@@ -115,7 +120,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "This is a key manager for Developers", value = "")
+  @ApiModelProperty(example = "This is Resident Key Manager", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -166,7 +171,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "https://localhost:9443/oauth2/token", value = "")
   @JsonProperty("tokenEndpoint")
   public String getTokenEndpoint() {
     return tokenEndpoint;
@@ -183,7 +188,7 @@ public class KeyManagerInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "https://localhost:9443/oauth2/revoke", value = "")
   @JsonProperty("revokeEndpoint")
   public String getRevokeEndpoint() {
     return revokeEndpoint;
@@ -303,6 +308,7 @@ public class KeyManagerInfoDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("applicationConfiguration")
   public List<KeyManagerApplicationConfigurationDTO> getApplicationConfiguration() {
     return applicationConfiguration;
@@ -320,6 +326,7 @@ public class KeyManagerInfoDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("additionalProperties")
   public Object getAdditionalProperties() {
     return additionalProperties;

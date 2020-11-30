@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentsDTO;
@@ -15,20 +17,23 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class SettingsDTO   {
   
     private String storeUrl = null;
-    private List<EnvironmentDTO> environment = new ArrayList<>();
-    private List<String> scopes = new ArrayList<>();
-    private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
+    private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
+    private List<String> scopes = new ArrayList<String>();
+    private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private Object securityAuditProperties = null;
     private Boolean externalStoresEnabled = null;
     private Boolean docVisibilityEnabled = null;
     private Boolean crossTenantSubscriptionEnabled = false;
-    private List<DeploymentsDTO> deployments = new ArrayList<>();
+    private List<DeploymentsDTO> deployments = new ArrayList<DeploymentsDTO>();
 
   /**
    * Store URL
@@ -39,7 +44,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "Store URL")
+  @ApiModelProperty(example = "https://localhost:9443/devportal", value = "Store URL")
   @JsonProperty("storeUrl")
   public String getStoreUrl() {
     return storeUrl;
@@ -57,6 +62,7 @@ public class SettingsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("environment")
   public List<EnvironmentDTO> getEnvironment() {
     return environment;
@@ -73,7 +79,7 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"apim:api_create\",\"apim:api_publish\"]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -90,7 +96,8 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
+      @Valid
   @JsonProperty("monetizationAttributes")
   public List<MonetizationAttributeDTO> getMonetizationAttributes() {
     return monetizationAttributes;
@@ -108,6 +115,7 @@ public class SettingsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("securityAuditProperties")
   public Object getSecurityAuditProperties() {
     return securityAuditProperties;
@@ -179,6 +187,7 @@ public class SettingsDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("deployments")
   public List<DeploymentsDTO> getDeployments() {
     return deployments;

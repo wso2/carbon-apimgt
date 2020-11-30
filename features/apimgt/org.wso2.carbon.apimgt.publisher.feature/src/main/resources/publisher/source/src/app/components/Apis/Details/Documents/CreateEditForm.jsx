@@ -129,7 +129,7 @@ class CreateEditForm extends React.Component {
             otherTypeName: null,
             nameNotDuplicate: true,
             nameMaxLengthExceeds: false,
-            invalidUrl: true,
+            invalidUrl: false,
             nameEmpty: false,
             summeryEmpty: false,
             urlEmpty: false,
@@ -140,7 +140,7 @@ class CreateEditForm extends React.Component {
     changeType = (e) => {
         const { value } = e.target;
         if (value === 'PUBLIC_FORUM' || value === 'SUPPORT_FORUM') {
-            this.setState({ type: 'URL' });
+            this.setState({ sourceType: 'URL' });
         }
         this.setState({ type: value });
     };
@@ -528,7 +528,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             className={classes.formControlLabel}
                             value='HOWTO'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>help_outline</Icon>
@@ -544,7 +544,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             className={classes.formControlLabel}
                             value='SAMPLES'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>code</Icon>
@@ -560,7 +560,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             className={classes.formControlLabel}
                             value='PUBLIC_FORUM'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>forum</Icon>
@@ -576,7 +576,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             className={classes.formControlLabel}
                             value='SUPPORT_FORUM'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>forum</Icon>
@@ -595,7 +595,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             className={classes.formControlLabel}
                             value='OTHER'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>video_label</Icon>
@@ -658,7 +658,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             disabled={this.setDisable('INLINE')}
                             value='INLINE'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <FormattedMessage
                                     id='Apis.Details.Documents.CreateEditForm.source.inline'
@@ -669,7 +669,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             disabled={this.setDisable('MARKDOWN')}
                             value='MARKDOWN'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <FormattedMessage
                                     id='Apis.Details.Documents.CreateEditForm.source.markdown'
@@ -680,7 +680,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             disabled={this.setDisable('URL')}
                             value='URL'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <FormattedMessage
                                     id='Apis.Details.Documents.CreateEditForm.source.url'
@@ -691,7 +691,7 @@ class CreateEditForm extends React.Component {
                         <FormControlLabel
                             disabled={this.setDisable('FILE')}
                             value='FILE'
-                            control={<Radio />}
+                            control={<Radio color='primary'/>}
                             label={
                                 <FormattedMessage
                                     id='Apis.Details.Documents.CreateEditForm.source.file'

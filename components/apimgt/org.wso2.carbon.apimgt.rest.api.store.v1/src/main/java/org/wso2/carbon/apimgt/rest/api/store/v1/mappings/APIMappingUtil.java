@@ -47,8 +47,12 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -91,7 +95,6 @@ public class APIMappingUtil {
 
         dto.setScopes(new ArrayList<>(uniqueScope.values()));
 
-        /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
             Date lastUpdateDate = model.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
@@ -104,7 +107,7 @@ public class APIMappingUtil {
             DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             String dateFormatted = formatter.format(date);
             dto.setCreatedTime(dateFormatted);
-        } */
+        }
 
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition = null;
@@ -808,7 +811,7 @@ public class APIMappingUtil {
                     }
 
                     if (api.isDefaultVersion()) {
-                        int index = endpointBuilder.indexOf(api.getId().getVersion());
+                        int index = endpointBuilder.lastIndexOf(api.getId().getVersion());
                         endpointBuilder.replace(index, endpointBuilder.length(), "");
                         if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
                             apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());

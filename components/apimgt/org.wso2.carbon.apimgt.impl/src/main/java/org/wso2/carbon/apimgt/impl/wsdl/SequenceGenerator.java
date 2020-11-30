@@ -88,6 +88,8 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
  */
 public class SequenceGenerator {
     private static final Logger log = LoggerFactory.getLogger(SequenceGenerator.class);
+    private static String soapMessageType = SOAPToRESTConstants.EMPTY_STRING;
+    private static String soapStyle = SOAPToRESTConstants.EMPTY_STRING;
 
     /**
      * Generates in/out sequences from the swagger given
@@ -132,6 +134,10 @@ public class SequenceGenerator {
                     namespace = (String) ((LinkedHashMap) vendorExtensionObj).get("namespace");
                     soapVersion = (String) ((LinkedHashMap) vendorExtensionObj)
                             .get(SOAPToRESTConstants.Swagger.SOAP_VERSION);
+                    soapMessageType = (String) ((LinkedHashMap) vendorExtensionObj)
+                            .get(SOAPToRESTConstants.Swagger.SOAP_MESSAGE_TYPE);
+                    soapStyle = (String) ((LinkedHashMap) vendorExtensionObj)
+                            .get(SOAPToRESTConstants.Swagger.SOAP_STYLE);
                     isResourceFromWSDL = true;
                 }
                 String soapNamespace = SOAPToRESTConstants.SOAP12_NAMSPACE;
@@ -324,9 +330,14 @@ public class SequenceGenerator {
             Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
-                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + operationId);
-            doc.appendChild(rootElement);
+            Element rootElement = null;
+            if (SOAPToRESTConstants.SOAP_RPC_MESSAGE_TYPE.equalsIgnoreCase(soapMessageType)
+                    || SOAPToRESTConstants.SOAP_RPC_MESSAGE_TYPE.equalsIgnoreCase(soapStyle)
+                    || parameterJsonPathMapping.size() == 0) {
+                rootElement = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                        + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + operationId);
+                doc.appendChild(rootElement);
+            }
             int count = 1;
             for (String parameter : parameterJsonPathMapping.keySet()) {
                 String parameterType = parameterJsonPathMapping.get(parameter);
@@ -388,15 +399,21 @@ public class SequenceGenerator {
                         }
 
                         if (doc.getElementsByTagName(element.getTagName()).getLength() > 0 &&
-                                parameter.contains(xPathOfNode)) {
+                                parameter.contains(xPathOfNode)
+                                && rootElement != doc.getElementsByTagName(element.getTagName()).item(0)) {
                             prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
                         } else {
                             if (elemPos == length - 1) {
                                 element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR + count);
                                 count++;
                             }
-                            prevElement.appendChild(element);
-                            prevElement = element;
+                            if (prevElement != null) {
+                                prevElement.appendChild(element);
+                                prevElement = element;
+                            } else {
+                                doc.appendChild(element);
+                                prevElement = element;
+                            }
                         }
                         elemPos++;
                     }
@@ -409,7 +426,11 @@ public class SequenceGenerator {
                             + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + queryParam);
                     element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR + count);
                     count++;
-                    rootElement.appendChild(element);
+                    if ( rootElement != null ) {
+                        rootElement.appendChild(element);
+                    } else {
+                        doc.appendChild(element);
+                    }
                 }
             } else if (parameterJsonPathMapping.size() > 0 && queryPathParamMapping.size() > 0) {
                 log.warn("Query parameters along with the body parameter is not allowed");

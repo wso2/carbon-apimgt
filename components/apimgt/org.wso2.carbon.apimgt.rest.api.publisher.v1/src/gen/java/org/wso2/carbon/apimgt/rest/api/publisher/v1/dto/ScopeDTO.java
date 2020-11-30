@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -12,6 +14,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -21,7 +26,7 @@ public class ScopeDTO   {
     private String name = null;
     private String displayName = null;
     private String description = null;
-    private List<String> bindings = new ArrayList<>();
+    private List<String> bindings = new ArrayList<String>();
     private Integer usageCount = null;
 
   /**
@@ -54,7 +59,7 @@ public class ScopeDTO   {
   @ApiModelProperty(example = "apim:api_view", required = true, value = "name of Scope ")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -72,7 +77,7 @@ public class ScopeDTO   {
   
   @ApiModelProperty(example = "api_view", value = "display name of Scope ")
   @JsonProperty("displayName")
-  public String getDisplayName() {
+ @Size(max=255)  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {
@@ -90,7 +95,7 @@ public class ScopeDTO   {
   
   @ApiModelProperty(example = "This Scope can used to view Apis", value = "description of Scope ")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=512)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {

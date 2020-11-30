@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -18,38 +23,37 @@ public class MediationDTO   {
     private String id = null;
     private String name = null;
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
+    @XmlType(name="TypeEnum")
+    @XmlEnum(String.class)
+    public enum TypeEnum {
+        IN("IN"),
+        OUT("OUT"),
+        FAULT("FAULT");
+        private String value;
 
-    @XmlEnumValue("in") IN(String.valueOf("in")), @XmlEnumValue("out") OUT(String.valueOf("out")), @XmlEnumValue("fault") FAULT(String.valueOf("fault"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TypeEnum fromValue(String v) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TypeEnum type = null;
     private String config = null;
 
@@ -78,7 +82,7 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(example = "json_fault.xml", required = true, value = "")
+  @ApiModelProperty(example = "custom_log_in_message.xml", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -96,7 +100,7 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(example = "in", required = true, value = "")
+  @ApiModelProperty(example = "IN", required = true, value = "")
   @JsonProperty("type")
   @NotNull
   public TypeEnum getType() {
@@ -114,7 +118,7 @@ public enum TypeEnum {
   }
 
   
-  @ApiModelProperty(example = "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"log_in_message\"> <log level=\"full\"> <property name=\"IN_MESSAGE\" value=\"IN_MESSAGE_21133232\"/> </log> </sequence>", required = true, value = "")
+  @ApiModelProperty(example = "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"custom_log_in_message\"> <log level=\"full\"> <property name=\"IN_MESSAGE\" value=\"IN_MESSAGE_21133232\"/> </log> </sequence>", required = true, value = "")
   @JsonProperty("config")
   @NotNull
   public String getConfig() {

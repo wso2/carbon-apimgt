@@ -168,6 +168,7 @@
 }
 #react-root{
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 .apim-dual-ring {
   display: inline-block;
@@ -201,12 +202,12 @@
 .image-load-frame {
 	background: #efefef;
     width: 100%;
-    height: 145px;
+    height: 100%;
     position: relative;
 }
 div.image-load-animation1 {
   width: 40px;
-  height: 145px;
+  height: 100%;
   background-color: #efefef;
   position: absolute;
   -webkit-animation-name: image-load-animation1; /* Safari 4.0 - 8.0 */
@@ -217,7 +218,7 @@ div.image-load-animation1 {
 }
 div.image-load-animation2 {
   width: 40px;
-  height: 145px;
+  height: 100%;
   background-color: #efefef;
   position: absolute;
   -webkit-animation-name: image-load-animation2; /* Safari 4.0 - 8.0 */
@@ -230,12 +231,12 @@ div.image-load-animation2 {
 /* Standard syntax */
 @keyframes image-load-animation1 {
   0%   {background-color:#efefef; left:0px; top:0px;}
-  70%  {background-color:#e3e3e3; left:160px; top:0px;}
+  70%  {background-color:#e3e3e3; left:70%; top:0px;}
   100% {background-color:#efefef; left:0px; top:0px;}
 }
 @keyframes image-load-animation2 {
-  0%   {background-color:#efefef; left:100px; top:0px;}
-  75%  {background-color:#e3e3e3; left:160px; top:0px;}
+  0%   {background-color:#efefef; left:20%; top:0px;}
+  75%  {background-color:#e3e3e3; left:75%; top:0px;}
   100% {background-color:#efefef; left:0px; top:0px;}
 }
 body{

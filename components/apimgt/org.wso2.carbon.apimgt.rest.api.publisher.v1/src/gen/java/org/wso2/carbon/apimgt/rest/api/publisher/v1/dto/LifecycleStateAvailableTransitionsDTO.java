@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -26,7 +31,7 @@ public class LifecycleStateAvailableTransitionsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Promote", value = "")
+  @ApiModelProperty(example = "Publish", value = "")
   @JsonProperty("event")
   public String getEvent() {
     return event;
@@ -43,7 +48,7 @@ public class LifecycleStateAvailableTransitionsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Created", value = "")
+  @ApiModelProperty(example = "Published", value = "")
   @JsonProperty("targetState")
   public String getTargetState() {
     return targetState;

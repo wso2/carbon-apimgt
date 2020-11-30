@@ -28,8 +28,8 @@ import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
 import io.swagger.oas.inflector.processors.JsonNodeExampleSerializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.swagger.util.Yaml;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -407,6 +407,19 @@ public class OAS3Parser extends APIDefinition {
                         } else {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
+                    } else if (!getScopeOfOperations("OAuth2Security", operation).isEmpty()) {
+                        opScopes = getScopeOfOperations("OAuth2Security", operation);
+                        if (opScopes.size() == 1) {
+                            String firstScope = opScopes.get(0);
+                            Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                            if (scope == null) {
+                                throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                            }
+                            template.setScope(scope);
+                            template.setScopes(scope);
+                        } else {
+                            template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
+                        }
                     }
                     Map<String, Object> extensios = operation.getExtensions();
                     if (extensios != null) {
@@ -451,26 +464,38 @@ public class OAS3Parser extends APIDefinition {
         OAuthFlows oAuthFlows;
         OAuthFlow oAuthFlow;
         Scopes scopes;
-        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
-                && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
-                && (oAuthFlows = securityScheme.getFlows()) != null
-                && (oAuthFlow = oAuthFlows.getImplicit()) != null
-                && (scopes = oAuthFlow.getScopes()) != null) {
+        if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes())
+                != null) {
             Set<Scope> scopeSet = new HashSet<>();
-            for (Map.Entry<String, String> entry : scopes.entrySet()) {
-                Scope scope = new Scope();
-                scope.setKey(entry.getKey());
-                scope.setName(entry.getKey());
-                scope.setDescription(entry.getValue());
-                Map<String, String> scopeBindings;
-                if (oAuthFlow.getExtensions() != null && (scopeBindings =
-                        (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
-                        != null) {
-                    if (scopeBindings.get(scope.getKey()) != null) {
-                        scope.setRoles(scopeBindings.get(scope.getKey()));
+            if  ((securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null &&
+                    (oAuthFlows = securityScheme.getFlows()) != null && (oAuthFlow = oAuthFlows.getImplicit()) != null
+                    && (scopes = oAuthFlow.getScopes()) != null) {
+                for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                    Scope scope = new Scope();
+                    scope.setKey(entry.getKey());
+                    scope.setName(entry.getKey());
+                    scope.setDescription(entry.getValue());
+                    Map<String, String> scopeBindings;
+                    if (oAuthFlow.getExtensions() != null && (scopeBindings =
+                            (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                            != null) {
+                        if (scopeBindings.get(scope.getKey()) != null) {
+                            scope.setRoles(scopeBindings.get(scope.getKey()));
+                        }
                     }
+                    scopeSet.add(scope);
                 }
-                scopeSet.add(scope);
+            } else if ((securityScheme = securitySchemes.get("OAuth2Security")) != null &&
+                    (oAuthFlows = securityScheme.getFlows()) != null && (oAuthFlow = oAuthFlows.getPassword()) != null
+                    && (scopes = oAuthFlow.getScopes()) != null) {
+                for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                    Scope scope = new Scope();
+                    scope.setKey(entry.getKey());
+                    scope.setName(entry.getKey());
+                    scope.setDescription(entry.getValue());
+                    Map<String, String> scopeBindings;
+                    scopeSet.add(scope);
+                }
             }
             return OASParserUtil.sortScopes(scopeSet);
         } else {
@@ -605,7 +630,32 @@ public class OAS3Parser extends APIDefinition {
         if (StringUtils.isEmpty(openAPI.getInfo().getVersion())) {
             openAPI.getInfo().setVersion(swaggerData.getVersion());
         }
+        preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         return Json.pretty(openAPI);
+    }
+
+    /**
+     * Preserve and rearrange the OpenAPI definition according to the resource path order of the updating API payload.
+     *
+     * @param swaggerData Updating API swagger data
+     * @param openAPI     Updated OpenAPI definition
+     */
+    private void preserveResourcePathOrderFromAPI(SwaggerData swaggerData, OpenAPI openAPI) {
+
+        Set<String> orderedResourcePaths = new LinkedHashSet<>();
+        Paths orderedOpenAPIPaths = new Paths();
+        // Iterate the URI template order given in the updating API payload (Swagger Data) and rearrange resource paths
+        // order in OpenAPI with relevance to the first matching resource path item from the swagger data path list.
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            String path = resource.getPath();
+            if (!orderedResourcePaths.contains(path)) {
+                orderedResourcePaths.add(path);
+                // Get the resource path item for the path from existing OpenAPI
+                PathItem resourcePathItem = openAPI.getPaths().get(path);
+                orderedOpenAPIPaths.addPathItem(path, resourcePathItem);
+            }
+        }
+        openAPI.setPaths(orderedOpenAPIPaths);
     }
 
     /**
@@ -1699,18 +1749,22 @@ public class OAS3Parser extends APIDefinition {
         Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
         if (!applicationSecurity.isEmpty()) {
             String securityList = api.getApiSecurity();
+            securityList = securityList == null ? "" : securityList;
             for (String securityType : applicationSecurity) {
-                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType)) {
+                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType) &&
+                        !securityList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     securityList = securityList + "," + APIConstants.DEFAULT_API_SECURITY_OAUTH2;
                 }
-                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType)) {
+                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType) &&
+                        !securityList.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
                     securityList = securityList + "," + APIConstants.API_SECURITY_BASIC_AUTH;
                 }
-                if (APIConstants.API_SECURITY_API_KEY.equals(securityType)) {
+                if (APIConstants.API_SECURITY_API_KEY.equals(securityType) &&
+                        !securityList.contains(APIConstants.API_SECURITY_API_KEY)) {
                     securityList = securityList + "," + APIConstants.API_SECURITY_API_KEY;
                 }
             }
-            if (!isOptional) {
+            if (!(isOptional || securityList.contains(APIConstants.MANDATORY))) {
                 securityList = securityList + "," + APIConstants.MANDATORY;
             }
             api.setApiSecurity(securityList);
@@ -1722,9 +1776,11 @@ public class OAS3Parser extends APIDefinition {
             if (StringUtils.isBlank(securityList)) {
                 securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
             }
-            if (APIConstants.OPTIONAL.equals(mutualSSL)) {
+            if (APIConstants.OPTIONAL.equals(mutualSSL) &&
+                    !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
+            } else if (APIConstants.MANDATORY.equals(mutualSSL) &&
+                    !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)){
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
                         APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
@@ -1786,6 +1842,51 @@ public class OAS3Parser extends APIDefinition {
             throw new APIManagementException("Error while removing examples from OpenAPI definition", e,
                     ExceptionCodes.ERROR_REMOVING_EXAMPLES);
         }
+    }
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(swaggerContent);
+        Map<String, Object> apiExtensions = openAPI.getExtensions();
+        if (apiExtensions == null) {
+            return swaggerContent;
+        }
+        //Check Disable Security is enabled in API level
+        boolean apiLevelDisableSecurity = OASParserUtil.getDisableSecurity(apiExtensions);
+        Paths paths = openAPI.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = paths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> resourceExtensions = operation.getExtensions();
+                boolean extensionsAreEmpty = false;
+                if (apiLevelDisableSecurity) {
+                    if (resourceExtensions == null) {
+                        resourceExtensions = new HashMap<>();
+                        extensionsAreEmpty = true;
+                    }
+                    resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    if (extensionsAreEmpty) {
+                        operation.setExtensions(resourceExtensions);
+                    }
+                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+                    //Check Disable Security is enabled in resource level
+                    boolean resourceLevelDisableSecurity = Boolean.parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+                    if (resourceLevelDisableSecurity) {
+                        resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    }
+                }
+            }
+        }
+        return Json.pretty(openAPI);
     }
 
 }

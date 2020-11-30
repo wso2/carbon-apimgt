@@ -33,9 +33,15 @@ class Wsdl extends Resource {
      * @memberof Wsdl
      */
     static validateFileOrArchive(file) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT)
+            .client;
+        const requestBody = {
+            requestBody: {
+                file,
+            },
+        };
         return apiClient.then((client) => {
-            return client.apis.Validation.validateWSDLDefinition({ file });
+            return client.apis.Validation.validateWSDLDefinition(null, requestBody);
         });
     }
 
@@ -48,9 +54,15 @@ class Wsdl extends Resource {
      * @memberof Wsdl
      */
     static validateUrl(url) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT)
+            .client;
         return apiClient.then((client) => {
-            return client.apis.Validation.validateWSDLDefinition({ url });
+            return client.apis.Validation.validateWSDLDefinition(
+                {},
+                {
+                    requestBody: { url },
+                },
+            );
         });
     }
 
@@ -65,14 +77,19 @@ class Wsdl extends Resource {
      * @memberof Wsdl
      */
     static importByUrl(url, additionalProperties, implementationType = 'SOAP') {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT)
+            .client;
         return apiClient.then((client) => {
-            const promisedResponse = client.apis.APIs.importWSDLDefinition({
-                url,
-                additionalProperties: JSON.stringify(additionalProperties),
-                implementationType,
-            });
-
+            const promisedResponse = client.apis.APIs.importWSDLDefinition(
+                {},
+                {
+                    requestBody: {
+                        url,
+                        additionalProperties: JSON.stringify(additionalProperties),
+                        implementationType,
+                    },
+                },
+            );
             return promisedResponse.then((response) => new API(response.body));
         });
     }
@@ -88,13 +105,19 @@ class Wsdl extends Resource {
      * @memberof Wsdl
      */
     static importByFileOrArchive(file, additionalProperties, implementationType = 'SOAP') {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT)
+            .client;
         return apiClient.then((client) => {
-            const promisedResponse = client.apis.APIs.importWSDLDefinition({
-                file,
-                additionalProperties: JSON.stringify(additionalProperties),
-                implementationType,
-            });
+            const promisedResponse = client.apis.APIs.importWSDLDefinition(
+                null,
+                {
+                    requestBody: {
+                        file,
+                        additionalProperties: JSON.stringify(additionalProperties),
+                        implementationType,
+                    },
+                },
+            );
 
             return promisedResponse.then((response) => new API(response.body));
         });

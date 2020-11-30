@@ -68,7 +68,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
-    
+
     private static final String NONE = "NONE";
 
     private static volatile long ttl = -1L;
@@ -212,7 +212,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
             JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 
-            if(standardClaims != null) {
+            if (standardClaims != null) {
                 Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
                 while (it.hasNext()) {
                     String claimURI = it.next();
@@ -283,17 +283,19 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
 
                 if (apimKeyCacheExpiry != null) {
-                    ttl = Long.parseLong(apimKeyCacheExpiry);
+                    //added one minute buffer to the expiry time to avoid inconsistencies happen during cache expiry
+                    //task time
+                    ttl = Long.parseLong(apimKeyCacheExpiry) + Long.valueOf(60);
                 } else {
-                    ttl = Long.valueOf(900);
+                    ttl = Long.valueOf(960);
                 }
             } else {
                 String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
                 if (ttlValue != null) {
-                    ttl = Long.parseLong(ttlValue);
+                    ttl = Long.parseLong(ttlValue) + Long.valueOf(60);
                 } else {
                     //15 * 60 (convert 15 minutes to seconds)
-                    ttl = Long.valueOf(900);
+                    ttl = Long.valueOf(960);
                 }
             }
             return ttl;

@@ -39,3 +39,6 @@ components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/admin-
 components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/swagger.json
+components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/.openapi-generator/publisher-api.yaml.sha256
+components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/.openapi-generator/store-api.yaml.sha256
+components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/.openapi-generator/admin-api.yaml.sha256

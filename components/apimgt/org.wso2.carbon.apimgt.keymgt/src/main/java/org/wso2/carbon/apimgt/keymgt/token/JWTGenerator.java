@@ -71,6 +71,10 @@ public class JWTGenerator extends AbstractJWTGenerator {
             dialect = getDialectURI();
         }
 
+        // dialect is either empty or '/' do not append a backslash. otherwise append a backslash '/'
+        if (!"".equals(dialect) && !"/".equals(dialect)) {
+            dialect = dialect + "/";
+        }
         String subscriber = validationContext.getValidationInfoDTO().getSubscriber();
         String applicationName = validationContext.getValidationInfoDTO().getApplicationName();
         String applicationId = validationContext.getValidationInfoDTO().getApplicationId();
@@ -94,23 +98,23 @@ public class JWTGenerator extends AbstractJWTGenerator {
 
         claims.put("iss", API_GATEWAY_ID);
         claims.put("exp", String.valueOf(expireIn));
-        claims.put(dialect + "/subscriber", subscriber);
-        claims.put(dialect + "/applicationid", applicationId);
-        claims.put(dialect + "/applicationname", applicationName);
-        claims.put(dialect + "/applicationtier", applicationTier);
-        claims.put(dialect + "/apiname", apiName);
-        claims.put(dialect + "/apicontext", validationContext.getContext());
-        claims.put(dialect + "/version", validationContext.getVersion());
-        claims.put(dialect + "/tier", tier);
-        claims.put(dialect + "/keytype", keyType);
-        claims.put(dialect + "/usertype", userType);
-        claims.put(dialect + "/enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
-        claims.put(dialect + "/enduserTenantId", enduserTenantId);
-        claims.put(dialect + "/applicationUUId", uuid);
+        claims.put(dialect + "subscriber", subscriber);
+        claims.put(dialect + "applicationid", applicationId);
+        claims.put(dialect + "applicationname", applicationName);
+        claims.put(dialect + "applicationtier", applicationTier);
+        claims.put(dialect + "apiname", apiName);
+        claims.put(dialect + "apicontext", validationContext.getContext());
+        claims.put(dialect + "version", validationContext.getVersion());
+        claims.put(dialect + "tier", tier);
+        claims.put(dialect + "keytype", keyType);
+        claims.put(dialect + "usertype", userType);
+        claims.put(dialect + "enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
+        claims.put(dialect + "enduserTenantId", enduserTenantId);
+        claims.put(dialect + "applicationUUId", uuid);
         try {
             if (appAttributes != null && !appAttributes.isEmpty()) {
                 String stringAppAttributes = new ObjectMapper().writeValueAsString(appAttributes);
-                claims.put(dialect + "/applicationAttributes", stringAppAttributes);
+                claims.put(dialect + "applicationAttributes", stringAppAttributes);
             }
 
         } catch (JsonProcessingException e) {
@@ -137,20 +141,19 @@ public class JWTGenerator extends AbstractJWTGenerator {
             if (accessToken != null) {
                 properties.put(APIConstants.KeyManager.ACCESS_TOKEN, accessToken);
             }
-            String dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+            String dialectURI = jwtConfigurationDto.getConsumerDialectUri();
             if (!StringUtils.isEmpty(dialectURI)) {
                 properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
-            }
-            String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
-            KeyManager keymanager = KeyManagerHolder
-                    .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
-            if (keymanager != null) {
-                customClaims = keymanager.getUserClaims(username, properties);
-                if (log.isDebugEnabled()) {
-                    log.debug("Retrieved claims :" + customClaims);
+                String keymanagerName = validationContext.getValidationInfoDTO().getKeyManager();
+                KeyManager keymanager = KeyManagerHolder
+                        .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keymanagerName);
+                if (keymanager != null) {
+                    customClaims = keymanager.getUserClaims(username, properties);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieved claims :" + customClaims);
+                    }
                 }
-            }
+            } 
         }
 
         ClaimsRetriever claimsRetriever = getClaimsRetriever();

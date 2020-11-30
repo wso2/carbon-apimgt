@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PodStatusDTO;
@@ -13,6 +15,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -20,7 +25,7 @@ public class DeploymentClusterStatusDTO   {
   
     private String clusterName = null;
     private Integer podsRunning = null;
-    private List<PodStatusDTO> healthStatus = new ArrayList<>();
+    private List<PodStatusDTO> healthStatus = new ArrayList<PodStatusDTO>();
 
   /**
    **/
@@ -67,6 +72,7 @@ public class DeploymentClusterStatusDTO   {
 
   
   @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("healthStatus")
   @NotNull
   public List<PodStatusDTO> getHealthStatus() {

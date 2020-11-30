@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 
@@ -50,6 +52,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -160,9 +163,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId,
-            String documentId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch,
-            MessageContext messageContext) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId, String documentId,
+                              String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent,
+                                                                          MessageContext messageContext) {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -621,6 +624,52 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving thumbnail location of API Product : " + apiProductId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Exports an API Product from API Manager. Meta information, API Product icon, documentation, client certificates
+     * and dependent APIs are exported. This service generates a zipped archive which contains all the above mentioned
+     * resources for a given API Product.
+     *
+     * @param name           Name of the API Product that needs to be exported
+     * @param version        Version of the API Product that needs to be exported
+     * @param providerName   Provider name of the API Product that needs to be exported
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus Preserve API Product status on export
+     * @return Zipped file containing exported API Product
+     */
+    @Override
+    public Response apiProductsExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
+        APIProductIdentifier apiProductIdentifier;
+        APIProductDTO apiProductDtoToReturn;
+
+        //If not specified status is preserved by default
+        preserveStatus = preserveStatus == null || preserveStatus;
+
+        // Default export format is YAML
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String userName = RestApiUtil.getLoggedInUsername();
+
+            // Validate API name, version and provider before exporting
+            String provider = ExportUtils.validateExportParams(name, version, providerName);
+            apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+            apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProvider.getAPIProduct(apiProductIdentifier));
+
+            File file = ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn,
+                    userName, exportFormat, preserveStatus);
+            return Response.ok(file)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                            + file.getName() + "\"")
+                    .build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while exporting " +
+                    RestApiConstants.RESOURCE_API_PRODUCT, e, log);
         }
         return null;
     }

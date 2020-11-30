@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -12,6 +14,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -22,7 +27,7 @@ public class ApplicationInfoDTO   {
     private String throttlingPolicy = null;
     private String description = null;
     private String status = "";
-    private List<String> groups = new ArrayList<>();
+    private List<String> groups = new ArrayList<String>();
     private Integer subscriptionCount = null;
     private Object attributes = null;
     private String owner = null;
@@ -120,7 +125,7 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"\"", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("groups")
   public List<String> getGroups() {
     return groups;
@@ -154,7 +159,8 @@ public class ApplicationInfoDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"External Reference ID, Billing Tier\"", value = "")
+  @ApiModelProperty(example = "External Reference ID, Billing Tier", value = "")
+      @Valid
   @JsonProperty("attributes")
   public Object getAttributes() {
     return attributes;

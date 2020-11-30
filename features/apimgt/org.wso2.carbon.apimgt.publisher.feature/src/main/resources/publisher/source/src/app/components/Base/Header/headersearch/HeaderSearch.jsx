@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -70,9 +71,6 @@ const styles = (theme) => ({
     infoButton: {
         margin: theme.spacing(1),
         color: 'white',
-    },
-    emptyContainer: {
-        flexGrow: 1,
     },
     InfoToolTip: {
         backgroundColor: '#f5f5f9',
@@ -235,7 +233,7 @@ class HeaderSearch extends React.Component {
             responsiveContainer = classes.smContainer;
         }
         return (
-            <>
+            <Box display='flex' alignItems='center' justifyContent='space-between' flexDirection='row' width={1}>
                 <Autosuggest
                     theme={{
                         container: responsiveContainer,
@@ -280,8 +278,14 @@ class HeaderSearch extends React.Component {
                             <ol style={{ marginLeft: '-20px', marginTop: '8px' }}>
                                 <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option0'
+                                        defaultMessage='Content [ Default ]'
+                                    />
+                                </li>
+                                <li style={{ marginTop: '5px' }}>
+                                    <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option1'
-                                        defaultMessage='Name [Default]'
+                                        defaultMessage='Name [ Syntax - name:xxxx ]'
                                     />
                                 </li>
                                 <li style={{ marginTop: '5px' }}>
@@ -358,8 +362,7 @@ class HeaderSearch extends React.Component {
                         <InfoIcon />
                     </IconButton>
                 </Tooltip>
-                <div className={classes.emptyContainer} />
-            </>
+            </Box>
         );
     }
 }

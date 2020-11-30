@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationInfoDTO;
@@ -13,6 +15,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -21,7 +26,7 @@ public class MediationListDTO   {
     private Integer count = null;
     private String next = null;
     private String previous = null;
-    private List<MediationInfoDTO> list = new ArrayList<>();
+    private List<MediationInfoDTO> list = new ArrayList<MediationInfoDTO>();
 
   /**
    * Number of mediation sequences returned. 
@@ -50,7 +55,7 @@ public class MediationListDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "Link to the next subset of sequences qualified. Empty if no more sequences are to be returned. ")
+  @ApiModelProperty(value = "Link to the next subset of sequences qualified. Empty if no more sequences are to be returned. ")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -68,7 +73,7 @@ public class MediationListDTO   {
   }
 
   
-  @ApiModelProperty(example = "", value = "Link to the previous subset of sequences qualified. Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(value = "Link to the previous subset of sequences qualified. Empty if current subset is the first subset returned. ")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;
@@ -86,6 +91,7 @@ public class MediationListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<MediationInfoDTO> getList() {
     return list;

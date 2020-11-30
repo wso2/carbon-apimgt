@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -12,6 +14,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -19,7 +24,7 @@ public class LabelDTO   {
   
     private String name = null;
     private String description = null;
-    private List<String> accessUrls = new ArrayList<>();
+    private List<String> accessUrls = new ArrayList<String>();
 
   /**
    **/
@@ -29,7 +34,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "marketing_store", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -47,7 +52,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "Public microgateway for marketing", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -64,7 +69,7 @@ public class LabelDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "https://localhost:9095", value = "")
   @JsonProperty("access_urls")
   public List<String> getAccessUrls() {
     return accessUrls;

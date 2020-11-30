@@ -105,9 +105,11 @@ export default class Subscription extends Resource {
 
             const payload = { 
                 subscriptionId: subscriptionId,
-                body: subscriptionData 
             };
-            return client.apis.Subscriptions.put_subscriptions__subscriptionId_(payload, { 'Content-Type': 'application/json' });
+            return client.apis.Subscriptions.put_subscriptions__subscriptionId_(
+                payload,
+                { requestBody: subscriptionData },
+                { 'Content-Type': 'application/json' });
         });
         return promised_update_subscription;
     }

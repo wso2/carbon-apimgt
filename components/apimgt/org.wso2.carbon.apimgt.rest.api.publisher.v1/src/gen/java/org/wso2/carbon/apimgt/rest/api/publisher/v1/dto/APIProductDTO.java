@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -31,38 +36,36 @@ public class APIProductDTO   {
     private String provider = null;
     private Boolean hasThumbnail = null;
 
-@XmlType(name="StateEnum")
-@XmlEnum(String.class)
-public enum StateEnum {
+    @XmlType(name="StateEnum")
+    @XmlEnum(String.class)
+    public enum StateEnum {
+        CREATED("CREATED"),
+        PUBLISHED("PUBLISHED");
+        private String value;
 
-    @XmlEnumValue("CREATED") CREATED(String.valueOf("CREATED")), @XmlEnumValue("PUBLISHED") PUBLISHED(String.valueOf("PUBLISHED"));
-
-
-    private String value;
-
-    StateEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static StateEnum fromValue(String v) {
-        for (StateEnum b : StateEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        StateEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static StateEnum fromValue(String v) {
+            for (StateEnum b : StateEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private StateEnum state = null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableStore = null;
@@ -70,129 +73,156 @@ public enum StateEnum {
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
 
-@XmlType(name="VisibilityEnum")
-@XmlEnum(String.class)
-public enum VisibilityEnum {
+    @XmlType(name="VisibilityEnum")
+    @XmlEnum(String.class)
+    public enum VisibilityEnum {
+        PUBLIC("PUBLIC"),
+        PRIVATE("PRIVATE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
 
-    @XmlEnumValue("PUBLIC") PUBLIC(String.valueOf("PUBLIC")), @XmlEnumValue("PRIVATE") PRIVATE(String.valueOf("PRIVATE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
-
-
-    private String value;
-
-    VisibilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static VisibilityEnum fromValue(String v) {
-        for (VisibilityEnum b : VisibilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        VisibilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static VisibilityEnum fromValue(String v) {
+            for (VisibilityEnum b : VisibilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
-    private List<String> visibleRoles = new ArrayList<>();
-    private List<String> visibleTenants = new ArrayList<>();
+    private List<String> visibleRoles = new ArrayList<String>();
+    private List<String> visibleTenants = new ArrayList<String>();
 
-@XmlType(name="AccessControlEnum")
-@XmlEnum(String.class)
-public enum AccessControlEnum {
+    @XmlType(name="AccessControlEnum")
+    @XmlEnum(String.class)
+    public enum AccessControlEnum {
+        NONE("NONE"),
+        RESTRICTED("RESTRICTED");
+        private String value;
 
-    @XmlEnumValue("NONE") NONE(String.valueOf("NONE")), @XmlEnumValue("RESTRICTED") RESTRICTED(String.valueOf("RESTRICTED"));
-
-
-    private String value;
-
-    AccessControlEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static AccessControlEnum fromValue(String v) {
-        for (AccessControlEnum b : AccessControlEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        AccessControlEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static AccessControlEnum fromValue(String v) {
+            for (AccessControlEnum b : AccessControlEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
-    private List<String> accessControlRoles = new ArrayList<>();
-    private List<String> gatewayEnvironments = new ArrayList<>();
-    private String apiType = null;
-    private List<String> transport = new ArrayList<>();
-    private List<String> tags = new ArrayList<>();
-    private List<String> policies = new ArrayList<>();
+    private List<String> accessControlRoles = new ArrayList<String>();
+    private List<String> gatewayEnvironments = new ArrayList<String>();
+
+    @XmlType(name="ApiTypeEnum")
+    @XmlEnum(String.class)
+    public enum ApiTypeEnum {
+        API("API"),
+        APIPRODUCT("APIProduct");
+        private String value;
+
+        ApiTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ApiTypeEnum fromValue(String v) {
+            for (ApiTypeEnum b : ApiTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private ApiTypeEnum apiType = null;
+    private List<String> transport = new ArrayList<String>();
+    private List<String> tags = new ArrayList<String>();
+    private List<String> policies = new ArrayList<String>();
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
-    private List<String> securityScheme = new ArrayList<>();
+    private List<String> securityScheme = new ArrayList<String>();
 
-@XmlType(name="SubscriptionAvailabilityEnum")
-@XmlEnum(String.class)
-public enum SubscriptionAvailabilityEnum {
+    @XmlType(name="SubscriptionAvailabilityEnum")
+    @XmlEnum(String.class)
+    public enum SubscriptionAvailabilityEnum {
+        CURRENT_TENANT("CURRENT_TENANT"),
+        ALL_TENANTS("ALL_TENANTS"),
+        SPECIFIC_TENANTS("SPECIFIC_TENANTS");
+        private String value;
 
-    @XmlEnumValue("CURRENT_TENANT") CURRENT_TENANT(String.valueOf("CURRENT_TENANT")), @XmlEnumValue("ALL_TENANTS") ALL_TENANTS(String.valueOf("ALL_TENANTS")), @XmlEnumValue("SPECIFIC_TENANTS") SPECIFIC_TENANTS(String.valueOf("SPECIFIC_TENANTS"));
-
-
-    private String value;
-
-    SubscriptionAvailabilityEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static SubscriptionAvailabilityEnum fromValue(String v) {
-        for (SubscriptionAvailabilityEnum b : SubscriptionAvailabilityEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        SubscriptionAvailabilityEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static SubscriptionAvailabilityEnum fromValue(String v) {
+            for (SubscriptionAvailabilityEnum b : SubscriptionAvailabilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private List<String> subscriptionAvailableTenants = new ArrayList<>();
-    private Map<String, String> additionalProperties = new HashMap<>();
+    private List<String> subscriptionAvailableTenants = new ArrayList<String>();
+    private Map<String, String> additionalProperties = new HashMap<String, String>();
     private APIMonetizationInfoDTO monetization = null;
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    private String createdTime = null;
-    private String lastUpdatedTime = null;
-    private List<ProductAPIDTO> apis = new ArrayList<>();
-    private List<APIScopeDTO> scopes = new ArrayList<>();
-    private List<String> categories = new ArrayList<>();
+    private java.util.Date createdTime = null;
+    private java.util.Date lastUpdatedTime = null;
+    private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+    private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
+    private List<String> categories = new ArrayList<String>();
 
   /**
    * UUID of the api product 
@@ -221,10 +251,10 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPIProduct", required = true, value = "Name of the API Product")
+  @ApiModelProperty(example = "PizzaShackAPIProduct", required = true, value = "Name of the API Product")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -239,9 +269,9 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "CalculatorAPI", value = "")
+  @ApiModelProperty(example = "pizzaproduct", value = "")
   @JsonProperty("context")
-  public String getContext() {
+ @Size(min=1,max=60)  public String getContext() {
     return context;
   }
   public void setContext(String context) {
@@ -257,7 +287,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "A calculator API Product that supports basic operations", value = "A brief description about the API")
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store", value = "A brief description about the API")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -277,7 +307,7 @@ public enum SubscriptionAvailabilityEnum {
   
   @ApiModelProperty(example = "admin", value = "If the provider value is not given, the user invoking the API will be used as the provider. ")
   @JsonProperty("provider")
-  public String getProvider() {
+ @Size(max=50)  public String getProvider() {
     return provider;
   }
   public void setProvider(String provider) {
@@ -292,7 +322,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "true", value = "")
+  @ApiModelProperty(example = "false", value = "")
   @JsonProperty("hasThumbnail")
   public Boolean isHasThumbnail() {
     return hasThumbnail;
@@ -448,7 +478,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("visibleTenants")
   public List<String> getVisibleTenants() {
     return visibleTenants;
@@ -484,7 +514,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "[\"admin\"]", value = "The user roles that are able to view/modify as API Product publisher or creator.")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to view/modify as API Product publisher or creator.")
   @JsonProperty("accessControlRoles")
   public List<String> getAccessControlRoles() {
     return accessControlRoles;
@@ -512,20 +542,20 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
-   * The api type to be used. Accepted values are API, API PRODUCT
+   * The API type to be used. Accepted values are API, APIProduct
    **/
-  public APIProductDTO apiType(String apiType) {
+  public APIProductDTO apiType(ApiTypeEnum apiType) {
     this.apiType = apiType;
     return this;
   }
 
   
-  @ApiModelProperty(example = "APIProduct", value = "The api type to be used. Accepted values are API, API PRODUCT")
+  @ApiModelProperty(example = "APIProduct", value = "The API type to be used. Accepted values are API, APIProduct")
   @JsonProperty("apiType")
-  public String getApiType() {
+  public ApiTypeEnum getApiType() {
     return apiType;
   }
-  public void setApiType(String apiType) {
+  public void setApiType(ApiTypeEnum apiType) {
     this.apiType = apiType;
   }
 
@@ -555,7 +585,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "[\"substract\",\"add\"]", value = "")
+  @ApiModelProperty(example = "[\"pizza\",\"food\"]", value = "")
   @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
@@ -608,7 +638,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
   public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -626,7 +656,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
@@ -661,7 +691,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(example = "[\"tenant1\",\"tenant2\"]", value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("subscriptionAvailableTenants")
   public List<String> getSubscriptionAvailableTenants() {
     return subscriptionAvailableTenants;
@@ -697,6 +727,7 @@ public enum SubscriptionAvailabilityEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetization")
   public APIMonetizationInfoDTO getMonetization() {
     return monetization;
@@ -714,6 +745,7 @@ public enum SubscriptionAvailabilityEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("businessInformation")
   public APIProductBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -731,6 +763,7 @@ public enum SubscriptionAvailabilityEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("corsConfiguration")
   public APICorsConfigurationDTO getCorsConfiguration() {
     return corsConfiguration;
@@ -741,35 +774,35 @@ public enum SubscriptionAvailabilityEnum {
 
   /**
    **/
-  public APIProductDTO createdTime(String createdTime) {
+  public APIProductDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIProductDTO lastUpdatedTime(String lastUpdatedTime) {
+  public APIProductDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
+  public java.util.Date getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
+  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
@@ -782,7 +815,8 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(value = "APIs and resources in the API Product. ")
+  @ApiModelProperty(example = "[{\"name\":\"PizzaShackAPI\",\"apiId\":\"01234567-0123-0123-0123-012345678901\",\"version\":\"1.0\",\"operations\":[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]}]", value = "APIs and resources in the API Product. ")
+      @Valid
   @JsonProperty("apis")
   public List<ProductAPIDTO> getApis() {
     return apis;
@@ -799,7 +833,8 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
+      @Valid
   @JsonProperty("scopes")
   public List<APIScopeDTO> getScopes() {
     return scopes;
@@ -817,7 +852,7 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   
-  @ApiModelProperty(value = "API categories ")
+  @ApiModelProperty(example = "[]", value = "API categories ")
   @JsonProperty("categories")
   public List<String> getCategories() {
     return categories;

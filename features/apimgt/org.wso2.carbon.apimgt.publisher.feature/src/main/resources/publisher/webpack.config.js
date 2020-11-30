@@ -23,7 +23,10 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 
 const config = {
-    entry: { index: './source/index.jsx', swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js' },
+    entry: {
+        index: './source/index.jsx',
+        swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js',
+    },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
         filename: '[name].[contenthash].bundle.js',
@@ -46,6 +49,8 @@ const config = {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
+            OverrideData: path.resolve(__dirname, 'override/src/app/data/'),
+            OverrideComponents: path.resolve(__dirname, 'override/src/app/components/'),
             AppTests: path.resolve(__dirname, 'source/Tests/'),
             react: fs.existsSync('../../../../../node_modules/react')
                 ? path.resolve('../../../../../node_modules/react') : path.resolve('../node_modules/react'),

@@ -116,6 +116,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
                 RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.",
                         e, log);
+            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                                "Provided throttling policy cannot be found.", e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API", e, log);
         }
@@ -189,6 +192,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API_PRODUCT
                         + " not found", e, log);
+            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                        "Provided throttling policy cannot be found.", e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API Product", e, log);
         }
@@ -268,6 +274,7 @@ public class ImportApiServiceImpl implements ImportApiService {
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
+            importExportManager.validateApplicationThrottlingPolicy(applicationDetails);
 
             // check whether we needs to update application or add it
             if (APIUtil.isApplicationExist(ownerId, applicationDetails.getName(), applicationDetails.getGroupId()) && update != null && update) {
@@ -312,6 +319,10 @@ public class ImportApiServiceImpl implements ImportApiService {
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Application", e, log);
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
+            if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                        "Provided throttling policy cannot be found.", e, log);
+            }
             RestApiUtil.handleInternalServerError("Error while importing Application", e, log);
         } catch (UnsupportedEncodingException e) {
             String errorMessage = "Error while Decoding apiId";

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
@@ -14,14 +16,17 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class LifecycleStateDTO   {
   
     private String state = null;
-    private List<LifecycleStateCheckItemsDTO> checkItems = new ArrayList<>();
-    private List<LifecycleStateAvailableTransitionsDTO> availableTransitions = new ArrayList<>();
+    private List<LifecycleStateCheckItemsDTO> checkItems = new ArrayList<LifecycleStateCheckItemsDTO>();
+    private List<LifecycleStateAvailableTransitionsDTO> availableTransitions = new ArrayList<LifecycleStateAvailableTransitionsDTO>();
 
   /**
    **/
@@ -49,6 +54,7 @@ public class LifecycleStateDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("checkItems")
   public List<LifecycleStateCheckItemsDTO> getCheckItems() {
     return checkItems;
@@ -66,6 +72,7 @@ public class LifecycleStateDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("availableTransitions")
   public List<LifecycleStateAvailableTransitionsDTO> getAvailableTransitions() {
     return availableTransitions;

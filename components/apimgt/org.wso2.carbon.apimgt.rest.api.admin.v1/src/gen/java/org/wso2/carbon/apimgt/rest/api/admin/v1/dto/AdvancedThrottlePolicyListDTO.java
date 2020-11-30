@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyInfoDTO;
@@ -13,13 +15,16 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class AdvancedThrottlePolicyListDTO   {
   
     private Integer count = null;
-    private List<AdvancedThrottlePolicyInfoDTO> list = new ArrayList<>();
+    private List<AdvancedThrottlePolicyInfoDTO> list = new ArrayList<AdvancedThrottlePolicyInfoDTO>();
 
   /**
    * Number of Advanced Throttling Policies returned. 
@@ -48,6 +53,7 @@ public class AdvancedThrottlePolicyListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<AdvancedThrottlePolicyInfoDTO> getList() {
     return list;

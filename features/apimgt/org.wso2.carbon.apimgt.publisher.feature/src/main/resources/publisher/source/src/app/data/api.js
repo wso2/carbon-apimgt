@@ -99,11 +99,14 @@ class API extends Resource {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
-                file: openAPIData,
-                additionalProperties: JSON.stringify(apiData),
+                requestBody: {
+                    file: openAPIData,
+                    additionalProperties: JSON.stringify(apiData),
+                }
             };
 
             const promisedResponse = client.apis['APIs'].importOpenAPIDefinition(
+                null,
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -121,11 +124,14 @@ class API extends Resource {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
-                url: openAPIUrl,
-                additionalProperties: JSON.stringify(apiData),
+                requestBody: {
+                    url: openAPIUrl,
+                    additionalProperties: JSON.stringify(apiData),
+                }
             };
 
             const promisedResponse = client.apis['APIs'].importOpenAPIDefinition(
+                null,
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -137,15 +143,21 @@ class API extends Resource {
     }
 
     static validateOpenAPIByFile(openAPIData) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         let payload, promisedValidate;
         payload = {
             file: openAPIData,
             'Content-Type': 'multipart/form-data',
         };
+        const requestBody = {
+            requestBody: {
+                file: openAPIData,
+            },
+        };
         promisedValidate = apiClient.then(client => {
             return client.apis.Validation.validateOpenAPIDefinition(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -155,15 +167,20 @@ class API extends Resource {
     }
 
     static validateOpenAPIByUrl(url, params = { returnContent: false }) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
-            url: url,
             'Content-Type': 'multipart/form-data',
             ...params
+        };
+        const requestBody = {
+            requestBody: {
+                url: url,
+            },
         };
         return apiClient.then(client => {
             return client.apis['Validation'].validateOpenAPIDefinition(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -231,11 +248,19 @@ class API extends Resource {
 
     updateResourcePolicy(resourcePolicy) {
         return this.client.then(client => {
-            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_({
-                apiId: this.id,
-                resourcePolicyId: resourcePolicy.id,
-                body: resourcePolicy,
-            });
+            return client.apis['API Resource Policies'].put_apis__apiId__resource_policies__resourcePolicyId_(
+                {
+                    apiId: this.id,
+                    resourcePolicyId: resourcePolicy.id,
+                },
+                {
+                    requestBody: {
+                        httpVerb: resourcePolicy.httpVerb,
+                        resourcePath: resourcePolicy.resourcePath,
+                        content: resourcePolicy.content,
+                    }
+                }
+            );
         });
     }
 
@@ -280,7 +305,7 @@ class API extends Resource {
 
     save(openAPIVersion = 'v3') {
         const promisedAPIResponse = this.client.then(client => {
-            const properties = client.spec.definitions.API.properties;
+            const properties = client.spec.components.schemas.API.properties;
             const data = {};
             Object.keys(this).forEach(apiAttribute => {
                 if (apiAttribute in properties) {
@@ -288,11 +313,13 @@ class API extends Resource {
                 }
             });
             const payload = {
-                body: data,
                 'Content-Type': 'application/json',
                 openAPIVersion,
             };
-            return client.apis['APIs'].post_apis(payload, this._requestMetaData());
+            const requestBody = {
+                'requestBody': data,
+            };
+            return client.apis['APIs'].post_apis(payload, requestBody, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
             return new API(response.body);
@@ -536,7 +563,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAllScopes(offset = null, limit = null, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
                 { limit, offset},
@@ -621,10 +648,10 @@ class API extends Resource {
      */
     configureMonetizationToApi(apiId, body) {
         const promised_status = this.client.then(client => {
-            return client.apis['API Monetization'].post_apis__apiId__monetize({
-                apiId,
-                body,
-            });
+            return client.apis['API Monetization'].post_apis__apiId__monetize(
+                { apiId },
+                { requestBody: body },
+            );
         });
         return promised_status;
     }
@@ -685,7 +712,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSharedScopeUsages(scopeId, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopeUsages(
                 { scopeId },
@@ -738,10 +765,15 @@ class API extends Resource {
     addSharedScope(body) {
         const promised_addSharedScope = this.client.then(client => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Scopes'].addSharedScope(payload, this._requestMetaData());
+            return client.apis['Scopes'].addSharedScope(
+                payload,
+                {
+                    requestBody: body
+                },
+                this._requestMetaData()
+            );
         });
         return promised_addSharedScope;
     }
@@ -756,10 +788,15 @@ class API extends Resource {
         const promised_updateSharedScope = this.client.then(client => {
             const payload = {
                 scopeId,
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Scopes'].updateSharedScope(payload, this._requestMetaData());
+            return client.apis['Scopes'].updateSharedScope(
+                payload,
+                {
+                    requestBody: body
+                },
+                this._requestMetaData()
+            );
         });
         return promised_updateSharedScope;
     }
@@ -881,11 +918,16 @@ class API extends Resource {
         const promised_updateSchema = this.client.then(client => {
             const payload = {
                 apiId: apiId,
-                schemaDefinition: graphQLSchema,
                 'Content-Type': 'multipart/form-data',
             };
+            const requestBody = {
+                requestBody: {
+                    schemaDefinition: graphQLSchema
+                }
+            }
             return client.apis['GraphQL Schema'].put_apis__apiId__graphql_schema(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -903,11 +945,16 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: this.id,
-                apiDefinition: JSON.stringify(swagger),
                 'Content-Type': 'multipart/form-data',
+            };
+            const requestBody = {
+                requestBody: {
+                    apiDefinition: JSON.stringify(swagger),
+                },
             };
             return client.apis['APIs'].put_apis__apiId__swagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1061,9 +1108,11 @@ class API extends Resource {
         const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiId: updatedAPI.id,
-                body: updatedAPI,
             };
-            return client.apis['APIs'].put_apis__apiId_(payload);
+            const requestBody = {
+                requestBody: updatedAPI,
+            };
+            return client.apis['APIs'].put_apis__apiId_(payload, requestBody);
         });
         return promisedUpdate.then(response => {
             return new API(response.body);
@@ -1078,9 +1127,11 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiProductId: api.id,
-                body: api,
             };
-            return client.apis['API Products'].put_api_products__apiProductId_(payload);
+            const requestBody = {
+                'requestBody': api,
+            };
+            return client.apis['API Products'].put_api_products__apiProductId_(payload, requestBody);
         });
         return promised_update;
     }
@@ -1182,10 +1233,13 @@ class API extends Resource {
         const promised_addDocument = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['API Documents'].post_apis__apiId__documents(payload, this._requestMetaData());
+            const requestBody = {
+                requestBody: body
+            };
+            return client.apis['API Documents'].post_apis__apiId__documents(payload, requestBody,
+                this._requestMetaData());
         });
         return promised_addDocument;
     }
@@ -1198,11 +1252,15 @@ class API extends Resource {
             const payload = {
                 apiId: api_id,
                 documentId: docId,
-                file: fileToDocument,
                 'Content-Type': 'application/json',
             };
             return client.apis['API Documents'].post_apis__apiId__documents__documentId__content(
                 payload,
+                {
+                    requestBody: {
+                        file: fileToDocument
+                    }
+                },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1221,11 +1279,16 @@ class API extends Resource {
                 apiId,
                 documentId,
                 sourceType,
-                inlineContent,
                 'Content-Type': 'application/json',
+            };
+            const requestBody = {
+                requestBody: {
+                    inlineContent: inlineContent,
+                }
             };
             return client.apis['API Documents'].post_apis__apiId__documents__documentId__content(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1285,12 +1348,14 @@ class API extends Resource {
         const promised_updateDocument = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 documentId: docId,
                 'Content-Type': 'application/json',
             };
             return client.apis['API Documents'].put_apis__apiId__documents__documentId_(
                 payload,
+                {
+                    requestBody: body,
+                },
                 this._requestMetaData(),
             );
         });
@@ -1345,15 +1410,20 @@ class API extends Resource {
         let payload;
         let promise_create;
         payload = {
-            type: 'GraphQL',
-            additionalProperties: api_data.additionalProperties,
-            file: api_data.file,
             'Content-Type': 'multipart/form-data',
+        };
+        const requestBody = {
+            requestBody: {
+                type: 'GraphQL',
+                additionalProperties: api_data.additionalProperties,
+                file: api_data.file,
+            }
         };
 
         promise_create = this.client.then(client => {
             return client.apis['APIs'].post_apis_import_graphql_schema(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1367,13 +1437,17 @@ class API extends Resource {
     }
 
     static validateGraphQLFile(file) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promised_validationResponse = apiClient.then(client => {
             return client.apis['Validation'].post_apis_validate_graphql_schema(
                 {
                     type: 'GraphQL',
-                    file,
                     'Content-Type': 'multipart/form-data',
+                },
+                {
+                    requestBody: {
+                        file,
+                    }
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1428,7 +1502,11 @@ class API extends Resource {
             return client.apis['APIs'].updateWSDLOfAPI(
                 {
                     apiId,
-                    url,
+                },
+                {
+                    requestBody: {
+                        url,
+                    }
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1449,7 +1527,11 @@ class API extends Resource {
             return client.apis['APIs'].updateWSDLOfAPI(
                 {
                     apiId,
-                    file,
+                },
+                {
+                    requestBody: {
+                        file,
+                    }
                 },
                 this._requestMetaData(),
             );
@@ -1604,11 +1686,16 @@ class API extends Resource {
         const promised_addAPIThumbnail = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                file: imageFile,
                 'Content-Type': imageFile.type,
+            };
+            const requestBody = {
+                requestBody: {
+                    file: imageFile,
+                },
             };
             return client.apis['APIs'].updateAPIThumbnail(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1722,7 +1809,7 @@ class API extends Resource {
      * @memberof API
      */
     getDataFromSpecFields(client) {
-        const properties = client.spec.definitions.API.properties;
+        const properties = client.spec.components.schemas.API.properties;
         const data = {};
         Object.keys(this).forEach(apiAttribute => {
             if (apiAttribute in properties) {
@@ -1774,11 +1861,11 @@ class API extends Resource {
         const promised_updateComplexity = this.client.then(client => {
             const payload = {
                 apiId: api_id,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['GraphQL Policies'].put_apis__apiId__graphql_policies_complexity(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -1821,7 +1908,7 @@ class API extends Resource {
             });
             params.query = query;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPIs = apiClient.then(client => {
             return client.apis['APIs'].get_apis(params, Resource._requestMetaData());
         });
@@ -1848,7 +1935,7 @@ class API extends Resource {
             }
             params.query = query;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
         });
@@ -1861,7 +1948,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAPIById(id, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
         });
@@ -1882,7 +1969,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
         });
@@ -1904,7 +1991,7 @@ class API extends Resource {
         if (applicationId) {
             payload[applicationId] = applicationId;
         }
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedGet = apiClient.then((client) => {
             return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
         });
@@ -1923,7 +2010,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
         });
@@ -1942,7 +2029,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
         });
@@ -1960,7 +2047,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getSwaggerByAPIId(apiId, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
         });
@@ -1978,7 +2065,7 @@ class API extends Resource {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     static updateLcState(id, state, checkedItems, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
             action: state,
             apiId: id,
@@ -2002,7 +2089,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static get(id, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
             return client.apis['APIs'].get_apis__apiId_(
                 {
@@ -2025,7 +2112,7 @@ class API extends Resource {
      */
     static update(updatedProperties, callback = null) {
         console.log('API factory');
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const updatedAPI = updatedProperties;
         console.log('updated api' + JSON.stringify(updatedAPI));
         const promisedUpdate = apiClient.then(client => {
@@ -2048,7 +2135,7 @@ class API extends Resource {
      * Get settings of an API
      */
     static getSettings() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedSettings = apiClient.then(client => {
             return client.apis['Settings'].get_settings();
         });
@@ -2064,7 +2151,7 @@ class API extends Resource {
      * @memberof API
      */
     static search(params) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
         });
@@ -2077,7 +2164,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static get(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
             return client.apis['APIs'].get_apis__apiId_(
                 {
@@ -2098,7 +2185,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getProduct(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
             return client.apis['API Products'].get_api_products__apiProductId_(
                 {
@@ -2121,7 +2208,7 @@ class API extends Resource {
      * @memberof API
      */
     static delete(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['APIs'].delete_apis__apiId_(
                 {
@@ -2141,7 +2228,7 @@ class API extends Resource {
      * @memberof API
      */
     static deleteProduct(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['API Products'].delete_api_products__apiProductId_(
                 {
@@ -2160,7 +2247,7 @@ class API extends Resource {
      *
      */
     static policies(policyLevel) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Throttling Policies'].getAllThrottlingPolicies(
                 {
@@ -2175,7 +2262,7 @@ class API extends Resource {
      * Get all the endpoint certificates.
      * */
     static getEndpointCertificates() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Endpoint Certificates'].get_endpoint_certificates();
         });
@@ -2189,14 +2276,18 @@ class API extends Resource {
      * @param {string} alias The certificate alias.
      * */
     static addCertificate(certificateFile, endpoint, alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
-                return client.apis['Endpoint Certificates'].post_endpoint_certificates({
-                    certificate: certificateFile,
-                    endpoint,
-                    alias,
-                });
+                return client.apis['Endpoint Certificates'].post_endpoint_certificates(
+                    {},
+                    {
+                        requestBody: {
+                            certificate: certificateFile,
+                            endpoint: endpoint,
+                            alias: alias,
+                        }
+                    });
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
@@ -2213,15 +2304,21 @@ class API extends Resource {
      * @param {string} alias The certificate alias.
      * */
     static addClientCertificate(apiId, certificateFile, tier, alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
-                return client.apis['Client Certificates'].post_apis__apiId__client_certificates({
-                    certificate: certificateFile,
-                    alias,
-                    apiId,
-                    tier,
-                });
+                return client.apis['Client Certificates'].post_apis__apiId__client_certificates(
+                    {
+                        apiId,
+                    },
+                    {
+                        requestBody: {
+                            certificate: certificateFile,
+                            alias: alias,
+                            tier: tier,
+                        }
+                    }
+                );
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
@@ -2235,7 +2332,7 @@ class API extends Resource {
      * @param apiId api id of the api to which the certificate is added
      */
     static getAllClientCertificates(apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
                 return client.apis['Client Certificates'].get_apis__apiId__client_certificates(
@@ -2256,7 +2353,7 @@ class API extends Resource {
      * @param apiId api id of the api of which the certificate is retrieved.
      * */
     static getClientCertificateStatus(alias, apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Client Certificates'].get_apis__apiId__client_certificates__alias_({
                 alias,
@@ -2272,7 +2369,7 @@ class API extends Resource {
      * @param apiId api id of the api of which the certificate is deleted.
      * */
     static deleteClientCertificate(alias, apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Client Certificates'].delete_apis__apiId__client_certificates__alias_({
                 alias,
@@ -2287,7 +2384,7 @@ class API extends Resource {
      * @param {string} alias The alias of the certificate which the information required.
      * */
     static getCertificateStatus(alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Endpoint Certificates'].get_endpoint_certificates__alias_({
                 alias: alias,
@@ -2301,7 +2398,7 @@ class API extends Resource {
      * @param {string} alias The alias of the certificate
      * */
     static deleteEndpointCertificate(alias) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Endpoint Certificates'].delete_endpoint_certificates__alias_({
                 alias,
@@ -2316,7 +2413,7 @@ class API extends Resource {
      *
      */
     static getMediationPolicies(apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesGet(
                 {
@@ -2334,13 +2431,17 @@ class API extends Resource {
      *
      */
     static addMediationPolicy(policyFile, apiId, type) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policies'].apisApiIdMediationPoliciesPost(
                 {
                     apiId: apiId,
-                    type: type.toLowerCase(),
-                    mediationPolicyFile: policyFile,
+                },
+                {
+                    requestBody: {
+                        type: type.toLowerCase(),
+                        mediationPolicyFile: policyFile,
+                    },
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -2357,7 +2458,7 @@ class API extends Resource {
      *
      */
     static getMediationPolicy(seqId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdGet(
                 {
@@ -2377,7 +2478,7 @@ class API extends Resource {
      *
      */
     static deleteMediationPolicy(seqId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdDelete(
                 {
@@ -2397,7 +2498,7 @@ class API extends Resource {
      *
      */
     static updateMediationPolicyContent(seqId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdContentPut(
                 {
@@ -2420,7 +2521,7 @@ class API extends Resource {
      *
      */
     static getMediationPolicyContent(mediationPolicyId, apiId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['API Mediation Policy'].apisApiIdMediationPoliciesMediationPolicyIdContentGet(
                 {
@@ -2440,7 +2541,7 @@ class API extends Resource {
      *
      */
     static getGlobalMediationPolicies() {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['Global Mediation Policies'].getAllGlobalMediationPolicies({}, this._requestMetaData());
         });
@@ -2454,7 +2555,7 @@ class API extends Resource {
      *
      */
     static getGlobalMediationPolicyContent(mediationPolicyId) {
-        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return restApiClient.then(client => {
             return client.apis['Global Mediation Policy'].getGlobalMediationPolicyContent(
                 {
@@ -2471,7 +2572,7 @@ class API extends Resource {
      * @returns {Promise}
      */
     static getAllExternalStores() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['External Stores'].getAllExternalStores(this._requestMetaData());
         });
@@ -2484,7 +2585,7 @@ class API extends Resource {
      * @returns {Promise}
      */
     static getPublishedExternalStores(apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['External Stores'].getAllPublishedExternalStoresByAPI(
                 { apiId: apiId },
@@ -2500,7 +2601,7 @@ class API extends Resource {
      * @param {Array} externalStoreIds
      */
     static publishAPIToExternalStores(apiId, externalStoreIds) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['External Stores'].publishAPIToExternalStores(
                 {
@@ -2518,7 +2619,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static getSupportedAlertTypes() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alerts'].getPublisherAlertTypes(this._requestMetaData());
         });
@@ -2530,7 +2631,7 @@ class API extends Resource {
      * @returns {Promise}
      * */
     static getSubscribedAlertTypesByUser() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Subscriptions'].getSubscribedAlertTypes(this._requestMetaData());
         });
@@ -2542,9 +2643,14 @@ class API extends Resource {
      * @return {Promise}
      * */
     static subscribeAlerts(alerts) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts({ body: alerts }, this._requestMetaData());
+            return client.apis['Alert Subscriptions'].subscribeToAlerts(
+                {},
+                {
+                    requestBody: alerts
+                },
+                this._requestMetaData());
         });
     }
 
@@ -2554,7 +2660,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static unsubscribeAlerts() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Subscriptions'].unsubscribeAllAlerts(this._requestMetaData());
         });
@@ -2567,7 +2673,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static getAlertConfigurations(alertType) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].getAllAlertConfigs(
                 {
@@ -2587,13 +2693,15 @@ class API extends Resource {
      * @return {Promise}
      * */
     static putAlertConfiguration(alertType, alertConfig, configId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].addAlertConfig(
                 {
                     alertType: alertType,
-                    body: alertConfig,
                     configurationId: configId,
+                },
+                {
+                    requestBody: alertConfig,
                 },
                 this._requestMetaData(),
             );
@@ -2608,7 +2716,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static deleteAlertConfiguration(alertType, configId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Alert Configuration'].deleteAlertConfig(
                 {
@@ -2627,7 +2735,7 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     static getAmznResourceNames(id) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['AWS Lambda (Individual)'].get_apis__apiId__amznResourceNames(
                 {
@@ -2644,7 +2752,7 @@ class API extends Resource {
      * @return {Promise}
      * */
     static apiCategories() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis["API Category (Collection)"].get_api_categories(
                 this._requestMetaData(),
@@ -2652,7 +2760,7 @@ class API extends Resource {
         });
     }
     static keyManagers() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis["Key Managers (Collection)"].get_key_managers(
                 this._requestMetaData(),

@@ -39,42 +39,47 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         Map<String, Object> claims = new HashMap<>();
         claims.put("iss", API_GATEWAY_ID);
         claims.put("exp", String.valueOf(expireIn));
+        claims.put("iat", String.valueOf(currentTime));
+        // dialect is either empty or '/' do not append a backslash. otherwise append a backslash '/'
+        if (!"".equals(dialect) && !"/".equals(dialect)) {
+            dialect = dialect + "/";
+        } 
         if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
-            claims.put(dialect + "/subscriber", jwtInfoDto.getSubscriber());
+            claims.put(dialect + "subscriber", jwtInfoDto.getSubscriber());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationid())) {
-            claims.put(dialect + "/applicationid", jwtInfoDto.getApplicationid());
+            claims.put(dialect + "applicationid", jwtInfoDto.getApplicationid());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationname())) {
-            claims.put(dialect + "/applicationname", jwtInfoDto.getApplicationname());
+            claims.put(dialect + "applicationname", jwtInfoDto.getApplicationname());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApplicationtier())) {
-            claims.put(dialect + "/applicationtier", jwtInfoDto.getApplicationtier());
+            claims.put(dialect + "applicationtier", jwtInfoDto.getApplicationtier());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApiName())) {
-            claims.put(dialect + "/apiname", jwtInfoDto.getApiName());
+            claims.put(dialect + "apiname", jwtInfoDto.getApiName());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getApicontext())) {
-            claims.put(dialect + "/apicontext", jwtInfoDto.getApicontext());
+            claims.put(dialect + "apicontext", jwtInfoDto.getApicontext());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getVersion())) {
-            claims.put(dialect + "/version", jwtInfoDto.getVersion());
+            claims.put(dialect + "version", jwtInfoDto.getVersion());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriptionTier())) {
-            claims.put(dialect + "/tier", jwtInfoDto.getSubscriptionTier());
+            claims.put(dialect + "tier", jwtInfoDto.getSubscriptionTier());
         }
         if (StringUtils.isNotEmpty(jwtInfoDto.getKeytype())) {
-            claims.put(dialect + "/keytype", jwtInfoDto.getKeytype());
+            claims.put(dialect + "keytype", jwtInfoDto.getKeytype());
         } else {
-            claims.put(dialect + "/keytype", "PRODUCTION");
+            claims.put(dialect + "keytype", "PRODUCTION");
         }
-        claims.put(dialect + "/usertype", APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
-        claims.put(dialect + "/enduser", jwtInfoDto.getEnduser());
-        claims.put(dialect + "/enduserTenantId", String.valueOf(jwtInfoDto.getEndusertenantid()));
-        claims.put(dialect + "/applicationUUId", jwtInfoDto.getApplicationuuid());
+        claims.put(dialect + "usertype", APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
+        claims.put(dialect + "enduser", jwtInfoDto.getEnduser());
+        claims.put(dialect + "enduserTenantId", String.valueOf(jwtInfoDto.getEndusertenantid()));
+        claims.put(dialect + "applicationUUId", jwtInfoDto.getApplicationuuid());
         Map<String, String> appAttributes = jwtInfoDto.getAppAttributes();
         if (appAttributes != null && !appAttributes.isEmpty()) {
-            claims.put(dialect + "/applicationAttributes", appAttributes);
+            claims.put(dialect + "applicationAttributes", appAttributes);
         }
         return claims;
     }

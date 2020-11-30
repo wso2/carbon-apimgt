@@ -141,6 +141,12 @@ public final class APIImportUtil {
             JsonElement configElement = new JsonParser().parse(jsonContent);
             JsonObject configObject = configElement.getAsJsonObject();
 
+            // Initially, when importing the API, it only contains the subscription tier names without the
+            // details. So, by matching with the names, correct subscription tiers with the details should be added
+            // to the API before doing further processing.
+            APIAndAPIProductCommonUtil.setSubscriptionTiers(configObject, apiProvider);
+            configElement = configObject;
+
             //locate the "providerName" within the "id" and set it as the current user
             JsonObject apiId = configObject.getAsJsonObject(APIImportExportConstants.ID_ELEMENT);
 
@@ -238,22 +244,16 @@ public final class APIImportUtil {
                 }
             }
 
-            Set<Tier> allowedTiers;
-            Set<Tier> unsupportedTiersList;
-            allowedTiers = apiProvider.getTiers();
-
-            if (!(allowedTiers.isEmpty())) {
-                unsupportedTiersList = Sets.difference(importedApi.getAvailableTiers(), allowedTiers);
-
-                //If at least one unsupported tier is found, it should be removed before adding API
-                if (!(unsupportedTiersList.isEmpty())) {
-                    //Process is continued with a warning and only supported tiers are added to the importer API
-                    unsupportedTiersList.forEach(unsupportedTier ->
-                            log.warn("Tier name : " + unsupportedTier.getName() + " is not supported."));
-                    //Remove the unsupported tiers before adding the API
-                    importedApi.removeAvailableTiers(unsupportedTiersList);
+            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
+                // Either only API level throttling policy or resource level throttling policies can be defined at once
+                if (importedApi.getApiLevelPolicy() != null) {
+                    apiProvider.validateAPIThrottlingTier(importedApi, currentTenantDomain);
+                } else {
+                    apiProvider.validateResourceThrottlingTiers(APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive),
+                            currentTenantDomain);
                 }
             }
+
             if (Boolean.FALSE.equals(overwrite)) {
                 //Add API in CREATED state
                 apiProvider.addAPI(importedApi);
@@ -331,8 +331,10 @@ public final class APIImportUtil {
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
                 log.info("Changing lifecycle from " + currentStatus + " to " + targetStatus);
-                apiProvider.changeAPILCCheckListItems(importedApi.getId(),
-                        APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
+                if (StringUtils.equals(lifecycleAction, APIConstants.LC_PUBLISH_LC_STATE)) {
+                    apiProvider.changeAPILCCheckListItems(importedApi.getId(),
+                            APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);
+                }
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
@@ -353,7 +355,7 @@ public final class APIImportUtil {
                 errorMessage += importedApi.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION
                         + ": " + importedApi.getId().getVersion();
             }
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
         }
     }
 

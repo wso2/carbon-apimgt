@@ -168,7 +168,7 @@ public class ThrottlingPolicyMappingUtil {
             tierPermission.setRoles(roles);
         } else {
             String permissionType = throttlingPolicy.getTierPermission().getPermissionType();
-            tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf(permissionType));
+            tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf(permissionType.toUpperCase()));
             tierPermission.setRoles(Arrays.asList(throttlingPolicy.getTierPermission().getRoles()));
         }
         throttlingPolicyDTO.setThrottlingPolicyPermissions(tierPermission);

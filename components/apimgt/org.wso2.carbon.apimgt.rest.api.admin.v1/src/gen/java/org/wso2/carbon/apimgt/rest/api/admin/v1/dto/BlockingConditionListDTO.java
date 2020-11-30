@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO;
@@ -13,13 +15,16 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class BlockingConditionListDTO   {
   
     private Integer count = null;
-    private List<BlockingConditionDTO> list = new ArrayList<>();
+    private List<BlockingConditionDTO> list = new ArrayList<BlockingConditionDTO>();
 
   /**
    * Number of Blocking Conditions returned. 
@@ -48,6 +53,7 @@ public class BlockingConditionListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<BlockingConditionDTO> getList() {
     return list;

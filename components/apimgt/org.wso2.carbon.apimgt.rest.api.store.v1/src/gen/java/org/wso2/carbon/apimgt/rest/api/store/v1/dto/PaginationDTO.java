@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -73,7 +78,7 @@ public class PaginationDTO   {
   }
 
   /**
-   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
+   * Link to the next subset of resources qualified. Empty if no more resources are to be returned. example: \&quot;\&quot; 
    **/
   public PaginationDTO next(String next) {
     this.next = next;
@@ -81,7 +86,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. example: \"\" ")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -91,7 +96,7 @@ public class PaginationDTO   {
   }
 
   /**
-   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
+   * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. example: \&quot;\&quot; 
    **/
   public PaginationDTO previous(String previous) {
     this.previous = previous;
@@ -99,7 +104,7 @@ public class PaginationDTO   {
   }
 
   
-  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. example: \"\" ")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;

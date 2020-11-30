@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLCustomComplexityInfoDTO;
@@ -13,12 +15,15 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class GraphQLQueryComplexityInfoDTO   {
   
-    private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<>();
+    private List<GraphQLCustomComplexityInfoDTO> list = new ArrayList<GraphQLCustomComplexityInfoDTO>();
 
   /**
    **/
@@ -29,6 +34,7 @@ public class GraphQLQueryComplexityInfoDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<GraphQLCustomComplexityInfoDTO> getList() {
     return list;

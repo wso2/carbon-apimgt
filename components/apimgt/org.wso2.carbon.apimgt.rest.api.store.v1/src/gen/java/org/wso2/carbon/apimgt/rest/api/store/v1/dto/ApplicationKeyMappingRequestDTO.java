@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -19,38 +24,36 @@ public class ApplicationKeyMappingRequestDTO   {
     private String consumerSecret = null;
     private String keyManager = null;
 
-@XmlType(name="KeyTypeEnum")
-@XmlEnum(String.class)
-public enum KeyTypeEnum {
+    @XmlType(name="KeyTypeEnum")
+    @XmlEnum(String.class)
+    public enum KeyTypeEnum {
+        PRODUCTION("PRODUCTION"),
+        SANDBOX("SANDBOX");
+        private String value;
 
-    @XmlEnumValue("PRODUCTION") PRODUCTION(String.valueOf("PRODUCTION")), @XmlEnumValue("SANDBOX") SANDBOX(String.valueOf("SANDBOX"));
-
-
-    private String value;
-
-    KeyTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static KeyTypeEnum fromValue(String v) {
-        for (KeyTypeEnum b : KeyTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        KeyTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static KeyTypeEnum fromValue(String v) {
+            for (KeyTypeEnum b : KeyTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private KeyTypeEnum keyType = null;
 
   /**
@@ -62,7 +65,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(required = true, value = "Consumer key of the application")
+  @ApiModelProperty(example = "oYhwZu4P2ThDmiDprBk6c0YfjR8a", required = true, value = "Consumer key of the application")
   @JsonProperty("consumerKey")
   @NotNull
   public String getConsumerKey() {
@@ -81,7 +84,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "Consumer secret of the application")
+  @ApiModelProperty(example = "ondWGtFTCOVM4sfPyOfZ7fel610a", value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -99,7 +102,7 @@ public enum KeyTypeEnum {
   }
 
   
-  @ApiModelProperty(value = "Key Manager Name")
+  @ApiModelProperty(example = "Resident Key Manager", value = "Key Manager Name")
   @JsonProperty("keyManager")
   public String getKeyManager() {
     return keyManager;

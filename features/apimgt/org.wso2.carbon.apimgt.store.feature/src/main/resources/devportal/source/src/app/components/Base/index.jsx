@@ -470,7 +470,7 @@ class Layout extends React.Component {
                                                 <Hidden mdDown>
                                                     <FormattedMessage
                                                         id='Base.index.go.to.public.store'
-                                                        defaultMessage='Go to public Dev Portal'
+                                                        defaultMessage='Switch Dev Portals'
                                                     />
                                                 </Hidden>
                                             </Button>

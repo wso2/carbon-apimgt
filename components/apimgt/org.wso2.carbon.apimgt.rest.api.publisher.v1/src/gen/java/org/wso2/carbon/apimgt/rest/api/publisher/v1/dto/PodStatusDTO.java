@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -82,7 +87,7 @@ public class PodStatusDTO   {
   }
 
   
-  @ApiModelProperty(example = "2020-05-12T06:12:00.000+0000", value = "")
+  @ApiModelProperty(example = "2020-05-12T06:12:00Z", value = "")
   @JsonProperty("creationTimestamp")
   public String getCreationTimestamp() {
     return creationTimestamp;

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>6.8.20-SNAPSHOT</version>
+        <version>6.8.107-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -55,5 +55,7 @@
         <module>org.wso2.carbon.apimgt.output.adapter.http</module>
         <module>org.wso2.carbon.apimgt.tokenmgt</module>
         <module>org.wso2.carbon.apimgt.notification</module>
+        <module>org.wso2.carbon.apimgt.cache.invalidation</module>
+        <module>org.wso2.carbon.apimgt.throttle.policy.deployer</module>
     </modules>
 </project>

@@ -2,11 +2,14 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GraphQLQueryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyAllOfDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
@@ -18,6 +21,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -29,7 +35,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
-    private List<CustomAttributeDTO> customAttributes = new ArrayList<>();
+    private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
     private SubscriptionThrottlePolicyPermissionDTO permissions = null;
@@ -79,6 +85,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   
   @ApiModelProperty(required = true, value = "")
+      @Valid
   @JsonProperty("defaultLimit")
   @NotNull
   public ThrottleLimitDTO getDefaultLimit() {
@@ -97,6 +104,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetization")
   public MonetizationInfoDTO getMonetization() {
     return monetization;
@@ -132,7 +140,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "Burst control time unit")
+  @ApiModelProperty(example = "min", value = "Burst control time unit")
   @JsonProperty("rateLimitTimeUnit")
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
@@ -150,7 +158,8 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(example = "{}", value = "Custom attributes added to the Subscription Throttling Policy ")
+  @ApiModelProperty(example = "[]", value = "Custom attributes added to the Subscription Throttling Policy ")
+      @Valid
   @JsonProperty("customAttributes")
   public List<CustomAttributeDTO> getCustomAttributes() {
     return customAttributes;
@@ -186,7 +195,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   
-  @ApiModelProperty(value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
+  @ApiModelProperty(example = "FREE", value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL. ")
   @JsonProperty("billingPlan")
   public String getBillingPlan() {
     return billingPlan;
@@ -204,6 +213,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("permissions")
   public SubscriptionThrottlePolicyPermissionDTO getPermissions() {
     return permissions;

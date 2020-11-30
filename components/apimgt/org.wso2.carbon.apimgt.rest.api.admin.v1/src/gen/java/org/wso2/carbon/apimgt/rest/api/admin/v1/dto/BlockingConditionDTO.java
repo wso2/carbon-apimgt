@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
@@ -14,13 +15,50 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 @ApiModel(description = "Blocking Conditions")
 
 public class BlockingConditionDTO   {
   
     private String conditionId = null;
-    private String conditionType = null;
+
+    @XmlType(name="ConditionTypeEnum")
+    @XmlEnum(String.class)
+    public enum ConditionTypeEnum {
+        API("API"),
+        APPLICATION("APPLICATION"),
+        IP("IP"),
+        IPRANGE("IPRANGE"),
+        USER("USER");
+        private String value;
+
+        ConditionTypeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ConditionTypeEnum fromValue(String v) {
+            for (ConditionTypeEnum b : ConditionTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private ConditionTypeEnum conditionType = null;
     private Object conditionValue = null;
     private Boolean conditionStatus = null;
 
@@ -45,7 +83,7 @@ public class BlockingConditionDTO   {
   /**
    * Type of the blocking condition
    **/
-  public BlockingConditionDTO conditionType(String conditionType) {
+  public BlockingConditionDTO conditionType(ConditionTypeEnum conditionType) {
     this.conditionType = conditionType;
     return this;
   }
@@ -54,10 +92,10 @@ public class BlockingConditionDTO   {
   @ApiModelProperty(example = "IP", required = true, value = "Type of the blocking condition")
   @JsonProperty("conditionType")
   @NotNull
-  public String getConditionType() {
+  public ConditionTypeEnum getConditionType() {
     return conditionType;
   }
-  public void setConditionType(String conditionType) {
+  public void setConditionType(ConditionTypeEnum conditionType) {
     this.conditionType = conditionType;
   }
 
@@ -70,7 +108,8 @@ public class BlockingConditionDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"{\\\"fixedIp\\\":\\\"192.168.1.1\\\":\\\"invert\\\":false}\"", required = true, value = "Value of the blocking condition")
+  @ApiModelProperty(example = "{\"fixedIp\":\"192.168.1.1\",\"invert\":false}", required = true, value = "Value of the blocking condition")
+      @Valid
   @JsonProperty("conditionValue")
   @NotNull
   public Object getConditionValue() {

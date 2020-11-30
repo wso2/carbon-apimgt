@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -23,75 +28,71 @@ public class ThrottlingPolicyDTO   {
     private String name = null;
     private String description = null;
 
-@XmlType(name="PolicyLevelEnum")
-@XmlEnum(String.class)
-public enum PolicyLevelEnum {
+    @XmlType(name="PolicyLevelEnum")
+    @XmlEnum(String.class)
+    public enum PolicyLevelEnum {
+        APPLICATION("application"),
+        SUBSCRIPTION("subscription");
+        private String value;
 
-    @XmlEnumValue("application") APPLICATION(String.valueOf("application")), @XmlEnumValue("subscription") SUBSCRIPTION(String.valueOf("subscription"));
-
-
-    private String value;
-
-    PolicyLevelEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static PolicyLevelEnum fromValue(String v) {
-        for (PolicyLevelEnum b : PolicyLevelEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        PolicyLevelEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static PolicyLevelEnum fromValue(String v) {
+            for (PolicyLevelEnum b : PolicyLevelEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private PolicyLevelEnum policyLevel = null;
-    private Map<String, String> attributes = new HashMap<>();
+    private Map<String, String> attributes = new HashMap<String, String>();
     private Long requestCount = null;
     private Long unitTime = null;
 
-@XmlType(name="TierPlanEnum")
-@XmlEnum(String.class)
-public enum TierPlanEnum {
+    @XmlType(name="TierPlanEnum")
+    @XmlEnum(String.class)
+    public enum TierPlanEnum {
+        FREE("FREE"),
+        COMMERCIAL("COMMERCIAL");
+        private String value;
 
-    @XmlEnumValue("FREE") FREE(String.valueOf("FREE")), @XmlEnumValue("COMMERCIAL") COMMERCIAL(String.valueOf("COMMERCIAL"));
-
-
-    private String value;
-
-    TierPlanEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TierPlanEnum fromValue(String v) {
-        for (TierPlanEnum b : TierPlanEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TierPlanEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TierPlanEnum fromValue(String v) {
+            for (TierPlanEnum b : TierPlanEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TierPlanEnum tierPlan = null;
     private Boolean stopOnQuotaReach = null;
     private MonetizationInfoDTO monetizationAttributes = null;
@@ -251,6 +252,7 @@ public enum TierPlanEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("monetizationAttributes")
   public MonetizationInfoDTO getMonetizationAttributes() {
     return monetizationAttributes;
@@ -268,6 +270,7 @@ public enum TierPlanEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("throttlingPolicyPermissions")
   public ThrottlingPolicyPermissionInfoDTO getThrottlingPolicyPermissions() {
     return throttlingPolicyPermissions;

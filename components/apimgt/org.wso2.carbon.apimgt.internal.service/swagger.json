@@ -417,6 +417,40 @@
         }
       }
     },
+    "/global-policies" : {
+      "get" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Get all Global throttling policies",
+        "description" : "This will provide access to global throttling policies in database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "policyName",
+          "in" : "query",
+          "description" : "**Search condition**.\n Global policy name\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of global policies in the database",
+            "schema" : {
+              "$ref" : "#/definitions/GlobalPolicyList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/application-key-mappings" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -1057,7 +1091,7 @@
         "count" : {
           "type" : "integer",
           "example" : 1,
-          "description" : "Number of ApplicationKeyMappings returned.\n"
+          "description" : "Number of Scopes returned.\n"
         },
         "list" : {
           "type" : "array",
@@ -1069,7 +1103,7 @@
           "$ref" : "#/definitions/Pagination"
         }
       },
-      "title" : "ApplicationKeyMapping List"
+      "title" : "Scopes List"
     },
     "Scope" : {
       "properties" : {
@@ -1097,6 +1131,9 @@
         },
         "tenantId" : {
           "type" : "integer"
+        },
+        "tenantDomain" : {
+          "type" : "string"
         },
         "name" : {
           "type" : "string"
@@ -1140,6 +1177,9 @@
           },
           "stopOnQuotaReach" : {
             "type" : "boolean"
+          },
+          "defaultLimit" : {
+            "$ref" : "#/definitions/ThrottleLimit"
           }
         }
       } ]
@@ -1179,6 +1219,11 @@
       "title" : "ApplicationPolicy List"
     },
     "ApplicationPolicy" : {
+      "properties" : {
+        "defaultLimit" : {
+          "$ref" : "#/definitions/ThrottleLimit"
+        }
+      },
       "allOf" : [ {
         "$ref" : "#/definitions/Policy"
       } ]
@@ -1215,6 +1260,9 @@
           },
           "applicableLevel" : {
             "type" : "string"
+          },
+          "defaultLimit" : {
+            "$ref" : "#/definitions/ThrottleLimit"
           }
         }
       } ]
@@ -1235,6 +1283,9 @@
           "items" : {
             "$ref" : "#/definitions/Condition"
           }
+        },
+        "defaultLimit" : {
+          "$ref" : "#/definitions/ThrottleLimit"
         }
       }
     },
@@ -1253,6 +1304,39 @@
           "type" : "boolean"
         }
       }
+    },
+    "GlobalPolicyList" : {
+      "properties" : {
+        "count" : {
+          "type" : "integer",
+          "example" : 1,
+          "description" : "Number of Global Policies returned.\n"
+        },
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/GlobalPolicy"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Global Policy List"
+    },
+    "GlobalPolicy" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/Policy"
+      }, {
+        "properties" : {
+          "siddhiQuery" : {
+            "type" : "string"
+          },
+          "keyTemplate" : {
+            "type" : "string"
+          }
+        }
+      } ]
     },
     "URLMapping" : {
       "properties" : {
@@ -1300,6 +1384,73 @@
         }
       },
       "title" : "Pagination"
+    },
+    "ThrottleLimitBase" : {
+      "required" : [ "timeUnit", "unitTime" ],
+      "properties" : {
+        "timeUnit" : {
+          "type" : "string",
+          "example" : "min",
+          "description" : "Unit of the time. Allowed values are \"sec\", \"min\", \"hour\", \"day\""
+        },
+        "unitTime" : {
+          "type" : "integer",
+          "example" : 10,
+          "description" : "Time limit that the throttling limit applies."
+        }
+      },
+      "title" : "Throttle Limit Base"
+    },
+    "ThrottleLimit" : {
+      "properties" : {
+        "quotaType" : {
+          "type" : "string"
+        },
+        "requestCount" : {
+          "$ref" : "#/definitions/RequestCountLimit"
+        },
+        "bandwidth" : {
+          "$ref" : "#/definitions/BandwidthLimit"
+        }
+      },
+      "title" : "Throttle Limit"
+    },
+    "BandwidthLimit" : {
+      "title" : "Bandwidth Limit object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/ThrottleLimitBase"
+      }, {
+        "required" : [ "dataAmount", "dataUnit" ],
+        "properties" : {
+          "dataAmount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Amount of data allowed to be transfered"
+          },
+          "dataUnit" : {
+            "type" : "string",
+            "example" : "KB",
+            "description" : "Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\""
+          }
+        }
+      } ]
+    },
+    "RequestCountLimit" : {
+      "title" : "Request Count Limit object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/ThrottleLimitBase"
+      }, {
+        "required" : [ "requestCount" ],
+        "properties" : {
+          "requestCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Maximum number of requests allowed"
+          }
+        }
+      } ]
     }
   },
   "parameters" : {

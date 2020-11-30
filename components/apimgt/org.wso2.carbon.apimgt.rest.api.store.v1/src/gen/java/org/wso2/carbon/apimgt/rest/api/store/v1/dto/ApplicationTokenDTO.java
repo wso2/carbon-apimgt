@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -12,13 +14,16 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class ApplicationTokenDTO   {
   
     private String accessToken = null;
-    private List<String> tokenScopes = new ArrayList<>();
+    private List<String> tokenScopes = new ArrayList<String>();
     private Long validityTime = null;
 
   /**
@@ -30,7 +35,7 @@ public class ApplicationTokenDTO   {
   }
 
   
-  @ApiModelProperty(example = "1.2345678901234568E30", value = "Access token")
+  @ApiModelProperty(example = "1.2345678901234568E+30", value = "Access token")
   @JsonProperty("accessToken")
   public String getAccessToken() {
     return accessToken;
@@ -48,7 +53,7 @@ public class ApplicationTokenDTO   {
   }
 
   
-  @ApiModelProperty(example = "\"default,read_api,write_api\"", value = "Valid comma seperated scopes for the access token")
+  @ApiModelProperty(example = "[\"default\",\"read_api\",\"write_api\"]", value = "Valid comma seperated scopes for the access token")
   @JsonProperty("tokenScopes")
   public List<String> getTokenScopes() {
     return tokenScopes;

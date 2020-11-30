@@ -101,6 +101,24 @@ public class RegistrationServiceImpl implements RegistrationService {
             String owner = profile.getOwner();
             String authUserName = RestApiUtil.getLoggedInUsername();
 
+            //If user is in a secondory userstore, update the owner of the application with
+            //correct domain
+            if (owner != null && authUserName != null) {
+                int index = authUserName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+                int ownerIndex = owner.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+                if (index > 0 && ownerIndex < 0) {
+                    if (!UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME
+                            .equalsIgnoreCase(authUserName.substring(0, index))
+                            && owner.equals(authUserName.substring(index + 1))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Update profile user name :" + owner + " with " + authUserName);
+                        }
+                        owner = authUserName;
+                        profile.setOwner(owner);
+                    }
+                }
+            }
+
             //Validates if the application owner and logged in username is same.
             if (authUserName != null && ((authUserName.equals(owner))|| isUserSuperAdmin(authUserName))) {
                 if (!isUserAccessAllowed(authUserName)) {

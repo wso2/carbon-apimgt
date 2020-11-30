@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,6 +12,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -29,7 +34,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "State of usage publish job")
+  @ApiModelProperty(example = "RUNNING", value = "State of usage publish job")
   @JsonProperty("state")
   public String getState() {
     return state;
@@ -47,7 +52,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Status of usage publish job")
+  @ApiModelProperty(example = "SUCCESSFULL", value = "Status of usage publish job")
   @JsonProperty("status")
   public String getStatus() {
     return status;
@@ -65,7 +70,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Timestamp of the started time of the Job")
+  @ApiModelProperty(example = "1599196134000", value = "Timestamp of the started time of the Job")
   @JsonProperty("startedTime")
   public String getStartedTime() {
     return startedTime;
@@ -83,7 +88,7 @@ public class MonetizationUsagePublishInfoDTO   {
   }
 
   
-  @ApiModelProperty(value = "Timestamp of the last published time")
+  @ApiModelProperty(example = "1599196134000", value = "Timestamp of the last published time")
   @JsonProperty("lastPublsihedTime")
   public String getLastPublsihedTime() {
     return lastPublsihedTime;

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -12,6 +14,9 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -19,7 +24,7 @@ public class LifecycleStateCheckItemsDTO   {
   
     private String name = null;
     private Boolean value = null;
-    private List<String> requiredStates = new ArrayList<>();
+    private List<String> requiredStates = new ArrayList<String>();
 
   /**
    **/
@@ -29,7 +34,7 @@ public class LifecycleStateCheckItemsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Deprecate old versions after publish the API", value = "")
+  @ApiModelProperty(example = "Deprecate old versions after publishing the API", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -63,7 +68,7 @@ public class LifecycleStateCheckItemsDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("requiredStates")
   public List<String> getRequiredStates() {
     return requiredStates;

@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -10,44 +12,45 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class IPConditionDTO   {
   
 
-@XmlType(name="IpConditionTypeEnum")
-@XmlEnum(String.class)
-public enum IpConditionTypeEnum {
+    @XmlType(name="IpConditionTypeEnum")
+    @XmlEnum(String.class)
+    public enum IpConditionTypeEnum {
+        IPRANGE("IPRANGE"),
+        IPSPECIFIC("IPSPECIFIC");
+        private String value;
 
-    @XmlEnumValue("IPRANGE") IPRANGE(String.valueOf("IPRANGE")), @XmlEnumValue("IPSPECIFIC") IPSPECIFIC(String.valueOf("IPSPECIFIC"));
-
-
-    private String value;
-
-    IpConditionTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static IpConditionTypeEnum fromValue(String v) {
-        for (IpConditionTypeEnum b : IpConditionTypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        IpConditionTypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static IpConditionTypeEnum fromValue(String v) {
+            for (IpConditionTypeEnum b : IpConditionTypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private IpConditionTypeEnum ipConditionType = null;
     private String specificIP = null;
     private String startingIP = null;
