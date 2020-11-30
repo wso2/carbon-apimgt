@@ -29,12 +29,12 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SearchResultMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SearchResultMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -63,9 +63,9 @@ public class SearchApiServiceImpl implements SearchApiService {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = apiProvider
                     .searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
