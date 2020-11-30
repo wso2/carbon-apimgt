@@ -24,6 +24,7 @@ import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import MUIDataTable from 'mui-datatables';
+import moment from 'moment';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -248,16 +249,6 @@ class Listing extends React.Component {
             {
                 name: 'definitionType',
                 label: intl.formatMessage({
-                    id: 'ServiceCatalog.Listing.Listing.service.type',
-                    defaultMessage: 'Service Type',
-                }),
-                options: {
-                    sort: false,
-                },
-            },
-            {
-                name: 'definitionType',
-                label: intl.formatMessage({
                     id: 'ServiceCatalog.Listing.Listing.schema.type',
                     defaultMessage: 'Schema Type',
                 }),
@@ -273,6 +264,29 @@ class Listing extends React.Component {
                 }),
                 options: {
                     sort: false,
+                },
+            },
+            {
+                name: 'createdTime',
+                label: intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Listing.created.time',
+                    defaultMessage: 'Created Time',
+                }),
+                options: {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
+                        if (tableMeta.rowData) {
+                            const dataRow = tableViewObj.state.serviceList[tableMeta.rowIndex];
+                            const { createdTime } = dataRow;
+                            if (dataRow) {
+                                return (
+                                    <span>{moment(createdTime).fromNow()}</span>
+                                );
+                            }
+                        }
+                        return <span />;
+                    },
+                    sort: false,
+                    filter: false,
                 },
             },
             {
