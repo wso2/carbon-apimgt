@@ -982,6 +982,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
+
                     if (ConditionTypeEnum.IP.equals(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("fixedIp").toString());
                     }
