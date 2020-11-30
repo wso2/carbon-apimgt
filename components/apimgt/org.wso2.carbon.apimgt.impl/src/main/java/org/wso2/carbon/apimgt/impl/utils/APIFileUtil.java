@@ -209,17 +209,6 @@ public class APIFileUtil {
      * @param extension file extension
      * @return collection of files for the extension
      */
-    public static Collection<File> searchFilesWithMatchingExtension(File folder, String extension, boolean recursive) {
-        return FileUtils.listFiles(folder, new String[] {extension}, recursive);
-    }
-
-    /**
-     * Returns a collection of files for the given extension in the given folder.
-     *
-     * @param folder    folder that include files
-     * @param extension file extension
-     * @return collection of files for the extension
-     */
     public static Collection<File> searchFilesWithMatchingExtension(File folder, String extension) {
         return FileUtils.listFiles(folder, new String[] {extension}, true);
     }

@@ -38,7 +38,6 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private static final Log log = LogFactory.getLog(AbstractAPIMgtGatewayJWTGenerator.class);
@@ -223,8 +222,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
             } else {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());
             }
-            //Adding JTI standard claim to the backend JWT
-            jwtClaimSetBuilder.jwtID(UUID.randomUUID().toString());
         }
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
         return jwtClaimsSet.toJSONObject().toString();

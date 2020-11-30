@@ -28,14 +28,10 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
@@ -50,8 +46,6 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.FileInputStream;
@@ -67,7 +61,7 @@ import java.util.UUID;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(value = {CarbonUtils.class, ServiceReferenceHolder.class, AbstractJWTGenerator.class, APIUtil.class,
         KeyStoreManager.class, System.class, OAuth2Util.class, IdentityUtil.class, OAuthServerConfiguration.class,
-        SubscriptionDataHolder.class, KeyManagerHolder.class})
+        SubscriptionDataHolder.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
 
@@ -274,48 +268,6 @@ public class TokenGenTest {
                 .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
         //Check if the encoded thumbprint get matched with JWT header's x5t
         Assert.assertTrue(header.contains(encodedThumbprint));
-    }
-
-    @Test public void testJTI() throws Exception {
-
-        AbstractJWTGenerator jwtGen = new JWTGenerator();
-        APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
-        TokenValidationContext validationContext = new TokenValidationContext();
-        validationContext.setContext("testAPI");
-        validationContext.setVersion("1.0.0");
-        validationContext.setAccessToken("DUMMY_TOKEN_STRING");
-        validationContext.setTenantDomain("carbon.super");
-        dto.setSubscriber("admin");
-        dto.setApplicationName("application");
-        dto.setApplicationId("1");
-        dto.setApplicationTier("UNLIMITED");
-        dto.setEndUserName("subscriber");
-        dto.setUserType(APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
-        dto.setSubscriberTenantDomain("carbon.super");
-        dto.setKeyManager("km1");
-        validationContext.setValidationInfoDTO(dto);
-        System.setProperty("carbon.home", "");
-        APIManagerConfiguration config = Mockito.mock(APIManagerConfiguration.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Mockito.doReturn(tenantManager).when(realmService).getTenantManager();
-        Mockito.doReturn(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID)
-                .when(tenantManager).getTenantId(Mockito.anyString());
-        JWTConfigurationDto jWTConfigurationDto = Mockito.mock(JWTConfigurationDto.class);
-        Mockito.when(config.getJwtConfigurationDto()).thenReturn(jWTConfigurationDto);
-        Mockito.when(config.getJwtConfigurationDto().getConsumerDialectUri()).thenReturn("http://wso2.org/claims");
-        APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
-        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                .setAPIManagerConfigurationService(apiManagerConfigurationService);
-
-        KeyManager keyManager = Mockito.mock(KeyManager.class);
-        PowerMockito.mockStatic(KeyManagerHolder.class);
-        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance("carbon.super", "km1"))
-                .thenReturn(keyManager);
-
-        String token = jwtGen.buildBody(validationContext);
-        Assert.assertTrue("Contains JTI value in access token", token.contains("jti"));
     }
 
     /**

@@ -58,8 +58,6 @@ public class APIDTO   {
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
     private List<String> categories = new ArrayList<>();
-    private String createdTime = null;
-    private String lastUpdatedTime = null;
     private Object keyManagers = null;
 
   /**
@@ -598,40 +596,6 @@ public class APIDTO   {
   }
 
   /**
-   **/
-  public APIDTO createdTime(String createdTime) {
-    this.createdTime = createdTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2020-10-31T13:57:16.229", value = "")
-  @JsonProperty("createdTime")
-  public String getCreatedTime() {
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  /**
-   **/
-  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2020-10-31T13:57:16.229", value = "")
-  @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-  }
-
-  /**
    * API Key Managers 
    **/
   public APIDTO keyManagers(Object keyManagers) {
@@ -689,14 +653,12 @@ public class APIDTO   {
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable) &&
         Objects.equals(categories, API.categories) &&
-        Objects.equals(createdTime, API.createdTime) &&
-        Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(keyManagers, API.keyManagers);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, createdTime, lastUpdatedTime, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers);
   }
 
   @Override
@@ -734,8 +696,6 @@ public class APIDTO   {
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
-    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("}");
     return sb.toString();
