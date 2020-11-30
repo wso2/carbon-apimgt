@@ -7034,8 +7034,11 @@ components:
       title: API Info object with basic API details
       properties:
         id:
-          type: string
+          type: integer
           example: 1
+        uuid:
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         description:
           type: string
           example: removed a post resource
