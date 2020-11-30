@@ -30,12 +30,12 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SearchResultMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -87,8 +87,8 @@ public class SearchApiServiceImpl implements SearchApiService {
                 query = StringUtils.replaceIgnoreCase(query, searchString, APIConstants.LCSTATE_SEARCH_TYPE_KEY);
             }
 
-            String username = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
             // Extracting search queries for the recommendation system
             apiConsumer.publishSearchQuery(query, username);
