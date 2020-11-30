@@ -121,7 +121,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset, apiTypeWrapper);
 
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -141,7 +141,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
-                        offset);
+                        offset, null);
                 return Response.ok().entity(subscriptionListDTO).build();
 
             } else {
@@ -221,7 +221,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     .addSubscription(apiTypeWrapper, username, application.getId());
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
-            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
+                    apiTypeWrapper);
             WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
             if (workflowResponse instanceof HttpWorkflowResponse) {
                 String payload = workflowResponse.getJSONPayload();

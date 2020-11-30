@@ -44,8 +44,8 @@ public class PersistenceManager {
                     apiPersistenceInstance = new MongoDBPersistenceImpl(userName);
                 }
             }
-        return new RegistryPersistenceImpl(userName);
-//        return apiPersistenceInstance;
+//        return new RegistryPersistenceImpl(userName);
+        return apiPersistenceInstance;
     }
 
 //    public static APIPersistence getInstance(String username) throws APIManagementException {

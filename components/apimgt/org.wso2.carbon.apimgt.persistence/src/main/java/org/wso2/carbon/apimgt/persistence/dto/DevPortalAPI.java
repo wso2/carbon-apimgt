@@ -56,6 +56,15 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String type;
     private Boolean advertisedOnly;
     private String swaggerDefinition;
+    private String contextTemplate;
+
+    public String getContextTemplate() {
+        return contextTemplate;
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+        this.contextTemplate = contextTemplate;
+    }
 
     public String getStatus() {
         return status;

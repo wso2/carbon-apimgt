@@ -5481,7 +5481,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     
     /**
      * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
-     * @param apiId Id of the API
      * @param synapseEnvName Name of the synapse gateway environment
      * @param clusterName Name of the container managed cluster
      * @return Updated Open API definition
@@ -5945,6 +5944,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    api = addTiersToAPI(api, requestedTenantDomain);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -5955,6 +5955,31 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
+    }
+
+    private API addTiersToAPI(API api, String requestedTenantDomain) throws APIManagementException {
+        int tenantId = 0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(requestedTenantDomain);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            log.error("Error when getting tiers");
+        }
+        Set<Tier> tierNames = api.getAvailableTiers();
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+
+        Set<Tier> availableTiers = new HashSet<Tier>();
+        for (Tier tierName : tierNames) {
+            Tier definedTier = definedTiers.get(tierName.getName());
+            if (definedTier != null) {
+                availableTiers.add(definedTier);
+            } else {
+                log.warn("Unknown tier: " + tierName + " found on API: ");
+            }
+        }
+        api.removeAllTiers();
+        api.addAvailableTiers(availableTiers);
+        return api;
     }
     
     /**

@@ -8,6 +8,7 @@ import com.mongodb.client.result.InsertOneResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
@@ -171,7 +172,20 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         //published prototyped only
-        return null;
+        searchQuery = "";
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(ctx.getOrganization().getName());
+        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
+        List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
+        while (aggregate.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = aggregate.next();
+            DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
+            devPortalAPIInfoList.add(api);
+        }
+        devPortalAPISearchResult.setDevPortalAPIInfoList(devPortalAPIInfoList);
+        devPortalAPISearchResult.setReturnedAPIsCount(devPortalAPIInfoList.size());
+        devPortalAPISearchResult.setTotalAPIsCount(5);
+        return devPortalAPISearchResult;
     }
 
     @Override
