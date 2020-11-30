@@ -85,7 +85,7 @@ public class SubscriptionMappingUtil {
 
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, ApiTypeWrapper apiTypeWrapper)
             throws APIManagementException {
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         if (apiTypeWrapper !=null && !apiTypeWrapper.isAPIProduct()) {
