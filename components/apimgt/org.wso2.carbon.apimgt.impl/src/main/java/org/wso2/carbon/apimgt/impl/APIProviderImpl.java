@@ -5051,7 +5051,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
-            deleteAPI(api);
+            deleteAPIFromDB(api);
             /**
              * Delete the API in Kubernetes
              */
@@ -5162,13 +5162,128 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    public void deleteAPI(API api) throws APIManagementException {
+
+        try {
+            int apiId = apiMgtDAO.getAPIID(api.getId(), null); 
+            
+            APIManagerConfiguration config = getAPIManagerConfiguration();
+            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
+            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+            // gatewayType check is required when API Management is deployed on
+            // other servers to avoid synapse
+            if (gatewayExists && "Synapse".equals(gatewayType)) {
+                removeFromGateway(api);
+                if (api.isDefaultVersion()) {
+                    removeDefaultAPIFromGateway(api);
+                }
+
+            } else {
+                log.debug("Gateway does not exist for the current API Provider");
+            }
+            //Check if there are already published external APIStores.If yes,removing APIs from them.
+            Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
+            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
+            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
+                for (APIStore store : apiStoreSet) {
+                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                }
+            }
+
+            //if manageAPIs == true
+            if (APIUtil.isAPIManagementEnabled()) {
+                Cache contextCache = APIUtil.getAPIContextCache();
+                String context = apiMgtDAO.getAPIContext(api.getId());
+                contextCache.remove(context);
+                contextCache.put(context, Boolean.FALSE);
+            }
+            deleteAPIFromDB(api);
+            /**
+             * Delete the API in Kubernetes
+             */
+            JSONArray containerMgt = APIUtil.getAllClustersFromConfig();
+            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
+            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
+                for (DeploymentEnvironments deploymentEnvironment : deploymentEnvironments) {
+                    if (deploymentEnvironment.getType().equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                        if (!containerMgt.isEmpty() && deploymentEnvironment.getClusterNames().size() != 0) {
+
+                            for (Object containerMgtObj : containerMgt) {
+                                JSONObject containerMgtDetails = (JSONObject) containerMgtObj;
+                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
+                                        .equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
+                                    for (String clusterId : deploymentEnvironment.getClusterNames()) {
+                                        JSONArray containerMgtInfo = (JSONArray) containerMgtDetails
+                                                .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
+                                        for (Object containerMgtInfoObj : containerMgtInfo) {
+                                            JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
+                                            if (clusterId.equalsIgnoreCase(containerMgtInfoDetails
+                                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
+                                                ContainerManager containerManager =
+                                                        getContainerManagerInstance(containerMgtDetails
+                                                                .get(ContainerBasedConstants.CLASS_NAME).toString());
+                                                    containerManager.deleteAPI(api.getId(), containerMgtInfoDetails);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                + " successfully removed from the database.";
+                log.debug(logMessage);
+            }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.DELETED, this.username);
+
+            cleanUpPendingAPIStateChangeTask(apiId);
+
+            if (api.getId().toString() != null) {
+                Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
+                for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
+                    KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
+                    if (keyManager != null) {
+                        try {
+                            keyManager.deleteRegisteredResourceByAPIId(api.getId().toString());
+                        } catch (APIManagementException e) {
+                            log.error("Error while deleting Resource Registration for API " + api.getId().toString() +
+                                    " in Key Manager " + keyManagerDtoEntry.getKey(), e);
+                        }
+                    }
+                }
+            }
+            apiPersistenceInstance.deleteAPI(new Organization(tenantDomain), api.getUuid());
+            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
+                    api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                    api.getStatus());
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
+        } catch (WorkflowException e) {
+            handleException("Failed to execute workflow cleanup task ", e);
+        } catch (APIPersistenceException e) {
+            handleException("Failed to delete api " + api.getUuid(), e);
+        }
+    }
     /**
      * Deletes API from the database and delete local scopes and resource scope attachments from KM.
      *
      * @param api API to delete
      * @throws APIManagementException if fails to delete the API
      */
-    private void deleteAPI(API api) throws APIManagementException {
+    private void deleteAPIFromDB(API api) throws APIManagementException {
 
         APIIdentifier apiIdentifier = api.getId();
         int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
@@ -10304,5 +10419,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String msg = "Failed to get API with uuid " + uuid;
             throw new APIManagementException(msg, e);
         }
+    }
+
+    @Override
+    public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {
+        List<APIResource> usedProductResources = new ArrayList<>();
+        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiId);
+        for (URITemplate uriTemplate : uriTemplates) {
+            // If existing URITemplate is used by any API Products
+            if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
+                APIResource apiResource = new APIResource(uriTemplate.getHTTPVerb(), uriTemplate.getUriTemplate());
+                usedProductResources.add(apiResource);
+            }
+        }
+
+        return usedProductResources;
     }
 }
