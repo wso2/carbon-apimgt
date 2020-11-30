@@ -1728,6 +1728,30 @@ public interface APIProvider extends APIManager {
      * @param apiProduct
      */
     void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException;
-    
-    
+
+    /**
+     * Adds a new APIRevision to an existing API
+     *
+     * @param apiRevision APIRevision
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    String addAPIRevision(APIRevision apiRevision) throws APIManagementException;
+
+    /**
+     * Get a Revision Object related to provided revision UUID
+     *
+     * @param revisionUUID API Revision UUID
+     * @return API Revision
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    APIRevision getAPIRevision(String revisionUUID) throws APIManagementException;
+
+    /**
+     * Get a List of API Revisions related to provided API UUID
+     *
+     * @param apiUUID API  UUID
+     * @return API Revision List
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    List<APIRevision> getAPIRevisions(String apiUUID) throws APIManagementException;
 }

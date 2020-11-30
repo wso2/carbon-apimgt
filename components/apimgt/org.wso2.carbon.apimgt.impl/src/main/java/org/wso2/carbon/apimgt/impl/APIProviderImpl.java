@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -1551,7 +1552,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             updateEndpointSecurity(oldApi, api);
 
-            updateApiArtifact(api, true, updatePermissions);
+            String apiUUid = updateApiArtifact(api, true, updatePermissions);
+            api.setUUID(apiUUid);
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
             }
@@ -1662,7 +1664,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
                             apiPublished.setGatewayLabels(labelsToPublish);
-                            updateApiArtifact(apiPublished, true, false);
+                            String apiUUID = updateApiArtifact(apiPublished, true, false);
+                            api.setUUID(apiUUID);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
                             failedGateways.put("PUBLISHED", failedToPublishEnvironments);
@@ -2301,13 +2304,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         updateAPI(api);
     }
 
-    private void updateApiArtifact(API api, boolean updateMetadata, boolean updatePermissions)
+    private String updateApiArtifact(API api, boolean updateMetadata, boolean updatePermissions)
             throws APIManagementException {
 
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
+        String apiUUID = null;
         try {
             registry.beginTransaction();
             String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
@@ -2433,6 +2437,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             registry.commitTransaction();
             transactionCommitted = true;
+            apiUUID = updateApiArtifact.getId();
             if (updatePermissions) {
                 APIManagerConfiguration config = getAPIManagerConfiguration();
                 boolean isSetDocLevelPermissions = Boolean.parseBoolean(
@@ -2496,6 +2501,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Error occurred while rolling back the transaction.", ex);
             }
         }
+        return apiUUID;
     }
 
     /**
@@ -10344,7 +10350,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
-    
+
     @Override
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         Organization org = new Organization(requestedTenantDomain);
@@ -10863,4 +10869,102 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return result ;
     }
 
+
+    /**
+     * Adds a new APIRevision to an existing API
+     *
+     * @param apiRevision APIRevision
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Override
+    public String addAPIRevision(APIRevision apiRevision) throws APIManagementException {
+        int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
+        apiRevision.setId(revisionId);
+        String revisionUUID = createAPIRevisionRegistryArtifacts(apiRevision.getApiUUID(), revisionId);
+        apiRevision.setRevisionUUID(revisionUUID);
+        apiMgtDAO.addAPIRevision(apiRevision);
+        //TODO: Need to do rest of the tables revisioned after adding the revision
+        return revisionUUID;
+    }
+
+    /**
+     * Get a Revision related to provided and revision UUID
+     *
+     * @param revisionUUID API Revision UUID
+     * @return API Revision
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    @Override
+    public APIRevision getAPIRevision(String revisionUUID) throws APIManagementException {
+        return apiMgtDAO.getRevisionByRevisionUUID(revisionUUID);
+    }
+
+    /**
+     * Copy Api registry artifacts to the revision registry location
+     *
+     * @param apiUUID API UUID
+     * @param revisionId Revision ID
+     * @throws APIManagementException if failed to copy API registry artifacts
+     */
+    protected String createAPIRevisionRegistryArtifacts(String apiUUID, int revisionId) throws APIManagementException {
+        String revisionUUID = null;
+        APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiUUID);
+        String apiPath = APIUtil.getAPIPath(apiId);
+        int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+        String apiSourcePath = apiPath.substring(0, prependIndex );
+        String revisionTargetPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId +
+                RegistryConstants.PATH_SEPARATOR;
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            if (registry.resourceExists(revisionTargetPath)) {
+                throw new APIManagementException("API revision already exists with id: " + revisionId);
+            }
+            registry.copy(apiSourcePath, revisionTargetPath);
+            Resource apiRevisionArtifact = registry.get(revisionTargetPath + "api");
+            registry.commitTransaction();
+            transactionCommitted = true;
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "Revision for API Name: " + apiId.getApiName() + ", API Version " + apiId.getVersion()
+                                + " created";
+                log.debug(logMessage);
+            }
+            revisionUUID = apiRevisionArtifact.getUUID();
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for revision creation for API : " + apiId.getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            handleException("Error while creating API Revision", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for revision creation for API: " + apiId.getApiName(), ex);
+            }
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Get a List of API Revisions related to provided API UUID
+     *
+     * @param apiUUID API  UUID
+     * @return API Revision List
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    @Override
+    public List<APIRevision> getAPIRevisions(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
+    }
 }

@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -3745,13 +3746,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response getAPIRevisions(String apiId, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
+            APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+            return Response.ok().entity(apiRevisionListDTO).build();
+        } catch (Exception e) {
+            String errorMessage = "Error while adding retrieving API Revision for api id : " + apiId + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     /**
@@ -3764,13 +3768,26 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIRevision apiRevision = new APIRevision();
+            apiRevision.setApiUUID(apiId);
+            apiRevision.setDescription(apIRevisionDTO.getDescription());
+            //adding the api revision
+            String revisionId = apiProvider.addAPIRevision(apiRevision);
+
+            //Retrieve the newly added APIRevision to send in the response payload
+            APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
+            APIRevisionDTO createdApiRevisionDTO = APIMappingUtil.fromAPIRevisiontoDTO(createdApiRevision);
+            //This URI used to set the location header of the POST response
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/" + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
+            return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
+        } catch (Exception e) {
+            String errorMessage = "Error while adding new API Revision : " + apIRevisionDTO.getApiInfo().getProvider() + "-" +
+                    apIRevisionDTO.getApiInfo().getName() + "-" + apIRevisionDTO.getApiInfo().getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     /**
