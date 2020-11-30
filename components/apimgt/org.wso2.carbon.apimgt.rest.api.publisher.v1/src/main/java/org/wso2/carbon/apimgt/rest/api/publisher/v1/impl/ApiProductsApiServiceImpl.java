@@ -728,6 +728,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String username = RestApiUtil.getLoggedInUsername();
             // if not add product
             provider = body.getProvider();
+            String context = body.getContext();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
                 if (!APIUtil.hasPermission(username, Permissions.APIM_ADMIN)) {
                     if (log.isDebugEnabled()) {
@@ -767,6 +768,18 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             if (body.getAuthorizationHeader() == null) {
                 body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+            }
+
+            //Remove the /{version} from the context.
+            if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+                context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+            }
+            //Make sure context starts with "/". ex: /pizzaProduct
+            context = context.startsWith("/") ? context : ("/" + context);
+            //Check whether the context already exists
+            if (apiProvider.isContextExist(context)) {
+                RestApiUtil.handleBadRequest("Error occurred while adding API Product. API Product with the context " + context
+                        + " already exists.", log);
             }
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
