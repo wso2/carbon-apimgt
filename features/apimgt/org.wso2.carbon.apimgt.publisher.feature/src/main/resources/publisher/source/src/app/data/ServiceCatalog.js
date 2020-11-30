@@ -98,7 +98,7 @@ class ServiceCatalog {
             // return client.apis['Services'].searchServices();
             return MockResponses.searchServices();
         });
-        return promisedServices.then(response => response);
+        return promisedServices;
     }
 
     /**
