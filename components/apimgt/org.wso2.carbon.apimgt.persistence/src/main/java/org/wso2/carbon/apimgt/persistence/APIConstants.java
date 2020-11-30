@@ -324,4 +324,8 @@ public final class APIConstants {
     }
     public static final String API_STATE_CHANGE_INDICATOR = "registry.api.state.change.indicator";
 
+    public static final String API_ICON_IMAGE = "icon";
+    public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
+    //registry location for API documentation
+    public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
 }

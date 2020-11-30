@@ -1564,4 +1564,19 @@ public interface APIProvider extends APIManager {
      * @return a list of Deploymentstatus objects in different cloud environments
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
+    
+    /**
+     * Retrieve list of resources of the provided api that are used in other API products
+     * @param apiId api id
+     * @return APIResource list of resources
+     * @throws APIManagementException
+     */
+    List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException ;
+
+    /**
+     * Delete API
+     * @param api API to delete
+     * @throws APIManagementException
+     */
+    void deleteAPI(API api) throws APIManagementException;
 }

@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
+import javax.cache.Cache;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -34,6 +36,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -42,8 +46,11 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
@@ -80,7 +87,9 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.common.CommonConstants;
+import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -629,8 +638,102 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when deleting API " + apiId;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            APIIdentifier identifier = new APIIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+
+            //Delete the dependencies associated  with the api artifact
+            GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
+
+            if (dependenciesArray.length > 0) {
+                for (GovernanceArtifact artifact : dependenciesArray) {
+                    registry.delete(artifact.getPath());
+                }
+            }
+            
+            artifactManager.removeGenericArtifact(apiArtifact);
+            
+            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+            Resource apiResource = registry.get(path);
+            String artifactId = apiResource.getUUID();
+            artifactManager.removeGenericArtifact(artifactId);
+
+            String thumbPath = RegistryPersistenceUtil.getIconPath(identifier);
+            if (registry.resourceExists(thumbPath)) {
+                registry.delete(thumbPath);
+            }
+
+            String wsdlArchivePath = RegistryPersistenceUtil.getWsdlArchivePath(identifier);
+            if (registry.resourceExists(wsdlArchivePath)) {
+                registry.delete(wsdlArchivePath);
+            }
+
+            /*Remove API Definition Resource - swagger*/
+            String apiDefinitionFilePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getApiName() + '-' + identifier.getVersion() + '-' + identifier.getProviderName();
+            if (registry.resourceExists(apiDefinitionFilePath)) {
+                registry.delete(apiDefinitionFilePath);
+            }
+
+            /*remove empty directories*/
+            String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
+            if (registry.resourceExists(apiCollectionPath)) {
+                Resource apiCollection = registry.get(apiCollectionPath);
+                CollectionImpl collection = (CollectionImpl) apiCollection;
+                //if there is no other versions of apis delete the directory of the api
+                if (collection.getChildCount() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No more versions of the API found, removing API collection from registry");
+                    }
+                    registry.delete(apiCollectionPath);
+                }
+            }
+
+            String apiProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName();
+
+            if (registry.resourceExists(apiProviderPath)) {
+                Resource providerCollection = registry.get(apiProviderPath);
+                CollectionImpl collection = (CollectionImpl) providerCollection;
+                //if there is no api for given provider delete the provider directory
+                if (collection.getChildCount() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No more APIs from the provider " + identifier.getProviderName() + " found. " +
+                                "Removing provider collection from registry");
+                    }
+                    registry.delete(apiProviderPath);
+                }
+            }
+            registry.commitTransaction();
+            transactionCommitted  = true;
+        } catch (RegistryException | APIManagementException e) {
+            throw new APIPersistenceException("Failed to remove the API : " + apiId, e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                throw new APIPersistenceException("Error occurred while rolling back the transaction. ", ex);
+            }
+        }
     }
 
     @Override
