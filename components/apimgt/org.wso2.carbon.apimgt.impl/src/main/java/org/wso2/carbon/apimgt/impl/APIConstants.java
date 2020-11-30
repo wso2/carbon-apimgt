@@ -75,6 +75,8 @@ public final class APIConstants {
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
+    public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
+
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
     public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
