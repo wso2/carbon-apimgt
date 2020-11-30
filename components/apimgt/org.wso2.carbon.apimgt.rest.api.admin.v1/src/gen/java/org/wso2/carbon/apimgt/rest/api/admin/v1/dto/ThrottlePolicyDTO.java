@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -11,8 +13,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -72,7 +76,7 @@ public class ThrottlePolicyDTO   {
   
   @ApiModelProperty(example = "30PerMin", value = "Display name of the policy")
   @JsonProperty("displayName")
-  public String getDisplayName() {
+ @Size(max=512)  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {

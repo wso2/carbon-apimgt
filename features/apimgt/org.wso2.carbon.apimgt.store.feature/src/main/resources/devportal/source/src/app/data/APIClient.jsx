@@ -45,14 +45,15 @@ class APIClient {
         };
 
         SwaggerClient.http.withCredentials = true;
-        const promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL(), requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; } });
+        const promisedResolve = SwaggerClient.resolve({
+            url: Utils.getSwaggerURL(),
+            requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; }
+        });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then((resolved) => {
             const argsv = Object.assign(
-                args,
                 {
                     spec: this._fixSpec(resolved.spec),
-                    authorizations,
                     requestInterceptor: this._getRequestInterceptor(),
                     responseInterceptor: this._getResponseInterceptor(),
                 },
@@ -115,7 +116,9 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.host;
+        const url = new URL(spec.servers[0].url);
+        url.host = this.host;
+        spec.servers[0].url = String(url);
         spec.security = [{ OAuth2Security: ['apim:api_subscribe'] }];
         return spec;
     }

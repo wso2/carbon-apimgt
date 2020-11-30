@@ -17,18 +17,14 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
@@ -36,8 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -137,19 +132,19 @@ public class ApplicationMappingUtil {
     public static void setPaginationParams(ApplicationListDTO applicationListDTO, String groupId, int limit, int offset,
             int size) {
 
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), groupId);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), groupId);
         }

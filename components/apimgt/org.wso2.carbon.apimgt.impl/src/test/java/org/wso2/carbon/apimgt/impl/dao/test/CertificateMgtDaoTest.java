@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -146,7 +147,7 @@ public class CertificateMgtDaoTest {
     @Test
     public void testAddCertificate() throws CertificateManagementException, CertificateAliasExistsException,
             EndpointForCertificateExistsException, APIManagementException {
-        boolean result = certificateMgtDAO.addCertificate(TEST_ALIAS, TEST_ENDPOINT, TENANT_ID);
+        boolean result = certificateMgtDAO.addCertificate(Mockito.anyString(),TEST_ALIAS, TEST_ENDPOINT, TENANT_ID);
         Assert.assertTrue(result);
     }
 
@@ -173,16 +174,16 @@ public class CertificateMgtDaoTest {
     @Test(expected = CertificateAliasExistsException.class)
     public void testAddCertificateForExistingAlias() throws CertificateManagementException,
             CertificateAliasExistsException, EndpointForCertificateExistsException {
-        certificateMgtDAO.addCertificate("ALIAS4", "EP4", TENANT_ID);
+        certificateMgtDAO.addCertificate(certificate,"ALIAS4", "EP4", TENANT_ID);
     }
 
     @Test
     public void testAddCertificateForExistingEndpoint() throws CertificateManagementException,
             CertificateAliasExistsException, EndpointForCertificateExistsException {
         // add certificate
-        certificateMgtDAO.addCertificate("ALIAS_WSO2_1", "http://wso2.com", TENANT_2);
+        certificateMgtDAO.addCertificate(certificate,"ALIAS_WSO2_1", "http://wso2.com", TENANT_2);
         // add same cert for endpoint with differnt alias
-        Assert.assertTrue(certificateMgtDAO.addCertificate("ALIAS_WSO2_2", "http://wso2.com", TENANT_2));
+        Assert.assertTrue(certificateMgtDAO.addCertificate(certificate,"ALIAS_WSO2_2", "http://wso2.com", TENANT_2));
     }
 
     /**

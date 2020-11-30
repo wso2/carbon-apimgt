@@ -185,6 +185,18 @@ class Utils {
     }
 
     /**
+     *
+     * Get service catalog swagger definition URL
+     * @static
+     * @returns
+     * @memberof Utils
+     */
+    static getServiceCatalogSwaggerURL() {
+        // return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+    }
+
+    /**
      * Return the time difference between the current time and the given time in the Date object in seconds
      * @param targetTime {Date|Integer} Date object which needs to be compared with current time
      * @returns {Integer} Time difference in seconds
@@ -338,8 +350,13 @@ Utils.CONST = {
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
+    // SERVICE_CATALOG_SWAGGER_YAML: '/api/service-catalog/v1/swagger.yaml',
+    SERVICE_CATALOG_SWAGGER_YAML: '../../../../../publisher/site/public/serviceCatalog.yaml',
     SWAGGER_YAML: '/api/am/publisher/v1/swagger.yaml',
     PROTOCOL: 'https://',
+    API_CLIENT: 'apiClient',
+    SERVICE_CATALOG_CLIENT: 'serviceCatalogClient',
+    ENABLE_SERVICE_CATALOG: false,
 };
 
 /**

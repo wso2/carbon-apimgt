@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/settings")
 
 @Api(description = "the settings API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class SettingsApi  {
@@ -38,12 +38,12 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive Admin Settings", notes = "Retreive admin settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:admin_settings", description = "Retrieve admin settings")
         })
     }, tags={ "Settings" })
     @ApiResponses(value = { 

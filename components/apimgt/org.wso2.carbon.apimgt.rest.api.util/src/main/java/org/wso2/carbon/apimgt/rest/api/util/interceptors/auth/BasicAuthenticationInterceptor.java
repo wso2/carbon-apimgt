@@ -37,7 +37,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.context.CarbonContext;
@@ -51,9 +52,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -154,7 +153,8 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     domainAwareUserName = domainAwareUserName + "@" + tenantDomain;
                 }
-                RestApiUtil.setThreadLocalRequestedTenant(MultitenantUtils.getTenantAwareUsername(domainAwareUserName));
+                RestApiCommonUtil
+                        .setThreadLocalRequestedTenant(MultitenantUtils.getTenantAwareUsername(domainAwareUserName));
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(domainAwareUserName);

@@ -56,6 +56,9 @@ const styles = {
         height: 30,
         marginLeft: 30,
     },
+    editMetaButton: {
+        whiteSpace: 'nowrap',
+    },
 };
 
 function Transition(props) {
@@ -124,7 +127,8 @@ function Edit(props) {
     const { classes, docId, apiId } = props;
     return (
         <div>
-            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                className={classes.editMetaButton}>
                 <Icon>edit</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Edit.documents.text.editor.edit'

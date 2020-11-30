@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/custom-urls")
 
 @Api(description = "the custom-urls API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class CustomUrlsApi  {
@@ -38,12 +38,12 @@ CustomUrlsApiService delegate = new CustomUrlsApiServiceImpl();
 
     @GET
     @Path("/{tenantDomain}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Custom URL Info of a Tenant Domain ", notes = "This operation is to get custom-url information of the provided tenant-domain ", response = CustomUrlInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:tenantInfo", description = "Retrieve tenant related information")
         })
     }, tags={ "Tenants" })
     @ApiResponses(value = { 

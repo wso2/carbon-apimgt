@@ -28,8 +28,8 @@ import javax.validation.constraints.*;
 @Path("/endpoint-certificates")
 
 @Api(description = "the endpoint-certificates API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class EndpointCertificatesApi  {
@@ -41,12 +41,12 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
 
     @GET
     @Path("/{alias}/content")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Download a Certificate", notes = "This operation can be used to download a certificate which matches the given alias. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -60,7 +60,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
 
     @DELETE
     @Path("/{alias}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a certificate.", notes = "This operation can be used to delete an uploaded certificate. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -79,12 +79,12 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
 
     @GET
     @Path("/{alias}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the Certificate Information", notes = "This operation can be used to get the information about a certificate. ", response = CertificateInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -111,18 +111,18 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response endpointCertificatesAliasPut( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail,  @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias) throws APIManagementException{
-        return delegate.endpointCertificatesAliasPut(certificateInputStream, certificateDetail, alias, securityContext);
+    public Response endpointCertificatesAliasPut( @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias,  @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail) throws APIManagementException{
+        return delegate.endpointCertificatesAliasPut(alias, certificateInputStream, certificateDetail, securityContext);
     }
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/Search Uploaded Certificates", notes = "This operation can be used to retrieve and search the uploaded certificates. ", response = CertificatesDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
         })
     }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
@@ -140,17 +140,15 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     @Produces({ "application/json" })
     @ApiOperation(value = "Upload a new Certificate.", notes = "This operation can be used to upload a new certificate for an endpoint. ", response = CertMetadataDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:ep_certificates_add", description = "Add backend endpoint certificates"),
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:ep_certificates_add", description = "Add backend endpoint certificates")
         })
     }, tags={ "Endpoint Certificates" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  @Size(min=1,max=30) 
-  String alias, @Multipart(value = "endpoint")  
-  String endpoint) throws APIManagementException{
+    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "endpoint")  String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesPost(certificateInputStream, certificateDetail, alias, endpoint, securityContext);
     }
 }

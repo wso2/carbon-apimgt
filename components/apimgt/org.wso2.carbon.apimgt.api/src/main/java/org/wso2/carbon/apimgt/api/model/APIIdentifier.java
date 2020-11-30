@@ -124,7 +124,7 @@ public class APIIdentifier implements Serializable, Identifier {
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }

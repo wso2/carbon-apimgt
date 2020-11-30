@@ -24,8 +24,8 @@ import javax.validation.constraints.*;
 @Path("/api-categories")
 
 @Api(description = "the api-categories API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ApiCategoriesApi  {
@@ -37,7 +37,7 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all API categories", notes = "Get all API categories ", response = APICategoryListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

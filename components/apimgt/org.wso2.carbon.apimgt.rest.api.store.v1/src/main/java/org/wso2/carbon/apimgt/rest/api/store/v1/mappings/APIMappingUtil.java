@@ -42,9 +42,9 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.Timestamp;
@@ -63,7 +63,7 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model, String tenantDomain) throws APIManagementException {
 
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
@@ -249,7 +249,7 @@ public class APIMappingUtil {
     }
 
     public static APIDTO fromAPItoDTO(APIProduct model, String tenantDomain) throws APIManagementException {
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getName());
         dto.setVersion(model.getId().getVersion());
@@ -442,8 +442,8 @@ public class APIMappingUtil {
     public static API getAPIInfoFromUUID(String apiUUID, String requestedTenantDomain)
             throws APIManagementException {
         API api;
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         api = apiConsumer.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
         return api;
     }
@@ -471,19 +471,19 @@ public class APIMappingUtil {
      * @param size       max offset
      */
     public static void setPaginationParams(APIListDTO apiListDTO, String query, int offset, int limit, int size) {
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
@@ -567,18 +567,18 @@ public class APIMappingUtil {
     public static void setRatingPaginationParams(RatingListDTO ratingListDTO, String apiId, int offset, int limit,
                                                  int size) {
         //acquiring pagination parameters and setting pagination urls
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getRatingPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getRatingPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
         }
@@ -773,7 +773,7 @@ public class APIMappingUtil {
         environmentsPublishedByAPI.remove("none");
 
         Set<String> apiTransports = new HashSet<>(Arrays.asList(api.getTransports().split(",")));
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
@@ -819,7 +819,7 @@ public class APIMappingUtil {
                     }
 
                     if (api.isDefaultVersion()) {
-                        int index = endpointBuilder.indexOf(api.getId().getVersion());
+                        int index = endpointBuilder.lastIndexOf(api.getId().getVersion());
                         endpointBuilder.replace(index, endpointBuilder.length(), "");
                         if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
                             apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());
@@ -929,7 +929,7 @@ public class APIMappingUtil {
         environmentsPublishedByAPI.remove("none");
 
         Set<String> apiTransports = new HashSet<>(Arrays.asList(apiProduct.getTransports().split(",")));
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
@@ -1047,7 +1047,7 @@ public class APIMappingUtil {
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
                                                    String subscriptionAllowedTenants) {
 
-        String userTenant = RestApiUtil.getLoggedInUserTenantDomain();
+        String userTenant = RestApiCommonUtil.getLoggedInUserTenantDomain();
         boolean subscriptionAllowed = false;
         if (!userTenant.equals(apiTenant)) {
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {

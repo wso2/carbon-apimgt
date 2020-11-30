@@ -32,7 +32,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.LabelMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -53,7 +54,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String user = RestApiUtil.getLoggedInUsername();
+            String user = RestApiCommonUtil.getLoggedInUsername();
             apiAdmin.deleteLabel(user, labelId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -72,7 +73,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsGet() {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             List<Label> labelList = apiAdmin.getAllLabels(tenantDomain);
             LabelListDTO labelListDTO =
                     LabelMappingUtil.fromLabelListToLabelListDTO(labelList);
@@ -95,7 +96,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         Label label = null;
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             label = LabelMappingUtil.labelDTOToLabel(body);
             LabelDTO labelDTO = LabelMappingUtil.
                     fromLabelToLabelDTO(apiAdmin.addLabel(tenantDomain, label));
@@ -122,7 +123,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             label = LabelMappingUtil.labelDTOToLabelPut(labelId, body);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             LabelDTO labelDTO = LabelMappingUtil.
                     fromLabelToLabelDTO(apiAdmin.updateLabel(tenantDomain, label));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_LABEL + "/" +

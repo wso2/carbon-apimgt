@@ -333,6 +333,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/wso2earth");
         api.setContextTemplate("/wso2earth/{version}");
+        api.setUUID(UUID.randomUUID().toString());
 
         apiMgtDAO.addAPI(api, -1234);
 
@@ -425,6 +426,7 @@ public class APIMgtDAOTest {
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
         api.setContextTemplate("/context1/{version}");
+        api.setUUID(UUID.randomUUID().toString());
 
         apiMgtDAO.addAPI(api, -1234);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -773,12 +775,14 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/getAPIVersionsMatchingApiName");
         api.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "2.0.0");
         API api2 = new API(apiId2);
         api2.setContext("/getAPIVersionsMatchingApiName");
         api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
+        api2.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api2, -1234);
         List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiName("getAPIVersionsMatchingApiName",
                 "getAPIVersionsMatchingApiName");
@@ -825,12 +829,14 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
+        api1.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api1, -1234);
         apiMgtDAO.createApplicationRegistrationEntry(applicationRegistrationWorkflowDTO, false);
         ApplicationRegistrationWorkflowDTO retrievedApplicationRegistrationWorkflowDTO = new
@@ -897,6 +903,7 @@ public class APIMgtDAOTest {
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -1085,6 +1092,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         BlockConditionsDTO apiBlockConditionDto = new BlockConditionsDTO();
         apiBlockConditionDto.setConditionValue("/testAddUpdateDeleteBlockCondition");
@@ -1156,6 +1164,7 @@ public class APIMgtDAOTest {
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
         int apiID = apiMgtDAO.addAPI(api, -1234);
         apiMgtDAO.addURITemplates(apiID, api, -1234);
         apiMgtDAO.updateAPI(api);
@@ -1189,6 +1198,7 @@ public class APIMgtDAOTest {
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
         int apiId = apiMgtDAO.addAPI(api, -1234);
         apiMgtDAO.addURITemplates(apiId, api, -1234);
         HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);

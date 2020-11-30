@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
@@ -63,7 +63,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -107,14 +107,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         query = query == null ? "" : query;
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
         // todo: what are the applications shared to group "g2" among them. 
         groupId = RestApiUtil.getLoggedInUserGroupId();
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
             applications = apiConsumer
@@ -150,10 +150,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //validate the tier specified for the application
             String tierName = body.getThrottlingPolicy();
@@ -216,7 +216,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -271,7 +271,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
@@ -325,10 +325,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(
-            String applicationId, String keyType, APIKeyGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType,
+                                    String ifMatch, APIKeyGenerateRequestDTO body, MessageContext messageContext) {
 
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         Application application;
         int validityPeriod;
         try {
@@ -378,9 +378,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType,
-                                                                      APIKeyRevokeRequestDTO body, String ifMatch,
-                                                                      MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+                                  String ifMatch, APIKeyRevokeRequestDTO body, MessageContext messageContext) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String apiKey = body.getApikey();
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
             try {
@@ -405,7 +404,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                     expiryTime = APIUtil.getExpiryifJWT(apiKey);
                                 }
                                 String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
-                                String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                                 apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
                                 return Response.ok().build();
                             } else {
@@ -469,7 +468,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
@@ -500,7 +499,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
             body, MessageContext messageContext) throws APIManagementException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -595,7 +594,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType, String ifMatch,
                              MessageContext messageContext) {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
@@ -615,7 +614,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     private Set<APIKey> getApplicationKeys(String applicationUUID) {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
@@ -638,8 +637,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId,
             String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
 
             if (application != null) {
@@ -756,7 +755,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
             ApplicationKeyDTO body, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -817,7 +816,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(String applicationId,
             String keyType, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
             if (applicationKeys == null){
@@ -856,7 +855,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
                                                          MessageContext messageContext) throws APIManagementException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -913,7 +912,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                               MessageContext messageContext)
             throws APIManagementException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
@@ -933,8 +932,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                                     MessageContext messageContext)
             throws APIManagementException {
 
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         Application application = apiConsumer.getApplicationByUUID(applicationId);
 
         if (application != null) {
@@ -1001,7 +1000,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                       MessageContext messageContext)
             throws APIManagementException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
@@ -1056,7 +1055,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                                                        MessageContext messageContext)
             throws APIManagementException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
             Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
             if (applicationKeys == null) {
                 return null;

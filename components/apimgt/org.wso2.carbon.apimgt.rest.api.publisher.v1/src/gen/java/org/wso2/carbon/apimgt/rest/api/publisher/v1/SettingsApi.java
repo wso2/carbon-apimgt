@@ -26,8 +26,8 @@ import javax.validation.constraints.*;
 @Path("/settings")
 
 @Api(description = "the settings API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class SettingsApi  {
@@ -39,7 +39,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
 
     @GET
     @Path("/gateway-environments")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All Gateway Environments", notes = "This operation can be used to retrieve the list of gateway environments available. ", response = EnvironmentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -56,7 +56,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive Publisher Settings", notes = "Retreive publisher settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
