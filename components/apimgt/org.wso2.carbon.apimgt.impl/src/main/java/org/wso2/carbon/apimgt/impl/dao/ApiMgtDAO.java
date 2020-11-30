@@ -5196,7 +5196,7 @@ public class ApiMgtDAO {
             preparedStatement.setInt(1, appId);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     String consumerKey = resultSet.getString("CONSUMER_KEY");
                     String keyManager = resultSet.getString("KEY_MANAGER");
                     consumerKeysOfApplication.put(consumerKey, keyManager);
