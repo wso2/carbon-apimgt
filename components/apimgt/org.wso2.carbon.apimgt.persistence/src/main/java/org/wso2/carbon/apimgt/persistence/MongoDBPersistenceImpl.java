@@ -2,10 +2,13 @@ package org.wso2.carbon.apimgt.persistence;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
@@ -16,6 +19,7 @@ import org.wso2.carbon.apimgt.persistence.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
@@ -31,6 +35,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.persistence.mapper.MongoAPIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.MongoDBPersistenceUtil;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.and;
@@ -51,11 +57,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        publisherAPI.setCreatedTime(String.valueOf(new Date().getTime()));
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
         InsertOneResult insertOneResult = collection.insertOne(mongoDBPublisherAPI);
         MongoDBPublisherAPI createdDoc = collection.find(eq("_id",
                 insertOneResult.getInsertedId())).first();
-        getDevPortalAPI(org, createdDoc.getMongodbUuId().toString());
         return MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
     }
 
@@ -107,14 +113,79 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
-        return null;
+        searchQuery = "";
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(ctx.getOrganization().getName());
+        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
+        List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
+
+        while (aggregate.hasNext()) {
+            MongoDBPublisherAPI mongoDBAPIDocument = aggregate.next();
+            PublisherAPIInfo api = MongoAPIMapper.INSTANCE.toPublisherApi(mongoDBAPIDocument);
+            publisherAPIInfoList.add(api);
+        }
+        publisherAPISearchResult.setPublisherAPIInfoList(publisherAPIInfoList);
+        publisherAPISearchResult.setReturnedAPIsCount(publisherAPIInfoList.size());
+        publisherAPISearchResult.setTotalAPIsCount(5);
+        return publisherAPISearchResult;
+    }
+
+    private String getSearchQuery(String query) {
+
+        if (!query.contains(":")) {
+            return "*" + query + "*";
+        }
+        String[] queryArray = query.split(":");
+        String searchCriteria = queryArray[0];
+        String searchQuery = queryArray[1];
+        return "*" + searchQuery + "*";
+    }
+
+    private List<Document> getSearchAggregate(String query) {
+        String searchQuery = getSearchQuery(query);
+        List<String> paths = new ArrayList<>();
+        paths.add("name");
+        paths.add("provider");
+        paths.add("version");
+        paths.add("context");
+        paths.add("status");
+        paths.add("description");
+        paths.add("tags");
+        paths.add("gatewayLabels");
+        paths.add("additionalProperties");
+
+        Document search = new Document();
+        Document wildCard = new Document();
+        Document wildCardBody = new Document();
+        wildCardBody.put("path", paths);
+        wildCardBody.put("query", searchQuery);
+        wildCardBody.put("allowAnalyzedField", true);
+        wildCard.put("wildcard", wildCardBody);
+        search.put("$search", wildCard);
+
+        List<Document> list = new ArrayList<>();
+        list.add(search);
+        return list;
     }
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         //published prototyped only
-        return null;
+        searchQuery = "";
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(ctx.getOrganization().getName());
+        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
+        List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
+        while (aggregate.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = aggregate.next();
+            DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
+            devPortalAPIInfoList.add(api);
+        }
+        devPortalAPISearchResult.setDevPortalAPIInfoList(devPortalAPIInfoList);
+        devPortalAPISearchResult.setReturnedAPIsCount(devPortalAPIInfoList.size());
+        devPortalAPISearchResult.setTotalAPIsCount(5);
+        return devPortalAPISearchResult;
     }
 
     @Override

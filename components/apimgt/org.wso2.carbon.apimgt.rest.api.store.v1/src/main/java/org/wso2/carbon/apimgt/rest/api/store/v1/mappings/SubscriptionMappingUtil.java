@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
@@ -82,6 +83,35 @@ public class SubscriptionMappingUtil {
         return subscriptionDTO;
     }
 
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+        subscriptionDTO.setSubscriptionId(subscription.getUUID());
+        if (apiTypeWrapper !=null && !apiTypeWrapper.isAPIProduct()) {
+            API api = apiTypeWrapper.getApi();
+            subscriptionDTO.setApiId(api.getUUID());
+            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
+            subscriptionDTO.setApiInfo(apiInfo);
+        } else {
+            APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+            subscriptionDTO.setApiId(apiProduct.getUuid());
+            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
+            subscriptionDTO.setApiInfo(apiInfo);
+        }
+        Application application = subscription.getApplication();
+        application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
+        subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
+        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
+        subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
+        subscriptionDTO.setRequestedThrottlingPolicy(subscription.getRequestedTier().getName());
+
+        ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
+        subscriptionDTO.setApplicationInfo(applicationInfoDTO);
+
+        return subscriptionDTO;
+    }
+
     /** Converts a List object of SubscribedAPIs into a DTO
      *
      * @param subscriptions a list of SubscribedAPI objects
@@ -90,7 +120,7 @@ public class SubscriptionMappingUtil {
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
-            Integer offset) throws APIManagementException {
+            Integer offset, ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
 
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
@@ -101,7 +131,7 @@ public class SubscriptionMappingUtil {
 
         for (SubscribedAPI subscription : subscriptions) {
             try {
-                subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription, apiTypeWrapper));
             } catch (APIManagementException e) {
                 log.error("Error while obtaining api metadata", e);
             }
