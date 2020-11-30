@@ -15968,6 +15968,4 @@ public class ApiMgtDAO {
                     + apiRevisionId, e);
         }
     }
-
-
 }
