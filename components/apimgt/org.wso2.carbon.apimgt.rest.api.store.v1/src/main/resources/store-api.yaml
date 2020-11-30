@@ -4336,12 +4336,6 @@ definitions:
         items:
           type: string
           example: ["Finance"]
-      createdTime:
-        type: string
-        example: '2020-10-31T13:57:16.229'
-      lastUpdatedTime:
-        type: string
-        example: '2020-10-31T13:57:16.229'
       keyManagers:
         description: |
           API Key Managers

@@ -60,12 +60,21 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -121,11 +130,11 @@ public class APIMWSDLReader {
         if (log.isDebugEnabled()) {
             log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
         }
-        WSDLProcessor processor = null;
+        WSDLProcessor processor;
         try {
             processor = getWSDLProcessor(extractedLocation);
         } catch (APIManagementException e) {
-           
+            return handleExceptionDuringValidation(e);
         }
 
         WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
@@ -151,58 +160,16 @@ public class APIMWSDLReader {
      * @throws APIManagementException Error occurred during validation
      */
     public static WSDLValidationResponse validateWSDLFile(InputStream inputStream) throws APIManagementException {
-        WSDLValidationResponse wsdlValidationResponse;
-        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
-                + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
-        String wsdlFilePath = path + File.separator + APIConstants.WSDL_FILE
-                + APIConstants.WSDL_FILE_EXTENSION;
-        // Append an additional '/' if not found before the prefix
-        if (!wsdlFilePath.startsWith("/")) {
-            wsdlFilePath = "/" + wsdlFilePath;
-        }
-        APIFileUtil.extractSingleWSDLFile(inputStream, path, wsdlFilePath);
-       String finalPath  =  APIConstants.FILE_URI_PREFIX + wsdlFilePath;
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(finalPath);
-        WSDL11SOAPOperationExtractor soapProcessor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
-        WSDLInfo wsdlInfo = soapProcessor.getWsdlInfo();
         try {
-            //byte[] wsdlContent = APIUtil.toByteArray(inputStream);
-            WSDLProcessor  processor = getWSDLProcessor(finalPath);
-            wsdlValidationResponse = new WSDLValidationResponse();
-            if (processor.hasError()) {
-                wsdlValidationResponse.setValid(false);
-                wsdlValidationResponse.setError(processor.getError());
-            } else {
-                wsdlValidationResponse.setValid(true);
-                WSDLArchiveInfo wsdlArchiveInfo = new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE,
-                        soapProcessor.getWsdlInfo());
-                wsdlValidationResponse.setWsdlArchiveInfo(wsdlArchiveInfo);
-                wsdlValidationResponse.setWsdlInfo(soapProcessor.getWsdlInfo());
-                wsdlValidationResponse.setWsdlProcessor(processor);
-            }
-            return wsdlValidationResponse;
+            byte[] wsdlContent = APIUtil.toByteArray(inputStream);
+            WSDLProcessor processor = getWSDLProcessor(wsdlContent);
+            return getWsdlValidationResponse(processor);
         } catch (APIManagementException e) {
             return handleExceptionDuringValidation(e);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Error while validating WSDL", e);
         }
     }
-
-    /**
-     * Gets WSDL definition as a byte array given the WSDL definition
-     * @param wsdlDefinition generated WSDL definition
-     * @return converted WSDL definition as byte array
-     * @throws APIManagementException
-     */
-    public byte[] getWSDL(Definition wsdlDefinition) throws APIManagementException {
-        try {
-            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
-        } catch (Exception e) {
-            throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
-        }
-    }
-
 
     /**
      * Extract the WSDL url and validates it
@@ -258,57 +225,20 @@ public class APIMWSDLReader {
     public static WSDLProcessor getWSDLProcessor(String wsdlPath) throws APIManagementException {
         WSDLProcessor wsdl11Processor = new WSDL11ProcessorImpl();
         WSDLProcessor wsdl20Processor = new WSDL20ProcessorImpl();
-        byte[] wsdlContent;
-        APIMWSDLReader wsdlReader;
-        if (wsdlPath.endsWith(".wsdl") || wsdlPath.endsWith("?wsdl")) {
-            wsdlReader = new APIMWSDLReader(wsdlPath);
-            wsdlContent = wsdlReader.getWSDL();
-            getWSDLProcessor(wsdlContent);
-        } else {
-            try {
-                if (wsdl11Processor.canProcess(wsdlPath)) {
-                    wsdl11Processor.initPath(wsdlPath);
-                    return wsdl11Processor;
-                } else if (wsdl20Processor.canProcess(wsdlPath)) {
-                    wsdl20Processor.initPath(wsdlPath);
-                    return wsdl20Processor;
-                } else {
-                    //no processors found if this line reaches
-                    throw new APIManagementException("No WSDL processor found to process WSDL content.",
-                            ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
-                }
-            } catch (APIMgtWSDLException e) {
-                throw new APIManagementException("Error while instantiating wsdl processor class", e);
-            }
-        }
-        return wsdl11Processor;
-    }
-
-    /**
-     * Get the Secured Parsed Document from given file
-     *
-     * @param file file path
-     * @return Secured Parsed Document
-     * @throws APIManagementException When error occurred when parsing the file
-     */
-    public Document getSecuredParsedDocument(String file) throws APIManagementException {
-        String errorMsg = "Error while reading WSDL document";
-        InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(new File(file));
-            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.parse(inputStream);
-        } catch (ParserConfigurationException e) {
-            throw new APIManagementException(errorMsg, e);
-        } catch (IOException e) {
-            throw new APIManagementException(errorMsg, e);
-        } catch (SAXException e) {
-            throw new APIManagementException(errorMsg, e);
-        } finally {
-            if(inputStream != null) {
-                IOUtils.closeQuietly(inputStream);
+            if (wsdl11Processor.canProcess(wsdlPath)) {
+                wsdl11Processor.initPath(wsdlPath);
+                return wsdl11Processor;
+            } else if (wsdl20Processor.canProcess(wsdlPath)) {
+                wsdl20Processor.initPath(wsdlPath);
+                return wsdl20Processor;
+            } else {
+                //no processors found if this line reaches
+                throw new APIManagementException("No WSDL processor found to process WSDL content.",
+                        ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
             }
+        } catch (APIMgtWSDLException e) {
+            throw new APIManagementException("Error while instantiating wsdl processor class", e);
         }
     }
 
@@ -393,10 +323,9 @@ public class APIMWSDLReader {
      * @return WSDL11SOAPOperationExtractor for the provided URL
      * @throws APIManagementException If an error occurs while determining the processor
      */
-    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractor(String wsdlPath, APIMWSDLReader
-            wsdlReader) throws APIManagementException {
+    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractor(String wsdlPath)
+            throws APIManagementException {
         WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor();
-        processor.loadXSDs(wsdlReader, wsdlPath);
         processor.initPath(wsdlPath);
         return processor;
     }
@@ -471,6 +400,23 @@ public class APIMWSDLReader {
         } catch (Exception e) {
             String msg = "Error occurs when change the address URL of the WSDL";
             throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Gets WSDL definition as a byte array given the WSDL definition
+     * @param wsdlDefinition generated WSDL definition
+     * @return converted WSDL definition as byte array
+     * @throws APIManagementException
+     */
+    public byte[] getWSDL(Definition wsdlDefinition) throws APIManagementException {
+        try {
+            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
         }
     }
 
@@ -1079,7 +1025,7 @@ public class APIMWSDLReader {
      * @return WSDL validation response
      * @throws APIMgtWSDLException if error occurred while retrieving WSDL info
      */
-    private static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor  processor)
+    private static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor processor)
             throws APIMgtWSDLException {
         WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
         if (processor.hasError()) {
@@ -1087,7 +1033,7 @@ public class APIMWSDLReader {
             wsdlValidationResponse.setError(processor.getError());
         } else {
             wsdlValidationResponse.setValid(true);
-//            wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+            wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
             wsdlValidationResponse.setWsdlProcessor(processor);
         }
         return wsdlValidationResponse;

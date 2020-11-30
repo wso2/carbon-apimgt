@@ -43,7 +43,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperation;
@@ -53,8 +52,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SwaggerFieldsExcludeStrategy;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
-import org.wso2.carbon.utils.CarbonUtils;
-
 import javax.wsdl.extensions.schema.SchemaImport;
 import javax.wsdl.extensions.soap12.SOAP12Operation;
 
@@ -76,9 +73,15 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.File;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.ATTRIBUTE_NODE_NAME;
 import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.ATTR_CONTENT_KEYWORD;
@@ -144,54 +147,6 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     public boolean initPath(String pathToExtractedZip) throws APIMgtWSDLException {
         super.initPath(pathToExtractedZip);
         return initModels();
-    }
-
-    /**
-     * Load the schemas into the listof based schemas
-     *
-     * @param url   url or the location to load the schemas
-     */
-    @Override
-    public void loadXSDs(APIMWSDLReader wsdlReader, String url) throws APIManagementException {
-        Collection<File> foundXSDFiles = new java.util.LinkedList<>();
-        if (url!= null && url.endsWith(File.pathSeparator + "extracted")) {
-            File folderToImport = new File(url);
-            foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "xsd", false);
-        }
-        foundXSDFiles.addAll(getStandardBaseXSDs());
-        Document document;
-        for (File file : foundXSDFiles) {
-            String absWSDLPath = file.getAbsolutePath();
-            if (log.isDebugEnabled()) {
-                log.debug("Processing xsd file: " + absWSDLPath);
-            }
-            document = wsdlReader.getSecuredParsedDocument(absWSDLPath);
-            Node namespace = document.getDocumentElement().getAttributes().getNamedItem("targetNamespace");
-            if (namespace != null) {
-                basedSchemas.put(namespace.getNodeValue(), document);
-            }
-        }
-    }
-
-    public Document loadXsds(String ns) throws APIManagementException {
-        Collection<File> foundXSDFiles = new java.util.LinkedList<>();
-        foundXSDFiles.addAll(getStandardBaseXSDs());
-        Document doc = null;
-        APIMWSDLReader reader = new APIMWSDLReader(ns + ".xsd");
-        for (File file : foundXSDFiles) {
-            String absWSDLPath = file.getAbsolutePath();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Processing xsd file: " + absWSDLPath);
-            }
-            doc = reader.getSecuredParsedDocument(absWSDLPath);
-
-            Node namespace = doc.getDocumentElement().getAttributes().getNamedItem("targetNamespace");
-            if (namespace != null) {
-                basedSchemas.put(namespace.getNodeValue(), doc);
-            }
-        }
-        return doc;
     }
 
     /**
@@ -327,18 +282,10 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             }
         }
         if (prevNode != null) {
-            try {
-                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, true, prevNode);
-            } catch (APIManagementException e) {
-                e.printStackTrace();
-            }
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, true, prevNode);
             setNamespaceDetails(model, element);
         } else {
-            try {
-                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, false, null);
-            } catch (APIManagementException e) {
-                e.printStackTrace();
-            }
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp, false, null);
             setNamespaceDetails(model, element);
         }
         NodeList nodeList = element.getChildNodes();
@@ -362,7 +309,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      * @return swagger property for the wsdl element
      */
     private Property generateSwaggerModelForComplexType(Node current, ModelImpl model, Property currentProp,
-                                                        boolean prevNodeExist, Node prevNode) throws APIManagementException {
+                                                        boolean prevNodeExist, Node prevNode) {
         if (WSDL_ELEMENT_NODE.equals(current.getLocalName())) {
             if (StringUtils.isNotBlank(getNodeName(current))) {
                 addModelDefinition(current, model, SOAPToRESTConstants.EMPTY_STRING, prevNodeExist, prevNode);
@@ -398,7 +345,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         return currentProp;
     }
 
-    private void readExtensionModel(ModelImpl model, Node node) throws APIManagementException {
+    private void readExtensionModel(ModelImpl model, Node node) {
         Node baseNode = node.getAttributes().getNamedItem(BASE_ATTR);
         if (baseNode == null) {
             return;
@@ -429,9 +376,6 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         }
 
         Document nsDoc = getBasedXSDofWSDL(ns);
-        if (nsDoc == null) {
-            nsDoc = loadXsds(ns);
-        }
         if (nsDoc == null) {
             log.warn("Couldn't find xsd document for namespace " + ns);
         }
@@ -1191,19 +1135,6 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             }
         }
         return false;
-    }
-
-    /**
-     * Get the standard base xsd files
-     * @return Collection of xsd files
-     */
-    private Collection<File> getStandardBaseXSDs() {
-        String baseStandardXSDLocation =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "xsds";
-        File folderToImport = new File(baseStandardXSDLocation);
-        Collection<File> foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "xsd", false);
-        return foundXSDFiles;
     }
 
     public Map<String, ModelImpl> getParameterModelMap() {

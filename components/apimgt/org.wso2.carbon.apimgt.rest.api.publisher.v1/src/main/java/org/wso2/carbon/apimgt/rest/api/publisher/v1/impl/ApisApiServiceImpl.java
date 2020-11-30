@@ -3617,7 +3617,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     validationResponse =
                             APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
                 } else if (filename.endsWith(".wsdl")) {
-                    //APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
                     validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
                 } else {
                     RestApiUtil.handleBadRequest("Unsupported extension type of file: " + filename, log);
@@ -3750,13 +3749,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
             } else if (fileDetail != null && fileInputStream != null) {
-                ResourceFile wsdlResource;
-                if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
-                        APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
-                    wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
-                } else {
-                    wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
-                }
+                ResourceFile wsdlResource = new ResourceFile(fileInputStream,
+                        fileDetail.getContentType().toString());
                 apiToAdd.setWsdlResource(wsdlResource);
             }
 
@@ -3823,11 +3817,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileInputStream != null) {
                 String filename = fileDetail.getContentDisposition().getFilename();
                 if (filename.endsWith(".zip")) {
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath, url);
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
                 } else if (filename.endsWith(".wsdl")) {
                     byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
-                    wsdlArchiveExtractedPath = wsdlArchiveExtractedPath.substring(0, wsdlArchiveExtractedPath.lastIndexOf('/'));
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath, url, wsdlContent);
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
                 } else {
                     throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
                 }
@@ -3898,13 +3891,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             api.setWsdlResource(null);
             apiProvider.updateWsdlFromUrl(api);
         } else {
-            ResourceFile wsdlResource;
-            if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
-                    APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
-                wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
-            } else {
-                wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
-            }
+            ResourceFile wsdlResource = new ResourceFile(fileInputStream,
+                    fileDetail.getContentType().toString());
             api.setWsdlResource(wsdlResource);
             api.setWsdlUrl(null);
             apiProvider.updateWsdlFromResourceFile(api);
