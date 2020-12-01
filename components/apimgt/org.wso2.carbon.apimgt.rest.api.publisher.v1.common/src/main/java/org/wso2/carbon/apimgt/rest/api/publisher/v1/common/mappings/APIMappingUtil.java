@@ -493,14 +493,13 @@ public class APIMappingUtil {
      * Returns the APIIdentifier given the uuid
      *
      * @param apiId                 API uuid
-     * @param requestedTenantDomain tenant domain of the API
      * @return APIIdentifier which represents the given id
      * @throws APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId)
             throws APIManagementException {
 
-        return getAPIInfoFromUUID(apiId, requestedTenantDomain).getId();
+        return APIUtil.getAPIIdentifierFromUUID(apiId);
     }
 
     /**

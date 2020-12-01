@@ -147,7 +147,8 @@ public class ExportUtils {
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn,
-                                 String userName, ExportFormat exportFormat, Boolean preserveStatus)
+                                 String userName, ExportFormat exportFormat, boolean preserveStatus,
+                                 boolean preserveDocs)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
@@ -162,12 +163,15 @@ public class ExportUtils {
                     getGovernanceSystemRegistry(tenantId);
 
             CommonUtil.createDirectory(archivePath);
-
-            addThumbnailToArchive(archivePath, apiIdentifier, registry);
+            if (preserveDocs) {
+                addThumbnailToArchive(archivePath, apiIdentifier, registry);
+            }
             addSOAPToRESTMediationToArchive(archivePath, apiIdentifier, registry);
-            addDocumentationToArchive(archivePath, apiIdentifier, registry, exportFormat, apiProvider);
+            if (preserveDocs) {
+                addDocumentationToArchive(archivePath, apiIdentifier, registry, exportFormat, apiProvider);
+            }
 
-            if (StringUtils.isNotEmpty(apiDtoToReturn.getWsdlUrl())) {
+            if (StringUtils.isNotEmpty(apiDtoToReturn.getWsdlUrl()) && preserveDocs) {
                 addWSDLtoArchive(archivePath, apiIdentifier, registry);
             } else if (log.isDebugEnabled()) {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
@@ -215,7 +219,7 @@ public class ExportUtils {
      */
     public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
                                         APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat,
-                                        Boolean preserveStatus)
+                                        Boolean preserveStatus,boolean preserveDocs)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
@@ -232,12 +236,15 @@ public class ExportUtils {
 
             CommonUtil.createDirectory(archivePath);
 
-            addThumbnailToArchive(archivePath, apiProductIdentifier, registry);
-            addDocumentationToArchive(archivePath, apiProductIdentifier, registry, exportFormat, apiProvider);
+            if (preserveDocs){
+                addThumbnailToArchive(archivePath, apiProductIdentifier, registry);
+                addDocumentationToArchive(archivePath, apiProductIdentifier, registry, exportFormat, apiProvider);
+
+            }
             addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider,
                     userName);
             addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                    preserveStatus);
+                    preserveStatus, preserveDocs);
 
             // Export mTLS authentication related certificates
             if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
@@ -1005,7 +1012,7 @@ public class ExportUtils {
      */
     public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
                                                  ExportFormat exportFormat, APIProvider provider, String userName,
-                                                 Boolean isStatusPreserved)
+                                                 Boolean isStatusPreserved,boolean preserveDocs)
             throws APIImportExportException, APIManagementException {
 
         String apisDirectoryPath = archivePath + File.separator + ImportExportConstants.APIS_DIRECTORY;
@@ -1017,7 +1024,7 @@ public class ExportUtils {
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,
-                    isStatusPreserved);
+                    isStatusPreserved, preserveDocs);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }

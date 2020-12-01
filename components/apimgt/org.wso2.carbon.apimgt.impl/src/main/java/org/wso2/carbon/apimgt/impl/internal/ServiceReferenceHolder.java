@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
@@ -56,6 +57,7 @@ public class ServiceReferenceHolder {
     private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
     private ArtifactSaver artifactSaver;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
+    private ImportExportAPI importExportService;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -212,4 +214,13 @@ public class ServiceReferenceHolder {
         this.artifactSaver = artifactSaver;
     }
 
+    public void setImportExportAPI(ImportExportAPI importExportService) {
+
+        this.importExportService = importExportService;
+    }
+
+    public ImportExportAPI getImportExportService() {
+
+        return importExportService;
+    }
 }
