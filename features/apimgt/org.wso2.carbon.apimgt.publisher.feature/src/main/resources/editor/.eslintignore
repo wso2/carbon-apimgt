@@ -1,0 +1,6 @@
+/public/**
+/node_modules/**
+/coverage/**
+# Pleae comment the reason if you are  ignoring a file/directory here
+/source/src/app/components/Apis/Details/Security/**
+/source/src/app/components/Apis/Details/Documents/**
