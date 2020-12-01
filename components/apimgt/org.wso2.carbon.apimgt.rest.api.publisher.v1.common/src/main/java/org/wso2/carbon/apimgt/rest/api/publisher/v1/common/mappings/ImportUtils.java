@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.statsupdate.stub.Exception;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -234,14 +236,21 @@ public class ImportUtils {
             importedApi.setStatus(targetStatus);
             return importedApi;
         } catch (CryptoException | IOException e) {
-            String errorMessage = "Error while reading API meta information from path: " + extractedFolderPath;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(
+                    "Error while reading API meta information from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API: " + importedApi.getId().getApiName();
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
             throw new APIImportExportException(errorMessage, e);
+        } catch (APIMgtAuthorizationFailedException e) {
+            throw new APIImportExportException("Please enable preserveProvider property for cross tenant API Import.",
+                    e, ExceptionCodes.TENANT_MISMATCH);
+        } catch (ParseException e) {
+            throw new APIImportExportException("Error while parsing the endpoint configuration of the API",
+                    ExceptionCodes.JSON_PARSE_ERROR);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API: ";
             if (importedApi != null) {
@@ -250,9 +259,6 @@ public class ImportUtils {
                                 + importedApi.getId().getVersion();
             }
             throw new APIImportExportException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
-        } catch (ParseException e) {
-            String errorMessage = "Error while parsing the endpoint configuration of the API";
-            throw new APIImportExportException(errorMessage, e);
         }
     }
 
@@ -341,7 +347,7 @@ public class ImportUtils {
                 configObject.addProperty(ImportExportConstants.VERSION_ELEMENT, apiVersion.replace(" ", ""));
             }
         } else {
-            throw new IOException("API Name (id.name) and Version (id.version) must be provided in api.yaml");
+            throw new IOException("API name and version must be provided in api.yaml");
         }
 
         configObject = validatePreserveProvider(configObject, isDefaultProviderAllowed, currentUser);
@@ -364,7 +370,7 @@ public class ImportUtils {
         if (isDefaultProviderAllowed) {
             if (!StringUtils.equals(prevTenantDomain, currentTenantDomain)) {
                 String errorMessage =
-                        "Tenant mismatch! Please enable preserveProvider property " + "for cross tenant API Import.";
+                        "Tenant mismatch! Please enable preserveProvider property for cross tenant API Import.";
                 throw new APIMgtAuthorizationFailedException(errorMessage);
             }
         } else {
@@ -446,20 +452,25 @@ public class ImportUtils {
      * Validate GraphQL Schema definition from the archive directory and return it.
      *
      * @param pathToArchive Path to API archive
-     * @throws IOException If an error occurs while reading the file
+     * @throws APIImportExportException If an error occurs while reading the file
      */
     private static String retrieveValidatedGraphqlSchemaFromArchive(String pathToArchive)
-            throws IOException, APIImportExportException, APIManagementException {
+            throws APIImportExportException {
         File file = new File(pathToArchive + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION);
-        String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
-        GraphQLValidationResponseDTO graphQLValidationResponseDTO = PublisherCommonUtils
-                .validateGraphQLSchema(file.getName(), schemaDefinition);
-        if (!graphQLValidationResponseDTO.isIsValid()) {
-            String errMsg = "Error occurred while importing the API. Invalid GraphQL schema definition found. "
-                    + graphQLValidationResponseDTO.getErrorMessage();
-            throw new APIImportExportException(errMsg);
+        try {
+            String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
+            GraphQLValidationResponseDTO graphQLValidationResponseDTO = PublisherCommonUtils
+                    .validateGraphQLSchema(file.getName(), schemaDefinition);
+            if (!graphQLValidationResponseDTO.isIsValid()) {
+                String errMsg = "Error occurred while importing the API. Invalid GraphQL schema definition found. "
+                        + graphQLValidationResponseDTO.getErrorMessage();
+                throw new APIImportExportException(errMsg);
+            }
+            return schemaDefinition;
+        } catch (IOException | APIManagementException e) {
+            throw new APIImportExportException("Error while reading API meta information from path: " + pathToArchive,
+                    e, ExceptionCodes.ERROR_READING_META_DATA);
         }
-        return schemaDefinition;
     }
 
     /**
@@ -467,19 +478,22 @@ public class ImportUtils {
      *
      * @param pathToArchive Path to API archive
      * @throws APIImportExportException If an error due to an invalid WSDL definition
-     * @throws IOException              If an error occurs while reading the file
-     * @throws APIManagementException   If an error occurs while retrieving the WSDL processor
      */
     private static void validateWSDLFromArchive(String pathToArchive, APIDTO apiDto)
-            throws APIImportExportException, IOException, APIManagementException {
-        byte[] wsdlDefinition = loadWsdlFile(pathToArchive, apiDto);
-        WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
-                getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
-        if (!wsdlValidationResponse.isValid()) {
-            String errMsg =
-                    "Error occurred while importing the API. Invalid WSDL definition found. " + wsdlValidationResponse
-                            .getError();
-            throw new APIImportExportException(errMsg);
+            throws APIImportExportException {
+        try {
+            byte[] wsdlDefinition = loadWsdlFile(pathToArchive, apiDto);
+            WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
+                    getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
+            if (!wsdlValidationResponse.isValid()) {
+                String errMsg =
+                        "Error occurred while importing the API. Invalid WSDL definition found. " + wsdlValidationResponse
+                                .getError();
+                throw new APIImportExportException(errMsg);
+            }
+        } catch (IOException | APIManagementException e) {
+            throw new APIImportExportException("Error while reading API meta information from path: " + pathToArchive,
+                    e, ExceptionCodes.ERROR_READING_META_DATA);
         }
     }
 
@@ -526,20 +540,24 @@ public class ImportUtils {
      * Validate swagger definition from the archive directory and return it.
      *
      * @param pathToArchive Path to API or API Product archive
-     * @throws IOException If an error occurs while reading the file
+     * @throws APIImportExportException If an error occurs while reading the file
      */
     private static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinitionFromArchive(String pathToArchive)
-            throws APIManagementException, APIImportExportException, IOException {
-        String swaggerContent = loadSwaggerFile(pathToArchive);
-        APIDefinitionValidationResponse validationResponse = OASParserUtil
-                .validateAPIDefinition(swaggerContent, Boolean.TRUE);
-        if (!validationResponse.isValid()) {
-            String errMsg =
-                    "Error occurred while importing the API. Invalid Swagger definition found. " + validationResponse
-                            .getErrorItems();
-            throw new APIImportExportException(errMsg);
+            throws APIImportExportException {
+        try {
+            String swaggerContent = loadSwaggerFile(pathToArchive);
+            APIDefinitionValidationResponse validationResponse = OASParserUtil
+                    .validateAPIDefinition(swaggerContent, Boolean.TRUE);
+            if (!validationResponse.isValid()) {
+                throw new APIImportExportException(
+                        "Error occurred while importing the API. Invalid Swagger definition found. "
+                                + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
+            }
+            return validationResponse;
+        } catch (IOException | APIManagementException e) {
+            throw new APIImportExportException("Error while reading API meta information from path: " + pathToArchive,
+                    e, ExceptionCodes.ERROR_READING_META_DATA);
         }
-        return validationResponse;
     }
 
     /**

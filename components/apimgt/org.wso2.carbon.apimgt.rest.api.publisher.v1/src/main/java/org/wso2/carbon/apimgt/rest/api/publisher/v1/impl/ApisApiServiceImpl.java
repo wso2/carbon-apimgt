@@ -494,7 +494,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (CryptoException e) {
             String errorMessage = "Error while encrypting the secret key of API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (ParseException | JsonProcessingException e) {
+        } catch (ParseException e) {
             String errorMessage = "Error while parsing endpoint config of API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -3481,34 +3481,16 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
+
+        String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                .get(RestApiConstants.USER_REST_API_SCOPES);
+        ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
-            String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
-                    .get(RestApiConstants.USER_REST_API_SCOPES);
-            ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             importExportAPI.importAPI(fileInputStream, preserveProvider, overwrite, tokenScopes);
-            return Response.status(Response.Status.OK).entity("API imported successfully.").build();
         } catch (APIImportExportException e) {
-            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                String errorMessage = "Error occurred while importing. Duplicate API already exists.";
-                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
-            } else if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                //Auth failure occurs when cross tenant accessing APIs with preserve provider true.
-                String errorMessage = "Not Authorized to import cross tenant APIs with preserveProvider true.";
-                RestApiUtil.handleAuthorizationFailure(errorMessage, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API + " not found", e,
-                        log);
-            } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
-                RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.", e,
-                        log);
-            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
-                RestApiUtil.handleResourceNotFoundError(
-                        "Error while adding the throttling policy. " + "Provided throttling policy cannot be found.", e,
-                        log);
-            }
-            RestApiUtil.handleInternalServerError("Error while importing API", e, log);
+            throw new APIManagementException(e.getMessage(), e.getCause(), e.getErrorHandler());
         }
-        return null;
+        return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 
     /**

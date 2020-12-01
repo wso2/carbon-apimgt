@@ -357,6 +357,7 @@ ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
     KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+    TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
@@ -398,7 +399,11 @@ ExceptionCodes implements ErrorHandler {
             "{apiName}#{apiVersion}#{tenantDomain}",400,"The configuration id validation failed. Should be " +
             "{apiName}#{apiVersion}#{tenantDomain}"),
     INVALID_API_NAME(900854, "Invalid API Name",400 ,"Invalid API Name"),
-    ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty");
+    ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty"),
+
+    // API import/export related codes
+    ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
+            "Error while reading meta information from the definition");
 
     private final long errorCode;
     private final String errorMessage;

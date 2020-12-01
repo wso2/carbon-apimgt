@@ -97,11 +97,9 @@ public class PublisherCommonUtils {
      * @throws CryptoException         If an error occurs while encrypting the secret key of API
      * @throws APIManagementException  If an error occurs while updating the API
      * @throws FaultGatewaysException  If an error occurs while updating manage of an existing API
-     * @throws JsonProcessingException f an error occurs while processing the endpoint configuration
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
-            throws ParseException, CryptoException, APIManagementException, FaultGatewaysException,
-            JsonProcessingException {
+            throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
         if (tokenScopes == null) {
@@ -686,7 +684,7 @@ public class PublisherCommonUtils {
 
         // AWS Lambda: secret key encryption while creating the API
         if (apiDto.getEndpointConfig() != null) {
-            LinkedHashMap endpointConfig = (LinkedHashMap) apiDto.getEndpointConfig();
+            Map endpointConfig = (Map) apiDto.getEndpointConfig();
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
                 String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
                 if (!StringUtils.isEmpty(secretKey)) {
