@@ -2390,16 +2390,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> claimMap = new HashMap<>();
         try {
             tenantId = getTenantId(tenantDomain);
-        SortedMap<String, String> subscriberClaims =
-                APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
-        APIManagerConfiguration configuration = getAPIManagerConfiguration();
-        String configuredClaims = configuration
-                .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
-        if (subscriberClaims != null) {
-            for (String claimURI : configuredClaims.split(",")) {
-                claimMap.put(claimURI, subscriberClaims.get(claimURI));
+            SortedMap<String, String> subscriberClaims =
+                    APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
+            APIManagerConfiguration configuration = getAPIManagerConfiguration();
+            String configuredClaims = configuration
+                    .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
+            if (subscriberClaims != null) {
+                for (String claimURI : configuredClaims.split(",")) {
+                    claimMap.put(claimURI, subscriberClaims.get(claimURI));
+                }
             }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while retrieving tenant id for tenant domain "
+                    + tenantDomain, e);
         }
+        return claimMap;
+    }
+
+    /**
+     * Returns the claims of subscriber for the given subscriber.
+     *
+     * @param userName The name of the subscriber to be returned
+     * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
+     * @throws APIManagementException if failed to get Subscriber
+     */
+    @Override
+    public Map<String, String> getLoggedInUserClaims(String userName) throws APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        int tenantId = 0;
+        Map<String, String> claimMap;
+        try {
+            tenantId = getTenantId(tenantDomain);
+            claimMap = APIUtil.getClaims(userName, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for tenant domain "
                     + tenantDomain, e);

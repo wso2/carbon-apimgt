@@ -199,6 +199,8 @@ public interface APIProvider extends APIManager {
      */
     Map getSubscriberClaims(String subscriber) throws APIManagementException;
 
+    Map getLoggedInUserClaims(String userName) throws APIManagementException;
+
     void addTier(Tier tier) throws APIManagementException;
 
     void addPolicy(Policy policy) throws APIManagementException;

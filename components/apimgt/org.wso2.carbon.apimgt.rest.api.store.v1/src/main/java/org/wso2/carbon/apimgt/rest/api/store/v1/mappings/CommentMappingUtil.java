@@ -21,12 +21,16 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.FullNameDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CommentMappingUtil {
 
@@ -46,6 +50,24 @@ public class CommentMappingUtil {
         commentDTO.setCreatedBy(comment.getUser());
         commentDTO.setCreatedTime(comment.getCreatedTime());
         return commentDTO;
+    }
+
+    /**
+     * Converts a Comment object into corresponding REST API CommentDTO object with User Info
+     *
+     * @param comment comment object
+     * @return CommentDTO
+     */
+    public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment) throws APIManagementException {
+
+        CommentDTO commentDTO = fromCommentToDTO(comment);
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiUtil.getProvider(username);
+        Map userClaims = apiProvider.getLoggedInUserClaims(comment.getUser());
+        FullNameDTO fullNameDTO = new FullNameDTO();
+        fullNameDTO.setFullName((String) userClaims.get("http://wso2.org/claims/userprincipal"));
+        commentDTO.setCommenterInformation(fullNameDTO);
+        return  commentDTO;
     }
 
     /**
@@ -72,7 +94,7 @@ public class CommentMappingUtil {
      * @param offset      starting position of the pagination
      * @return CommentListDTO
      */
-    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset) {
+    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset, boolean commenterInfo) {
         CommentListDTO commentListDTO = new CommentListDTO();
         List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
         commentListDTO.setCount(commentList.length);
@@ -82,7 +104,11 @@ public class CommentMappingUtil {
 
         for (int i = start; i <= end; i++) {
             try {
-                listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
+                if (commenterInfo) {
+                    listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i]));
+                } else {
+                    listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
+                }
             } catch (APIManagementException e) {
                 log.error("Error while creating comments list", e);
             }

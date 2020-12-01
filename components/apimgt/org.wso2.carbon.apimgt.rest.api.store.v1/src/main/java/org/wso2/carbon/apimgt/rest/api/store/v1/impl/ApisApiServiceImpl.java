@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
@@ -51,10 +52,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
@@ -64,7 +62,9 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.GraphqlQueryAnalysisMap
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -265,7 +265,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
-
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
@@ -290,14 +289,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
-                                        MessageContext messageContext) {
+                                        Boolean commenterInfo, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
 
             Comment[] comments = apiConsumer.getComments(apiTypeWrapper);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset, commenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;

@@ -250,6 +250,7 @@ public class RestApiUtil {
         return CarbonContext.getThreadLocalCarbonContext().getUsername();
     }
 
+
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     }
