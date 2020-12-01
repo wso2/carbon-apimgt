@@ -3370,9 +3370,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
                                   Boolean preserveStatus, MessageContext messageContext) {
 
-        APIIdentifier apiIdentifier;
-        APIDTO apiDtoToReturn;
-
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
 
@@ -3465,6 +3462,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Import an API by uploading an archive file. All relevant API data will be included upon the creation of
+     * the API. Depending on the choice of the user, provider of the imported API will be preserved or modified.
+     *
+     * @param fileInputStream  Input stream from the REST request
+     * @param fileDetail       File details as Attachment
+     * @param preserveProvider User choice to keep or replace the API provider
+     * @param overwrite        Whether to update the API or not. This is used when updating already existing APIs.
+     * @return API import response
+     * @throws APIManagementException when error occurred while trying to import the API
+     */
     @Override
     public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
@@ -3474,10 +3482,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
         try {
-            String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
             String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                     .get(RestApiConstants.USER_REST_API_SCOPES);
-            ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
+            ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
+            importExportAPI.importAPI(fileInputStream, preserveProvider, overwrite, tokenScopes);
             return Response.status(Response.Status.OK).entity("API imported successfully.").build();
         } catch (APIImportExportException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {

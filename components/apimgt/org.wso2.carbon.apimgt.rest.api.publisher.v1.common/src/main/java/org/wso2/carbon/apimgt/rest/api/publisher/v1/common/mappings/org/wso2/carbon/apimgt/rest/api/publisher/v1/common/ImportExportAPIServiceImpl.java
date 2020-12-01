@@ -33,11 +33,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * Osgi Service implementation for import export API.
@@ -49,6 +51,7 @@ import java.io.File;
 )
 public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
+    @Override
     public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
                           ExportFormat format, boolean preserveDocs) throws APIManagementException,
             APIImportExportException {
@@ -79,9 +82,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
-    public File exportApiProduct(String apiId, String name, String version, String providerName, ExportFormat format,
-                                 boolean preserveStatus, boolean preserveDocs) throws APIManagementException,
-            APIImportExportException {
+    public File exportAPIProduct(String apiId, String name, String version, String providerName,
+            ExportFormat format, boolean preserveStatus, boolean preserveDocs)
+            throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;
         APIProductDTO apiProductDtoToReturn;
@@ -102,11 +105,18 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         }
         if (apiProduct != null) {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
-            return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn,
-                    userName, format, preserveStatus, preserveDocs);
+            return ExportUtils
+                    .exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, format,
+                            preserveStatus, preserveDocs);
         }
         return null;
 
     }
 
+    @Override
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite,
+            String[] tokenScopes) throws APIImportExportException {
+        String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
+    }
 }
