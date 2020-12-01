@@ -215,13 +215,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.solr.SolrClient;
-import org.wso2.carbon.user.api.ClaimManager;
-import org.wso2.carbon.user.api.ClaimMapping;
-import org.wso2.carbon.user.api.Permission;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.Tenant;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.api.*;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
@@ -11020,7 +11014,6 @@ public final class APIUtil {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
     }
 
     /**

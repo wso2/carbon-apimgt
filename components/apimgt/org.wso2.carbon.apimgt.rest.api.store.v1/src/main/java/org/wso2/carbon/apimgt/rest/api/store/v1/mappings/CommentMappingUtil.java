@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.FullNameDTO;
@@ -65,7 +66,9 @@ public class CommentMappingUtil {
         APIProvider apiProvider = RestApiUtil.getProvider(username);
         Map userClaims = apiProvider.getLoggedInUserClaims(comment.getUser());
         FullNameDTO fullNameDTO = new FullNameDTO();
-        fullNameDTO.setFullName((String) userClaims.get("http://wso2.org/claims/userprincipal"));
+        fullNameDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
+        fullNameDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
+        fullNameDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
         commentDTO.setCommenterInformation(fullNameDTO);
         return  commentDTO;
     }
