@@ -1067,11 +1067,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 String clientId = applicationKeyDTO.getConsumerKey();
                 String clientSecret = apiConsumer.renewConsumerSecret(clientId, applicationKeyDTO.getKeyManager());
 
-                ApplicationKeyDTO retrievedApplicationKet = new ApplicationKeyDTO();
-                retrievedApplicationKet.setConsumerKey(clientId);
-                retrievedApplicationKet.setConsumerSecret(clientSecret);
+                ApplicationKeyDTO retrievedApplicationKey = new ApplicationKeyDTO();
+                retrievedApplicationKey.setConsumerKey(clientId);
+                retrievedApplicationKey.setConsumerSecret(clientSecret);
 
-                return Response.ok().entity(retrievedApplicationKet).build();
+                return Response.ok().entity(retrievedApplicationKey).build();
             }
         return null;
     }
