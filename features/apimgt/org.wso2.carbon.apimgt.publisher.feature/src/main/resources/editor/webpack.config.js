@@ -29,8 +29,8 @@ const config = {
     },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
-        filename: '[name].[contenthash].bundle.js',
-        chunkFilename: '[name].[contenthash].bundle.js',
+        filename: '[name].bundle.js',
+        chunkFilename: '[name].bundle.js',
         publicPath: 'site/public/dist/',
     },
     node: {
