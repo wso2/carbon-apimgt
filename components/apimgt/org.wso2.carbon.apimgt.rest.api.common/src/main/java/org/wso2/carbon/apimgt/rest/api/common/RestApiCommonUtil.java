@@ -362,7 +362,13 @@ public class RestApiCommonUtil {
      * */
     public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
-        String apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+        String apiSwagger = null;
+        if (api.getUuid() != null) {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid());
+        } else {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+        }
+         
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
         return parser.getOASDefinitionForPublisher(api, apiSwagger);
     }

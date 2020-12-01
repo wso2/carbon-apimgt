@@ -6029,7 +6029,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
  
     public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
-        log.info("=============================================");
+
         String uuid = null;
         try {
             Organization org = new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
