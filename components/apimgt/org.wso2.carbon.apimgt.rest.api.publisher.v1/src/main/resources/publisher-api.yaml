@@ -3363,6 +3363,60 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/export?apiId=96077508-fd01-4fae-bc64-5de0e2baf43c&name=PizzaShackAPI&version=1.0&provider=admin&format=YAML"
           > exportAPI.zip'
 
+  /apis/import:
+    post:
+      tags:
+        - Import Export
+      summary: Import an API
+      description: |
+        This operation can be used to import an API.
+      parameters:
+        - name: preserveProvider
+          in: query
+          description: |
+            Preserve Original Provider of the API. This is the user choice to keep or replace the API provider
+          required: false
+          schema:
+            type: boolean
+        - name: overwrite
+          in: query
+          description: |
+            Whether to update the API or not. This is used when updating already existing APIs
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: Zip archive consisting on exported api configuration
+                  format: binary
+      responses:
+        200:
+          description: |
+            Created.
+            API Imported Successfully.
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/publisher/v1/apis/import?preserveProvider=false&overwrite=false"'
+
   ######################################################
   # The "Subscription Collection" resource APIs
   ######################################################

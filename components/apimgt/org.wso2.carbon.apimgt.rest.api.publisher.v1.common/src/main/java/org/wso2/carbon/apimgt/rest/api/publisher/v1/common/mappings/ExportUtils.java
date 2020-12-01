@@ -401,9 +401,6 @@ public class ExportUtils {
                     String individualDocDirectoryPath = docDirectoryPath + File.separator +
                             individualDocument.getName();
                     CommonUtil.createDirectory(individualDocDirectoryPath);
-                    writeDtoToFile(individualDocDirectoryPath +
-                                    ImportExportConstants.DOCUMENT_FILE_NAME, exportFormat,
-                            ImportExportConstants.TYPE_DOCUMENTS, individualDocument);
                     if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                         localFileName = individualDocument.getFilePath().substring(
                                 individualDocument.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
@@ -417,6 +414,9 @@ public class ExportUtils {
                                 APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
                                 localFileName;
                     }
+                    writeDtoToFile(individualDocDirectoryPath + ImportExportConstants.DOCUMENT_FILE_NAME, exportFormat,
+                            ImportExportConstants.TYPE_DOCUMENTS,
+                            DocumentationMappingUtil.fromDocumentationToDTO(individualDocument));
 
                     if (resourcePath != null) {
                         // Write content for Inline/Markdown/File type documentations only
@@ -524,7 +524,6 @@ public class ExportUtils {
                 String direction = mediationPolicyDto.getType().toLowerCase();
                 String pathToExportedSequence = seqArchivePath + File.separator + direction + "-sequence" +
                         File.separator;
-                String pathToIndividualSequenceFile = pathToExportedSequence + ImportExportConstants.SEQUENCE_FILE_NAME;
                 if (sequenceName != null) {
                     sequenceDetails = getCustomSequence(sequenceName, direction, registry);
                     if (sequenceDetails == null) {
@@ -534,13 +533,6 @@ public class ExportUtils {
                         pathToExportedSequence += ImportExportConstants.CUSTOM_TYPE + File.separator;
                     }
                     writeSequenceToFile(pathToExportedSequence, sequenceDetails, apiIdentifier);
-                    try {
-                        writeDtoToFile(pathToIndividualSequenceFile, exportFormat, ImportExportConstants.TYPE_SEQUENCE,
-                                mediationPolicyDto);
-                    } catch (IOException e) {
-                        String errorMessage = "I/O error while writing sequence: " + sequenceName + " to file";
-                        throw new APIImportExportException(errorMessage, e);
-                    }
                 }
             }
         } else if (log.isDebugEnabled()) {

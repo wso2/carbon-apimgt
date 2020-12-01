@@ -174,21 +174,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Url validator, Allow any url with https and http.
-     * Allow any url without fully qualified domain
-     *
-     * @param url Url as string
-     * @return boolean type stating validated or not
-     */
-    public static boolean isURL(String url) {
-
-        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(url);
-        return matcher.matches();
-
-    }
-
-    /**
      * Create a JAXRS Response object based on the provided ResourceFile
      *
      * @param fileNameWithoutExtension Filename without the extension. The extension is determined from the method
@@ -949,30 +934,6 @@ public class RestApiUtil {
                 RestApiUtil.handleMethodNotAllowedError(method, resource, log);
             }
         }
-    }
-
-    /**
-     * Checks whether the list of tiers are valid given the all valid tiers
-     *
-     * @param allTiers All defined tiers
-     * @param currentTiers tiers to check if they are a subset of defined tiers
-     * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
-     */
-    public static List<String> getInvalidTierNames(Set<Tier> allTiers, List<String> currentTiers) {
-        List<String> invalidTiers = new ArrayList<>();
-        for (String tierName : currentTiers) {
-            boolean isTierValid = false;
-            for (Tier definedTier : allTiers) {
-                if (tierName.equals(definedTier.getName())) {
-                    isTierValid = true;
-                    break;
-                }
-            }
-            if (!isTierValid) {
-                invalidTiers.add(tierName);
-            }
-        }
-        return invalidTiers;
     }
 
     /**
