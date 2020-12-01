@@ -39,7 +39,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.PoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.mediation.MediationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
@@ -78,7 +79,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             List<Mediation> mediationList = apiProvider.getAllGlobalMediationPolicies();
             MediationListDTO mediationListDTO = MediationMappingUtil.fromMediationListToDTO(mediationList, offset,
                     limit);
@@ -102,7 +103,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     public Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId, String ifMatch,
                                                              String ifUnmodifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Delete given global mediation policy
             boolean deleteState = apiProvider.deleteGlobalMediationPolicy(mediationPolicyId);
             if (deleteState) {
@@ -131,7 +132,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     public Response policiesMediationMediationPolicyIdGet(String mediationPolicyId, String accept, String ifNoneMatch
             , String ifModifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Get given global mediation policy
             Mediation mediation = apiProvider.getGlobalMediationPolicy(mediationPolicyId);
             if (mediation != null) {
@@ -163,7 +164,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
                   MediationDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         InputStream contentStream = null;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Get registry resource correspond to given uuid
             Resource mediationResource = apiProvider.getCustomMediationResourceFromUuid(mediationPolicyId);
             if (mediationResource != null) {
@@ -238,7 +239,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
                                           String ifUnmodifiedSince, MessageContext messageContext) {
         InputStream contentStream = null;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String content = body.getConfig();
             contentStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
             ResourceFile contentFile = new ResourceFile(contentStream, contentType);

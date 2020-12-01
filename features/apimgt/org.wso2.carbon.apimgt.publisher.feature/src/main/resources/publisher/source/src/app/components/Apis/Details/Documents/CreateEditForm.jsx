@@ -129,7 +129,7 @@ class CreateEditForm extends React.Component {
             otherTypeName: null,
             nameNotDuplicate: true,
             nameMaxLengthExceeds: false,
-            invalidUrl: true,
+            invalidUrl: false,
             nameEmpty: false,
             summeryEmpty: false,
             urlEmpty: false,
@@ -140,7 +140,7 @@ class CreateEditForm extends React.Component {
     changeType = (e) => {
         const { value } = e.target;
         if (value === 'PUBLIC_FORUM' || value === 'SUPPORT_FORUM') {
-            this.setState({ type: 'URL' });
+            this.setState({ sourceType: 'URL' });
         }
         this.setState({ type: value });
     };

@@ -31,6 +31,7 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
 import AuthManager from 'AppData/AuthManager';
+import Utils from 'AppData/Utils';
 
 const styles = (theme) => ({
     listRoot: {
@@ -103,6 +104,7 @@ function GlobalNavLinks(props) {
     } = props;
 
     const publisherUser = !AuthManager.isNotPublisher();
+    const enableServiceCatalog = Utils.CONST.ENABLE_SERVICE_CATALOG;
     const detectCurrentMenu = (location) => {
         const { pathname } = location;
         if (/\/apis($|\/)/g.test(pathname)) {
@@ -234,24 +236,32 @@ function GlobalNavLinks(props) {
                 </Link>
             </Collapse>
             <Divider className={classes.divider} />
-            <Link
-                to='/service-catalog'
-                className={classNames({ [classes.selected]: selected === 'service-catalog', [classes.links]: true })}
-            >
-                <ListItem className={classes.categoryHeader} button onClick={toggleGlobalNavBar}>
-                    <ListItemText
-                        classes={{
-                            primary: classes.categoryHeaderPrimary,
-                        }}
+            { enableServiceCatalog
+            && (
+                <>
+                    <Link
+                        to='/service-catalog'
+                        className={classNames({
+                            [classes.selected]: selected === 'service-catalog',
+                            [classes.links]: true,
+                        })}
                     >
-                        <FormattedMessage
-                            id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
-                            defaultMessage='Service Catalog'
-                        />
-                    </ListItemText>
-                </ListItem>
-            </Link>
-            <Divider className={classes.divider} />
+                        <ListItem className={classes.categoryHeader} button onClick={toggleGlobalNavBar}>
+                            <ListItemText
+                                classes={{
+                                    primary: classes.categoryHeaderPrimary,
+                                }}
+                            >
+                                <FormattedMessage
+                                    id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
+                                    defaultMessage='Service Catalog'
+                                />
+                            </ListItemText>
+                        </ListItem>
+                    </Link>
+                    <Divider className={classes.divider} />
+                </>
+            )}
             <ListItem className={classes.categoryHeader} button onClick={handleSettingsClick}>
                 <ListItemText
                     classes={{

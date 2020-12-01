@@ -28,7 +28,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APICategoryMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -44,7 +45,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     public Response apiCategoriesGet(MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             List<APICategory> categoryList = apiAdmin.getAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
@@ -61,7 +62,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
         APICategory apiCategory = null;
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiCategory = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
                     fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName));
@@ -79,7 +80,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                                                   MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(userName);
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
@@ -120,7 +121,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                                                      MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiAdmin.deleteCategory(apiCategoryId, userName);
             return Response.ok().build();
         } catch (APIManagementException e) {
