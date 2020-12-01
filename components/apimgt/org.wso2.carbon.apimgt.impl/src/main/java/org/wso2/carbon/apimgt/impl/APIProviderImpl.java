@@ -2408,11 +2408,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns the claims of subscriber for the given subscriber.
+     * Returns the claims of a User
      *
-     * @param userName The name of the subscriber to be returned
-     * @return The looked up claims of the subscriber or null if the requested subscriber does not exist
-     * @throws APIManagementException if failed to get Subscriber
+     * @param userName The name of the user
+     * @return The looked up claims of the user
+     * @throws APIManagementException if failed to get user
      */
     @Override
     public Map<String, String> getLoggedInUserClaims(String userName) throws APIManagementException {
