@@ -1078,36 +1078,24 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 registryType = registry;
             }
-            String[] idArray = apiId.split(":");
             Identifier id = null;
-            if (idArray.length > 1) { // this is a temp impl. id comes as provider-name-version combination. remove this
-                                      // to uuid based impl in the else section
-                log.info("definition from provider-name-version combination"); // TODO remove this log.
-                if ("API".equals(idArray[0])) {
-                    id = new APIIdentifier(idArray[1], idArray[2], idArray[3]);
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            if (apiArtifact != null) {
+
+                String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                if ("APIProduct".equals(type)) {
+                    id = new APIProductIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
+                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 } else {
-                    id = new APIProductIdentifier(idArray[1], idArray[2], idArray[3]);
+                    id = new APIIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
+                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 }
-                
-            } else {
-                GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                        APIConstants.API_KEY);
 
-                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-                if (apiArtifact != null) {
-
-                    String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-                    if ("APIProduct".equals(type)) {
-                        id = new APIProductIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                    } else {
-                        id = new APIIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                                apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                    }
-
-                }
             }
             definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
             if (log.isDebugEnabled()) {

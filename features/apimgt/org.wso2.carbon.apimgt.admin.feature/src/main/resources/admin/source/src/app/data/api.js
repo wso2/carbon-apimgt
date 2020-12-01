@@ -169,30 +169,35 @@ class API extends Resource {
     }
 
     /**
-     * Add new advanced polcy
+     * Update an advanced throttling policy
      */
     putThrottlingPoliciesAdvanced(policyId, policy) {
         return this.client.then((client) => {
             return client.apis['Advanced Policy (Individual)'].put_throttling_policies_advanced__policyId_(
-                {policyId: policyId, body: policy},
+                {
+                    policyId: policyId,
+                    'Content-Type': 'application/json',
+                },
+                { requestBody: policy },
                 this._requestMetaData(),
             );
         });
     }
 
     /**
-     * update polcy
+     * Add new advanced throttling policy
      */
     postThrottlingPoliciesAdvanced(policy) {
         return this.client.then((client) => {
             return client.apis['Advanced Policy (Collection)'].post_throttling_policies_advanced(
-                {body: policy},
+                { 'Content-Type': 'application/json' },
+                { requestBody: policy },
                 this._requestMetaData(),
             );
         });
     }
     /**
-     * delete polcy
+     * delete policy
      */
     deleteThrottlingPoliciesAdvanced(policyId) {
         return this.client.then((client) => {
@@ -227,7 +232,8 @@ class API extends Resource {
             return client.apis[
                 'API Category (Individual)'
             ].put_api_categories__apiCategoryId_(
-                { apiCategoryId: id, body: data },
+                { apiCategoryId: id },
+                { requestBody: data },
                 this._requestMetaData(),
             );
         });
@@ -257,11 +263,11 @@ class API extends Resource {
                 description: description,
             };
             const payload = {
-                body: data,
                 'Content-Type': 'application/json',
             };
             return client.apis['API Category (Individual)'].post_api_categories(
                 payload,
+                { requestBody: data },
                 this._requestMetaData(),
             );
         });
@@ -296,11 +302,11 @@ class API extends Resource {
     addSubscriptionThrottlingPolicy(body) {
         return this.client.then((client) => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Subscription Policy (Collection)'].post_throttling_policies_subscription(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -325,11 +331,11 @@ class API extends Resource {
         return this.client.then((client) => {
             const payload = {
                 policyId: policyId,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Subscription Policy (Individual)'].put_throttling_policies_subscription__policyId_(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -353,11 +359,11 @@ class API extends Resource {
     addApplicationThrottlingPolicy(body) {
         return this.client.then((client) => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Application Policy (Collection)'].post_throttling_policies_application(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -382,11 +388,11 @@ class API extends Resource {
         return this.client.then((client) => {
             const payload = {
                 policyId: policyId,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Application Policy (Individual)'].put_throttling_policies_application__policyId_(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -462,11 +468,11 @@ class API extends Resource {
                 accessUrls: hosts,
             };
             const payload = {
-                body: data,
                 'Content-Type': 'application/json',
             };
             return client.apis['Label'].post_labels(
                 payload,
+                { requestBody: data },
                 this._requestMetaData(),
             );
         });
@@ -483,7 +489,8 @@ class API extends Resource {
                 accessUrls: hosts,
             };
             return client.apis['Label'].put_labels__labelId_(
-                { labelId: id, body: data },
+                { labelId: id },
+                { requestBody: data },
                 this._requestMetaData(),
             );
         });
@@ -494,18 +501,18 @@ class API extends Resource {
      */
     blacklistPoliciesGet() {
         return this.client.then((client) => {
-            return client.apis['Blacklist (Collection)'].get_throttling_blacklist(
+            return client.apis['Deny Policies (Collection)'].get_throttling_deny_policies(
                 this._requestMetaData(),
             );
         });
     }
 
     /**
-     * Delete an Blacklist Policy
+     * Delete an Deny Policy
      */
     deleteBlacklistPolicy(policyId) {
         return this.client.then((client) => {
-            return client.apis['Blacklist (Individual)'].delete_throttling_blacklist__conditionId_(
+            return client.apis['Deny Policy (Individual)'].delete_throttling_deny_policy__conditionId_(
                 { conditionId: policyId },
                 this._requestMetaData(),
             );
@@ -513,27 +520,27 @@ class API extends Resource {
     }
 
     /**
-     * Add a Blacklist Policy
+     * Add a Deny Policy
      */
     addBlacklistPolicy(body) {
         return this.client.then((client) => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Blacklist (Collection)'].post_throttling_blacklist(
+            return client.apis['Deny Policies (Collection)'].post_throttling_deny_policies(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
     }
 
     /**
-     * Get details of a Blacklist Policy
+     * Get details of a Deny Policy
      */
     blacklistPolicyGet(policyId) {
         return this.client.then((client) => {
-            return client.apis['Blacklist (Individual)'].get_throttling_blacklist__conditionId_(
+            return client.apis['Deny Policy (Individual)'].get_throttling_deny_policy__conditionId_(
                 { conditionId: policyId },
                 this._requestMetaData(),
             );
@@ -541,15 +548,16 @@ class API extends Resource {
     }
 
     /**
-     * Update the Condition Status of a Blacklist Policy
+     * Update the Condition Status of a Deny Policy
      */
     updateBlacklistPolicy(policyId, conditionStatus) {
         return this.client.then((client) => {
             const payload = {
                 conditionStatus: conditionStatus,
             };
-            return client.apis['Blacklist (Individual)'].patch_throttling_blacklist__conditionId_(
-                { conditionId: policyId, body: payload, 'Content-Type': 'application/json', },
+            return client.apis['Deny Policy (Individual)'].patch_throttling_deny_policy__conditionId_(
+                { conditionId: policyId, 'Content-Type': 'application/json', },
+                { requestBody: payload },
                 this._requestMetaData(),
             );
         });
@@ -572,11 +580,11 @@ class API extends Resource {
     addCustomPolicy(body) {
         return this.client.then((client) => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Custom Rules (Collection)'].post_throttling_policies_custom(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -613,11 +621,11 @@ class API extends Resource {
         return this.client.then((client) => {
             const payload = {
                 ruleId: policyId,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Custom Rules (Individual)'].put_throttling_policies_custom__ruleId_(
                 payload,
+                { requestBody: body},
                 this._requestMetaData(),
             );
         });
@@ -654,11 +662,11 @@ class API extends Resource {
                 email: email,
             };
             const payload = {
-                body: data,
                 'Content-Type': 'application/json',
             };
             return client.apis['Bot Detection Alert Subscriptions'].subscribeForBotDetectionAlerts(
                 payload,
+                { requestBody: data },
                 this._requestMetaData(),
             );
         });
@@ -694,9 +702,14 @@ class API extends Resource {
     uploadTenantTheme(file) {
         return this.client.then(
             client => {
-                return client.apis['Tenant Theme'].importTenantTheme({
-                    file: file,
-                });
+                return client.apis['Tenant Theme'].importTenantTheme(
+                    {},
+                    {
+                        requestBody: {
+                            file: file,
+                        }
+                    }
+                );
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data',
@@ -747,7 +760,7 @@ class API extends Resource {
     subscribeAlerts(alerts) {
         return this.client.then((client) => {
             return client.apis['Alert Subscriptions']
-            .subscribeToAlerts({ body: alerts }, this._requestMetaData());
+            .subscribeToAlerts({}, { requestBody: alerts }, this._requestMetaData());
         });
     }
 
@@ -788,11 +801,11 @@ class API extends Resource {
     keyManagersDiscover(requestData) {
         return this.client.then((client) => {
             const payload = {
-                ...requestData,
                 'Content-Type': 'application/json',
             };
             return client.apis['Key Manager (Collection)'].post_key_managers_discover(
                 payload,
+                { requestBody: requestData },
                 this._requestMetaData(),
             );
         });
@@ -808,33 +821,35 @@ class API extends Resource {
             );
         });
     }
-            /**
+
+    /**
      * Add an Key Manager
      */
     addKeyManager(body) {
         return this.client.then((client) => {
             const payload = {
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Key Manager (Collection)'].post_key_managers(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
     }
-             /**
+
+    /**
      * Update an Key Manager
      */
     updateKeyManager(keyManagerId, body) {
         return this.client.then((client) => {
             const payload = {
                 keyManagerId: keyManagerId,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Key Manager (Individual)'].put_key_managers__keyManagerId_(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });
@@ -882,11 +897,11 @@ class API extends Resource {
         return this.client.then((client) => {
             const payload = {
                 workflowReferenceId: workflowReferenceId,
-                body,
                 'Content-Type': 'application/json',
             };
             return client.apis['Workflows (Individual)'].post_workflows_update_workflow_status(
                 payload,
+                { requestBody: body },
                 this._requestMetaData(),
             );
         });

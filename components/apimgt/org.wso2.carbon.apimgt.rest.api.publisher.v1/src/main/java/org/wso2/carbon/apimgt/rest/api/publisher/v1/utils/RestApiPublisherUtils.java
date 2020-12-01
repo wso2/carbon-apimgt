@@ -24,10 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.netbeans.lib.cvsclient.commandLine.command.log;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -35,9 +31,10 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -90,7 +87,7 @@ public class RestApiPublisherUtils {
      */
     public static String validateUserRoles(List<String> inputRoles) throws APIManagementException {
 
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         String[] tenantRoleList = APIUtil.getRoleNames(userName);
         boolean isMatched = false;
         String[] userRoleList = null;
@@ -163,7 +160,7 @@ public class RestApiPublisherUtils {
      * @throws APIManagementException API Management Exception.
      */
     public static String validateRoles(List<String> inputRoles) throws APIManagementException {
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isMatched = false;
         if (inputRoles != null && !inputRoles.isEmpty()) {
             String roleString = String.join(",", inputRoles);
@@ -187,8 +184,8 @@ public class RestApiPublisherUtils {
     public static void attachFileToDocument(String apiId, Documentation documentation, InputStream inputStream,
                                             Attachment fileDetails) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String documentId = documentation.getId();
         String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
         String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
@@ -273,8 +270,8 @@ public class RestApiPublisherUtils {
     public static void attachFileToProductDocument(String productId, Documentation documentation, InputStream inputStream,
             Attachment fileDetails) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String documentId = documentation.getId();
         String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
         String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
@@ -346,4 +343,5 @@ public class RestApiPublisherUtils {
                 + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}," +
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
     }
+
 }

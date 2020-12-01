@@ -98,7 +98,14 @@ const tenantListing = (props) => {
                 <div className={classes.list}>
                     {orderedList.map(({ domain }) => {
                         return (
-                            <Grid key={domain} item xs={12} md={12} className={classes.listItem}>
+                            <Grid
+                                key={domain}
+                                item
+                                xs={12}
+                                md={12}
+                                className={classes.listItem}
+                                id={`tenantList_${domain.replace(/\W/g, '')}`}
+                            >
                                 <Link
                                     style={{
                                         textDecoration: 'none',

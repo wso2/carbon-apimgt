@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -106,8 +106,8 @@ public class ApplicationImportExportManager {
         if (log.isDebugEnabled()) {
             log.debug("Validating tier defined in the Application");
         }
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String userName = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         ApplicationPolicy[] appPolicies = (ApplicationPolicy[]) apiProvider.getPolicies(userName,
                 PolicyConstants.POLICY_LEVEL_APP);
         if (appPolicies != null || appPolicies.length > 0) {

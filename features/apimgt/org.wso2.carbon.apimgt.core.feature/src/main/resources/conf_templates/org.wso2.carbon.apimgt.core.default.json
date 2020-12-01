@@ -161,5 +161,6 @@
   "apim.cache.invalidation.stream":"cache.invalidation.stream:1.0.0",
   "apim.cache_invalidation.username":"${admin.username}",
   "apim.cache_invalidation.password":"${admin.password}",
-  "apim.cache_invalidation.topic_name":"globalCacheInvalidation"
+  "apim.cache_invalidation.topic_name":"globalCacheInvalidation",
+  "apim.auth_manager.iskm_reverseproxy_enabled": false
 }

@@ -24,15 +24,8 @@ import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.wso2.balana.XACMLConstants;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.EntitlementServiceClient;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 //import org.wso2.carbon.identity.entitlement.proxy.PEPProxy;
 

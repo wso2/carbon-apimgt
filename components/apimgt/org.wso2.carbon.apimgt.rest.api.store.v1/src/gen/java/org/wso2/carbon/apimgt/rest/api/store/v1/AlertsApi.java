@@ -27,8 +27,8 @@ import javax.validation.constraints.*;
 @Path("/alerts")
 
 @Api(description = "the alerts API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class AlertsApi  {
@@ -51,13 +51,13 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with newly created object as entity. Location header contains URL of newly created entity. ", response = AlertConfigDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response addAlertConfig(@ApiParam(value = "The alert type. ",required=true) @PathParam("alertType") String alertType, @ApiParam(value = "The alert configuration id. Base64 encoded value of 'apiName#apiVersion#applicationName'. ",required=true) @PathParam("configurationId") String configurationId, @ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) AlertConfigInfoDTO body) throws APIManagementException{
-        return delegate.addAlertConfig(alertType, configurationId, body, securityContext);
+    public Response addAlertConfig(@ApiParam(value = "The alert type. ",required=true) @PathParam("alertType") String alertType, @ApiParam(value = "The alert configuration id. Base64 encoded value of 'apiName#apiVersion#applicationName'. ",required=true) @PathParam("configurationId") String configurationId, @ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) AlertConfigInfoDTO alertConfigInfoDTO) throws APIManagementException{
+        return delegate.addAlertConfig(alertType, configurationId, alertConfigInfoDTO, securityContext);
     }
 
     @DELETE
     @Path("/{alertType}/configurations/{configurationId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type. ", notes = "This operation is used to delete configuration from the AbnormalRequestsPerMin alert type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -75,7 +75,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
 
     @GET
     @Path("/{alertType}/configurations")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All AbnormalRequestsPerMin Alert Configurations ", notes = "This operation is used to get all configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

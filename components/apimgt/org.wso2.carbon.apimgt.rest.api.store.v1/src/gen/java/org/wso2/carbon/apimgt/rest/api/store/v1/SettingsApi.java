@@ -26,8 +26,8 @@ import javax.validation.constraints.*;
 @Path("/settings")
 
 @Api(description = "the settings API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class SettingsApi  {
@@ -39,7 +39,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
 
     @GET
     @Path("/application-attributes")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All Application Attributes from Configuration ", notes = "This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes. ", response = ApplicationAttributeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -50,13 +50,13 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Application attributes returned. ", response = ApplicationAttributeListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response settingsApplicationAttributesGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+    public Response settingsApplicationAttributesGet( @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.settingsApplicationAttributesGet(ifNoneMatch, securityContext);
     }
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive store settings", notes = "Retreive Store Settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -66,7 +66,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response settingsGet(@ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+    public Response settingsGet( @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.settingsGet(xWSO2Tenant, securityContext);
     }
 }

@@ -32,7 +32,8 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ExportApiService;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -41,7 +42,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, APIUtil.class})
+@PrepareForTest({RestApiUtil.class, APIUtil.class, RestApiCommonUtil.class})
 public class ExportApiServiceImplTestCase {
     private final String USER = "admin";
     private ExportApiService exportApiService;
@@ -49,6 +50,9 @@ public class ExportApiServiceImplTestCase {
 
     @Before
     public void init() throws Exception {
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.mockStatic(APIUtil.class);
         exportApiService = new ExportApiServiceImpl();
         apiConsumer = Mockito.mock(APIConsumer.class);
     }
@@ -62,9 +66,8 @@ public class ExportApiServiceImplTestCase {
     @Test
     public void testExportApplicationsGetNotFound() throws Exception {
 
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         Response response = exportApiService.exportApplicationsGet(null, null, false);
         Assert.assertEquals(response.getStatus(), 404);
     }
@@ -77,10 +80,8 @@ public class ExportApiServiceImplTestCase {
      */
     @Test
     public void testExportApplicationsGetCrossTenantError() throws Exception {
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
-        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         Application testApp = new Application("sampleApp", new Subscriber("admin@hr.lk"));
         Subscriber subscriber = new Subscriber("admin@hr.lk");
         Mockito.when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
@@ -98,11 +99,9 @@ public class ExportApiServiceImplTestCase {
      */
     @Test
     public void testExportApplicationsGetCrossTenantAtMigrationMode() throws Exception {
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         System.setProperty(RestApiConstants.MIGRATION_MODE, "true");
-        PowerMockito.mockStatic(APIUtil.class);
         Application testApp = new Application("sampleApp", new Subscriber("admin@hr.lk"));
         Subscriber subscriber = new Subscriber("admin@hr.lk");
         when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
@@ -132,10 +131,8 @@ public class ExportApiServiceImplTestCase {
         testApp.setCallbackUrl("testURL");
         testApp.setIsBlackListed(false);
         testApp.setTier("Unlimited");
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         Subscriber subscriber = new Subscriber("admin");
         Mockito.when(apiConsumer.getSubscriber("admin")).thenReturn(subscriber);
         Mockito.when(APIUtil.getApplicationId("sampleApp", "admin")).thenReturn(1);

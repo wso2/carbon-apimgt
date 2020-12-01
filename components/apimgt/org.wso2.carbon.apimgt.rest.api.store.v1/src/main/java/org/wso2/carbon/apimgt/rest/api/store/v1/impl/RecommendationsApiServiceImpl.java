@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +49,8 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
         JSONObject responseObj = new JSONObject();
         String apiId = null;
         try {
-            String userName = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String requestedTenantDomain = apiConsumer.getRequestedTenant();
 
             if (apiConsumer.isRecommendationEnabled(requestedTenantDomain) &&

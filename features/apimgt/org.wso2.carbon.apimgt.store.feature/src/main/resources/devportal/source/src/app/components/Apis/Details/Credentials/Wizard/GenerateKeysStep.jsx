@@ -225,8 +225,7 @@ const generateKeysStep = (props) => {
             }
         });
     };
-
-
+    
     const classes = useStyles();
 
     return (
@@ -281,7 +280,7 @@ const generateKeysStep = (props) => {
                                                 defaultMessage='Token Endpoint'
                                             />
                                         </TableCell>
-                                        <TableCell>{keyManager.tokenEndpoint}</TableCell>
+                                        <TableCell>{keyManager.additionalProperties['sandbox_token_endpoint'] || keyManager.tokenEndpoint}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell component='th' scope='row' className={classes.leftCol}>
@@ -290,7 +289,7 @@ const generateKeysStep = (props) => {
                                                 defaultMessage='Revoke Endpoint'
                                             />
                                         </TableCell>
-                                        <TableCell>{keyManager.revokeEndpoint}</TableCell>
+                                        <TableCell>{keyManager.additionalProperties['sandbox_revoke_endpoint'] || keyManager.revokeEndpoint}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell component='th' scope='row' className={classes.leftCol}>
