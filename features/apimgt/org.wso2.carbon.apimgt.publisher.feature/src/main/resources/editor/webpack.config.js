@@ -43,6 +43,13 @@ const config = {
         poll: true,
         ignored: ['files/**/*.js', 'node_modules/**'],
     },
+    devServer: {
+        watchOptions: {
+          poll: true,
+          ignored: /node_modules/
+        }
+    },
+    
     devtool: 'source-map', // todo: Commented out the source
     // mapping in case need to speed up the build time & reduce size
     resolve: {
