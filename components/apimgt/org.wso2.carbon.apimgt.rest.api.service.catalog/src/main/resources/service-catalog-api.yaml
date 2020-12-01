@@ -20,9 +20,6 @@ info:
     This specifies a **RESTful API** for Service Catalog.
   version: '0.9'
 servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/malinthaprasan/ServiceCatalog/0.9
   - url: 'https://apis.wso2.com/api/service-catalog/v1'
   - url: 'http://apis.wso2.com/api/service-catalog/v1'
 

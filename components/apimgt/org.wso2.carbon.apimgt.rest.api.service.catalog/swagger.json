@@ -6,9 +6,6 @@
     "version" : "0.9"
   },
   "servers" : [ {
-    "description" : "SwaggerHub API Auto Mocking",
-    "url" : "https://virtserver.swaggerhub.com/malinthaprasan/ServiceCatalog/0.9"
-  }, {
     "url" : "https://apis.wso2.com/api/service-catalog/v1"
   }, {
     "url" : "http://apis.wso2.com/api/service-catalog/v1"
