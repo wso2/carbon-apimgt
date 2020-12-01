@@ -687,9 +687,9 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         int free = 0, commercial = 0;
         for (Tier tier : throttlingPolicies) {
-            if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.FREE)) {
+            if (RestApiConstants.FREE.equalsIgnoreCase(tier.getTierPlan())) {
                 free = free + 1;
-            } else if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.COMMERCIAL)) {
+            } else if (RestApiConstants.COMMERCIAL.equalsIgnoreCase(tier.getTierPlan())) {
                 commercial = commercial + 1;
             }
         }

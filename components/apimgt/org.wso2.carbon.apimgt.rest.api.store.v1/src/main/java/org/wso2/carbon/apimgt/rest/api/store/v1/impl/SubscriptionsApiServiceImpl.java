@@ -122,7 +122,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset, apiTypeWrapper);
+                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
 
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -142,7 +142,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
-                        offset, null);
+                        offset);
                 return Response.ok().entity(subscriptionListDTO).build();
 
             } else {
