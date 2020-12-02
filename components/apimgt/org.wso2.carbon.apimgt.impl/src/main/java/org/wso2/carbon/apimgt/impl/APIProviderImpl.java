@@ -1882,13 +1882,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             try {
+                api.setCreatedTime(oldApi.getCreatedTime());
                 apiPersistenceInstance.updateAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
+
+            //need to be moved to persistent layer
+
             updateWSDL(oldApi);///////////////has registry access /////////////////
 
             updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
+
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
                 Cache contextCache = APIUtil.getAPIContextCache();

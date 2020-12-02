@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gson.Gson;
+import org.apache.poi.ss.formula.functions.T;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -161,7 +162,7 @@ public interface APIMapper {
     }
 
     default Set<String> mapAccessControlRolesToSet(String accessControlRoles){
-        if(accessControlRoles != null) {
+        if (accessControlRoles != null && !"null".equalsIgnoreCase(accessControlRoles)) {
             return  new HashSet<>(Arrays.asList(accessControlRoles.split(",")));
         } else {
             return null;

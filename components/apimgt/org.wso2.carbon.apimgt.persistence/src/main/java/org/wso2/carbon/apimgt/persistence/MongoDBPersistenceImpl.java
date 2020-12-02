@@ -70,7 +70,18 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             throws APIPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
+        String swaggerDefinition = mongoDBPublisherAPI.getSwaggerDefinition();
         String apiId = mongoDBPublisherAPI.getId();
+
+        //Temporary check
+        if (swaggerDefinition == null) {
+            try {
+                mongoDBPublisherAPI.setSwaggerDefinition(getOASDefinition(org, apiId));
+            } catch (OASPersistenceException e) {
+                log.error("Error when getting swagger ", e);
+                throw new APIPersistenceException("Error when updating api");
+            }
+        }
         MongoDBPublisherAPI updatedDocument =
                 collection.findOneAndReplace(eq("_id", new ObjectId(apiId)), mongoDBPublisherAPI);
         return MongoAPIMapper.INSTANCE.toPublisherApi(updatedDocument);

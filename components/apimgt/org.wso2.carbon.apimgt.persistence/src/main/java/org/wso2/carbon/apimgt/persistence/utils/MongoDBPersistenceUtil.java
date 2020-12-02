@@ -73,7 +73,6 @@ public class MongoDBPersistenceUtil {
                 }
 
                 String parsedConnectionString = tomlParseResult.getString("database.reg_db.connectionString");
-                log.info("mongodb connection string" + parsedConnectionString);
                 ConnectionString connectionString = new ConnectionString(parsedConnectionString);
 
                 ClassModel<MongoDBPublisherAPI> mongoDBAPIDocument = ClassModel.builder(MongoDBPublisherAPI.class)
@@ -111,6 +110,7 @@ public class MongoDBPersistenceUtil {
     public static MongoClient getMongoClient() {
         if (mongoClient == null) {
             initialize();
+            log.info("mongodb connection created ");
         }
         return mongoClient;
     }
