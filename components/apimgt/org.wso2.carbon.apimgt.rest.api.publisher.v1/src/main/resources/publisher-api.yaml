@@ -6462,6 +6462,212 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/92bc1330-1848-4fe8-b992-c792186c212e/deployments/"'
 
+  ######################################################
+  #  The "API History" individual resource APIs
+  ######################################################
+  /apis/{apiId}/history:
+    #--------------------------------------------
+    # Get API History
+    #--------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: List API History
+      description: |
+        List all history events of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: revisionId
+          in: query
+          schema:
+            type: string
+          description: |
+            Specify the revision to return API history up to.
+          required: false
+          example: 01234567-0123-0123-0123-012345678901
+        - name: timePeriod
+          schema:
+            type: string
+          in: query
+          description: |
+            Specify the time period to show history.
+          required: false
+          example: Month
+      operationId: getAPIHistory
+      tags:
+        - API History
+      responses:
+        200:
+          description: |
+            OK.
+            API History list is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryEventList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f/history"'
+
+  /apis/{apiId}/history/{eventId}/payload:
+    #--------------------------------------------
+    # Get API History Event Payload
+    #--------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: Get payload of an API History Event.
+      description: |
+        Get the payload of a particular history event of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/eventId'
+      tags:
+        - API History
+      operationId: getAPIHistoryEventPayload
+      responses:
+        200:
+          description: |
+            OK.
+            API History Event Payload is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f/history/1/payload"'
+
+  ######################################################
+  #  The "API Product History" individual resource APIs
+  ######################################################
+  /api-products/{apiProductId}/history:
+    #--------------------------------------------
+    # Get API Product History
+    #--------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: List API Product History
+      description: |
+        List all history events of an API Product.
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - name: revisionId
+          in: query
+          schema:
+            type: string
+          description: |
+            Specify the revision to return API history up to.
+          required: false
+          example: 01234567-0123-0123-0123-012345678901
+        - name: timePeriod
+          schema:
+            type: string
+          in: query
+          description: |
+            Specify the time period to show history.
+          required: false
+          example: Month
+      tags:
+        - API Product History
+      operationId: getAPIProductHistory
+      responses:
+        200:
+          description: |
+            OK.
+            API Product History list is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryEventList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/history"'
+
+  /api-products/{apiProductId}/history/{eventId}/payload:
+    #--------------------------------------------
+    # Get API Product History Event Payload
+    #--------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: Get payload of an API Product History Event.
+      description: |
+        Get the payload of a particular history event of an API Product.
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/eventId'
+      tags:
+        - API History
+      operationId: getAPIProductHistoryEventPayload
+      responses:
+        200:
+          description: |
+            OK.
+            API Product History Event Payload is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/history/1/payload"'
+
 components:
   schemas:
     APIList:
@@ -7286,6 +7492,39 @@ components:
         httpVerb:
           type: string
           example: GET
+    HistoryEventList:
+      title: History event list.
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of History Events returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryEvent'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    HistoryEvent:
+      title: History event with details.
+      readOnly: true
+      properties:
+        id:
+          type: string
+          example: 3333ce7e1-8233-46a5-9295-525dca347f33
+        operation:
+          type: string
+          example: Update API
+        description:
+          type: string
+          example: PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5
+        user:
+          type: string
+          example: user1
+        timestamp:
+          type: string
+          example: 2017-02-20T13:57:16.229
     ResourcePathList:
       title: ResourcePath List
       type: object
@@ -9691,6 +9930,14 @@ components:
       in: path
       description: |
         The UUID of a Policy
+      required: true
+      schema:
+        type: string
+    eventId:
+      name: eventId
+      in: path
+      description: |
+        The UUID of the event
       required: true
       schema:
         type: string
