@@ -212,7 +212,7 @@ public class ExportUtils {
      */
     public static File exportApiProduct(APIProvider apiProvider, APIProductIdentifier apiProductIdentifier,
             APIProductDTO apiProductDtoToReturn, String userName, ExportFormat exportFormat, Boolean preserveStatus,
-            boolean preserveDocs) throws APIManagementException, APIImportExportException {
+            boolean preserveDocs,boolean preserveCredentials) throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
         try {
@@ -235,7 +235,7 @@ public class ExportUtils {
             }
             addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
             addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                    preserveStatus, preserveDocs);
+                    preserveStatus, preserveDocs, preserveCredentials);
 
             // Export mTLS authentication related certificates
             if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
@@ -922,8 +922,9 @@ public class ExportUtils {
      * @throws APIManagementException   If an error occurs while retrieving API related resources
      */
     public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
-            ExportFormat exportFormat, APIProvider provider, String userName, Boolean isStatusPreserved,
-            boolean preserveDocs) throws APIImportExportException, APIManagementException {
+                                                 ExportFormat exportFormat, APIProvider provider, String userName,
+                                                 Boolean isStatusPreserved, boolean preserveDocs,
+                                                 boolean preserveCredentials) throws APIImportExportException, APIManagementException {
 
         String apisDirectoryPath = archivePath + File.separator + ImportExportConstants.APIS_DIRECTORY;
         CommonUtil.createDirectory(apisDirectoryPath);
@@ -932,7 +933,7 @@ public class ExportUtils {
         for (ProductAPIDTO productAPIDTO : apisList) {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
-            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
+            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,
                     isStatusPreserved, preserveDocs);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);

@@ -46,7 +46,7 @@ public interface ImportExportAPI {
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
-            ExportFormat format, boolean preserveDocs) throws APIManagementException, APIImportExportException;
+            ExportFormat format, boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException;
 
     /**
      * Used to export API product artifact.
@@ -63,7 +63,7 @@ public interface ImportExportAPI {
      * @throws APIImportExportException
      */
     public File exportAPIProduct(String apiId, String name, String version, String providerName, ExportFormat format,
-            boolean preserveStatus, boolean preserveDocs) throws APIManagementException, APIImportExportException;
+            boolean preserveStatus, boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException;
 
     /**
      * Used to import an API artifact.
