@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class FullNameDTO   {
+public class CommenterInfoDTO   {
   
     private String firstName = null;
     private String lastName = null;
@@ -26,7 +26,7 @@ public class FullNameDTO   {
 
   /**
    **/
-  public FullNameDTO firstName(String firstName) {
+  public CommenterInfoDTO firstName(String firstName) {
     this.firstName = firstName;
     return this;
   }
@@ -43,7 +43,7 @@ public class FullNameDTO   {
 
   /**
    **/
-  public FullNameDTO lastName(String lastName) {
+  public CommenterInfoDTO lastName(String lastName) {
     this.lastName = lastName;
     return this;
   }
@@ -60,7 +60,7 @@ public class FullNameDTO   {
 
   /**
    **/
-  public FullNameDTO fullName(String fullName) {
+  public CommenterInfoDTO fullName(String fullName) {
     this.fullName = fullName;
     return this;
   }
@@ -84,10 +84,10 @@ public class FullNameDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    FullNameDTO fullName = (FullNameDTO) o;
-    return Objects.equals(firstName, fullName.firstName) &&
-        Objects.equals(lastName, fullName.lastName) &&
-        Objects.equals(fullName, fullName.fullName);
+    CommenterInfoDTO commenterInfo = (CommenterInfoDTO) o;
+    return Objects.equals(firstName, commenterInfo.firstName) &&
+        Objects.equals(lastName, commenterInfo.lastName) &&
+        Objects.equals(fullName, commenterInfo.fullName);
   }
 
   @Override
@@ -98,7 +98,7 @@ public class FullNameDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class FullNameDTO {\n");
+    sb.append("class CommenterInfoDTO {\n");
     
     sb.append("    firstName: ").append(toIndentedString(firstName)).append("\n");
     sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");

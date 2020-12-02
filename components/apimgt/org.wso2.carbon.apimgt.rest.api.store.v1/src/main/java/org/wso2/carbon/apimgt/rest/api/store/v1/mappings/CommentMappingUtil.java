@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.FullNameDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
@@ -65,11 +65,11 @@ public class CommentMappingUtil {
         String username = RestApiUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiUtil.getProvider(username);
         Map userClaims = apiProvider.getLoggedInUserClaims(comment.getUser());
-        FullNameDTO fullNameDTO = new FullNameDTO();
-        fullNameDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
-        fullNameDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
-        fullNameDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
-        commentDTO.setCommenterInformation(fullNameDTO);
+        CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
+        commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
+        commenterInfoDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
+        commenterInfoDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
+        commentDTO.setCommenterInfo(commenterInfoDTO);
         return  commentDTO;
     }
 

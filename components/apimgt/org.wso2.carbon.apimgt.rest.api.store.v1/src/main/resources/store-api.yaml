@@ -845,7 +845,7 @@ paths:
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
-      - $ref: '#/components/parameters/commenterInfo'
+      - $ref: '#/components/parameters/includeCommenterInfo'
       responses:
         200:
           description: |
@@ -4026,8 +4026,8 @@ components:
           type: string
           readOnly: true
           example: admin
-        commenterInformation:
-          $ref: '#/components/schemas/FullName'
+        commenterInfo:
+          $ref: '#/components/schemas/CommenterInfo'
     CommentList:
       title: Comments List
       type: object
@@ -4593,7 +4593,7 @@ components:
             example: admin
           apiUUID:
             type: string
-    FullName:
+    CommenterInfo:
       type: object
       properties:
         firstName:
@@ -5261,8 +5261,8 @@ components:
           retrieved from.
       schema:
         type: string
-    commenterInfo:
-      name: commenterInfo
+    includeCommenterInfo:
+      name: includeCommenterInfo
       in: query
       description: |
         Whether we need to display commentor details.
