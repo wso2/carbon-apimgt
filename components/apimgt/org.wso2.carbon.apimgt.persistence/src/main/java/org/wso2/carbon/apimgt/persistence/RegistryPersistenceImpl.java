@@ -349,7 +349,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (artifactManager == null) {
                 String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
                 log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
+                throw new APIPersistenceException(errorMessage);
             }
 
             boolean isSecured = Boolean.parseBoolean(
@@ -648,7 +648,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when deleting API " + apiId;
                 log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
+                throw new APIPersistenceException(errorMessage);
             }
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
@@ -1054,8 +1054,50 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
-        // TODO Auto-generated method stub
-        
+
+        try {
+            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when deleting API " + apiId;
+                log.error(errorMessage);
+                throw new OASPersistenceException(errorMessage);
+            }
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            String visibleRoles = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+            String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion,
+                    apiProviderName);
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(apiDefinition);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+            String[] visibleRolesArr = null;
+            if (visibleRoles != null) {
+                visibleRolesArr = visibleRoles.split(",");
+            }
+
+            // Need to set anonymous if the visibility is public
+            RegistryPersistenceUtil.clearResourcePermissions(resourcePath,
+                    new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
+
+        } catch (RegistryException | APIManagementException e) {
+            throw new OASPersistenceException("Error while adding OSA Definition for " + apiId, e);
+        }
     }
 
     @Override

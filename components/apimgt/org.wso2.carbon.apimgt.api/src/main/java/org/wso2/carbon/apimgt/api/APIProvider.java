@@ -783,6 +783,15 @@ public interface APIProvider extends APIManager {
     /**
      * This method updates the swagger definition in registry
      *
+     * @param apiId   uuid of the api
+     * @param jsonText    openAPI definition
+     * @throws APIManagementException
+     */
+    void saveSwaggerDefinition(String apiId, String jsonText) throws APIManagementException;
+    
+    /**
+     * This method updates the swagger definition in registry
+     *
      * @param apiProduct   APIProduct
      * @param jsonText    openAPI definition
      * @throws APIManagementException
