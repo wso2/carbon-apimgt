@@ -83,7 +83,7 @@ public class ScopesDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIManagementException("Error while saving scopes into db", e, ExceptionCodes.INTERNAL_ERROR);
-            }finally {
+            } finally {
                 APIMgtDBUtil.closeStatement(addScopeBindingStatement);
                 APIMgtDBUtil.closeStatement(addScopeStatement);
             }
