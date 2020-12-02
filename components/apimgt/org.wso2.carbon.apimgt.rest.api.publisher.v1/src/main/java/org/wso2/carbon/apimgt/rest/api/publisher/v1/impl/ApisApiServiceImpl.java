@@ -48,6 +48,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -3218,6 +3219,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        existingAPI.setSwaggerDefinition(null); // remove existing definition
+        
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         apiDefinition = OASParserUtil.preProcess(apiDefinition);
@@ -3245,7 +3248,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
         }
-
+        
         List<APIResource> removedProductResources = apiProvider.getRemovedProductResources(uriTemplates, existingAPI);
 
         if (!removedProductResources.isEmpty()) {
@@ -3260,10 +3263,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-        apiProvider.updateAPI(existingAPI);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        //apiProvider.updateAPI(existingAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId); // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -3597,11 +3602,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             // adding the API and definition
-            apiProvider.addAPI(apiToAdd);
-            apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
+            apiToAdd.setSwaggerDefinition(definitionToAdd);
+            API addedAPI = apiProvider.addAPI(apiToAdd);
+            //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
-            API addedAPI = apiProvider.getAPI(apiToAdd.getId());
+            //API addedAPI = apiProvider.getAPI(apiToAdd.getId());
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
             // This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -4251,10 +4257,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-        APIIdentifier apiIdentifier = originalAPI.getId();
-        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-        apiDefinition=String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
-        apiProvider.saveSwaggerDefinition(originalAPI,apiDefinition);
+
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId);
+        apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
+        apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition);
         return Response.ok().entity(apiDefinition).build();
     }
 

@@ -6488,9 +6488,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
 
         try {
+            String uuid;
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            saveSwaggerDefinition(getAPI(apiId), jsonText);
+            if (apiId.getUUID() != null) {
+                uuid = apiId.getUUID();
+            } else {
+                uuid = apiMgtDAO.getUUIDFromIdentifier(apiId);
+                log.info("++++++templog+++++ OSA Def identifier Save: uuid not set ");
+            }
+            saveSwaggerDefinition(uuid, jsonText);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -6501,13 +6508,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            OASParserUtil.saveAPIDefinition(api, jsonText, registry);
+            String apiId;
+            if (api.getUuid() != null) {
+                apiId = api.getUuid();
+            } else if (api.getId().getUUID() != null) {
+                apiId = api.getId().getUUID();
+            } else {
+                apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
+                log.info("++++++templog+++++ OSA Def API Save: uuid not set ");
+            }
+            saveSwaggerDefinition(apiId, jsonText);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
+    @Override
+    public void saveSwaggerDefinition(String apiId, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            //OASParserUtil.saveAPIDefinition(api, jsonText, registry);
+            apiPersistenceInstance.saveOASDefinition(new Organization(tenantDomain), apiId, jsonText);
+
+        } catch (OASPersistenceException e) {
+            throw new APIManagementException("Error while persisting OAS definition ", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+    
     @Override
     public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException {
         try {
