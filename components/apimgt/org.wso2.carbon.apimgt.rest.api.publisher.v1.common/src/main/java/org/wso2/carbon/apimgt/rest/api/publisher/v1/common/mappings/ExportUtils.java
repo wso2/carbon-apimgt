@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -834,20 +833,22 @@ public class ExportUtils {
 
         try {
             // If a web socket API is exported, it does not contain a swagger file.
-            // Therefore swagger export is only required for REST, Graphql or SOAP based APIs
+            // Therefore swagger export is only required for REST or SOAP based APIs
             String apiType = apiDtoToReturn.getType().toString();
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)) {
-                //For Graphql APIs, the graphql schema definition, swagger and the serialized api object are exported.
+                // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
                     String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                 }
-                String formattedSwaggerJson = RestApiCommonUtil
-                        .retrieveSwaggerDefinition(APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, userName), apiProvider);
-                writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
-                        formattedSwaggerJson);
-
+                // For GraphQL APIs, swagger export is not needed
+                if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
+                    String formattedSwaggerJson = RestApiCommonUtil
+                            .retrieveSwaggerDefinition(APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, userName), apiProvider);
+                    writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
+                            formattedSwaggerJson);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
