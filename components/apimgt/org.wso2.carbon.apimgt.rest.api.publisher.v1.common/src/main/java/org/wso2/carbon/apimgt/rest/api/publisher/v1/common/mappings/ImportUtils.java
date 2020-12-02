@@ -612,7 +612,7 @@ public class ImportUtils {
         if (imageFolder.isDirectory() && fileArray != null) {
             //This loop locates the icon of the API
             for (File imageFile : fileArray) {
-                if (imageFile != null && imageFile.getName().contains(APIConstants.API_ICON_IMAGE)) {
+                if (imageFile != null) {
                     updateWithThumbnail(imageFile, apiTypeWrapper, apiProvider);
                     //the loop is terminated after successfully locating the icon
                     break;
