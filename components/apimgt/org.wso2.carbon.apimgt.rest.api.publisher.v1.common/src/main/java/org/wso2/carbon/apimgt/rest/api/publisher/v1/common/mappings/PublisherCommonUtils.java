@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -93,10 +94,10 @@ public class PublisherCommonUtils {
      * @param apiDtoToUpdate New API DTO to update
      * @param apiProvider    API Provider
      * @param tokenScopes    Scopes of the token
-     * @throws ParseException          If an error occurs while parsing the endpoint configuration
-     * @throws CryptoException         If an error occurs while encrypting the secret key of API
-     * @throws APIManagementException  If an error occurs while updating the API
-     * @throws FaultGatewaysException  If an error occurs while updating manage of an existing API
+     * @throws ParseException         If an error occurs while parsing the endpoint configuration
+     * @throws CryptoException        If an error occurs while encrypting the secret key of API
+     * @throws APIManagementException If an error occurs while updating the API
+     * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
@@ -734,11 +735,11 @@ public class PublisherCommonUtils {
         boolean isValid = false;
 
         if (api.getEndpointConfig() != null) {
-            LinkedHashMap endpointConfig = (LinkedHashMap) api.getEndpointConfig();
+            Map endpointConfig = (Map) api.getEndpointConfig();
             String prodEndpointUrl = String
-                    .valueOf(((LinkedHashMap) endpointConfig.get("production_endpoints")).get("url"));
+                    .valueOf(((Map) endpointConfig.get("production_endpoints")).get("url"));
             String sandboxEndpointUrl = String
-                    .valueOf(((LinkedHashMap) endpointConfig.get("sandbox_endpoints")).get("url"));
+                    .valueOf(((Map) endpointConfig.get("sandbox_endpoints")).get("url"));
             isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
 
             if (isValid) {
@@ -1031,7 +1032,8 @@ public class PublisherCommonUtils {
                 if (schema.isEmpty()) {
                     throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
                             ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
-                } SchemaParser schemaParser = new SchemaParser();
+                }
+                SchemaParser schemaParser = new SchemaParser();
                 TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
                 GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
                 SchemaValidator schemaValidation = new SchemaValidator();
@@ -1057,7 +1059,8 @@ public class PublisherCommonUtils {
             } else {
                 throw new APIManagementException("Unsupported extension type of file: " + filename,
                         ExceptionCodes.UNSUPPORTED_GRAPHQL_FILE_EXTENSION);
-            } isValid = validationResponse.isIsValid();
+            }
+            isValid = validationResponse.isIsValid();
             errorMessage = validationResponse.getErrorMessage();
         } catch (SchemaProblem e) {
             errorMessage = e.getMessage();
@@ -1137,5 +1140,156 @@ public class PublisherCommonUtils {
             }
         }
         return invalidTiers;
+    }
+
+    /**
+     * Update an API Product.
+     *
+     * @param originalAPIProduct    Existing API Product
+     * @param apiProductDtoToUpdate New API Product DTO to update
+     * @param apiProvider           API Provider
+     * @param username              Username
+     * @throws APIManagementException If an error occurs while retrieving and updating an existing API Product
+     * @throws FaultGatewaysException If an error occurs while updating an existing API Product
+     */
+    public static APIProduct updateApiProduct(APIProduct originalAPIProduct, APIProductDTO apiProductDtoToUpdate,
+            APIProvider apiProvider, String username) throws APIManagementException, FaultGatewaysException {
+        List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
+        //validation for tiers
+        List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
+        if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
+                .contains(APIConstants.API_SECURITY_API_KEY)) {
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                throw new APIManagementException("No tier defined for the API Product",
+                        ExceptionCodes.TIER_CANNOT_BE_NULL);
+            }
+        }
+
+        //check whether the added API Products's tiers are all valid
+        Set<Tier> definedTiers = apiProvider.getTiers();
+        List<String> invalidTiers = PublisherCommonUtils.getInvalidTierNames(definedTiers, tiersFromDTO);
+        if (!invalidTiers.isEmpty()) {
+            throw new APIManagementException(
+                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
+                    ExceptionCodes.TIER_NAME_INVALID);
+        }
+        if (apiProductDtoToUpdate.getAdditionalProperties() != null) {
+            String errorMessage = PublisherCommonUtils
+                    .validateAdditionalProperties(apiProductDtoToUpdate.getAdditionalProperties());
+            if (!errorMessage.isEmpty()) {
+                throw new APIManagementException(errorMessage, ExceptionCodes
+                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, originalAPIProduct.getId().getName(),
+                                originalAPIProduct.getId().getVersion()));
+            }
+        }
+
+        //only publish api product if tiers are defined
+        if (APIProductDTO.StateEnum.PUBLISHED.equals(apiProductDtoToUpdate.getState())) {
+            //if the already created API product does not have tiers defined and the update request also doesn't
+            //have tiers defined, then the product should not moved to PUBLISHED state.
+            if (originalAPIProduct.getAvailableTiers() == null && apiProductDtoToUpdate.getPolicies() == null) {
+                throw new APIManagementException("Policy needs to be defined before publishing the API Product",
+                        ExceptionCodes.THROTTLING_POLICY_CANNOT_BE_NULL);
+            }
+        }
+
+        APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
+        //We do not allow to modify provider,name,version  and uuid. Set the origial value
+        APIProductIdentifier productIdentifier = originalAPIProduct.getId();
+        product.setID(productIdentifier);
+        product.setUuid(originalAPIProduct.getUuid());
+
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
+        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, product);
+
+        //preserve monetization status in the update flow
+        apiProvider.configureMonetizationInAPIProductArtifact(product);
+        return apiProvider.getAPIProduct(productIdentifier);
+    }
+
+    /**
+     * Add API Product with the generated swagger from the DTO
+     *
+     * @param apiProductDTO API Product DTO
+     * @param provider      Provider name
+     * @param username      Username
+     * @return Created API Product object
+     * @throws APIManagementException Error while creating the API Product
+     * @throws FaultGatewaysException Error while adding the API Product to gateway
+     */
+    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String provider,
+            String username) throws APIManagementException, FaultGatewaysException {
+        username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        // if not add product
+        provider = apiProductDTO.getProvider();
+        String context = apiProductDTO.getContext();
+        if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
+            if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User " + username + " does not have admin permission ("
+                            + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
+                            + ") overridden with current user (" + username + ")");
+                }
+                provider = username;
+            }
+        } else {
+            // Set username in case provider is null or empty
+            provider = username;
+        }
+
+        List<String> tiersFromDTO = apiProductDTO.getPolicies();
+        Set<Tier> definedTiers = apiProvider.getTiers();
+        List<String> invalidTiers = PublisherCommonUtils.getInvalidTierNames(definedTiers, tiersFromDTO);
+        if (!invalidTiers.isEmpty()) {
+            throw new APIManagementException(
+                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
+                    ExceptionCodes.TIER_NAME_INVALID);
+        }
+        if (apiProductDTO.getAdditionalProperties() != null) {
+            String errorMessage = PublisherCommonUtils
+                    .validateAdditionalProperties(apiProductDTO.getAdditionalProperties());
+            if (!errorMessage.isEmpty()) {
+                throw new APIManagementException(errorMessage,
+                        ExceptionCodes.from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiProductDTO.getName()));
+            }
+        }
+        if (apiProductDTO.getVisibility() == null) {
+            //set the default visibility to PUBLIC
+            apiProductDTO.setVisibility(APIProductDTO.VisibilityEnum.PUBLIC);
+        }
+
+        if (apiProductDTO.getAuthorizationHeader() == null) {
+            apiProductDTO.setAuthorizationHeader(
+                    APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
+        }
+        if (apiProductDTO.getAuthorizationHeader() == null) {
+            apiProductDTO.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
+
+        //Remove the /{version} from the context.
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        //Make sure context starts with "/". ex: /pizzaProduct
+        context = context.startsWith("/") ? context : ("/" + context);
+        //Check whether the context already exists
+        if (apiProvider.isContextExist(context)) {
+            throw new APIManagementException(
+                    "Error occurred while adding API Product. API Product with the context " + context
+                            + " already exists.", ExceptionCodes.API_ALREADY_EXISTS);
+        }
+
+        APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
+
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
+                .addAPIProductWithoutPublishingToGateway(productToBeAdded);
+        apiProvider.addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded);
+
+        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
+        APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
+
+        apiProvider.saveToGateway(createdProduct);
+        return createdProduct;
     }
 }

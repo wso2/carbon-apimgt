@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
@@ -46,11 +47,16 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -67,8 +73,11 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.statsupdate.stub.Exception;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
@@ -102,6 +111,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ImportUtils {
 
@@ -1280,5 +1291,367 @@ public class ImportUtils {
             return transition.getAction(targetStatus.toLowerCase());
         }
         return null;
+    }
+
+    /**
+     * This method imports an API Product.
+     *
+     * @param extractedFolderPath Location of the extracted folder of the API Product
+     * @param preserveProvider    Decision to keep or replace the provider
+     * @param overwriteAPIProduct Whether to update the API Product or not
+     * @param overwriteAPIs       Whether to update the dependent APIs or not
+     * @param importAPIs          Whether to import the dependent APIs or not
+     * @throws APIImportExportException If there is an error in importing an API
+     */
+    public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
+            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+            throws APIImportExportException {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
+        APIProduct importedApiProduct = null;
+
+        try {
+            JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
+            APIProductDTO importedApiProductDTO = new Gson().fromJson(jsonObject, APIProductDTO.class);
+
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiProductDTO.getProvider());
+
+            // Check whether the API resources are valid
+            checkAPIProductResourcesValid(extractedFolderPath, userName, apiProvider, importedApiProductDTO,
+                    preserveProvider);
+
+            if (importAPIs) {
+                // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
+                // fresh import happens)
+                importedApiProductDTO = importDependentAPIs(extractedFolderPath, userName, preserveProvider,
+                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes);
+            } else {
+                // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are already in the APIM
+                importedApiProductDTO = updateDependentApiUuids(importedApiProductDTO, apiProvider,
+                        currentTenantDomain);
+            }
+
+            APIProduct targetApiProduct = retrieveApiProductToOverwrite(importedApiProductDTO.getName(),
+                    currentTenantDomain, apiProvider, Boolean.TRUE);
+
+            // If the overwrite is set to true (which means an update), retrieve the existing API
+            if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
+                log.info("Existing API Product found, attempting to update it...");
+                importedApiProduct = PublisherCommonUtils.updateApiProduct(targetApiProduct, importedApiProductDTO,
+                        RestApiCommonUtil.getLoggedInUserProvider(), userName);
+            } else {
+                if (targetApiProduct == null && Boolean.TRUE.equals(overwriteAPIProduct)) {
+                    log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
+                }
+                importedApiProduct = PublisherCommonUtils
+                        .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
+                                importedApiProductDTO.getProvider(), importedApiProductDTO.getProvider());
+            }
+
+            // Add/update swagger of API Product
+            importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct, apiProvider);
+
+            // Since Image, documents and client certificates are optional, exceptions are logged and ignored in implementation
+            ApiTypeWrapper apiTypeWrapperWithUpdatedApiProduct = new ApiTypeWrapper(importedApiProduct);
+            addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
+
+            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Mutual SSL enabled. Importing client certificates.");
+                }
+                addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
+                        importedApiProduct.getId().getProviderName());
+            }
+            return importedApiProduct;
+        } catch (IOException e) {
+            // Error is logged and APIImportExportException is thrown because adding API Product and swagger are mandatory steps
+            String errorMessage = "Error while reading API Product meta information from path: " + extractedFolderPath;
+            throw new APIImportExportException(errorMessage, e);
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API Product: " + importedApiProduct.getId().getName();
+            throw new APIImportExportException(errorMessage, e);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while importing API Product: ";
+            if (importedApiProduct != null) {
+                errorMessage +=
+                        importedApiProduct.getId().getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                                + importedApiProduct.getId().getVersion();
+            }
+            throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * This method checks whether the resources in the API Product are valid.
+     *
+     * @param path          Location of the extracted folder of the API Product
+     * @param currentUser   The current logged in user
+     * @param apiProvider   API provider
+     * @param apiProductDto API Product DTO
+     * @throws IOException            If there is an error while reading an API file
+     * @throws APIManagementException If failed to get the API Provider of an API,
+     *                                or failed when checking the existence of an API
+     */
+    private static void checkAPIProductResourcesValid(String path, String currentUser, APIProvider apiProvider,
+            APIProductDTO apiProductDto, Boolean preserveProvider) throws IOException, APIManagementException {
+
+        // Get dependent APIs in the API Product
+        List<ProductAPIDTO> apis = apiProductDto.getApis();
+
+        String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
+        File apisDirectory = new File(apisDirectoryPath);
+        File[] apisDirectoryListing = apisDirectory.listFiles();
+
+        if (apisDirectoryListing != null) {
+            for (File apiDirectory : apisDirectoryListing) {
+                String apiDirectoryPath =
+                        path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
+                                .getName();
+                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, preserveProvider, currentUser);
+                APIDTO apiDto = new Gson().fromJson(jsonObject, APIDTO.class);
+                String apiName = apiDto.getName();
+                String apiVersion = apiDto.getVersion();
+
+                String swaggerContent = loadSwaggerFile(apiDirectoryPath);
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
+                Set<URITemplate> apiUriTemplates = apiDefinition.getURITemplates(swaggerContent);
+
+                for (ProductAPIDTO apiFromProduct : apis) {
+                    if (StringUtils.equals(apiFromProduct.getName(), apiName) && StringUtils
+                            .equals(apiFromProduct.getVersion(), apiVersion)) {
+                        List<APIOperationsDTO> invalidApiOperations = filterInvalidProductResources(
+                                apiFromProduct.getOperations(), apiUriTemplates);
+
+                        // If there are still product resources to be checked (which were not able to find in the
+                        // dependent APIs inside the directory) check whether those are already inside APIM
+                        if (!invalidApiOperations.isEmpty()) {
+                            // Get the provider of the API if the API is in current user's tenant domain.
+                            API api = retrieveApiToOverwrite(apiName, apiVersion,
+                                    MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser)),
+                                    apiProvider, Boolean.FALSE);
+                            invalidApiOperations = filterInvalidProductResources(invalidApiOperations,
+                                    api.getUriTemplates());
+                        }
+
+                        // invalidApiOperations is not empty means, at least one of the resources of the API
+                        // Product does not have corresponding API resources neither inside the importing directory nor
+                        // inside the APIM
+                        if (!invalidApiOperations.isEmpty()) {
+                            throw new APIMgtResourceNotFoundException(
+                                    "Cannot find API resources for some API Product resources.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * This method filter the invalid resources in the API Product by matching with the URI Templates of a particular
+     * dependent API.
+     *
+     * @param apiProductOperations Operations from API Product
+     * @param apiUriTemplates      URI Templates of the dependent API
+     *                             (either inside the import directory or already inside the APIM)
+     * @return Invalid API operations
+     */
+    private static List<APIOperationsDTO> filterInvalidProductResources(List<APIOperationsDTO> apiProductOperations,
+            Set<URITemplate> apiUriTemplates) {
+        List<APIOperationsDTO> apiOperations = new ArrayList<>(apiProductOperations);
+        for (URITemplate apiUriTemplate : apiUriTemplates) {
+            // If the URI Template is Available in the API, remove it from the list since it is valid
+            apiOperations.removeIf(
+                    apiOperation -> StringUtils.equals(apiOperation.getVerb(), apiUriTemplate.getHTTPVerb())
+                            && StringUtils.equals(apiOperation.getTarget(), apiUriTemplate.getUriTemplate()));
+        }
+        return apiOperations;
+    }
+
+    /**
+     * This method imports dependent APIs of the API Product.
+     *
+     * @param path                     Location of the extracted folder of the API Product
+     * @param currentUser              The current logged in user
+     * @param isDefaultProviderAllowed Decision to keep or replace the provider
+     * @param apiProvider              API provider
+     * @param overwriteAPIs            Whether to overwrite the APIs or not
+     * @param apiProductDto            API Product DTO
+     * @param tokenScopes              Scopes of the token
+     * @return Modified API Product DTO with the correct API UUIDs
+     * @throws IOException              If there is an error while reading an API file
+     * @throws APIImportExportException If there is an error in importing an API
+     * @throws APIManagementException   If failed to get the API Provider of an API, or failed when
+     *                                  checking the existence of an API
+     */
+    private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
+            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes)
+            throws APIImportExportException, IOException, APIManagementException {
+
+        String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
+        File apisDirectory = new File(apisDirectoryPath);
+        File[] apisDirectoryListing = apisDirectory.listFiles();
+        if (apisDirectoryListing != null) {
+            for (File apiDirectory : apisDirectoryListing) {
+                String apiDirectoryPath =
+                        path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
+                                .getName();
+
+                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, isDefaultProviderAllowed,
+                        currentUser);
+                APIDTO apiDtoToImport = new Gson().fromJson(jsonObject, APIDTO.class);
+                API importedApi = null;
+                String apiName = apiDtoToImport.getName();
+                String apiVersion = apiDtoToImport.getVersion();
+
+                if (isDefaultProviderAllowed) {
+                    APIIdentifier apiIdentifier = new APIIdentifier(
+                            APIUtil.replaceEmailDomain(apiDtoToImport.getProvider()), apiName, apiVersion);
+
+                    // Checking whether the API exists
+                    if (apiProvider.isAPIAvailable(apiIdentifier)) {
+                        // If the API is already imported, update it if the overWriteAPIs flag is specified,
+                        // otherwise do not update the API. (Just skip it)
+                        if (Boolean.TRUE.equals(overwriteAPIs)) {
+                            importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
+                                    Boolean.TRUE, tokenScopes);
+                        }
+                    } else {
+                        // If the API is not already imported, import it
+                        importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
+                                Boolean.FALSE, tokenScopes);
+                    }
+                } else {
+                    // Retrieve the current tenant domain of the logged in user
+                    String currentTenantDomain = MultitenantUtils
+                            .getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser));
+
+                    // Get the provider of the API if the API is in current user's tenant domain.
+                    String apiProviderInCurrentTenantDomain = APIUtil
+                            .getAPIProviderFromAPINameVersionTenant(apiName, apiVersion, currentTenantDomain);
+
+                    if (StringUtils.isBlank(apiProviderInCurrentTenantDomain)) {
+                        // If there is no API in the current tenant domain (which means the provider name is blank)
+                        // then the API should be imported freshly
+                        importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
+                                Boolean.FALSE, tokenScopes);
+                    } else {
+                        // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
+                        // otherwise do not import/update the API. (Just skip it)
+                        if (Boolean.TRUE.equals(overwriteAPIs)) {
+                            importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
+                                    Boolean.TRUE, tokenScopes);
+                        }
+                    }
+                }
+                if (importedApi == null) {
+                    // Retrieve the API from the environment (This happens when you have not specified
+                    // the overwrite flag, so that we should retrieve the API from inside)
+                    importedApi = retrieveApiToOverwrite(apiDtoToImport.getName(), apiDtoToImport.getVersion(),
+                            MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(currentUser)), apiProvider,
+                            Boolean.FALSE);
+                }
+                updateApiUuidInApiProduct(apiProductDto, importedApi);
+            }
+        } else {
+            String msg = "No dependent APIs supplied. Continuing ...";
+            log.info(msg);
+        }
+        return apiProductDto;
+    }
+
+    /**
+     * This method updates the UUID of the dependent API in an API Product.
+     *
+     * @param apiProductDto API Product DTO
+     * @param importedApi   Imported API
+     */
+    private static APIProductDTO updateApiUuidInApiProduct(APIProductDTO apiProductDto, API importedApi) {
+        APIIdentifier importedApiIdentifier = importedApi.getId();
+        List<ProductAPIDTO> apis = apiProductDto.getApis();
+        for (ProductAPIDTO api : apis) {
+            if (StringUtils.equals(api.getName(), importedApiIdentifier.getName()) && StringUtils
+                    .equals(api.getVersion(), importedApiIdentifier.getVersion())) {
+                api.setApiId(importedApi.getUUID());
+                break;
+            }
+        }
+        return apiProductDto;
+    }
+
+    /**
+     * This method updates the UUIDs of dependent APIs, when the dependent APIs are already inside APIM.
+     *
+     * @param importedApiProductDtO API Product DTO
+     * @param apiProvider           API Provider
+     * @param currentTenantDomain   Current tenant domain
+     * @throws APIManagementException If failed failed when checking the existence of an API
+     */
+    private static APIProductDTO updateDependentApiUuids(APIProductDTO importedApiProductDtO, APIProvider apiProvider,
+            String currentTenantDomain) throws APIManagementException {
+        List<ProductAPIDTO> apis = importedApiProductDtO.getApis();
+        for (ProductAPIDTO api : apis) {
+            API targetApi = retrieveApiToOverwrite(api.getName(), api.getVersion(), currentTenantDomain, apiProvider,
+                    Boolean.FALSE);
+            if (targetApi != null) {
+                api.setApiId(targetApi.getUUID());
+            }
+        }
+        return importedApiProductDtO;
+    }
+
+    /**
+     * This method retrieves an API Product to overwrite in the current tenant domain.
+     *
+     * @param apiProductName      API Product Name
+     * @param currentTenantDomain Current tenant domain
+     * @param apiProvider         API Provider
+     * @param ignoreAndImport     This should be true if the exception should be ignored
+     * @throws APIManagementException If an error occurs when retrieving the API to overwrite
+     */
+    private static APIProduct retrieveApiProductToOverwrite(String apiProductName, String currentTenantDomain,
+            APIProvider apiProvider, Boolean ignoreAndImport) throws APIManagementException {
+        String provider = APIUtil.getAPIProviderFromAPINameVersionTenant(apiProductName,
+                ImportExportConstants.DEFAULT_API_PRODUCT_VERSION, currentTenantDomain);
+        APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider),
+                apiProductName, ImportExportConstants.DEFAULT_API_PRODUCT_VERSION);
+
+        // Checking whether the API exists
+        if (!apiProvider.isAPIProductAvailable(apiProductIdentifier)) {
+            if (ignoreAndImport) {
+                return null;
+            }
+            String errorMessage = "Error occurred while retrieving the API Product. API Product: " + apiProductName
+                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                    + ImportExportConstants.DEFAULT_API_PRODUCT_VERSION + " not found";
+            throw new APIMgtResourceNotFoundException(errorMessage);
+        }
+        return apiProvider.getAPIProduct(apiProductIdentifier);
+    }
+
+    /**
+     * This method updates the API Product and the swagger with the correct scopes.
+     *
+     * @param pathToArchive      Path to the extracted folder
+     * @param importedApiProduct Imported API Product
+     * @param apiProvider        API Provider
+     * @throws APIManagementException If an error occurs when retrieving the parser and updating the API Product
+     * @throws FaultGatewaysException If an error occurs when updating the API to overwrite
+     * @throws IOException            If an error occurs when loading the swagger file
+     */
+    private static APIProduct updateApiProductSwagger(String pathToArchive, APIProduct importedApiProduct,
+            APIProvider apiProvider) throws APIManagementException, FaultGatewaysException, IOException {
+        String swaggerContent = loadSwaggerFile(pathToArchive);
+
+        // Load required properties from swagger to the API Product
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
+        Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
+        importedApiProduct.setScopes(scopes);
+
+        // This is required to make scopes get effected
+        Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
+                .updateAPIProduct(importedApiProduct);
+        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, importedApiProduct);
+        return importedApiProduct;
     }
 }

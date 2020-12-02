@@ -5492,6 +5492,73 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v1/api-products/export?name=LeasingAPIProduct&version=1.0.0&provider=admin&format=YAML"
           > exportAPIProduct.zip'
 
+  /api-products/import:
+    post:
+      tags:
+        - Import Export
+      summary: Import an API Product
+      description: |
+        This operation can be used to import an API Product.
+      parameters:
+        - name: preserveProvider
+          in: query
+          description: |
+            Preserve Original Provider of the API Product. This is the user choice to keep or replace the API Product provider
+          required: false
+          schema:
+            type: boolean
+        - name: importAPIs
+          in: query
+          description: |
+            Whether to import the dependent APIs or not.
+          schema:
+            type: boolean
+        - name: overwriteAPIProduct
+          in: query
+          description: |
+            Whether to update the API Product or not. This is used when updating already existing API Products.
+          schema:
+            type: boolean
+        - name: overwriteAPIs
+          in: query
+          description: |
+            Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    Zip archive consisting on exported API Product configuration
+                  format: binary
+      responses:
+        200:
+          description: |
+            Created.
+            API Product Imported Successfully.
+          content: {}
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -F file=@admin-PizzaShackAPIProduct.zip "https://127.0.0.1:9443/api/am/admin/v1/api-products/importt?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
+
   ######################################################
   # Roles resource APIs
   ######################################################
@@ -6881,6 +6948,7 @@ components:
           readOnly: true
       x-scopes:
       - apim:api_create
+      - apim:api_import_export
     AuditReport:
       title: Resource for Audit Report
       type: object

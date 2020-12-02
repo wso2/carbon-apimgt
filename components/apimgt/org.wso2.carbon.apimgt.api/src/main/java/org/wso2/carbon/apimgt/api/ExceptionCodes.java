@@ -224,7 +224,7 @@ ExceptionCodes implements ErrorHandler {
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
     GRAPHQL_SCHEMA_CANNOT_BE_NULL(900801, "GraphQL Schema cannot be empty or nul", 400,
-            "GraphQL Schema cannot be empty or nul"),
+            "GraphQL Schema cannot be empty or null"),
     UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
 
@@ -270,6 +270,8 @@ ExceptionCodes implements ErrorHandler {
     MUTUAL_SSL_NOT_SUPPORTED(
             900988, "Mutual SSL based authentication is not supported in this server", 400,
             "Cannot add client certificates to this server"),
+    THROTTLING_POLICY_CANNOT_BE_NULL(900989,
+            "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),

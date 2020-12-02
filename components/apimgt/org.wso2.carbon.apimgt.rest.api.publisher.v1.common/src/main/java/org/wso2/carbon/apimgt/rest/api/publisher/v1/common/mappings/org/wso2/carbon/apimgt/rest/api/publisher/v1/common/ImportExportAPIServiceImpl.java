@@ -119,4 +119,12 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
     }
+
+    @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
+            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+            throws APIImportExportException {
+        String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+        return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, overwriteAPIProduct, overwriteAPIs,
+                importAPIs, tokenScopes);
+    }
 }
