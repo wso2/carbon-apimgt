@@ -166,7 +166,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             List<SubscribedAPI> apiUsages;
 
             if (apiId != null) {
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);

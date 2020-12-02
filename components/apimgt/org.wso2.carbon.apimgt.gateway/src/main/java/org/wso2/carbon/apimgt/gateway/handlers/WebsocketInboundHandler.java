@@ -158,7 +158,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             URI uriTemp = new URI(uri);
             apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),
                      null, uriTemp.getFragment()).toString();
-
+            apiContextUri = this.apiContextUri.endsWith("/") ? apiContextUri.substring(0, apiContextUri.length() - 1)
+                    : apiContextUri;
+            if (log.isDebugEnabled()) {
+                log.debug("Websocket API apiContextUri = " + apiContextUri);
+            }
             if (req.getUri().contains("/t/")) {
                 tenantDomain = MultitenantUtils.getTenantDomainFromUrl(req.getUri());
             } else {

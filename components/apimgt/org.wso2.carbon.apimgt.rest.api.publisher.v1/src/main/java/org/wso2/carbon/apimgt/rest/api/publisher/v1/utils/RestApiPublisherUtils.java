@@ -208,7 +208,7 @@ public class RestApiPublisherUtils {
                                 + filename + "'");
             }
             APIIdentifier apiIdentifier = APIMappingUtil
-                    .getAPIIdentifierFromUUID(apiId, tenantDomain);
+                    .getAPIIdentifierFromUUID(apiId);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);

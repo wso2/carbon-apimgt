@@ -38,13 +38,14 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.VisibilityEnum;
@@ -652,9 +653,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @return Zipped file containing exported API Product
      */
     @Override
-    public Response apiProductsExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
-        APIProductIdentifier apiProductIdentifier;
-        APIProductDTO apiProductDtoToReturn;
+    public Response apiProductsExportGet(String name, String version, String providerName, String format,
+                                         Boolean preserveStatus, MessageContext messageContext)
+            throws APIManagementException {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -662,18 +663,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
-
+        ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String userName = RestApiCommonUtil.getLoggedInUsername();
-
-            // Validate API name, version and provider before exporting
-            String provider = ExportUtils.validateExportParams(name, version, providerName);
-            apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProvider.getAPIProduct(apiProductIdentifier));
-
-            File file = ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn,
-                    userName, exportFormat, preserveStatus);
+            File file =
+                    importExportAPI.exportApiProduct(null, name, version, providerName, exportFormat, preserveStatus,
+                            true);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
