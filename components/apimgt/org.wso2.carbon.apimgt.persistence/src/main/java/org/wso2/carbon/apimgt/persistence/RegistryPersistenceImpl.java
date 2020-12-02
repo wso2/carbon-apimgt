@@ -17,8 +17,7 @@ package org.wso2.carbon.apimgt.persistence;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
-import java.io.File;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -26,31 +25,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 
-import javax.cache.Cache;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
@@ -78,6 +66,7 @@ import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -308,34 +297,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
-/*
-    @Override
-    public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        API api = APIMapper.INSTANCE.toApi(publisherAPI);
-        GenericArtifactManager artifactManager;
-        PublisherAPI updatedPubAPI;
-        try {
-            artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            // get the exsisting artifact and update the content with the new values
-            GenericArtifact artifact = artifactManager.getGenericArtifact(publisherAPI.getId()); // This might not needed if we send the full api
-            GenericArtifact updateApiArtifact = RegistryPersistenceUtil.createAPIArtifactContent(artifact, api);
-            artifactManager.updateGenericArtifact(updateApiArtifact);
-            artifact = artifactManager.getGenericArtifact(publisherAPI.getId());
-            API updatedAPI = RegistryPersistenceUtil.getApiForPublishing(registry, artifact);
-            //TODO directly map to PublisherAPI from the registry
-            updatedPubAPI = APIMapper.INSTANCE.toPublisherApi(updatedAPI) ; 
-            if (log.isDebugEnabled()) {
-                log.debug("API for id " + updatedPubAPI.getId() + " : " + updatedPubAPI.toString());
-            }
-        } catch (APIManagementException e) {
-            throw new APIPersistenceException("Error while retrieving artifact manager ", e);
-        } catch (GovernanceException e) {
-            throw new APIPersistenceException("Error while retrieving artifact ", e);
-        }
 
-        return updatedPubAPI;
-    }
-    */
     @Override
     public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
@@ -345,12 +307,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             registry.beginTransaction();
             String apiArtifactId = registry.get(RegistryPersistenceUtil.getAPIPath(api.getId())).getUUID();
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
             if (artifactManager == null) {
                 String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
 
             boolean isSecured = Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
@@ -1196,8 +1158,43 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public Documentation getDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        Documentation documentation = null;
+        try {
+            Registry registryType;
+            String requestedTenantDomain = org.getName();
+            boolean isTenantMode = (requestedTenantDomain != null);
+            // Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if ((isTenantMode && this.tenantDomain == null)
+                    || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {
+                int tenantId = getTenantManager().getTenantId(requestedTenantDomain);
+                registryType = getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
+                    .getDocumentArtifactManager(registryType);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            
+            if (artifact == null) {
+                return documentation;
+            }
+            if (null != artifact) {
+                documentation = RegistryPersistanceDocUtil.getDocumentation(artifact);
+                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
+                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
+                if (lastModified != null) {
+                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get documentation details";
+            throw new DocumentationPersistenceException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get documentation details";
+            throw new DocumentationPersistenceException(msg, e);
+        }
+        return documentation;
     }
 
     @Override

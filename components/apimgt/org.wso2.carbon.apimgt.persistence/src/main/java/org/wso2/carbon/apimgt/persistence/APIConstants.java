@@ -328,4 +328,7 @@ public final class APIConstants {
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
     //registry location for API documentation
     public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
+    
+    public static final String DOC_API_BASE_PATH = "overview_apiBasePath";
+
 }
