@@ -397,7 +397,7 @@ public class ExportUtils {
                     String resourcePath = null;
                     String localFileName = null;
                     String individualDocDirectoryPath =
-                            docDirectoryPath + File.separator + individualDocument.getName();
+                            docDirectoryPath + File.separator + cleanFolderName(individualDocument.getName());
                     CommonUtil.createDirectory(individualDocDirectoryPath);
                     if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                         localFileName = individualDocument.getFilePath().substring(
@@ -455,6 +455,17 @@ public class ExportUtils {
         } else if (log.isDebugEnabled()) {
             log.debug("No documentation found for API/API Product: " + identifier + ". Skipping documentation export.");
         }
+    }
+
+    /**
+     * Replace the unwanted characters for a folder name with the underscore.
+     *
+     * @param name   Name of the folder
+     * @return Folder name which the unwanted characters are replaced
+     */
+    private static String cleanFolderName(String name) {
+        // Replace everything but [a-zA-Z0-9.-]
+        return name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
     }
 
     /**
