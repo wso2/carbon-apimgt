@@ -162,9 +162,11 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -210,6 +212,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10456,5 +10459,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return usedProductResources;
+    }
+    /**
+     * Get a documentation by artifact Id
+     *
+     * @param docId                 artifact id of the document
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return Document object which represents the artifact id
+     * @throws APIManagementException
+     */
+    public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
+        Documentation documentation = null;
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
+                    .getDocumentation(new Organization(requestedTenantDomain), null, docId);
+            if (doc != null) {
+               if(log.isDebugEnabled()) {
+                   log.debug("Retrieved doc: " + doc);
+               }
+               documentation = DocumentMapper.INSTANCE.toDocumentation(doc);
+            }
+        } catch (DocumentationPersistenceException e) {
+            throw new APIManagementException("Error while retrieving document for id " + docId, e);
+        }
+        return documentation;
     }
 }
