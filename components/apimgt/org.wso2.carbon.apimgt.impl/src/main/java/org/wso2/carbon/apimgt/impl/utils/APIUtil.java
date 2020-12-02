@@ -1771,7 +1771,7 @@ public final class APIUtil {
      */
     public static String getIconPath(Identifier identifier) {
 
-        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
@@ -6361,17 +6361,34 @@ public final class APIUtil {
 
             for (SolrDocument document : documentList) {
                 String filePath = (String) document.getFieldValue("path_s");
+                String fileName = (String) document.getFieldValue("resourceName_s");
                 int index = filePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
                 filePath = filePath.substring(index);
-                Association[] associations = registry.getAllAssociations(filePath);
                 API api = null;
                 Documentation doc = null;
-                for (Association association : associations) {
-                    boolean isAuthorized;
-                    String documentationPath = association.getSourcePath();
-                    String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                boolean isAuthorized;
+                int indexOfContents = filePath.indexOf(APIConstants.INLINE_DOCUMENT_CONTENT_DIR);
+                String documentationPath = filePath.substring(0, indexOfContents) + fileName;
+                String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
+                if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
+                    isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
+                } else {
+                    isAuthorized = manager.isUserAuthorized(username, path, ActionConstants.GET);
+                }
+                if (isAuthorized) {
+                    Resource docResource = registry.get(documentationPath);
+                    String docArtifactId = docResource.getUUID();
+                    if (docArtifactId != null) {
+                        GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                        doc = APIUtil.getDocumentation(docArtifact);
+                    }
+                    int indexOfDocumentation = filePath.indexOf(APIConstants.DOCUMENTATION_KEY);
+                    String apiPath = documentationPath.substring(0, indexOfDocumentation) + APIConstants.API_KEY;
+                    path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
+                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + apiPath);
                     if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
                         isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
                     } else {
@@ -6379,49 +6396,26 @@ public final class APIUtil {
                     }
 
                     if (isAuthorized) {
-                        Resource docResource = registry.get(documentationPath);
-                        String docArtifactId = docResource.getUUID();
-                        if (docArtifactId != null) {
-                            GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
-                            doc = APIUtil.getDocumentation(docArtifact);
-                        }
-
-                        Association[] docAssociations = registry.getAssociations(documentationPath, APIConstants.DOCUMENTATION_ASSOCIATION);
-                        /* There will be only one document association, for a document path which is by its owner API*/
-                        if (docAssociations.length > 0) {
-
-                            String apiPath = docAssociations[0].getSourcePath();
-                            path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + apiPath);
-                            if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
-                                isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-                            } else {
-                                isAuthorized = manager.isUserAuthorized(username, path, ActionConstants.GET);
-                            }
-
-                            if (isAuthorized) {
-                                Resource resource = registry.get(apiPath);
-                                String apiArtifactId = resource.getUUID();
-                                if (apiArtifactId != null) {
-                                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                                    api = APIUtil.getAPI(apiArtifact, registry);
-                                } else {
-                                    throw new GovernanceException("artifact id is null of " + apiPath);
-                                }
-                            }
+                        Resource resource = registry.get(apiPath);
+                        String apiArtifactId = resource.getUUID();
+                        if (apiArtifactId != null) {
+                            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                            api = APIUtil.getAPI(apiArtifact, registry);
+                        } else {
+                            throw new GovernanceException("artifact id is null of " + apiPath);
                         }
                     }
 
-                    if (doc != null && api != null) {
-                        if (APIConstants.STORE_CLIENT.equals(searchClient)) {
-                            if (APIConstants.PUBLISHED.equals(api.getStatus()) ||
-                                    APIConstants.PROTOTYPED.equals(api.getStatus())) {
-                                apiDocMap.put(doc, api);
-                            }
-                        } else {
+                }
+
+                if (doc != null && api != null) {
+                    if (APIConstants.STORE_CLIENT.equals(searchClient)) {
+                        if (APIConstants.PUBLISHED.equals(api.getStatus()) ||
+                                APIConstants.PROTOTYPED.equals(api.getStatus())) {
                             apiDocMap.put(doc, api);
                         }
+                    } else {
+                        apiDocMap.put(doc, api);
                     }
                 }
             }

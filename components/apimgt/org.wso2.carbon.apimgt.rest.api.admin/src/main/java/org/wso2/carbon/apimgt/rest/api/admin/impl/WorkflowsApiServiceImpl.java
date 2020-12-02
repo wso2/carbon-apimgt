@@ -28,7 +28,8 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -56,7 +57,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body) {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         boolean isTenantFlowStarted = false;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomainOfUser = MultitenantUtils.getTenantDomain(username);
         try {
             if (workflowReferenceId == null) {

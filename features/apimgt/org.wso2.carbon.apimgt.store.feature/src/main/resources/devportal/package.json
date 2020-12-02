@@ -69,7 +69,7 @@
         "react-safe-html": "^0.6.1",
         "react-tagcloud": "^1.4.0",
         "react-tap-event-plugin": "^2.0.1",
-        "swagger-client": "^3.10.0",
+        "swagger-client": "^3.12.0",
         "swagger-ui": "^3.25.0",
         "swagger-ui-react": "^3.25.0",
         "swagger2-postman2-converter": "0.0.3"

@@ -17,6 +17,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import Settings from 'Settings';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -42,9 +43,14 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import Environments from './Environments';
 import Labels from './Labels';
+<<<<<<< HEAD
 import CloudDownloadRounded from "@material-ui/icons/CloudDownloadRounded";
 import Utils from "AppData/Utils";
 import Alert from "AppComponents/Shared/Alert";
+=======
+
+const propertyDisplaySuffix = Settings.app.propertyDisplaySuffix || '__display';
+>>>>>>> upstream/master
 /**
  *
  *
@@ -393,7 +399,7 @@ class InfoBar extends React.Component {
         const { additionalProperties, securityScheme } = api;
         let additionalProperties__display = null;
         if (additionalProperties && Object.keys(additionalProperties).length > 0 && additionalProperties.constructor === Object) {
-            additionalProperties__display = Object.keys(additionalProperties).filter(aProp => aProp.indexOf('__display') !== -1);
+            additionalProperties__display = Object.keys(additionalProperties).filter(aProp => aProp.indexOf(propertyDisplaySuffix) !== -1);
         }
 
         let securityScheme_display = null;
@@ -730,7 +736,7 @@ class InfoBar extends React.Component {
                                                         <div className={classes.iconAligner}>
                                                             <Icon className={classes.iconEven}>adjust</Icon>
                                                             <span className={classes.iconTextWrapper}>
-                                                                {displayProp.split('__display')[0]}
+                                                                {displayProp.split(propertyDisplaySuffix)[0]}
                                                             </span>
                                                         </div>
                                                     </TableCell>

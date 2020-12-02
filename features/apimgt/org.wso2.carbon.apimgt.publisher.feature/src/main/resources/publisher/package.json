@@ -65,7 +65,7 @@
         "react-tagsinput": "3.19.0",
         "react-tap-event-plugin": "^2.0.1",
         "react-toastify": "^1.7.0",
-        "swagger-client": "^3.9.4",
+        "swagger-client": "^3.12.0",
         "swagger-parser": "^7.0.1",
         "swagger-ui": "^3.25.0",
         "swagger-ui-react": "^3.25.0",

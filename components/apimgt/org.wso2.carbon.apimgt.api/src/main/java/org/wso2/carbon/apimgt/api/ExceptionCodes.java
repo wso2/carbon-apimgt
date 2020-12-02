@@ -368,10 +368,21 @@ ExceptionCodes implements ErrorHandler {
     //mediation policies related common errors
     MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
                                                 "The name of the mediation policy exceeds the max length (%s)"),
+<<<<<<< HEAD
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
     ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status");
+=======
+    INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
+            "Provided API identifier (%s) is invalid"),
+    API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
+    INVALID_CONFIGURATION_ID(900853,"The configuration id validation failed. Should be " +
+            "{apiName}#{apiVersion}#{tenantDomain}",400,"The configuration id validation failed. Should be " +
+            "{apiName}#{apiVersion}#{tenantDomain}"),
+    INVALID_API_NAME(900854, "Invalid API Name",400 ,"Invalid API Name"),
+    ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty");
+>>>>>>> upstream/master
 
     private final long errorCode;
     private final String errorMessage;
