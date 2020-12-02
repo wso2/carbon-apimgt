@@ -1887,9 +1887,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             //need to be moved to persistent layer
 
-//            updateWSDL(oldApi);///////////////has registry access /////////////////
+            updateWSDL(oldApi);///////////////has registry access /////////////////
 
-//            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
+            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
 
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
