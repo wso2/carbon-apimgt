@@ -304,7 +304,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
 
-
     /**
      * Get complexity details of a given API
      *
@@ -343,7 +342,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
-
 
     /**
      * Update complexity details of a given API
@@ -501,9 +499,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
-
-
     /**
      * Get all types and fields of the GraphQL Schema of a given API
      *
@@ -511,8 +506,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext message context
      * @return Response with all the types and fields found within the schema definition
      */
-    @Override
-    public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) {
+    @Override public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, MessageContext messageContext) {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -543,7 +537,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
-
 
     // AWS Lambda: rest api operation to get ARNs
     @Override
@@ -1548,7 +1541,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
-
 
     /**
      * Get external store list which the given API is already published to.
@@ -3366,24 +3358,22 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param preserveStatus Preserve API status on export
      * @return
      */
-    @Override
-    public Response apisExportGet(String apiId, String name, String version, String providerName, String format,
-                                  Boolean preserveStatus, MessageContext messageContext) {
+    @Override public Response apisExportGet(String apiId, String name, String version, String providerName,
+            String format, Boolean preserveStatus, MessageContext messageContext) {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
 
         // Default export format is YAML
-        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            File file = importExportAPI.exportAPI(apiId, name, version,
-                    providerName, preserveStatus, exportFormat, true);
-            return Response.ok(file)
-                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
-                            + file.getName() + "\"")
-                    .build();
+            File file = importExportAPI
+                    .exportAPI(apiId, name, version, providerName, preserveStatus, exportFormat, true);
+            return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
@@ -3473,8 +3463,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API import response
      * @throws APIManagementException when error occurred while trying to import the API
      */
-    @Override
-    public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail,
+    @Override public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;
@@ -3485,11 +3474,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-        try {
-            importExportAPI.importAPI(fileInputStream, preserveProvider, overwrite, tokenScopes);
-        } catch (APIImportExportException e) {
-            throw new APIManagementException(e.getMessage(), e.getCause(), e.getErrorHandler());
-        }
+        importExportAPI.importAPI(fileInputStream, preserveProvider, overwrite, tokenScopes);
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 
@@ -3672,7 +3657,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 
-
     /***
      * To check if the API is modified or not when the given sequence is in API.
      *
@@ -3740,7 +3724,6 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Check the existence of the mediation policy
      *
      * @param mediationResourcePath mediation config content
-     *
      */
     public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath, String name) throws APIManagementException {
         if (apiProvider.checkIfResourceExists(mediationResourcePath)) {

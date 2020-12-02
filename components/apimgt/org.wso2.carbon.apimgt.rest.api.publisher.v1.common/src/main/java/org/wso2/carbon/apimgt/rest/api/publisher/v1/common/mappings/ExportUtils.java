@@ -177,7 +177,7 @@ public class ExportUtils {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
             }
 
-            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry, exportFormat);
+            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry);
 
             // Set API status to created if the status is not preserved
             if (!preserveStatus) {
@@ -516,13 +516,12 @@ public class ExportUtils {
      * @param apiIdentifier API Identifier
      * @param apiDto        API DTO
      * @param registry      Current tenant registry
-     * @param exportFormat  Export format of file
      * @throws APIImportExportException If an error occurs while exporting sequences
      */
     public static void addSequencesToArchive(String archivePath, APIIdentifier apiIdentifier, APIDTO apiDto,
-            Registry registry, ExportFormat exportFormat) throws APIImportExportException {
+            Registry registry) throws APIImportExportException {
 
-        String seqArchivePath = archivePath.concat(File.separator + "Sequences");
+        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
         List<MediationPolicyDTO> mediationPolicyDtos = apiDto.getMediationPolicies();
         if (!apiDto.getMediationPolicies().isEmpty()) {
             CommonUtil.createDirectory(seqArchivePath);

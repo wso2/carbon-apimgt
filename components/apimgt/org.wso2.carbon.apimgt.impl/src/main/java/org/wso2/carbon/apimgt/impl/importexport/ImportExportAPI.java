@@ -76,7 +76,7 @@ public interface ImportExportAPI {
      * @@return Imported API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite, String[] tokenScopes)
-            throws APIImportExportException;
+            throws APIManagementException;
 
     /**
      * Used to import an API Product artifact.
@@ -91,5 +91,5 @@ public interface ImportExportAPI {
      */
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
             Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
-            throws APIImportExportException;
+            throws APIManagementException;
 }

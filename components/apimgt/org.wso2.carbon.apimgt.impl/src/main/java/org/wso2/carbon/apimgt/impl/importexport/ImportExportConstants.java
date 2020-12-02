@@ -157,4 +157,10 @@ public final class ImportExportConstants {
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
     public static final String APIM_VERSION = "v4";
+
+    public static final String ENDPOINT_CONFIG = "endpointConfig";
+
+    public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
+
+
 }

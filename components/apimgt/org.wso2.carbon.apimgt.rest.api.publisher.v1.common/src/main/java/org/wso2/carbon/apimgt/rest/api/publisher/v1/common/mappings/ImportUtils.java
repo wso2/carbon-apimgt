@@ -132,7 +132,7 @@ public class ImportUtils {
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-            Boolean overwrite, String[] tokenScopes) throws APIImportExportException {
+            Boolean overwrite, String[] tokenScopes) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -245,20 +245,20 @@ public class ImportUtils {
             importedApi.setStatus(targetStatus);
             return importedApi;
         } catch (CryptoException | IOException e) {
-            throw new APIImportExportException(
+            throw new APIManagementException(
                     "Error while reading API meta information from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API: " + importedApi.getId().getApiName();
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (APIMgtAuthorizationFailedException e) {
-            throw new APIImportExportException("Please enable preserveProvider property for cross tenant API Import.",
-                    e, ExceptionCodes.TENANT_MISMATCH);
+            throw new APIManagementException("Please enable preserveProvider property for cross tenant API Import.", e,
+                    ExceptionCodes.TENANT_MISMATCH);
         } catch (ParseException e) {
-            throw new APIImportExportException("Error while parsing the endpoint configuration of the API",
+            throw new APIManagementException("Error while parsing the endpoint configuration of the API",
                     ExceptionCodes.JSON_PARSE_ERROR);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API: ";
@@ -267,7 +267,7 @@ public class ImportUtils {
                         importedApi.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                                 + importedApi.getId().getVersion();
             }
-            throw new APIImportExportException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
     }
 
@@ -293,7 +293,8 @@ public class ImportUtils {
             }
             String errorMessage = "Error occurred while retrieving the API. API: " + apiName + StringUtils.SPACE
                     + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found";
-            throw new APIMgtResourceNotFoundException(errorMessage);
+            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
+                    .from(ExceptionCodes.API_NOT_FOUND, apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion()));
         }
         return apiProvider.getAPI(apiIdentifier);
     }
@@ -337,6 +338,8 @@ public class ImportUtils {
         JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
         JsonObject configObject = configElement.getAsJsonObject();
 
+        configObject = preProcessEndpointConfig(configObject);
+
         // Locate the "provider" within the "id" and set it as the current user
         String apiName = configObject.get(ImportExportConstants.API_NAME_ELEMENT).getAsString();
 
@@ -364,6 +367,44 @@ public class ImportUtils {
     }
 
     /**
+     * This function will preprocess endpoint config security.
+     *
+     * @param configObject Data object from the API/API Product configuration
+     * @return API config object with pre processed endpoint config
+     */
+    private static JsonObject preProcessEndpointConfig(JsonObject configObject) {
+        if (configObject.has(ImportExportConstants.ENDPOINT_CONFIG)) {
+            JsonObject endpointConfig = configObject.get(ImportExportConstants.ENDPOINT_CONFIG).getAsJsonObject();
+            if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
+                JsonObject endpointSecurity = endpointConfig.get(APIConstants.ENDPOINT_SECURITY).getAsJsonObject();
+                if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                    JsonObject endpointSecuritySandbox = endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)
+                            .getAsJsonObject();
+                    if (endpointSecuritySandbox.has(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS)) {
+                        String customParameters = endpointSecuritySandbox
+                                .get(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS).toString();
+                        endpointSecuritySandbox.remove(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS);
+                        endpointSecuritySandbox
+                                .addProperty(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS, customParameters);
+                    }
+                }
+                if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                    JsonObject endpointSecuritySandbox = endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION)
+                            .getAsJsonObject();
+                    if (endpointSecuritySandbox.has(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS)) {
+                        String customParameters = endpointSecuritySandbox
+                                .get(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS).toString();
+                        endpointSecuritySandbox.remove(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS);
+                        endpointSecuritySandbox
+                                .addProperty(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS, customParameters);
+                    }
+                }
+            }
+        }
+        return configObject;
+    }
+
+    /**
      * Validate the provider of the API and modify the provider based on the preserveProvider flag value.
      *
      * @param configObject             Data object from the API/API Product configuration
@@ -378,8 +419,7 @@ public class ImportUtils {
 
         if (isDefaultProviderAllowed) {
             if (!StringUtils.equals(prevTenantDomain, currentTenantDomain)) {
-                String errorMessage =
-                        "Tenant mismatch! Please enable preserveProvider property for cross tenant API Import.";
+                String errorMessage = "Tenant mismatch! Please enable preserveProvider property for cross tenant API Import.";
                 throw new APIMgtAuthorizationFailedException(errorMessage);
             }
         } else {
@@ -464,7 +504,7 @@ public class ImportUtils {
      * @throws APIImportExportException If an error occurs while reading the file
      */
     private static String retrieveValidatedGraphqlSchemaFromArchive(String pathToArchive)
-            throws APIImportExportException {
+            throws APIManagementException {
         File file = new File(pathToArchive + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION);
         try {
             String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
@@ -473,12 +513,12 @@ public class ImportUtils {
             if (!graphQLValidationResponseDTO.isIsValid()) {
                 String errMsg = "Error occurred while importing the API. Invalid GraphQL schema definition found. "
                         + graphQLValidationResponseDTO.getErrorMessage();
-                throw new APIImportExportException(errMsg);
+                throw new APIManagementException(errMsg);
             }
             return schemaDefinition;
-        } catch (IOException | APIManagementException e) {
-            throw new APIImportExportException("Error while reading API meta information from path: " + pathToArchive,
-                    e, ExceptionCodes.ERROR_READING_META_DATA);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
         }
     }
 
@@ -488,21 +528,19 @@ public class ImportUtils {
      * @param pathToArchive Path to API archive
      * @throws APIImportExportException If an error due to an invalid WSDL definition
      */
-    private static void validateWSDLFromArchive(String pathToArchive, APIDTO apiDto)
-            throws APIImportExportException {
+    private static void validateWSDLFromArchive(String pathToArchive, APIDTO apiDto) throws APIManagementException {
         try {
             byte[] wsdlDefinition = loadWsdlFile(pathToArchive, apiDto);
             WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
                     getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
             if (!wsdlValidationResponse.isValid()) {
-                String errMsg =
-                        "Error occurred while importing the API. Invalid WSDL definition found. " + wsdlValidationResponse
-                                .getError();
-                throw new APIImportExportException(errMsg);
+                String errMsg = "Error occurred while importing the API. Invalid WSDL definition found. "
+                        + wsdlValidationResponse.getError();
+                throw new APIManagementException(errMsg);
             }
         } catch (IOException | APIManagementException e) {
-            throw new APIImportExportException("Error while reading API meta information from path: " + pathToArchive,
-                    e, ExceptionCodes.ERROR_READING_META_DATA);
+            throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
         }
     }
 
@@ -552,20 +590,20 @@ public class ImportUtils {
      * @throws APIImportExportException If an error occurs while reading the file
      */
     private static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinitionFromArchive(String pathToArchive)
-            throws APIImportExportException {
+            throws APIManagementException {
         try {
             String swaggerContent = loadSwaggerFile(pathToArchive);
             APIDefinitionValidationResponse validationResponse = OASParserUtil
                     .validateAPIDefinition(swaggerContent, Boolean.TRUE);
             if (!validationResponse.isValid()) {
-                throw new APIImportExportException(
+                throw new APIManagementException(
                         "Error occurred while importing the API. Invalid Swagger definition found. "
                                 + validationResponse.getErrorItems(), ExceptionCodes.ERROR_READING_META_DATA);
             }
             return validationResponse;
-        } catch (IOException | APIManagementException e) {
-            throw new APIImportExportException("Error while reading API meta information from path: " + pathToArchive,
-                    e, ExceptionCodes.ERROR_READING_META_DATA);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
         }
     }
 
@@ -957,7 +995,7 @@ public class ImportUtils {
      * @throws APIImportExportException If an error occurs while importing endpoint certificates from file
      */
     private static void addEndpointCertificates(String pathToArchive, API importedApi, APIProvider apiProvider,
-            int tenantId) throws APIImportExportException {
+            int tenantId) throws APIManagementException {
 
         String jsonContent = null;
         String pathToEndpointsCertificatesDirectory =
@@ -993,7 +1031,7 @@ public class ImportUtils {
             }
         } catch (IOException e) {
             String errorMessage = "Error in reading certificates file";
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
     }
 
@@ -1061,13 +1099,13 @@ public class ImportUtils {
      * @param tenantId    Tenant Id
      */
     private static void updateAPIWithCertificate(JsonElement certificate, APIProvider apiProvider, API importedApi,
-            int tenantId) throws APIImportExportException {
+            int tenantId) throws APIManagementException {
         String certificateFileName = certificate.getAsJsonObject().get(ImportExportConstants.CERTIFICATE_FILE)
                 .getAsString();
         String certificateContent = certificate.getAsJsonObject()
                 .get(ImportExportConstants.CERTIFICATE_CONTENT_JSON_KEY).getAsString();
         if (certificateContent == null) {
-            throw new APIImportExportException("Certificate " + certificateFileName + "is null");
+            throw new APIManagementException("Certificate " + certificateFileName + "is null");
         }
         String alias = certificate.getAsJsonObject().get(ImportExportConstants.ALIAS_JSON_KEY).getAsString();
         String endpoint = certificate.getAsJsonObject().get(ImportExportConstants.ENDPOINT_JSON_KEY).getAsString();
@@ -1093,7 +1131,7 @@ public class ImportUtils {
      * @throws APIImportExportException
      */
     private static void addClientCertificates(String pathToArchive, APIProvider apiProvider, Boolean preserveProvider,
-            String provider) throws APIImportExportException {
+            String provider) throws APIManagementException {
         String jsonContent = null;
         String pathToClientCertificatesDirectory =
                 pathToArchive + File.separator + ImportExportConstants.CLIENT_CERTIFICATES_DIRECTORY;
@@ -1135,10 +1173,10 @@ public class ImportUtils {
             }
         } catch (IOException e) {
             String errorMessage = "Error in reading certificates file";
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing client certificate";
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
     }
 
@@ -1151,7 +1189,7 @@ public class ImportUtils {
      * @throws APIImportExportException If an error occurs while importing mediation logic
      */
     private static void addSOAPToREST(String pathToArchive, API importedApi, Registry registry)
-            throws APIImportExportException {
+            throws APIManagementException {
 
         String inFlowFileLocation = pathToArchive + File.separator + SOAPTOREST + File.separator + IN;
         String outFlowFileLocation = pathToArchive + File.separator + SOAPTOREST + File.separator + OUT;
@@ -1179,7 +1217,7 @@ public class ImportUtils {
                 importMediationLogic(outFlowDirectory, registry, soapToRestLocationOut);
 
             } catch (DirectoryIteratorException e) {
-                throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
+                throw new APIManagementException("Error in importing SOAP to REST mediation logic", e);
             }
         }
     }
@@ -1193,7 +1231,7 @@ public class ImportUtils {
      * @throws APIImportExportException If an error occurs while importing/storing SOAP to REST mediation logic
      */
     private static void importMediationLogic(Path flowDirectory, Registry registry, String soapToRestLocation)
-            throws APIImportExportException {
+            throws APIManagementException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(flowDirectory)) {
             for (Path file : stream) {
                 String fileName = file.getFileName().toString();
@@ -1212,9 +1250,9 @@ public class ImportUtils {
                 }
             }
         } catch (IOException | DirectoryIteratorException e) {
-            throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
+            throw new APIManagementException("Error in importing SOAP to REST mediation logic", e);
         } catch (RegistryException e) {
-            throw new APIImportExportException("Error in storing imported SOAP to REST mediation logic", e);
+            throw new APIManagementException("Error in storing imported SOAP to REST mediation logic", e);
         }
     }
 
@@ -1228,7 +1266,7 @@ public class ImportUtils {
      * @throws APIImportExportException If getting lifecycle action failed
      */
     public static String getLifeCycleAction(String tenantDomain, String currentStatus, String targetStatus,
-            APIProvider provider) throws APIImportExportException {
+            APIProvider provider) throws APIManagementException {
 
         // No need to change the lifecycle if both the statuses are same
         if (StringUtils.equalsIgnoreCase(currentStatus, targetStatus)) {
@@ -1271,16 +1309,13 @@ public class ImportUtils {
             }
         } catch (ParserConfigurationException | SAXException e) {
             String errorMessage = "Error parsing APILifeCycle for tenant: " + tenantDomain;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (UnsupportedEncodingException e) {
             String errorMessage = "Error parsing unsupported encoding for APILifeCycle in tenant: " + tenantDomain;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (IOException e) {
             String errorMessage = "Error reading APILifeCycle for tenant: " + tenantDomain;
-            throw new APIImportExportException(errorMessage, e);
-        } catch (APIManagementException e) {
-            String errorMessage = "Error retrieving APILifeCycle for tenant: " + tenantDomain;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
 
         // Retrieve lifecycle action
@@ -1303,7 +1338,7 @@ public class ImportUtils {
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
             Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
-            throws APIImportExportException {
+            throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         APIProduct importedApiProduct = null;
@@ -1365,10 +1400,10 @@ public class ImportUtils {
         } catch (IOException e) {
             // Error is logged and APIImportExportException is thrown because adding API Product and swagger are mandatory steps
             String errorMessage = "Error while reading API Product meta information from path: " + extractedFolderPath;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API Product: " + importedApiProduct.getId().getName();
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API Product: ";
             if (importedApiProduct != null) {
@@ -1376,7 +1411,7 @@ public class ImportUtils {
                         importedApiProduct.getId().getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                                 + importedApiProduct.getId().getVersion();
             }
-            throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
+            throw new APIManagementException(errorMessage + " " + e.getMessage(), e);
         }
     }
 
@@ -1484,7 +1519,7 @@ public class ImportUtils {
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
             APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes)
-            throws APIImportExportException, IOException, APIManagementException {
+            throws IOException, APIManagementException {
 
         String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);

@@ -115,15 +115,25 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite,
-            String[] tokenScopes) throws APIImportExportException {
-        String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+            String[] tokenScopes) throws APIManagementException {
+        String extractedFolderPath;
+        try {
+            extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e);
+        }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
     }
 
     @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
             Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
-            throws APIImportExportException {
-        String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+            throws APIManagementException {
+        String extractedFolderPath;
+        try {
+            extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e);
+        }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, overwriteAPIProduct, overwriteAPIs,
                 importAPIs, tokenScopes);
     }

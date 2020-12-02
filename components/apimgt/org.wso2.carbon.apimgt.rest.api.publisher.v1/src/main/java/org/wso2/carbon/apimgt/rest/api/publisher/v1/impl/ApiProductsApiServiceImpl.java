@@ -732,12 +732,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
 
-        try {
-            importExportAPI.importAPIProduct(fileInputStream, preserveProvider, overwriteAPIProduct, overwriteAPIs,
-                    importAPIs, tokenScopes);
-        } catch (APIImportExportException e) {
-            throw new APIManagementException(e.getMessage(), e.getCause(), e.getErrorHandler());
-        }
+        importExportAPI.importAPIProduct(fileInputStream, preserveProvider, overwriteAPIProduct, overwriteAPIs, importAPIs,
+                        tokenScopes);
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
     }
 
