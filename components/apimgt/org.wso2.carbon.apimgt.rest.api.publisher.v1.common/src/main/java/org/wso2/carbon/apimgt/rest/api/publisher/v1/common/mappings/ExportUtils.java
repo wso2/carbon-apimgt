@@ -829,7 +829,7 @@ public class ExportUtils {
             ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String userName)
             throws APIImportExportException {
 
-        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.META_INFO_DIRECTORY);
+        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
             // If a web socket API is exported, it does not contain a swagger file.
@@ -958,7 +958,7 @@ public class ExportUtils {
     public static void addAPIProductMetaInformationToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
             ExportFormat exportFormat, APIProvider apiProvider, String userName) throws APIImportExportException {
 
-        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.META_INFO_DIRECTORY);
+        CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
             String formattedSwaggerJson = apiProvider

@@ -28,15 +28,18 @@ import java.util.Map;
 public final class ImportExportConstants {
 
     // Location of the API definition file
-    public static final String API_FILE_LOCATION = File.separator + "Meta-information" + File.separator + "api";
+    public static final String API_FILE_LOCATION = File.separator + "api";
+
+    // Location of the definitions such as swagger, graphql schema etc
+    public static final String DEFINITIONS_DIRECTORY = "Definitions";
 
     // Location of the API swagger definition file
     public static final String SWAGGER_DEFINITION_LOCATION =
-            File.separator + ImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger";
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger";
 
     // Location of the graphql schema definition file
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION =
-            File.separator + ImportExportConstants.META_INFO_DIRECTORY + File.separator + "schema.graphql";
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "schema.graphql";
 
     // Location of the wsdl file
     public static final String WSDL_LOCATION = File.separator + "WSDL" + File.separator;
@@ -54,8 +57,6 @@ public final class ImportExportConstants {
 
     public static final String DOCUMENT_DIRECTORY = "Docs";
 
-    public static final String META_INFO_DIRECTORY = "Meta-information";
-
     public static final String ENDPOINT_CERTIFICATES_DIRECTORY = "Endpoint-certificates";
 
     public static final String CLIENT_CERTIFICATES_DIRECTORY = "Client-certificates";
@@ -68,27 +69,23 @@ public final class ImportExportConstants {
 
     public static final String CERTIFICATE_FILE = "certificate";
 
-    public static final String SEQUENCE_FILE_NAME = File.separator + "sequence";
-
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
     public static final String UPLOAD_FILE_NAME = "APIArchive.zip";
 
     // Location of the API YAML file
-    public static final String YAML_API_FILE_LOCATION =
-            File.separator + "Meta-information" + File.separator + "api.yaml";
+    public static final String YAML_API_FILE_LOCATION = File.separator + "api.yaml";
 
     // Location of the API JSON file
-    public static final String JSON_API_FILE_LOCATION =
-            File.separator + "Meta-information" + File.separator + "api.json";
+    public static final String JSON_API_FILE_LOCATION = File.separator + "api.json";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
-            File.separator + ImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger.json";
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger.json";
 
     // Location of the API swagger definition file
     public static final String YAML_SWAGGER_DEFINITION_LOCATION =
-            File.separator + ImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger.yaml";
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger.yaml";
 
     // Name of the API provider element tag of the api.json file
     public static final String PROVIDER_ELEMENT = "provider";
@@ -115,15 +112,15 @@ public final class ImportExportConstants {
     public static final String SEQUENCES_RESOURCE = "Sequences";
 
     // Location of the in sequence
-    public static final String IN_SEQUENCE_LOCATION = File.separator + ImportExportConstants.SEQUENCES_RESOURCE
+    public static final String IN_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
             + File.separator + "in-sequence" + File.separator;
 
     // Location of the out sequence
-    public static final String OUT_SEQUENCE_LOCATION = File.separator + ImportExportConstants.SEQUENCES_RESOURCE
+    public static final String OUT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
             + File.separator + "out-sequence" + File.separator;
 
     //Location of the fault sequence
-    public static final String FAULT_SEQUENCE_LOCATION = File.separator + ImportExportConstants.SEQUENCES_RESOURCE
+    public static final String FAULT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
             + File.separator + "fault-sequence" + File.separator;
 
     public static final String CERTIFICATE_CONTENT_JSON_KEY = "certificate";
