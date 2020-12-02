@@ -198,6 +198,9 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.APPLICATION_DELETE.toString().equals(eventType)) {
             ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplication(event);
+        } else if (EventType.REMOVE_APPLICATION_KEYMAPPING.toString().equals(eventType)) {
+            ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplicationKeyMapping(event);
         } else if (EventType.SCOPE_CREATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson,ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
