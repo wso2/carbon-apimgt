@@ -219,6 +219,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
 
+            if (isWSAPI) {
+                ArrayList<String> websocketTransports = new ArrayList<>();
+                websocketTransports.add(APIConstants.WS_PROTOCOL);
+                websocketTransports.add(APIConstants.WSS_PROTOCOL);
+                body.setTransport(websocketTransports);
+            }
+
             API apiToAdd = prepareToCreateAPIByDTO(body);
             validateScopes(apiToAdd);
             //validate API categories
@@ -1060,7 +1067,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String updatedAsyncAPIDefinition;
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             //Handle URL and file based definition imports
             if (url != null || fileInputStream != null){
                 //Validate and retrieve the AsyncAPI definition
@@ -3683,8 +3689,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (RestApiPublisherUtils.isValidWSAPI(apiDTOFromProperties)){
             apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
             ArrayList<String> websocketTransports = new ArrayList<>();
-            websocketTransports.add("ws");
-            websocketTransports.add("wss");
+            websocketTransports.add(APIConstants.WS_PROTOCOL);
+            websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDTOFromProperties.setTransport(websocketTransports);
         }
 
@@ -4498,13 +4504,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate file
             String fileName = fileDetail.getContentDisposition().getFilename();
             try {
-                if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")){
+                if (fileName.endsWith(APIConstants.YAML_FILE_EXTENSION) || fileName.endsWith(APIConstants.YML_FILE_EXTENSION)){
                     //convert .yml or .yaml to JSON for validation
                     ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
                     Object obj = yamlReader.readValue(fileInputStream, Object.class);
                     ObjectMapper jsonWriter = new ObjectMapper();
                     schemaToBeValidated = jsonWriter.writeValueAsString(obj);
-                } else if (fileName.endsWith(".json")){
+                } else if (fileName.endsWith(APIConstants.JSON_FILE_EXTENSION)){
                     //continue with .json
                     JSONTokener jsonDataFile = new JSONTokener(fileInputStream);
                     schemaToBeValidated = new org.json.JSONObject(jsonDataFile).toString();
@@ -4515,113 +4521,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }
         }
-
-        /*//import and load AsyncAPI HyperSchema for JSON schema validation
-        org.json.JSONObject hyperSchema = new org.json.JSONObject(ASYNCAPI_JSON_HYPERSCHEMA);
-        Schema schemaValidator = SchemaLoader.load(hyperSchema);
-
-        org.json.JSONObject schemaToBeValidated = null;
-
-        if (url != null) {
-            //validate AsyncAPI Specification using URL
-            try {
-                URL urlObj = new URL(url);
-                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
-                HttpGet httpGet = new HttpGet(url);
-
-                HttpResponse response = httpClient.execute(httpGet);
-
-                if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()){
-                    //get json data from url
-                    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-                    Object obj = yamlReader.readValue(urlObj, Object.class);
-                    ObjectMapper jsonWriter = new ObjectMapper();
-                    String json = jsonWriter.writeValueAsString(obj);
-                    schemaToBeValidated = new org.json.JSONObject(json);
-                } else {
-                    //error in validating URL
-                    validationResponse.setValid(false);
-                    validationResponse.getErrorItems().add(ExceptionCodes.MALFORMED_URL);
-                }
-
-            } catch (IOException e) {
-                //e.printStackTrace();
-                //error while creating URL object
-                ErrorHandler errorHandler = ExceptionCodes.MALFORMED_URL;
-                log.error(errorHandler.getErrorDescription(), e);
-                validationResponse.setValid(false);
-                validationResponse.getErrorItems().add(errorHandler);
-            }
-        } else if (fileInputStream != null){
-
-            //validate AsyncAPI Specification file
-            String fileName = fileDetail.getContentDisposition().getFilename();
-            try {
-                if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")){
-                    //convert .yml or .yaml to JSON for validation
-                    ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-                    Object obj = yamlReader.readValue(fileInputStream, Object.class);
-                    ObjectMapper jsonWriter = new ObjectMapper();
-                    String json = jsonWriter.writeValueAsString(obj);
-                    schemaToBeValidated = new org.json.JSONObject(json);
-                } else if (fileName.endsWith(".json")){
-                    //continue with .json
-                    JSONTokener jsonDataFile = new JSONTokener(fileInputStream);
-                    schemaToBeValidated = new org.json.JSONObject(jsonDataFile);
-                } else {
-                    //exception for other file types
-                }
-            } catch (IOException e){
-                //error while reading the schemas
-                RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
-            }
-        }
-
-        boolean validationSuccess = false;
-        List<String> validationErrorMessages = null;
-
-        //check whether a JSON object was assigned for validation
-        if (schemaToBeValidated != null){
-            //validate AsyncAPI using JSON schema validation
-            try {
-                schemaValidator.validate(schemaToBeValidated);
-                validationSuccess = true;
-            } catch (ValidationException e){
-                //validation error messages
-                validationErrorMessages = e.getAllMessages();
-            }
-        }
-
-        if (validationSuccess){
-            ArrayList<String> endpoints = new ArrayList<>();
-            validationResponse.setValid(true);
-            APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
-            validationResponse.setContent(schemaToBeValidated.toString());
-            info.setOpenAPIVersion(schemaToBeValidated.getString("asyncapi"));
-            info.setName(schemaToBeValidated.getJSONObject("info").getString("title"));
-            info.setVersion(schemaToBeValidated.getJSONObject("info").getString("version"));
-            info.setContext("TO BE DECIDED");
-            info.setDescription(schemaToBeValidated.getJSONObject("info").getString("description"));
-            for (Iterator<String> it = schemaToBeValidated.getJSONObject("servers").keys(); it.hasNext(); ) {
-                String server = it.next();
-                endpoints.add(schemaToBeValidated.getJSONObject("servers").getJSONObject(server).getString("url"));
-            }
-            info.setEndpoints(endpoints);
-            validationResponse.setInfo(info);
-            if (returnContent){
-                validationResponse.setJsonContent(schemaToBeValidated.toString());
-            }
-            //validationResponse.setParser();
-        } else {
-            if (validationErrorMessages != null){
-                validationResponse.setValid(false);
-                for (String errorMessage: validationErrorMessages){
-                    ErrorItem errorItem = new ErrorItem();
-                    errorItem.setMessage(errorMessage);
-                    validationResponse.getErrorItems().add(errorItem);
-                }
-            }
-        }*/
 
         responseDTO = APIMappingUtil.getAsyncAPISpecificationValidationResponseFromModel(validationResponse, returnContent);
 

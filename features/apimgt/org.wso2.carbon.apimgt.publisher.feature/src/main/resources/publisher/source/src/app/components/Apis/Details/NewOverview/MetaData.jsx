@@ -99,10 +99,17 @@ function MetaData(props) {
                     </Grid>
                     <Grid item xs={12} md={6} lg={4}>
                         <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                            <FormattedMessage
-                                id='Apis.Details.NewOverview.MetaData.context:'
-                                defaultMessage={api.type === 'WS' ? 'Channel:' : 'Context:'}
-                            />
+                            {api.type === 'WS' ? (
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.MetaData.channel:'
+                                    defaultMessage='Channel:'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.MetaData.context:'
+                                    defaultMessage='Context:'
+                                />
+                            )}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={6} lg={8}>

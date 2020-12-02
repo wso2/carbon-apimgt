@@ -164,8 +164,8 @@ export default function ImportDefinition(props) {
             reader.readAsText(inputValue);
         }
         const newAPI = new API();
-        const promisedResponse = isFileInput ? newAPI.updateAPIDefinitionByFile(api.id, inputValue)
-            : newAPI.updateAPIDefinitionByUrl(api.Id, inputValue);
+        const promisedResponse = isFileInput ? newAPI.updateAsyncAPIDefinitionByFile(api.id, inputValue)
+            : newAPI.updateAsyncAPIDefinitionByUrl(api.Id, inputValue);
         promisedResponse
             .then(() => {
                 Alert.success(intl.formatMessage({
@@ -366,7 +366,7 @@ export default function ImportDefinition(props) {
             <ProvideAsyncAPI
                 onValidate={handleOnValidate}
                 apiInputs={apiInputs}
-                inputDispatcher={inputsDispatcher}
+                inputsDispatcher={inputsDispatcher}
             />
         );
         btnText = (
@@ -376,6 +376,9 @@ export default function ImportDefinition(props) {
             />
         );
     }
+
+    console.log(isWebSocket);
+    console.log(apiInputs);
 
     return (
         <>

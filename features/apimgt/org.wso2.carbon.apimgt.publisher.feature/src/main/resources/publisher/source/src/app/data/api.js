@@ -2661,7 +2661,7 @@ class API extends Resource {
     }
 
     static validateAsyncAPIByFile(asyncAPIData){
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         let payload, promisedValidate;
         payload = {
             file: asyncAPIData,
@@ -2679,7 +2679,7 @@ class API extends Resource {
     }
 
     static validateAsyncAPIByUrl(url, params = {returnContent: false}) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
             url: url,
             'Content-Type': 'multipart/form-data',
@@ -2775,6 +2775,62 @@ class API extends Resource {
             );
         });
         return promised_update;
+    }
+
+    /**
+     * Update AsyncAPI definition of a given API by URL content
+     * @param apiId         API Identifier
+     * @param AsyncAPIUrl    AsyncAPI definition content URL
+     * @returns {boolean|*}
+     */
+    updateAsyncAPIDefinitionByUrl(apiId, AsyncAPIUrl) {
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                apiId: apiId,
+                url: AsyncAPIUrl,
+            };
+
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_updated;
+    }
+
+    /**
+     * Update AsyncAPI definition of a given API by file content
+     * @param apiId         API Identifier
+     * @param AsyncAPIFile   AsyncAPI definition file content
+     * @returns {boolean|*}
+     */
+    updateAsyncAPIDefinitionByFile(apiId, AsyncAPIFile) {
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                apiId: apiId,
+                file: AsyncAPIFile,
+            };
+
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_updated;
     }
 
 }

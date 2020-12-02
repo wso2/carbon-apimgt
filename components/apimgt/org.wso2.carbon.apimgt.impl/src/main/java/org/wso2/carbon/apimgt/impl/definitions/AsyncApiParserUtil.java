@@ -29,17 +29,18 @@ import java.util.List;
 
 public class AsyncApiParserUtil {
     
-    private static APIDefinition asyncApiParser = new AsyncApiParser();
-    private static final Log log = LogFactory.getLog(OASParserUtil.class);
+    private static final APIDefinition asyncApiParser = new AsyncApiParser();
+    private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
 
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
 
         APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated, returnJSONContent);
+        final String asyncAPIKeyNotFound = "#: required key [asyncapi] not found";
 
         if (!validationResponse.isValid()){
             for (ErrorHandler errorItem : validationResponse.getErrorItems()){
-                if (errorItem.getErrorMessage().equals("#: required key [asyncapi] not found")){
+                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())){    //change it other way
                     addErrorToValidationResponse(validationResponse, "#: attribute [asyncapi] should be present");
                     return validationResponse;
                 }
@@ -138,7 +139,7 @@ public class AsyncApiParserUtil {
                 resource = registry.get(resourcePath);
             }
             resource.setContent(apiDefinitionJSON);
-            resource.setMediaType("application/json");
+            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);          //add a constant for app.json
             registry.put(resourcePath, resource);
 
             String[] visibleRoles = null;

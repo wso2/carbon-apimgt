@@ -495,10 +495,17 @@ class InfoBar extends React.Component {
                                                 <div className={classes.iconAligner}>
                                                     <Icon className={classes.iconOdd}>account_balance_wallet</Icon>
                                                     <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.list.context'
-                                                            defaultMessage='Context'
-                                                        />
+                                                        {api.type === 'WS' ? (
+                                                            <FormattedMessage
+                                                                id='Apis.Details.InfoBar.list.channel'
+                                                                defaultMessage='Channel'
+                                                            />
+                                                        ) : (
+                                                            <FormattedMessage
+                                                                id='Apis.Details.InfoBar.list.context'
+                                                                defaultMessage='Context'
+                                                            />
+                                                        )}
                                                     </span>
                                                 </div>
                                             </TableCell>
@@ -732,23 +739,31 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                 </TableRow>))
                                         )}
-                                        {(api.type === 'WS') && (
+                                        {api.type === 'WS' && (
                                             <TableRow>
-                                                <TableCell component='th' scope='row' />
-                                                <TableCell>
-                                                    <div style={{ float: 'right' }}>
-                                                        <Button
-                                                            size='small'
-                                                            variant="contained"
-                                                            onClick={() => api.endpointURLs.map((endpoint) => {this.downloadAsyncAPI(api.id, endpoint.environmentName)})}
-                                                        >
-                                                            <CloudDownloadRounded className={classes.buttonIcon} />
+                                                <TableCell component='th' scope='row'>
+                                                    <div className={classes.iconAligner}>
+                                                        <Icon className={classes.iconOdd}>cloud_download</Icon>
+                                                        <span className={classes.iconTextWrapper}>
                                                             <FormattedMessage
-                                                                id='Apis.Details.Environments.download.asyncAPI'
-                                                                defaultMessage='AsyncAPI Definition'
+                                                                id='Apis.Details.InfoBar.download.AsyncAPI.definition'
+                                                                defaultMessage='Download Definition'
                                                             />
-                                                        </Button>
+                                                        </span>
                                                     </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        onClick={() => api.endpointURLs.map((endpoint) => {this.downloadAsyncAPI(api.id, endpoint.environmentName)})}
+                                                        size='small'
+                                                        fontSize='small'
+                                                        variant='outlined'
+                                                    >
+                                                        <FormattedMessage
+                                                            id='Apis.Details.InfoBar.AsyncAPI.definition'
+                                                            defaultMessage='AsyncAPI Definition'
+                                                        />
+                                                    </Button>
                                                 </TableCell>
                                             </TableRow>
                                         )}

@@ -377,7 +377,11 @@ class ApiThumb extends React.Component {
                                         className={classes.context}
                                         Component='div'
                                     >
-                                        <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                                        {api.type === 'WS' ? (
+                                            <FormattedMessage defaultMessage='Channel' id='Apis.Listing.ApiThumb.channel' />
+                                        ) : (
+                                            <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                                        )}
                                     </Typography>
                                 </div>
                             </div>

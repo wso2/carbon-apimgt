@@ -1627,6 +1627,8 @@ public final class APIConstants {
     public static final String SWAGGER_CODEGEN_DIRECTORY = "swaggerCodegen";
     public static final String JSON_FILE_EXTENSION = ".json";
     public static final String ZIP_FILE_EXTENSION = ".zip";
+    public static final String YAML_FILE_EXTENSION = ".yaml";
+    public static final String YML_FILE_EXTENSION = ".yml";
 
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";

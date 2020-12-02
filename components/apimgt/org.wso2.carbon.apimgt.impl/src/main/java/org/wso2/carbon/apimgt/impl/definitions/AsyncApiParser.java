@@ -1430,18 +1430,6 @@ public class AsyncApiParser extends APIDefinition {
         JSONObject hyperSchema = new JSONObject(ASYNCAPI_JSON_HYPERSCHEMA);
         Schema schemaValidator = SchemaLoader.load(hyperSchema);
 
-        /*File schemaData = new File("AsyncAPIHyperSchema.json");
-        JSONTokener schemaDataFile = null;
-        try {
-            schemaDataFile = new JSONTokener(new FileInputStream(schemaData));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        Schema schemaValidator = null;
-        if (schemaDataFile != null) {
-            schemaValidator = SchemaLoader.load(new JSONObject(schemaDataFile));
-        }*/
-
         boolean validationSuccess = false;
         List<String> validationErrorMessages = null;
 
@@ -1450,34 +1438,30 @@ public class AsyncApiParser extends APIDefinition {
         //validate AsyncAPI using JSON schema validation
         try {
             schemaValidator.validate(schemaToBeValidated);
-            validationSuccess = true;
+            AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            validationErrorMessages = new ArrayList<>();
+            if (asyncApiDocument.getServers().size() == 1) {
+                if (!APIConstants.WS_PROTOCOL.toUpperCase().equals(asyncApiDocument.getServers().get(0).protocol.toUpperCase())) {
+                    validationErrorMessages.add("#:The protocol of the server should be 'ws' for websockets");
+                }
+            }
+            if (asyncApiDocument.getServers().size() > 1) {
+                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single server for websockets");
+            }
+            if (asyncApiDocument.getChannels().size() > 1) {
+                validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
+            }
+            if (validationErrorMessages.size() == 0) {
+                validationSuccess = true;
+                validationErrorMessages = null;
+            }
+
         } catch (ValidationException e){
             //validation error messages
             validationErrorMessages = e.getAllMessages();
         }
 
         if (validationSuccess) {
-            /*ArrayList<String> endpoints = new ArrayList<>();
-            for (Iterator<String> it = schemaToBeValidated.getJSONObject("servers").keys(); it.hasNext(); ){
-                String server = it.next();
-                endpoints.add(schemaToBeValidated.getJSONObject("servers").getJSONObject(server).getString("url"));
-            }
-            String description = null;
-            if (schemaToBeValidated.getJSONObject("info").has("description")) description = schemaToBeValidated.getJSONObject("info").getString("description");
-            AsyncApiParserUtil.updateValidationResponseAsSuccess(
-                    validationResponse,
-                    apiDefinition,
-                    schemaToBeValidated.getString("asyncapi"),
-                    schemaToBeValidated.getJSONObject("info").getString("title"),
-                    schemaToBeValidated.getJSONObject("info").getString("version"),
-                    null,
-                    description,
-                    endpoints
-            );
-            validationResponse.setParser(this);
-            if (returnJsonContent){
-                validationResponse.setJsonContent(apiDefinition);
-            }*/
             AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
             for (AaiServer x : asyncApiDocument.getServers()){
@@ -1567,10 +1551,10 @@ public class AsyncApiParser extends APIDefinition {
         Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
         JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
         server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
-        server.protocol = api.getType();
+        server.protocol = api.getType().toLowerCase();
         aaiDocument.addServer("production", server);
         aaiDocument.channels = new HashMap<String, AaiChannelItem>();
-        Aai20ChannelItem channelItem = aaiDocument.createChannelItem("/echo");
+        Aai20ChannelItem channelItem = aaiDocument.createChannelItem(api.getContext());
         aaiDocument.addChannelItem(channelItem);
         return Library.writeDocumentToJSONString(aaiDocument);
     }
