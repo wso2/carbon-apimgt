@@ -185,8 +185,7 @@ public class ExportUtils {
             }
 
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
-                    userName);
+            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
 
             // Export mTLS authentication related certificates
             if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
@@ -240,8 +239,7 @@ public class ExportUtils {
                 addDocumentationToArchive(archivePath, apiProductIdentifier, registry, exportFormat, apiProvider);
 
             }
-            addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider,
-                    userName);
+            addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
             addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
                     preserveStatus, preserveDocs);
 
@@ -832,11 +830,10 @@ public class ExportUtils {
      * @param exportFormat   Export format of file
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
-     * @param userName       Username
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String userName)
+            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier)
             throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
@@ -854,8 +851,8 @@ public class ExportUtils {
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil
-                            .retrieveSwaggerDefinition(APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, userName), apiProvider);
+                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
+                            APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
                     writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
                             formattedSwaggerJson);
                 }
@@ -962,17 +959,16 @@ public class ExportUtils {
      * @param apiProductDtoToReturn APIProductDTO to be exported
      * @param exportFormat          Export format of file
      * @param apiProvider           API Provider
-     * @param userName              Username
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIProductMetaInformationToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, String userName) throws APIImportExportException {
+            ExportFormat exportFormat, APIProvider apiProvider) throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
-            String formattedSwaggerJson = apiProvider
-                    .getAPIDefinitionOfAPIProduct(APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToReturn, userName));
+            String formattedSwaggerJson = apiProvider.getAPIDefinitionOfAPIProduct(
+                    APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToReturn, apiProductDtoToReturn.getProvider()));
             writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
                     formattedSwaggerJson);
 

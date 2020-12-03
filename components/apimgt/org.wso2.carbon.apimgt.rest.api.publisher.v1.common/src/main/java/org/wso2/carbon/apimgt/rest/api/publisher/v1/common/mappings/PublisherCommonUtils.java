@@ -697,7 +697,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        API apiToAdd = prepareToCreateAPIByDTO(apiDto);
+        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
         validateScopes(apiToAdd);
         //validate API categories
         List<APICategory> apiCategories = apiToAdd.getApiCategories();
@@ -753,13 +753,14 @@ public class PublisherCommonUtils {
     /**
      * Prepares the API Model object to be created using the DTO object
      *
-     * @param body APIDTO of the API
+     * @param body        APIDTO of the API
+     * @param apiProvider API Provider
+     * @param username    Username
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
-    public static API prepareToCreateAPIByDTO(APIDTO body) throws APIManagementException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String username = RestApiCommonUtil.getLoggedInUsername();
+    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username)
+            throws APIManagementException {
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
         String context = body.getContext();
         //Make sure context starts with "/". ex: /pizza
