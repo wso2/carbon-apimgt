@@ -937,8 +937,7 @@ public class PublisherCommonUtils {
                 for (String aRole : roles.split(",")) {
                     boolean isValidRole = APIUtil.isRoleNameExist(RestApiCommonUtil.getLoggedInUsername(), aRole);
                     if (!isValidRole) {
-                        String error = "Role '" + aRole + "' Does not exist.";
-                        throw new APIManagementException(error);
+                        throw new APIManagementException("Role '" + aRole + "' Does not exist.");
                     }
                 }
             }
@@ -1108,7 +1107,6 @@ public class PublisherCommonUtils {
         //this will fail if user does not have access to the API or the API does not exist
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
-            String errorMessage = "Requested document '" + documentName + "' already exists";
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }

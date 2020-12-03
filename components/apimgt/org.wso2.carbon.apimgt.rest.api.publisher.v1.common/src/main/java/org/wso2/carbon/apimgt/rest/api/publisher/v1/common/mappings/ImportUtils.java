@@ -249,11 +249,9 @@ public class ImportUtils {
                     "Error while reading API meta information from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
         } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating API: " + importedApi.getId().getApiName();
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error while updating API: " + importedApi.getId().getApiName(), e);
         } catch (RegistryException e) {
-            String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         } catch (APIMgtAuthorizationFailedException e) {
             throw new APIManagementException("Please enable preserveProvider property for cross tenant API Import.", e,
                     ExceptionCodes.TENANT_MISMATCH);
@@ -291,9 +289,9 @@ public class ImportUtils {
             if (ignoreAndImport) {
                 return null;
             }
-            String errorMessage = "Error occurred while retrieving the API. API: " + apiName + StringUtils.SPACE
-                    + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found";
-            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes
+            throw new APIMgtResourceNotFoundException(
+                    "Error occurred while retrieving the API. API: " + apiName + StringUtils.SPACE
+                            + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found", ExceptionCodes
                     .from(ExceptionCodes.API_NOT_FOUND, apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion()));
         }
         return apiProvider.getAPI(apiIdentifier);
@@ -419,8 +417,8 @@ public class ImportUtils {
 
         if (isDefaultProviderAllowed) {
             if (!StringUtils.equals(prevTenantDomain, currentTenantDomain)) {
-                String errorMessage = "Tenant mismatch! Please enable preserveProvider property for cross tenant API Import.";
-                throw new APIMgtAuthorizationFailedException(errorMessage);
+                throw new APIMgtAuthorizationFailedException(
+                        "Tenant mismatch! Please enable preserveProvider property for cross tenant API Import.");
             }
         } else {
             String prevProviderWithDomain = APIUtil.replaceEmailDomain(prevProvider);
@@ -511,9 +509,9 @@ public class ImportUtils {
             GraphQLValidationResponseDTO graphQLValidationResponseDTO = PublisherCommonUtils
                     .validateGraphQLSchema(file.getName(), schemaDefinition);
             if (!graphQLValidationResponseDTO.isIsValid()) {
-                String errMsg = "Error occurred while importing the API. Invalid GraphQL schema definition found. "
-                        + graphQLValidationResponseDTO.getErrorMessage();
-                throw new APIManagementException(errMsg);
+                throw new APIManagementException(
+                        "Error occurred while importing the API. Invalid GraphQL schema definition found. "
+                                + graphQLValidationResponseDTO.getErrorMessage());
             }
             return schemaDefinition;
         } catch (IOException e) {
@@ -534,9 +532,9 @@ public class ImportUtils {
             WSDLValidationResponse wsdlValidationResponse = APIMWSDLReader.
                     getWsdlValidationResponse(APIMWSDLReader.getWSDLProcessor(wsdlDefinition));
             if (!wsdlValidationResponse.isValid()) {
-                String errMsg = "Error occurred while importing the API. Invalid WSDL definition found. "
-                        + wsdlValidationResponse.getError();
-                throw new APIManagementException(errMsg);
+                throw new APIManagementException(
+                        "Error occurred while importing the API. Invalid WSDL definition found. "
+                                + wsdlValidationResponse.getError());
             }
         } catch (IOException | APIManagementException e) {
             throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
@@ -1030,8 +1028,7 @@ public class ImportUtils {
                 updateAPIWithCertificate(certificate, apiProvider, importedApi, tenantId);
             }
         } catch (IOException e) {
-            String errorMessage = "Error in reading certificates file";
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error in reading certificates file", e);
         }
     }
 
@@ -1117,9 +1114,9 @@ public class ImportUtils {
                 apiProvider.updateCertificate(certificateContent, alias);
             }
         } catch (APIManagementException e) {
-            String errorMessage = "Error while importing certificate endpoint [" + endpoint + " ]" + "alias [" + alias
-                    + " ] tenant user [" + APIUtil.replaceEmailDomainBack(importedApi.getId().getProviderName()) + "]";
-            log.error(errorMessage, e);
+            log.error("Error while importing certificate endpoint [" + endpoint + " ]" + "alias [" + alias
+                            + " ] tenant user [" + APIUtil.replaceEmailDomainBack(importedApi.getId().getProviderName()) + "]",
+                    e);
         }
     }
 
@@ -1172,11 +1169,9 @@ public class ImportUtils {
                         certDTO.getCertificate(), certDTO.getAlias(), certDTO.getTierName());
             }
         } catch (IOException e) {
-            String errorMessage = "Error in reading certificates file";
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error in reading certificates file", e);
         } catch (APIManagementException e) {
-            String errorMessage = "Error while importing client certificate";
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error while importing client certificate", e);
         }
     }
 
@@ -1308,14 +1303,12 @@ public class ImportUtils {
                 }
             }
         } catch (ParserConfigurationException | SAXException e) {
-            String errorMessage = "Error parsing APILifeCycle for tenant: " + tenantDomain;
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error parsing APILifeCycle for tenant: " + tenantDomain, e);
         } catch (UnsupportedEncodingException e) {
-            String errorMessage = "Error parsing unsupported encoding for APILifeCycle in tenant: " + tenantDomain;
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException(
+                    "Error parsing unsupported encoding for APILifeCycle in tenant: " + tenantDomain, e);
         } catch (IOException e) {
-            String errorMessage = "Error reading APILifeCycle for tenant: " + tenantDomain;
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error reading APILifeCycle for tenant: " + tenantDomain, e);
         }
 
         // Retrieve lifecycle action
@@ -1398,12 +1391,13 @@ public class ImportUtils {
             }
             return importedApiProduct;
         } catch (IOException e) {
-            // Error is logged and APIImportExportException is thrown because adding API Product and swagger are mandatory steps
-            String errorMessage = "Error while reading API Product meta information from path: " + extractedFolderPath;
-            throw new APIManagementException(errorMessage, e);
+            // Error is logged and APIImportExportException is thrown because adding API Product and swagger are
+            // mandatory steps
+            throw new APIManagementException(
+                    "Error while reading API Product meta information from path: " + extractedFolderPath, e);
         } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating API Product: " + importedApiProduct.getId().getName();
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException(
+                    "Error while updating API Product: " + importedApiProduct.getId().getName(), e);
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API Product: ";
             if (importedApiProduct != null) {
@@ -1654,10 +1648,10 @@ public class ImportUtils {
             if (ignoreAndImport) {
                 return null;
             }
-            String errorMessage = "Error occurred while retrieving the API Product. API Product: " + apiProductName
-                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
-                    + ImportExportConstants.DEFAULT_API_PRODUCT_VERSION + " not found";
-            throw new APIMgtResourceNotFoundException(errorMessage);
+            throw new APIMgtResourceNotFoundException(
+                    "Error occurred while retrieving the API Product. API Product: " + apiProductName
+                            + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                            + ImportExportConstants.DEFAULT_API_PRODUCT_VERSION + " not found");
         }
         return apiProvider.getAPIProduct(apiProductIdentifier);
     }

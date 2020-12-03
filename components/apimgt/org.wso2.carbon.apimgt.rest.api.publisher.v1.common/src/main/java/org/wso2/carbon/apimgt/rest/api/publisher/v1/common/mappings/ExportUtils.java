@@ -120,9 +120,8 @@ public class ExportUtils {
 
             // If there is no provider in current domain, the API cannot be exported
             if (providerName == null) {
-                String errorMessage =
-                        "Error occurred while exporting. API: " + name + " version: " + version + " not found";
-                throw new APIMgtResourceNotFoundException(errorMessage);
+                throw new APIMgtResourceNotFoundException(
+                        "Error occurred while exporting. API: " + name + " version: " + version + " not found");
             }
         }
 
@@ -198,8 +197,7 @@ public class ExportUtils {
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (RegistryException e) {
-            String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         }
     }
 
@@ -254,8 +252,7 @@ public class ExportUtils {
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (RegistryException e) {
-            String errorMessage = "Error while getting governance registry for tenant: " + tenantId;
-            throw new APIManagementException(errorMessage, e);
+            throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         }
     }
 
@@ -427,9 +424,8 @@ public class ExportUtils {
                         } else {
                             // Log error and avoid throwing as we give capability to export document artifact without
                             // the content if does not exists
-                            String errorMessage = "Documentation resource for API/API Product: " + identifier.getName()
-                                    + " not found in " + resourcePath;
-                            log.error(errorMessage);
+                            log.error("Documentation resource for API/API Product: " + identifier.getName()
+                                    + " not found in " + resourcePath);
                         }
                     }
                 }
@@ -438,17 +434,15 @@ public class ExportUtils {
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion());
                 }
             } catch (IOException e) {
-                String errorMessage =
+                throw new APIImportExportException(
                         "I/O error while writing documentation to file for API/API Product: " + identifier.getName()
-                                + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion();
-                log.error(errorMessage, e);
-                throw new APIImportExportException(errorMessage, e);
+                                + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion(),
+                        e);
             } catch (RegistryException e) {
-                String errorMessage =
+                throw new APIImportExportException(
                         "Error while retrieving documentation for API/API Product: " + identifier.getName()
-                                + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion();
-                log.error(errorMessage, e);
-                throw new APIImportExportException(errorMessage, e);
+                                + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion(),
+                        e);
             }
         } else if (log.isDebugEnabled()) {
             log.debug("No documentation found for API/API Product: " + identifier + ". Skipping documentation export.");
@@ -458,7 +452,7 @@ public class ExportUtils {
     /**
      * Replace the unwanted characters for a folder name with the underscore.
      *
-     * @param name   Name of the folder
+     * @param name Name of the folder
      * @return Folder name which the unwanted characters are replaced
      */
     private static String cleanFolderName(String name) {
@@ -498,11 +492,9 @@ public class ExportUtils {
                 log.debug("WSDL resource does not exists in path: " + wsdlPath + ". Skipping WSDL export.");
             }
         } catch (IOException e) {
-            String errorMessage = "I/O error while writing WSDL: " + wsdlPath + " to file";
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException("I/O error while writing WSDL: " + wsdlPath + " to file", e);
         } catch (RegistryException e) {
-            String errorMessage = "Error while retrieving WSDL: " + wsdlPath + " to file";
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException("Error while retrieving WSDL: " + wsdlPath + " to file", e);
         }
     }
 
@@ -618,12 +610,12 @@ public class ExportUtils {
                 }
             }
         } catch (RegistryException e) {
-            String errorMessage = "Error while retrieving sequence: " + sequenceName + " from the path: " + regPath;
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(
+                    "Error while retrieving sequence: " + sequenceName + " from the path: " + regPath, e);
         } catch (Exception e) {
-            //APIUtil.buildOMElement() throws a generic exception
-            String errorMessage = "Error while reading content for sequence: " + sequenceName + " from the registry";
-            throw new APIImportExportException(errorMessage, e);
+            // APIUtil.buildOMElement() throws a generic exception
+            throw new APIImportExportException(
+                    "Error while reading content for sequence: " + sequenceName + " from the registry", e);
         }
         return sequenceDetails;
     }
@@ -651,15 +643,13 @@ public class ExportUtils {
                     log.debug(sequenceFileName + " of API: " + apiIdentifier.getApiName() + " retrieved successfully");
                 }
             } catch (IOException e) {
-                String errorMessage = "Unable to find file: " + exportedSequenceFile;
-                throw new APIImportExportException(errorMessage, e);
+                throw new APIImportExportException("Unable to find file: " + exportedSequenceFile, e);
             } catch (XMLStreamException e) {
-                String errorMessage = "Error while processing XML stream ";
-                throw new APIImportExportException(errorMessage, e);
+                throw new APIImportExportException("Error while processing XML stream ", e);
             }
         } else {
-            String errorMessage = "Error while writing sequence of API: " + apiIdentifier.getApiName() + " to file.";
-            throw new APIImportExportException(errorMessage);
+            throw new APIImportExportException(
+                    "Error while writing sequence of API: " + apiIdentifier.getApiName() + " to file.");
         }
     }
 
@@ -716,13 +706,13 @@ public class ExportUtils {
                         + ". Skipping certificate export.");
             }
         } catch (JSONException e) {
-            String errorMsg = "Error in converting Endpoint config to JSON object in API: " + apiDto.getName();
-            throw new APIImportExportException(errorMsg, e);
+            throw new APIImportExportException(
+                    "Error in converting Endpoint config to JSON object in API: " + apiDto.getName(), e);
         } catch (IOException e) {
-            String errorMessage =
+
+            throw new APIImportExportException(
                     "Error while retrieving saving endpoint certificate details for API: " + apiDto.getName()
-                            + " as YAML";
-            throw new APIImportExportException(errorMessage, e);
+                            + " as YAML", e);
         }
     }
 
@@ -744,8 +734,8 @@ public class ExportUtils {
         try {
             certificateMetadataDTOS = certificateManager.getCertificates(tenantId, null, url);
         } catch (APIManagementException e) {
-            String errorMsg = "Error retrieving certificate meta data. For tenantId: " + tenantId + " hostname: " + url;
-            throw new APIImportExportException(errorMsg, e);
+            throw new APIImportExportException(
+                    "Error retrieving certificate meta data. For tenantId: " + tenantId + " hostname: " + url, e);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -813,8 +803,7 @@ public class ExportUtils {
                     }
                 }
             } catch (JSONException ex) {
-                String errorMsg = "Endpoint type: " + type + " not found in API: " + apiName;
-                throw new APIImportExportException(errorMsg);
+                throw new APIImportExportException("Endpoint type: " + type + " not found in API: " + apiName);
             }
         }
         return urls;
@@ -864,15 +853,13 @@ public class ExportUtils {
             writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API, apiDtoToReturn);
         } catch (APIManagementException e) {
-            String errorMessage =
+            throw new APIImportExportException(
                     "Error while retrieving Swagger definition for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
-                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion();
-            throw new APIImportExportException(errorMessage, e);
+                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion(), e);
         } catch (IOException e) {
-            String errorMessage =
+            throw new APIImportExportException(
                     "Error while retrieving saving as YAML for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
-                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion();
-            throw new APIImportExportException(errorMessage, e);
+                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion(), e);
         }
     }
 
@@ -911,12 +898,10 @@ public class ExportUtils {
                 }
             }
         } catch (IOException e) {
-            String errorMessage = "Error while saving as YAML or JSON";
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException("Error while saving as YAML or JSON", e);
         } catch (APIManagementException e) {
-            String errorMsg =
-                    "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" + tenantId + "]";
-            throw new APIImportExportException(errorMsg, e);
+            throw new APIImportExportException(
+                    "Error retrieving certificate meta data. tenantId [" + tenantId + "] api [" + tenantId + "]", e);
         }
     }
 
@@ -979,12 +964,11 @@ public class ExportUtils {
             writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API_PRODUCT, apiProductDtoToReturn);
         } catch (APIManagementException e) {
-            String errorMessage =
-                    "Error while retrieving Swagger definition for API Product: " + apiProductDtoToReturn.getName();
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(
+                    "Error while retrieving Swagger definition for API Product: " + apiProductDtoToReturn.getName(), e);
         } catch (IOException e) {
-            String errorMessage = "Error while saving as YAML for API Product: " + apiProductDtoToReturn.getName();
-            throw new APIImportExportException(errorMessage, e);
+            throw new APIImportExportException(
+                    "Error while saving as YAML for API Product: " + apiProductDtoToReturn.getName(), e);
         }
     }
 
