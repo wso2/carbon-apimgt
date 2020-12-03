@@ -502,9 +502,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //this will fail if user doesn't have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 

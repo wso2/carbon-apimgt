@@ -225,6 +225,14 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Returns a list of documentation attached to a particular API
+     *
+     * @param uuid id of the api
+     * @return List<Documentation>
+     * @throws APIManagementException if failed to get Documentations
+     */
+    List<Documentation> getAllDocumentation(String uuid) throws APIManagementException;
+    /**
      * Returns the specified document attached to the given API
      *
      * @param apiId   APIIdentifier

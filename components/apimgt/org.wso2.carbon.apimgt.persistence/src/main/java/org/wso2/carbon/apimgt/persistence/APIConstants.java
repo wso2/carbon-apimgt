@@ -332,4 +332,5 @@ public final class APIConstants {
     public static final String DOC_API_BASE_PATH = "overview_apiBasePath";
 
     public static final String INLINE_DOCUMENT_CONTENT_DIR = "contents";
+    public static final String DOCUMENT_FILE_DIR = "files";
 }

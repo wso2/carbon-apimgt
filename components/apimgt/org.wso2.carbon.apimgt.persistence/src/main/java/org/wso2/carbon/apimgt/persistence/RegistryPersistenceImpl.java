@@ -853,7 +853,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
-
             }
 
             Registry userRegistry;
@@ -1294,8 +1293,74 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset,
             String searchQuery, UserContext ctx) throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+
+        DocumentSearchResult result = null;
+        Registry registryType;
+        String requestedTenantDomain = org.getName();
+        boolean isTenantMode = (requestedTenantDomain != null);
+        boolean isTenantFlowStarted = false;
+        try {
+            if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
+            } else {
+                requestedTenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
+            }
+
+            // Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if ((isTenantMode && this.tenantDomain == null)
+                    || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {
+                int tenantId = getTenantManager().getTenantId(requestedTenantDomain);
+                registryType = getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+            String apiOrAPIProductDocPath = RegistryPersistanceDocUtil.getDocPath(apiProviderName, apiName, apiVersion);
+            String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+            String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
+
+            if (registryType.resourceExists(apiOrAPIProductDocPath)) {
+                List<Documentation> documentationList = new ArrayList<Documentation>();
+                Resource resource = registryType.get(apiOrAPIProductDocPath);
+                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
+                    for (String docPath : docsPaths) {
+                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
+                            Resource docResource = registryType.get(docPath);
+                            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
+                                    .getDocumentArtifactManager(registryType);
+                            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
+                            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+                            documentationList.add(doc);
+                        }
+                    }
+                }
+                result = new DocumentSearchResult();
+                result.setDocumentationList(documentationList);
+            }
+        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e) {
+            String msg = "Failed to get documentations for api/product " + apiId;
+            throw new DocumentationPersistenceException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
     }
 
     @Override

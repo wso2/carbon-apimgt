@@ -84,8 +84,10 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -1239,6 +1241,31 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Failed to check existence of the document :" + docPath;
             throw new APIManagementException(msg, e);
         }
+    }
+    
+    public List<Documentation> getAllDocumentation(String uuid) throws APIManagementException {
+        String tenantDoiamin = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+
+        Organization org = new Organization(tenantDoiamin);
+        UserContext ctx = new UserContext(username, org, null);
+        List<Documentation> convertedList = null;
+        try {
+            DocumentSearchResult list = apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
+            if (list != null) {
+                convertedList = new ArrayList<Documentation>();
+                List<org.wso2.carbon.apimgt.persistence.dto.Documentation> docList = list.getDocumentationList();
+                if (docList != null) {
+                    for (int i = 0; i < docList.size(); i++) {
+                        convertedList.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
+                    }
+                }
+            }
+        } catch (DocumentationPersistenceException e) {
+            String msg = "Failed to get documentations for api/product " + uuid;
+            throw new APIManagementException(msg, e);
+        }
+        return convertedList;
     }
 
     public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
