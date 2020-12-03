@@ -68,7 +68,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -1366,8 +1365,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
-        
+        try {
+            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil.getDocumentArtifactManager(registry);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when removing documentation of " + apiId
+                        + " Document ID " + docId;
+                log.error(errorMessage);
+                throw new DocumentationPersistenceException(errorMessage);
+            }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            String docPath = artifact.getPath();
+            if (docPath != null) {
+                if (registry.resourceExists(docPath)) {
+                    registry.delete(docPath);
+                }
+            }
+
+        } catch (RegistryException e) {
+            throw new DocumentationPersistenceException("Failed to delete documentation", e);
+        }
     }
 
     @Override

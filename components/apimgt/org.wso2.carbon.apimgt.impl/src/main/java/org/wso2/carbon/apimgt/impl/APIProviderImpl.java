@@ -4409,41 +4409,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public void removeDocumentation(Identifier id, String docId)
             throws APIManagementException {
-        String docPath;
-        String identifierType = StringUtils.EMPTY;
-        String artifactKey = StringUtils.EMPTY;
-
-        if (id instanceof APIIdentifier) {
-            identifierType = APIConstants.API_IDENTIFIER_TYPE;
-            artifactKey = APIConstants.DOCUMENTATION_KEY;
-        } else if (id instanceof APIProductIdentifier) {
-            identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
-            artifactKey = APIConstants.DOCUMENTATION_KEY;
+        String uuid;
+        if (id.getUUID() == null) {
+            uuid = id.getUUID();
+        } else {
+            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion());
         }
-
-        try {
-            GenericArtifactManager artifactManager = APIUtil
-                    .getArtifactManager(registry, artifactKey);
-            if (artifactManager == null) {
-                String errorMessage =
-                        "Failed to retrieve artifact manager when removing documentation of " + identifierType + " "
-                                + id + " Document ID " + docId;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
-            docPath = artifact.getPath();
-            if (docPath != null) {
-                if (registry.resourceExists(docPath)) {
-                    registry.delete(docPath);
-                }
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to delete documentation", e);
-        }
+        removeDocumentation(uuid, docId);
     }
 
+
+    @Override
+    public void removeDocumentation(String apiId, String docId) throws APIManagementException {
+        try {
+            apiPersistenceInstance.deleteDocumentation(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, docId);
+        } catch (DocumentationPersistenceException e) {
+            throw new APIManagementException("Error while deleting the document " + docId);
+        }
+
+    }
 
     /**
      * Adds Documentation to an API/Product
