@@ -10460,28 +10460,5 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return usedProductResources;
     }
-    /**
-     * Get a documentation by artifact Id
-     *
-     * @param docId                 artifact id of the document
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
-     * @return Document object which represents the artifact id
-     * @throws APIManagementException
-     */
-    public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
-        Documentation documentation = null;
-        try {
-            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(new Organization(requestedTenantDomain), null, docId);
-            if (doc != null) {
-               if(log.isDebugEnabled()) {
-                   log.debug("Retrieved doc: " + doc);
-               }
-               documentation = DocumentMapper.INSTANCE.toDocumentation(doc);
-            }
-        } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while retrieving document for id " + docId, e);
-        }
-        return documentation;
-    }
+
 }

@@ -331,4 +331,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return database.getCollection(orgName, MongoDBDevPortalAPI.class);
     }
 
+    @Override
+    public DocumentContent addDocumentationContent(Organization org, String apiId, String docId,
+            DocumentContent content) throws DocumentationPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
