@@ -244,14 +244,14 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API Product or the API Product does not exist
-            APIProductIdentifier productIdentifier = APIMappingUtil
-                    .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            //APIProductIdentifier productIdentifier = APIMappingUtil
+            //        .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil
                         .handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(productIdentifier, documentId);
+            apiProvider.removeDocumentation(apiProductId, documentId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource

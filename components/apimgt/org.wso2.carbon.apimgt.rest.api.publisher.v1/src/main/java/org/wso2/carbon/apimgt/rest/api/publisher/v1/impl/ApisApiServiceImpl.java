@@ -1954,12 +1954,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(apiIdentifier, documentId);
+            apiProvider.removeDocumentation(apiId, documentId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
