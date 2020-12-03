@@ -140,7 +140,7 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
 
     @POST
     @Path("/import")
-    
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a service", notes = "Import  a service by providing an archived service ", response = ServiceDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -150,8 +150,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successful response with the imported service metadata. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class) })
-    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
-        return delegate.importService(serviceId, ifMatch, overwrite, securityContext);
+    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
+        return delegate.importService(serviceId, fileInputStream, fileDetail, ifMatch, overwrite, securityContext);
     }
 
     @GET

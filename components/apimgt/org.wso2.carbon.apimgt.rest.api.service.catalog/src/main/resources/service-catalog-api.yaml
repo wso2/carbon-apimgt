@@ -325,6 +325,19 @@ paths:
           required: false
           schema:
             type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    Zip archive consisting of exported Application Configuration.
+                  format: binary
+        required: true
       responses:
         "200":
           description: |
