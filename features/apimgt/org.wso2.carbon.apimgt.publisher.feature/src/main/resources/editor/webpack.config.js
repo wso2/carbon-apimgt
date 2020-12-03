@@ -21,6 +21,7 @@ const path = require('path');
 const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
+const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 const config = {
     entry: {
@@ -29,9 +30,9 @@ const config = {
     },
     output: {
         path: path.resolve(__dirname, 'site/public/dist'),
-        filename: '[name].bundle.js',
-        chunkFilename: '[name].bundle.js',
-        publicPath: 'site/public/dist/',
+        filename: '[name].[contenthash].bundle.js',
+        chunkFilename: '[name].[contenthash].bundle.js',
+        //publicPath: 'site/public/dist/',
     },
     node: {
         fs: 'empty',
@@ -47,7 +48,8 @@ const config = {
         watchOptions: {
           poll: true,
           ignored: /node_modules/
-        }
+        },
+        //contentBase: './site/public/dist',
     },
     
     devtool: 'source-map', // todo: Commented out the source
@@ -72,6 +74,14 @@ const config = {
                 test: /\.worker\.js$/,
                 use: { loader: 'worker-loader' },
             },
+            //{
+                //test: /\.html$/,
+                //use: [
+                  //{
+                    //loader: "html-loader"
+                  //}
+                //]
+            //},
             {
                 test: /\.(js|jsx)$/,
                 exclude: [/node_modules\/(?!(@hapi)\/).*/, /coverage/],
@@ -118,6 +128,11 @@ const config = {
         new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] }),
         new CleanWebpackPlugin(),
         new ManifestPlugin(),
+        new HtmlWebPackPlugin({
+            template: "./source/index.html",
+            filename: "index.html",
+            //hash: true,
+        }),
     ],
 };
 
