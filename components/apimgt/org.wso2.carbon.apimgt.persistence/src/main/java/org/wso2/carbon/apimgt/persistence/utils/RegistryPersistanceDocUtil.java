@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.persistence.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentationType;
@@ -29,6 +28,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -126,5 +126,14 @@ public class RegistryPersistanceDocUtil {
             throw new DocumentationPersistenceException(msg, e);
         }
         return artifactManager;
+    }
+    
+    public static String getDocPath(String provider, String apiName, String version) {
+
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                RegistryPersistenceUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR +
+                version + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 }

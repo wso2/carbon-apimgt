@@ -22,10 +22,14 @@ package org.wso2.carbon.apimgt.persistence.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 
 @Mapper
 public interface DocumentMapper {
     DocumentMapper INSTANCE = Mappers.getMapper(DocumentMapper.class);
     
     Documentation toDocumentation(org.wso2.carbon.apimgt.persistence.dto.Documentation doc);
+
+    DocumentationContent toDocumentationContent(DocumentContent content);
 }

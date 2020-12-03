@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -82,11 +83,16 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
@@ -1236,6 +1242,31 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
     }
+    
+    public List<Documentation> getAllDocumentation(String uuid) throws APIManagementException {
+        String tenantDoiamin = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+
+        Organization org = new Organization(tenantDoiamin);
+        UserContext ctx = new UserContext(username, org, null);
+        List<Documentation> convertedList = null;
+        try {
+            DocumentSearchResult list = apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
+            if (list != null) {
+                convertedList = new ArrayList<Documentation>();
+                List<org.wso2.carbon.apimgt.persistence.dto.Documentation> docList = list.getDocumentationList();
+                if (docList != null) {
+                    for (int i = 0; i < docList.size(); i++) {
+                        convertedList.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
+                    }
+                }
+            }
+        } catch (DocumentationPersistenceException e) {
+            String msg = "Failed to get documentations for api/product " + uuid;
+            throw new APIManagementException(msg, e);
+        }
+        return convertedList;
+    }
 
     public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
@@ -1403,40 +1434,34 @@ public abstract class AbstractAPIManager implements APIManager {
     public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
         Documentation documentation = null;
         try {
-            Registry registryType;
-            boolean isTenantMode = (requestedTenantDomain != null);
-            //Tenant store anonymous mode if current tenant and the required tenant is not matching
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
-                    requestedTenantDomain))) {
-                int tenantId = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                registryType = getRegistryService()
-                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
+            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
+                    .getDocumentation(new Organization(requestedTenantDomain), null, docId);
+            if (doc != null) {
+               if(log.isDebugEnabled()) {
+                   log.debug("Retrieved doc: " + doc);
+               }
+               documentation = DocumentMapper.INSTANCE.toDocumentation(doc);
             }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
-                    .DOCUMENTATION_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
-            if(artifact == null) {
-                return documentation;
-            }
-            if (null != artifact) {
-                documentation = APIUtil.getDocumentation(artifact);
-                documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
-                Date lastModified = registryType.get(artifact.getPath()).getLastModified();
-                if (lastModified != null) {
-                    documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get documentation details";
-            throw new APIManagementException(msg, e);
+        } catch (DocumentationPersistenceException e) {
+            throw new APIManagementException("Error while retrieving document for id " + docId, e);
         }
         return documentation;
+    }
+    
+    @Override
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException {
+        try {
+            DocumentContent content = apiPersistenceInstance
+                    .getDocumentationContent(new Organization(requestedTenantDomain), apiId, docId);
+            DocumentationContent docContent = null;
+            if (content != null) {
+                docContent = DocumentMapper.INSTANCE.toDocumentationContent(content);
+            }
+            return docContent;
+        } catch (DocumentationPersistenceException e) {
+            throw new APIManagementException("Error while retrieving document content ", e);
+        }
     }
 
     public String getDocumentationContent(Identifier identifier, String documentationName)

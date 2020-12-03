@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -224,6 +225,14 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Returns a list of documentation attached to a particular API
+     *
+     * @param uuid id of the api
+     * @return List<Documentation>
+     * @throws APIManagementException if failed to get Documentations
+     */
+    List<Documentation> getAllDocumentation(String uuid) throws APIManagementException;
+    /**
      * Returns the specified document attached to the given API
      *
      * @param apiId   APIIdentifier
@@ -243,6 +252,18 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Documentation
      */
      Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+     
+    /**
+     * Get a documentation Content by apiid and doc id
+     *
+     * @param apiId uuid of the API
+     * @param docId DocumentID
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return DocumentationContent
+     * @throws APIManagementException if failed to get Documentation
+     */
+    DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
