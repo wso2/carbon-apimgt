@@ -470,6 +470,9 @@ public class ApiKeyAuthenticator implements Authenticator {
                     }
                     throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
                             "Access forbidden for the invocations");
+                } else {
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                            "Access forbidden for the invocations");
                 }
             }
         }
