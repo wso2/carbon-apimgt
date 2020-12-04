@@ -54,7 +54,7 @@ public class ETagValueGenerator {
 
 
     /**
-     * This generates the hash value using the MD5 algorithm
+     * This generates the hash value for files using the MD5 algorithm
      *
      * @param files, the List of File objects included in zip
      * @return String
@@ -63,8 +63,7 @@ public class ETagValueGenerator {
     private static String getHash(List<File> files) throws NoSuchAlgorithmException, IOException {
 
         MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-        String checksum = getFileChecksum(md5Digest, files.get(0)) + ":" + getFileChecksum(md5Digest, files.get(1));
-        return getMd5(checksum);
+        return getFileChecksum(md5Digest, files.get(0)) + getFileChecksum(md5Digest, files.get(1));
     }
 
     /**
@@ -92,25 +91,6 @@ public class ETagValueGenerator {
             sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
         }
         return sb.toString();
-    }
-
-    /**
-     * Method returns the hashed value for the String using MD5 hashing as default
-     *
-     * @param input the any String value
-     * @return String
-     * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
-     */
-    private static String getMd5(String input) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        byte[] messageDigest = md.digest(input.getBytes());
-        BigInteger no = new BigInteger(1, messageDigest);
-
-        StringBuilder hashtext = new StringBuilder(no.toString(16));
-        while (hashtext.length() < 32) {
-            hashtext.insert(0, "0");
-        }
-        return hashtext.toString();
     }
 
 

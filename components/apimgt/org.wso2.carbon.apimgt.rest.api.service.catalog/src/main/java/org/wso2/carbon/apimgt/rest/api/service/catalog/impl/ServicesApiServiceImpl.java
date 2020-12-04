@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -13,10 +15,8 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.model.Service;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ETagValueGenerator;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.mappings.ServiceMapping;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -25,6 +25,8 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -81,14 +83,11 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     public Response exportService(String name, String version, MessageContext messageContext) {
         APIConsumer consumer;
-        String exportedFilePath;
         File exportedServiceArchiveFile = null;
         String pathToExportDir =
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH + UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
-        //Creating a File object
         File file = new File(pathToExportDir);
-        //Creating the directory
-        boolean bool = file.mkdir();
+        file.mkdir();
         String username = RestApiUtil.getLoggedInUsername();
         String exportedFileName = null;
         ExportArchive exportArchive = null;
@@ -140,14 +139,14 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     @Override
-    public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+    public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String ifMatch,
+                                  Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         APIConsumer consumer;
         String username = RestApiUtil.getLoggedInUsername();
-        String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH + UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
-        //Creating a File object
+        String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH
+                + UUID.randomUUID().toString();
         File file = new File(tempDirPath);
-        //Creating the directory
-        boolean bool = file.mkdir();
+        file.mkdir();
         try {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedServicesImportExportManager importExportManager =
@@ -167,6 +166,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 return Response.notModified().build();
             } else if (overwrite != null) {
                 if (overwrite) {
+                    if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
+                        File rsc = new File(RESOURCE_FOLDER_LOCATION);
+                        rsc.mkdir();
+                    }
                     for (File source : fileList) {
                         try {
                             FileUtils.copyFile(source, new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName()));
@@ -174,17 +177,14 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                             RestApiUtil.handleInternalServerError("Error while updating Service", e, log);
                         }
                     }
-                    ServiceDTO serviceDTO;
-                    Service service = new Service();
-                    service.setId("01234567-0123-0123-0123-012345678901");
-                    service.setName("Swagger Petstore");
-                    service.setDisplayName("Swagger Petstore");
-                    service.setDescription("This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters.");
-                    service.setVersion("1.0.0");
-                    service.setServiceUrl("http://swagger.io");
 
-                    serviceDTO = ServiceMapping.fromServiceToDTO(service);
-                    return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
+                    try {
+                        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                        ServiceDTO serviceDTO = mapper.readValue(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME), ServiceDTO.class);
+                        return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
+                    } catch (IOException e) {
+                        RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
+                    }
                 } else {
                     return Response.notModified().build();
                 }
