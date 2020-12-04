@@ -932,6 +932,7 @@ paths:
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/includeCommenterInfo'
       responses:
         200:
           description: |

@@ -21,15 +21,12 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIRealmUtils;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +59,13 @@ public class CommentMappingUtil {
      * @return CommentDTO
      */
     public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment) throws APIManagementException {
-
         CommentDTO commentDTO = fromCommentToDTO(comment);
+        addCommentDTOWithUserInfo(comment, commentDTO);
+        return  commentDTO;
+    }
+
+    public static  CommentDTO addCommentDTOWithUserInfo(Comment comment, CommentDTO commentDTO)
+            throws APIManagementException {
         Map userClaims = APIRealmUtils.getLoggedInUserClaims(comment.getUser());
         CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
         commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
@@ -97,7 +99,8 @@ public class CommentMappingUtil {
      * @param offset      starting position of the pagination
      * @return CommentListDTO
      */
-    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset, boolean commenterInfo) {
+    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset,
+                                                      boolean includeCommenterInfo) {
         CommentListDTO commentListDTO = new CommentListDTO();
         List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
         commentListDTO.setCount(commentList.length);
@@ -107,7 +110,7 @@ public class CommentMappingUtil {
 
         for (int i = start; i <= end; i++) {
             try {
-                if (commenterInfo) {
+                if (includeCommenterInfo) {
                     listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i]));
                 } else {
                     listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
