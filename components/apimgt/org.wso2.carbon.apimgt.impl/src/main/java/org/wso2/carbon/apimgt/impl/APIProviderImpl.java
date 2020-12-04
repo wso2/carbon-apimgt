@@ -2407,28 +2407,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return claimMap;
     }
 
-    /**
-     * Returns the claims of a User
-     *
-     * @param userName The name of the user
-     * @return The looked up claims of the user
-     * @throws APIManagementException if failed to get user
-     */
-    @Override
-    public Map<String, String> getLoggedInUserClaims(String userName) throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        int tenantId = 0;
-        Map<String, String> claimMap;
-        try {
-            tenantId = getTenantId(tenantDomain);
-            claimMap = APIUtil.getClaims(userName, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
-        } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving tenant id for tenant domain "
-                    + tenantDomain, e);
-        }
-        return claimMap;
-    }
-
     private Map<String, String> publishToGateway(API api) throws APIManagementException {
         Map<String, String> failedEnvironment;
         String tenantDomain = null;

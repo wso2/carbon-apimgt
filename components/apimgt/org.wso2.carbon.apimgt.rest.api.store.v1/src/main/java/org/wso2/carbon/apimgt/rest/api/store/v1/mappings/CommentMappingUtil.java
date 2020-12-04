@@ -24,6 +24,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIRealmUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
@@ -62,9 +64,7 @@ public class CommentMappingUtil {
     public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment) throws APIManagementException {
 
         CommentDTO commentDTO = fromCommentToDTO(comment);
-        String username = RestApiUtil.getLoggedInUsername();
-        APIProvider apiProvider = RestApiUtil.getProvider(username);
-        Map userClaims = apiProvider.getLoggedInUserClaims(comment.getUser());
+        Map userClaims = APIRealmUtils.getLoggedInUserClaims(comment.getUser());
         CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
         commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
         commenterInfoDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
