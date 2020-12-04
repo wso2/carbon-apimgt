@@ -2605,7 +2605,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return failedGateways;
     }
-
     public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus, API api)
             throws APIManagementException {
         Map<String, String> failedGateways = new HashMap<String, String>();
