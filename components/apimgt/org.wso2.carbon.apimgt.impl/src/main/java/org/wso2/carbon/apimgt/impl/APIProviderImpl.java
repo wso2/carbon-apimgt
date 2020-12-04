@@ -1243,7 +1243,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
             if (api.getWsdlResource() != null) {
                 String path = APIUtil.saveWSDLResource(registry, api);
-                registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
                 apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
                 artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
                 registry.commitTransaction();
@@ -1882,7 +1881,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
                         String path = APIUtil.createWSDL(registry, api);
                         if (path != null) {
-                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
                             // reset the wsdl path to permlink
                             updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
                         }
@@ -3965,7 +3963,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateWSDLUriInAPIArtifact(String wsdlPath, GenericArtifactManager artifactManager,
               GenericArtifact artifact, String artifactPath) throws RegistryException {
         if (wsdlPath != null) {
-            registry.addAssociation(artifactPath, wsdlPath, CommonConstants.ASSOCIATION_TYPE01);
             artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, wsdlPath);
             artifactManager.updateGenericArtifact(artifact); //update the  artifact
         }
