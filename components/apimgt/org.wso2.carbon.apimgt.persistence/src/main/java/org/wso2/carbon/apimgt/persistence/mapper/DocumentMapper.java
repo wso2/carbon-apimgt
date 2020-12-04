@@ -1,4 +1,3 @@
-
 /*
  *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -32,4 +31,6 @@ public interface DocumentMapper {
     Documentation toDocumentation(org.wso2.carbon.apimgt.persistence.dto.Documentation doc);
 
     DocumentationContent toDocumentationContent(DocumentContent content);
+
+    org.wso2.carbon.apimgt.persistence.dto.Documentation toDocumentation(Documentation documentation);
 }

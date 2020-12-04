@@ -2144,15 +2144,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
+            if (apiProvider.isDocumentationExist(apiId, documentName)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
             }
-            apiProvider.addDocumentation(apiIdentifier, documentation);
+            documentation = apiProvider.addDocumentation(apiId, documentation);
 
             //retrieve the newly added document
             String newDocumentId = documentation.getId();
-            documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
+            //documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
                     .replace(RestApiConstants.APIID_PARAM, apiId)
@@ -3414,8 +3414,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            return apiProvider.isDocumentationExist(apiIdentifier, name) ? Response.status(Response.Status.OK).build() :
+            return apiProvider.isDocumentationExist(apiId, name) ? Response.status(Response.Status.OK).build() :
                     Response.status(Response.Status.NOT_FOUND).build();
 
         } catch(APIManagementException e){

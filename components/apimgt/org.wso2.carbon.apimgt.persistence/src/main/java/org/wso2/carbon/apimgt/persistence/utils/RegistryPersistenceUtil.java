@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -70,6 +71,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -400,7 +402,7 @@ public class RegistryPersistenceUtil {
      * @throws APIManagementException if failed to initialized GenericArtifactManager
      */
     public static GenericArtifactManager getArtifactManager(Registry registry, String key)
-            throws APIManagementException {
+            throws APIPersistenceException {
 
         GenericArtifactManager artifactManager = null;
 
@@ -417,7 +419,7 @@ public class RegistryPersistenceUtil {
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
             log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIPersistenceException(msg, e);
         }
         return artifactManager;
     }
@@ -886,7 +888,7 @@ public class RegistryPersistenceUtil {
     }
 
     protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType)
-                                    throws APIManagementException {
+                                    throws APIPersistenceException {
         return getArtifactManager(registry, keyType);
     }
 
@@ -2458,5 +2460,29 @@ public class RegistryPersistenceUtil {
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+    }
+    public static String getAPIPath(String apiName, String apiVersion, String apiProvider) {
+
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(apiProvider)
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + APIConstants.API_RESOURCE_NAME;
+    }
+
+    public static String[] getAuthorizedRoles(String apiPath, String tenantDomain) throws UserStoreException {
+        String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                        + apiPath);
+
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService()
+                    .getTenantUserRealm(tenantId).getAuthorizationManager();
+            return authManager.getAllowedRolesForResource(resourcePath, ActionConstants.GET);
+        } else {
+            RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(
+                    ServiceReferenceHolder.getUserRealm());
+            return authorizationManager.getAllowedRolesForResource(resourcePath, ActionConstants.GET);
+        }
     }
 }

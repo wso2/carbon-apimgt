@@ -136,4 +136,52 @@ public class RegistryPersistanceDocUtil {
                 version + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
+    
+    public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, String apiName, String apiVersion,
+            String apiProvider, Documentation documentation) throws DocumentationPersistenceException {
+
+        try {
+            artifact.setAttribute(APIConstants.DOC_NAME, documentation.getName());
+            artifact.setAttribute(APIConstants.DOC_SUMMARY, documentation.getSummary());
+            artifact.setAttribute(APIConstants.DOC_TYPE, documentation.getType().getType());
+            artifact.setAttribute(APIConstants.DOC_VISIBILITY, documentation.getVisibility().name());
+
+            Documentation.DocumentSourceType sourceType = documentation.getSourceType();
+
+            switch (sourceType) {
+            case INLINE:
+                sourceType = Documentation.DocumentSourceType.INLINE;
+                break;
+            case MARKDOWN:
+                sourceType = Documentation.DocumentSourceType.MARKDOWN;
+                break;
+            case URL:
+                sourceType = Documentation.DocumentSourceType.URL;
+                break;
+            case FILE: {
+                sourceType = Documentation.DocumentSourceType.FILE;
+            }
+                break;
+            default:
+                throw new DocumentationPersistenceException("Unknown sourceType " + sourceType + " provided for documentation");
+            }
+            // Documentation Source URL is a required field in the documentation.rxt for migrated setups
+            // Therefore setting a default value if it is not set.
+            if (documentation.getSourceUrl() == null) {
+                documentation.setSourceUrl(" ");
+            }
+            artifact.setAttribute(APIConstants.DOC_SOURCE_TYPE, sourceType.name());
+            artifact.setAttribute(APIConstants.DOC_SOURCE_URL, documentation.getSourceUrl());
+            artifact.setAttribute(APIConstants.DOC_FILE_PATH, documentation.getFilePath());
+            artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME, documentation.getOtherTypeName());
+            String basePath = RegistryPersistenceUtil.replaceEmailDomain(apiProvider) + RegistryConstants.PATH_SEPARATOR
+                    + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
+            artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
+        } catch (GovernanceException e) {
+            String msg = "Failed to create doc artifact content from :" + documentation.getName();
+            log.error(msg, e);
+            throw new DocumentationPersistenceException(msg, e);
+        }
+        return artifact;
+    }
 }

@@ -460,6 +460,17 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add documentation
      */
     void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
+    
+    /**
+     * Adds Documentation to an API/Product
+     *
+     * @param id         API/Product Identifier
+     * @param documentation Documentation
+     * @return created documentation Documentation
+     * @throws APIManagementException if failed to add documentation
+     */
+    Documentation addDocumentation(String uuid, Documentation documentation) throws APIManagementException;
+
 
     /**
      * Add a file to a document of source type FILE
@@ -1598,5 +1609,14 @@ public interface APIProvider extends APIManager {
      */
     void deleteAPI(API api) throws APIManagementException;
 
+    /**
+     * Checks whether the given document already exists for the given api/product
+     *
+     * @param uuid API/Product id
+     * @param docName    Name of the document
+     * @return true if document already exists for the given api/product
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    boolean isDocumentationExist(String uuid, String docName) throws APIManagementException;
 
 }

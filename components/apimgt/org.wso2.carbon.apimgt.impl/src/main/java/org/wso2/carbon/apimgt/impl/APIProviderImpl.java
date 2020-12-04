@@ -156,6 +156,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
@@ -4851,6 +4852,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public Documentation addDocumentation(String uuid, Documentation documentation) throws APIManagementException {
+        if (documentation != null) {
+            org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
+                    .toDocumentation(documentation);
+            try {
+                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid,
+                        mappedDoc);
+                if (addedDoc != null) {
+                    return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
+                }
+            } catch (DocumentationPersistenceException e) {
+                handleException("Failed to add documentation", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isDocumentationExist(String uuid, String docName) throws APIManagementException {
+        boolean exist = false;
+        UserContext ctx = null;
+        try {
+            DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid, 0, 0,
+                    "name:" + docName, ctx);
+            if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
+                String returnDocName = result.getDocumentationList().get(0).getName();
+                if (returnDocName != null && returnDocName.equals(docName)) {
+                    exist = true;
+                }
+            }
+        } catch (DocumentationPersistenceException e) {
+            handleException("Failed to search documentation for name " + docName, e);
+        }
+        return exist;
+    }
 
     private String[] getAuthorizedRoles(String artifactPath) throws UserStoreException {
         String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
