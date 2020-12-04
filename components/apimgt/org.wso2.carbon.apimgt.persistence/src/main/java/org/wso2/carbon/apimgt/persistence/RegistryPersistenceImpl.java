@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceAPIUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -87,8 +88,8 @@ import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -158,13 +159,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 this.apiGenericArtifactManager = RegistryPersistenceUtil.getArtifactManager(this.registry,
                                                 APIConstants.API_KEY);
             }
-        } catch (RegistryException e) {
+        } catch (RegistryException e) { //TODO fix these
 
         } catch (UserStoreException e) {
             e.printStackTrace();
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            e.printStackTrace();
         } catch (APIManagementException e) {
+            e.printStackTrace();
+        } catch (APIPersistenceException e) {
             e.printStackTrace();
         }
     }
@@ -493,7 +494,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         } catch (APIManagementException e) {
@@ -590,7 +591,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 return null;
             }
-        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e) {
+        } catch (RegistryException | UserStoreException | APIManagementException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         } finally {
@@ -687,7 +688,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             registry.commitTransaction();
             transactionCommitted  = true;
-        } catch (RegistryException | APIManagementException e) {
+        } catch (RegistryException e) {
             throw new APIPersistenceException("Failed to remove the API : " + apiId, e);
         } finally {
             try {
@@ -750,7 +751,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 result = searchPaginatedPublisherAPIs(userRegistry, tenantIDLocal, searchQuery, start, offset);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException | APIManagementException e) {
+        } catch (UserStoreException | RegistryException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs " , e);
         } finally {
             if (isTenantFlowStarted) {
@@ -883,7 +884,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 result = searchPaginatedDevPortalAPIs(userRegistry, tenantIDLocal, searchQuery, start, offset);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException | APIManagementException e) {
+        } catch (UserStoreException | RegistryException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs " , e);
         } finally {
             if (isTenantFlowStarted) {
@@ -1058,9 +1059,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
             RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRolesArr, resourcePath);
 
-        } catch (RegistryException | APIManagementException e) {
+        } catch (RegistryException | APIPersistenceException| APIManagementException e) {
             throw new OASPersistenceException("Error while adding OSA Definition for " + apiId, e);
-        }
+        } 
     }
 
     @Override
@@ -1106,13 +1107,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (log.isDebugEnabled()) {
                 log.debug("Definition for " + apiId + " : " +  definition);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get swagger documentation of API : " + apiId;
-            throw new OASPersistenceException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "Failed to get swagger documentation of API : " + apiId;
-            throw new OASPersistenceException(msg, e);
-        } catch (APIManagementException e) {
+        } catch (UserStoreException | RegistryException | APIManagementException | APIPersistenceException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             throw new OASPersistenceException(msg, e);
         } finally {
@@ -1145,8 +1140,56 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            String tenantDomain = org.getName();
+            Registry registry = this.registry; // for future impl
+            
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            
+            GenericArtifactManager docArtifactManager = new GenericArtifactManager(registry,
+                    APIConstants.DOCUMENTATION_KEY);
+            GenericArtifact docArtifact = docArtifactManager.newGovernanceArtifact(new QName(documentation.getName()));
+            docArtifactManager.addGenericArtifact(RegistryPersistanceDocUtil.createDocArtifactContent(docArtifact,
+                    apiName, apiVersion, apiProviderName, documentation));           
+            
+            String apiPath = RegistryPersistenceUtil.getAPIPath(apiName, apiVersion, apiProviderName);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = RegistryPersistenceUtil.getAuthorizedRoles(apiPath, tenantDomain);
+            String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName,visibility, authorizedRoles, docArtifact
+                    .getPath(), registry);
+            String docFilePath = docArtifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if (docFilePath != null && !"".equals(docFilePath)) {
+                // The docFilePatch comes as
+                // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                // We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set
+                // permissions.
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
+                        registry);
+            }
+            documentation.setId(docArtifact.getId());
+            return documentation;
+        } catch (RegistryException | APIManagementException | UserStoreException | APIPersistenceException e) {
+            throw new DocumentationPersistenceException("Failed to add documentation", e);
+        } 
     }
 
     @Override
@@ -1188,10 +1231,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
                 }
             }
-        } catch (RegistryException e) {
-            String msg = "Failed to get documentation details";
-            throw new DocumentationPersistenceException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (RegistryException | UserStoreException e) {
             String msg = "Failed to get documentation details";
             throw new DocumentationPersistenceException(msg, e);
         }
@@ -1272,13 +1312,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             .setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
                 }
             }
-        } catch (RegistryException e) {
+        } catch (RegistryException | UserStoreException e) {
             String msg = "Failed to get documentation details";
             throw new DocumentationPersistenceException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get documentation details";
-            throw new DocumentationPersistenceException(msg, e);
-        }
+        } 
         return documentContent;
     }
     
@@ -1328,7 +1365,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            String apiOrAPIProductDocPath = RegistryPersistanceDocUtil.getDocPath(apiProviderName, apiName, apiVersion);
+            String apiOrAPIProductDocPath = RegistryPersistanceDocUtil.getDocPath(apiProviderName, apiName,
+                    apiVersion);
             String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
             String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
 
@@ -1344,14 +1382,26 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                     .getDocumentArtifactManager(registryType);
                             GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
                             Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
-                            documentationList.add(doc);
+                            if (searchQuery != null) {
+                                if (searchQuery.toLowerCase().startsWith("name:")) {
+                                    String requestedDocName = searchQuery.split(":")[1];
+                                    if (doc.getName().equalsIgnoreCase(requestedDocName)) {
+                                        documentationList.add(doc);
+                                    }
+                                } else {
+                                    log.warn("Document search not implemented for the query " + searchQuery);
+                                }
+                            } else {
+                                documentationList.add(doc);
+                            }
+                            
                         }
                     }
                 }
                 result = new DocumentSearchResult();
                 result.setDocumentationList(documentationList);
             }
-        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e) {
+        } catch (RegistryException | UserStoreException | APIPersistenceException e) {
             String msg = "Failed to get documentations for api/product " + apiId;
             throw new DocumentationPersistenceException(msg, e);
         } finally {

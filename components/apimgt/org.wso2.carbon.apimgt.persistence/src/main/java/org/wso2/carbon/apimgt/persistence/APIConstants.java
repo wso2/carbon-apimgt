@@ -202,7 +202,9 @@ public final class APIConstants {
     public static final String API_CONTROLLED_VISIBILITY = "controlled";
     public static final String DOC_OWNER_VISIBILITY = "OWNER_ONLY";
     public static final String API_GLOBAL_VISIBILITY = "public";
+    public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
     public static final String VISIBILITY = "visibility";
+    public static final String GOVERNANCE = "governance";
 
     public static final String STORE_VIEW_ROLES = "store_view_roles";
 
