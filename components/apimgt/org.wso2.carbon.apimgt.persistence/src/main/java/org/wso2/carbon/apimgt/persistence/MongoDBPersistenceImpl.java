@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.InsertOneResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.persistence.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -250,6 +251,9 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        APIDocumentation apiDocumentation = new APIDocumentation();
+        collection.updateOne(eq("_id", new ObjectId(apiId)), set("documentation", apiDocumentation));
         return null;
     }
 

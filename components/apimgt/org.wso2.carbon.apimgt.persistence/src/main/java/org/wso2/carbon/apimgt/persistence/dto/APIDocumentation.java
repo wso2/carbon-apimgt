@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+
 import java.util.Date;
 
 public class APIDocumentation {
@@ -27,13 +29,46 @@ public class APIDocumentation {
     private String name;
     private String summary;
     private String sourceUrl;
-    private String visibility;
+    private Documentation.DocumentVisibility visibility;
     private Date lastUpdated;
     private String filePath;
     private Date createdDate;
-    private String textContent;
-    private String contentType;
-    private String fileType;
+    private DocumentContent documentContent;
+    private DocumentationType documentationType;
+    private Documentation.DocumentSourceType documentationSourceType;
+
+    public Documentation.DocumentVisibility getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(Documentation.DocumentVisibility visibility) {
+        this.visibility = visibility;
+    }
+
+    public DocumentationType getDocumentationType() {
+        return documentationType;
+    }
+
+    public void setDocumentationType(DocumentationType documentationType) {
+        this.documentationType = documentationType;
+    }
+
+    public Documentation.DocumentSourceType getDocumentationSourceType() {
+        return documentationSourceType;
+    }
+
+    public void setDocumentationSourceType(
+            Documentation.DocumentSourceType documentationSourceType) {
+        this.documentationSourceType = documentationSourceType;
+    }
+
+    public DocumentContent getDocumentContent() {
+        return documentContent;
+    }
+
+    public void setDocumentContent(DocumentContent documentContent) {
+        this.documentContent = documentContent;
+    }
 
     public String getGridFsReference() {
         return gridFsReference;
@@ -67,14 +102,6 @@ public class APIDocumentation {
         this.sourceUrl = sourceUrl;
     }
 
-    public String getVisibility() {
-        return visibility;
-    }
-
-    public void setVisibility(String visibility) {
-        this.visibility = visibility;
-    }
-
     public Date getLastUpdated() {
         return lastUpdated;
     }
@@ -97,30 +124,6 @@ public class APIDocumentation {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
-    }
-
-    public String getTextContent() {
-        return textContent;
-    }
-
-    public void setTextContent(String textContent) {
-        this.textContent = textContent;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
     }
 
     public ObjectId getId() {

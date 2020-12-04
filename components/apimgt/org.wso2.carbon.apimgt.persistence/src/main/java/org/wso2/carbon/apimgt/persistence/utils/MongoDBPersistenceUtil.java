@@ -98,6 +98,7 @@ public class MongoDBPersistenceUtil {
                         .codecRegistry(codecRegistry)
                         .build();
                 mongoClient = MongoClients.create(clientSettings);
+                log.info("mongodb client created ");
             }
         }
     }
@@ -110,7 +111,6 @@ public class MongoDBPersistenceUtil {
     public static MongoClient getMongoClient() {
         if (mongoClient == null) {
             initialize();
-            log.info("mongodb connection created ");
         }
         return mongoClient;
     }
