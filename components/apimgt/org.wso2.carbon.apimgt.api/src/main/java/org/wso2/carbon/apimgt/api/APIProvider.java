@@ -473,6 +473,17 @@ public interface APIProvider extends APIManager {
 
 
     /**
+     * Adds Document content to an API/Product
+     *
+     * @param uuid         API/Product Identifier
+     * @param content Documentation content
+     * @param docId doc uuid
+     * @throws APIManagementException if failed to add documentation
+     */
+    void addDocumentationContent(String uuid, String docId, DocumentationContent content)
+            throws APIManagementException;
+
+    /**
      * Add a file to a document of source type FILE
      *
      * @param apiId API identifier the document belongs to

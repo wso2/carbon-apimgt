@@ -33,4 +33,6 @@ public interface DocumentMapper {
     DocumentationContent toDocumentationContent(DocumentContent content);
 
     org.wso2.carbon.apimgt.persistence.dto.Documentation toDocumentation(Documentation documentation);
+
+    DocumentContent toDocumentContent(DocumentationContent content);
 }

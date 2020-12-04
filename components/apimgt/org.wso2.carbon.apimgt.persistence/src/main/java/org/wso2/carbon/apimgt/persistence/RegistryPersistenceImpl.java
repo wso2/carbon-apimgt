@@ -591,7 +591,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 return null;
             }
-        } catch (RegistryException | UserStoreException | APIManagementException e) {
+        } catch (RegistryException | UserStoreException | APIManagementException | OASPersistenceException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         } finally {
@@ -1322,7 +1322,96 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public DocumentContent addDocumentationContent(Organization org, String apiId, String docId,
             DocumentContent content) throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            boolean isTenantMode = (tenantDomain != null);
+            if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            Registry registry = this.registry; // for future impl
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            
+            GenericArtifactManager docArtifactManager = RegistryPersistanceDocUtil
+                    .getDocumentArtifactManager(registry);
+            GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docId);
+            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+
+            if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
+                ResourceFile resource = content.getResourceFile();
+                String filePath = RegistryPersistanceDocUtil.getDocumentFilePath(apiProviderName, apiName, apiVersion,
+                        resource.getName());
+                String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+                String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
+                RegistryPersistenceUtil.setResourcePermissions(RegistryPersistenceUtil.replaceEmailDomain(apiProviderName), visibility, visibleRoles,
+                        filePath, registry);
+                //documentation.setFilePath(addResourceFile(apiId, filePath, icon));
+                String savedFilePath = addResourceFile(filePath, resource, registry, tenantDomain);
+                //doc.setFilePath(savedFilePath);
+                docArtifact.setAttribute(APIConstants.DOC_FILE_PATH, savedFilePath);
+                docArtifactManager.updateGenericArtifact(docArtifact);
+                RegistryPersistenceUtil.setFilePermission(filePath);
+            } else {
+                String contentPath = RegistryPersistanceDocUtil.getDocumentContentPath(apiProviderName, apiName,
+                        apiVersion, doc.getName());
+                Resource docContent;
+
+                if (!registry.resourceExists(contentPath)) {
+                    docContent = registry.newResource();
+                } else {
+                    docContent = registry.get(contentPath);
+                }
+                String text = content.getTextContent();
+                if (!APIConstants.NO_CONTENT_UPDATE.equals(text )) {
+                    docContent.setContent(text);
+                }
+                docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
+                registry.put(contentPath, docContent);            
+                
+                // Set resource permission
+                String apiPath = RegistryPersistenceUtil.getAPIPath(apiName, apiVersion, apiProviderName);
+                String docVisibility = doc.getVisibility().name();
+                String[] authorizedRoles = RegistryPersistenceUtil.getAuthorizedRoles(apiPath, tenantDomain);
+                String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+                if (docVisibility != null) {
+                    if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                        authorizedRoles = null;
+                        visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                    } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                        authorizedRoles = null;
+                        visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                    }
+                }
+                RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
+                        contentPath, registry);
+            } 
+        } catch (APIPersistenceException | RegistryException | APIManagementException | PersistenceException
+                | UserStoreException e) {
+            throw new DocumentationPersistenceException("Error while adding document content", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
         return null;
     }
 
@@ -1365,7 +1454,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            String apiOrAPIProductDocPath = RegistryPersistanceDocUtil.getDocPath(apiProviderName, apiName,
+            String apiOrAPIProductDocPath = RegistryPersistanceDocUtil.getDocumentPath(apiProviderName, apiName,
                     apiVersion);
             String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
             String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
@@ -1597,4 +1686,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return Integer.MAX_VALUE;
     }
 
+    protected String addResourceFile(String resourcePath, ResourceFile resourceFile,
+            Registry registry, String tenantDomain) throws PersistenceException {
+        try {
+            Resource thumb = registry.newResource();
+            thumb.setContentStream(resourceFile.getContent());
+            thumb.setMediaType(resourceFile.getContentType());
+            registry.put(resourcePath, thumb);
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)) {
+                return RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR + "resource"
+                        + RegistryConstants.PATH_SEPARATOR + "_system" + RegistryConstants.PATH_SEPARATOR + "governance"
+                        + resourcePath;
+            } else {
+                return "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                        + RegistryConstants.PATH_SEPARATOR + "resource" + RegistryConstants.PATH_SEPARATOR + "_system"
+                        + RegistryConstants.PATH_SEPARATOR + "governance" + resourcePath;
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while adding the resource to the registry";
+            throw new PersistenceException(msg, e);
+        }
+    }
 }
