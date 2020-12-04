@@ -128,13 +128,40 @@ public class RegistryPersistanceDocUtil {
         return artifactManager;
     }
     
-    public static String getDocPath(String provider, String apiName, String version) {
+    /**
+     * Get Document collection location path
+     * @param provider provider 
+     * @param apiName api name  
+     * @param version version
+     * @return
+     */
+    public static String getDocumentPath(String provider, String apiName, String version) {
 
         return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 RegistryPersistenceUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR +
                 version + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+    
+    /**
+     * Get file type content location
+     * @param provider provider 
+     * @param apiName api name  
+     * @param version version
+     * @param fileName file name
+     * @return
+     */
+    public static String getDocumentFilePath(String provider, String apiName, String version, String fileName) {
+
+        return getDocumentPath(provider, apiName, version) + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
+    }
+    
+    public static String getDocumentContentPath(String provider, String apiName, String version, String fileName) {
+
+        return getDocumentPath(provider, apiName, version) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
     }
     
     public static GenericArtifact createDocArtifactContent(GenericArtifact artifact, String apiName, String apiVersion,

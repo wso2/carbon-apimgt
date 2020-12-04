@@ -2485,4 +2485,21 @@ public class RegistryPersistenceUtil {
             return authorizationManager.getAllowedRolesForResource(resourcePath, ActionConstants.GET);
         }
     }
+    
+    public static void setFilePermission(String filePath) throws APIManagementException {
+
+        try {
+            String filePathString = filePath.replaceFirst("/registry/resource/", "");
+            org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
+                    getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
+                    getAuthorizationManager();
+            if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
+                    filePathString, ActionConstants.GET)) {
+                accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
+                        filePathString, ActionConstants.GET);
+            }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while setting up permissions for file location", e);
+        }
+    }
 }

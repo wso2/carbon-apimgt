@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -156,6 +157,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
@@ -10483,6 +10485,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return usedProductResources;
+    }
+    
+    @Override
+    public void addDocumentationContent(String uuid, String docId, DocumentationContent content)
+            throws APIManagementException {
+        DocumentContent mappedContent = null;
+        try {
+            mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
+            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid, docId,
+                    mappedContent);
+        } catch (DocumentationPersistenceException e) {
+            throw new APIManagementException("Error while adding content to doc " + docId);
+        }
     }
 
 }

@@ -335,4 +335,7 @@ public final class APIConstants {
 
     public static final String INLINE_DOCUMENT_CONTENT_DIR = "contents";
     public static final String DOCUMENT_FILE_DIR = "files";
+    
+    public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
+    public static final String NO_CONTENT_UPDATE = "no_content_update";
 }
