@@ -160,6 +160,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -4615,7 +4616,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPIRevisions(String apiId, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
             APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
             return Response.ok().entity(apiRevisionListDTO).build();
@@ -4637,7 +4638,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
