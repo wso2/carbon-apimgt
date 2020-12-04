@@ -701,7 +701,10 @@ public class AbstractAPIManagerTestCase {
         APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
         String wsdlName =
                 identifier.getProviderName() + "--" + identifier.getApiName() + identifier.getVersion() + ".wsdl";
-        String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + wsdlName;
+        String wsdlResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + wsdlName;
         Resource resource = new ResourceImpl(wsdlResourcePath, new ResourceDO());
         Mockito.when(registry.get(wsdlResourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
         Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(true);

@@ -1089,7 +1089,12 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
-        String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION +
+        String apiPath = APIUtil.getAPIPath(apiId);
+        int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+        String apiSourcePath = apiPath.substring(0, prependIndex );
+        String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR +
+                APIUtil.createWsdlFileName(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
+        String wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION +
                 APIUtil.createWsdlFileName(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
         String tenantDomain = getTenantDomain(apiId);
         boolean isTenantFlowStarted = false;
@@ -1111,13 +1116,23 @@ public abstract class AbstractAPIManager implements APIManager {
             if (registry.resourceExists(wsdlResourcePath)) {
                 Resource resource = registry.get(wsdlResourcePath);
                 return new ResourceFile(resource.getContentStream(), resource.getMediaType());
+            } else if (registry.resourceExists(wsdlResourcePathOld)) {
+                Resource resource = registry.get(wsdlResourcePathOld);
+                return new ResourceFile(resource.getContentStream(), resource.getMediaType());
             } else {
                 wsdlResourcePath =
+                        apiSourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiId
+                                .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + apiId.getApiName() +
+                                apiId.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+                wsdlResourcePathOld =
                         APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiId
                                 .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + apiId.getApiName() +
                                 apiId.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
                 if (registry.resourceExists(wsdlResourcePath)) {
                     Resource resource = registry.get(wsdlResourcePath);
+                    return new ResourceFile(resource.getContentStream(), resource.getMediaType());
+                } else if (registry.resourceExists(wsdlResourcePathOld)) {
+                    Resource resource = registry.get(wsdlResourcePathOld);
                     return new ResourceFile(resource.getContentStream(), resource.getMediaType());
                 } else {
                     throw new APIManagementException("No WSDL found for the API: " + apiId,
