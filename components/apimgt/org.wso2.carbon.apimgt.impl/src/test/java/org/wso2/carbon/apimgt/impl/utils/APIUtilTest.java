@@ -1737,7 +1737,10 @@ public class APIUtilTest {
     @Test
     public void testWsdlDefinitionFilePath () {
         Assert.assertEquals(APIUtil.getWSDLDefinitionFilePath("test", "1.0.0", "publisher1")
-                , APIConstants.API_WSDL_RESOURCE_LOCATION + "publisher1" + "--" + "test" + "1.0.0" + ".wsdl");
+                , APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        "publisher1" + RegistryConstants.PATH_SEPARATOR +
+                        "test" + RegistryConstants.PATH_SEPARATOR +
+                        "1.0.0" + RegistryConstants.PATH_SEPARATOR + "publisher1" + "--" + "test" + "1.0.0" + ".wsdl");
     }
 
     @Test
