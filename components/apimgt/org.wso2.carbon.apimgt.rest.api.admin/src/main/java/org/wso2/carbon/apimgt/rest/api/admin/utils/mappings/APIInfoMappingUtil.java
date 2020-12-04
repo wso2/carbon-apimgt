@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

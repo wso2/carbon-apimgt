@@ -23,9 +23,9 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.KeyManagerMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.KeyManagerMappingUtil;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     @Override
     public Response keyManagersGet(MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                 apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);

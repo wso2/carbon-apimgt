@@ -18,61 +18,67 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import com.google.gson.Gson;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.ExportUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.VisibilityEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.*;
+import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA;
+import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME;
+import static org.wso2.carbon.apimgt.impl.APIConstants.Permissions;
+import static org.wso2.carbon.apimgt.impl.APIConstants.SEARCH_AND_TAG;
+import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
@@ -80,8 +86,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     @Override public Response apiProductsApiProductIdDelete(String apiProductId, String ifMatch,
             MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             APIProductIdentifier apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             if (log.isDebugEnabled()) {
@@ -111,9 +117,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String documentId, String accept, String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
@@ -167,8 +173,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                               String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent,
                                                                           MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIProductIdentifier productIdentifier = APIMappingUtil
                     .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             APIProduct product = apiProvider.getAPIProduct(productIdentifier);
@@ -235,8 +241,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String ifMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil
@@ -269,8 +275,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String accept, String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
             APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             if (documentation == null) {
@@ -299,8 +305,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId, String documentId,
             DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String sourceUrl = body.getSourceUrl();
             Documentation oldDocument = apiProvider.getProductDocumentation(documentId, tenantDomain);
 
@@ -308,6 +314,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (oldDocument == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
                 return null;
+            }
+            if (body.getType() == null) {
+                throw new BadRequestException();
             }
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && org.apache.commons.lang3.StringUtils.isBlank(body.getOtherTypeName())) {
                 //check otherTypeName for not null if doc type is OTHER
@@ -355,8 +364,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             List<Documentation> allDocumentation = apiProvider.getAllDocumentation(productIdentifier);
@@ -384,10 +393,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response apiProductsApiProductIdDocumentsPost(String apiProductId, DocumentDTO body,
             MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
-            String documentName = body.getName();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            if (body.getType() == null) {
+                throw new BadRequestException();
+            }
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && org.apache.commons.lang3.StringUtils.isBlank(body.getOtherTypeName())) {
                 //check otherTypeName for not null if doc type is OTHER
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
@@ -397,6 +406,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     (org.apache.commons.lang3.StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
                 RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
             }
+            Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
+            String documentName = body.getName();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             if (apiProvider.isDocumentationExist(productIdentifier, documentName)) {
@@ -436,8 +448,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     @Override public Response apiProductsApiProductIdGet(String apiProductId, String accept, String ifNoneMatch,
             MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (log.isDebugEnabled()) {
                 log.debug("API Product request: Id " +apiProductId + " by " + username);
@@ -466,9 +478,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
             MessageContext messageContext) {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
@@ -532,9 +544,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch,
             MessageContext messageContext) {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             APIProduct retrievedProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
@@ -556,8 +568,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept,
             String ifNoneMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil
                     .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
@@ -590,8 +602,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -641,9 +653,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @return Zipped file containing exported API Product
      */
     @Override
-    public Response apiProductsExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException {
-        APIProductIdentifier apiProductIdentifier;
-        APIProductDTO apiProductDtoToReturn;
+    public Response apiProductsExportGet(String name, String version, String providerName, String format,
+                                         Boolean preserveStatus, MessageContext messageContext)
+            throws APIManagementException {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -651,23 +663,16 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Default export format is YAML
         ExportFormat exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                 ExportFormat.YAML;
-
+        ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
-
-            // Validate API name, version and provider before exporting
-            String provider = ExportUtils.validateExportParams(name, version, providerName);
-            apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProvider.getAPIProduct(apiProductIdentifier));
-
-            File file = ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn,
-                    userName, exportFormat, preserveStatus);
+            File file =
+                    importExportAPI.exportApiProduct(null, name, version, providerName, exportFormat, preserveStatus,
+                            true);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
                     .build();
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | APIImportExportException e) {
             RestApiUtil.handleInternalServerError("Error while exporting " +
                     RestApiConstants.RESOURCE_API_PRODUCT, e, log);
         }
@@ -692,12 +697,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             searchQuery = searchQuery.equals("") ? RestApiConstants.GET_API_PRODUCT_QUERY : query + SEARCH_AND_TAG +
                     RestApiConstants.GET_API_PRODUCT_QUERY;
 
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (log.isDebugEnabled()) {
                 log.debug("API Product list request by " + username);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(searchQuery, tenantDomain, offset, limit);
 
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
@@ -724,10 +729,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     @Override public Response apiProductsPost(APIProductDTO body, MessageContext messageContext) {
         String provider = null;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             // if not add product
             provider = body.getProvider();
+            String context = body.getContext();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
                 if (!APIUtil.hasPermission(username, Permissions.APIM_ADMIN)) {
                     if (log.isDebugEnabled()) {
@@ -767,6 +773,18 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
             if (body.getAuthorizationHeader() == null) {
                 body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+            }
+
+            //Remove the /{version} from the context.
+            if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+                context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+            }
+            //Make sure context starts with "/". ex: /pizzaProduct
+            context = context.startsWith("/") ? context : ("/" + context);
+            //Check whether the context already exists
+            if (apiProvider.isContextExist(context)) {
+                RestApiUtil.handleBadRequest("Error occurred while adding API Product. API Product with the context " + context
+                        + " already exists.", log);
             }
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);

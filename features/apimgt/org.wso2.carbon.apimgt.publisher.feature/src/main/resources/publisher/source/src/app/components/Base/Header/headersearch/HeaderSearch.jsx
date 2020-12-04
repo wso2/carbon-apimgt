@@ -278,8 +278,14 @@ class HeaderSearch extends React.Component {
                             <ol style={{ marginLeft: '-20px', marginTop: '8px' }}>
                                 <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
+                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option0'
+                                        defaultMessage='Content [ Default ]'
+                                    />
+                                </li>
+                                <li style={{ marginTop: '5px' }}>
+                                    <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option1'
-                                        defaultMessage='Name [Default]'
+                                        defaultMessage='Name [ Syntax - name:xxxx ]'
                                     />
                                 </li>
                                 <li style={{ marginTop: '5px' }}>
