@@ -556,6 +556,43 @@
         }
       }
     },
+    "/runtime-artifacts" : {
+      "get" : {
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get all the runtime artifacts for a given API UUID and gateway label",
+        "description" : "This will provide access to runtime artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "**Search condition**.\n type of gateway\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of runtime Artifacts"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/synapse-artifacts" : {
       "get" : {
         "tags" : [ "Retrieving Synapse artifacts" ],
