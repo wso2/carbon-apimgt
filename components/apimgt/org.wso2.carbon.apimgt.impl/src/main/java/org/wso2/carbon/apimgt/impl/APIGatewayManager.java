@@ -51,6 +51,8 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
@@ -67,9 +69,18 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import java.util.*;
 
 public class APIGatewayManager {
 
@@ -157,15 +168,7 @@ public class APIGatewayManager {
             }
         }
 
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
-                api.getUUID(), publishedGateways);
-        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-        if (debugEnabled) {
-            log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
-                    + "with apiID " +   api.getId() + " at " + deployAPIInGatewayEvent.getTimeStamp());
-        }
+        sendDeploymentEvent(api.getUUID(), tenantDomain, publishedGateways);
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
@@ -175,6 +178,19 @@ public class APIGatewayManager {
         }
 
         return failedGatewaysMap;
+    }
+
+    private void sendDeploymentEvent(String apiUUID, String tenantDomain, Set<String> publishedGateways) {
+
+        DeployAPIInGatewayEvent
+                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
+                apiUUID, publishedGateways);
+        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+        if (debugEnabled) {
+            log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
+                    + "with apiID " +   apiUUID + " at " + deployAPIInGatewayEvent.getTimeStamp());
+        }
     }
 
     /**
@@ -627,11 +643,7 @@ public class APIGatewayManager {
             }
         }
 
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
-                apiProduct.getUuid(), publishedGateways);
-        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+        sendDeploymentEvent(apiProductId.getUUID(), tenantDomain, publishedGateways);
 
         return failedEnvironmentsMap;
     }
@@ -710,12 +722,7 @@ public class APIGatewayManager {
             }
         }
 
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                api.getUUID(), removedGateways);
-        APIUtil.sendNotification(deployAPIInGatewayEvent,
-                APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+        sendUnDeploymentEvent(api.getUUID(),tenantDomain,removedGateways);
 
         updateRemovedClientCertificates(api, tenantDomain);
 
@@ -726,6 +733,17 @@ public class APIGatewayManager {
             recommendationThread.start();
         }
         return failedEnvironmentsMap;
+    }
+
+    private void sendUnDeploymentEvent(String apiId, String tenantDomain, Set<String> removedGateways) {
+
+        DeployAPIInGatewayEvent
+                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
+                apiId, removedGateways);
+        APIUtil.sendNotification(deployAPIInGatewayEvent,
+                APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+
     }
 
     /**
@@ -892,13 +910,8 @@ public class APIGatewayManager {
                 }
             }
         }
+        sendUnDeploymentEvent(apiProduct.getUuid(), tenantDomain, removedGateways);
 
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(),
-                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain, apiProduct.getUuid(),
-                removedGateways);
-        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         return failedEnvironmentsMap;
     }
 
@@ -1152,8 +1165,12 @@ public class APIGatewayManager {
                 }
             }
         } else {
-            if (saveArtifactsToStorage){
-                return artifactSaver.isAPIPublished(api.getUUID());
+            if (saveArtifactsToStorage) {
+                try {
+                    return artifactSaver.isAPIPublished(api.getUUID(), "CURRENT");
+                } catch (ArtifactSynchronizerException e) {
+                    throw new APIManagementException("Error while check existence of api in gateway", e);
+                }
             }
         }
         return false;
@@ -1650,4 +1667,139 @@ public class APIGatewayManager {
                 , gatewayAPIDTO.getEndpointEntriesToBeRemove()));
     }
 
+    public void deployToGateway(API api, String tenantDomain) throws APIManagementException {
+
+        String apiId = api.getUUID();
+        APIIdentifier apiIdentifier = api.getId();
+        Set<String> environments = api.getEnvironments();
+        List<Label> gatewayLabels = api.getGatewayLabels();
+        Set<String> gateways = new HashSet<>();
+        if (gatewayLabels != null) {
+            for (Label gatewayLabel : gatewayLabels) {
+                gateways.add(gatewayLabel.getName());
+            }
+        }
+        if (environments != null) {
+            Map<String, Environment> apiGatewayEnvironments =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getApiGatewayEnvironments();
+            for (String environment : environments) {
+                if (apiGatewayEnvironments != null) {
+                    if (apiGatewayEnvironments.containsKey(environment)) {
+                        gateways.add(environment);
+                    }
+                }
+            }
+        }
+        if (saveArtifactsToStorage) {
+            try {
+                File artifact = ServiceReferenceHolder.getInstance().getImportExportService()
+                        .exportAPI(apiId, null, null, null, true,
+                                ExportFormat.JSON, false, true);
+                artifactSaver.saveArtifact(apiId, apiIdentifier.getApiName(), apiIdentifier.getVersion(), "Current",
+                        tenantDomain, artifact, gateways.toArray(new String[0]));
+
+            } catch (APIManagementException | APIImportExportException | ArtifactSynchronizerException e) {
+                throw new APIManagementException("API " + api.getId() + "couldn't get deployed", e);
+            }
+            if (debugEnabled) {
+                log.debug("Status of " + api.getId() + " has been updated to DB");
+            }
+            sendDeploymentEvent(api.getUUID(), tenantDomain, gateways);
+        }
+    }
+    public void deployToGateway(APIProduct api, String tenantDomain) throws APIManagementException {
+
+        String apiId = api.getUuid();
+        APIProductIdentifier apiIdentifier = api.getId();
+        Set<String> environments = api.getEnvironments();
+        List<Label> gatewayLabels = api.getGatewayLabels();
+        Set<String> gateways = new HashSet<>();
+        if (gatewayLabels != null) {
+            for (Label gatewayLabel : gatewayLabels) {
+                gateways.add(gatewayLabel.getName());
+            }
+        }
+        if (environments != null) {
+            Map<String, Environment> apiGatewayEnvironments =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getApiGatewayEnvironments();
+            for (String environment : environments) {
+                if (apiGatewayEnvironments != null) {
+                    if (apiGatewayEnvironments.containsKey(environment)) {
+                        gateways.add(environment);
+                    }
+                }
+            }
+        }
+        if (saveArtifactsToStorage) {
+            try {
+                File artifact = ServiceReferenceHolder.getInstance().getImportExportService()
+                        .exportApiProduct(apiId, null, null, null, ExportFormat.JSON, true, false, true);
+                artifactSaver.saveArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), "Current",
+                        tenantDomain, artifact, gateways.toArray(new String[0]));
+
+            } catch (APIManagementException | APIImportExportException | ArtifactSynchronizerException e) {
+                throw new APIManagementException("API " + api.getId() + "couldn't get deployed", e);
+            }
+            if (debugEnabled) {
+                log.debug("Status of " + api.getId() + " has been updated to DB");
+            }
+            sendDeploymentEvent(api.getUuid(), tenantDomain, gateways);
+        }
+    }
+
+    public void unDeployFromGateway(API api, String tenantDomain) throws APIManagementException {
+
+        String apiId = api.getUUID();
+        APIIdentifier apiIdentifier = api.getId();
+        if (saveArtifactsToStorage) {
+            try {
+                artifactSaver.removeArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), "Current",
+                        tenantDomain);
+
+            } catch (ArtifactSynchronizerException e) {
+                throw new APIManagementException("API " + api.getId() + "couldn't get unDeployed", e);
+            }
+            if (debugEnabled) {
+                log.debug("Status of " + api.getId() + " has been updated to DB");
+            }
+            sendUnDeploymentEvent(apiId, tenantDomain, Collections.emptySet());
+        }
+
+    }
+
+    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+
+        String apiProductUuid = apiProduct.getUuid();
+        APIProductIdentifier apiProductIdentifier = apiProduct.getId();
+        if (saveArtifactsToStorage) {
+            try {
+                artifactSaver.removeArtifact(apiProductUuid, apiProductIdentifier.getName(),
+                        apiProductIdentifier.getVersion(), "Current",
+                        tenantDomain);
+
+            } catch (ArtifactSynchronizerException e) {
+                throw new APIManagementException("API " + apiProductIdentifier + "couldn't get unDeployed", e);
+            }
+            if (debugEnabled) {
+                log.debug("Status of " + apiProductIdentifier + " has been updated to DB");
+            }
+            sendUnDeploymentEvent(apiProductUuid, tenantDomain, Collections.emptySet());
+        }
+
+    }
+
+    public boolean isAPIDeployed(API api) throws APIManagementException {
+
+        if (saveArtifactsToStorage) {
+            try {
+                return artifactSaver.isAPIPublished(api.getUUID(), "Current");
+
+            } catch (ArtifactSynchronizerException e) {
+                throw new APIManagementException("Error while cehcking existence of API deployed", e);
+            }
+        }
+        return false;
+    }
 }
