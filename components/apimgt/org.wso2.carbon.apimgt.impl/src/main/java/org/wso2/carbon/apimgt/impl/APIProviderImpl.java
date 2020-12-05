@@ -4593,64 +4593,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Updates a given documentation
      *
-     * @param apiId         APIIdentifier
+     * @param apiId         id of the document
      * @param documentation Documentation
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update docs
+     * @return updated documentation Documentation
+     * @throws APIManagementException if failed to update docs
      */
-    public void updateDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException {
 
-        String apiPath = APIUtil.getAPIPath(apiId);
-        API api = getAPI(apiPath);
-        String docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiId.getProviderName() +
-                RegistryConstants.PATH_SEPARATOR + apiId.getApiName() +
-                RegistryConstants.PATH_SEPARATOR + apiId.getVersion() +
-                RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR +
-                RegistryConstants.PATH_SEPARATOR + documentation.getName();
-
-        try {
-            String apiArtifactId = registry.get(docPath).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-            String docVisibility = documentation.getVisibility().name();
-            String[] authorizedRoles = new String[0];
-            String visibleRolesList = api.getVisibleRoles();
-            if (visibleRolesList != null) {
-                authorizedRoles = visibleRolesList.split(",");
-            }
-            String visibility = api.getVisibility();
-            if (docVisibility != null) {
-                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
-                    authorizedRoles = null;
-                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
-                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
-                    authorizedRoles = null;
-                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+        if (documentation != null) {
+            org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
+                    .toDocumentation(documentation);
+            try {
+                org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
+                        .updateDocumentation(
+                                new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                                mappedDoc);
+                if (updatedDoc != null) {
+                    return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
+            } catch (DocumentationPersistenceException e) {
+                handleException("Failed to add documentation", e);
             }
-
-            GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
-            artifactManager.updateGenericArtifact(updateApiArtifact);
-            APIUtil.clearResourcePermissions(docPath, apiId, ((UserRegistry) registry).getTenantId());
-
-            APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles,
-                    artifact.getPath(), registry);
-
-            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-            if (docFilePath != null && !"".equals(docFilePath)) {
-                // The docFilePatch comes as
-                // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
-                // We need to remove the
-                // /t/tenanatdoman/registry/resource/_system/governance section
-                // to set permissions.
-                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
-                String filePath = docFilePath.substring(startIndex, docFilePath.length());
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
-                        registry);
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to update documentation", e);
         }
+        return null;
     }
 
     /**

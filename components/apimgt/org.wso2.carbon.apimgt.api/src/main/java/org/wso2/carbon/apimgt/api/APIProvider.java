@@ -517,11 +517,12 @@ public interface APIProvider extends APIManager {
     /**
      * Updates a given documentation
      *
-     * @param apiId         APIIdentifier
+     * @param apiId         id of the document
      * @param documentation Documentation
+     * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    void updateDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException;
+    Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
