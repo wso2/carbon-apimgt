@@ -100,7 +100,6 @@ return null;
     private Integer usage = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
-    private String etag = null;
 
   /**
    **/
@@ -311,24 +310,6 @@ return null;
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
-  /**
-   * md5 value representing current state of the service and the definition
-   **/
-  public ServiceDTO etag(String etag) {
-    this.etag = etag;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "32c890312cfadc94a7c1153f65a4f100", value = "md5 value representing current state of the service and the definition")
-  @JsonProperty("etag")
-  public String getEtag() {
-    return etag;
-  }
-  public void setEtag(String etag) {
-    this.etag = etag;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -350,13 +331,12 @@ return null;
         Objects.equals(mutualSSLEnabled, service.mutualSSLEnabled) &&
         Objects.equals(usage, service.usage) &&
         Objects.equals(createdTime, service.createdTime) &&
-        Objects.equals(lastUpdatedTime, service.lastUpdatedTime) &&
-        Objects.equals(etag, service.etag);
+        Objects.equals(lastUpdatedTime, service.lastUpdatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, etag);
+    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime);
   }
 
   @Override
@@ -376,7 +356,6 @@ return null;
     sb.append("    usage: ").append(toIndentedString(usage)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    etag: ").append(toIndentedString(etag)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -599,11 +599,6 @@ components:
           type: string
           readOnly: true
           example: '2020-02-20T13:57:16.229'
-        etag:
-          type: string
-          description: md5 value representing current state of the service and the definition
-          readOnly: true
-          example: '32c890312cfadc94a7c1153f65a4f100'
         
     #-----------------------------------------------------
     # The Service Catalog Entry Schema resource
@@ -735,6 +730,7 @@ components:
       name: If-Match
       in: header
       description: ETag of the service resource to update
+      required: false
       schema:
         type: string
 

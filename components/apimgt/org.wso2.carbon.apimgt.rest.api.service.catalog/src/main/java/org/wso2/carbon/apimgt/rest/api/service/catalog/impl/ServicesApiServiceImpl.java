@@ -141,58 +141,64 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     @Override
     public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String ifMatch,
                                   Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+        if (StringUtils.isBlank(ifMatch)) {
+            ifMatch = null;
+        }
         APIConsumer consumer;
-        ServiceDTO serviceDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH
                 + UUID.randomUUID().toString();
         File file = new File(tempDirPath);
         file.mkdir();
+        String currentETag = null;
+        if (Files.exists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
+            List<File> existingFiles = new ArrayList<File>();
+            existingFiles.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME));
+            existingFiles.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + OAS_FILE_NAME));
+            currentETag = ETagValueGenerator.getETag(existingFiles);
+        }
+
+        if (!StringUtils.equals(currentETag, ifMatch)) {
+            return Response.status(Response.Status.PRECONDITION_FAILED).build();
+        }
         try {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedServicesImportExportManager importExportManager =
                     new FileBasedServicesImportExportManager(consumer, tempDirPath);
             importExportManager.importService(fileInputStream);
-            // Extract values to the DTO since it's needed to check the eTag value coming through the yaml
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            serviceDTO = mapper.readValue(new File(tempDirPath + File.separator + METADATA_FILE_NAME), ServiceDTO.class);
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
         }
 
-        if (!StringUtils.isBlank(ifMatch)) {
-            String eTag;
-            List<File> fileList;
-            if (!StringUtils.equals(serviceDTO.getEtag(), ifMatch)) {
-                return Response.status(Response.Status.PRECONDITION_FAILED).build();
-            } else {
-                fileList = new ArrayList<File>();
-                fileList.add(new File(tempDirPath + File.separator + METADATA_FILE_NAME));
-                fileList.add(new File(tempDirPath + File.separator + OAS_FILE_NAME));
-                eTag = ETagValueGenerator.getETag(fileList);
-            }
-            // will never get this true - review!!
-            if (StringUtils.equals(ifMatch, eTag)) {
-                return Response.status(Response.Status.CONFLICT).build();
-            } else if (overwrite != null) {
-                if (overwrite) {
-                    if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
-                        File rsc = new File(RESOURCE_FOLDER_LOCATION);
-                        rsc.mkdir();
-                    }
-                    for (File source : fileList) {
-                        try {
-                            FileUtils.copyFile(source, new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName()));
-                        } catch (IOException e) {
-                            RestApiUtil.handleInternalServerError("Error while updating Service", e, log);
-                        }
-                    }
-                    return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
-                } else {
-                    return Response.notModified().build();
+        List<File> fileList = new ArrayList<File>();
+        fileList.add(new File(tempDirPath + File.separator + METADATA_FILE_NAME));
+        fileList.add(new File(tempDirPath + File.separator + OAS_FILE_NAME));
+        String eTag = ETagValueGenerator.getETag(fileList);
+
+        if (StringUtils.equals(ifMatch, eTag)) {
+            return Response.notModified().build();
+        } else if (overwrite != null) {
+            if (overwrite) {
+                if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
+                    File rsc = new File(RESOURCE_FOLDER_LOCATION);
+                    rsc.mkdir();
                 }
+                for (File source : fileList) {
+                    try {
+                        FileUtils.copyFile(source, new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName()));
+                    } catch (IOException e) {
+                        RestApiUtil.handleInternalServerError("Error while updating Service", e, log);
+                    }
+                }
+                try {
+                    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                    ServiceDTO serviceDTO = mapper.readValue(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME), ServiceDTO.class);
+                    return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
+                }
+            } else {
+                return Response.status(Response.Status.NOT_MODIFIED).build();
             }
         }
         return null;
