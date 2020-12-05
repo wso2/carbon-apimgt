@@ -2056,10 +2056,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             newDocumentation.setFilePath(oldDocument.getFilePath());
-            apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
+            newDocumentation.setId(documentId);
+            newDocumentation = apiProvider.updateDocumentation(apiId, newDocumentation);
 
-            //retrieve the updated documentation
-            newDocumentation = apiProvider.getDocumentation(documentId, tenantDomain);
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource

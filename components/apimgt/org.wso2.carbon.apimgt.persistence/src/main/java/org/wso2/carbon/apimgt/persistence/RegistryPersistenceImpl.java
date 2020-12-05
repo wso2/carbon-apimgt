@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.persistence;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +67,6 @@ import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceAPIUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -77,8 +74,6 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
-import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -591,7 +586,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 return null;
             }
-        } catch (RegistryException | UserStoreException | APIManagementException | OASPersistenceException e) {
+        } catch (RegistryException | UserStoreException | APIManagementException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         } finally {
@@ -1195,8 +1190,63 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            String tenantDomain = org.getName();
+            Registry registry = this.registry; // for future impl
+            
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil.getDocumentArtifactManager(registry);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(documentation.getId());
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = new String[0];
+            String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+            if (visibleRolesList != null) {
+                authorizedRoles = visibleRolesList.split(",");
+            }
+            String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
+            }
+
+            GenericArtifact updateApiArtifact = RegistryPersistanceDocUtil.createDocArtifactContent(artifact,
+                    apiProviderName, apiName, apiVersion, documentation);
+            artifactManager.updateGenericArtifact(updateApiArtifact);
+            RegistryPersistenceUtil.clearResourcePermissions(updateApiArtifact.getPath(),
+                    new APIIdentifier(apiProviderName, apiName, apiVersion), ((UserRegistry) registry).getTenantId());
+
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
+                    artifact.getPath(), registry);
+
+            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            if (docFilePath != null && !"".equals(docFilePath)) {
+                // The docFilePatch comes as
+                // /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
+                // We need to remove the
+                // /t/tenanatdoman/registry/resource/_system/governance section
+                // to set permissions.
+                int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
+                String filePath = docFilePath.substring(startIndex, docFilePath.length());
+                RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles, filePath,
+                        registry);
+            }
+            return documentation;
+        } catch (RegistryException | APIManagementException | APIPersistenceException e) {
+            throw new DocumentationPersistenceException("Failed to update documentation", e);
+        }
     }
 
     @Override
