@@ -1260,6 +1260,8 @@ public abstract class AbstractAPIManager implements APIManager {
                         convertedList.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
                     }
                 }
+            } else {
+                convertedList = new ArrayList<Documentation>();
             }
         } catch (DocumentationPersistenceException e) {
             String msg = "Failed to get documentations for api/product " + uuid;

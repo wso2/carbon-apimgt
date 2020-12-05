@@ -260,6 +260,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         visibleRoles, resourcePath);
             }
             
+            //Set permissions to doc path
+            String docLocation = RegistryPersistanceDocUtil.getDocumentPath(api.getId().getProviderName(),
+                    api.getId().getApiName(), api.getId().getVersion());
+            RegistryPersistenceUtil.clearResourcePermissions(docLocation, api.getId(),
+                    ((UserRegistry) registry).getTenantId());
+            RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                    visibleRoles, docLocation);
+            
             registry.commitTransaction();
             api.setUuid(artifact.getId());
             transactionCommitted = true;
