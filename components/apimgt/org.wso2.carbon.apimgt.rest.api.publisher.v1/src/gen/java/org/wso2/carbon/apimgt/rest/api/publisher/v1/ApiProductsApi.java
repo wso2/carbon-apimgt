@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ApiProductsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -337,12 +338,46 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Products" })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "'Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.' ", response = APIProductDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
     public Response apiProductsPost(@ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO apIProductDTO) throws APIManagementException{
         return delegate.apiProductsPost(apIProductDTO, securityContext);
+    }
+
+    @GET
+    @Path("/{apiProductId}/history")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List API Product History", notes = "List all history events of an API Product. ", response = HistoryEventListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API Product History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Product History list is returned. ", response = HistoryEventListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIProductHistory(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the time period to show history. ")  @QueryParam("timePeriod") String timePeriod) throws APIManagementException{
+        return delegate.getAPIProductHistory(apiProductId, limit, offset, revisionId, timePeriod, securityContext);
+    }
+
+    @GET
+    @Path("/{apiProductId}/history/{eventId}/payload")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get payload of an API Product History Event.", notes = "Get the payload of a particular history event of an API Product. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API History" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Product History Event Payload is returned. ", response = String.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIProductHistoryEventPayload(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
+        return delegate.getAPIProductHistoryEventPayload(apiProductId, eventId, securityContext);
     }
 }

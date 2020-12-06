@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
@@ -1014,6 +1015,40 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response generateMockScripts(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.generateMockScripts(apiId, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/history")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List API History", notes = "List all history events of an API. ", response = HistoryEventListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API History list is returned. ", response = HistoryEventListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIHistory(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the time period to show history. ")  @QueryParam("timePeriod") String timePeriod) throws APIManagementException{
+        return delegate.getAPIHistory(apiId, limit, offset, revisionId, timePeriod, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/history/{eventId}/payload")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get payload of an API History Event.", notes = "Get the payload of a particular history event of an API. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API History Event Payload is returned. ", response = String.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIHistoryEventPayload(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
+        return delegate.getAPIHistoryEventPayload(apiId, eventId, securityContext);
     }
 
     @GET

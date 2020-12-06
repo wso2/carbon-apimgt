@@ -4602,4 +4602,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return apiEndpointValidationResponseDTO;
     }
+
+    @Override
+    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String timePeriod,
+                                  MessageContext messageContext) throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext)
+            throws APIManagementException {
+
+        return null;
+    }
 }
