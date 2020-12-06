@@ -2773,12 +2773,10 @@ public class APIMappingUtil {
     public static APIRevisionListDTO fromListAPIRevisiontoDTO(List<APIRevision> apiRevisionList) throws APIManagementException {
         APIRevisionListDTO apiRevisionListDTO = new APIRevisionListDTO();
         List<APIRevisionDTO> apiRevisionDTOS = new ArrayList<>();
-        int count = 0;
         for (APIRevision apiRevision: apiRevisionList) {
-            count++;
             apiRevisionDTOS.add(fromAPIRevisiontoDTO(apiRevision));
         }
-        apiRevisionListDTO.setCount(count);
+        apiRevisionListDTO.setCount(apiRevisionList.size());
         apiRevisionListDTO.setList(apiRevisionDTOS);
         return apiRevisionListDTO;
     }
