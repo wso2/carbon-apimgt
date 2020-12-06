@@ -191,10 +191,11 @@ public interface APIManager {
      * Returns the OpenAPI definition as a string
      *
      * @param apiId id of the api
+     * @param tenantDomain tenant
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(String apiId) throws APIManagementException;
+    String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
     /**
      * Checks whether the given document already exists for the given api/product
      *
@@ -228,10 +229,11 @@ public interface APIManager {
      * Returns a list of documentation attached to a particular API
      *
      * @param uuid id of the api
+     * @param requestedTenantDomain tenant domain
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(String uuid) throws APIManagementException;
+    List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException;
     /**
      * Returns the specified document attached to the given API
      *

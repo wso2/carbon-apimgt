@@ -1184,11 +1184,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
     
     @Override
-    public String getOpenAPIDefinition(String apiId) throws APIManagementException {
-        String apiTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), apiId);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1243,11 +1242,10 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
     
-    public List<Documentation> getAllDocumentation(String uuid) throws APIManagementException {
-        String tenantDoiamin = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = new Organization(tenantDoiamin);
+        Organization org = new Organization(tenantDomain);
         UserContext ctx = new UserContext(username, org, null);
         List<Documentation> convertedList = null;
         try {

@@ -5397,6 +5397,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String definition = super.getOpenAPIDefinition(apiId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
+    
+    @Override
+    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
+        return APIUtil.removeXMediationScriptsFromSwagger(definition);
+    }
 
     @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
@@ -5419,7 +5425,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (api.getSwaggerDefinition() != null) {
             definition = api.getSwaggerDefinition();
         } else {
-            definition = super.getOpenAPIDefinition(api.getUuid());
+            throw new APIManagementException("Missing API definition in the api " + api.getUuid());
         }
         
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
@@ -5496,7 +5502,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if(api.getSwaggerDefinition() != null) {
             definition = api.getSwaggerDefinition();
         } else {
-            definition = super.getOpenAPIDefinition(api.getUuid());
+            throw new APIManagementException("Missing API definition in the api " + api.getUuid());
         }
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         api.setScopes(oasParser.getScopes(definition));
