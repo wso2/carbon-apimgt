@@ -762,4 +762,19 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
     }
+
+    @Override
+    public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId,
+                                         String timePeriod, MessageContext messageContext)
+            throws APIManagementException {
+
+        return null;
+    }
+
+    @Override
+    public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext)
+            throws APIManagementException {
+
+        return null;
+    }
 }
