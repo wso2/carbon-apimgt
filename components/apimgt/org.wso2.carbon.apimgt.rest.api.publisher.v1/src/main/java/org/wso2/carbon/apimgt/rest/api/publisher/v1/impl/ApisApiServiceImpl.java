@@ -3752,7 +3752,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
             APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
             return Response.ok().entity(apiRevisionListDTO).build();
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             String errorMessage = "Error while adding retrieving API Revision for api id : " + apiId + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -3783,9 +3783,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             //This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/" + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API Revision : " + apIRevisionDTO.getApiInfo().getProvider() + "-" +
-                    apIRevisionDTO.getApiInfo().getName() + "-" + apIRevisionDTO.getApiInfo().getVersion() + " - " + e.getMessage();
+                    apIRevisionDTO.getApiInfo().getName() + "-" + apIRevisionDTO.getApiInfo().getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving created revision API location : " + apIRevisionDTO.getApiInfo().getProvider() + "-" +
+                    apIRevisionDTO.getApiInfo().getName() + "-" + apIRevisionDTO.getApiInfo().getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

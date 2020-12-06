@@ -10877,10 +10877,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String addAPIRevision(APIRevision apiRevision) throws APIManagementException {
         int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
         apiRevision.setId(revisionId);
-        String revisionUUID = createAPIRevisionRegistryArtifacts(apiRevision.getApiUUID(), revisionId);
+        APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+        if (apiId == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiRevision.getApiUUID(), ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiRevision.getApiUUID()));
+        }
+        String revisionUUID = createAPIRevisionRegistryArtifacts(apiRevision.getApiUUID(), revisionId, apiId);
+        if (StringUtils.isEmpty(revisionUUID)) {
+            String errorMessage = "Failed to retrieve revision uuid";
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIRevision(apiRevision);
-        //TODO: Need to do rest of the tables revisioned after adding the revision
         return revisionUUID;
     }
 
@@ -10903,9 +10913,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param revisionId Revision ID
      * @throws APIManagementException if failed to copy API registry artifacts
      */
-    protected String createAPIRevisionRegistryArtifacts(String apiUUID, int revisionId) throws APIManagementException {
+    protected String createAPIRevisionRegistryArtifacts(String apiUUID, int revisionId, APIIdentifier apiId)
+            throws APIManagementException {
         String revisionUUID = null;
-        APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiUUID);
         String apiPath = APIUtil.getAPIPath(apiId);
         int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
         String apiSourcePath = apiPath.substring(0, prependIndex );
