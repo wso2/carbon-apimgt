@@ -505,7 +505,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
             //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, requestedTenantDomain);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 
@@ -658,6 +658,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 api.setUuid(apiId);
             }
 
+            if (api.getSwaggerDefinition() != null) {
+                api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
+            } else {
+                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, requestedTenantDomain));
+            }
+
             // gets the first available environment if any of label, environment or cluster name is not provided
             if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
                     && StringUtils.isEmpty(clusterName)) {
@@ -707,7 +713,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (StringUtils.isNotEmpty(clusterName)) {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api, clusterName);
             } else {
-                apiSwagger = apiConsumer.getOpenAPIDefinition(apiId);
+                apiSwagger = api.getSwaggerDefinition();
             }
 
             return Response.ok().entity(apiSwagger).header("Content-Disposition",

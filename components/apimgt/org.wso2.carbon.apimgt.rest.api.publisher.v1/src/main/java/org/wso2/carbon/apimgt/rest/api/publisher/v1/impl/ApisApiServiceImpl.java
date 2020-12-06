@@ -937,7 +937,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
 
             if (!isWSAPI) {
-                String oldDefinition = apiProvider.getOpenAPIDefinition(apiId);
+                String oldDefinition = apiProvider.getOpenAPIDefinition(apiId, tenantDomain);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -2099,7 +2099,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             //List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
-            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiId);
+            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiId, tenantDomain);
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
                     offset, limit);
             DocumentationMappingUtil
@@ -3269,7 +3269,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //apiProvider.updateAPI(existingAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId); // TODO see why we need to get it instead of passing same
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -4258,7 +4258,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
 
-        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, tenantDomain);
         apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
         apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition);
         return Response.ok().entity(apiDefinition).build();

@@ -3257,7 +3257,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String swagger;
         if (api.getSwaggerDefinition() == null) { // If definition is not in the API object
             if (api.getUuid() != null) {
-                swagger = getOpenAPIDefinition(api.getUuid()); 
+                swagger = getOpenAPIDefinition(api.getUuid(), tenantDomain); 
             } else {
                 swagger = getOpenAPIDefinition(api.getId()); // TODO this needs to be changed to uuid based one
             }

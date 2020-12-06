@@ -116,7 +116,7 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
@@ -284,7 +284,7 @@ public class APIMappingUtil {
             if (model.getDefinition() != null) {
                 apiSwaggerDefinition = model.getDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
         dto.setApiDefinition(apiSwaggerDefinition);

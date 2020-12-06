@@ -1088,7 +1088,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 registryType = registry;
             }
             Identifier id = null;
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
@@ -1104,9 +1104,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
                             apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                 }
-
+                definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
             }
-            definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
             if (log.isDebugEnabled()) {
                 log.debug("Definition for " + apiId + " : " +  definition);
             }
