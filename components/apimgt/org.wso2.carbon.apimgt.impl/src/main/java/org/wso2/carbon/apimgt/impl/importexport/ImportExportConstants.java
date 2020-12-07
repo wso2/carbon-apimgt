@@ -112,16 +112,28 @@ public final class ImportExportConstants {
     public static final String SEQUENCES_RESOURCE = "Sequences";
 
     // Location of the in sequence
-    public static final String IN_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
+    public static final String IN_SEQUENCE_LOCATION_OLD = File.separator + SEQUENCES_RESOURCE
             + File.separator + "in-sequence" + File.separator;
 
     // Location of the out sequence
-    public static final String OUT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
+    public static final String OUT_SEQUENCE_LOCATION_OLD = File.separator + SEQUENCES_RESOURCE
             + File.separator + "out-sequence" + File.separator;
 
     //Location of the fault sequence
-    public static final String FAULT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
+    public static final String FAULT_SEQUENCE_LOCATION_OLD = File.separator + SEQUENCES_RESOURCE
             + File.separator + "fault-sequence" + File.separator;
+
+    // Sequence location post fix
+    public static final String SEQUENCE_LOCATION_POSTFIX = "-sequence";
+
+    // Location of the in sequence
+    public static final String IN_SEQUENCE_PREFIX = "in";
+
+    // Location of the out sequence
+    public static final String OUT_SEQUENCE_PREFIX = "out";
+
+    // Location of the fault sequence
+    public static final String FAULT_SEQUENCE_PREFIX = "fault";
 
     public static final String CERTIFICATE_CONTENT_JSON_KEY = "certificate";
 

@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -61,6 +62,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.registry.api.Collection;
@@ -73,16 +75,20 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -176,7 +182,7 @@ public class ExportUtils {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
             }
 
-            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry);
+            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry, apiProvider);
 
             // Set API status to created if the status is not preserved
             if (!preserveStatus) {
@@ -506,36 +512,91 @@ public class ExportUtils {
      * @param apiIdentifier API Identifier
      * @param apiDto        API DTO
      * @param registry      Current tenant registry
+     * @param apiProvider   API Provider
      * @throws APIImportExportException If an error occurs while exporting sequences
      */
     public static void addSequencesToArchive(String archivePath, APIIdentifier apiIdentifier, APIDTO apiDto,
-            Registry registry) throws APIImportExportException {
+            Registry registry, APIProvider apiProvider)
+            throws APIImportExportException, APIManagementException, RegistryException {
 
         String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
         List<MediationPolicyDTO> mediationPolicyDtos = apiDto.getMediationPolicies();
-        if (!apiDto.getMediationPolicies().isEmpty()) {
+
+        if (!mediationPolicyDtos.isEmpty()) {
             CommonUtil.createDirectory(seqArchivePath);
             for (MediationPolicyDTO mediationPolicyDto : mediationPolicyDtos) {
-                AbstractMap.SimpleEntry<String, OMElement> sequenceDetails;
-                String sequenceName = mediationPolicyDto.getName();
-                String direction = mediationPolicyDto.getType().toLowerCase();
-                String pathToExportedSequence =
-                        seqArchivePath + File.separator + direction + "-sequence" + File.separator;
-                if (sequenceName != null) {
-                    sequenceDetails = getCustomSequence(sequenceName, direction, registry);
-                    if (sequenceDetails == null) {
-                        // If sequence doesn't exist in 'apimgt/customsequences/{in/out/fault}' directory check in API
-                        // specific registry path
-                        sequenceDetails = getAPISpecificSequence(apiIdentifier, sequenceName, direction, registry);
-                        pathToExportedSequence += ImportExportConstants.CUSTOM_TYPE + File.separator;
+                if (mediationPolicyDto.isShared()) {
+                    String individualSequenceExportPath =
+                            seqArchivePath + File.separator + mediationPolicyDto.getType().toLowerCase()
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                    if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                        CommonUtil.createDirectory(individualSequenceExportPath);
                     }
-                    writeSequenceToFile(pathToExportedSequence, sequenceDetails, apiIdentifier);
+                    //Get registry resource correspond to identifier
+                    Resource mediationResource = apiProvider
+                            .getCustomMediationResourceFromUuid(mediationPolicyDto.getId());
+                    writeSequenceToArchive(mediationResource, individualSequenceExportPath, registry,
+                            mediationPolicyDto.getName(), apiIdentifier);
                 }
             }
-        } else if (log.isDebugEnabled()) {
-            log.debug("No custom sequences available for API: " + apiIdentifier.getApiName() + StringUtils.SPACE
-                    + APIConstants.API_DATA_VERSION + ": " + apiIdentifier.getVersion()
-                    + ". Skipping custom sequence export.");
+
+            // Getting list of API specific custom mediation policies
+            List<Mediation> apiSpecificMediationList = apiProvider.getAllApiSpecificMediationPolicies(apiIdentifier);
+            if (!apiSpecificMediationList.isEmpty()) {
+                for (Mediation mediation : apiSpecificMediationList) {
+                    String individualSequenceExportPath =
+                            seqArchivePath + File.separator + mediation.getType().toLowerCase()
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+                    if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                        CommonUtil.createDirectory(individualSequenceExportPath);
+                    }
+                    // Get registry resource correspond to identifier
+                    String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+                    apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+                    Resource mediationResource = apiProvider
+                            .getApiSpecificMediationResourceFromUuid(apiIdentifier, mediation.getUuid(),
+                                    apiResourcePath);
+                    writeSequenceToArchive(mediationResource, individualSequenceExportPath, registry,
+                            mediation.getName(), apiIdentifier);
+                }
+            }
+        }
+    }
+
+    /**
+     * Write the sequence to API archive.
+     *
+     * @param mediationResource Mediation resource
+     * @param individualSequenceExportPath         Path to export the mediation sequence
+     * @param registry     Current tenant registry
+     * @param mediationName     Name of the mediation policy
+     * @param apiIdentifier     API Identifier
+     * @throws RegistryException If an error occurs while retrieving registry elements
+     * @throws APIManagementException If an error occurs while writing the mediation policy to file
+     */
+    private static void writeSequenceToArchive(Resource mediationResource, String individualSequenceExportPath,
+            Registry registry, String mediationName, APIIdentifier apiIdentifier)
+            throws RegistryException, APIManagementException {
+        if (mediationResource != null) {
+            // Get the registry resource path
+            String resourcePath = mediationResource.getPath();
+            // Check whether resource exists in the registry
+            if (registry.resourceExists(resourcePath)) {
+                Resource mediationFile = registry.get(resourcePath);
+                try (OutputStream outputStream = new FileOutputStream(
+                        individualSequenceExportPath + File.separator + mediationName + APIConstants.DOT
+                                + APIConstants.XML_DOC_EXTENSION);
+                        InputStream fileInputStream = mediationFile.getContentStream()) {
+                    IOUtils.copy(fileInputStream, outputStream);
+                } catch (IOException e) {
+                    throw new APIManagementException("Error while writing the mediation sequence"+ mediationName+ "to file");
+                }
+            } else {
+                // Log error and avoid throwing as we give capability to export an API without sequences
+                log.error("Sequence resource for API/API Product: " + apiIdentifier.getName() + " not found in "
+                        + resourcePath);
+            }
         }
     }
 
