@@ -23,7 +23,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.axiom.om.OMElement;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -62,7 +61,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.registry.api.Collection;
@@ -75,22 +73,14 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.ws.rs.core.Response;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 public class ExportUtils {
 
@@ -597,120 +587,6 @@ public class ExportUtils {
                 log.error("Sequence resource for API/API Product: " + apiIdentifier.getName() + " not found in "
                         + resourcePath);
             }
-        }
-    }
-
-    /**
-     * Retrieve custom sequence details from the registry.
-     *
-     * @param sequenceName Name of the sequence
-     * @param type         Sequence type
-     * @param registry     Current tenant registry
-     * @return Registry resource name of the sequence and its content
-     * @throws APIImportExportException If an error occurs while retrieving registry elements
-     */
-    private static AbstractMap.SimpleEntry<String, OMElement> getCustomSequence(String sequenceName, String type,
-            Registry registry) throws APIImportExportException {
-
-        String regPath = null;
-        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(type)) {
-            regPath = APIConstants.API_CUSTOM_INSEQUENCE_LOCATION;
-        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(type)) {
-            regPath = APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION;
-        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(type)) {
-            regPath = APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION;
-        }
-        return getSeqDetailsFromRegistry(sequenceName, regPath, registry);
-    }
-
-    /**
-     * Retrieve API Specific sequence details from the registry.
-     *
-     * @param sequenceName Name of the sequence
-     * @param type         Sequence type
-     * @param registry     Current tenant registry
-     * @return Registry resource name of the sequence and its content
-     * @throws APIImportExportException If an error occurs while retrieving registry elements
-     */
-    private static AbstractMap.SimpleEntry<String, OMElement> getAPISpecificSequence(APIIdentifier api,
-            String sequenceName, String type, Registry registry) throws APIImportExportException {
-
-        String regPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.getProviderName()
-                + RegistryConstants.PATH_SEPARATOR + api.getApiName() + RegistryConstants.PATH_SEPARATOR + api
-                .getVersion() + RegistryConstants.PATH_SEPARATOR + type;
-        return getSeqDetailsFromRegistry(sequenceName, regPath, registry);
-    }
-
-    /**
-     * Retrieve sequence details from registry by given registry path.
-     *
-     * @param sequenceName Sequence Name
-     * @param regPath      Registry path
-     * @param registry     Registry
-     * @return Sequence details as a simple entry
-     * @throws APIImportExportException If an error occurs while retrieving sequence details from registry
-     */
-    private static AbstractMap.SimpleEntry<String, OMElement> getSeqDetailsFromRegistry(String sequenceName,
-            String regPath, Registry registry) throws APIImportExportException {
-
-        AbstractMap.SimpleEntry<String, OMElement> sequenceDetails = null;
-        Collection seqCollection;
-
-        try {
-            seqCollection = (Collection) registry.get(regPath);
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElement.getAttributeValue(new QName("name")))) {
-                        String sequenceFileName = sequenceName + APIConstants.XML_EXTENSION;
-                        sequenceDetails = new AbstractMap.SimpleEntry<>(sequenceFileName, seqElement);
-                        break;
-                    }
-                }
-            }
-        } catch (RegistryException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving sequence: " + sequenceName + " from the path: " + regPath, e);
-        } catch (Exception e) {
-            // APIUtil.buildOMElement() throws a generic exception
-            throw new APIImportExportException(
-                    "Error while reading content for sequence: " + sequenceName + " from the registry", e);
-        }
-        return sequenceDetails;
-    }
-
-    /**
-     * Store API Specific or custom sequences in the archive directory.
-     *
-     * @param sequenceDetails Details of the sequence
-     * @param apiIdentifier   ID of the requesting API
-     * @throws APIImportExportException If an error occurs while serializing XML stream or storing in
-     *                                  archive directory
-     */
-    private static void writeSequenceToFile(String pathToExportedSequence,
-            AbstractMap.SimpleEntry<String, OMElement> sequenceDetails, APIIdentifier apiIdentifier)
-            throws APIImportExportException {
-
-        if (sequenceDetails != null) {
-            String sequenceFileName = sequenceDetails.getKey();
-            OMElement sequenceConfig = sequenceDetails.getValue();
-            CommonUtil.createDirectory(pathToExportedSequence);
-            String exportedSequenceFile = pathToExportedSequence + sequenceFileName;
-            try (OutputStream outputStream = new FileOutputStream(exportedSequenceFile)) {
-                sequenceConfig.serialize(outputStream);
-                if (log.isDebugEnabled()) {
-                    log.debug(sequenceFileName + " of API: " + apiIdentifier.getApiName() + " retrieved successfully");
-                }
-            } catch (IOException e) {
-                throw new APIImportExportException("Unable to find file: " + exportedSequenceFile, e);
-            } catch (XMLStreamException e) {
-                throw new APIImportExportException("Error while processing XML stream ", e);
-            }
-        } else {
-            throw new APIImportExportException(
-                    "Error while writing sequence of API: " + apiIdentifier.getApiName() + " to file.");
         }
     }
 
