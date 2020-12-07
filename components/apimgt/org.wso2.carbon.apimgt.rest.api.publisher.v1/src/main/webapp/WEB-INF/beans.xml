@@ -50,6 +50,7 @@
     <bean id="URLValidationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.URLValidationInterceptor" />
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
+    <bean id="LogRequestInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.request.LogRequestInInterceptor"/>
 
     <!-- For Basic Authentication scheme please comment the AuthenticationInterceptor which contains "OAuthAuthenticationInterceptor"
             and uncomment the AuthenticationInterceptor which contains "BasicAuthenticationInterceptor"-->
@@ -76,6 +77,7 @@
     <!-- Out interceptors -->
     <bean id="gZipInterceptor" class="org.apache.cxf.transport.common.gzip.GZIPOutInterceptor" />
     <bean id="responseInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.response.ResponseOutInterceptor" />
+    <bean id="LogResponseOutInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.response.LogResponseOutInterceptor"/>
 
     <cxf:bus>
         <cxf:inInterceptors>
@@ -86,8 +88,10 @@
             <ref bean="BasicAuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
+            <ref bean="LogRequestInInterceptor"/>
         </cxf:inInterceptors>
         <cxf:outInterceptors>
+            <ref bean="LogResponseOutInterceptor"/>
             <ref bean="gZipInterceptor"/>
             <ref bean="responseInterceptor"/>
         </cxf:outInterceptors>
