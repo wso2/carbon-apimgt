@@ -44,17 +44,19 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private final String DASH = "-";
 
     public Response checkServiceExistence(String name, String version, MessageContext messageContext) {
-        if (StringUtils.equals(name, ENDPOINT_NAME) && StringUtils.equals(version, ENDPOINT_VERSION)) {
-            List<File> fileList = new ArrayList<File>();
-            fileList.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME));
-            fileList.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + OAS_FILE_NAME));
-            String eTag = ETagValueGenerator.getETag(fileList);
+        if (Files.exists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
+            if (StringUtils.equals(name, ENDPOINT_NAME) && StringUtils.equals(version, ENDPOINT_VERSION)) {
+                List<File> fileList = new ArrayList<File>();
+                fileList.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME));
+                fileList.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + OAS_FILE_NAME));
+                String eTag = ETagValueGenerator.getETag(fileList);
 
-            return Response.ok().header("ETag", eTag).build();
-        } else {
-            RestApiUtil.handleBadRequest("Invalid API Category name(s) defined", log);
+                return Response.ok().header("ETag", eTag).build();
+            } else {
+                RestApiUtil.handleBadRequest("Invalid service name or version defined", log);
+            }
         }
-        return null;
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
@@ -176,7 +178,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String eTag = ETagValueGenerator.getETag(fileList);
 
         if (StringUtils.equals(ifMatch, eTag)) {
-            return Response.notModified().build();
+            return Response.status(Response.Status.CONFLICT).build();
         } else if (overwrite != null) {
             if (overwrite) {
                 if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
@@ -198,7 +200,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                     RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
                 }
             } else {
-                return Response.status(Response.Status.NOT_MODIFIED).build();
+                return Response.status(Response.Status.CONFLICT).build();
             }
         }
         return null;
