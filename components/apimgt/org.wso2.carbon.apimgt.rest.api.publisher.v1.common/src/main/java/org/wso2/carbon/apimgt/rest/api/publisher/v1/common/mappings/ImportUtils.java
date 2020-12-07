@@ -1086,8 +1086,8 @@ public class ImportUtils {
                 if (StringUtils.equals(certificateFileName, endpointsCertificate.getName())) {
                     certificateContent = FileUtils.readFileToString(
                             new File(pathToCertificatesDirectory + File.separator + certificateFileName));
-                    certificateContent = certificateContent.replace(APIConstants.BEGIN_CERTIFICATE_STRING, "");
-                    certificateContent = certificateContent.replace(APIConstants.END_CERTIFICATE_STRING, "");
+                    certificateContent = StringUtils.substringBetween(certificateContent,
+                            APIConstants.BEGIN_CERTIFICATE_STRING, APIConstants.END_CERTIFICATE_STRING);
                 }
             }
         }
