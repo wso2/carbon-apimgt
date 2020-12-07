@@ -42,6 +42,7 @@ import Scopes from 'AppComponents/Scopes/Scopes';
 import merge from 'lodash/merge';
 import Utils from 'AppData/Utils';
 
+const editor = true;
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
     <Suspense fallback={<Progress per={50} message='Loading components ...' />}>
@@ -193,7 +194,7 @@ export default class Protected extends Component {
         const { settings } = this.state;
         const { theme } = this.state;
         const enableServiceCatalog = Utils.CONST.ENABLE_SERVICE_CATALOG;
-        if (!user) {
+        if (!user && !editor) {
             return (
                 <IntlProvider locale={language} messages={messages}>
                     <RedirectToLogin />

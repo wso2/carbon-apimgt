@@ -34,7 +34,7 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import UnexpectedError from 'AppComponents/Base/Errors/UnexpectedError';
 import LoginDenied from './app/LoginDenied';
 
-
+const editor = true;
 const ProtectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApps" */));
 
 /**
@@ -186,7 +186,7 @@ class Publisher extends React.Component {
                                         return <LoginDenied />;
                                     } else if (unexpectedServerError) {
                                         return <UnexpectedError />;
-                                    } else if (!user) {
+                                    } else if (!user && !editor) {
                                         return <RedirectToLogin />;
                                     }
                                     return (
