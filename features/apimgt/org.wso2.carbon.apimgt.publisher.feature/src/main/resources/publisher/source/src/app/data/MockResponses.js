@@ -31,6 +31,9 @@ class MockResponses {
             scopes: [
                 'string',
             ],
+            schemaTypes: [
+                'OAS2', 'OAS3', 'WSDL1', 'WSDL2', 'GRAPHQL_SDL', 'ASYNC_API',
+            ],
         };
         return Promise.resolve({ body: response });
     }
@@ -45,8 +48,39 @@ class MockResponses {
         const response = {
             limit: 0,
             offset: 0,
-            total: 0,
-            list: [],
+            total: 2,
+            list: [
+                {
+                    id: '01234567-0123-0123-0123-012345678901',
+                    name: 'Pizzashack-Endpoint',
+                    displayName: 'Pizzashack-Endpoint',
+                    description: 'A Catalog Entry that exposes a REST endpoint',
+                    version: 'v1',
+                    serviceUrl: 'http://localhost/pizzashack',
+                    definitionType: 'OAS3',
+                    securityType: 'BASIC',
+                    mutualSSLEnabled: false,
+                    usage: 1,
+                    createdTime: '2020-02-20T13:57:16.229Z',
+                    lastUpdatedTime: '2020-02-20T13:57:16.229Z',
+                    etag: '32c890312cfadc94a7c1153f65a4f100',
+                },
+                {
+                    id: '43214567-0123-2345-1298-012345678901',
+                    name: 'New-Endpoint',
+                    displayName: 'New-Endpoint',
+                    description: 'A Catalog Entry that exposes a REST endpoint',
+                    version: 'v1',
+                    serviceUrl: 'http://localhost/new',
+                    definitionType: 'ASYNC_API',
+                    securityType: 'OAUTH2',
+                    mutualSSLEnabled: false,
+                    usage: 1,
+                    createdTime: '2020-02-20T13:57:16.229Z',
+                    lastUpdatedTime: '2020-02-20T13:57:16.229Z',
+                    etag: '32c890312cfadc94a7c1153f65a4f100',
+                },
+            ],
             pagination: {
                 offset: 0,
                 limit: 1,
