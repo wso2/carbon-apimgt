@@ -845,7 +845,7 @@ public class ImportUtils {
 
         String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
         String inSequenceFileLocation =
-                pathToArchive + ImportExportConstants.IN_SEQUENCE_LOCATION_OLD + inSequenceFileName;
+                pathToArchive + ImportExportConstants.IN_SEQUENCE_LOCATION + inSequenceFileName;
         String regResourcePath;
 
         //Adding in-sequence, if any
@@ -856,7 +856,7 @@ public class ImportUtils {
 
         String outSequenceFileName = importedApi.getOutSequence() + APIConstants.XML_EXTENSION;
         String outSequenceFileLocation =
-                pathToArchive + ImportExportConstants.OUT_SEQUENCE_LOCATION_OLD + outSequenceFileName;
+                pathToArchive + ImportExportConstants.OUT_SEQUENCE_LOCATION + outSequenceFileName;
 
         //Adding out-sequence, if any
         if (CommonUtil.checkFileExistence(outSequenceFileLocation)) {
@@ -866,7 +866,7 @@ public class ImportUtils {
 
         String faultSequenceFileName = importedApi.getFaultSequence() + APIConstants.XML_EXTENSION;
         String faultSequenceFileLocation =
-                pathToArchive + ImportExportConstants.FAULT_SEQUENCE_LOCATION_OLD + faultSequenceFileName;
+                pathToArchive + ImportExportConstants.FAULT_SEQUENCE_LOCATION + faultSequenceFileName;
 
         //Adding fault-sequence, if any
         if (CommonUtil.checkFileExistence(faultSequenceFileLocation)) {
