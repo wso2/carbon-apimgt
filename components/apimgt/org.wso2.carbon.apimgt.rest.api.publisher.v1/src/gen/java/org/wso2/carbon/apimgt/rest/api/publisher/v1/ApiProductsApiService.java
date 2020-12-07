@@ -44,6 +44,7 @@ public interface ApiProductsApiService {
       public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsExportGet(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apiProductsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsPost(APIProductDTO apIProductDTO, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId, String timePeriod, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext) throws APIManagementException;
