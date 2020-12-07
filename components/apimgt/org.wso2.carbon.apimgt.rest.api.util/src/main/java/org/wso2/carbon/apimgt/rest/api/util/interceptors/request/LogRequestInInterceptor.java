@@ -24,13 +24,20 @@ import org.apache.cxf.phase.Phase;
 
 public class LogRequestInInterceptor extends AbstractPhaseInterceptor {
 
-    public LogRequestInInterceptor(String phase) {
+    public LogRequestInInterceptor() {
 
         super(Phase.PRE_INVOKE);
     }
 
     @Override
     public void handleMessage(Message message) throws Fault {
+
+        //message.get("org.apache.cxf.request.method") = PUT
+        //         InputStream in = message.getContent(InputStream.class);
+        //        byte payload[] = IOUtils.readBytesFromStream(in);
+        //        ByteArrayInputStream bin = new ByteArrayInputStream(payload);
+        //        message.setContent(InputStream.class, bin);
+        //message.get("path_to_match_slash") = /apis/13db822a-b52e-401f-99a6-da45dc05c7b6/swagger
 
         //Read the resource path and verbs for history events on API Manager configuration
         //Check whether invoking request matches with that list, if yes add event and payload to the Exchange object

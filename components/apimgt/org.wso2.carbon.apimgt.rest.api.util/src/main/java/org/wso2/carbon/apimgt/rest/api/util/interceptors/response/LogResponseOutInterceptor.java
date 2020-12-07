@@ -24,7 +24,7 @@ import org.apache.cxf.phase.Phase;
 
 public class LogResponseOutInterceptor extends AbstractPhaseInterceptor {
 
-    public LogResponseOutInterceptor(String phase) {
+    public LogResponseOutInterceptor() {
 
         super(Phase.PRE_LOGICAL);
     }
