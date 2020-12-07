@@ -51,7 +51,7 @@ public class HistoryEventDTO   {
   }
 
   
-  @ApiModelProperty(example = "Update API", value = "")
+  @ApiModelProperty(example = "PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5", value = "")
   @JsonProperty("operation")
   public String getOperation() {
     return operation;
@@ -68,7 +68,7 @@ public class HistoryEventDTO   {
   }
 
   
-  @ApiModelProperty(example = "PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5", value = "")
+  @ApiModelProperty(example = "Update API", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
