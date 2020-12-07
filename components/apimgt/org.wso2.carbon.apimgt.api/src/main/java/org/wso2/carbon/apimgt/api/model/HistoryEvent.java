@@ -21,7 +21,7 @@ public class HistoryEvent {
 
     private String id;
     private String description;
-    private String requestURI;
+    private String operation;
     private String user;
     private Object payload;
     private String createdTime;
@@ -48,14 +48,14 @@ public class HistoryEvent {
         this.description = description;
     }
 
-    public String getRequestURI() {
+    public String getOperation() {
 
-        return requestURI;
+        return operation;
     }
 
-    public void setRequestURI(String requestURI) {
+    public void setOperation(String operation) {
 
-        this.requestURI = requestURI;
+        this.operation = operation;
     }
 
     public String getUser() {
