@@ -7515,10 +7515,10 @@ components:
           example: 3333ce7e1-8233-46a5-9295-525dca347f33
         operation:
           type: string
-          example: Update API
+          example: PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5
         description:
           type: string
-          example: PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5
+          example: Update API
         user:
           type: string
           example: user1
