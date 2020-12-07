@@ -194,12 +194,6 @@ public final class APIImportUtil {
                 APIAndAPIProductCommonUtil.setCurrentProviderToAPIProperties(apiTypeWrapper, currentTenantDomain, prevTenantDomain);
             }
 
-            // Get API params Definition as JSON and resolve them
-            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(pathToArchive);
-            if (paramsConfigObject != null) {
-                importedApi = APIControllerUtil.injectEnvParamsToAPI(importedApi, paramsConfigObject, pathToArchive);
-            }
-
             // Store imported API status
             targetStatus = importedApi.getStatus();
             if (Boolean.TRUE.equals(overwrite)) {
