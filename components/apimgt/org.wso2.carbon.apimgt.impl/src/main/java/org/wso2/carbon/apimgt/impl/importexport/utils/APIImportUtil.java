@@ -356,9 +356,6 @@ public final class APIImportUtil {
                         + ": " + importedApi.getId().getVersion();
             }
             throw new APIImportExportException(errorMessage + " " + e.getMessage(), e);
-        } catch (APIImportExportException e) {
-            String errorMessage = "Error while importing API: " + e.getMessage();
-            throw new APIImportExportException(errorMessage, e);
         }
     }
 
