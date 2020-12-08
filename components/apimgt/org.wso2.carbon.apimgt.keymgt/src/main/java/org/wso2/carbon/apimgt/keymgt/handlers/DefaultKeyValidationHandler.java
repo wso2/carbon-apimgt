@@ -160,8 +160,14 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         }
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        API api = tenantSubscriptionStore.getApiByContextAndVersion(validationContext.getContext(),
-                validationContext.getVersion());
+        String version = validationContext.getVersion();
+        if (StringUtils.isNotEmpty(version) && version.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+            String[] tempArr = version.split(APIConstants.DEFAULT_VERSION_PREFIX);
+            if (tempArr.length > 1) {
+                version = tempArr[1];
+            }
+        }
+        API api = tenantSubscriptionStore.getApiByContextAndVersion(validationContext.getContext(), version);
         boolean scopesValidated = false;
         if (api != null) {
 
