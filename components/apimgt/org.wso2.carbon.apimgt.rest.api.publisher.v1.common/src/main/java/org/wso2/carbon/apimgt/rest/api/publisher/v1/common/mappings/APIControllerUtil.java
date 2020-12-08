@@ -351,7 +351,8 @@ public class APIControllerUtil {
         } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {// if endpoint type is AWS Lambda
             //if aws config is not provided
             if (envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
-                throw new APIManagementException("Please specify awsLambdaEndpoints field for  and continue...");
+                throw new APIManagementException(
+                        "Please specify awsLambdaEndpoints field for the environment and continue...");
             }
             JsonObject awsEndpointParams = envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY)
                     .getAsJsonObject();
@@ -376,8 +377,10 @@ public class APIControllerUtil {
                     defaultSandboxEndpoint);
             //add AWS endpoint configs as endpoint configs
             return updatedAwsEndpointParams;
+        } else {
+            throw new APIManagementException(
+                    "Please specify valid endpoint configurations for the environment and continue...");
         }
-        return null;
     }
 
     /**
@@ -411,7 +414,8 @@ public class APIControllerUtil {
             JsonElement loadBalancedConfigElement = envParams.get(ImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
-                throw new APIManagementException("Please specify loadBalanceEndpoints field for and continue...");
+                throw new APIManagementException(
+                        "Please specify loadBalanceEndpoints for the environment and continue...");
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
             }
@@ -451,7 +455,8 @@ public class APIControllerUtil {
             JsonElement failoverConfigElement = envParams.get(ImportExportConstants.FAILOVER_ENDPOINTS_FIELD);
             JsonObject failoverConfigs;
             if (failoverConfigElement == null) {
-                throw new APIManagementException("Please specify failoverEndpoints field for and continue...");
+                throw new APIManagementException(
+                        "Please specify failoverEndpoints field for the environment and continue...");
             } else {
                 failoverConfigs = failoverConfigElement.getAsJsonObject();
             }
@@ -467,7 +472,8 @@ public class APIControllerUtil {
             if (productionFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
-                    throw new APIManagementException("Please specify production failover field for and continue...");
+                    throw new APIManagementException(
+                            "Please specify production failover field for the environment and continue...");
                 }
             } else if (!productionFailOvers.isJsonNull()) {
                 updatedRESTEndpointParams
@@ -481,7 +487,8 @@ public class APIControllerUtil {
             if (sandboxFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
-                    throw new APIManagementException("Please specify sandbox failover field for and continue...");
+                    throw new APIManagementException(
+                            "Please specify sandbox failover field for for the environment and continue...");
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
                 updatedRESTEndpointParams
@@ -524,7 +531,8 @@ public class APIControllerUtil {
             JsonElement loadBalancedConfigElement = envParams.get(ImportExportConstants.LOAD_BALANCE_ENDPOINTS_FIELD);
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
-                throw new APIManagementException("Please specify loadBalanceEndpoints field for and continue...");
+                throw new APIManagementException(
+                        "Please specify loadBalanceEndpoints field for for the environment and continue...");
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
             }
@@ -574,7 +582,8 @@ public class APIControllerUtil {
             JsonElement failoverConfigElement = envParams.get(ImportExportConstants.FAILOVER_ENDPOINTS_FIELD);
             JsonObject failoverConfigs;
             if (failoverConfigElement == null) {
-                throw new APIManagementException("Please specify failoverEndpoints field for and continue...");
+                throw new APIManagementException(
+                        "Please specify failoverEndpoints field for the environment and continue...");
             } else {
                 failoverConfigs = failoverConfigElement.getAsJsonObject();
             }
@@ -590,7 +599,8 @@ public class APIControllerUtil {
             if (productionFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
-                    throw new APIManagementException("Please specify production failover field for and continue...");
+                    throw new APIManagementException(
+                            "Please specify production failover field for the environment and continue...");
                 }
             } else if (!productionFailOvers.isJsonNull()) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY,
@@ -604,7 +614,8 @@ public class APIControllerUtil {
             if (sandboxFailOvers == null) {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
-                    throw new APIManagementException("Please specify sandbox failover field for and continue...");
+                    throw new APIManagementException(
+                            "Please specify sandbox failover field for the environment and continue...");
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY,

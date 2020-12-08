@@ -28,6 +28,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
@@ -336,9 +337,9 @@ public class CommonUtil {
      *
      * @param filePath String of new file path
      * @param content  String of content to write into the file
-     * @throws IOException If an error occurs when generating new certs and yaml file
+     * @throws APIManagementException If an error occurs when generating new certs and yaml file
      */
-    public static void generateFiles(String filePath, String content) throws IOException {
+    public static void generateFiles(String filePath, String content) throws APIManagementException {
 
         File file = new File(filePath);
         try (FileOutputStream fos = new FileOutputStream(file)) {
@@ -353,7 +354,7 @@ public class CommonUtil {
 
         } catch (IOException e) {
             String errorMessage = "Error while generating meta information of client certificates from path.";
-            throw new IOException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
     }
 
@@ -362,14 +363,14 @@ public class CommonUtil {
      *
      * @param source String of the source file path
      * @param dest   String of the destination file path
-     * @throws IOException If an error occurs when copying files
+     * @throws APIManagementException If an error occurs when copying files
      */
-    public static void moveFile(String source, String dest) throws IOException {
+    public static void moveFile(String source, String dest) throws APIManagementException {
         try {
             Files.move(Paths.get(source), Paths.get(dest));
         } catch (IOException e) {
             String errorMessage = "Error while moving file from" + source + "to" + dest;
-            throw new IOException(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
     }
 }
