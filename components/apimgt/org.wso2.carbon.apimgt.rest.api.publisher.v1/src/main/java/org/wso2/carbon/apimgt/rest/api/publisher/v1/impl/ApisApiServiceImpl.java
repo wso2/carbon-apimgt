@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.HistoryEvent;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -3783,9 +3784,17 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String timePeriod,
-                                  MessageContext messageContext) throws APIManagementException {
+    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String startTime,
+                                  String endTime, MessageContext messageContext) throws APIManagementException {
 
+        // pre-processing
+        // setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<HistoryEvent> historyEvents = apiProvider.getHistoryEventsWithPagination(apiId, revisionId, startTime,
+                endTime, offset, limit);
+        int eventCount = apiProvider.getAllHistoryCount(apiId, revisionId, startTime, endTime);
         return null;
     }
 
@@ -3793,6 +3802,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext)
             throws APIManagementException {
 
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String payload = apiProvider.getHistoryEventPayload(apiId, eventId);
         return null;
     }
 }
