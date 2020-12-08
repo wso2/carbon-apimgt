@@ -50,7 +50,7 @@ public class CommenterInfoDTO   {
 
   
   @ApiModelProperty(example = "David", value = "")
-  @JsonProperty("LastName")
+  @JsonProperty("lastName")
   public String getLastName() {
     return lastName;
   }

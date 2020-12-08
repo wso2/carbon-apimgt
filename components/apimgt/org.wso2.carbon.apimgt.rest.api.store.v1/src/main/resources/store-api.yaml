@@ -4600,7 +4600,7 @@ components:
         firstName:
           type: string
           example: John
-        LastName:
+        lastName:
           type: string
           example: David
         fullName:
