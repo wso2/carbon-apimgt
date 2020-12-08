@@ -891,9 +891,12 @@ public class ImportUtils {
         String sequencesDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.SEQUENCES_RESOURCE;
 
         // Add multiple custom sequences to registry for each type in/out/fault
-        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry, ImportExportConstants.IN_SEQUENCE_PREFIX);
-        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry, ImportExportConstants.OUT_SEQUENCE_PREFIX);
-        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry, ImportExportConstants.FAULT_SEQUENCE_PREFIX);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
+                ImportExportConstants.IN_SEQUENCE_PREFIX);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
+                ImportExportConstants.OUT_SEQUENCE_PREFIX);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
+                ImportExportConstants.FAULT_SEQUENCE_PREFIX);
     }
 
     /**
