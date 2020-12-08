@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -13,6 +13,9 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import API from 'AppData/api';
 import DeleteApiButton from './DeleteApiButton';
@@ -87,6 +90,7 @@ const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
+    const [revision, setRevision] = useState(null);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
  * The component for advanced endpoint configurations.
@@ -112,6 +116,17 @@ const APIDetailsTopMenu = (props) => {
             console.error(error);
         });
     }
+
+    React.useEffect(() => {
+        const restApi = new API();
+        restApi.getRevisions().then((response) => {
+            setRevision(response.list);
+        })
+            .catch((errorMessage) => {
+                console.error(errorMessage);
+                Alert.error(JSON.stringify(errorMessage));
+            });
+    }, []);
 
     const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
@@ -160,7 +175,30 @@ const APIDetailsTopMenu = (props) => {
                     />
                 </Typography>
             </div>
+
             <div className={classes.dateWrapper} />
+            <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
+                {revision && (
+                    <FormControl 
+                        variant='outlined' 
+                        className={classes.formControl}
+                    >
+                        <Select
+                            labelId='demo-simple-select-outlined-label'
+                            id='demo-simple-select-outlined'
+                            defaultValue={10}
+                        >
+                            <MenuItem value={10}>Working copy</MenuItem>
+                            {revision.map((number) =>
+                                <MenuItem value={number.id}>
+                                    {'revision_ ' + number.id}
+                                </MenuItem>
+                            )}
+                        </Select>
+                    </FormControl>
+                )}
+            </div>
+
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
             {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}

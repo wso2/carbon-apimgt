@@ -361,7 +361,7 @@ function APICreateDefault(props) {
                                     disabled={!isPublishable || isAPICreateDisabled || !apiInputs.isFormValid}
                                     onClick={createAndPublish}
                                 >
-                                    {!isPublishing && 'Create & Publish'}
+                                    {!isPublishing && 'Create & Deploy'}
                                     {isPublishing && <CircularProgress size={24} />}
                                     {isCreating && isPublishing && 'Creating API . . .'}
                                     {!isCreating && isPublishing && 'Publishing API . . .'}

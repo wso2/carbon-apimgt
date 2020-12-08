@@ -18,6 +18,7 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
+import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -2028,6 +2029,35 @@ class API extends Resource {
             return client.apis['Unified Search'].search(params, Resource._requestMetaData());
         });
     }
+
+     getRevisions() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                const promisedRevisions = apiClient.then(client => {
+//                    return client.apis['API Revisions'].getAPIRevisions(
+//                        this._requestMetaData(),
+//                    );
+                    return MockResponses.listRevision();
+                });
+                return promisedRevisions.then(response => response.body);
+    }
+
+    /**
+     * Upload endpoint certificate.
+     *
+     * @param {any} certificateFile The certificate file to be uploaded.
+     * @param {string} endpoint The certificate endpoint.
+     * @param {string} alias The certificate alias.
+     * */
+    static addRevision(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].createAPIRevision({
+                    apiId: apiId,
+                });
+            });    
+    }
+
 
     /**
      * Get details of a given API
