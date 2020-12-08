@@ -53,7 +53,7 @@ public class APIRealmUtilTest {
         PowerMockito.when(APIUtil.getTenantId("carbon.super")).thenReturn(-1234);
         PowerMockito.when(APIUtil.getClaims("admin", -1234, DEFAULT_DIALECT_URI))
                 .thenReturn(claimValues);
-        Map loggedInUserClaims = APIRealmUtils.getLoggedInUserClaims("admin");
+        Map loggedInUserClaims = APIRealmUtils.getUserClaims("admin");
         assertNotNull(loggedInUserClaims);
         assertEquals(configuredClaims.split(",").length, loggedInUserClaims.size());
     }

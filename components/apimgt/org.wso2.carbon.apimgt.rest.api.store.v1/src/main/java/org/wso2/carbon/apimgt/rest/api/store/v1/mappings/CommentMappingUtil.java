@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,23 +59,37 @@ public class CommentMappingUtil {
      * @param comment comment object
      * @return CommentDTO
      */
-    public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment) throws APIManagementException {
+    public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment, Map<String,
+            Map<String, String>> userClaimsMap)  throws APIManagementException {
         CommentDTO commentDTO = fromCommentToDTO(comment);
-        addCommentDTOWithUserInfo(comment, commentDTO);
+        if (userClaimsMap.get(comment.getUser()) != null) {
+            Map userClaims = userClaimsMap.get(comment.getUser());
+            CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
+            commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
+            commenterInfoDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
+            commenterInfoDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
+            commentDTO.setCommenterInfo(commenterInfoDTO);
+        }
         return  commentDTO;
     }
 
-    public static  CommentDTO addCommentDTOWithUserInfo(Comment comment, CommentDTO commentDTO)
+    /**
+     * Retrieve userClaims from UserStore and save it in a cache map.
+     *
+     * @param username        commenter username
+     * @param userClaimsMap   cache map with user deatils
+     * @return Map<String, Map<String, String>>
+     */
+    public static  Map<String, Map<String, String>> retrieveUserClaims(String username,
+                                                                       Map<String, Map<String, String>> userClaimsMap)
             throws APIManagementException {
-        Map userClaims = APIRealmUtils.getLoggedInUserClaims(comment.getUser());
-        CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
-        commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
-        commenterInfoDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
-        commenterInfoDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
-        commentDTO.setCommenterInfo(commenterInfoDTO);
-        return  commentDTO;
+        Map userClaims;
+        if (userClaimsMap.get(username) == null) {
+            userClaims = APIRealmUtils.getUserClaims(username);
+            userClaimsMap.put(username, userClaims);
+        }
+        return userClaimsMap;
     }
-
     /**
      * Converts a CommentDTO to a Comment object
      *
@@ -107,11 +122,12 @@ public class CommentMappingUtil {
 
         int start = offset < commentList.length && offset >= 0 ? offset : Integer.MAX_VALUE;
         int end = offset + limit - 1 <= commentList.length - 1 ? offset + limit - 1 : commentList.length - 1;
-
+        Map<String, Map<String, String>> userClaimsMap = new HashMap<>();
         for (int i = start; i <= end; i++) {
             try {
                 if (includeCommenterInfo) {
-                    listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i]));
+                    userClaimsMap = retrieveUserClaims(commentList[i].getUser(), userClaimsMap);
+                    listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i], userClaimsMap));
                 } else {
                     listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
                 }

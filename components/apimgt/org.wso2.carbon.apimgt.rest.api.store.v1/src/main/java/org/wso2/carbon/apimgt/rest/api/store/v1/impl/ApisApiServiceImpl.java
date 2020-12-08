@@ -53,10 +53,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
@@ -336,9 +333,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             Comment comment = apiConsumer.getComment(identifier, commentId);
 
             if (comment != null) {
-                CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+                CommentDTO commentDTO;
                 if (includeCommenterInfo) {
-                    CommentMappingUtil.addCommentDTOWithUserInfo(comment, commentDTO);
+                    Map<String, Map<String, String>> userClaimsMap = new HashMap<>();
+                    CommentMappingUtil.retrieveUserClaims(comment.getUser(),userClaimsMap);
+                    commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
+                } else {
+                    commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
                 }
                 String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                         RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;

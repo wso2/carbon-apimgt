@@ -17,7 +17,7 @@ public class APIRealmUtils {
      * @return The looked up claims of the user
      * @throws APIManagementException if failed to get user
      */
-    public static Map<String, String> getLoggedInUserClaims(String userName) throws APIManagementException {
+    public static Map<String, String> getUserClaims(String userName) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         int tenantId = APIUtil.getTenantId(tenantDomain);
         Map<String, String> claimMap = APIUtil.getClaims(userName, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
