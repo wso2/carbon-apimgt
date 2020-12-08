@@ -87,8 +87,9 @@ public class CommonUtil {
         if (identifier != null) {
             createdDirectories = File.separator + identifier.toString() + File.separator;
         } else {
-            createdDirectories = File.separator + RandomStringUtils
-                    .randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH) + File.separator;
+            createdDirectories =
+                    File.separator + RandomStringUtils.randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH)
+                            + File.separator;
         }
         File tempDirectory = new File(currentDirectory + createdDirectories);
         createDirectory(tempDirectory.getPath());
@@ -142,7 +143,7 @@ public class CommonUtil {
     private static void writeArchiveFile(File directoryToZip, List<File> fileList) throws APIImportExportException {
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(directoryToZip.getPath() + ".zip");
-             ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
+                ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             for (File file : fileList) {
                 if (!file.isDirectory()) {
                     addToArchive(directoryToZip, file, zipOutputStream);
@@ -237,15 +238,12 @@ public class CommonUtil {
      */
     public static String jsonToYaml(String json) throws IOException {
 
-        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory()
-                .enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
+        ObjectMapper yamlReader = new ObjectMapper(
+                new YAMLFactory().enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
         JsonNode jsonNodeTree = yamlReader.readTree(json);
-        YAMLMapper yamlMapper = new YAMLMapper()
-                .disable(YAMLGenerator.Feature.SPLIT_LINES)
-                .enable(YAMLGenerator.Feature.INDENT_ARRAYS)
-                .disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+        YAMLMapper yamlMapper = new YAMLMapper().disable(YAMLGenerator.Feature.SPLIT_LINES)
+                .enable(YAMLGenerator.Feature.INDENT_ARRAYS).disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
+                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER).enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
         return yamlMapper.writeValueAsString(jsonNodeTree);
     }
@@ -298,8 +296,8 @@ public class CommonUtil {
 
                 //This index variable is used to get the extracted folder name; that is root directory
                 if (index == 0) {
-                    archiveName = currentEntry.substring(0, currentEntry.indexOf(
-                            APIImportExportConstants.ZIP_FILE_SEPARATOR));
+                    archiveName = currentEntry
+                            .substring(0, currentEntry.indexOf(APIImportExportConstants.ZIP_FILE_SEPARATOR));
                     --index;
                 }
 
@@ -307,8 +305,8 @@ public class CommonUtil {
                 File destinationParent = destinationFile.getParentFile();
                 String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
                 if (!canonicalizedDestinationFilePath.startsWith(new File(destination).getCanonicalPath())) {
-                    String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry +
-                            ". File path is outside target directory";
+                    String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry
+                            + ". File path is outside target directory";
                     throw new APIImportExportException(errorMessage);
                 }
 
@@ -320,8 +318,8 @@ public class CommonUtil {
                 if (!entry.isDirectory()) {
                     // write the current file to the destination
                     try (InputStream zipInputStream = zip.getInputStream(entry);
-                         BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
-                         FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+                            BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
+                            FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
                         IOUtils.copy(inputStream, outputStream);
                     }
                 }
@@ -341,12 +339,9 @@ public class CommonUtil {
      * @throws IOException If an error occurs when generating new certs and yaml file
      */
     public static void generateFiles(String filePath, String content) throws IOException {
-        FileOutputStream fos = null;
-        File file;
-        try {
-            //Specify the file path here
-            file = new File(filePath);
-            fos = new FileOutputStream(file);
+
+        File file = new File(filePath);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
 
             if (!file.exists()) {
                 file.createNewFile();
@@ -359,29 +354,19 @@ public class CommonUtil {
         } catch (IOException e) {
             String errorMessage = "Error while generating meta information of client certificates from path.";
             throw new IOException(errorMessage, e);
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                String errorMessage = "Error while generating meta information of client certificates from path.";
-                throw new IOException(errorMessage, e);
-            }
         }
     }
-
 
     /**
      * This method will be used to copy files from source to destination
      *
      * @param source String of the source file path
-     * @param dest  String of the destination file path
+     * @param dest   String of the destination file path
      * @throws IOException If an error occurs when copying files
      */
-    public static void moveFile(String source, String dest ) throws IOException {
+    public static void moveFile(String source, String dest) throws IOException {
         try {
-             Files.move(Paths.get(source), Paths.get(dest));
+            Files.move(Paths.get(source), Paths.get(dest));
         } catch (IOException e) {
             String errorMessage = "Error while moving file from" + source + "to" + dest;
             throw new IOException(errorMessage, e);
