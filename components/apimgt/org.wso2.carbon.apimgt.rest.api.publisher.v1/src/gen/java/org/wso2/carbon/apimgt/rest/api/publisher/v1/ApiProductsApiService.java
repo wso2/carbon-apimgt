@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
 
 import java.util.List;
 
@@ -45,4 +46,6 @@ public interface ApiProductsApiService {
       public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsPost(APIProductDTO apIProductDTO, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId, String timePeriod, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext) throws APIManagementException;
 }
