@@ -147,6 +147,14 @@ public class ImportUtils {
                 JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
                 importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
             }
+
+            // Get API params Definition as JSON and resolve them
+            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            if (paramsConfigObject != null) {
+                importedApiDTO = APIControllerUtil.injectEnvParamsToAPI(importedApiDTO,
+                                paramsConfigObject, extractedFolderPath);
+            }
+
             String apiType = importedApiDTO.getType().toString();
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiDTO.getProvider());
