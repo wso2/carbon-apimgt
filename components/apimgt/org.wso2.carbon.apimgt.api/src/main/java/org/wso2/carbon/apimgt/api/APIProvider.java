@@ -1529,5 +1529,43 @@ public interface APIProvider extends APIManager {
      * @param apiId API Identifier
      * @return a list of Deploymentstatus objects in different cloud environments
      */
-    List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
+    List<DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException;
+
+    /**
+     * Get the paginated list of API/API Product history events for the given API/API Product.
+     *
+     * @param apiId      API/API Product UUID
+     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @param offset     Start index
+     * @param limit      Max no of events need to return
+     * @return a list of History events
+     * @throws APIManagementException if failed to get the API history events
+     */
+    List<HistoryEvent> getHistoryEventsWithPagination(String apiId, String revisionId, String startTime, String endTime,
+                                                      int offset, int limit) throws APIManagementException;
+
+    /**
+     * Get the payload associated with the given event Id for the given API/API Product.
+     *
+     * @param apiId   API/API Product UUID
+     * @param eventId Event Id to get the payload of
+     * @return event payload
+     * @throws APIManagementException if failed to get the event payload
+     */
+    String getHistoryEventPayload(String apiId, String eventId) throws APIManagementException;
+
+    /**
+     * Get the count of all API/API Product history events for the given API/API Product.
+     *
+     * @param apiId      API/API Product UUID
+     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @return count of all history events based on the requested filters
+     * @throws APIManagementException if failed to get all events count
+     */
+    int getAllHistoryCount(String apiId, String revisionId, String startTime, String endTime)
+            throws APIManagementException;
 }
