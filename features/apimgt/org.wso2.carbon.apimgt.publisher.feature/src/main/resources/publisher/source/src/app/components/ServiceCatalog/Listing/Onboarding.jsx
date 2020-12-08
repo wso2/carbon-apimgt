@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Service Catalog On boarding
  *
- * @returns
+ * @returns {void} Onboarding page for Services
  */
 function Onboarding() {
     const classes = useStyles();
