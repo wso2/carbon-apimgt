@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
@@ -2749,4 +2750,85 @@ public class APIMappingUtil {
         }
         return endpointSecurityElement;
     }
+
+    /**
+     * Sets API history pagination urls for a HistoryEventListDTO object given pagination parameters and url parameters.
+     *
+     * @param historyEventListDTO A HistoryEventListDTO object
+     * @param apiId               API UUID
+     * @param revisionId          Revision Id which the history events are up to (optional)
+     * @param startTime           Starting timestamp to show history from
+     * @param endTime             Ending timestamp to show history upto
+     * @param offset              Start index
+     * @param limit               Max number of objects to return
+     * @param size                max offset
+     */
+    public static void setAPIHistoryPaginationParams(HistoryEventListDTO historyEventListDTO, String apiId,
+                                                     String revisionId, String startTime, String endTime, int limit,
+                                                     int offset, int size) {
+
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getAPIHistoryEventPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId, revisionId,
+                            startTime, endTime);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getAPIHistoryEventPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId, revisionId,
+                            startTime, endTime);
+        }
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        historyEventListDTO.setPagination(paginationDTO);
+    }
+
+    /**
+     * Sets API Product history pagination urls for a HistoryEventListDTO object given pagination parameters and url
+     * parameters.
+     *
+     * @param historyEventListDTO A HistoryEventListDTO object
+     * @param apiProductId        API Product UUID
+     * @param revisionId          Revision Id which the history events are up to (optional)
+     * @param startTime           Starting timestamp to show history from
+     * @param endTime             Ending timestamp to show history upto
+     * @param offset              Start index
+     * @param limit               Max number of objects to return
+     * @param size                max offset
+     */
+    public static void setAPIProductHistoryPaginationParams(HistoryEventListDTO historyEventListDTO,
+                                                            String apiProductId, String revisionId, String startTime,
+                                                            String endTime, int limit, int offset, int size) {
+
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getAPIProductHistoryEventPaginatedURL(paginatedParams
+                                    .get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiProductId, revisionId,
+                            startTime, endTime);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getAPIProductHistoryEventPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiProductId, revisionId,
+                            startTime, endTime);
+        }
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        historyEventListDTO.setPagination(paginationDTO);
+    }
+
 }

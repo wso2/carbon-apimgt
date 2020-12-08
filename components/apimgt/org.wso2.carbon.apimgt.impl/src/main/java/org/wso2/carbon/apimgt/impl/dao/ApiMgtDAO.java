@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.HistoryEvent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -15425,5 +15426,51 @@ public class ApiMgtDAO {
             handleException("Failed to delete tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
+    }
+
+    /**
+     * Get History Events for given API.
+     *
+     * @param apiId      UUID of API
+     * @param revisionId Revision Id to filter history events
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @param limit      Max no of records
+     * @param offset     Start index
+     * @throws APIManagementException if an error occurs while getting API history from database
+     */
+    public List<HistoryEvent> getHistoryEvents(String apiId, String revisionId, String startTime, String endTime,
+                                               int offset, int limit) throws APIManagementException {
+
+        return null;
+    }
+
+    /**
+     * Get the payload associated with the given event Id for the given API.
+     *
+     * @param apiId   API UUID
+     * @param eventId Event Id to get the payload of
+     * @return event payload string
+     * @throws APIManagementException if failed to get the event payload
+     */
+    public String getHistoryEventPayload(String apiId, String eventId) throws APIManagementException {
+
+        return null;
+    }
+
+    /**
+     * Get the count of all history records for the given API.
+     *
+     * @param apiId      API UUID
+     * @param revisionId Revision Id to filter history events
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @return count of history records
+     * @throws APIManagementException if failed get count
+     */
+    public int getAllHistoryEventsCount(String apiId, String revisionId, String startTime, String endTime)
+            throws APIManagementException {
+
+        return 0;
     }
 }

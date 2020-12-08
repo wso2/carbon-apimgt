@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.HistoryEvent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -765,9 +766,17 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     @Override
     public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId,
-                                         String timePeriod, MessageContext messageContext)
+                                         String startTime, String endTime, MessageContext messageContext)
             throws APIManagementException {
 
+        // pre-processing
+        // setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<HistoryEvent> historyEvents = apiProvider.getHistoryEventsWithPagination(apiProductId, revisionId, startTime,
+                endTime, offset, limit);
+        int eventCount = apiProvider.getAllHistoryCount(apiProductId, revisionId, startTime, endTime);
         return null;
     }
 
@@ -775,6 +784,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext)
             throws APIManagementException {
 
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String payload = apiProvider.getHistoryEventPayload(apiProductId, eventId);
         return null;
     }
 }

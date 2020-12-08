@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.HistoryEvent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -8989,5 +8990,56 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 deleteScope(scope, tenantId);
             }
         }
+    }
+
+    /**
+     * Get the paginated list of API/API Product history events for the given API/API Product.
+     *
+     * @param apiId      API/API Product UUID
+     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @param offset     Start index
+     * @param limit      Max no of events need to return
+     * @return a list of History events
+     * @throws APIManagementException if failed to get the API history events
+     */
+    @Override
+    public List<HistoryEvent> getHistoryEventsWithPagination(String apiId, String revisionId, String startTime,
+                                                             String endTime, int offset, int limit)
+            throws APIManagementException {
+
+        return apiMgtDAO.getHistoryEvents(apiId, revisionId, startTime, endTime, offset, limit);
+    }
+
+    /**
+     * Get the count of all API/API Product history events for the given API/API Product.
+     *
+     * @param apiId      API/API Product UUID
+     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @return count of all history events based on the requested filters
+     * @throws APIManagementException if failed to get all events count
+     */
+    @Override
+    public int getAllHistoryCount(String apiId, String revisionId, String startTime, String endTime)
+            throws APIManagementException {
+
+        return apiMgtDAO.getAllHistoryEventsCount(apiId, revisionId, startTime, endTime);
+    }
+
+    /**
+     * Get the payload associated with the given event Id for the given API/API Product.
+     *
+     * @param apiId   API/API Product UUID
+     * @param eventId Event Id to get the payload of
+     * @return event payload
+     * @throws APIManagementException if failed to get the event payload
+     */
+    @Override
+    public String getHistoryEventPayload(String apiId, String eventId) throws APIManagementException {
+
+        return apiMgtDAO.getHistoryEventPayload(apiId, eventId);
     }
 }
