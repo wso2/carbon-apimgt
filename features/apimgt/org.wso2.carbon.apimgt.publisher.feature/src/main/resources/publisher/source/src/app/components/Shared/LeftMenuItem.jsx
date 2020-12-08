@@ -32,6 +32,17 @@ const styles = (theme) => ({
         textAlign: 'left',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
+        fontWeight: 450,
+        whiteSpace: 'nowrap',
+    },
+    leftLInkTextHead: {
+        color: theme.palette.getContrastText(theme.palette.background.leftMenu),
+        textTransform: theme.custom.leftMenuTextStyle,
+        width: '100%',
+        textAlign: 'left',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        fontWeight: 800,
         whiteSpace: 'nowrap',
     },
     leftLInkText_IconLeft: {
@@ -70,6 +81,7 @@ const styles = (theme) => ({
     leftLInkText_NoText: {
         diplay: 'none',
     },
+
 });
 
 /**
@@ -82,7 +94,7 @@ function LeftMenuItem(props) {
     const [selected, setSelected] = useState(false);
 
     const {
-        classes, theme, Icon, to, history, text, route,
+        classes, theme, Icon, to, history, text, route, head
     } = props;
     const routeToCheck = route || text;
     const { leftMenu } = theme.custom;
@@ -119,10 +131,10 @@ function LeftMenuItem(props) {
             style={{ backgroundColor: selected ? theme.palette.background.appBarSelected : '' }}
         >
             {// If the icon pro ( which is comming from the React Material library )
-            // is coming we add css class and render.
-            // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
-            // allow customers theme
-            // the product without compiling.
+                // is coming we add css class and render.
+                // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
+                // allow customers theme
+                // the product without compiling.
                 Icon ? (
                     React.cloneElement(Icon, {
                         className: classNames(
@@ -134,34 +146,39 @@ function LeftMenuItem(props) {
                         ),
                     })
                 ) : (
-                // We can also add custom icons
-                    <CustomIcon
-                        strokeColor={strokeColor}
-                        width={iconSize}
-                        height={iconSize}
-                        icon={props.iconText}
-                        className={classNames(
-                            classes.leftLInk,
-                            {
-                                [classes.noIcon]: leftMenu === 'no icon',
-                            },
-                            'leftLink_Icon',
-                        )}
-                    />
-                )
-            }
+                        // We can also add custom icons
+                        <CustomIcon
+                            strokeColor={strokeColor}
+                            width={iconSize}
+                            height={iconSize}
+                            icon={props.iconText}
+                            className={classNames(
+                                classes.leftLInk,
+                                {
+                                    [classes.noIcon]: leftMenu === 'no icon',
+                                },
+                                'leftLink_Icon',
+                            )}
+                        />
+                    )}
+            {head === 'xxx' ? (
             <Typography
                 className={classNames(
-                    classes.leftLInkText,
-                    {
-                        [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
-                        [classes.leftLInkText_NoText]: leftMenu === 'no text',
-                    },
-                    'leftLInkText',
+                    classes.leftLInkTextHead,
                 )}
-            >
-                {text}
-            </Typography>
+            >{text}</Typography>)
+                : (<Typography
+                    className={classNames(
+                        classes.leftLInkText,
+                        {
+                            [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
+                            [classes.leftLInkText_NoText]: leftMenu === 'no text',
+                        },
+                        'leftLInkText',
+                    )}
+                >
+                    {text}
+                </Typography>)}
         </Link>
     );
 }
@@ -177,6 +194,7 @@ LeftMenuItem.propTypes = {
         noIcon: PropTypes.string,
         leftLink_Icon: PropTypes.string,
         leftLInkText: PropTypes.string,
+        leftLInkTextHead: PropTypes.string,
         leftLInkText_IconLeft: PropTypes.string,
         leftLInkText_NoText: PropTypes.string,
     }).isRequired,
@@ -197,6 +215,7 @@ LeftMenuItem.propTypes = {
     Icon: PropTypes.element.isRequired,
     text: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
+    head: PropTypes.string.isRequired,
     route: PropTypes.string,
     history: PropTypes.shape({
         listen: PropTypes.func.isRequired,

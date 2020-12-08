@@ -160,6 +160,36 @@ const useStyles = makeStyles((theme) => ({
             borderBottom: '41px solid transparent',
         },
     },
+    pointerMiddle1: {
+        height: 82,
+        position: 'relative',
+        background: theme.custom.overviewStepper.backgrounds.active,
+        margin: '0 20px',
+        '&:before': {
+            content: '""',
+            position: 'absolute',
+            right: '-41px',
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+        '&:after': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.wrapperBackground,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+    },
     pointerEnd: {
         height: 82,
         position: 'relative',
@@ -182,6 +212,18 @@ const useStyles = makeStyles((theme) => ({
         background: theme.custom.overviewStepper.backgrounds.completed,
         '&:before': {
             borderLeftColor: theme.custom.overviewStepper.backgrounds.completed,
+        },
+    },
+    pointerMiddleActive: {
+        background: theme.custom.overviewStepper.backgrounds.active,
+        '&:before': {
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
+        },
+    },
+    pointerMiddleDisabled: {
+        background: theme.custom.overviewStepper.backgrounds.inactive,
+        '&:before': {
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.inactive,
         },
     },
     pointerEndActive: {
@@ -385,18 +427,28 @@ export default function CustomizedSteppers() {
         activeStep = 2;
     } else if (lifecycleState === 'Created') {
         activeStep = 1;
-    } else if (lifecycleState !== 'Created') {
+    } else if (lifecycleState !== 'Created' && api.deploymentEnvironments.length === 0) {
         activeStep = 3;
+    } else if (lifecycleState !== 'Created' && api.deploymentEnvironments.length !== 0) {
+        activeStep = 4;
     }
 
     const step2Class = activeStep > 1 ? classes.pointerMiddleCompleted : '';
-    let step3Class;
+    let step3Class = activeStep > 1 ? classes.pointerMiddleCompleted : '';
+    let step4Class;
     if (activeStep === 2) {
-        step3Class = classes.pointerEndActive;
+        step3Class = classes.pointerMiddleActive;
+        step4Class = '';
+        
     } else if (activeStep === 3) {
-        step3Class = classes.pointerEndCompleted;
-    } else {
-        step3Class = '';
+        step4Class = classes.pointerEndActive;
+    } else if (activeStep === 4) {
+        step3Class = classes.pointerMiddleCompleted;
+        step4Class = classes.pointerEndActive;
+    }
+    else {
+        step3Class = classes.pointerMiddleDisabled;
+        step4Class = '';
     }
 
     return (
@@ -476,9 +528,44 @@ export default function CustomizedSteppers() {
                 </Step>
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
-                        <div className={`${classes.pointerEnd} ${step3Class}`}>
+                        <div className={`${classes.pointerMiddle1} ${step3Class}`}>
                             <Box className={classes.box}>
                                 {finalLifecycleState(lifecycleState)}
+                            </Box>
+                        </div>
+                    </StepLabel>
+                </Step>
+                <Step className={classes.label}>
+                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
+                        <div className={`${classes.pointerEnd} ${step4Class}`}>
+                            <Box className={classes.box}>
+                            <Grid xs={12} className={classes.gridSmall}>
+                                        {lifecycleState === 'Published' && (api.deploymentEnvironments.length !== 0) ? (
+                                            <CheckIcon className={classes.iconTrue} />
+                                        ) : (
+                                            <CloseIcon className={classes.iconFalse} />
+                                        )}
+                                        <Typography variant='h7'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.Deployments'
+                                                defaultMessage=' Deployments'
+                                            />
+                                        </Typography>
+                                        {lifecycleState === 'Published' ? (
+                                        <Link to={'/apis/' + api.id + '/environments'}>
+                                            <LaunchIcon
+                                                style={{ marginLeft: '5px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
+                                        </Link> ) : (
+                                            <LaunchIcon
+                                            style={{ marginLeft: '5px' }}
+                                            color='default'
+                                            fontSize='small'
+                                        />
+                                        )}
+                                    </Grid>
                             </Box>
                         </div>
                     </StepLabel>

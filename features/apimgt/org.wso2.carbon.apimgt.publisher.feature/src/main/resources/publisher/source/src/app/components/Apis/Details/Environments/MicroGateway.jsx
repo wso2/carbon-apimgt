@@ -23,11 +23,14 @@ import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
+import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Switch from '@material-ui/core/Switch';
 import Checkbox from '@material-ui/core/Checkbox';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -88,27 +91,30 @@ export default function MicroGateway(props) {
     }
     return (
         <>
-            <Typography variant='h4' align='left' className={classes.mainTitle}>
+            <Typography variant='h6' align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.GatewayLabels'
                     defaultMessage='Gateway Labels'
                 />
             </Typography>
             {mgLabels.length > 0 ? (
-                <Paper className={classes.gatewayPaper}>
+
+                <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell />
+                                {/* <TableCell /> */}
                                 <TableCell align='left'>Label</TableCell>
                                 <TableCell align='left'>Description</TableCell>
                                 <TableCell align='left'>Access URL</TableCell>
+                                <TableCell align='left'>Deployed Revision</TableCell>
+                                <TableCell align='left'>Display in devportal</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {mgLabels.map((row) => (
                                 <TableRow key={row.name}>
-                                    <TableCell padding='checkbox'>
+                                    {/* <TableCell padding='checkbox'>
                                         <Checkbox
                                             disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                             checked={selectedMgLabel.includes(row.name)}
@@ -127,19 +133,35 @@ export default function MicroGateway(props) {
                                             name={row.name}
                                             color='primary'
                                         />
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell component='th' scope='row' align='left'>
                                         {row.name}
                                     </TableCell>
                                     <TableCell align='left'>{row.description}</TableCell>
-                                    <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
+                                    <TableCell align='left'>
+                                        {row.access_urls.map((host) => (
+                                            <div>{host}</div>
+                                        ))}
+
+                                    </TableCell>
+                                    <TableCell align='left'>N/A</TableCell>
+                                    <TableCell align='left'>
+                                        <Switch
+
+                                            name="checkedA"
+
+                                        />
+
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
-                </Paper>
+                </TableContainer>
+
             )
                 : (
+
                     <InlineMessage type='info' height={100} className={classes.emptyBox}>
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
