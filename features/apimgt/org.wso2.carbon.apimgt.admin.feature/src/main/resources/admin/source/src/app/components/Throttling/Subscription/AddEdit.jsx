@@ -244,8 +244,8 @@ function AddEdit(props) {
                     customAttributes: setCustomAttributes(result.body.customAttributes),
                     stopOnQuotaReach: result.body.stopOnQuotaReach,
                     permissions: {
-                        roles: 'Internal/everyone',
-                        permissionStatus: 'ALLOW',
+                        permissionStatus: result.body.permissions.permissionType,
+                        roles: result.body.permissions.roles && result.body.permissions.roles.join(','),
                     },
                     graphQL: {
                         maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
