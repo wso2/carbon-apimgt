@@ -21,7 +21,7 @@ public class HistoryEvent {
 
     private String id;
     private String description;
-    private String operation;
+    private String operationId;
     private String user;
     private Object payload;
     private String createdTime;
@@ -48,14 +48,14 @@ public class HistoryEvent {
         this.description = description;
     }
 
-    public String getOperation() {
+    public String getOperationId() {
 
-        return operation;
+        return operationId;
     }
 
-    public void setOperation(String operation) {
+    public void setOperationId(String operationId) {
 
-        this.operation = operation;
+        this.operationId = operationId;
     }
 
     public String getUser() {

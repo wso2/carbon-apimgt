@@ -6488,14 +6488,25 @@ paths:
             Specify the revision to return API history up to.
           required: false
           example: 01234567-0123-0123-0123-012345678901
-        - name: timePeriod
+        - name: startTime
           schema:
             type: string
+            format: dateTime
+            example: 2019-02-31T23:59:60Z
           in: query
           description: |
-            Specify the time period to show history.
+            Specify the starting timestamp to show history from.
           required: false
-          example: Month
+          example:
+        - name: endTime
+          schema:
+            type: string
+            format: dateTime
+            example: 2020-02-31T23:59:60Z
+          in: query
+          description: |
+            Specify the ending timestamp to show history upto.
+          required: false
       operationId: getAPIHistory
       tags:
         - API History
@@ -6591,14 +6602,25 @@ paths:
             Specify the revision to return API history up to.
           required: false
           example: 01234567-0123-0123-0123-012345678901
-        - name: timePeriod
+        - name: startTime
           schema:
             type: string
+            format: dateTime
+            example: 2019-02-31T23:59:60Z
           in: query
           description: |
-            Specify the time period to show history.
+            Specify the starting timestamp to show history from.
           required: false
-          example: Month
+          example:
+        - name: endTime
+          schema:
+            type: string
+            format: dateTime
+            example: 2020-02-31T23:59:60Z
+          in: query
+          description: |
+            Specify the ending timestamp to show history upto.
+          required: false
       tags:
         - API Product History
       operationId: getAPIProductHistory
@@ -7513,12 +7535,12 @@ components:
         id:
           type: string
           example: 3333ce7e1-8233-46a5-9295-525dca347f33
-        operation:
+        operationId:
           type: string
-          example: PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5
+          example: updateAPI
         description:
           type: string
-          example: Update API
+          example: PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5
         user:
           type: string
           example: user1
