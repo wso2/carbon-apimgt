@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.Holder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -92,7 +94,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 public class RegistryPersistenceImpl implements APIPersistence {
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
-    private static APIPersistence instance;
+/*    private static APIPersistence instance;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected Registry registry;
     protected String tenantDomain;
@@ -101,9 +103,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
     protected Organization organization;
     private RegistryService registryService;
     private GenericArtifactManager apiGenericArtifactManager;
-    
+  */  
+    protected String username;
     public RegistryPersistenceImpl(String username) {
-        this.registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+ /*       this.registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         this.username = username;
         try {
             // is it ok to reuse artifactManager object TODO : resolve this concern
@@ -162,7 +165,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             e.printStackTrace();
         } catch (APIPersistenceException e) {
             e.printStackTrace();
-        }
+       } */ 
+       this.username = username;
     }
 
     protected String getTenantAwareUsername(String username) {
@@ -187,24 +191,29 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
-        if (apiGenericArtifactManager == null) {
-            String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
-            log.error(errorMessage);
-            throw new APIPersistenceException(errorMessage);
-        }
         boolean transactionCommitted = false;
+        boolean tenantFlowStarted = false;
+        Registry registry = null;
         try {
-            
+            RegistryHolder holder = getRegistry(org.getName());
+            registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
+                log.error(errorMessage);
+                throw new APIPersistenceException(errorMessage);
+            }
             GenericArtifact genericArtifact =
-                    apiGenericArtifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
+                    artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
             if (genericArtifact == null) {
                 String errorMessage = "Generic artifact is null when creating API " + api.getId().getApiName();
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
             GenericArtifact artifact = RegistryPersistenceUtil.createAPIArtifactContent(genericArtifact, api);
-            apiGenericArtifactManager.addGenericArtifact(artifact);
+            artifactManager.addGenericArtifact(artifact);
             //Attach the API lifecycle
             artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
@@ -226,7 +235,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             String apiStatus = api.getStatus();
-            saveAPIStatus(artifactPath, apiStatus);
+            saveAPIStatus(registry, artifactPath, apiStatus);
 
             String visibleRolesList = api.getVisibleRoles();
             String[] visibleRoles = new String[0];
@@ -235,7 +244,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
 
             String publisherAccessControlRoles = api.getAccessControlRoles();
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+            updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                                             api.getAdditionalProperties());
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                                             visibleRoles, artifactPath, registry);
@@ -293,6 +302,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while creating API", e);
         } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
             try {
                 if (!transactionCommitted) {
                     registry.rollbackTransaction();
@@ -309,7 +321,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
 
         boolean transactionCommitted = false;
+        boolean tenantFlowStarted = false;
+        Registry registry = null;
         try {
+            RegistryHolder holder = getRegistry(org.getName());
+            registry = holder.getRegistry();
+            tenantFlowStarted  = holder.isTenantFlowStarted();
+            
             registry.beginTransaction();
             String apiArtifactId = registry.get(RegistryPersistenceUtil.getAPIPath(api.getId())).getUUID();
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
@@ -363,12 +381,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
-            String apiStatus = api.getStatus().toUpperCase();
+            //String apiStatus = api.getStatus().toUpperCase();
             //saveAPIStatus(artifactPath, apiStatus);
             String[] visibleRoles = new String[0];
             String publisherAccessControlRoles = api.getAccessControlRoles();
 
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+            updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
 
             //propagate api status change and access control roles change to document artifact
@@ -428,6 +446,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             throw new APIPersistenceException("Error while performing registry transaction operation ", e);
         } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
             try {
                 if (!transactionCommitted) {
                     registry.rollbackTransaction();
@@ -456,10 +477,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
      */
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
+        //test();
         boolean tenantFlowStarted = false;
         try {
-            Registry registry;
+            RegistryHolder holder = getRegistry(org.getName());
+            tenantFlowStarted  = holder.isTenantFlowStarted();
+            Registry registry = holder.getRegistry();
             String requestedTenantDomain = org.getName();
+            /*
             if (requestedTenantDomain  != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                                             .equals(requestedTenantDomain)) {
                 int tenantId = getTenantManager().getTenantId(requestedTenantDomain);
@@ -476,7 +501,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry = this.registry;
                 }
             }
-
+            */
+            
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                                             APIConstants.API_KEY);
 
@@ -497,9 +523,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
-        } catch (UserStoreException e) {
-            String msg = "Failed to get API";
-            throw new APIPersistenceException(msg, e);
         } catch (APIManagementException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
@@ -512,12 +535,19 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
-    
+
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
+        //test(org.getName());
         boolean tenantFlowStarted = false;
         try {
-            Registry registry;
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            String username = holder.getRegistryUser();
+            //tenantFlowStarted = setRegistry(registry, org.getName());
+            /*
             String requestedTenantDomain = org.getName();
             if (requestedTenantDomain  != null) {
                 int id = getTenantManager().getTenantId(requestedTenantDomain);
@@ -533,7 +563,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 registry = this.registry;
             }
-
+            */
 
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -568,7 +598,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         return APIMapper.INSTANCE.toDevPortalApi(api);
                     }
 
-                    if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                    if (tenantDomain == null || !tenantDomain.equals(apiTenantDomain)) {
                         throw new APIPersistenceException(
                                 "User " + username + " does not have permission to view API : " + api.getId()
                                         .getApiName());
@@ -583,7 +613,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         return APIMapper.INSTANCE.toDevPortalApi(api);
                     }
 
-                    if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                    if (tenantDomain == null || !tenantDomain.equals(apiTenantDomain)) {
                         throw new APIPersistenceException(
                                 "User " + username + " does not have permission to view API : " + api.getId()
                                         .getApiName());
@@ -594,7 +624,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 return null;
             }
-        } catch (RegistryException | UserStoreException | APIManagementException e) {
+        } catch (RegistryException | APIManagementException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
         } finally {
@@ -608,7 +638,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
 
         boolean transactionCommitted = false;
+        boolean tenantFlowStarted = false;
+        Registry registry = null;
         try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            registry = holder.getRegistry();
+            tenantFlowStarted  = holder.isTenantFlowStarted();
             registry.beginTransaction();
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
@@ -694,6 +730,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (RegistryException e) {
             throw new APIPersistenceException("Failed to remove the API : " + apiId, e);
         } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
             try {
                 if (!transactionCommitted) {
                     registry.rollbackTransaction();
@@ -708,11 +747,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
-        boolean isTenantMode = (requestedTenantDomain != null);
+        
         boolean isTenantFlowStarted = false;
         PublisherAPISearchResult result = null;
         try {
-
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry userRegistry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            int tenantIDLocal = holder.getTenantId();
+            /*
+            boolean isTenantMode = (requestedTenantDomain != null);
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -722,28 +766,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
             }
 
-            Registry userRegistry;
-            int tenantIDLocal = 0;
             String userNameLocal = this.username;
             if ((isTenantMode && this.tenantDomain == null)
                     || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {// Tenant store anonymous
                                                                                             // mode
                 tenantIDLocal = getTenantManager().getTenantId(requestedTenantDomain);
-                RegistryPersistenceUtil.loadTenantRegistry(tenantIDLocal);
+                RegistryPersistenceUtil.loadTenantRegistry(tenantIDLocal);///////////////////////////////////////////////////////////////////////
                 userRegistry = getRegistryService()
                         .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    RegistryPersistenceUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                    RegistryPersistenceUtil.loadTenantConfigBlockingMode(requestedTenantDomain);////////////////////////////////////////////////////////////////
                 }
             } else {
                 userRegistry = this.registry;
                 tenantIDLocal = tenantId;
-            }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+            }*/
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(holder.getRegistryUser());
 
             if (searchQuery != null && searchQuery.contains(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX + "=")) {
                 // TODO
@@ -754,7 +795,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 result = searchPaginatedPublisherAPIs(userRegistry, tenantIDLocal, searchQuery, start, offset);
             }
-        } catch (UserStoreException | RegistryException | APIManagementException e) {
+        } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs " , e);
         } finally {
             if (isTenantFlowStarted) {
@@ -776,14 +817,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
             PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
 
             List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-                    .findGovernanceArtifacts(searchQuery, registry, APIConstants.API_RXT_MEDIA_TYPE,
+                    .findGovernanceArtifacts(searchQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
                             true);
             totalLength = PaginationContext.getInstance().getLength();
             boolean isFound = true;
             if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
                 if (searchQuery.contains(APIConstants.API_OVERVIEW_PROVIDER)) {
                     searchQuery = searchQuery.replaceAll(APIConstants.API_OVERVIEW_PROVIDER, APIConstants.API_OVERVIEW_OWNER);
-                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery, registry,
+                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery, userRegistry,
                             APIConstants.API_RXT_MEDIA_TYPE, true);
                     if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
                         isFound = false;
@@ -846,7 +887,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         DevPortalAPISearchResult result = null;
         try {
-
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry userRegistry = holder.getRegistry();
+            int tenantIDLocal = holder.getTenantId();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            /*
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -857,25 +902,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
             }
-
-            Registry userRegistry;
-            int tenantIDLocal = 0;
+            
             String userNameLocal = this.username;
             if ((isTenantMode && this.tenantDomain == null)
                     || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {// Tenant store anonymous
                                                                                             // mode
                 tenantIDLocal = getTenantManager().getTenantId(requestedTenantDomain);
-                RegistryPersistenceUtil.loadTenantRegistry(tenantIDLocal);
+                RegistryPersistenceUtil.loadTenantRegistry(tenantIDLocal); //////////////////////////////////////////////////////////////////////
                 userRegistry = getRegistryService()
                         .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    RegistryPersistenceUtil.loadTenantConfigBlockingMode(requestedTenantDomain);
+                    RegistryPersistenceUtil.loadTenantConfigBlockingMode(requestedTenantDomain);//////////////////////////////////////////////////////////////////////
                 }
             } else {
                 userRegistry = this.registry;
                 tenantIDLocal = tenantId;
-            }
+            } */
+            
+            String userNameLocal = getTenantAwareUsername(holder.getRegistryUser());
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (searchQuery != null && searchQuery.contains(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX + "=")) {
@@ -887,7 +932,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } else {
                 result = searchPaginatedDevPortalAPIs(userRegistry, tenantIDLocal, searchQuery, start, offset);
             }
-        } catch (UserStoreException | RegistryException | APIManagementException e) {
+        } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs " , e);
         } finally {
             if (isTenantFlowStarted) {
@@ -916,7 +961,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
                 if (searchQuery.contains(APIConstants.API_OVERVIEW_PROVIDER)) {
                     searchQuery = searchQuery.replaceAll(APIConstants.API_OVERVIEW_PROVIDER, APIConstants.API_OVERVIEW_OWNER);
-                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery, registry,
+                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery, userRegistry,
                             APIConstants.API_RXT_MEDIA_TYPE, true);
                     if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
                         isFound = false;
@@ -976,11 +1021,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
         GenericArtifactManager artifactManager = null;
+        boolean isTenantFlowStarted = false;
         try {
-            PrivilegedCarbonContext.startTenantFlow();
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted   = holder.isTenantFlowStarted();
+            //PrivilegedCarbonContext.startTenantFlow();
             //PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org.getName(), true);
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            //PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(org.getName(), true);
+            //GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);  /////////////////////////////???????
             if (GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry) != null) {
                 artifactManager = new GenericArtifactManager(registry, APIConstants.API_KEY);
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
@@ -1001,7 +1050,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
         } catch (PersistenceException e) {
             throw new APIPersistenceException("Error while accessing the lifecycle. ", e);
         } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         
     }
@@ -1022,8 +1073,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
 
+        boolean isTenantFlowStarted = false;
         try {
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted  = holder.isTenantFlowStarted();
+            //GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);/////////////////????/////////////
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             if (artifactManager == null) {
@@ -1064,7 +1119,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         } catch (RegistryException | APIPersistenceException| APIManagementException e) {
             throw new OASPersistenceException("Error while adding OSA Definition for " + apiId, e);
-        } 
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     @Override
@@ -1073,7 +1132,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
         String definition = null;
         boolean tenantFlowStarted = false;
         try {
-            Registry registryType;
+            RegistryHolder holder = getRegistry(apiTenantDomain);
+            Registry registryType = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted;
+            /*
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
             if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
                 if (apiTenantDomain != null) {
@@ -1086,7 +1148,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
-            }
+            } */
             Identifier id = null;
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
                     APIConstants.API_KEY);
@@ -1106,10 +1168,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
             }
-            if (log.isDebugEnabled()) {
+            /*if (log.isDebugEnabled()) {
                 log.debug("Definition for " + apiId + " : " +  definition);
-            }
-        } catch (UserStoreException | RegistryException | APIManagementException | APIPersistenceException e) {
+            }*/
+        } catch (RegistryException | APIManagementException | APIPersistenceException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             throw new OASPersistenceException(msg, e);
         } finally {
@@ -1119,13 +1181,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return definition;
     }
-
+/*
     private boolean isTenantDomainNotMatching(String tenantDomain) {
         if (this.tenantDomain != null) {
             return !(this.tenantDomain.equals(tenantDomain));
         }
         return true;
-    }
+    } */
     @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {
@@ -1142,10 +1204,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
+        boolean tenantFlowStarted = false;
         try {
             String tenantDomain = org.getName();
-            Registry registry = this.registry; // for future impl
-            
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
 
@@ -1191,15 +1255,22 @@ public class RegistryPersistenceImpl implements APIPersistence {
             return documentation;
         } catch (RegistryException | APIManagementException | UserStoreException | APIPersistenceException e) {
             throw new DocumentationPersistenceException("Failed to add documentation", e);
-        } 
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
     }
 
     @Override
     public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
+        boolean tenantFlowStarted = false;
         try {
             String tenantDomain = org.getName();
-            Registry registry = this.registry; // for future impl
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
             
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -1253,6 +1324,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             return documentation;
         } catch (RegistryException | APIManagementException | APIPersistenceException e) {
             throw new DocumentationPersistenceException("Failed to update documentation", e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
         }
     }
 
@@ -1260,9 +1335,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public Documentation getDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
         Documentation documentation = null;
+        boolean tenantFlowStarted = false;
         try {
-            Registry registryType;
             String requestedTenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry registryType = holder.getRegistry();
+            tenantFlowStarted  = holder.isTenantFlowStarted();
+            /*
             boolean isTenantMode = (requestedTenantDomain != null);
             // Tenant store anonymous mode if current tenant and the required tenant is not matching
             if ((isTenantMode && this.tenantDomain == null)
@@ -1272,7 +1351,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
-            }
+            }*/
             GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
                     .getDocumentArtifactManager(registryType);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
@@ -1288,9 +1367,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     documentation.setLastUpdated(registryType.get(artifact.getPath()).getLastModified());
                 }
             }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException | APIPersistenceException e) {
             String msg = "Failed to get documentation details";
             throw new DocumentationPersistenceException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
         }
         return documentation;
     }
@@ -1299,9 +1382,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
         DocumentContent documentContent = null;
+        boolean tenantFlowStarted = false;
         try {
-            Registry registryType;
             String requestedTenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry registryType = holder.getRegistry();
+            tenantFlowStarted  = holder.isTenantFlowStarted();
+            /*
             boolean isTenantMode = (requestedTenantDomain != null);
             // Tenant store anonymous mode if current tenant and the required tenant is not matching
             if ((isTenantMode && this.tenantDomain == null)
@@ -1311,7 +1398,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
-            }
+            }*/
             GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
                     .getDocumentArtifactManager(registryType);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
@@ -1369,10 +1456,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             .setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
                 }
             }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException | APIPersistenceException e) {
             String msg = "Failed to get documentation details";
             throw new DocumentationPersistenceException(msg, e);
-        } 
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
         return documentContent;
     }
     
@@ -1382,18 +1473,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = org.getName();
-            boolean isTenantMode = (tenantDomain != null);
-            if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            } else {
-                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            Registry registry = this.registry; // for future impl
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
 
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -1479,9 +1561,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
         DocumentSearchResult result = null;
         Registry registryType;
         String requestedTenantDomain = org.getName();
-        boolean isTenantMode = (requestedTenantDomain != null);
         boolean isTenantFlowStarted = false;
         try {
+            
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            registryType = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            /*
+            boolean isTenantMode = (requestedTenantDomain != null);
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
@@ -1501,7 +1588,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                         .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
-            }
+            } */
 
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
                     APIConstants.API_KEY);
@@ -1547,7 +1634,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 result = new DocumentSearchResult();
                 result.setDocumentationList(documentationList);
             }
-        } catch (RegistryException | UserStoreException | APIPersistenceException e) {
+        } catch (RegistryException | APIPersistenceException e) {
             String msg = "Failed to get documentations for api/product " + apiId;
             throw new DocumentationPersistenceException(msg, e);
         } finally {
@@ -1561,7 +1648,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
+        boolean isTenantFlowStarted = false;
         try {
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
             GenericArtifactManager artifactManager = RegistryPersistanceDocUtil.getDocumentArtifactManager(registry);
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when removing documentation of " + apiId
@@ -1577,8 +1668,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
             }
 
-        } catch (RegistryException e) {
+        } catch (RegistryException | APIPersistenceException e) {
             throw new DocumentationPersistenceException("Failed to delete documentation", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -1643,7 +1738,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
      * @param apiStatus  Current status of the API
      * @throws APIManagementException on error
      */
-    private void saveAPIStatus(String artifactId, String apiStatus) throws APIManagementException {
+    private void saveAPIStatus(Registry registry, String artifactId, String apiStatus) throws APIManagementException {
         try {
             Resource resource = registry.get(artifactId);
             if (resource != null) {
@@ -1668,7 +1763,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
      * @param additionalProperties        Additional properties that is related with an API/Product.
      * @throws RegistryException Registry Exception.
      */
-    private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
+    private void updateRegistryResources(Registry registry, String artifactPath, String publisherAccessControlRoles,
                                     String publisherAccessControl, Map<String, String> additionalProperties)
                                     throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
@@ -1763,5 +1858,114 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String msg = "Error while adding the resource to the registry";
             throw new PersistenceException(msg, e);
         }
+    }
+    
+    class RegistryHolder {
+        private Registry registry;
+        private boolean isTenantFlowStarted;
+        private int tenantId;
+        private String registryUser;
+
+        public Registry getRegistry() {
+            return registry;
+        }
+
+        public void setRegistry(Registry registry) {
+            this.registry = registry;
+        }
+
+        public boolean isTenantFlowStarted() {
+            return isTenantFlowStarted;
+        }
+
+        public void setTenantFlowStarted(boolean isTenantFlowStarted) {
+            this.isTenantFlowStarted = isTenantFlowStarted;
+        }
+
+        public int getTenantId() {
+            return tenantId;
+        }
+
+        public void setTenantId(int tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        public String getRegistryUser() {
+            return registryUser;
+        }
+
+        public void setRegistryUser(String registryUser) {
+            this.registryUser = registryUser;
+        }
+    }
+    
+    protected RegistryHolder getRegistry(String requestedTenantDomain) throws APIPersistenceException {
+        //String username = getTenantAwareUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
+        String tenantAwareUserName = getTenantAwareUsername(username);
+        String userTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        log.debug("Accessing registry for user:" + tenantAwareUserName + " in tenant domain " + userTenantDomain
+                + ". Requested tenant domain: " + requestedTenantDomain);
+        //System.out.println("======= user " + tenantAwareUserName + " tenant " + userTenantDomain + " : " + tenantId);
+        boolean tenantFlowStarted = false;
+        Registry registry;
+        RegistryHolder holder = new RegistryHolder();
+        holder.setRegistryUser(tenantAwareUserName);
+        try {
+            if (requestedTenantDomain != null) {
+                int id = getTenantManager().getTenantId(requestedTenantDomain);
+                RegistryPersistenceUtil.startTenantFlow(requestedTenantDomain);
+                tenantFlowStarted = true;
+                if (APIConstants.WSO2_ANONYMOUS_USER.equals(tenantAwareUserName)) { // annonymous
+                    log.debug("Annonymous user from tenant " + userTenantDomain + " accessing the registry");
+                    loadTenantRegistry(id);
+                    registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
+                    holder.setTenantId(id);
+                    //System.out.println("++++++++++++++++++++++++++ annonymous ++++++++++");
+                } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant scenario
+                    log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
+                            + requestedTenantDomain + " registry");
+                    loadTenantRegistry(id);
+                    registry = getRegistryService().getGovernanceSystemRegistry(id);
+                    holder.setTenantId(id);
+                    /*
+                    int requestedTenantId = getTenantManager().getTenantId(requestedTenantDomain);
+                    registry = getRegistryService()
+                            .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, requestedTenantId);
+                    */
+                    ServiceReferenceHolder
+                            .setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
+                    //System.out.println("++++++++++++++++++++++++++ cross tenant ++++++++++");
+                } else {
+                    log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant " + userTenantDomain
+                            + ":" + tenantId);
+                    loadTenantRegistry(tenantId);
+                    registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
+                    RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
+                    RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
+                    holder.setTenantId(tenantId);
+                    ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
+                            .getRealmService().getTenantUserRealm(tenantId)));
+                    //System.out.println("++++++++++++++++++++++++++ normal ++++++++++");
+                }
+            } else {
+                log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant " + userTenantDomain + ":"
+                        + tenantId);
+                loadTenantRegistry(tenantId);
+                registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
+                RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
+                RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
+                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
+                        .getRealmService().getTenantUserRealm(tenantId)));
+                holder.setTenantId(tenantId);
+                //System.out.println("++++++++++++++++++++++++++ no requested domain ++++++++++");
+            }
+        } catch (RegistryException | UserStoreException | APIManagementException e) {
+            String msg = "Failed to get API";
+            throw new APIPersistenceException(msg, e);
+        } 
+        holder.setRegistry(registry);
+        holder.setTenantFlowStarted(tenantFlowStarted);
+        return holder;
     }
 }
