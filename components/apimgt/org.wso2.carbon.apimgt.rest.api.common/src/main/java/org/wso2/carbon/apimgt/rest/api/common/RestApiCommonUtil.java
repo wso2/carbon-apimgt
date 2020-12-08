@@ -327,6 +327,55 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
+    /**
+     * Returns the paginated url for API history events.
+     *
+     * @param offset starting index
+     * @param limit  max number of objects returned
+     * @param apiId  API UUID
+     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @return constructed paginated url
+     */
+    public static String getAPIHistoryEventPaginatedURL(Integer offset, Integer limit, String apiId, String revisionId,
+                                                        String startTime, String endTime) {
+
+        String paginatedURL = RestApiConstants.APIS_HISTORY_EVENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.REVISIONID_PARAM, revisionId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime);
+        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime);
+        return paginatedURL;
+    }
+
+    /**
+     * Returns the paginated url for API Product history events.
+     *
+     * @param offset starting index
+     * @param limit  max number of objects returned
+     * @param apiProductId  API Product UUID
+     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from
+     * @param endTime    Ending timestamp to show history upto
+     * @return constructed paginated url
+     */
+    public static String getAPIProductHistoryEventPaginatedURL(Integer offset, Integer limit, String apiProductId,
+                                                               String revisionId, String startTime, String endTime) {
+
+        String paginatedURL = RestApiConstants.API_PRODUCTS_HISTORY_EVENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIPRODUCTID_PARAM, apiProductId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.REVISIONID_PARAM, revisionId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime);
+        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime);
+        return paginatedURL;
+    }
+
+
     public static APIProvider getProvider(String username) throws APIManagementException {
 
         return APIManagerFactory.getInstance().getAPIProvider(username);

@@ -85,6 +85,9 @@ public final class RestApiConstants {
     public static final String SHARED_SCOPE_ID_PARAM = "{scopeId}";
     public static final String URL_ENCODED_API_ID_DELIMITER = "%2D";
     public static final String CHARSET = "UTF-8";
+    public static final String REVISIONID_PARAM = "{revisionId}";
+    public static final String STARTTIME_PARAM = "{startTime}";
+    public static final String ENDTIME_PARAM = "{endTime}";
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
@@ -134,6 +137,11 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
+    public static final String RESOURCE_PATH_HISTORY = "/history";
+    public static final String RESOURCE_PATH_API_HISTORY = RESOURCE_PATH_APIS + "/" + APIID_PARAM
+            + RESOURCE_PATH_HISTORY;
+    public static final String RESOURCE_PATH_PRODUCT_HISTORY = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM
+            + RESOURCE_PATH_HISTORY;
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
     public static final String RESOURCE_PATH_CATEGORY_THUMBNAIL = RESOURCE_PATH_API_CATEGORIES + "/" + APICATEGORYID_PARAM + "/thumbnail";
@@ -208,6 +216,14 @@ public final class RestApiConstants {
 
     public static final String PRODUCT_DOCUMENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_PRODUCT_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    public static final String APIS_HISTORY_EVENTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_API_HISTORY + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&revisionId="
+                    + REVISIONID_PARAM + "&startTime=" + STARTTIME_PARAM + "&endTime=" + ENDTIME_PARAM;
+
+    public static final String API_PRODUCTS_HISTORY_EVENTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_PRODUCT_HISTORY + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&revisionId="
+                    + REVISIONID_PARAM + "&startTime=" + STARTTIME_PARAM + "&endTime=" + ENDTIME_PARAM;
 
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
