@@ -18,7 +18,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
@@ -31,6 +30,7 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
+import Overview from 'AppComponents/ServiceCatalog/Listing/Overview';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
 import Edit from 'AppComponents/ServiceCatalog/Listing/Edit';
 import Grid from '@material-ui/core/Grid';
@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
         borderTop: '0px',
         width: '100%',
     },
-    serviceNameStyle: {
+    serviceDisplayNameStyle: {
         color: theme.palette.primary.main,
     },
     tableStyle: {
@@ -111,7 +111,8 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Listing for service catalog entries
  *
- * @class Listing
+ * @function Listing
+ * @returns {any} Listing Page for Services
  */
 function Listing() {
     const [serviceList, setServiceList] = useState([]);
@@ -139,7 +140,7 @@ function Listing() {
     };
 
     useEffect(() => {
-        setServiceList(getData());
+        getData();
     }, []);
 
     const onDelete = (serviceId) => {
@@ -199,12 +200,9 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const serviceDisplayName = tableMeta.rowData[1];
                         if (dataRow) {
                             return (
-                                <div className={classes.serviceNameStyle}>
-                                    <span>{serviceDisplayName}</span>
-                                </div>
+                                <b><span>{dataRow.displayName}</span></b>
                             );
                         }
                     }
@@ -282,6 +280,7 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
+                        // const serviceId = dataRow.id;
                         return (
                             <Box display='flex' flexDirection='row'>
                                 <Link>
@@ -294,6 +293,14 @@ function Listing() {
                                         </Typography>
                                     </Button>
                                 </Link>
+                                <Overview dataRow={dataRow} />
+                                {/* <Link
+                                    to={'/service-catalog/' + serviceId + '/edit'}
+                                >
+                                    <Button>
+                                        <Icon>edit</Icon>
+                                    </Button>
+                                </Link> */}
                                 <Edit dataRow={dataRow} onEdit={onEdit} />
                                 <Delete
                                     serviceDisplayName={dataRow.displayName}
@@ -376,11 +383,3 @@ function Listing() {
 }
 
 export default Listing;
-
-Listing.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
-    theme: PropTypes.shape({
-        custom: PropTypes.string,
-    }).isRequired,
-};
