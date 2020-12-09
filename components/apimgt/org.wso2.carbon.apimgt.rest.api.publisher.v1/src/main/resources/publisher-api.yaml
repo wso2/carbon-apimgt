@@ -1312,7 +1312,7 @@ paths:
                   description: Additional attributes specified as a stringified JSON with API's schema
                 inlineAPIDefinition:
                   type: string
-                  description: Inline content of the swagger file
+                  description: Inline content of the OpenAPI definition 
       responses:
         201:
           description: |
