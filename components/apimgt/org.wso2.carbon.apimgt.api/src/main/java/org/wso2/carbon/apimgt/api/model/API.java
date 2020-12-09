@@ -196,7 +196,6 @@ public class API implements Serializable {
      */
     private int revisionId;
 
-
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }
