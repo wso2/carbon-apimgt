@@ -80,6 +80,7 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -87,6 +88,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -919,9 +921,14 @@ public class OASParserUtil {
     public static Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry)
             throws APIManagementException {
         Map<String, String> timeStampMap = new HashMap<String, String>();
-        String resourcePath =
-                APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                        apiIdentifier.getProviderName());
+        String resourcePath;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
+        } else {
+            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                    apiIdentifier.getProviderName());
+        }
         try {
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
                 Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
@@ -999,8 +1006,13 @@ public class OASParserUtil {
         String resourcePath = "";
 
         if (apiIdentifier instanceof APIIdentifier) {
-            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                    apiIdentifier.getProviderName());
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                        apiIdentifier.getProviderName());
+            }
         } else if (apiIdentifier instanceof APIProductIdentifier) {
             resourcePath =
                     APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),

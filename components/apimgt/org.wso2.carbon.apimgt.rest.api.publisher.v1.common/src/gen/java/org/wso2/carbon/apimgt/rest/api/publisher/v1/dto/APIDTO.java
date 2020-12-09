@@ -53,6 +53,8 @@ public class APIDTO   {
     private String destinationStatsEnabled = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
+    private Boolean isRevision = null;
+    private String revisionedApiId = null;
     private Boolean enableSchemaValidation = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private Boolean enableStore = null;
@@ -521,6 +523,41 @@ return null;
   }
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
+  }
+
+  /**
+   **/
+  public APIDTO isRevision(Boolean isRevision) {
+    this.isRevision = isRevision;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isRevision")
+  public Boolean isIsRevision() {
+    return isRevision;
+  }
+  public void setIsRevision(Boolean isRevision) {
+    this.isRevision = isRevision;
+  }
+
+  /**
+   * UUID of the api registry artifact 
+   **/
+  public APIDTO revisionedApiId(String revisionedApiId) {
+    this.revisionedApiId = revisionedApiId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the api registry artifact ")
+  @JsonProperty("revisionedApiId")
+  public String getRevisionedApiId() {
+    return revisionedApiId;
+  }
+  public void setRevisionedApiId(String revisionedApiId) {
+    this.revisionedApiId = revisionedApiId;
   }
 
   /**
@@ -1189,6 +1226,8 @@ return null;
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(isRevision, API.isRevision) &&
+        Objects.equals(revisionedApiId, API.revisionedApiId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(enableStore, API.enableStore) &&
         Objects.equals(type, API.type) &&
@@ -1229,7 +1268,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
   }
 
   @Override
@@ -1252,6 +1291,8 @@ return null;
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
+    sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
