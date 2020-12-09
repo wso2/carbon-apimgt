@@ -122,7 +122,6 @@ public class LogsHandler extends AbstractSynapseHandler {
                 apiRestReqFullPath = LogUtils.getRestReqFullPath(messageContext);
                 apiMsgUUID = (String) messageContext.getMessageID();
                 apiRsrcCacheKey = LogUtils.getResourceCacheKey(messageContext);
-
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
                 return false;
