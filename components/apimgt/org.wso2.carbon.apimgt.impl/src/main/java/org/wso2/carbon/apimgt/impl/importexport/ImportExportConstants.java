@@ -162,6 +162,8 @@ public final class ImportExportConstants {
 
     public static final String TYPE_API_PRODUCT = "api_product";
 
+    public static final String TYPE_APPLICATION = "application";
+
     public static final String TYPE_DOCUMENTS = "document";
 
     public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
@@ -173,6 +175,10 @@ public final class ImportExportConstants {
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
     public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
+
+    public static final String APPLICATION_KEY_TYPE_SANDBOX = "SANDBOX";
+
+    public static final String APPLICATION_KEY_TYPE_PRODUCTION = "PRODUCTION";
 
     //Api controller Env Params related constants
     public static final String YAML_API_PARAMS_FILE_LOCATION = File.separator + "api_params.yaml";

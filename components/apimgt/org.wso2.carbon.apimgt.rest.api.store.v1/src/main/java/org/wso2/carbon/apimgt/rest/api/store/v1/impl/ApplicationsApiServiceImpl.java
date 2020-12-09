@@ -34,6 +34,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -45,6 +46,10 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
@@ -64,12 +69,16 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +87,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -322,6 +333,76 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         }
         return null;
+    }
+
+    /**
+     * Export an existing Application
+     *
+     * @param appName  Search query
+     * @param appOwner Owner of the Application
+     * @param withKeys Export keys with application
+     * @return Zip file containing exported Application
+     */
+    @Override public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format,
+            MessageContext messageContext) throws APIManagementException {
+        APIConsumer apiConsumer;
+        Application application = null;
+
+        if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
+            RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
+        }
+
+        // Default export format is YAML
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+
+        apiConsumer = RestApiCommonUtil.getConsumer(username);
+        if (appOwner != null && apiConsumer.getSubscriber(appOwner) != null) {
+            application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
+        }
+        if (application == null) {
+            throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner, ExceptionCodes.APPLICATION_NOT_FOUND);
+        } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
+                .equals(MultitenantUtils.getTenantDomain(username))) {  // normal non-migration flow
+            String errorMsg = "Cross Tenant Exports are not allowed";
+            log.error(errorMsg);
+            return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
+        }
+
+        // clear all duplicate keys with tokens
+        application.getKeys().clear();
+
+        // export keys for application
+        if (withKeys == null || !withKeys) {
+            application.clearOAuthApps();
+        } else {
+            // encode Oauth secrets
+            Map<String, OAuthApplicationInfo> keyManagerWiseProductionOAuthApplicationInfoMap = application
+                    .getOAuthApp(ImportExportConstants.APPLICATION_KEY_TYPE_PRODUCTION);
+            if (keyManagerWiseProductionOAuthApplicationInfoMap != null) {
+                keyManagerWiseProductionOAuthApplicationInfoMap.forEach((keyManagerName, oAuthApplicationInfo) -> {
+                    byte[] consumerSecretBytes = oAuthApplicationInfo.getClientSecret()
+                            .getBytes(Charset.defaultCharset());
+                    oAuthApplicationInfo.setClientSecret(
+                            new String(org.apache.commons.codec.binary.Base64.encodeBase64(consumerSecretBytes)));
+                });
+            }
+            Map<String, OAuthApplicationInfo> keyManagerWiseSandboxOAuthApplicationInfoMap = application.getOAuthApp(ImportExportConstants.APPLICATION_KEY_TYPE_SANDBOX);
+            if (keyManagerWiseSandboxOAuthApplicationInfoMap != null) {
+                keyManagerWiseSandboxOAuthApplicationInfoMap.forEach((keyManagerName, oAuthApplicationInfo) -> {
+                    byte[] consumerSecretBytes = oAuthApplicationInfo.getClientSecret()
+                            .getBytes(Charset.defaultCharset());
+                    oAuthApplicationInfo.setClientSecret(
+                            new String(org.apache.commons.codec.binary.Base64.encodeBase64(consumerSecretBytes)));
+                });
+            }
+        }
+        File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat);
+        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getName() + "\"").build();
     }
 
     @Override

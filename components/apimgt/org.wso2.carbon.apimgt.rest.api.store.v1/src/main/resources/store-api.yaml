@@ -2005,6 +2005,74 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"'
 
+  /applications/export:
+    get:
+      tags:
+        - Import Export
+      summary: Export an Application
+      description: |
+        This operation can be used to export the details of a particular application as a zip file.
+      parameters:
+        - name: appName
+          in: query
+          description: |
+            Application Name
+          required: true
+          schema:
+            type: string
+        - name: appOwner
+          in: query
+          description: |
+            Owner of the Application
+          required: true
+          schema:
+            type: string
+        - name: withKeys
+          in: query
+          description: |
+            Export application keys
+          schema:
+            type: boolean
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          schema:
+            type: string
+            enum:
+              - JSON
+              - YAML
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:app_import_export
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/store/v1/applications/import?appName=sampleApp&appOwner=admin&withKeys=true"
+          > exportedApplication.zip'
+
   ######################################################
   # The "Subscription Collection" resource APIs
   ######################################################

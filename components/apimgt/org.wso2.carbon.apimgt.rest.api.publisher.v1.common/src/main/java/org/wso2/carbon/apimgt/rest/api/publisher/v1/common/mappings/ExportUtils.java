@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -405,7 +404,7 @@ public class ExportUtils {
                                 APIUtil.getAPIOrAPIProductDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
                                         + RegistryConstants.PATH_SEPARATOR + localFileName;
                     }
-                    writeDtoToFile(individualDocDirectoryPath + ImportExportConstants.DOCUMENT_FILE_NAME, exportFormat,
+                    CommonUtil.writeDtoToFile(individualDocDirectoryPath + ImportExportConstants.DOCUMENT_FILE_NAME, exportFormat,
                             ImportExportConstants.TYPE_DOCUMENTS,
                             DocumentationMappingUtil.fromDocumentationToDTO(individualDocument));
 
@@ -637,7 +636,7 @@ public class ExportUtils {
                 endpointCertificatesDetails.addAll(certificateListOfUrl);
             }
             if (endpointCertificatesDetails.size() > 0) {
-                writeDtoToFile(endpointCertsDirectoryPath + ImportExportConstants.ENDPOINTS_CERTIFICATE_FILE,
+                CommonUtil.writeDtoToFile(endpointCertsDirectoryPath + ImportExportConstants.ENDPOINTS_CERTIFICATE_FILE,
                         exportFormat, ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, endpointCertificatesDetails);
             } else if (log.isDebugEnabled()) {
                 log.debug("No endpoint certificates available for API: " + apiDto.getName() + StringUtils.SPACE
@@ -781,7 +780,7 @@ public class ExportUtils {
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
                             APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
-                    writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
+                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
                             formattedSwaggerJson);
                 }
                 if (log.isDebugEnabled()) {
@@ -789,7 +788,7 @@ public class ExportUtils {
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
                 }
             }
-            writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
+            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API, apiDtoToReturn);
         } catch (APIManagementException e) {
             throw new APIImportExportException(
@@ -832,7 +831,7 @@ public class ExportUtils {
                         clientCertsDirectoryPath);
 
                 if (certificateList.size() > 0) {
-                    writeDtoToFile(clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
+                    CommonUtil.writeDtoToFile(clientCertsDirectoryPath + ImportExportConstants.CLIENT_CERTIFICATE_FILE,
                             exportFormat, ImportExportConstants.TYPE_CLIENT_CERTIFICATES, certificateList);
                 }
             }
@@ -893,14 +892,14 @@ public class ExportUtils {
         try {
             String formattedSwaggerJson = apiProvider.getAPIDefinitionOfAPIProduct(
                     APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToReturn, apiProductDtoToReturn.getProvider()));
-            writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
+            CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
                     formattedSwaggerJson);
 
             if (log.isDebugEnabled()) {
                 log.debug(
                         "Meta information retrieved successfully for API Product: " + apiProductDtoToReturn.getName());
             }
-            writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
+            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API_PRODUCT, apiProductDtoToReturn);
         } catch (APIManagementException e) {
             throw new APIImportExportException(
@@ -942,57 +941,4 @@ public class ExportUtils {
         }
     }
 
-    /**
-     * Add the type and the version to the artifact file when exporting.
-     *
-     * @param type        Type of the artifact to be exported
-     * @param version     API Manager version
-     * @param jsonElement JSON element to be added as data
-     */
-    public static JsonObject addTypeAndVersionToFile(String type, String version, JsonElement jsonElement) {
-
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(APIConstants.TYPE, type);
-        jsonObject.addProperty(APIConstants.API_DATA_VERSION, version);
-        jsonObject.add(APIConstants.DATA, jsonElement);
-        return jsonObject;
-    }
-
-    /**
-     * Write the DTO an artifact based on the format.
-     *
-     * @param filePath     Path to the location where the file content should be written
-     * @param exportFormat Format to be exported
-     * @param type         Type of the file to be written
-     * @param dtoObject    DTO object
-     */
-    public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, Object dtoObject)
-            throws APIImportExportException, IOException {
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonObject jsonObject = addTypeAndVersionToFile(type, ImportExportConstants.APIM_VERSION,
-                gson.toJsonTree(dtoObject));
-        String jsonContent = gson.toJson(jsonObject);
-        writeToYamlOrJson(filePath, exportFormat, jsonContent);
-    }
-
-    /**
-     * Write the file content of an API or API related artifact based on the format.
-     *
-     * @param filePath     Path to the location where the file content should be written
-     * @param exportFormat Format to be exported
-     * @param fileContent  Content to be written
-     */
-    public static void writeToYamlOrJson(String filePath, ExportFormat exportFormat, String fileContent)
-            throws APIImportExportException, IOException {
-
-        switch (exportFormat) {
-        case YAML:
-            String fileInYaml = CommonUtil.jsonToYaml(fileContent);
-            CommonUtil.writeFile(filePath + ImportExportConstants.YAML_EXTENSION, fileInYaml);
-            break;
-        case JSON:
-            CommonUtil.writeFile(filePath + ImportExportConstants.JSON_EXTENSION, fileContent);
-        }
-    }
 }
