@@ -1535,7 +1535,7 @@ paths:
                   format: binary
                 inlineAPIDefinition:
                   type: string
-                  description: Inline content of the swagger file
+                  description: Inline content of the OpenAPI definition 
       responses:
         200:
           description: |
