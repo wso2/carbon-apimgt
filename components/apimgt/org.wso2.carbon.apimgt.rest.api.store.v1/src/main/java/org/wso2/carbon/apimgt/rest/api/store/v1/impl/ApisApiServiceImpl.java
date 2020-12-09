@@ -336,8 +336,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 CommentDTO commentDTO;
                 if (includeCommenterInfo) {
-                    Map<String, Map<String, String>> userClaimsMap = new HashMap<>();
-                    CommentMappingUtil.retrieveUserClaims(comment.getUser(), userClaimsMap);
+                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
+                            .retrieveUserClaims(comment.getUser(), new HashMap<>());
                     commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
                 } else {
                     commentDTO = CommentMappingUtil.fromCommentToDTO(comment);

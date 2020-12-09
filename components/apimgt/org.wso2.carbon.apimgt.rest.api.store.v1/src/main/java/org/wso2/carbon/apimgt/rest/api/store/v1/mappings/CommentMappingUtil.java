@@ -80,9 +80,8 @@ public class CommentMappingUtil {
      * @param userClaimsMap   cache map with user deatils
      * @return Map<String, Map<String, String>>
      */
-    public static  Map<String, Map<String, String>> retrieveUserClaims(String username,
-                                                                       Map<String, Map<String, String>> userClaimsMap)
-            throws APIManagementException {
+    public static  Map<String, Map<String, String>> retrieveUserClaims(String username, Map<String,
+            Map<String, String>> userClaimsMap)  throws APIManagementException {
         Map userClaims;
         if (userClaimsMap.get(username) == null) {
             userClaims = APIRealmUtils.getUserClaims(username);
