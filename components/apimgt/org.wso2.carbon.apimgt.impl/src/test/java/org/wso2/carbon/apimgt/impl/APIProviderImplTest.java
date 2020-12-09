@@ -1290,6 +1290,9 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         api.setUUID("1223332");
 
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
         Set<String> environments = new HashSet<String>();
         environments.add("Production");
         environments.add("Sandbox");
@@ -1657,6 +1660,8 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
         TestUtils.mockRegistryAndUserRealm(-1);
         Resource resource = PowerMockito.mock(Resource.class);

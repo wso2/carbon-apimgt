@@ -15465,6 +15465,8 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
                 // Adding to AM_REVISION table
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
@@ -15623,6 +15625,8 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to add API Revision entry of API UUID "
                         + apiRevision.getApiUUID(), e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add API Revision entry of API UUID "
@@ -15699,5 +15703,30 @@ public class ApiMgtDAO {
             handleException("Failed to get revision details for API UUID: " + apiUUID, e);
         }
         return revisionList;
+    }
+
+    /**
+     * Get a provided api uuid is in the revision db table
+     *
+     * @return String apiUUID
+     * @throws APIManagementException if an error occurs while checking revision table
+     */
+    public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
+        APIRevision apiRevision = new APIRevision();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    apiRevision.setApiUUID(rs.getString(1));
+                    apiRevision.setId(rs.getInt(2));
+                    apiRevision.setRevisionUUID(apiUUID);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to search UUID: " + apiUUID + " in the revision db table", e);
+        }
+        return apiRevision;
     }
 }
