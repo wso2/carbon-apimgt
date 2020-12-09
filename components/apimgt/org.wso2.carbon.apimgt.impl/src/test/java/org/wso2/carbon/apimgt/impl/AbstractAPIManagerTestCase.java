@@ -873,7 +873,7 @@ public class AbstractAPIManagerTestCase {
     public void testGetAllDocumentation() throws APIManagementException, RegistryException {
         Registry registry = Mockito.mock(UserRegistry.class);
 
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registry, null);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager,null, registry , null, apiMgtDAO);
         abstractAPIManager.registry = registry;
 
         GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
@@ -896,6 +896,7 @@ public class AbstractAPIManagerTestCase {
         Documentation documentation = new Documentation(DocumentationType.HOWTO, docName);
         PowerMockito.when(APIUtil.getDocumentation(genericArtifact)).thenReturn(documentation);
         Mockito.when(registry.resourceExists(apiDocPath)).thenThrow(RegistryException.class).thenReturn(true);
+        Mockito.when(apiMgtDAO.checkAPIUUIDIsARevisionUUID(Mockito.anyString())).thenReturn(null);
         try {
             abstractAPIManager.getAllDocumentation(identifier);
             Assert.fail("Registry exception not thrown for error scenario");
@@ -1729,6 +1730,7 @@ public class AbstractAPIManagerTestCase {
         }
         API api1 = new API(getAPIIdentifier("api1", API_PROVIDER, "v1"));
         BDDMockito.when(APIUtil.getAPI((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any())).thenReturn(api1);
+        BDDMockito.when(APIUtil.getAPIIdentifierFromUUID((String) Mockito.any())).thenReturn(getAPIIdentifier("api1", API_PROVIDER, "v1"));
         SortedSet<API> apiSet = (SortedSet<API>) abstractAPIManager
                 .searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false).get("apis");
         Assert.assertEquals(apiSet.size(), 1);

@@ -24,6 +24,7 @@ public class APIRevisionDTO   {
     private Integer id = null;
     private String uuid = null;
     private String description = null;
+    private java.util.Date createdTime = null;
     private APIRevisionAPIInfoDTO apiInfo = null;
 
   /**
@@ -79,6 +80,23 @@ public class APIRevisionDTO   {
 
   /**
    **/
+  public APIRevisionDTO createdTime(java.util.Date createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("createdTime")
+  public java.util.Date getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(java.util.Date createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
   public APIRevisionDTO apiInfo(APIRevisionAPIInfoDTO apiInfo) {
     this.apiInfo = apiInfo;
     return this;
@@ -108,12 +126,13 @@ public class APIRevisionDTO   {
     return Objects.equals(id, apIRevision.id) &&
         Objects.equals(uuid, apIRevision.uuid) &&
         Objects.equals(description, apIRevision.description) &&
+        Objects.equals(createdTime, apIRevision.createdTime) &&
         Objects.equals(apiInfo, apIRevision.apiInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, uuid, description, apiInfo);
+    return Objects.hash(id, uuid, description, createdTime, apiInfo);
   }
 
   @Override
@@ -124,6 +143,7 @@ public class APIRevisionDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
     sb.append("}");
     return sb.toString();

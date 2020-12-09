@@ -177,6 +177,16 @@ public class API implements Serializable {
 
     private String testKey;
 
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private boolean isRevision = false;
+
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private String revisionedApiId;
+
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -1053,6 +1063,22 @@ public class API implements Serializable {
 
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
+    }
+
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setRevision(boolean revision) {
+        isRevision = revision;
+    }
+
+    public String getRevisionedApiId() {
+        return revisionedApiId;
+    }
+
+    public void setRevisionedApiId(String revisionedApiId) {
+        this.revisionedApiId = revisionedApiId;
     }
 
     @Override
