@@ -2390,16 +2390,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> claimMap = new HashMap<>();
         try {
             tenantId = getTenantId(tenantDomain);
-        SortedMap<String, String> subscriberClaims =
-                APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
-        APIManagerConfiguration configuration = getAPIManagerConfiguration();
-        String configuredClaims = configuration
-                .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
-        if (subscriberClaims != null) {
-            for (String claimURI : configuredClaims.split(",")) {
-                claimMap.put(claimURI, subscriberClaims.get(claimURI));
+            SortedMap<String, String> subscriberClaims =
+                    APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
+            APIManagerConfiguration configuration = getAPIManagerConfiguration();
+            String configuredClaims = configuration
+                    .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
+            if (subscriberClaims != null) {
+                for (String claimURI : configuredClaims.split(",")) {
+                    claimMap.put(claimURI, subscriberClaims.get(claimURI));
+                }
             }
-        }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for tenant domain "
                     + tenantDomain, e);
