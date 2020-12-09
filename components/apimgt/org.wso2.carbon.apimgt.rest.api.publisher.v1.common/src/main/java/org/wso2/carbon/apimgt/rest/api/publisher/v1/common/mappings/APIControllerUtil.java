@@ -331,6 +331,11 @@ public class APIControllerUtil {
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
         }
+        // if the endpoint type is REST or SOAP return null
+        if (ImportExportConstants.REST_TYPE_ENDPOINT.equals(endpointType) || ImportExportConstants.SOAP_TYPE_ENDPOINT
+                .equals(endpointType) || ImportExportConstants.HTTP_TYPE_ENDPOINT.equals(endpointType)) {
+            return null;
+        }
         // if endpoint type is Dynamic
         if (ImportExportConstants.DYNAMIC_TYPE_ENDPOINT.equals(endpointType)) {
             JsonObject updatedDynamicEndpointParams = new JsonObject();
@@ -638,7 +643,7 @@ public class APIControllerUtil {
      * @param defaultSandboxEndpoint    Default sandbox endpoint json object
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) {
+            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         //check api params file to get provided endpoints
         if (endpointConfigs == null) {
@@ -654,6 +659,17 @@ public class APIControllerUtil {
             if (endpointConfigs.get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY) != null) {
                 updatedEndpointParams.add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY,
                         endpointConfigs.get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY));
+            }
+            if (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY) == null
+                    && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY) == null) {
+                throw new APIManagementException(
+                        "Please specify production sandbox or endpoints for the environment and continue...");
+            }
+
+            if (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY).isJsonNull()
+                    && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY).isJsonNull()) {
+                throw new APIManagementException(
+                        "Please specify production or sandbox endpoints for the environment and continue...");
             }
         }
     }
