@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -1310,8 +1311,13 @@ public abstract class AbstractAPIManager implements APIManager {
         List<Documentation> documentationList = new ArrayList<Documentation>();
         String docArtifactKeyType = StringUtils.EMPTY;
         docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
-
-        String apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(id);
+        String apiOrAPIProductDocPath;
+        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(id.getUUID());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductRevisionDocPath(apiRevision.getApiUUID(), apiRevision.getId());
+        } else {
+            apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(id);
+        }
         String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
         String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
         try {
@@ -2700,17 +2706,19 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 } else {
                     API resultAPI;
-                    if (limitAttributes) {
-                        resultAPI = APIUtil.getAPI(artifact);
-                    } else {
-                        if(reducedPublisherAPIInfo) {
-                            resultAPI = APIUtil.getReducedPublisherAPIForListing(artifact, registry);
+                    if (APIUtil.getAPIIdentifierFromUUID(artifact.getId()) != null) {
+                        if (limitAttributes) {
+                            resultAPI = APIUtil.getAPI(artifact);
                         } else {
-                            resultAPI = APIUtil.getAPI(artifact, registry);
+                            if (reducedPublisherAPIInfo) {
+                                resultAPI = APIUtil.getReducedPublisherAPIForListing(artifact, registry);
+                            } else {
+                                resultAPI = APIUtil.getAPI(artifact, registry);
+                            }
                         }
-                    }
-                    if (resultAPI != null) {
-                        apiList.add(resultAPI);
+                        if (resultAPI != null) {
+                            apiList.add(resultAPI);
+                        }
                     }
                 }
 
