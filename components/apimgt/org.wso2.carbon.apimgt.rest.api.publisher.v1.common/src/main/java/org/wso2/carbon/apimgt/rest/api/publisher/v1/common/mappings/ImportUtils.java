@@ -190,6 +190,13 @@ public class ImportUtils {
                 currentStatus = targetApi.getStatus();
                 // Set the status of imported API to current status of target API when updating
                 importedApiDTO.setLifeCycleStatus(currentStatus);
+
+                // If the set of operations are not set in the DTO, those should be set explicitly. Otherwise when
+                // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
+                // when updating an API from the UI there is at least one resource (operation) inside the DTO.
+                if (importedApiDTO.getOperations().isEmpty()) {
+                    setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
+                }
                 importedApi = PublisherCommonUtils
                         .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
             } else {
@@ -276,6 +283,21 @@ public class ImportUtils {
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
+    }
+
+    /**
+     * This method sets the operations which were retrieved from the swagger definition to the API DTO.
+     *
+     * @param apiDto             API DTO
+     * @param response          API Validation Response
+     * @throws APIManagementException If an error occurs when retrieving the URI templates
+     */
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
+            throws APIManagementException {
+        List<URITemplate> uriTemplates = new ArrayList<>();
+        uriTemplates.addAll(response.getParser().getURITemplates(response.getJsonContent()));
+        List<APIOperationsDTO> apiOperationsDtos =APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
+        apiDto.setOperations(apiOperationsDtos);
     }
 
     /**
