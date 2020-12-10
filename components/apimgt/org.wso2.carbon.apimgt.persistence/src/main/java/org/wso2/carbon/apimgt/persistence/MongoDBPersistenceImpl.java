@@ -1,3 +1,19 @@
+/*
+ *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.apimgt.persistence;
 
 import com.mongodb.client.FindIterable;
@@ -7,6 +23,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
+import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.BsonField;
@@ -26,6 +43,7 @@ import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.MongoDBDevPortalAPI;
@@ -63,6 +81,8 @@ import static com.mongodb.client.model.Aggregates.unwind;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.pull;
 import static com.mongodb.client.model.Updates.push;
 import static com.mongodb.client.model.Updates.set;
 import static com.mongodb.client.model.Projections.exclude;
@@ -292,40 +312,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
-            throws DocumentationPersistenceException {
-        return null;
-    }
-
-    @Override
-    public Documentation getDocumentation(Organization org, String apiId, String docId)
-            throws DocumentationPersistenceException {
-
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-        MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
-                unwind("$documentationList"),
-                match(eq("documentationList.docId", new ObjectId(docId))),
-                project(include("documentationList")),
-                group(new ObjectId(), Accumulators.push("documentationList",
-                        "$documentationList"))
-                                                                                    ))
-                .cursor();
-        while (cursor.hasNext()) {
-            MongoDBPublisherAPI mongoDBAPIDocument = cursor.next();
-            APIDocumentation apiDocumentation = (APIDocumentation) mongoDBAPIDocument.getDocumentationList()
-                    .toArray()[0];
-            return DocumentationMapper.INSTANCE.toDocumentation(apiDocumentation);
-        }
-        return null;
-    }
-
-    @Override
-    public DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
-            throws DocumentationPersistenceException {
-        return null;
-    }
-
-    @Override
     public DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset,
                                                     String searchQuery, UserContext ctx)
             throws DocumentationPersistenceException {
@@ -353,9 +339,167 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public DocumentContent addDocumentationContent(Organization org, String apiId, String docId,
+                                                   DocumentContent content) throws DocumentationPersistenceException {
+        String sourceType = content.getSourceType().name();
+        if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType)) {
+            handleFileTypeContent(org, apiId, docId, content);
+            return content;
+        }
+        handleInlineMDTypeContent(org, apiId, docId, content);
+        return content;
+    }
+
+    @Override
+    public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
+            throws DocumentationPersistenceException {
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        APIDocumentation apiDocumentation = DocumentationMapper.INSTANCE.toAPIDocumentation(documentation);
+        ObjectId docId = apiDocumentation.getId();
+        FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
+        options.returnDocument(ReturnDocument.AFTER);
+        MongoDBPublisherAPI updatedAPI = collection.findOneAndUpdate(
+                and(
+                        eq("_id", new ObjectId(apiId)),
+                        eq("documentationList.docId", docId)
+                   ),
+                set("documentationList.$", apiDocumentation)
+                , options);
+        Set<APIDocumentation> documentationList = updatedAPI.getDocumentationList();
+        for (APIDocumentation apiDoc : documentationList) {
+            if (docId.toString().equalsIgnoreCase(apiDoc.getId().toString())) {
+                return DocumentationMapper.INSTANCE.toDocumentation(apiDoc);
+            }
+        }
+        throw new DocumentationPersistenceException("Failed to update documentation" + docId.toString() + "in " +
+                "mongodb for api " + apiId);
+    }
+
+    @Override
+    public Documentation getDocumentation(Organization org, String apiId, String docId)
+            throws DocumentationPersistenceException {
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
+                unwind("$documentationList"),
+                match(eq("documentationList.docId", new ObjectId(docId))),
+                project(include("documentationList")),
+                group(new ObjectId(), Accumulators.push("documentationList",
+                        "$documentationList"))
+                                                                                    ))
+                .cursor();
+        while (cursor.hasNext()) {
+            MongoDBPublisherAPI mongoDBAPIDocument = cursor.next();
+            APIDocumentation apiDocumentation = (APIDocumentation) mongoDBAPIDocument.getDocumentationList()
+                    .toArray()[0];
+            return DocumentationMapper.INSTANCE.toDocumentation(apiDocumentation);
+        }
+        return null;
+    }
+
+    @Override
+    public DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
+            throws DocumentationPersistenceException {
+        APIDocumentation apiDocumentation = getMongodbDocUsingId(org, apiId, docId);
+        String sourceType = apiDocumentation.getSourceType().name();
+        ObjectId gridFsReference = apiDocumentation.getGridFsReference();
+
+        DocumentContent documentContent = new DocumentContent();
+        documentContent.setSourceType(DocumentContent.ContentSourceType.valueOf(sourceType));
+
+        if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType) && gridFsReference != null) {
+            MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
+            GridFSBucket gridFSBucket = GridFSBuckets.create(database, org.getName());
+            GridFSDownloadStream downloadStream = gridFSBucket.openDownloadStream(gridFsReference);
+            ResourceFile resourceFile = new ResourceFile(downloadStream, apiDocumentation.getContentType());
+            resourceFile.setName(downloadStream.getGridFSFile().getFilename());
+            documentContent.setResourceFile(resourceFile);
+            return documentContent;
+        }
+        documentContent.setTextContent(apiDocumentation.getTextContent());
+        return documentContent;
+    }
+
+    @Override
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        APIDocumentation apiDocumentation = getMongodbDocUsingId(org, apiId, docId);
+        String sourceType = apiDocumentation.getSourceType().name();
+        ObjectId gridFsReference = apiDocumentation.getGridFsReference();
+        if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType) && gridFsReference != null) {
+            MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
+            GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getName());
+            gridFSFilesBucket.delete(apiDocumentation.getGridFsReference());
+        }
 
+        collection.updateOne(
+                eq("_id", new ObjectId(apiId)),
+                pull(
+                        "documentationList",
+                        eq("docId", new ObjectId(docId))
+                    )
+                            );
+    }
+
+    private APIDocumentation getMongodbDocUsingId(Organization org, String apiId, String docId)
+            throws DocumentationPersistenceException {
+        APIDocumentation apiDocumentation = null;
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+
+        MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
+                match(eq("_id", new ObjectId(apiId))),
+                unwind("$documentationList"),
+                match(eq("documentationList.docId", new ObjectId(docId))),
+                project(include("documentationList")),
+                group(new ObjectId(), Accumulators.push("documentationList",
+                        "$documentationList"))
+                                                                                    ))
+                .cursor();
+
+        //This will only return one api and with one doc
+        while (cursor.hasNext()) {
+            MongoDBPublisherAPI mongoDBAPIDocument = cursor.next();
+            apiDocumentation = (APIDocumentation) mongoDBAPIDocument.getDocumentationList()
+                    .toArray()[0];
+        }
+        if (apiDocumentation == null) {
+            throw new DocumentationPersistenceException("Failed to delete documentation. Cannot find " + docId + "in " +
+                    "mongodb for api " + apiId);
+        }
+        return apiDocumentation;
+    }
+
+    private void handleFileTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
+        MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getName());
+        ResourceFile resourceFile = content.getResourceFile();
+        InputStream inputStream = resourceFile.getContent();
+        GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
+        ObjectId gridFsReference = gridFSFilesBucket.uploadFromStream(resourceFile.getName(), inputStream, options);
+
+        collection.updateOne(
+                and(
+                        eq("_id", new ObjectId(apiId)),
+                        eq("documentationList.docId", new ObjectId(docId))
+                   ),
+                combine(
+                        set("documentationList.$.gridFsReference", gridFsReference),
+                        set("documentationList.$.contentType", resourceFile.getContentType())
+                       )
+                            );
+    }
+
+    private void handleInlineMDTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+
+        collection.updateOne(
+                and(
+                        eq("_id", new ObjectId(apiId)),
+                        eq("documentationList.docId", new ObjectId(docId))
+                   ),
+                set("documentationList.$.textContent", content.getTextContent())
+                            );
     }
 
     @Override
@@ -412,52 +556,5 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
         return database.getCollection(orgName, MongoDBDevPortalAPI.class);
-    }
-
-    @Override
-    public DocumentContent addDocumentationContent(Organization org, String apiId, String docId,
-                                                   DocumentContent content) throws DocumentationPersistenceException {
-        String sourceType = content.getSourceType().name();
-        if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType)) {
-            handleFileTypeContent(org, apiId, docId, content);
-            return content;
-        }
-
-        if (DocumentContent.ContentSourceType.URL.name().equalsIgnoreCase(sourceType)) {
-            return content;
-        }
-
-        handleInlineMDTypeContent(org, apiId, docId, content);
-        return null;
-    }
-
-    private void handleFileTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
-        MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getName());
-        ResourceFile resourceFile = content.getResourceFile();
-        InputStream inputStream = resourceFile.getContent();
-        GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
-        ObjectId gridFsReference = gridFSFilesBucket.uploadFromStream(resourceFile.getName(), inputStream, options);
-
-        collection.updateOne(
-                and(
-                        eq("_id", new ObjectId(apiId)),
-                        eq("documentationList.docId", new ObjectId(docId))
-                   ),
-                set("documentationList.$.gridFsReference", gridFsReference)
-                            );
-    }
-
-    private void handleInlineMDTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-
-        collection.updateOne(
-                and(
-                        eq("_id", new ObjectId(apiId)),
-                        eq("documentationList.docId", new ObjectId(docId))
-                   ),
-                set("documentationList.$.textContent", content.getTextContent())
-                            );
     }
 }

@@ -39,6 +39,15 @@ public class APIDocumentation {
     private String textContent;
     private DocumentationType type;
     private DocumentationInfo.DocumentSourceType sourceType;
+    private String contentType;
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
     public Documentation.DocumentVisibility getVisibility() {
         return visibility;
