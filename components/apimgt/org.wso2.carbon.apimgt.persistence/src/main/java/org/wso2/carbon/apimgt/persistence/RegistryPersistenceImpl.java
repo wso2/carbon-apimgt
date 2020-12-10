@@ -1063,7 +1063,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void saveWSDL(Organization org, String apiId, ResourceFile wsdlResourceFile)
             throws WSDLPersistenceException {
-        log.info("======================================================");
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = org.getName();
@@ -1150,7 +1149,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException {
-        log.info("=========================get============================");
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = org.getName();
