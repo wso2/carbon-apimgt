@@ -463,7 +463,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
-            documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
+            documentation = apiConsumer.getDocumentation(apiId, documentId, requestedTenantDomain);
             if (null != documentation) {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();

@@ -1441,16 +1441,18 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Get a documentation by artifact Id
      *
+     * @param apiId                 artifact id of the api
      * @param docId                 artifact id of the document
      * @param requestedTenantDomain tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
+    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException {
         Documentation documentation = null;
         try {
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(new Organization(requestedTenantDomain), null, docId);
+                    .getDocumentation(new Organization(requestedTenantDomain), apiId, docId);
             if (doc != null) {
                if(log.isDebugEnabled()) {
                    log.debug("Retrieved doc: " + doc);
