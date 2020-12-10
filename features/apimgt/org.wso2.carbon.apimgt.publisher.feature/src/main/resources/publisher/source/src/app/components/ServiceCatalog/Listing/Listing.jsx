@@ -30,7 +30,6 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
-import Overview from 'AppComponents/ServiceCatalog/Listing/Overview';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
@@ -186,9 +185,15 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
+                        const serviceId = dataRow.id;
                         if (dataRow) {
                             return (
-                                <b><span>{dataRow.displayName}</span></b>
+                                <Link
+                                    className={classes.removePaddingOnLink}
+                                    to={'/service-catalog/' + serviceId + '/overview'}
+                                >
+                                    <span>{dataRow.displayName}</span>
+                                </Link>
                             );
                         }
                     }
@@ -280,7 +285,6 @@ function Listing() {
                                             </Typography>
                                         </Button>
                                     </Link>
-                                    <Overview dataRow={dataRow} />
                                     <Link
                                         className={classes.removePaddingOnLink}
                                         to={'/service-catalog/' + serviceId + '/edit'}
