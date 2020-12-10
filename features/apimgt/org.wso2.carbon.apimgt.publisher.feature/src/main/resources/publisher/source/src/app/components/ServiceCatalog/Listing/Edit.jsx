@@ -20,24 +20,33 @@ import React, { useReducer, useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
-import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
 import Grid from '@material-ui/core/Grid';
-import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Container from '@material-ui/core/Container';
+import Box from '@material-ui/core/Box';
+import Typography from '@material-ui/core/Typography';
+import { Progress } from 'AppComponents/Shared';
 import Joi from '@hapi/joi';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
         marginLeft: theme.spacing(0.1),
+    },
+    buttonWrapper: {
+        paddingTop: 10,
+    },
+    buttonSection: {
+        paddingTop: theme.spacing(1),
+    },
+    headingSpacing: {
+        marginTop: theme.spacing(3),
     },
 }));
 
@@ -53,6 +62,8 @@ function reducer(state, { field, value }) {
         case 'serviceUrl':
         case 'definitionType':
             return { ...state, [field]: value };
+        case 'initialize':
+            return value;
         default:
             return state;
     }
@@ -60,20 +71,46 @@ function reducer(state, { field, value }) {
 
 /**
 * Service Catalog service edit
-* @param {any} props Props for edit function.
 * @returns {any} Returns the rendered UI for service edit.
 */
 function Edit(props) {
     const intl = useIntl();
     const classes = useStyles();
-    const { onEdit, dataRow } = props;
-    const [open, setOpen] = useState(false);
+    const { match, history } = props;
+    const serviceId = match.params.service_uuid;
+    const [service, setService] = useState(null);
     const [schemaTypeList, setSchemaTypeList] = useState([]);
-    const toggleOpen = () => {
-        setOpen(!open);
-    };
-    const [state, dispatch] = useReducer(reducer, dataRow);
     const [validity, setValidity] = useState({});
+
+    const initialState = {
+        id: '',
+        name: '',
+        displayName: '',
+        description: '',
+        serviceUrl: '',
+        definitionType: '',
+    };
+
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    // Get Service Details
+    const getService = () => {
+        const promisedService = ServiceCatalog.getServiceById(serviceId);
+        promisedService.then((data) => {
+            setService(data);
+            dispatch({ field: 'initialize', value: data });
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error While Loading Service',
+                id: 'ServiceCatalog.Listing.Edit.error.loading.service',
+            }));
+        });
+        return null;
+    };
+
+    useEffect(() => {
+        getService();
+    }, []);
 
     const {
         id,
@@ -166,36 +203,63 @@ function Edit(props) {
     /**
      * Function for updating a given service entry
      */
+    const onEdit = () => {
+        const updateServicePromise = ServiceCatalog.updateService(id, state);
+        updateServicePromise.then(() => {
+            Alert.info(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.Listing.service.updated.successfully',
+                defaultMessage: 'Service updated successfully!',
+            }));
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error while updating service',
+                id: 'ServiceCatalog.Listing.Listing.error.update',
+            }));
+        });
+    };
+
+    /**
+     * Function for updating a given service entry
+     */
     function doneEditing() {
         const formErrors = getAllFormErrors();
         if (formErrors !== '') {
             Alert.error(formErrors);
         } else {
-            onEdit(id, state);
-            setOpen(!open);
+            onEdit(state.id, state);
+            // Redirect to listing page
+            history.push('/service-catalog');
         }
+    }
+
+    const listingRedirect = () => {
+        history.push('/service-catalog');
+    };
+
+    if (!service) {
+        return <Progress per={90} message='Loading Service ...' />;
     }
 
     return (
         <>
-            <Button onClick={toggleOpen}>
-                <Icon>edit</Icon>
-            </Button>
-            <Dialog
-                open={open}
-                maxWidth='sm'
-                fullWidth
-                aria-labelledby='confirmation-dialog-title'
-            >
-                <DialogTitle id='confirmation-dialog-title'>
-                    <FormattedMessage
-                        id='ServiceCatalog.Listing.Edit.service'
-                        defaultMessage='Edit Service'
-                    />
-                </DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2}>
-                        <Grid item md={12}>
+            <Container maxWidth='md'>
+                <Box mb={3} className={classes.headingSpacing}>
+                    <Typography variant='h4'>
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.Edit.heading'
+                            defaultMessage='Edit Service'
+                        />
+                    </Typography>
+                    <Typography variant='caption'>
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.Edit.heading.caption'
+                            defaultMessage='Edit the service in the service catalog'
+                        />
+                    </Typography>
+                </Box>
+                <Paper elevation={1}>
+                    <Box px={8} py={5}>
+                        <form noValidate autoComplete='off'>
                             <TextField
                                 name='name'
                                 label={(
@@ -209,6 +273,7 @@ function Edit(props) {
                                 )}
                                 value={name}
                                 variant='outlined'
+                                margin='normal'
                                 fullWidth
                                 helperText={(
                                     <FormattedMessage
@@ -218,8 +283,6 @@ function Edit(props) {
                                 )}
                                 disabled
                             />
-                        </Grid>
-                        <Grid item md={12}>
                             <TextField
                                 name='displayName'
                                 label={(
@@ -233,6 +296,7 @@ function Edit(props) {
                                 )}
                                 value={displayName}
                                 variant='outlined'
+                                margin='normal'
                                 error={validity.displayName}
                                 fullWidth
                                 helperText={validity.displayName ? validity.displayName
@@ -250,8 +314,6 @@ function Edit(props) {
                                 }}
                                 onChange={handleChange}
                             />
-                        </Grid>
-                        <Grid item md={12}>
                             <TextField
                                 name='description'
                                 label={(
@@ -262,6 +324,7 @@ function Edit(props) {
                                 )}
                                 value={description}
                                 variant='outlined'
+                                margin='normal'
                                 fullWidth
                                 helperText={(
                                     <FormattedMessage
@@ -272,8 +335,6 @@ function Edit(props) {
                                 onChange={handleChange}
                                 multiline
                             />
-                        </Grid>
-                        <Grid item md={12}>
                             <TextField
                                 name='serviceUrl'
                                 label={(
@@ -288,6 +349,7 @@ function Edit(props) {
                                 value={serviceUrl}
                                 fullWidth
                                 variant='outlined'
+                                margin='normal'
                                 error={validity.serviceUrl}
                                 helperText={validity.serviceUrl ? validity.serviceUrl
                                     : (
@@ -304,8 +366,6 @@ function Edit(props) {
                                 }}
                                 onChange={handleChange}
                             />
-                        </Grid>
-                        <Grid item md={12}>
                             <TextField
                                 name='definitionType'
                                 select
@@ -318,6 +378,7 @@ function Edit(props) {
                                 value={definitionType}
                                 fullWidth
                                 variant='outlined'
+                                margin='normal'
                                 error={validity.definitionType}
                                 helperText={validity.definitionType ? validity.definitionType
                                     : (
@@ -353,42 +414,47 @@ function Edit(props) {
                                     </MenuItem>
                                 ))}
                             </TextField>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={toggleOpen} color='primary'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Edit.cancel.btn'
-                            defaultMessage='Cancel'
-                        />
-                    </Button>
-                    <Button
-                        onClick={doneEditing}
-                        color='primary'
-                        variant='contained'
-                    >
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Edit.update.btn'
-                            defaultMessage='Update'
-                        />
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                        </form>
+                        <div className={classes.buttonWrapper}>
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={1}
+                                className={classes.buttonSection}
+                            >
+                                <Grid item>
+                                    <Button
+                                        onClick={doneEditing}
+                                        color='primary'
+                                        variant='contained'
+                                    >
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.update.btn'
+                                            defaultMessage='Update'
+                                        />
+                                    </Button>
+                                </Grid>
+                                <Grid item>
+                                    <Button onClick={listingRedirect} color='primary'>
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Edit.cancel.btn'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </div>
+                    </Box>
+                </Paper>
+            </Container>
         </>
     );
 }
 Edit.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    dataRow: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        displayName: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        definitionType: PropTypes.string.isRequired,
-        serviceUrl: PropTypes.string.isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.object,
     }).isRequired,
-    onEdit: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
 };
 
 export default Edit;

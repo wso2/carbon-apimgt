@@ -32,7 +32,7 @@ import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
 import Overview from 'AppComponents/ServiceCatalog/Listing/Overview';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
-import Edit from 'AppComponents/ServiceCatalog/Listing/Edit';
+import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -106,6 +106,14 @@ const useStyles = makeStyles((theme) => ({
             minWidth: '150px',
         },
     },
+    removePaddingOnLink: {
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1),
+    },
+    editButtonStyle: {
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+    },
 }));
 
 /**
@@ -156,28 +164,6 @@ function Listing() {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error while deleting service',
                 id: 'ServiceCatalog.Listing.Listing.error.delete',
-            }));
-        });
-    };
-
-    /**
-     * Function for updating a given service entry
-     * @param {string} serviceId ID of the service
-     * @param {object} body service payload
-     */
-    const onEdit = (serviceId, body) => {
-        const updateServicePromise = ServiceCatalog.updateService(serviceId, body);
-        updateServicePromise.then(() => {
-            Alert.info(intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.service.updated.successfully',
-                defaultMessage: 'Service updated successfully!',
-            }));
-            // Reload the services list
-            getData();
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while updating service',
-                id: 'ServiceCatalog.Listing.Listing.error.update',
             }));
         });
     };
@@ -280,34 +266,36 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        // const serviceId = dataRow.id;
+                        const serviceId = dataRow.id;
                         return (
-                            <Box display='flex' flexDirection='row'>
-                                <Link>
-                                    <Button color='primary' variant='outlined' className={classes.buttonStyle}>
-                                        <Typography className={classes.textStyle}>
-                                            <FormattedMessage
-                                                id='ServiceCatalog.Listing.Listing.create.api'
-                                                defaultMessage='Create API'
-                                            />
-                                        </Typography>
-                                    </Button>
-                                </Link>
-                                <Overview dataRow={dataRow} />
-                                {/* <Link
-                                    to={'/service-catalog/' + serviceId + '/edit'}
-                                >
-                                    <Button>
-                                        <Icon>edit</Icon>
-                                    </Button>
-                                </Link> */}
-                                <Edit dataRow={dataRow} onEdit={onEdit} />
-                                <Delete
-                                    serviceDisplayName={dataRow.displayName}
-                                    serviceId={dataRow.id}
-                                    onDelete={onDelete}
-                                />
-                            </Box>
+                            <>
+                                <Box display='flex' flexDirection='row'>
+                                    <Link>
+                                        <Button color='primary' variant='outlined' className={classes.buttonStyle}>
+                                            <Typography className={classes.textStyle}>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Listing.create.api'
+                                                    defaultMessage='Create API'
+                                                />
+                                            </Typography>
+                                        </Button>
+                                    </Link>
+                                    <Overview dataRow={dataRow} />
+                                    <Link
+                                        className={classes.removePaddingOnLink}
+                                        to={'/service-catalog/' + serviceId + '/edit'}
+                                    >
+                                        <Button>
+                                            <Icon>edit</Icon>
+                                        </Button>
+                                    </Link>
+                                    <Delete
+                                        serviceDisplayName={dataRow.displayName}
+                                        serviceId={serviceId}
+                                        onDelete={onDelete}
+                                    />
+                                </Box>
+                            </>
                         );
                     }
                     return false;
