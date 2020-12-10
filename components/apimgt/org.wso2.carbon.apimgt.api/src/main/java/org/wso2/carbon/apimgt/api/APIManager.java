@@ -248,12 +248,14 @@ public interface APIManager {
     /**
      * Get a documentation by artifact Id
      *
+     * @param apiId   apiId
      * @param docId   DocumentID
      * @param requestedTenantDomain tenant domain of the registry where the artifact is located
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-     Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+    Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException;
      
     /**
      * Get a documentation Content by apiid and doc id

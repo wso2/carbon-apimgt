@@ -131,6 +131,7 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_API_VERSION = "1.0.0";
     public static final String SAMPLE_TENANT_DOMAIN = "carbon.super";
     public static final String SAMPLE_RESOURCE_ID = "xyz";
+    public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
@@ -1014,12 +1015,14 @@ public class AbstractAPIManagerTestCase {
         Organization org = Mockito.mock(Organization.class);
         PowerMockito.whenNew(Organization.class).withArguments(SAMPLE_TENANT_DOMAIN, null).thenReturn(org);
         
-        Mockito.when(apiPersistenceInstance.getDocumentation(org , null,
-                SAMPLE_RESOURCE_ID)).thenReturn(document);
-        
-        Assert.assertNotNull(abstractAPIManager.getDocumentation(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN));
+        Mockito.when(apiPersistenceInstance.getDocumentation(org, SAMPLE_API_RESOURCE_ID, SAMPLE_RESOURCE_ID))
+                .thenReturn(document);
+
+        Assert.assertNotNull(
+                abstractAPIManager.getDocumentation(SAMPLE_API_RESOURCE_ID, SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN));
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Documentation doc = abstractAPIManager.getDocumentation(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN);
+        Documentation doc = abstractAPIManager.getDocumentation(SAMPLE_API_RESOURCE_ID, SAMPLE_RESOURCE_ID,
+                SAMPLE_TENANT_DOMAIN);
         Assert.assertEquals(doc.getName(), docName);
 
     }
