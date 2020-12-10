@@ -496,8 +496,13 @@
         <!--This parameter specifies whether Provisioning Out-of-Band OAuth Clients is enabled-->
         <MapExistingAuthApps>{{apim.devportal.enable_key_provisioning}}</MapExistingAuthApps>
 
+        <!--This parameter specifies the name of the Api Key which will be used for Api Key Signing-->
+        <APIKeyKeystore>{{apim.devportal.api_key_keystore}}</APIKeyKeystore>
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
+        <!--This parameter specifies the class name which includes the custom implementation for API Key generation and
+        signing-->
+        <ApiKeyGeneratorImpl>{{apim.devportal.api_key_generator_impl}}</ApiKeyGeneratorImpl>
 
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
@@ -1338,4 +1343,22 @@
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
      <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
+     <!-- This parameter can be used to provide the metadata on key stores can be used for different purposes in API
+      Manager-->
+     <Security>
+         {% for key,keyStore in custom_keystore.items() %}
+             <{{key}}>
+                 <!-- Keystore file location-->
+                 <Location>${carbon.home}/repository/resources/security/{{keyStore.file_name}}</Location>
+                 <!-- Keystore type (JKS/PKCS12 etc.)-->
+                 <Type>{{keyStore.type}}</Type>
+                 <!-- Keystore password-->
+                 <Password>{{keyStore.password}}</Password>
+                 <!-- Private Key alias-->
+                 <KeyAlias>{{keyStore.alias}}</KeyAlias>
+                 <!-- Private Key password-->
+                 <KeyPassword>{{keyStore.key_password}}</KeyPassword>
+             </{{key}}>
+         {% endfor %}
+     </Security>
 </APIManager>
