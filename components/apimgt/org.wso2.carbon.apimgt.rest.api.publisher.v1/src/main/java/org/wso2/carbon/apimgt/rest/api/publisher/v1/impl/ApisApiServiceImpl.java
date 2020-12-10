@@ -4099,7 +4099,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
                 apiDtoToReturn = getAPIByID(apiId);
             }
-
+            apiIdentifier.setUuid(apiId);
             File file = ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, exportFormat,
                     preserveStatus);
             return Response.ok(file)
