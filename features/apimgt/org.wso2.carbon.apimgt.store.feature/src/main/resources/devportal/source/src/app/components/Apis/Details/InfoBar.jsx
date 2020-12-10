@@ -333,7 +333,17 @@ class InfoBar extends React.Component {
      */
     render() {
         const { api } = this.context;
-
+//
+       // console.log(api);
+       // console.log(api.tags);
+        let awsApi = false;
+        for (let i=0; i<api.tags.length; i++) {
+            if (api.tags[i]==="aws") {
+                awsApi = true;
+            }
+        }
+        console.log(awsApi);
+//
         const { classes, theme, intl } = this.props;
         const {
             notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl, avgRating, total, count,
@@ -447,6 +457,8 @@ class InfoBar extends React.Component {
                                 <Typography>{api.description}</Typography>
                                 <Table className={classes.table}>
                                     <TableBody>
+                                    {!awsApi && (
+                                        <>
                                         <TableRow>
                                             <TableCell component='th' scope='row' className={classes.leftCol}>
                                                 <div className={classes.iconAligner}>
@@ -475,6 +487,8 @@ class InfoBar extends React.Component {
                                             </TableCell>
                                             <TableCell>{api.context}</TableCell>
                                         </TableRow>
+                                    </>
+                                )}
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
@@ -489,6 +503,7 @@ class InfoBar extends React.Component {
                                             </TableCell>
                                             <TableCell>{this.getProvider(api)} {this.getProviderMail(api)}</TableCell>
                                         </TableRow>
+
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
                                                 <div className={classes.iconAligner}>
@@ -582,8 +597,8 @@ class InfoBar extends React.Component {
                                                 </TableCell>
                                             </TableRow>
                                         )}
-                                        {!api.advertiseInfo.advertised ? (
-                                            <>
+
+
                                                 <TableRow>
                                                     <TableCell
                                                         component='th'
@@ -626,8 +641,8 @@ class InfoBar extends React.Component {
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
-                                            </>
-                                        ) : (
+
+
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
@@ -642,7 +657,7 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
                                                 </TableRow>
-                                            )}
+
                                         {apisTagsWithoutGroups && apisTagsWithoutGroups.length > 0 && (
                                             <TableRow>
                                                 <TableCell component='th' scope='row'>
