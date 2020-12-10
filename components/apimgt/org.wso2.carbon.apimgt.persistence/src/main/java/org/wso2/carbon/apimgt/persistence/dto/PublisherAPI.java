@@ -86,15 +86,6 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String thumbnail;
     private String createdTime;
     private String lastUpdated;
-    private APIDocumentation documentation;
-
-    public APIDocumentation getDocumentation() {
-        return documentation;
-    }
-
-    public void setDocumentation(APIDocumentation documentation) {
-        this.documentation = documentation;
-    }
 
     public String getSwaggerDefinition() {
         return swaggerDefinition;

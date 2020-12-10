@@ -18,14 +18,17 @@
 
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 
 import java.util.Date;
 
 public class APIDocumentation {
+    @BsonProperty(value = "docId")
     private ObjectId id;
-    private String gridFsReference;
+    private ObjectId gridFsReference;
     private String name;
     private String summary;
     private String sourceUrl;
@@ -33,9 +36,9 @@ public class APIDocumentation {
     private Date lastUpdated;
     private String filePath;
     private Date createdDate;
-    private DocumentContent documentContent;
-    private DocumentationType documentationType;
-    private Documentation.DocumentSourceType documentationSourceType;
+    private String textContent;
+    private DocumentationType type;
+    private DocumentationInfo.DocumentSourceType sourceType;
 
     public Documentation.DocumentVisibility getVisibility() {
         return visibility;
@@ -46,35 +49,42 @@ public class APIDocumentation {
     }
 
     public DocumentationType getDocumentationType() {
-        return documentationType;
+        return type;
     }
 
     public void setDocumentationType(DocumentationType documentationType) {
-        this.documentationType = documentationType;
+        this.type = documentationType;
     }
 
-    public Documentation.DocumentSourceType getDocumentationSourceType() {
-        return documentationSourceType;
+    public DocumentationType getType() {
+        return type;
     }
 
-    public void setDocumentationSourceType(
-            Documentation.DocumentSourceType documentationSourceType) {
-        this.documentationSourceType = documentationSourceType;
+    public void setType(DocumentationType type) {
+        this.type = type;
     }
 
-    public DocumentContent getDocumentContent() {
-        return documentContent;
+    public DocumentationInfo.DocumentSourceType getSourceType() {
+        return sourceType;
     }
 
-    public void setDocumentContent(DocumentContent documentContent) {
-        this.documentContent = documentContent;
+    public void setSourceType(DocumentationInfo.DocumentSourceType sourceType) {
+        this.sourceType = sourceType;
     }
 
-    public String getGridFsReference() {
+    public String getTextContent() {
+        return textContent;
+    }
+
+    public void setTextContent(String textContent) {
+        this.textContent = textContent;
+    }
+
+    public ObjectId getGridFsReference() {
         return gridFsReference;
     }
 
-    public void setGridFsReference(String gridFsReference) {
+    public void setGridFsReference(ObjectId gridFsReference) {
         this.gridFsReference = gridFsReference;
     }
 

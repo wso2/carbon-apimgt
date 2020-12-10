@@ -29,8 +29,14 @@ import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 public interface DocumentationMapper {
     DocumentationMapper INSTANCE = Mappers.getMapper(DocumentationMapper.class);
 
+    @Mapping(source = "sourceType", target = "sourceType")
+    @Mapping(source = "type", target = "type")
+    @Mapping(source = "id", target = "id")
     Documentation toDocumentation(APIDocumentation apiDoc);
 
+    @Mapping(source = "sourceType", target = "sourceType")
+    @Mapping(source = "type", target = "type")
+    @Mapping(source = "id", target = "id")
     APIDocumentation toAPIDocumentation(Documentation doc);
 
     default ObjectId mapStringIdToObjectId(String id) {
