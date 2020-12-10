@@ -41,7 +41,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -96,8 +97,8 @@ public class ImportApiServiceImpl extends ImportApiService {
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIImportExportManager apiImportExportManager = new APIImportExportManager(apiProvider, userName);
             apiImportExportManager.importAPIArchive(fileInputStream, preserveProvider, overwrite);
             return Response.status(Response.Status.OK).entity("API imported successfully.").build();
@@ -137,12 +138,12 @@ public class ImportApiServiceImpl extends ImportApiService {
         APIConsumer consumer;
         String ownerId;
         int appId;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
                 APPLICATION_IMPORT_DIR_PREFIX +
                 UUID.randomUUID().toString();
         try {
-            consumer = RestApiUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager =
                     new FileBasedApplicationImportExportManager(consumer, tempDirPath);
             Application applicationDetails = importExportManager.importApplication(fileInputStream);

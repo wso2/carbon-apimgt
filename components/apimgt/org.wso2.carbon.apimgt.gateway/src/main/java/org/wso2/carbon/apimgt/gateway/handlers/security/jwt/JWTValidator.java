@@ -161,8 +161,10 @@ public class JWTValidator {
                     /*
                      * Set api.ut.apiPublisher of the subscribed api to the message context.
                      * This is necessary for the functionality of Publisher alerts.
+                     * Set API_NAME of the subscribed api to the message context.
                      * */
                     synCtx.setProperty(APIMgtGatewayConstants.API_PUBLISHER, apiKeyValidationInfoDTO.getApiPublisher());
+                    synCtx.setProperty("API_NAME", apiKeyValidationInfoDTO.getApiName());
                     /* GraphQL Query Analysis Information */
                     if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
                         synCtx.setProperty(APIConstants.MAXIMUM_QUERY_DEPTH,
@@ -495,7 +497,6 @@ public class JWTValidator {
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
     }
-
     protected Cache getGatewayTokenCache() {
 
         return CacheProvider.getGatewayTokenCache();

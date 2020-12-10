@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
@@ -39,13 +38,15 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BlockingConditionDTO.ConditionTypeEnum;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.ApplicationThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.BlockingConditionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.GlobalThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.throttling.SubscriptionThrottlePolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -76,8 +77,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince,
                                                   MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIPolicy[] apiPolicies = (APIPolicy[]) apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_API);
             AdvancedThrottlePolicyListDTO listDTO =
                     AdvancedThrottlePolicyMappingUtil.fromAPIPolicyArrayToListDTO(apiPolicies);
@@ -97,14 +98,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesAdvancedPost(AdvancedThrottlePolicyDTO body, String contentType,
-                                                   MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesAdvancedPost(String contentType, AdvancedThrottlePolicyDTO body,
+                                               MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
 
             //Check if there's a policy exists before adding the new policy
@@ -147,8 +148,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince
             , MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             APIPolicy apiPolicy = apiProvider.getAPIPolicyByUUID(policyId);
@@ -179,12 +180,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
-                                                          String contentType, String ifMatch,
-                                                          String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, String contentType,
+              AdvancedThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
@@ -228,8 +228,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch,
                                                              String ifUnmodifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             APIPolicy existingPolicy = apiProvider.getAPIPolicyByUUID(policyId);
@@ -267,8 +267,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesApplicationGet(String accept, String ifNoneMatch, String ifModifiedSince,
                                                      MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             ApplicationPolicy[] appPolicies = (ApplicationPolicy[]) apiProvider.getPolicies(userName,
                     PolicyConstants.POLICY_LEVEL_APP);
             ApplicationThrottlePolicyListDTO listDTO =
@@ -289,14 +289,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Newly created Application Throttle Policy with the location with the Location header
      */
     @Override
-    public Response throttlingPoliciesApplicationPost(ApplicationThrottlePolicyDTO body, String contentType,
+    public Response throttlingPoliciesApplicationPost(String contentType, ApplicationThrottlePolicyDTO body,
                                                       MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             ApplicationPolicy appPolicy =
                     ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(body);
 
@@ -341,8 +341,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, String ifNoneMatch,
                                                              String ifModifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy appPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
@@ -374,12 +374,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, ApplicationThrottlePolicyDTO body,
-                                                             String contentType, String ifMatch,
-                                                             String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, String contentType,
+         ApplicationThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
@@ -424,8 +423,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                                                 String ifUnmodifiedSince,
                                                                 MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             ApplicationPolicy existingPolicy = apiProvider.getApplicationPolicyByUUID(policyId);
@@ -463,8 +462,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionGet(String accept, String ifNoneMatch, String ifModifiedSince,
                                                       MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider.getPolicies(userName,
                     PolicyConstants.POLICY_LEVEL_SUB);
             SubscriptionThrottlePolicyListDTO listDTO =
@@ -485,14 +484,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPost(SubscriptionThrottlePolicyDTO body, String contentType,
-                                                       MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesSubscriptionPost(String contentType, SubscriptionThrottlePolicyDTO body,
+                                               MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             SubscriptionPolicy subscriptionPolicy =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(body);
             //Check if there's a policy exists before adding the new policy
@@ -555,7 +554,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @throws APIManagementException when there are validation errors or error while updating the permissions
      */
     private void updatePolicyPermissions(SubscriptionThrottlePolicyDTO body) throws APIManagementException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         SubscriptionThrottlePolicyPermissionDTO policyPermissions = body.getPermissions();
         if (policyPermissions != null) {
             if (policyPermissions.getRoles().size() > 0) {
@@ -581,7 +580,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @throws APIManagementException error while setting/retrieve the permissions to the DTO
      */
     private void setPolicyPermissionsToDTO(SubscriptionThrottlePolicyDTO policyDTO) throws APIManagementException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         TierPermissionDTO addedPolicyPermission =
                 (TierPermissionDTO) apiProvider.getThrottleTierPermission(policyDTO.getPolicyName());
         if (addedPolicyPermission != null) {
@@ -603,8 +602,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
                                                               String ifModifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy subscriptionPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
@@ -640,12 +639,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, SubscriptionThrottlePolicyDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext)
-            throws APIManagementException{
+    public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType,
+                      SubscriptionThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince,
+                      MessageContext messageContext) throws APIManagementException{
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
@@ -701,8 +700,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                                                  String ifUnmodifiedSince,
                                                                  MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             SubscriptionPolicy existingPolicy = apiProvider.getSubscriptionPolicyByUUID(policyId);
@@ -741,8 +740,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
                                                 MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
@@ -766,14 +765,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created policy along with the location of it with Location header
      */
     @Override
-    public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType,
-                                                 MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesCustomPost(String contentType, CustomRuleDTO body, MessageContext messageContext)
+                                                                throws APIManagementException {
 
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
@@ -819,8 +818,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesCustomRuleIdGet(String ruleId, String ifNoneMatch, String ifModifiedSince,
                                                       MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
@@ -854,16 +853,16 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Updated policy
      */
     @Override
-    public Response throttlingPoliciesCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
-                                                      String ifMatch, String ifUnmodifiedSince,
-                                                      MessageContext messageContext) throws APIManagementException {
+    public Response throttlingPoliciesCustomRuleIdPut(String ruleId, String contentType, CustomRuleDTO body,
+                    String ifMatch, String ifUnmodifiedSince, MessageContext messageContext)
+                    throws APIManagementException {
 
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
@@ -909,12 +908,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     public Response throttlingPoliciesCustomRuleIdDelete(String ruleId, String ifMatch, String ifUnmodifiedSince,
                                                          MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             //only super tenant is allowed to access global policies/custom rules
             checkTenantDomainForCustomRules();
 
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give PolicyNotFoundException if there's no policy exists with UUID
             GlobalPolicy existingPolicy = apiProvider.getGlobalPolicyByUUID(ruleId);
@@ -943,10 +942,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingBlacklistGet(String accept, String ifNoneMatch, String ifModifiedSince,
+    public Response throttlingDenyPoliciesGet(String accept, String ifNoneMatch, String ifModifiedSince,
                                            MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
             BlockingConditionListDTO listDTO =
                     BlockingConditionMappingUtil.fromBlockConditionListToListDTO(blockConditions);
@@ -966,32 +965,33 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Created block condition along with the location of it with Location header
      */
     @Override
-    public Response throttlingBlacklistPost(BlockingConditionDTO body, String contentType,
+    public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO body,
                                             MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
             String uuid = null;
-            if (APIConstants.BLOCKING_CONDITIONS_API.equals(body.getConditionType()) ||
-                    APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(body.getConditionType()) ||
-                    APIConstants.BLOCKING_CONDITIONS_USER.equals(body.getConditionType())) {
-                uuid = apiProvider.addBlockCondition(body.getConditionType(), (String) body.getConditionValue(),
-                        body.isConditionStatus());
-            } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType()) ||
-                    APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
+            if (ConditionTypeEnum.API.equals(body.getConditionType()) ||
+                    ConditionTypeEnum.APPLICATION.equals(body.getConditionType()) ||
+                    ConditionTypeEnum.USER.equals(body.getConditionType())) {
+                uuid = apiProvider.addBlockCondition(body.getConditionType().toString(),
+                        (String) body.getConditionValue(), body.isConditionStatus());
+            } else if (ConditionTypeEnum.IP.equals(body.getConditionType()) ||
+                    ConditionTypeEnum.IPRANGE.equals(body.getConditionType())) {
                 if (body.getConditionValue() instanceof Map) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.putAll((Map) body.getConditionValue());
-                    if (APIConstants.BLOCKING_CONDITIONS_IP.equals(body.getConditionType())) {
+
+                    if (ConditionTypeEnum.IP.equals(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("fixedIp").toString());
                     }
-                    if (APIConstants.BLOCK_CONDITION_IP_RANGE.equalsIgnoreCase(body.getConditionType())) {
+                    if (ConditionTypeEnum.IPRANGE.equals(body.getConditionType())) {
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("startingIp").toString());
                         RestApiAdminUtils.validateIPAddress(jsonObject.get("endingIp").toString());
                     }
-                    uuid = apiProvider.addBlockCondition(body.getConditionType(), jsonObject.toJSONString(),
-                            body.isConditionStatus());
+                    uuid = apiProvider.addBlockCondition(body.getConditionType().toString(),
+                            jsonObject.toJSONString(), body.isConditionStatus());
                 }
             }
 
@@ -1026,11 +1026,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return Matched block condition for the given Id
      */
     @Override
-    public Response throttlingBlacklistConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince,
+    public Response throttlingDenyPolicyConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince,
                                                       MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditionsDTO blockCondition = apiProvider.getBlockConditionByUUID(conditionId);
@@ -1062,11 +1062,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 OK response if successfully deleted the block condition
      */
     @Override
-    public Response throttlingBlacklistConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince
+    public Response throttlingDenyPolicyConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince
             , MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
@@ -1097,12 +1097,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return 200 response if successful
      */
     @Override
-    public Response throttlingBlacklistConditionIdPatch(String conditionId, BlockingConditionStatusDTO body,
-                                                        String contentType, String ifMatch, String ifUnmodifiedSince,
-                                                        MessageContext messageContext) {
+    public Response throttlingDenyPolicyConditionIdPatch(String conditionId, String contentType,
+            BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String username = RestApiCommonUtil.getLoggedInUsername();
 
             //This will give BlockConditionNotFoundException if there's no block condition exists with UUID
             BlockConditionsDTO existingCondition = apiProvider.getBlockConditionByUUID(conditionId);
@@ -1134,7 +1133,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @throws ForbiddenException
      */
     private void checkTenantDomainForCustomRules() throws ForbiddenException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             RestApiUtil.handleAuthorizationFailure("You are not allowed to access this resource",
                     new APIManagementException("Tenant " + tenantDomain + " is not allowed to access custom rules. " +

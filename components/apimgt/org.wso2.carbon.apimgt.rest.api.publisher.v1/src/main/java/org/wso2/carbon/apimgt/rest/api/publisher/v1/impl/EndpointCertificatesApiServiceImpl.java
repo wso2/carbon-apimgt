@@ -30,13 +30,14 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateValidityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.CertificateRestApiUtils;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
@@ -51,7 +52,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
     public Response endpointCertificatesAliasContentGet(String alias, MessageContext messageContext) {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String certFileName = alias + ".crt";
 
@@ -60,7 +61,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Could not find a certificate in truststore which belongs to tenant : %d " +
@@ -85,12 +86,12 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     public Response endpointCertificatesAliasDelete(String alias, MessageContext messageContext) {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
                 String message = "Certificate for alias '" + alias + "' is not found.";
                 RestApiUtil.handleResourceNotFoundError(message, log);
@@ -120,7 +121,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
     }
 
     public Response endpointCertificatesAliasGet(String alias, MessageContext messageContext) {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         if (!StringUtils.isNotEmpty(alias)) {
@@ -133,7 +134,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Could not find a certificate in truststore which belongs to tenant %d " +
@@ -162,8 +163,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesAliasPut(InputStream certificateInputStream, Attachment certificateDetail,
-            String alias, MessageContext messageContext) {
+    public Response endpointCertificatesAliasPut(String alias, InputStream certificateInputStream,
+                                                 Attachment certificateDetail, MessageContext messageContext) {
         try {
             if (StringUtils.isEmpty(alias)) {
                 RestApiUtil.handleBadRequest("The alias should not be empty", log);
@@ -175,8 +176,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
             if (StringUtils.isBlank(fileName)) {
                 RestApiUtil.handleBadRequest("Certificate update failed. The Certificate should not be empty", log);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(userName);
 
             if (!apiProvider.isCertificatePresent(tenantId, alias)) {
@@ -231,12 +232,12 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         List<CertificateMetadataDTO> certificates;
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String query = CertificateRestApiUtils.buildQueryString("alias", alias, "endpoint", endpoint);
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
                 if (log.isDebugEnabled()) {
@@ -275,8 +276,8 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
                 RestApiUtil.handleBadRequest("Certificate update failed. Proper Certificate file should be provided",
                         log);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addCertificate(userName, base64EncodedCert, alias, endpoint);
 

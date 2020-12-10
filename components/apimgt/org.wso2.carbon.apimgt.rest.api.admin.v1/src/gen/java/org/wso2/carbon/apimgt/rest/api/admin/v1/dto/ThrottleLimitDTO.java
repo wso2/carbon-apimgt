@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitDTO;
 import javax.validation.constraints.*;
@@ -11,45 +13,46 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class ThrottleLimitDTO   {
   
 
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
+    @XmlType(name="TypeEnum")
+    @XmlEnum(String.class)
+    public enum TypeEnum {
+        REQUESTCOUNTLIMIT("REQUESTCOUNTLIMIT"),
+        BANDWIDTHLIMIT("BANDWIDTHLIMIT");
+        private String value;
 
-    @XmlEnumValue("REQUESTCOUNTLIMIT") REQUESTCOUNTLIMIT(String.valueOf("REQUESTCOUNTLIMIT")), @XmlEnumValue("BANDWIDTHLIMIT") BANDWIDTHLIMIT(String.valueOf("BANDWIDTHLIMIT"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        TypeEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static TypeEnum fromValue(String v) {
+            for (TypeEnum b : TypeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private TypeEnum type = null;
     private RequestCountLimitDTO requestCount = null;
     private BandwidthLimitDTO bandwidth = null;
@@ -82,6 +85,7 @@ public enum TypeEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("requestCount")
   public RequestCountLimitDTO getRequestCount() {
     return requestCount;
@@ -99,6 +103,7 @@ public enum TypeEnum {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("bandwidth")
   public BandwidthLimitDTO getBandwidth() {
     return bandwidth;

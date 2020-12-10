@@ -37,14 +37,16 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -82,7 +84,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsGet(String apiId, String applicationId, String groupId,
                                      String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
                                      MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
@@ -97,7 +99,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
                 // todo : FIX properly, need to done properly with backend side pagination.
@@ -169,12 +171,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
 
         try {
-            apiConsumer = RestApiUtil.getConsumer(username);
+            apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
 
             //check whether user is permitted to access the API. If the API does not exist,
@@ -259,23 +261,28 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsSubscriptionIdPut(SubscriptionDTO body, String subscriptionId, String xWSO2Tenant, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String xWSO2Tenant,
+                                                   MessageContext messageContext) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
 
         try {
-            apiConsumer = RestApiUtil.getConsumer(username);
+            apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             String currentThrottlingPolicy = body.getThrottlingPolicy();
             String requestedThrottlingPolicy = body.getRequestedThrottlingPolicy();
 
+            SubscribedAPI subscribedAPI = ApiMgtDAO.getInstance()
+                    .getSubscriptionByUUID(subscriptionId);
             //Check whether the subscription status is not empty and also not blocked
-            if (body.getStatus() != null) {
+            if (body.getStatus() != null && subscribedAPI != null) {
                 if ("BLOCKED".equals(body.getStatus().value()) || "ON_HOLD".equals(body.getStatus().value())
-                        || "REJECTED".equals(body.getStatus().value())) {
+                        || "REJECTED".equals(body.getStatus().value()) || "BLOCKED".equals(subscribedAPI.getSubStatus())
+                        || "ON_HOLD".equals(subscribedAPI.getSubStatus())
+                        || "REJECTED".equals(subscribedAPI.getSubStatus())) {
                     RestApiUtil.handleBadRequest(
-                            "Cannot update subscriptions with provided status", log);
+                            "Cannot update subscriptions with provided or existing status", log);
                     return null;
                 }
             } else {
@@ -362,12 +369,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     @Override
     public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String xWSO2Tenant,
                                               MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
             try {
-                APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
                 String applicationId = subscriptionDTO.getApplicationId();
                 APIIdentifier apiIdentifier = APIMappingUtil
                         .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), tenantDomain);
@@ -443,10 +450,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
                                                    MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
-            apiConsumer = RestApiUtil.getConsumer(username);
+            apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
 
             SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
@@ -465,10 +472,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             RestApiUtil.handleBadRequest(errorMessage, log);
         }
         try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             Monetization monetizationImplementation = apiConsumer.getMonetizationImplClass();
             Map<String, String> billingEngineUsageData = monetizationImplementation.
-                    getCurrentUsageForSubscription(subscriptionId, RestApiUtil.getLoggedInUserProvider());
+                    getCurrentUsageForSubscription(subscriptionId, RestApiCommonUtil.getLoggedInUserProvider());
             if (MapUtils.isEmpty(billingEngineUsageData)) {
                 String errorMessage = "Billing engine usage data was not found for subscription ID : " + subscriptionId;
                 RestApiUtil.handleBadRequest(errorMessage, log);
@@ -496,10 +503,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
                                                       MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
         try {
-            apiConsumer = RestApiUtil.getConsumer(username);
+            apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
 
             apiConsumer.removeSubscription(subscribedAPI);

@@ -128,9 +128,10 @@ export default class Application extends Resource {
                     scopes: selectedScopes,
                     additionalProperties: keys.additionalProperties,
                 };
-                const payload = { applicationId: this.id, keyMappingId: keyMappingId, body: requestContent };
+                const payload = { applicationId: this.id, keyMappingId: keyMappingId };
+                const body = { requestBody: requestContent };
                 return client.apis['Application Tokens']
-                    .post_applications__applicationId__oauth_keys__keyMappingId__generate_token(payload);
+                    .post_applications__applicationId__oauth_keys__keyMappingId__generate_token(payload, body);
             });
         return promiseToken.then((tokenResponse) => {
             const token = tokenResponse.obj;
@@ -164,8 +165,9 @@ export default class Application extends Resource {
                 validityTime: 3600,
                 scopes: ['default'],
             };
-            const payload = { applicationId: this.id, body: requestContent };
-            return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload);
+            const payload = { applicationId: this.id };
+            const body = { requestBody: requestContent };
+            return client.apis['Application Keys'].post_applications__applicationId__generate_keys(payload, body);
         });
         return promisedKeys.then((keysResponse) => {
             if (keyType === 'PRODUCTION') {
@@ -227,8 +229,11 @@ export default class Application extends Resource {
                 tokenType,
                 additionalProperties
             };
-            const payload = { applicationId: this.id, keyMappingId, body: requestContent };
-            return client.apis['Application Keys'].put_applications__applicationId__oauth_keys__keyMappingId_(payload);
+            const payload = { applicationId: this.id, keyMappingId };
+            return client.apis['Application Keys'].put_applications__applicationId__oauth_keys__keyMappingId_(
+                payload,
+                { requestBody: requestContent },
+            );
         });
         return promisedPut.then((keysResponse) => {
             if (keyType === 'PRODUCTION') {
@@ -281,8 +286,9 @@ export default class Application extends Resource {
     provideKeys(keyType, consumerKey, consumerSecret, keyManager) {
         const promisedKeys = this.client.then((client) => {
             const requestContent = { consumerKey, consumerSecret, keyType, keyManager};
-            const payload = { applicationId: this.id, body: requestContent };
-            return client.apis['Application Keys'].post_applications__applicationId__map_keys(payload);
+            const payload = { applicationId: this.id };
+            const body = { requestBody: requestContent };
+            return client.apis['Application Keys'].post_applications__applicationId__map_keys(payload, body);
         });
         return promisedKeys.then((keysResponse) => {
             if (keyType === 'PRODUCTION') {

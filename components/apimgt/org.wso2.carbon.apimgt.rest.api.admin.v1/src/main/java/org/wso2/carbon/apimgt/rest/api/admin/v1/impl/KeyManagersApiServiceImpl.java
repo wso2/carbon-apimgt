@@ -23,7 +23,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.KeyManagerMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
@@ -62,7 +63,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersGet(MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         List<KeyManagerConfigurationDTO> keyManagerConfigurationsByTenant =
                 apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
@@ -74,7 +75,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersKeyManagerIdDelete(String keyManagerId, MessageContext messageContext)
             throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         apiAdmin.deleteKeyManagerConfigurationById(tenantDomain, keyManagerId);
         return Response.ok().build();
@@ -83,7 +84,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
     public Response keyManagersKeyManagerIdGet(String keyManagerId, MessageContext messageContext)
             throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                 apiAdmin.getKeyManagerConfigurationById(tenantDomain, keyManagerId);
@@ -97,7 +98,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersKeyManagerIdPut(String keyManagerId, KeyManagerDTO body, MessageContext messageContext) {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
@@ -126,7 +127,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersPost(KeyManagerDTO body, MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =

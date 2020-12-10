@@ -18,8 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl.importexport.utils;
 
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -30,6 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -69,7 +75,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -157,6 +165,7 @@ public class APIAndAPIProductCommonUtil {
                 String sourceType = doc.getSourceType().name();
                 String resourcePath = null;
                 String localFileName = null;
+                docDirectoryPath = File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
                 if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                     localFileName = doc.getFilePath().substring(
                             doc.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
@@ -636,6 +645,76 @@ public class APIAndAPIProductCommonUtil {
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing client certificate";
             throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Get the subscription level policy names of an API/API Product
+     *
+     * @param apiTypeWrapper API or API Product to be exported
+     * @throws APIImportExportException
+     */
+    public static Set<String> getAvailableTierNames(ApiTypeWrapper apiTypeWrapper) {
+        Set<String> tiers = new LinkedHashSet<String>();
+        Set<Tier> tiersFromApi;
+        if (!apiTypeWrapper.isAPIProduct()) {
+            tiersFromApi = apiTypeWrapper.getApi().getAvailableTiers();
+        } else {
+            tiersFromApi = apiTypeWrapper.getApiProduct().getAvailableTiers();
+        }
+        for (Tier tier : tiersFromApi) {
+            tiers.add(tier.getName());
+        }
+        return tiers;
+    }
+
+    /**
+     * Set the subscription level tiers of an API/API Product by validating with the tiers available in the environment
+     *
+     * @param apiJsonContent JSON content of API or API Product to be imported
+     * @param apiProvider    API Provider
+     * @throws APIImportExportException
+     */
+    public static void setSubscriptionTiers(JsonObject apiJsonContent, APIProvider apiProvider)
+            throws APIManagementException {
+        // Retrieve the subscription tier names mentioned in the API
+        JsonArray subscriptionTierNames = apiJsonContent.get(APIConstants.SUBSCRIPTION_TIERS).getAsJsonArray();
+        // Retrieve the subscription tiers that are already available in the instance
+        Set<Tier> allowedTiers = apiProvider.getTiers();
+
+        // An array will be created to store the valid subscription tier details
+        JsonArray subscriptionTiers = new JsonArray();
+        Gson gson = new GsonBuilder().create();
+
+        // Check whether the subscription tiers are provided or not in the API
+        if (subscriptionTierNames != null || subscriptionTierNames.size() > 0) {
+            // If provided, iterate the names array, and check whether those are available in the instance
+            for (JsonElement subscriptionTierName : subscriptionTierNames) {
+                // To store whether the tier is available in the instance
+                Boolean tierFound = false;
+                if (allowedTiers != null) {
+                    // Iterate the available tiers in the instance
+                    for (Tier tier : allowedTiers) {
+                        // If a tier from the API and a tier from the instance is matched, that can be named as a
+                        // valid match ,and the tier will be added to the set and tierFound will be marked as true
+                        if (StringUtils.equals(tier.getName(), subscriptionTierName.getAsString())) {
+                            subscriptionTiers.add(gson.toJsonTree(tier));
+                            tierFound = true;
+                        }
+                    }
+                    // If any of the tiers from the API does not have a valid match from the tiers available in the
+                    // instance, an error will be thrown
+                    if (!tierFound) {
+                        String message = "Invalid Subscription level throttling tier:" + subscriptionTierName.getAsString() +
+                                " provided.";
+                        throw new APIManagementException(message);
+                    }
+                }
+            }
+            // Remove the old tier names array from the apiJsonContent
+            apiJsonContent.remove(APIConstants.SUBSCRIPTION_TIERS);
+            // Add the new tier array to the apiJsonContent
+            apiJsonContent.add(APIConstants.SUBSCRIPTION_TIERS, subscriptionTiers);
         }
     }
 }

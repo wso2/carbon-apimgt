@@ -2,10 +2,11 @@
     <h1><a name="Deploy API"></a>Deploy API</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="deployApiPost"></a>Deploy the API in the gateway</h4> <code>POST https://apis.wso2.com/api/am/gateway/v1/deploy-api</code>
+            <h4 class="operation-heading"><a name="redeployApiPost"></a>Re Deploy the API in the gateway</h4> <code>POST https://apis.wso2.com/api/am/gateway/v1/redeploy-api</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation is used to deploy and API in the gateway.
+            <p class="marked">This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super
+will be picked as the Tenant domain.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -70,14 +71,14 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>label</p>
+                            <p>version</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Label of the API Gateway
+                            <p class="param-description marked">version of the API
 </p>
                         </td>
                         <td>
@@ -98,16 +99,14 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>apiId</p>
+                            <p>tenantDomain</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
-The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
-Should be formatted as **provider-name-version**.
+                            <p class="param-description marked">Tenant Domain of the API
 </p>
                         </td>
                         <td>

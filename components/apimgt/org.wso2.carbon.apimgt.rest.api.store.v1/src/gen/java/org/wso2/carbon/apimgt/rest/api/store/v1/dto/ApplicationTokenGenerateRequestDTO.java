@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.*;
@@ -11,7 +13,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -19,7 +24,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   
     private String consumerSecret = null;
     private Long validityPeriod = null;
-    private List<String> scopes = new ArrayList<>();
+    private List<String> scopes = new ArrayList<String>();
     private String revokeToken = null;
     private Object additionalProperties = null;
 
@@ -32,7 +37,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Consumer secret of the application")
+  @ApiModelProperty(example = "cV5pvyisxug5b5QZInq9cGZrMOMa", value = "Consumer secret of the application")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -50,7 +55,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Token validity period")
+  @ApiModelProperty(example = "3600", value = "Token validity period")
   @JsonProperty("validityPeriod")
   public Long getValidityPeriod() {
     return validityPeriod;
@@ -68,7 +73,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "Allowed scopes (space seperated) for the access token")
+  @ApiModelProperty(example = "[\"apim:subscribe\"]", value = "Allowed scopes (space seperated) for the access token")
   @JsonProperty("scopes")
   public List<String> getScopes() {
     return scopes;
@@ -105,6 +110,7 @@ public class ApplicationTokenGenerateRequestDTO   {
 
   
   @ApiModelProperty(value = "Additional parameters if Authorization server needs any")
+      @Valid
   @JsonProperty("additionalProperties")
   public Object getAdditionalProperties() {
     return additionalProperties;

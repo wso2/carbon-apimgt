@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/export")
 
 @Api(description = "the export API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ExportApi  {
@@ -38,8 +38,8 @@ ExportApiService delegate = new ExportApiServiceImpl();
 
     @GET
     @Path("/api")
-    @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
+    
+    @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
@@ -48,45 +48,45 @@ ExportApiService delegate = new ExportApiServiceImpl();
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. Error in exporting API. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response exportApiGet( @NotNull @ApiParam(value = "API Name ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the API ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
         return delegate.exportApiGet(name, version, providerName, format, preserveStatus, securityContext);
     }
 
     @GET
     @Path("/api-product")
-    @Consumes({ "application/json" })
-    @Produces({ "application/zip" })
+    
+    @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export an API Product", notes = "This operation can be used to export the details of a particular API Product as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "API Product (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. Error in exporting API Product. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response exportApiProductGet( @NotNull @ApiParam(value = "API Product Name ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the API Product ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API Product ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Product Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
         return delegate.exportApiProductGet(name, version, providerName, format, preserveStatus, securityContext);
     }
 
     @GET
     @Path("/applications")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json", "application/zip" })
-    @ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular Application as a zip file. ", response = File.class, authorizations = {
+    @ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular application as a zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations")
         })
     }, tags={ "Application (Individual)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Application does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response exportApplicationsGet( @NotNull @ApiParam(value = "Application Name ",required=true)  @QueryParam("appName") String appName,  @NotNull @ApiParam(value = "Owner of the Application ",required=true)  @QueryParam("appOwner") String appOwner,  @ApiParam(value = "Export application keys ")  @QueryParam("withKeys") Boolean withKeys) throws APIManagementException{
         return delegate.exportApplicationsGet(appName, appOwner, withKeys, securityContext);
     }

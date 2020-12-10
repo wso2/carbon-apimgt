@@ -22,11 +22,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIRealmUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CommentMappingUtil {
 
@@ -44,10 +49,46 @@ public class CommentMappingUtil {
         commentDTO.setId(comment.getId());
         commentDTO.setContent(comment.getText());
         commentDTO.setCreatedBy(comment.getUser());
-        commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        commentDTO.setCreatedTime(comment.getCreatedTime());
         return commentDTO;
     }
 
+    /**
+     * Converts a Comment object into corresponding REST API CommentDTO object with User Info
+     *
+     * @param comment comment object
+     * @return CommentDTO
+     */
+    public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment, Map<String,
+            Map<String, String>> userClaimsMap)  throws APIManagementException {
+        CommentDTO commentDTO = fromCommentToDTO(comment);
+        if (userClaimsMap.get(comment.getUser()) != null) {
+            Map userClaims = userClaimsMap.get(comment.getUser());
+            CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
+            commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
+            commenterInfoDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
+            commenterInfoDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
+            commentDTO.setCommenterInfo(commenterInfoDTO);
+        }
+        return  commentDTO;
+    }
+
+    /**
+     * Retrieve userClaims from UserStore and save it in a cache map.
+     *
+     * @param username        commenter username
+     * @param userClaimsMap   cache map with user deatils
+     * @return Map<String, Map<String, String>>
+     */
+    public static  Map<String, Map<String, String>> retrieveUserClaims(String username, Map<String,
+            Map<String, String>> userClaimsMap)  throws APIManagementException {
+        Map userClaims;
+        if (userClaimsMap.get(username) == null) {
+            userClaims = APIRealmUtils.getUserClaims(username);
+            userClaimsMap.put(username, userClaims);
+        }
+        return userClaimsMap;
+    }
     /**
      * Converts a CommentDTO to a Comment object
      *
@@ -72,17 +113,23 @@ public class CommentMappingUtil {
      * @param offset      starting position of the pagination
      * @return CommentListDTO
      */
-    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset) {
+    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset,
+                                                      boolean includeCommenterInfo) {
         CommentListDTO commentListDTO = new CommentListDTO();
         List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
         commentListDTO.setCount(commentList.length);
 
         int start = offset < commentList.length && offset >= 0 ? offset : Integer.MAX_VALUE;
         int end = offset + limit - 1 <= commentList.length - 1 ? offset + limit - 1 : commentList.length - 1;
-
+        Map<String, Map<String, String>> userClaimsMap = new HashMap<>();
         for (int i = start; i <= end; i++) {
             try {
-                listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
+                if (includeCommenterInfo) {
+                    userClaimsMap = retrieveUserClaims(commentList[i].getUser(), userClaimsMap);
+                    listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i], userClaimsMap));
+                } else {
+                    listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
+                }
             } catch (APIManagementException e) {
                 log.error("Error while creating comments list", e);
             }

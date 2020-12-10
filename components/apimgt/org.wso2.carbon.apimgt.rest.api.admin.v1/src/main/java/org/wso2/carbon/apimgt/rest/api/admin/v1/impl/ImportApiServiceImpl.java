@@ -41,7 +41,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -97,8 +98,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIImportExportManager apiImportExportManager = new APIImportExportManager(apiProvider, userName);
             apiImportExportManager.importAPIArchive(fileInputStream, preserveProvider, overwrite);
             return Response.status(Response.Status.OK).entity("API imported successfully.").build();
@@ -116,6 +117,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToMetaInfoIsCorrupted(e)) {
                 RestApiUtil.handleMetaInformationFailureError("Error while reading API meta information from path.",
                         e, log);
+            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                                "Provided throttling policy cannot be found.", e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API", e, log);
         }
@@ -173,8 +177,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIImportExportManager apiImportExportManager = new APIImportExportManager(apiProvider, userName);
             apiImportExportManager.importAPIProductArchive(fileInputStream, preserveProvider, overwriteAPIProduct, overwriteAPIs, isImportAPIs);
             return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
@@ -189,6 +193,9 @@ public class ImportApiServiceImpl implements ImportApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API_PRODUCT
                         + " not found", e, log);
+            } else if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                        "Provided throttling policy cannot be found.", e, log);
             }
             RestApiUtil.handleInternalServerError("Error while importing API Product", e, log);
         }
@@ -214,11 +221,11 @@ public class ImportApiServiceImpl implements ImportApiService {
         APIConsumer consumer;
         String ownerId;
         int appId;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tempDirPath =
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + APPLICATION_IMPORT_DIR_PREFIX + UUID.randomUUID().toString();
         try {
-            consumer = RestApiUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager =
                     new FileBasedApplicationImportExportManager(consumer, tempDirPath);
             Application applicationDetails = importExportManager.importApplication(fileInputStream);
@@ -268,6 +275,7 @@ public class ImportApiServiceImpl implements ImportApiService {
                 return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
+            importExportManager.validateApplicationThrottlingPolicy(applicationDetails);
 
             // check whether we needs to update application or add it
             if (APIUtil.isApplicationExist(ownerId, applicationDetails.getName(), applicationDetails.getGroupId()) && update != null && update) {
@@ -312,6 +320,10 @@ public class ImportApiServiceImpl implements ImportApiService {
         } catch (APIMgtResourceAlreadyExistsException e) {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Application", e, log);
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
+            if (RestApiUtil.isDueToProvidedThrottlingPolicyMissing(e)) {
+                RestApiUtil.handleResourceNotFoundError("Error while adding the throttling policy. " +
+                        "Provided throttling policy cannot be found.", e, log);
+            }
             RestApiUtil.handleInternalServerError("Error while importing Application", e, log);
         } catch (UnsupportedEncodingException e) {
             String errorMessage = "Error while Decoding apiId";

@@ -470,7 +470,7 @@ class Layout extends React.Component {
                                                 <Hidden mdDown>
                                                     <FormattedMessage
                                                         id='Base.index.go.to.public.store'
-                                                        defaultMessage='Go to public Dev Portal'
+                                                        defaultMessage='Switch Dev Portals'
                                                     />
                                                 </Hidden>
                                             </Button>
@@ -586,7 +586,7 @@ class Layout extends React.Component {
                                 {footerText && footerText !== '' ? <span>{footerText}</span> : (
                                     <FormattedMessage
                                         id='Base.index.copyright.text'
-                                        defaultMessage='WSO2 API-M v3.2.0 | © 2020 WSO2 Inc'
+                                        defaultMessage='WSO2 API-M v4.0.0 | © 2020 WSO2 Inc'
                                     />
                                 )}
                             </Typography>)}

@@ -24,8 +24,8 @@ import javax.validation.constraints.*;
 @Path("/labels")
 
 @Api(description = "the labels API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class LabelsApi  {
@@ -37,9 +37,9 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all registered Labels", notes = "Get all registered Labels ", response = LabelListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all Registered Labels", notes = "Get all registered Labels ", response = LabelListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })

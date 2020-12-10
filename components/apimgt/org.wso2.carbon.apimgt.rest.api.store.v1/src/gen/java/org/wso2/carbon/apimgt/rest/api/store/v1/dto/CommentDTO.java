@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -9,7 +12,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -17,8 +23,9 @@ public class CommentDTO   {
   
     private String id = null;
     private String content = null;
-    private String createdTime = null;
+    private java.util.Date createdTime = null;
     private String createdBy = null;
+    private CommenterInfoDTO commenterInfo = null;
 
   /**
    **/
@@ -28,7 +35,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "943d3002-000c-42d3-a1b9-d6559f8a4d49", value = "")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -45,10 +52,10 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "This is a comment", required = true, value = "")
   @JsonProperty("content")
   @NotNull
-  public String getContent() {
+ @Size(max=512)  public String getContent() {
     return content;
   }
   public void setContent(String content) {
@@ -57,18 +64,18 @@ public class CommentDTO   {
 
   /**
    **/
-  public CommentDTO createdTime(String createdTime) {
+  public CommentDTO createdTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public String getCreatedTime() {
+  public java.util.Date getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(String createdTime) {
+  public void setCreatedTime(java.util.Date createdTime) {
     this.createdTime = createdTime;
   }
 
@@ -80,13 +87,31 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "admin", value = "")
   @JsonProperty("createdBy")
   public String getCreatedBy() {
     return createdBy;
   }
   public void setCreatedBy(String createdBy) {
     this.createdBy = createdBy;
+  }
+
+  /**
+   **/
+  public CommentDTO commenterInfo(CommenterInfoDTO commenterInfo) {
+    this.commenterInfo = commenterInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("commenterInfo")
+  public CommenterInfoDTO getCommenterInfo() {
+    return commenterInfo;
+  }
+  public void setCommenterInfo(CommenterInfoDTO commenterInfo) {
+    this.commenterInfo = commenterInfo;
   }
 
 
@@ -102,12 +127,13 @@ public class CommentDTO   {
     return Objects.equals(id, comment.id) &&
         Objects.equals(content, comment.content) &&
         Objects.equals(createdTime, comment.createdTime) &&
-        Objects.equals(createdBy, comment.createdBy);
+        Objects.equals(createdBy, comment.createdBy) &&
+        Objects.equals(commenterInfo, comment.commenterInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, content, createdTime, createdBy);
+    return Objects.hash(id, content, createdTime, createdBy, commenterInfo);
   }
 
   @Override
@@ -119,6 +145,7 @@ public class CommentDTO   {
     sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
+    sb.append("    commenterInfo: ").append(toIndentedString(commenterInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

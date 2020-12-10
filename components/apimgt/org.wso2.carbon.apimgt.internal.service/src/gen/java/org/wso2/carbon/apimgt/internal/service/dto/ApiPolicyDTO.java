@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -13,7 +14,8 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
@@ -21,10 +23,12 @@ public class ApiPolicyDTO   {
   
     private Integer id = null;
     private Integer tenantId = null;
+    private String tenantDomain = null;
     private String name = null;
     private String quotaType = null;
     private List<ApiPolicyConditionGroupDTO> conditionGroups = new ArrayList<>();
     private String applicableLevel = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
    **/
@@ -58,6 +62,23 @@ public class ApiPolicyDTO   {
   }
   public void setTenantId(Integer tenantId) {
     this.tenantId = tenantId;
+  }
+
+  /**
+   **/
+  public ApiPolicyDTO tenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("tenantDomain")
+  public String getTenantDomain() {
+    return tenantDomain;
+  }
+  public void setTenantDomain(String tenantDomain) {
+    this.tenantDomain = tenantDomain;
   }
 
   /**
@@ -128,6 +149,23 @@ public class ApiPolicyDTO   {
     this.applicableLevel = applicableLevel;
   }
 
+  /**
+   **/
+  public ApiPolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -140,15 +178,17 @@ public class ApiPolicyDTO   {
     ApiPolicyDTO apiPolicy = (ApiPolicyDTO) o;
     return Objects.equals(id, apiPolicy.id) &&
         Objects.equals(tenantId, apiPolicy.tenantId) &&
+        Objects.equals(tenantDomain, apiPolicy.tenantDomain) &&
         Objects.equals(name, apiPolicy.name) &&
         Objects.equals(quotaType, apiPolicy.quotaType) &&
         Objects.equals(conditionGroups, apiPolicy.conditionGroups) &&
-        Objects.equals(applicableLevel, apiPolicy.applicableLevel);
+        Objects.equals(applicableLevel, apiPolicy.applicableLevel) &&
+        Objects.equals(defaultLimit, apiPolicy.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, tenantId, name, quotaType, conditionGroups, applicableLevel);
+    return Objects.hash(id, tenantId, tenantDomain, name, quotaType, conditionGroups, applicableLevel, defaultLimit);
   }
 
   @Override
@@ -158,10 +198,12 @@ public class ApiPolicyDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    tenantDomain: ").append(toIndentedString(tenantDomain)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    quotaType: ").append(toIndentedString(quotaType)).append("\n");
     sb.append("    conditionGroups: ").append(toIndentedString(conditionGroups)).append("\n");
     sb.append("    applicableLevel: ").append(toIndentedString(applicableLevel)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

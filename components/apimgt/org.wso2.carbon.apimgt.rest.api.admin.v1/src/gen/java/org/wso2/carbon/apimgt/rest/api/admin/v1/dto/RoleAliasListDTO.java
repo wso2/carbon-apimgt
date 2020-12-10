@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
@@ -12,14 +14,17 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class RoleAliasListDTO   {
   
     private Integer count = null;
-    private List<RoleAliasDTO> list = new ArrayList<>();
+    private List<RoleAliasDTO> list = new ArrayList<RoleAliasDTO>();
 
   /**
    * The number of role aliases
@@ -30,7 +35,7 @@ public class RoleAliasListDTO   {
   }
 
   
-  @ApiModelProperty(example = "3", value = "The number of role aliases")
+  @ApiModelProperty(example = "1", value = "The number of role aliases")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -48,6 +53,7 @@ public class RoleAliasListDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("list")
   public List<RoleAliasDTO> getList() {
     return list;

@@ -80,6 +80,17 @@ ExceptionCodes implements ErrorHandler {
     API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API(900343,
             "Cannot create API Product, due to resources parent API being in an unsupported Life Cycle state",
             409, "Cannot create API Product, due to resources parent API being in an unsupported Life Cycle state: %s"),
+    API_PRODUCT_USED_RESOURCES(900344,
+            "Cannot remove the resource paths because they are used by one or more API Products",
+            409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
+    API_CATEGORY_INVALID(
+            900345, "The API category is invalid.", 400, " The API category is invalid for API: %s:%s"),
+    INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
+            "Invalid additional properties for API: %s:%s"),
+    INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
+    INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
+    USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -148,6 +159,7 @@ ExceptionCodes implements ErrorHandler {
             "roles with the same display name exist in the system"),
     MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
             "users with the same username exist in the system"),
+    INVALID_USER_ROLES(900610, "Invalid user roles found", 400, "Invalid user roles found"),
 
 
     // Labels related codes
@@ -211,6 +223,10 @@ ExceptionCodes implements ErrorHandler {
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
+    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900801, "GraphQL Schema cannot be empty or nul", 400,
+            "GraphQL Schema cannot be empty or null"),
+    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
+            "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
 
 
     // Oauth related codes
@@ -248,7 +264,14 @@ ExceptionCodes implements ErrorHandler {
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
     JWT_PARSING_FAILED(900986, "Key Management Error", 500, "Error while parsing JWT. Invalid Jwt."),
-
+    TOKEN_SCOPES_NOT_SET(
+            900987, "The token information has not been correctly set internally", 400,
+            "The token information has not been correctly set internally"),
+    MUTUAL_SSL_NOT_SUPPORTED(
+            900988, "Mutual SSL based authentication is not supported in this server", 400,
+            "Cannot add client certificates to this server"),
+    THROTTLING_POLICY_CANNOT_BE_NULL(900989,
+            "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
@@ -276,6 +299,8 @@ ExceptionCodes implements ErrorHandler {
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
     SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED(900987, "Shared Scope display name not specified", 400,
             "Shared Scope display name not specified"),
+    SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
+            "Scope already assigned locally by another API"),
 
     //Dedicated container based gateway related Codes
     NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based resource Not Found", 404, "No resource loaded from " +
@@ -334,6 +359,7 @@ ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_MISSING_REQUIRED_PROPERTIES_IN_APPLICATION(901407, "Required application properties are missing", 400,
             "Required application properties are missing"),
     KEY_MAPPING_ALREADY_EXIST(901408, "Application already Registered", 409, "Application already Registered"),
+    TENANT_MISMATCH(901409,"Tenant mismatch", 400, "Tenant mismatch"),
 
     //Scope related
     SCOPE_NOT_FOUND_FOR_USER(901500, "Scope does not belong to this user", 404, "Scope not found"),
@@ -367,7 +393,19 @@ ExceptionCodes implements ErrorHandler {
 
     //mediation policies related common errors
     MEDIATION_POLICY_NAME_TOO_LONG(900850, "Mediation Policy Name Too Long", 400,
-                                                "The name of the mediation policy exceeds the max length (%s)");
+                                                "The name of the mediation policy exceeds the max length (%s)"),
+    INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
+            "Provided API identifier (%s) is invalid"),
+    API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
+    INVALID_CONFIGURATION_ID(900853,"The configuration id validation failed. Should be " +
+            "{apiName}#{apiVersion}#{tenantDomain}",400,"The configuration id validation failed. Should be " +
+            "{apiName}#{apiVersion}#{tenantDomain}"),
+    INVALID_API_NAME(900854, "Invalid API Name",400 ,"Invalid API Name"),
+    ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty"),
+
+    // API import/export related codes
+    ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
+            "Error while reading meta information from the definition");
 
     private final long errorCode;
     private final String errorMessage;

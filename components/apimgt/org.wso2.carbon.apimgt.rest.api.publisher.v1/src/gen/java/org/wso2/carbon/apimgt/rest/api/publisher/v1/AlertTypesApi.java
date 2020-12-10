@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/alert-types")
 
 @Api(description = "the alert-types API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class AlertTypesApi  {
@@ -38,7 +38,7 @@ AlertTypesApiService delegate = new AlertTypesApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of API Publisher alert types. ", notes = "This operation is used to get the list of supportd alert types for the 'publisher' agent. ", response = AlertTypesListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -47,7 +47,7 @@ AlertTypesApiService delegate = new AlertTypesApiServiceImpl();
     }, tags={ "Alerts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The list of publisher alert types are returned. ", response = AlertTypesListDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the alert types. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getPublisherAlertTypes() throws APIManagementException{
         return delegate.getPublisherAlertTypes(securityContext);
     }

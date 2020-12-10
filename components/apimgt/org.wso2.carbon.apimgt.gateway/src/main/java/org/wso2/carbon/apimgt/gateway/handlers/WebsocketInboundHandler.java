@@ -19,15 +19,21 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.CharsetUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -152,7 +158,11 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             URI uriTemp = new URI(uri);
             apiContextUri = new URI(uriTemp.getScheme(), uriTemp.getAuthority(), uriTemp.getPath(),
                      null, uriTemp.getFragment()).toString();
-
+            apiContextUri = this.apiContextUri.endsWith("/") ? apiContextUri.substring(0, apiContextUri.length() - 1)
+                    : apiContextUri;
+            if (log.isDebugEnabled()) {
+                log.debug("Websocket API apiContextUri = " + apiContextUri);
+            }
             if (req.getUri().contains("/t/")) {
                 tenantDomain = MultitenantUtils.getTenantDomainFromUrl(req.getUri());
             } else {
@@ -196,7 +206,12 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 gaUtils.publishGATrackingData(gaData, req.headers().get(HttpHeaders.USER_AGENT),
                         headers.get(HttpHeaders.AUTHORIZATION));
             } else {
-                ctx.writeAndFlush(new TextWebSocketFrame(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE));
+                String errorMessage = APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE;
+                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer(errorMessage, CharsetUtil.UTF_8));
+                httpResponse.headers().set("content-type", "text/plain; charset=UTF-8");
+                httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
+                ctx.writeAndFlush(httpResponse);
                 if (log.isDebugEnabled()) {
                     log.debug("Authentication Failure for the websocket context: " + apiContextUri);
                 }

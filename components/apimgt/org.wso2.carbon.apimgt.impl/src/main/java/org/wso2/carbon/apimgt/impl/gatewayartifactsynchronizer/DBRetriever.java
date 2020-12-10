@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -190,7 +191,11 @@ public class DBRetriever implements ArtifactRetriever {
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT , APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, APIConstants.DigestAuthConstants.CHARSET));
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
-        return  APIUtil.executeHTTPRequest(method, httpClient);
+        try {
+            return  APIUtil.executeHTTPRequest(method, httpClient);
+        } catch (APIManagementException e) {
+            throw new ArtifactSynchronizerException(e);
+        }
     }
 
     @Override

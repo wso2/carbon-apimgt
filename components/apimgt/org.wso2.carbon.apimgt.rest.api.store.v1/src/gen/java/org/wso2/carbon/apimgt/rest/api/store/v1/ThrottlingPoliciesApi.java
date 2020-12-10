@@ -26,8 +26,8 @@ import javax.validation.constraints.*;
 @Path("/throttling-policies")
 
 @Api(description = "the throttling-policies API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ThrottlingPoliciesApi  {
@@ -39,9 +39,9 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
 
     @GET
     @Path("/{policyLevel}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all available throttling policies", notes = "Get available Throttling Policies ", response = ThrottlingPolicyListDTO.class, responseContainer = "List", authorizations = {
+    @ApiOperation(value = "Get All Available Throttling Policies", notes = "Get available Throttling Policies ", response = ThrottlingPolicyListDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
@@ -49,16 +49,16 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of throttling policies returned. ", response = ThrottlingPolicyListDTO.class, responseContainer = "List"),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response throttlingPoliciesPolicyLevelGet(@ApiParam(value = "List Application or Subscription type thro. ",required=true, allowableValues="application, subscription") @PathParam("policyLevel") String policyLevel,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response throttlingPoliciesPolicyLevelGet(@ApiParam(value = "List Application or Subscription type thro. ",required=true, allowableValues="application, subscription") @PathParam("policyLevel") String policyLevel,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.throttlingPoliciesPolicyLevelGet(policyLevel, limit, offset, ifNoneMatch, xWSO2Tenant, securityContext);
     }
 
     @GET
     @Path("/{policyLevel}/{policyId}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get details of a throttling policy ", notes = "This operation can be used to retrieve details of a single throttling policy by specifying the policy level and policy name.  `X-WSO2-Tenant` header can be used to retrive throttling policy that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Get Details of a Throttling Policy ", notes = "This operation can be used to retrieve details of a single throttling policy by specifying the policy level and policy name.  `X-WSO2-Tenant` header can be used to retrive throttling policy that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = ThrottlingPolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
@@ -66,9 +66,9 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Throttling Policy returned ", response = ThrottlingPolicyDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Throttling Policy does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
-    public Response throttlingPoliciesPolicyLevelPolicyIdGet(@ApiParam(value = "Policy Id represented as a UUID ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "List Application or Subscription type thro. ",required=true, allowableValues="application, subscription") @PathParam("policyLevel") String policyLevel, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response throttlingPoliciesPolicyLevelPolicyIdGet(@ApiParam(value = "The name of the policy ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "List Application or Subscription type thro. ",required=true, allowableValues="application, subscription") @PathParam("policyLevel") String policyLevel,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.throttlingPoliciesPolicyLevelPolicyIdGet(policyId, policyLevel, xWSO2Tenant, ifNoneMatch, securityContext);
     }
 }

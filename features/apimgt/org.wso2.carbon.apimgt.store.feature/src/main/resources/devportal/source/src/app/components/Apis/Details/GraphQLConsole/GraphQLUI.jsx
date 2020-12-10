@@ -46,6 +46,7 @@ export default function GraphQLUI(props) {
         URLs,
         securitySchemeType,
         accessTokenProvider,
+        handleSchema,
 
     } = props;
     const { api } = useContext(ApiContext);
@@ -59,11 +60,11 @@ export default function GraphQLUI(props) {
         const apiID = api.id;
         const apiClient = new Api();
         const promiseGraphQL = apiClient.getGraphQLSchemaByAPIId(apiID);
-
         promiseGraphQL
             .then((res) => {
                 const graphqlSchemaObj = buildSchema(res.data);
                 setSchema(graphqlSchemaObj);
+                handleSchema(res.data);
             });
     }, []);
 

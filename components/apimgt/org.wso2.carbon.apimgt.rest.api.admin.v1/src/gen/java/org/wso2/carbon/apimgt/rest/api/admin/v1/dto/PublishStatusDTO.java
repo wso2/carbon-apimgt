@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -9,7 +11,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -27,7 +32,7 @@ public class PublishStatusDTO   {
   }
 
   
-  @ApiModelProperty(value = "Status of the usage publish request")
+  @ApiModelProperty(example = "successfull", value = "Status of the usage publish request")
   @JsonProperty("status")
   public String getStatus() {
     return status;
@@ -45,7 +50,7 @@ public class PublishStatusDTO   {
   }
 
   
-  @ApiModelProperty(value = "detailed message of the status")
+  @ApiModelProperty(example = "Records published successfully", value = "detailed message of the status")
   @JsonProperty("message")
   public String getMessage() {
     return message;
