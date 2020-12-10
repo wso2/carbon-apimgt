@@ -3802,16 +3802,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
+            
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
+                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url);
             } else if (fileDetail != null && fileInputStream != null) {
                 ResourceFile wsdlResource = new ResourceFile(fileInputStream,
                         fileDetail.getContentType().toString());
                 apiToAdd.setWsdlResource(wsdlResource);
+                apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null);
             }
-
-            //adding the api
-            apiProvider.addAPI(apiToAdd);
 
             //add the generated swagger definition to SOAP
             APIDefinition oasParser = new OAS2Parser();
@@ -3904,9 +3906,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
-            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), getWSDLResponse);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            ResourceFile resource = apiProvider.getWSDL(apiId, tenantDomain);
+            return RestApiUtil.getResponseFromResourceFile(resource.getName(), resource);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -3942,16 +3944,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        if (api == null) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
+        }
         if (StringUtils.isNotBlank(url)) {
-            api.setWsdlUrl(url);
-            api.setWsdlResource(null);
-            apiProvider.updateWsdlFromUrl(api);
+            apiProvider.addWSDLResource(apiId, null, url);
         } else {
             ResourceFile wsdlResource = new ResourceFile(fileInputStream,
                     fileDetail.getContentType().toString());
-            api.setWsdlResource(wsdlResource);
-            api.setWsdlUrl(null);
-            apiProvider.updateWsdlFromResourceFile(api);
+
+            apiProvider.addWSDLResource(apiId, wsdlResource, null);
         }
         return Response.ok().build();
     }

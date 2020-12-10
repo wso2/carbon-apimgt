@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -80,11 +81,13 @@ import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -1060,14 +1063,156 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void saveWSDL(Organization org, String apiId, ResourceFile wsdlResourceFile)
             throws WSDLPersistenceException {
-        // TODO Auto-generated method stub
-        
+        log.info("======================================================");
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            
+            String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+            String wsdlResourcePath = null;
+            boolean isZip = false;
+            String wsdlResourcePathArchive = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                    + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiProviderName + APIConstants.WSDL_PROVIDER_SEPERATOR
+                    + apiName + apiVersion + APIConstants.ZIP_FILE_EXTENSION;
+            String wsdlResourcePathFile = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+            if (APIConstants.APPLICATION_ZIP.equals(wsdlResourceFile.getContentType())) {
+                wsdlResourcePath = wsdlResourcePathArchive;
+                isZip = true;
+            } else {
+                wsdlResourcePath = wsdlResourcePathFile;
+            }
+
+            String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+
+            Resource wsdlResource = registry.newResource();;
+            
+            wsdlResource.setContentStream(wsdlResourceFile.getContent());
+            if (wsdlResourceFile.getContentType() != null) {
+                wsdlResource.setMediaType(wsdlResourceFile.getContentType());
+            }
+            registry.put(wsdlResourcePath, wsdlResource);
+            //set the anonymous role for wsld resource to avoid basicauth security.
+            String[] visibleRoles = null;
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, visibleRoles, wsdlResourcePath);
+            
+            if (isZip) {
+                //Delete any WSDL file if exists
+                if (registry.resourceExists(wsdlResourcePathFile)) {
+                    registry.delete(wsdlResourcePathFile);
+                }
+            } else {
+                //Delete any WSDL archives if exists
+                if (registry.resourceExists(wsdlResourcePathArchive)) {
+                    registry.delete(wsdlResourcePathArchive);
+                }
+            }
+            String absoluteWSDLResourcePath = RegistryUtils
+                    .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                    + wsdlResourcePath;
+            String wsdlRegistryPath;
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equalsIgnoreCase(tenantDomain)) {
+                wsdlRegistryPath =
+                        RegistryConstants.PATH_SEPARATOR + "registry" + RegistryConstants.PATH_SEPARATOR + "resource"
+                                + absoluteWSDLResourcePath;
+            } else {
+                wsdlRegistryPath = "/t/" + tenantDomain + RegistryConstants.PATH_SEPARATOR + "registry"
+                        + RegistryConstants.PATH_SEPARATOR + "resource" + absoluteWSDLResourcePath;
+            }
+            apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, wsdlRegistryPath);
+            apiArtifactManager.updateGenericArtifact(apiArtifact);
+        } catch (APIPersistenceException | APIManagementException | RegistryException e) {
+            throw new WSDLPersistenceException("Error while saving the wsdl for api " + apiId, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
     }
 
     @Override
     public ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        log.info("=========================get============================");
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+            String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+            String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+            String wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION
+                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+            String resourceFileName = apiProviderName + "-" + apiName + "-" + apiVersion;
+            if (registry.resourceExists(wsdlResourcePath)) {
+                Resource resource = registry.get(wsdlResourcePath);
+                ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
+                returnResource.setName(resourceFileName);
+                return returnResource;
+            } else if (registry.resourceExists(wsdlResourcePathOld)) {
+                Resource resource = registry.get(wsdlResourcePathOld);
+                ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
+                returnResource.setName(resourceFileName);
+                return returnResource;
+            } else {
+                wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiProviderName
+                        + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion + APIConstants.ZIP_FILE_EXTENSION;
+                wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION
+                        + apiProviderName + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion
+                        + APIConstants.ZIP_FILE_EXTENSION;
+                if (registry.resourceExists(wsdlResourcePath)) {
+                    Resource resource = registry.get(wsdlResourcePath);
+                    ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
+                    returnResource.setName(resourceFileName);
+                    return returnResource;
+                } else if (registry.resourceExists(wsdlResourcePathOld)) {
+                    Resource resource = registry.get(wsdlResourcePathOld);
+                    ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
+                    returnResource.setName(resourceFileName);
+                    return returnResource;
+                } else {
+                    throw new WSDLPersistenceException("No WSDL found for the API: " + apiId,
+                            ExceptionCodes.from(ExceptionCodes.NO_WSDL_AVAILABLE_FOR_API, apiName, apiVersion));
+                }
+            }
+        } catch (RegistryException | APIPersistenceException e) {
+            String msg = "Error while getting wsdl file from the registry for API: " + apiId.toString();
+            throw new WSDLPersistenceException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     @Override
@@ -1900,13 +2045,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
     
     protected RegistryHolder getRegistry(String requestedTenantDomain) throws APIPersistenceException {
-        //String username = getTenantAwareUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
+        // String username = getTenantAwareUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
         String tenantAwareUserName = getTenantAwareUsername(username);
         String userTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         log.debug("Accessing registry for user:" + tenantAwareUserName + " in tenant domain " + userTenantDomain
                 + ". Requested tenant domain: " + requestedTenantDomain);
-        //System.out.println("======= user " + tenantAwareUserName + " tenant " + userTenantDomain + " : " + tenantId);
         boolean tenantFlowStarted = false;
         Registry registry;
         RegistryHolder holder = new RegistryHolder();
@@ -1921,24 +2065,24 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
                     holder.setTenantId(id);
-                    //System.out.println("++++++++++++++++++++++++++ annonymous ++++++++++");
-                } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant scenario
+                } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross
+                                                                                                          // tenant
+                                                                                                          // scenario
                     log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceSystemRegistry(id);
                     holder.setTenantId(id);
                     /*
-                    int requestedTenantId = getTenantManager().getTenantId(requestedTenantDomain);
-                    registry = getRegistryService()
-                            .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, requestedTenantId);
-                    */
+                     * int requestedTenantId = getTenantManager().getTenantId(requestedTenantDomain);
+                     * registry = getRegistryService()
+                     * .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, requestedTenantId);
+                     */
                     ServiceReferenceHolder
                             .setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
-                    //System.out.println("++++++++++++++++++++++++++ cross tenant ++++++++++");
                 } else {
-                    log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant " + userTenantDomain
-                            + ":" + tenantId);
+                    log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
+                            + userTenantDomain + ":" + tenantId);
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                     RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
@@ -1946,24 +2090,22 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     holder.setTenantId(tenantId);
                     ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
                             .getRealmService().getTenantUserRealm(tenantId)));
-                    //System.out.println("++++++++++++++++++++++++++ normal ++++++++++");
                 }
             } else {
-                log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant " + userTenantDomain + ":"
-                        + tenantId);
+                log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
+                        + userTenantDomain + ":" + tenantId);
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, tenantId);
                 RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
                 RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
-                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
-                        .getRealmService().getTenantUserRealm(tenantId)));
+                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);
-                //System.out.println("++++++++++++++++++++++++++ no requested domain ++++++++++");
             }
         } catch (RegistryException | UserStoreException | APIManagementException e) {
             String msg = "Failed to get API";
             throw new APIPersistenceException(msg, e);
-        } 
+        }
         holder.setRegistry(registry);
         holder.setTenantFlowStarted(tenantFlowStarted);
         return holder;

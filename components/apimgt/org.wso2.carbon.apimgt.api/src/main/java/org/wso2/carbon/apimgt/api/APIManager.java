@@ -745,6 +745,16 @@ public interface APIManager {
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
     ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException;
+    
+    /**
+     * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
+     * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
+     *
+     * @param apiId api identifier of the API
+     * @param tenantDomain tenant
+     * @return wsdl content matching name if exist else throws an APIManagementException
+     */
+    ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException;
 
     /**
      * Returns the graphql schema content in registry specified by the schema name

@@ -5108,6 +5108,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiIdentifier.toString()));
         }
     }
+    
+    @Override
+    public ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
+            throws APIManagementException {
+        WSDLValidationResponse validationResponse;
+        ResourceFile resourceFile = getWSDL(api.getUuid(), tenantDomain);
+        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
+            validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
+        } else {
+            validationResponse = APIMWSDLReader.validateWSDLFile(resourceFile.getContent());
+        }
+        if (validationResponse.isValid()) {
+            WSDLProcessor wsdlProcessor = validationResponse.getWsdlProcessor();
+            wsdlProcessor.updateEndpoints(api, environmentName, environmentType);
+            InputStream wsdlDataStream = wsdlProcessor.getWSDL();
+            return new ResourceFile(wsdlDataStream, resourceFile.getContentType());
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CORRUPTED_STORED_WSDL,
+                    api.getId().toString()));
+        }
+    }
 
     @Override
     public Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier,

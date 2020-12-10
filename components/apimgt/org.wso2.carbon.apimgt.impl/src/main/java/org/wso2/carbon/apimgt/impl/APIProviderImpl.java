@@ -143,6 +143,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -156,6 +157,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
@@ -168,6 +170,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
@@ -210,6 +213,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -962,16 +967,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
                     + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
         }
-
-        // TODO Implement this using persistence layer methods /////////
-        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
-            updateWsdlFromUrl(api);
-        }
-
-        if (api.getWsdlResource() != null) {
-            updateWsdlFromResourceFile(api);
-        }
-        ///////////////////////////////////////////////////////////////
+        
         int tenantId;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -10468,6 +10464,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
+        }
+    }
+
+    @Override
+    public void addWSDLResource(String apiId, ResourceFile resource, String url) throws APIManagementException {
+        if (!StringUtils.isEmpty(url)) {
+            URL wsdlUrl;
+            try {
+                wsdlUrl = new URL(url);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Invalid/Malformed WSDL URL : " + url, e,
+                        ExceptionCodes.INVALID_WSDL_URL_EXCEPTION);
+            }
+            // Get the WSDL 1.1 or 2.0 processor and process the content based on the version
+            WSDLProcessor wsdlProcessor = APIMWSDLReader.getWSDLProcessorForUrl(wsdlUrl);
+            InputStream wsdlContent = wsdlProcessor.getWSDL();
+            // wsdlResource.setContentStream(wsdlContent);
+
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
+                    wsdlContent, null);
+            try {
+                apiPersistenceInstance.saveWSDL(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                        wsdlResourceFile);
+            } catch (WSDLPersistenceException e) {
+                throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
+            }
+        } else if (resource != null) {
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
+                    resource.getContent(), resource.getContentType());
+            try {
+                apiPersistenceInstance.saveWSDL(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                        wsdlResourceFile);
+            } catch (WSDLPersistenceException e) {
+                throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
+            }
         }
     }
 
