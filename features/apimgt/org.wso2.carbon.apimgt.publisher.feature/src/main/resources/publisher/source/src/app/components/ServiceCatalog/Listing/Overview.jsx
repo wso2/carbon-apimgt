@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -24,17 +24,18 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import Configurations from 'Config';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import Collapse from '@material-ui/core/Collapse';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Chip from '@material-ui/core/Chip';
 import Tooltip from '@material-ui/core/Tooltip';
+import { Progress } from 'AppComponents/Shared';
+import Alert from 'AppComponents/Shared/Alert';
+import ServiceCatalog from 'AppData/ServiceCatalog';
+import Container from '@material-ui/core/Container';
+import Box from '@material-ui/core/Box';
+import Paper from '@material-ui/core/Paper';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import LocalOfferOutlinedIcon from '@material-ui/icons/LocalOfferOutlined';
@@ -94,6 +95,15 @@ const useStyles = makeStyles((theme) => ({
     expandButton: {
         marginTop: -7,
     },
+    headingSpacing: {
+        marginTop: theme.spacing(3),
+    },
+    buttonWrapper: {
+        paddingTop: 10,
+    },
+    buttonSection: {
+        paddingTop: theme.spacing(1),
+    },
 }));
 
 /**
@@ -105,18 +115,35 @@ const useStyles = makeStyles((theme) => ({
 function Overview(props) {
     const classes = useStyles();
     const intl = useIntl();
-    const { dataRow } = props;
-    const [open, setOpen] = useState(false);
-    const [expand, setExpand] = useState(false);
-    const toggleOpen = () => {
-        setOpen(!open);
+    const { match, history } = props;
+    const serviceId = match.params.service_uuid;
+    const [service, setService] = useState(null);
+
+    // Get Service Details
+    const getService = () => {
+        const promisedService = ServiceCatalog.getServiceById(serviceId);
+        promisedService.then((data) => {
+            setService(data);
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error While Loading Service',
+                id: 'ServiceCatalog.Listing.Edit.error.loading.service',
+            }));
+        });
+        return null;
     };
-    const toggleExpand = () => {
-        setExpand(!expand);
+
+    useEffect(() => {
+        getService();
+    }, []);
+
+    const listingRedirect = () => {
+        history.push('/service-catalog');
     };
-    const handleClose = () => {
-        setOpen(false);
-    };
+
+    if (!service) {
+        return <Progress per={90} message='Loading Service ...' />;
+    }
 
     let serviceTypeIcon = (
         <img
@@ -125,7 +152,7 @@ function Overview(props) {
             alt='Type API'
         />
     );
-    if (dataRow.definitionType === 'OAS3' || dataRow.definitionType === 'OAS2') {
+    if (service.definitionType === 'OAS3' || service.definitionType === 'OAS2') {
         serviceTypeIcon = (
             <Tooltip
                 position='right'
@@ -143,7 +170,7 @@ function Overview(props) {
                 />
             </Tooltip>
         );
-    } else if (dataRow.definitionType === 'GRAPHQL_SDL') {
+    } else if (service.definitionType === 'GRAPHQL_SDL') {
         serviceTypeIcon = (
             <Tooltip
                 position='right'
@@ -161,7 +188,7 @@ function Overview(props) {
                 />
             </Tooltip>
         );
-    } else if (dataRow.definitionType === 'ASYNC_API') {
+    } else if (service.definitionType === 'ASYNC_API') {
         serviceTypeIcon = (
             <Tooltip
                 position='right'
@@ -179,7 +206,7 @@ function Overview(props) {
                 />
             </Tooltip>
         );
-    } else if (dataRow.definitionType === 'WSDL1' || dataRow.definitionType === 'WSDL2') {
+    } else if (service.definitionType === 'WSDL1' || service.definitionType === 'WSDL2') {
         serviceTypeIcon = (
             <Tooltip
                 position='right'
@@ -201,255 +228,207 @@ function Overview(props) {
 
     return (
         <>
-            <Button onClick={toggleOpen}>
-                <Icon>visibility</Icon>
-            </Button>
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                maxWidth='sm'
-                fullWidth
-                aria-labelledby='view-dialog-title'
-            >
-                <DialogContent>
-                    <div>
-                        <Grid container spacing={1}>
-                            <Grid item md={9}>
-                                <div className={classes.contentTopBarStyle}>
-                                    {serviceTypeIcon}
-                                    <div className={classes.topBarDetailsSectionStyle}>
-                                        <div className={classes.versionBarStyle}>
-                                            <Typography className={classes.heading} variant='h5'>
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.service.display.name'
-                                                    defaultMessage='{serviceDisplayName}'
-                                                    values={{ serviceDisplayName: dataRow.displayName }}
+            <Container maxWidth='md'>
+                <Box mb={3} className={classes.headingSpacing}>
+                    <Typography variant='h4'>
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.Overview.heading'
+                            defaultMessage='Overview'
+                        />
+                    </Typography>
+                    <Typography variant='caption'>
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.Overview.heading.caption'
+                            defaultMessage='Overview of the service'
+                        />
+                    </Typography>
+                </Box>
+                <Paper elevation={1}>
+                    <Box px={8} py={5}>
+                        <div>
+                            <Grid container spacing={1}>
+                                <Grid item md={9}>
+                                    <div className={classes.contentTopBarStyle}>
+                                        {serviceTypeIcon}
+                                        <div className={classes.topBarDetailsSectionStyle}>
+                                            <div className={classes.versionBarStyle}>
+                                                <Typography className={classes.heading} variant='h5'>
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.service.display.name'
+                                                        defaultMessage='{serviceDisplayName}'
+                                                        values={{ serviceDisplayName: service.displayName }}
+                                                    />
+                                                </Typography>
+                                            </div>
+                                            <div className={classes.versionBarStyle}>
+                                                <LocalOfferOutlinedIcon />
+                                                <Typography className={classes.versionStyle}>
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.service.version'
+                                                        defaultMessage='{serviceVersion}'
+                                                        values={{ serviceVersion: service.version }}
+                                                    />
+                                                </Typography>
+                                            </div>
+                                            <div className={classes.chipStyle}>
+                                                <Chip
+                                                    variant='outlined'
+                                                    color='primary'
+                                                    label={intl.formatMessage({
+                                                        id: 'ServiceCatalog.Listing.Overview.usage.data',
+                                                        defaultMessage: 'Used by {usage} API(s)',
+                                                    }, { usage: service.usage })}
                                                 />
-                                            </Typography>
-                                        </div>
-                                        <div className={classes.versionBarStyle}>
-                                            <LocalOfferOutlinedIcon />
-                                            <Typography className={classes.versionStyle}>
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.service.version'
-                                                    defaultMessage='{serviceVersion}'
-                                                    values={{ serviceVersion: dataRow.version }}
-                                                />
-                                            </Typography>
-                                        </div>
-                                        <div className={classes.chipStyle}>
-                                            <Chip
-                                                variant='outlined'
-                                                color='primary'
-                                                label={intl.formatMessage({
-                                                    id: 'ServiceCatalog.Listing.Overview.usage.data',
-                                                    defaultMessage: 'Used by {usage} API(s)',
-                                                }, { usage: dataRow.usage })}
-                                            />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Grid>
+                                <Grid item md={3}>
+                                    <Button color='primary' variant='contained' className={classes.topMarginSpacing}>
+                                        <Typography>
+                                            <FormattedMessage
+                                                id='ServiceCatalog.Listing.Overview.create.api'
+                                                defaultMessage='Create API'
+                                            />
+                                        </Typography>
+                                    </Button>
+                                </Grid>
                             </Grid>
-                            <Grid item md={3}>
-                                <Button color='primary' variant='contained' className={classes.topMarginSpacing}>
-                                    <Typography>
-                                        <FormattedMessage
-                                            id='ServiceCatalog.Listing.Overview.create.api'
-                                            defaultMessage='Create API'
-                                        />
-                                    </Typography>
-                                </Button>
-                                { !dataRow.description && dataRow.description === '' && (
+                        </div>
+                        <div className={classes.bodyStyle}>
+                            <Grid container spacing={1}>
+                                { service.description && service.description !== '' && (
                                     <>
-                                        {expand ? (
-                                            <Button
-                                                onClick={toggleExpand}
-                                                color='primary'
-                                                endIcon={<ExpandLessIcon />}
-                                                className={classes.moreButtonSansDescription}
-                                            >
-
+                                        <Grid item md={12}>
+                                            <Typography>
                                                 <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.expand.less.sans.description'
-                                                    defaultMessage='Less'
+                                                    id='ServiceCatalog.Listing.Overview.service.description'
+                                                    defaultMessage='{description}'
+                                                    values={{ description: service.description }}
                                                 />
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                onClick={toggleExpand}
-                                                color='primary'
-                                                endIcon={<ExpandMoreIcon />}
-                                                className={classes.moreButtonSansDescription}
-                                            >
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.expand.more.sans.description'
-                                                    defaultMessage='More'
-                                                />
-                                            </Button>
-                                        )}
+                                            </Typography>
+                                        </Grid>
                                     </>
                                 )}
                             </Grid>
-                        </Grid>
-                    </div>
-                    <div className={classes.bodyStyle}>
-                        <Grid container spacing={1}>
-                            { dataRow.description && dataRow.description !== '' && (
-                                <>
-                                    <Grid item md={9}>
-                                        <Typography>
-                                            <FormattedMessage
-                                                id='ServiceCatalog.Listing.Overview.service.description'
-                                                defaultMessage='{description}'
-                                                values={{ description: dataRow.description }}
-                                            />
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item md={3}>
-                                        {expand ? (
-                                            <Button
-                                                onClick={toggleExpand}
-                                                color='primary'
-                                                endIcon={<ExpandLessIcon />}
-                                                className={classes.expandButton}
-                                            >
-
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.expand.less'
-                                                    defaultMessage='Less'
-                                                />
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                onClick={toggleExpand}
-                                                color='primary'
-                                                endIcon={<ExpandMoreIcon />}
-                                                className={classes.expandButton}
-                                            >
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.expand.more'
-                                                    defaultMessage='More'
-                                                />
-                                            </Button>
-                                        )}
-                                    </Grid>
-                                </>
-                            )}
-                        </Grid>
-                        {expand && (
-                            <Collapse in={expand}>
-                                <div className={classes.contentWrapper}>
-                                    <Table className={classes.table}>
-                                        <TableBody>
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.tableIcon}>link</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='ServiceCatalog.Listing.Overview.service.url'
-                                                                defaultMessage='Service URL'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{dataRow.serviceUrl}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.tableIcon}>code</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='ServiceCatalog.Listing.Overview.definition.type'
-                                                                defaultMessage='Schema Type'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{dataRow.definitionType}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.tableIcon}>security</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='ServiceCatalog.Listing.Overview.security.type'
-                                                                defaultMessage='Security Type'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{dataRow.securityType}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.tableIcon}>sync_alt</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='ServiceCatalog.Listing.Overview.mutual.ssl'
-                                                                defaultMessage='Mutual SSL'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {dataRow.mutualSSLEnabled ? (
+                            <div className={classes.contentWrapper}>
+                                <Table className={classes.table}>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.tableIcon}>link</Icon>
+                                                    <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.mutual.ssl.enabled'
-                                                            defaultMessage='Enabled'
+                                                            id='ServiceCatalog.Listing.Overview.service.url'
+                                                            defaultMessage='Service URL'
                                                         />
-                                                    ) : (
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{service.serviceUrl}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.tableIcon}>code</Icon>
+                                                    <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.mutual.ssl.disabled'
-                                                            defaultMessage='Disabled'
+                                                            id='ServiceCatalog.Listing.Overview.definition.type'
+                                                            defaultMessage='Schema Type'
                                                         />
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.tableIcon}>timeline</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='ServiceCatalog.Listing.Overview.created.time'
-                                                                defaultMessage='Created Time'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>{moment(dataRow.createdTime).fromNow()}</TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </Collapse>
-                        )}
-                    </div>
-                </DialogContent>
-            </Dialog>
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{service.definitionType}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.tableIcon}>security</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.security.type'
+                                                            defaultMessage='Security Type'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{service.securityType}</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.tableIcon}>sync_alt</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.mutual.ssl'
+                                                            defaultMessage='Mutual SSL'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {service.mutualSSLEnabled ? (
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.mutual.ssl.enabled'
+                                                        defaultMessage='Enabled'
+                                                    />
+                                                ) : (
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.mutual.ssl.disabled'
+                                                        defaultMessage='Disabled'
+                                                    />
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.tableIcon}>timeline</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.created.time'
+                                                            defaultMessage='Created Time'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{moment(service.createdTime).fromNow()}</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                        <div className={classes.buttonWrapper}>
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={1}
+                                className={classes.buttonSection}
+                            >
+                                <Grid item>
+                                    <Button onClick={listingRedirect} color='primary'>
+                                        <FormattedMessage
+                                            id='ServiceCatalog.Listing.Overview.back.btn'
+                                            defaultMessage='Go Back'
+                                        />
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </div>
+                    </Box>
+                </Paper>
+            </Container>
         </>
     );
 }
 
 Overview.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    dataRow: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        displayName: PropTypes.string.isRequired,
-        version: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
-        definitionType: PropTypes.string.isRequired,
-        serviceUrl: PropTypes.string.isRequired,
-        usage: PropTypes.string.isRequired,
-        createdTime: PropTypes.string.isRequired,
-        mutualSSLEnabled: PropTypes.bool.isRequired,
-        securityType: PropTypes.string.isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.object,
     }).isRequired,
-    intl: PropTypes.shape({}).isRequired,
 };
 
 export default Overview;
