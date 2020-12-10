@@ -2502,4 +2502,21 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException("Error while setting up permissions for file location", e);
         }
     }
+    /**
+     * Method used to create the file name of the wsdl to be stored in the registry
+     *
+     * @param provider   Name of the provider of the API
+     * @param apiName    Name of the API
+     * @param apiVersion API Version
+     * @return WSDL file name
+     */
+    public static String createWsdlFileName(String provider, String apiName, String apiVersion) {
+
+        return provider + "--" + apiName + apiVersion + ".wsdl";
+    }
+    
+    public static String getAPIBasePath(String provider, String apiName, String version) {
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(provider)
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + version;
+    }
 }

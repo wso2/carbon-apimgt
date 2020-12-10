@@ -1630,5 +1630,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to check existence of the documentation
      */
     boolean isDocumentationExist(String uuid, String docName) throws APIManagementException;
+    
+    /**
+     * Add WSDL to the api. wsdl can be provided either as a url or a resource file
+     * @param apiId id of the api
+     * @param resource Resource
+     * @param url wsdl url
+     * @throws APIManagementException
+     */
+    void addWSDLResource(String apiId, ResourceFile resource, String url) throws APIManagementException;
 
 }

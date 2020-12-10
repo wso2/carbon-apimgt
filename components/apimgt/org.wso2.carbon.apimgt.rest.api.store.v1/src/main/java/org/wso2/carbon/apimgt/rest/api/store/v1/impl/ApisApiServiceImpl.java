@@ -935,8 +935,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, xWSO2Tenant);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         APIIdentifier apiIdentifier = api.getId();
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
@@ -957,8 +958,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
                         environmentName));
             }
-            ResourceFile wsdl = apiConsumer.getWSDL(apiIdentifier, selectedEnvironment.getName(),
-                    selectedEnvironment.getType());
+            ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
+                    requestedTenantDomain);
 
             return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
         } else {

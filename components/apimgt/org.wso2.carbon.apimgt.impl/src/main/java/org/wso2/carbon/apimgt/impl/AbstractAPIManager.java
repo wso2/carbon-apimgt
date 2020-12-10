@@ -91,6 +91,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
@@ -180,6 +181,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     private LRUCache<String, GenericArtifactManager> genericArtifactCache = new LRUCache<String, GenericArtifactManager>(
             5);
+    private org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdl;
 
     public AbstractAPIManager() throws APIManagementException {
     }
@@ -1091,6 +1093,19 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    @Override
+    public ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException {
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
+                    .getWSDL(new Organization(tenantDomain), apiId);
+            if (resource != null) {
+                return new ResourceFile(resource.getContent(), resource.getContentType());
+            }
+        } catch (WSDLPersistenceException e) {
+            throw new APIManagementException("Error while retrieving wsdl resource for api " + apiId, e);
+        }
+        return null;
+    }
     /**
      * Create a wsdl in the path specified.
      *
