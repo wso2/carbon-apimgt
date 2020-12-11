@@ -46,6 +46,6 @@ public interface ApiProductsApiService {
       public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsPost(APIProductDTO apIProductDTO, MessageContext messageContext) throws APIManagementException;
-      public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId, String startTime, String endTime, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId, java.util.Date startTime, java.util.Date endTime, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext) throws APIManagementException;
 }

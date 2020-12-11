@@ -6491,7 +6491,7 @@ paths:
         - name: startTime
           schema:
             type: string
-            format: dateTime
+            format: date-time
             example: 2019-02-31T23:59:60Z
           in: query
           description: |
@@ -6501,7 +6501,7 @@ paths:
         - name: endTime
           schema:
             type: string
-            format: dateTime
+            format: date-time
             example: 2020-02-31T23:59:60Z
           in: query
           description: |
@@ -6599,13 +6599,13 @@ paths:
           schema:
             type: string
           description: |
-            Specify the revision to return API history up to.
+            Specify the revision to return API Product history up to.
           required: false
           example: 01234567-0123-0123-0123-012345678901
         - name: startTime
           schema:
             type: string
-            format: dateTime
+            format: date-time
             example: 2019-02-31T23:59:60Z
           in: query
           description: |
@@ -6615,7 +6615,7 @@ paths:
         - name: endTime
           schema:
             type: string
-            format: dateTime
+            format: date-time
             example: 2020-02-31T23:59:60Z
           in: query
           description: |
@@ -7544,8 +7544,9 @@ components:
         user:
           type: string
           example: user1
-        timestamp:
+        createdTime:
           type: string
+          format: date-time
           example: 2017-02-20T13:57:16.229
     ResourcePathList:
       title: ResourcePath List
