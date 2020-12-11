@@ -580,12 +580,12 @@ public class ExportUtils {
                         InputStream fileInputStream = mediationFile.getContentStream()) {
                     IOUtils.copy(fileInputStream, outputStream);
                 } catch (IOException e) {
-                    throw new APIManagementException("Error while writing the mediation sequence"+ mediationName+ "to file");
+                    throw new APIManagementException("Error while writing the mediation sequence"+ mediationName+ "to file", e);
                 }
             } else {
-                // Log error and avoid throwing as we give capability to export an API without sequences
-                log.error("Sequence resource for API/API Product: " + apiIdentifier.getName() + " not found in "
-                        + resourcePath);
+                throw new APIManagementException(
+                        "Resource specified by " + resourcePath + " cannot be found in the registry",
+                        ExceptionCodes.RESOURCE_NOT_FOUND);
             }
         }
     }
