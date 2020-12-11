@@ -288,15 +288,15 @@ public class ImportUtils {
     /**
      * This method sets the operations which were retrieved from the swagger definition to the API DTO.
      *
-     * @param apiDto             API DTO
-     * @param response          API Validation Response
+     * @param apiDto   API DTO
+     * @param response API Validation Response
      * @throws APIManagementException If an error occurs when retrieving the URI templates
      */
     private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
             throws APIManagementException {
         List<URITemplate> uriTemplates = new ArrayList<>();
         uriTemplates.addAll(response.getParser().getURITemplates(response.getJsonContent()));
-        List<APIOperationsDTO> apiOperationsDtos =APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
+        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
         apiDto.setOperations(apiOperationsDtos);
     }
 
