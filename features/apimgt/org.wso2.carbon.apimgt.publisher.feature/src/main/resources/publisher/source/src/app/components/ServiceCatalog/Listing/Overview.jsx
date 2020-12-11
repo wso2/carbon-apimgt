@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -28,15 +28,25 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import Chip from '@material-ui/core/Chip';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Container from '@material-ui/core/Container';
+import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import Switch from '@material-ui/core/Switch';
+import FormControl from '@material-ui/core/FormControl';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Box from '@material-ui/core/Box';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import { Link } from 'react-router-dom';
 import Paper from '@material-ui/core/Paper';
 import moment from 'moment';
+import Joi from '@hapi/joi';
 import PropTypes from 'prop-types';
 import LocalOfferOutlinedIcon from '@material-ui/icons/LocalOfferOutlined';
 
@@ -84,9 +94,8 @@ const useStyles = makeStyles((theme) => ({
     },
     topMarginSpacing: {
         marginTop: theme.spacing(2),
-        display: 'flex',
     },
-    chipStyle: {
+    apiUsageStyle: {
         marginTop: theme.spacing(3),
     },
     moreButtonSansDescription: {
@@ -103,8 +112,35 @@ const useStyles = makeStyles((theme) => ({
     },
     buttonSection: {
         paddingTop: theme.spacing(1),
+        marginLeft: theme.spacing(2),
+    },
+    nameStyle: {
+        fontSize: 14,
+    },
+    paperStyle: {
+        marginBottom: theme.spacing(3),
     },
 }));
+
+/**
+ * Reducer
+ * @param {JSON} state State.
+ * @returns {Promise} Promised state.
+ */
+function reducer(state, { field, value }) {
+    switch (field) {
+        case 'displayName':
+        case 'description':
+        case 'serviceUrl':
+        case 'definitionType':
+        case 'securityType':
+            return { ...state, [field]: value };
+        case 'initialize':
+            return value;
+        default:
+            return state;
+    }
+}
 
 /**
  * Service Catalog Overview Page
@@ -118,12 +154,128 @@ function Overview(props) {
     const { match, history } = props;
     const serviceId = match.params.service_uuid;
     const [service, setService] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [notFound, setNotFound] = useState(true);
+    const [schemaTypeList, setSchemaTypeList] = useState([]);
+    const [securityTypeList, setSecurityTypeList] = useState([]);
+
+    const [validity, setValidity] = useState({});
+
+    const initialState = {
+        id: '',
+        name: '',
+        displayName: '',
+        description: '',
+        serviceUrl: '',
+        definitionType: '',
+        securityType: '',
+    };
+
+    const [state, dispatch] = useReducer(reducer, initialState);
+
+    const {
+        id,
+        displayName,
+        description,
+        serviceUrl,
+        definitionType,
+        securityType,
+    } = state;
+
+    const handleChange = (e) => {
+        dispatch({ field: e.target.name, value: e.target.value });
+    };
+
+    const validate = (fieldName, value) => {
+        let error = '';
+        const schema = Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/);
+        switch (fieldName) {
+            case 'displayName':
+                if (value === '') {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.display.name.empty',
+                        defaultMessage: 'Service display name is empty ',
+                    });
+                } else if (value.length > 60) {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.display.name.too.long',
+                        defaultMessage: 'Service display name is too long ',
+                    });
+                } else if (schema.validate(value).error) {
+                    error = intl.formatMessage({
+                        id: 'ServiceCatalog.Listing.Edit.service.display.name.invalid.character',
+                        defaultMessage: 'Service display name contains one or more illegal characters ',
+                    });
+                } else {
+                    error = '';
+                }
+                setValidity({
+                    ...validity,
+                    displayName: error,
+                });
+                break;
+            case 'serviceUrl':
+                error = value === '' ? intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Edit.service.url.empty',
+                    defaultMessage: 'Service Url is empty ',
+                }) : '';
+                setValidity({
+                    ...validity,
+                    serviceUrl: error,
+                });
+                break;
+            case 'definitionType':
+                error = value === '' ? intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Overview.service.definition.type.empty',
+                    defaultMessage: 'Schema Type is empty ',
+                }) : '';
+                setValidity({
+                    ...validity,
+                    definitionType: error,
+                });
+                break;
+            case 'securityType':
+                error = value === '' ? intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Overview.service.security.type.empty',
+                    defaultMessage: 'Security Type is empty ',
+                }) : '';
+                setValidity({
+                    ...validity,
+                    securityType: error,
+                });
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
+    const getAllFormErrors = () => {
+        let errorText = '';
+        const serviceDisplayNameErrors = validate('displayName', displayName);
+        const serviceUrlErrors = validate('serviceUrl', serviceUrl);
+        const definitionTypeErrors = validate('definitionType', definitionType);
+        const securityTypeErrors = validate('securityType', securityType);
+        errorText += serviceDisplayNameErrors + serviceUrlErrors + definitionTypeErrors + securityTypeErrors;
+        return errorText;
+    };
+
+    const onEditFromOverview = () => {
+        setIsEditing(true);
+    };
+
+    const overviewRedirect = () => {
+        setIsEditing(false);
+        history.push(`/service-catalog/${serviceId}/overview`);
+    };
 
     // Get Service Details
     const getService = () => {
         const promisedService = ServiceCatalog.getServiceById(serviceId);
         promisedService.then((data) => {
             setService(data);
+            dispatch({ field: 'initialize', value: data });
+            setNotFound(false);
         }).catch(() => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error While Loading Service',
@@ -137,12 +289,95 @@ function Overview(props) {
         getService();
     }, []);
 
+    useEffect(() => {
+        const settingPromise = ServiceCatalog.getSettings();
+        settingPromise.then((response) => {
+            setSchemaTypeList(response.schemaTypes);
+            setSecurityTypeList(response.securityTypes);
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error while retrieving settings data',
+                id: 'ServiceCatalog.Listing.Edit.error.retrieve.service.settings.data',
+            }));
+        });
+    }, []);
+
     const listingRedirect = () => {
         history.push('/service-catalog');
     };
 
+    /**
+     * Function for updating a given service entry
+     */
+    const onEdit = () => {
+        const updateServicePromise = ServiceCatalog.updateService(id, state);
+        updateServicePromise.then(() => {
+            Alert.info(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.Listing.service.updated.successfully',
+                defaultMessage: 'Service updated successfully!',
+            }));
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                defaultMessage: 'Error while updating service',
+                id: 'ServiceCatalog.Listing.Listing.error.update',
+            }));
+        });
+    };
+
+    /**
+     * Function for updating a given service entry
+     */
+    function doneEditing() {
+        const formErrors = getAllFormErrors();
+        if (formErrors !== '') {
+            Alert.error(formErrors);
+        } else {
+            onEdit(id, state);
+            // Redirect to read only overview page
+            overviewRedirect();
+        }
+    }
+
+    const renderContent = () => {
+        if (isEditing) {
+            return (
+                <FormControl component='fieldset'>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={(
+                                <Switch
+                                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                                    name='mutualSslEnabled'
+                                />
+                            )}
+                            label='Enable'
+                        />
+                    </FormGroup>
+                </FormControl>
+            );
+        } else if (service.mutualSSLEnabled) {
+            return (
+                <FormattedMessage
+                    id='ServiceCatalog.Listing.Overview.mutual.ssl.enabled'
+                    defaultMessage='Enabled'
+                />
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    id='ServiceCatalog.Listing.Overview.mutual.ssl.disabled'
+                    defaultMessage='Disabled'
+                />
+            );
+        }
+    };
+
     if (!service) {
         return <Progress per={90} message='Loading Service ...' />;
+    }
+
+    if (notFound) {
+        return <ResourceNotFound />;
     }
 
     let serviceTypeIcon = (
@@ -230,35 +465,74 @@ function Overview(props) {
         <>
             <Container maxWidth='md'>
                 <Box mb={3} className={classes.headingSpacing}>
-                    <Typography variant='h4'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Overview.heading'
-                            defaultMessage='Overview'
-                        />
-                    </Typography>
-                    <Typography variant='caption'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Overview.heading.caption'
-                            defaultMessage='Overview of the service'
-                        />
-                    </Typography>
+                    <Breadcrumbs aria-label='breadcrumb'>
+                        <Link color='inherit' to='/service-catalog'>
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Overview.parent.breadcrumb'
+                                defaultMessage='Service Catalog'
+                            />
+                        </Link>
+                        {!isEditing ? (
+                            <Typography color='textPrimary'>
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Overview.readonly.breadcrumb'
+                                    defaultMessage='Overview'
+                                />
+                            </Typography>
+                        ) : (
+                            <Typography color='textPrimary'>
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Overview.edit.breadcrumb'
+                                    defaultMessage='Edit'
+                                />
+                            </Typography>
+                        )}
+                    </Breadcrumbs>
                 </Box>
-                <Paper elevation={1}>
+                <Paper elevation={1} className={classes.paperStyle}>
                     <Box px={8} py={5}>
                         <div>
                             <Grid container spacing={1}>
-                                <Grid item md={9}>
+                                <Grid item md={10}>
                                     <div className={classes.contentTopBarStyle}>
                                         {serviceTypeIcon}
                                         <div className={classes.topBarDetailsSectionStyle}>
                                             <div className={classes.versionBarStyle}>
-                                                <Typography className={classes.heading} variant='h5'>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.service.display.name'
-                                                        defaultMessage='{serviceDisplayName}'
-                                                        values={{ serviceDisplayName: service.displayName }}
-                                                    />
-                                                </Typography>
+                                                {!isEditing ? (
+                                                    <Typography className={classes.heading} variant='h5'>
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.service.display.name'
+                                                            defaultMessage='{serviceDisplayName}'
+                                                            values={{ serviceDisplayName: service.displayName }}
+                                                        />
+                                                    </Typography>
+                                                ) : (
+                                                    <Typography>
+                                                        <TextField
+                                                            name='displayName'
+                                                            value={displayName}
+                                                            margin='normal'
+                                                            fullWidth
+                                                            className={classes.nameStyle}
+                                                            error={validity.displayName}
+                                                            helperText={validity.displayName ? validity.displayName
+                                                                : (
+                                                                    <FormattedMessage
+                                                                        id='ServiceCatalog.Listing.Overview.name.helper'
+                                                                        defaultMessage='Display name of the service'
+                                                                    />
+                                                                )}
+                                                            InputProps={{
+                                                                id: 'itest-id-servicedisplayname-input',
+                                                                onBlur: ({ target: { value } }) => {
+                                                                    validate('displayName', value);
+                                                                },
+                                                                style: { fontSize: 20 },
+                                                            }}
+                                                            onChange={handleChange}
+                                                        />
+                                                    </Typography>
+                                                )}
                                             </div>
                                             <div className={classes.versionBarStyle}>
                                                 <LocalOfferOutlinedIcon />
@@ -270,28 +544,49 @@ function Overview(props) {
                                                     />
                                                 </Typography>
                                             </div>
-                                            <div className={classes.chipStyle}>
-                                                <Chip
-                                                    variant='outlined'
-                                                    color='primary'
-                                                    label={intl.formatMessage({
-                                                        id: 'ServiceCatalog.Listing.Overview.usage.data',
-                                                        defaultMessage: 'Used by {usage} API(s)',
-                                                    }, { usage: service.usage })}
-                                                />
+                                            <div className={classes.apiUsageStyle} primary>
+                                                <Typography color='primary'>
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.service.usage'
+                                                        defaultMessage='Used by {usage} API(s)'
+                                                        values={{ usage: service.usage }}
+                                                    />
+                                                </Typography>
                                             </div>
                                         </div>
                                     </div>
                                 </Grid>
-                                <Grid item md={3}>
-                                    <Button color='primary' variant='contained' className={classes.topMarginSpacing}>
-                                        <Typography>
-                                            <FormattedMessage
-                                                id='ServiceCatalog.Listing.Overview.create.api'
-                                                defaultMessage='Create API'
-                                            />
-                                        </Typography>
-                                    </Button>
+                                <Grid item md={2}>
+                                    <Box display='flex' flexDirection='column'>
+                                        { !isEditing ? (
+                                            <Button
+                                                color='primary'
+                                                variant='contained'
+                                                className={classes.topMarginSpacing}
+                                            >
+                                                <Typography>
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.create.api'
+                                                        defaultMessage='Create API'
+                                                    />
+                                                </Typography>
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                color='primary'
+                                                variant='contained'
+                                                className={classes.topMarginSpacing}
+                                                disabled
+                                            >
+                                                <Typography>
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.create.api'
+                                                        defaultMessage='Create API'
+                                                    />
+                                                </Typography>
+                                            </Button>
+                                        )}
+                                    </Box>
                                 </Grid>
                             </Grid>
                         </div>
@@ -300,13 +595,30 @@ function Overview(props) {
                                 { service.description && service.description !== '' && (
                                     <>
                                         <Grid item md={12}>
-                                            <Typography>
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.service.description'
-                                                    defaultMessage='{description}'
-                                                    values={{ description: service.description }}
+                                            {!isEditing ? (
+                                                <Typography>
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.Overview.service.description'
+                                                        defaultMessage='{description}'
+                                                        values={{ description: service.description }}
+                                                    />
+                                                </Typography>
+                                            ) : (
+                                                <TextField
+                                                    name='description'
+                                                    value={description}
+                                                    margin='normal'
+                                                    fullWidth
+                                                    multiline
+                                                    helperText={(
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.description.helper.text'
+                                                            defaultMessage='Description of the Service'
+                                                        />
+                                                    )}
+                                                    onChange={handleChange}
                                                 />
-                                            </Typography>
+                                            )}
                                         </Grid>
                                     </>
                                 )}
@@ -326,7 +638,26 @@ function Overview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{service.serviceUrl}</TableCell>
+                                            { isEditing ? (
+                                                <TableCell>
+                                                    <TextField
+                                                        name='serviceUrl'
+                                                        value={serviceUrl}
+                                                        margin='normal'
+                                                        fullWidth
+                                                        error={validity.serviceUrl}
+                                                        helperText={validity.serviceUrl}
+                                                        InputProps={{
+                                                            id: 'itest-id-serviceurl-input',
+                                                            onBlur: ({ target: { value } }) => {
+                                                                validate('serviceUrl', value);
+                                                            },
+                                                        }}
+                                                        onChange={handleChange}
+                                                    />
+                                                </TableCell>
+                                            )
+                                                : (<TableCell>{service.serviceUrl}</TableCell>)}
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
@@ -340,7 +671,50 @@ function Overview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{service.definitionType}</TableCell>
+                                            {isEditing ? (
+                                                <TableCell>
+                                                    <TextField
+                                                        name='definitionType'
+                                                        select
+                                                        value={definitionType}
+                                                        variant='outlined'
+                                                        fullWidth
+                                                        margin='normal'
+                                                        error={validity.definitionType}
+                                                        helperText={validity.definitionType}
+                                                        InputProps={{
+                                                            id: 'itest-id-definitionType-input',
+                                                            onBlur: ({ target: { value } }) => {
+                                                                validate('definitionType', value);
+                                                            },
+                                                        }}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
+                                                            },
+                                                            style: {
+                                                                height: 60,
+                                                            },
+                                                        }}
+                                                        onChange={handleChange}
+                                                    >
+                                                        {schemaTypeList.map((schema) => (
+                                                            <MenuItem
+                                                                id={schema}
+                                                                key={schema}
+                                                                value={schema}
+                                                            >
+                                                                <ListItemText primary={schema} />
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </TableCell>
+                                            )
+                                                : (<TableCell>{service.definitionType}</TableCell>)}
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
@@ -354,7 +728,50 @@ function Overview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{service.securityType}</TableCell>
+                                            {isEditing ? (
+                                                <TableCell>
+                                                    <TextField
+                                                        name='securityType'
+                                                        select
+                                                        value={securityType}
+                                                        variant='outlined'
+                                                        fullWidth
+                                                        margin='normal'
+                                                        error={validity.securityType}
+                                                        helperText={validity.securityType}
+                                                        InputProps={{
+                                                            id: 'itest-id-securityType-input',
+                                                            onBlur: ({ target: { value } }) => {
+                                                                validate('securityType', value);
+                                                            },
+                                                        }}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
+                                                            },
+                                                            style: {
+                                                                height: 60,
+                                                            },
+                                                        }}
+                                                        onChange={handleChange}
+                                                    >
+                                                        {securityTypeList.map((type) => (
+                                                            <MenuItem
+                                                                id={type}
+                                                                key={type}
+                                                                value={type}
+                                                            >
+                                                                <ListItemText primary={type} />
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </TableCell>
+                                            )
+                                                : (<TableCell>{service.securityType}</TableCell>)}
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
@@ -369,17 +786,7 @@ function Overview(props) {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                {service.mutualSSLEnabled ? (
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.mutual.ssl.enabled'
-                                                        defaultMessage='Enabled'
-                                                    />
-                                                ) : (
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.mutual.ssl.disabled'
-                                                        defaultMessage='Disabled'
-                                                    />
-                                                )}
+                                                { renderContent() }
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
@@ -409,12 +816,48 @@ function Overview(props) {
                                 className={classes.buttonSection}
                             >
                                 <Grid item>
-                                    <Button onClick={listingRedirect} color='primary'>
-                                        <FormattedMessage
-                                            id='ServiceCatalog.Listing.Overview.back.btn'
-                                            defaultMessage='Go Back'
-                                        />
-                                    </Button>
+                                    {isEditing ? (
+                                        <Button
+                                            onClick={doneEditing}
+                                            color='primary'
+                                            variant='contained'
+                                        >
+                                            <FormattedMessage
+                                                id='ServiceCatalog.Listing.Overview.save.btn'
+                                                defaultMessage='Save'
+                                            />
+                                        </Button>
+                                    )
+                                        : (
+                                            <Button
+                                                onClick={onEditFromOverview}
+                                                color='primary'
+                                                variant='outlined'
+                                            >
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Overview.edit.btn'
+                                                    defaultMessage='Edit'
+                                                />
+                                            </Button>
+                                        )}
+                                </Grid>
+                                <Grid item>
+                                    {isEditing ? (
+                                        <Button onClick={overviewRedirect} color='primary'>
+                                            <FormattedMessage
+                                                id='ServiceCatalog.Listing.Edit.cancel.btn'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    )
+                                        : (
+                                            <Button onClick={listingRedirect} color='primary'>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Overview.back.btn'
+                                                    defaultMessage='Go Back'
+                                                />
+                                            </Button>
+                                        )}
                                 </Grid>
                             </Grid>
                         </div>
