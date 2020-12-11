@@ -28,6 +28,10 @@ const DefaultConfigurations = {
         h4: {
             fontWeight: 200,
         },
+        caption: {
+            fontSize: '0.70rem',
+            color: '#666',
+        },
     },
     custom: {
         contentAreaWidth: 1240,
@@ -329,7 +333,17 @@ const DefaultConfigurations = {
        publicTenantStore: {
             active: true,
             redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
-        }
+        },
+        overrides: {
+             MuiOutlinedInput: {
+                 root: {
+                     borderColor: '#444',
+                 },
+                 notchedOutline: {
+                     borderColor: '#444',
+                 },
+             },
+        },
     },
 };
 

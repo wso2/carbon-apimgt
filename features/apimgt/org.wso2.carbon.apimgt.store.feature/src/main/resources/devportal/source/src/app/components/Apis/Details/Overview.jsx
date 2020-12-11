@@ -268,7 +268,7 @@ function Overview(props) {
                                 height={titleIconSize}
                                 icon='credentials'
                             />
-                            <Typography className={classes.heading} variant='h6'>
+                            <Typography className={classes.heading} variant='h6' component='h1'>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.api.subscriptions'
                                     defaultMessage='Subscriptions'
@@ -298,7 +298,7 @@ function Overview(props) {
                                 <ExpansionPanelDetails classes={{ root: classes.expansionRoot }}>
                                     <Grid container className={classes.root} spacing={2}>
                                         <Grid item xs={12}>
-                                            <Typography variant='subtitle2'>
+                                            <Typography variant='subtitle2' component='h3'>
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.subscriptions.title'
                                                     defaultMessage='Subscriptions'
@@ -414,7 +414,7 @@ function Overview(props) {
                                 height={titleIconSize}
                                 icon='credentials'
                             />
-                            <Typography id='APIOperationTitle' className={classes.heading} variant='h6'>
+                            <Typography id='APIOperationTitle' className={classes.heading} variant='h6' component='h2'>
                                 {getTitleForAPIOperationType(api.type)}
                             </Typography>
                         </ExpansionPanelSummary>
@@ -457,7 +457,7 @@ function Overview(props) {
                                         height={titleIconSize}
                                         icon='comments'
                                     />
-                                    <Typography id='comments' className={classes.heading} variant='h6'>
+                                    <Typography id='comments' className={classes.heading} variant='h6' component='h2'>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.comments.title'
                                             defaultMessage='Comments'
@@ -520,7 +520,7 @@ function Overview(props) {
                                         height={titleIconSize}
                                         icon='sdk'
                                     />
-                                    <Typography id='SDKGeneration' className={classes.heading} variant='h6'>
+                                    <Typography id='SDKGeneration' className={classes.heading} variant='h6' component='h2'>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.sdk.generation.title'
                                             defaultMessage='SDK Generation'
@@ -576,7 +576,7 @@ function Overview(props) {
                                 icon='docs'
                             />
 
-                            <Typography id='Documents' className={classes.heading} variant='h6'>
+                            <Typography id='Documents' className={classes.heading} variant='h6' component='h2'>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.documents.title'
                                     defaultMessage='Documents'

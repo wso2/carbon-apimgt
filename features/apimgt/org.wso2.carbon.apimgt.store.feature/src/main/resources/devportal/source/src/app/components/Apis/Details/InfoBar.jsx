@@ -413,7 +413,7 @@ class InfoBar extends React.Component {
                     )}
                     <div style={{ marginLeft: theme.spacing(1) }}>
                         <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
-                            <Typography variant='h4'>{api.name}</Typography>
+                            <Typography variant='h4' component='div'>{api.name}</Typography>
                         </Link>
                         <Typography variant='caption' gutterBottom align='left'>
                             {this.getProvider(api)}

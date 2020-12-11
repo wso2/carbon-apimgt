@@ -359,15 +359,20 @@ class ApiThumb extends React.Component {
                         <div className={classes.thumbInfo}>
                             <div className={classes.row}>
                                 <div className={classes.thumbLeft}>
-                                    <Typography variant='subtitle1'>{version}</Typography>
-                                    <Typography variant='caption' gutterBottom align='left'>
+                                    <Typography variant='subtitle1' component='div'>{version}</Typography>
+                                    <Typography variant='caption' component='div' gutterBottom align='left'>
                                         <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
                                     </Typography>
                                 </div>
                             </div>
                             <div className={classes.row}>
                                 <div className={classes.thumbRight}>
-                                    <Typography variant='subtitle1' align='right' className={classes.contextBox}>
+                                    <Typography
+                                        variant='subtitle1'
+                                        component='div'
+                                        align='right'
+                                        className={classes.contextBox}
+                                    >
                                         {context}
                                     </Typography>
                                     <Typography
@@ -386,6 +391,8 @@ class ApiThumb extends React.Component {
                             {showRating && <div className={classes.thumbLeftAction}>
                                 <Typography
                                     variant='subtitle1'
+                                    component='div'
+                                    aria-label='API Rating'
                                     gutterBottom
                                     align='left'
                                     className={classNames('api-thumb-rating', classes.ratingWrapper)}

@@ -216,7 +216,7 @@ class Environments extends React.Component {
                                             || endpoint.URLs.https !== null
                                             || endpoint.URLs.ws !== null
                                             || endpoint.URLs.wss !== null) && (
-                                                <Typography className={classes.heading}>
+                                                <Typography component='label' htmlFor='bootstrap-input' className={classes.heading}>
                                                     <FormattedMessage
                                                         id='Apis.Details.InfoBar.gateway.urls'
                                                         defaultMessage='Gateway URLs'

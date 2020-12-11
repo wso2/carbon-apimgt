@@ -422,7 +422,7 @@ class Details extends React.Component {
                     )}
                 >
                     {rootIconVisible && (
-                        <Link to='/apis' className={classes.leftLInkMain}>
+                        <Link to='/apis' className={classes.leftLInkMain} aria-label='ALL APIs'>
                             <CustomIcon width={rootIconSize} height={rootIconSize} icon='api' />
                             {rootIconTextVisible && (
                                 <Typography className={classes.leftLInkMainText}>

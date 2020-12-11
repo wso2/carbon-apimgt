@@ -180,6 +180,7 @@ const subscribeToApi = (props) => {
                         </InputLabel>
                         <Autocomplete
                            id="application-subscribe"
+                           aria-describedby='application-helper-text'
                            options={applicationsList}
                            value={(applicationsList.length !== 0 && appSelected === '') ?
                                 applicationsList[0] : appSelected}
@@ -188,7 +189,7 @@ const subscribeToApi = (props) => {
                            classes={{root:classes.fullWidth}}
                            renderInput={(params) => <TextField {...params} />}
                          />
-                        <FormHelperText>
+                        <FormHelperText id='application-helper-text'>
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.SubscribeToApi.select.an.application.to.subscribe'
                                 defaultMessage='Select an Application to subscribe'
@@ -211,6 +212,7 @@ const subscribeToApi = (props) => {
                         </InputLabel>
                         <Select
                             value={policySelected}
+                            aria-describedby='policies-helper-text'
                             onChange={e => handleChange('throttlingPolicy', e)}
                             input={<Input name='policySelected' id='policy-label-placeholder' />}
                             displayEmpty
@@ -248,7 +250,7 @@ const subscribeToApi = (props) => {
                                 </MenuItem>
                             ))}
                         </Select>
-                        <FormHelperText>
+                        <FormHelperText id='policies-helper-text'>
                             <FormattedMessage
                                 id='Shared.AppsAndKeys.SubscribeToApi.available.policies'
                                 defaultMessage='Available Policies -'
