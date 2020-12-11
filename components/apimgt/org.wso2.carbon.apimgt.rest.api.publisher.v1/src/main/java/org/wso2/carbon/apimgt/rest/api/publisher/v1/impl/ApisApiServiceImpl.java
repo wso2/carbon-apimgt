@@ -139,6 +139,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
@@ -183,6 +184,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -3784,26 +3786,55 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String startTime,
-                                  String endTime, MessageContext messageContext) throws APIManagementException {
+    public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext)
+            throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        String payload = apiProvider.getAPIOrAPIProductHistoryEventPayload(apiIdentifier, eventId);
+        if (StringUtils.isBlank(payload)) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API
+                    + RestApiConstants.RESOURCE_HISTORY_PAYLOAD, StringUtils.EMPTY, log);
+        }
+        return Response.ok().entity(payload).build();
+    }
+
+    @Override
+    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, Date startTime,
+                                  Date endTime, MessageContext messageContext) throws APIManagementException {
 
         // pre-processing
         // setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        List<HistoryEvent> historyEvents = apiProvider.getHistoryEventsWithPagination(apiId, revisionId, startTime,
-                endTime, offset, limit);
-        int eventCount = apiProvider.getAllHistoryCount(apiId, revisionId, startTime, endTime);
-        return null;
-    }
+        HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
 
-    @Override
-    public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext)
-            throws APIManagementException {
-
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String payload = apiProvider.getHistoryEventPayload(apiId, eventId);
-        return null;
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (revisionId != null) {
+                //TODO: check if revision exists
+            }
+            List<HistoryEvent> historyEvents = apiProvider
+                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, apiId, revisionId, startTime, endTime,
+                            offset,
+                            limit);
+            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiId, revisionId, startTime, endTime);
+            historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
+            APIMappingUtil
+                    .setAPIHistoryPaginationParams(historyEventListDTO, apiId, revisionId, startTime, endTime, limit,
+                            offset, eventCount);
+            return Response.ok().entity(historyEventListDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
+                //this is not an error of the user as he does not know the total number of applications available.
+                // Thus sends an empty response
+                historyEventListDTO.setCount(0);
+                historyEventListDTO.setPagination(new PaginationDTO());
+                return Response.ok().entity(historyEventListDTO).build();
+            } else {
+                throw e;
+            }
+        }
     }
 }

@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Date;
+
 public class HistoryEvent {
 
     private String id;
@@ -24,7 +26,7 @@ public class HistoryEvent {
     private String operationId;
     private String user;
     private Object payload;
-    private String createdTime;
+    private Date createdTime;
     private String apiId;
     private String revisionKey;
 
@@ -78,12 +80,12 @@ public class HistoryEvent {
         this.payload = payload;
     }
 
-    public String getCreatedTime() {
+    public Date getCreatedTime() {
 
         return createdTime;
     }
 
-    public void setCreatedTime(String createdTime) {
+    public void setCreatedTime(Date createdTime) {
 
         this.createdTime = createdTime;
     }

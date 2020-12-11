@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.HistoryEvent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -46,6 +47,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -616,5 +618,22 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
         checkPublishPermission();
         super.deleteWorkflowTask(apiIdentifier);
+    }
+
+    @Override
+    public List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String uuid,
+                                                                      String revisionId, Date startTime, Date endTime,
+                                                                      int offset, int limit) throws APIManagementException {
+
+        checkAccessControlPermission(identifier);
+        return super
+                .getAPIOrAPIProductHistoryWithPagination(identifier, uuid, revisionId, startTime, endTime, offset, limit);
+    }
+
+    @Override
+    public String getAPIOrAPIProductHistoryEventPayload(Identifier identifier, String eventId) throws APIManagementException {
+
+        checkAccessControlPermission(identifier);
+        return super.getAPIOrAPIProductHistoryEventPayload(identifier, eventId);
     }
 }

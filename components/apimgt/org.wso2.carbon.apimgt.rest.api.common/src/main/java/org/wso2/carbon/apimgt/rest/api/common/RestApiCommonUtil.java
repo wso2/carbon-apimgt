@@ -339,15 +339,15 @@ public class RestApiCommonUtil {
      * @return constructed paginated url
      */
     public static String getAPIHistoryEventPaginatedURL(Integer offset, Integer limit, String apiId, String revisionId,
-                                                        String startTime, String endTime) {
+                                                        Date startTime, Date endTime) {
 
         String paginatedURL = RestApiConstants.APIS_HISTORY_EVENTS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
         paginatedURL = paginatedURL.replace(RestApiConstants.REVISIONID_PARAM, revisionId);
-        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime);
-        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime);
+        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime.toInstant().toString());
+        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime.toInstant().toString());
         return paginatedURL;
     }
 
@@ -363,15 +363,15 @@ public class RestApiCommonUtil {
      * @return constructed paginated url
      */
     public static String getAPIProductHistoryEventPaginatedURL(Integer offset, Integer limit, String apiProductId,
-                                                               String revisionId, String startTime, String endTime) {
+                                                               String revisionId, Date startTime, Date endTime) {
 
         String paginatedURL = RestApiConstants.API_PRODUCTS_HISTORY_EVENTS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIPRODUCTID_PARAM, apiProductId);
         paginatedURL = paginatedURL.replace(RestApiConstants.REVISIONID_PARAM, revisionId);
-        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime);
-        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime);
+        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime.toInstant().toString());
+        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime.toInstant().toString());
         return paginatedURL;
     }
 

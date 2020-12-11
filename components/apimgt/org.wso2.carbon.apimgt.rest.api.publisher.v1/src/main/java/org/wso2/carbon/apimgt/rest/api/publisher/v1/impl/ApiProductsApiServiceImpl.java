@@ -51,6 +51,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -63,6 +65,7 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -766,18 +769,42 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     @Override
     public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId,
-                                         String startTime, String endTime, MessageContext messageContext)
+                                         Date startTime, Date endTime, MessageContext messageContext)
             throws APIManagementException {
 
         // pre-processing
         // setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        List<HistoryEvent> historyEvents = apiProvider.getHistoryEventsWithPagination(apiProductId, revisionId, startTime,
-                endTime, offset, limit);
-        int eventCount = apiProvider.getAllHistoryCount(apiProductId, revisionId, startTime, endTime);
-        return null;
+        HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
+
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+            if (revisionId != null) {
+                //TODO: check if revision exists
+            }
+            List<HistoryEvent> historyEvents = apiProvider
+                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, apiProductId, revisionId, startTime,
+                            endTime, offset, limit);
+            int eventCount =
+                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductId, revisionId, startTime, endTime);
+            historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
+            APIMappingUtil
+                    .setAPIProductHistoryPaginationParams(historyEventListDTO, apiProductId, revisionId, startTime,
+                            endTime, limit, offset, eventCount);
+            return Response.ok().entity(historyEventListDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
+                //this is not an error of the user as he does not know the total number of applications available.
+                // Thus sends an empty response
+                historyEventListDTO.setCount(0);
+                historyEventListDTO.setPagination(new PaginationDTO());
+                return Response.ok().entity(historyEventListDTO).build();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
@@ -785,7 +812,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String payload = apiProvider.getHistoryEventPayload(apiProductId, eventId);
-        return null;
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        String payload = apiProvider.getAPIOrAPIProductHistoryEventPayload(apiProductIdentifier, eventId);
+        if (StringUtils.isBlank(payload)) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT
+                    + RestApiConstants.RESOURCE_HISTORY_PAYLOAD, StringUtils.EMPTY, log);
+        }
+        return Response.ok().entity(payload).build();
     }
+
 }
