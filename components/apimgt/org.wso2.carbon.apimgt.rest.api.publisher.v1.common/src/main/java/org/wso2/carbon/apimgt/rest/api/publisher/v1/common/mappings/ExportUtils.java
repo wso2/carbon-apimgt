@@ -23,7 +23,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.axiom.om.OMElement;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -46,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -77,14 +77,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 public class ExportUtils {
 
@@ -176,7 +172,7 @@ public class ExportUtils {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
             }
 
-            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry);
+            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry, apiProvider);
 
             // Set API status to created if the status is not preserved
             if (!preserveStatus) {
@@ -506,150 +502,91 @@ public class ExportUtils {
      * @param apiIdentifier API Identifier
      * @param apiDto        API DTO
      * @param registry      Current tenant registry
+     * @param apiProvider   API Provider
      * @throws APIImportExportException If an error occurs while exporting sequences
      */
     public static void addSequencesToArchive(String archivePath, APIIdentifier apiIdentifier, APIDTO apiDto,
-            Registry registry) throws APIImportExportException {
+            Registry registry, APIProvider apiProvider)
+            throws APIImportExportException, APIManagementException, RegistryException {
 
         String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
         List<MediationPolicyDTO> mediationPolicyDtos = apiDto.getMediationPolicies();
-        if (!apiDto.getMediationPolicies().isEmpty()) {
+
+        if (!mediationPolicyDtos.isEmpty()) {
             CommonUtil.createDirectory(seqArchivePath);
             for (MediationPolicyDTO mediationPolicyDto : mediationPolicyDtos) {
-                AbstractMap.SimpleEntry<String, OMElement> sequenceDetails;
-                String sequenceName = mediationPolicyDto.getName();
-                String direction = mediationPolicyDto.getType().toLowerCase();
-                String pathToExportedSequence =
-                        seqArchivePath + File.separator + direction + "-sequence" + File.separator;
-                if (sequenceName != null) {
-                    sequenceDetails = getCustomSequence(sequenceName, direction, registry);
-                    if (sequenceDetails == null) {
-                        // If sequence doesn't exist in 'apimgt/customsequences/{in/out/fault}' directory check in API
-                        // specific registry path
-                        sequenceDetails = getAPISpecificSequence(apiIdentifier, sequenceName, direction, registry);
-                        pathToExportedSequence += ImportExportConstants.CUSTOM_TYPE + File.separator;
+                if (mediationPolicyDto.isShared()) {
+                    String individualSequenceExportPath =
+                            seqArchivePath + File.separator + mediationPolicyDto.getType().toLowerCase()
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                    if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                        CommonUtil.createDirectory(individualSequenceExportPath);
                     }
-                    writeSequenceToFile(pathToExportedSequence, sequenceDetails, apiIdentifier);
+                    //Get registry resource correspond to identifier
+                    Resource mediationResource = apiProvider
+                            .getCustomMediationResourceFromUuid(mediationPolicyDto.getId());
+                    writeSequenceToArchive(mediationResource, individualSequenceExportPath, registry,
+                            mediationPolicyDto.getName(), apiIdentifier);
                 }
             }
-        } else if (log.isDebugEnabled()) {
-            log.debug("No custom sequences available for API: " + apiIdentifier.getApiName() + StringUtils.SPACE
-                    + APIConstants.API_DATA_VERSION + ": " + apiIdentifier.getVersion()
-                    + ". Skipping custom sequence export.");
-        }
-    }
 
-    /**
-     * Retrieve custom sequence details from the registry.
-     *
-     * @param sequenceName Name of the sequence
-     * @param type         Sequence type
-     * @param registry     Current tenant registry
-     * @return Registry resource name of the sequence and its content
-     * @throws APIImportExportException If an error occurs while retrieving registry elements
-     */
-    private static AbstractMap.SimpleEntry<String, OMElement> getCustomSequence(String sequenceName, String type,
-            Registry registry) throws APIImportExportException {
-
-        String regPath = null;
-        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(type)) {
-            regPath = APIConstants.API_CUSTOM_INSEQUENCE_LOCATION;
-        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(type)) {
-            regPath = APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION;
-        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(type)) {
-            regPath = APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION;
-        }
-        return getSeqDetailsFromRegistry(sequenceName, regPath, registry);
-    }
-
-    /**
-     * Retrieve API Specific sequence details from the registry.
-     *
-     * @param sequenceName Name of the sequence
-     * @param type         Sequence type
-     * @param registry     Current tenant registry
-     * @return Registry resource name of the sequence and its content
-     * @throws APIImportExportException If an error occurs while retrieving registry elements
-     */
-    private static AbstractMap.SimpleEntry<String, OMElement> getAPISpecificSequence(APIIdentifier api,
-            String sequenceName, String type, Registry registry) throws APIImportExportException {
-
-        String regPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.getProviderName()
-                + RegistryConstants.PATH_SEPARATOR + api.getApiName() + RegistryConstants.PATH_SEPARATOR + api
-                .getVersion() + RegistryConstants.PATH_SEPARATOR + type;
-        return getSeqDetailsFromRegistry(sequenceName, regPath, registry);
-    }
-
-    /**
-     * Retrieve sequence details from registry by given registry path.
-     *
-     * @param sequenceName Sequence Name
-     * @param regPath      Registry path
-     * @param registry     Registry
-     * @return Sequence details as a simple entry
-     * @throws APIImportExportException If an error occurs while retrieving sequence details from registry
-     */
-    private static AbstractMap.SimpleEntry<String, OMElement> getSeqDetailsFromRegistry(String sequenceName,
-            String regPath, Registry registry) throws APIImportExportException {
-
-        AbstractMap.SimpleEntry<String, OMElement> sequenceDetails = null;
-        Collection seqCollection;
-
-        try {
-            seqCollection = (Collection) registry.get(regPath);
-            if (seqCollection != null) {
-                String[] childPaths = seqCollection.getChildren();
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElement = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElement.getAttributeValue(new QName("name")))) {
-                        String sequenceFileName = sequenceName + APIConstants.XML_EXTENSION;
-                        sequenceDetails = new AbstractMap.SimpleEntry<>(sequenceFileName, seqElement);
-                        break;
+            // Getting list of API specific custom mediation policies
+            List<Mediation> apiSpecificMediationList = apiProvider.getAllApiSpecificMediationPolicies(apiIdentifier);
+            if (!apiSpecificMediationList.isEmpty()) {
+                for (Mediation mediation : apiSpecificMediationList) {
+                    String individualSequenceExportPath =
+                            seqArchivePath + File.separator + mediation.getType().toLowerCase()
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+                    if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                        CommonUtil.createDirectory(individualSequenceExportPath);
                     }
+                    // Get registry resource correspond to identifier
+                    String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+                    apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+                    Resource mediationResource = apiProvider
+                            .getApiSpecificMediationResourceFromUuid(apiIdentifier, mediation.getUuid(),
+                                    apiResourcePath);
+                    writeSequenceToArchive(mediationResource, individualSequenceExportPath, registry,
+                            mediation.getName(), apiIdentifier);
                 }
             }
-        } catch (RegistryException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving sequence: " + sequenceName + " from the path: " + regPath, e);
-        } catch (Exception e) {
-            // APIUtil.buildOMElement() throws a generic exception
-            throw new APIImportExportException(
-                    "Error while reading content for sequence: " + sequenceName + " from the registry", e);
         }
-        return sequenceDetails;
     }
 
     /**
-     * Store API Specific or custom sequences in the archive directory.
+     * Write the sequence to API archive.
      *
-     * @param sequenceDetails Details of the sequence
-     * @param apiIdentifier   ID of the requesting API
-     * @throws APIImportExportException If an error occurs while serializing XML stream or storing in
-     *                                  archive directory
+     * @param mediationResource Mediation resource
+     * @param individualSequenceExportPath         Path to export the mediation sequence
+     * @param registry     Current tenant registry
+     * @param mediationName     Name of the mediation policy
+     * @param apiIdentifier     API Identifier
+     * @throws RegistryException If an error occurs while retrieving registry elements
+     * @throws APIManagementException If an error occurs while writing the mediation policy to file
      */
-    private static void writeSequenceToFile(String pathToExportedSequence,
-            AbstractMap.SimpleEntry<String, OMElement> sequenceDetails, APIIdentifier apiIdentifier)
-            throws APIImportExportException {
-
-        if (sequenceDetails != null) {
-            String sequenceFileName = sequenceDetails.getKey();
-            OMElement sequenceConfig = sequenceDetails.getValue();
-            CommonUtil.createDirectory(pathToExportedSequence);
-            String exportedSequenceFile = pathToExportedSequence + sequenceFileName;
-            try (OutputStream outputStream = new FileOutputStream(exportedSequenceFile)) {
-                sequenceConfig.serialize(outputStream);
-                if (log.isDebugEnabled()) {
-                    log.debug(sequenceFileName + " of API: " + apiIdentifier.getApiName() + " retrieved successfully");
+    private static void writeSequenceToArchive(Resource mediationResource, String individualSequenceExportPath,
+            Registry registry, String mediationName, APIIdentifier apiIdentifier)
+            throws RegistryException, APIManagementException {
+        if (mediationResource != null) {
+            // Get the registry resource path
+            String resourcePath = mediationResource.getPath();
+            // Check whether resource exists in the registry
+            if (registry.resourceExists(resourcePath)) {
+                Resource mediationFile = registry.get(resourcePath);
+                try (OutputStream outputStream = new FileOutputStream(
+                        individualSequenceExportPath + File.separator + mediationName + APIConstants.DOT
+                                + APIConstants.XML_DOC_EXTENSION);
+                        InputStream fileInputStream = mediationFile.getContentStream()) {
+                    IOUtils.copy(fileInputStream, outputStream);
+                } catch (IOException e) {
+                    throw new APIManagementException("Error while writing the mediation sequence"+ mediationName+ "to file", e);
                 }
-            } catch (IOException e) {
-                throw new APIImportExportException("Unable to find file: " + exportedSequenceFile, e);
-            } catch (XMLStreamException e) {
-                throw new APIImportExportException("Error while processing XML stream ", e);
+            } else {
+                throw new APIManagementException(
+                        "Resource specified by " + resourcePath + " cannot be found in the registry",
+                        ExceptionCodes.RESOURCE_NOT_FOUND);
             }
-        } else {
-            throw new APIImportExportException(
-                    "Error while writing sequence of API: " + apiIdentifier.getApiName() + " to file.");
         }
     }
 
