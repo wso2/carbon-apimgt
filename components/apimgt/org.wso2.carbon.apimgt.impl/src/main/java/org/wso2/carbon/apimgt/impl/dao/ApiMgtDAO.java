@@ -135,6 +135,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -15439,23 +15440,89 @@ public class ApiMgtDAO {
      * @param offset     Start index
      * @throws APIManagementException if an error occurs while getting API history from database
      */
-    public List<HistoryEvent> getHistoryEvents(String apiId, String revisionId, String startTime, String endTime,
+    public List<HistoryEvent> getHistoryEvents(String apiId, String revisionId, Date startTime, Date endTime,
                                                int offset, int limit) throws APIManagementException {
 
-        return null;
+        List<HistoryEvent> historyEvents = null;
+        String sqlQuery;
+        if (StringUtils.isNotBlank(revisionId) && startTime != null && endTime != null) {
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_HISTORY_FOR_API_BY_REVISION_CREATED_WITHIN");
+        } else if (StringUtils.isNotBlank(revisionId)) {
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_HISTORY_FOR_API_BY_REVISION");
+        } else if (startTime != null && endTime != null) {
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_HISTORY_FOR_API_CREATED_WITHIN");
+        } else {
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_HISTORY_FOR_API");
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+            statement.setString(1, apiId);
+            if (StringUtils.isNotBlank(revisionId) && startTime != null && endTime != null) {
+                statement.setTimestamp(2, new Timestamp(startTime.getTime()));
+                statement.setTimestamp(3, new Timestamp(endTime.getTime()));
+                statement.setString(4, revisionId);
+                statement.setInt(5, offset);
+                statement.setInt(6, limit);
+            } else if (StringUtils.isNotBlank(revisionId)) {
+                statement.setString(2, revisionId);
+                statement.setInt(3, offset);
+                statement.setInt(4, limit);
+            } else if (startTime != null && endTime != null) {
+                statement.setTimestamp(2, new Timestamp(startTime.getTime()));
+                statement.setTimestamp(3, new Timestamp(endTime.getTime()));
+                statement.setInt(4, offset);
+                statement.setInt(5, limit);
+            } else {
+                statement.setInt(2, offset);
+                statement.setInt(3, limit);
+            }
+            try (ResultSet rs = statement.executeQuery()) {
+                historyEvents = new ArrayList<>();
+                while (rs.next()) {
+                    HistoryEvent historyEvent = new HistoryEvent();
+                    historyEvent.setId(rs.getString("UUID"));
+                    historyEvent.setCreatedTime(rs.getDate("CREATED_TIME"));
+                    historyEvent.setOperationId(rs.getString("OPERATION_ID"));
+                    historyEvent.setDescription(rs.getString("DESCRIPTION"));
+                    historyEvent.setRevisionKey(rs.getString("REVISION_KEY"));
+                    historyEvent.setApiId(rs.getString("API_ID"));
+                    historyEvent.setUser(rs.getString("USERNAME"));
+                    historyEvents.add(historyEvent);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get all history events for API: " + apiId, e);
+        }
+        return historyEvents;
     }
 
     /**
      * Get the payload associated with the given event Id for the given API.
      *
-     * @param apiId   API UUID
      * @param eventId Event Id to get the payload of
      * @return event payload string
      * @throws APIManagementException if failed to get the event payload
      */
-    public String getHistoryEventPayload(String apiId, String eventId) throws APIManagementException {
+    public String getHistoryEventPayload(String eventId) throws APIManagementException {
 
-        return null;
+        String payload = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.HistorySqlConstants.GET_HISTORY_PAYLOAD)) {
+            statement.setString(1, eventId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Blob payloadBlob = rs.getBlob("PAYLOAD");
+                    if (payloadBlob != null) {
+                        byte[] payloadBlobBytes = payloadBlob.getBytes(1, (int) payloadBlob.length());
+                        payload = new String(payloadBlobBytes);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get payload for history event : " + eventId, e);
+        }
+        return payload;
     }
 
     /**
@@ -15468,9 +15535,75 @@ public class ApiMgtDAO {
      * @return count of history records
      * @throws APIManagementException if failed get count
      */
-    public int getAllHistoryEventsCount(String apiId, String revisionId, String startTime, String endTime)
+    public int getAllHistoryEventsCount(String apiId, String revisionId, Date startTime, Date endTime)
             throws APIManagementException {
 
-        return 0;
+        int historyCount = 0;
+        String sqlQuery;
+        if (StringUtils.isNotBlank(revisionId) && startTime != null && endTime != null) {
+            sqlQuery = SQLConstants.HistorySqlConstants.GET_HISTORY_COUNT_FOR_API_BY_REVISION_CREATED_WITHIN;
+        } else if (StringUtils.isNotBlank(revisionId)) {
+            sqlQuery = SQLConstants.HistorySqlConstants.GET_HISTORY_COUNT_FOR_API_BY_REVISION;
+        } else if (startTime != null && endTime != null) {
+            sqlQuery = SQLConstants.HistorySqlConstants.GET_HISTORY_COUNT_FOR_API_CREATED_WITHIN;
+        } else {
+            sqlQuery = SQLConstants.HistorySqlConstants.GET_HISTORY_COUNT_FOR_API;
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+            statement.setString(1, apiId);
+            if (startTime != null && endTime != null) {
+                statement.setTimestamp(2, new Timestamp(startTime.getTime()));
+                statement.setTimestamp(3, new Timestamp(endTime.getTime()));
+                if (StringUtils.isNotBlank(revisionId)) {
+                    statement.setString(4, revisionId);
+                }
+            } else if (StringUtils.isNotBlank(revisionId)) {
+                statement.setString(2, revisionId);
+            }
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    historyCount = rs.getInt("COUNT");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get all history event count for API : " + apiId, e);
+        }
+        return Math.max(historyCount, 0);
+    }
+
+    /**
+     * Add history event for API/API Product.
+     *
+     * @param historyEvent History Event
+     * @return UUID of the shared scope
+     * @throws APIManagementException if an error occurs while adding shared scope
+     */
+    public String addHistoryEvent(HistoryEvent historyEvent) throws APIManagementException {
+
+        String uuid = UUID.randomUUID().toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.HistorySqlConstants.ADD_HISTORY_EVENT)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, historyEvent.getId());
+                statement.setTimestamp(2, new Timestamp(historyEvent.getCreatedTime().getTime()));
+                statement.setString(3, historyEvent.getOperationId());
+                statement.setString(4, historyEvent.getDescription());
+                statement.setString(5, historyEvent.getRevisionKey());
+                statement.setBlob(6, (InputStream) historyEvent.getPayload());
+                statement.setString(7, historyEvent.getApiId());
+                statement.setString(8, historyEvent.getUser());
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add history event for API/API Product : " + historyEvent.getApiId(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add history event for API/API Product : " + historyEvent.getApiId(), e);
+        }
+        return uuid;
     }
 }
