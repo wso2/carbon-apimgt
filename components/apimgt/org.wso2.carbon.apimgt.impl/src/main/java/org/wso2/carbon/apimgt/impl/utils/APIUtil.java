@@ -520,6 +520,7 @@ public final class APIUtil {
             }
             api.addTags(tags);
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
@@ -528,6 +529,12 @@ public final class APIUtil {
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
 
+            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+            if (StringUtils.isNotEmpty(keyManagers)) {
+                api.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+            } else {
+                api.setKeyManagers(Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+            }
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
