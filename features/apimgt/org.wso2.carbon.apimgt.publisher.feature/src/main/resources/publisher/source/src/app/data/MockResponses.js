@@ -34,6 +34,9 @@ class MockResponses {
             schemaTypes: [
                 'OAS2', 'OAS3', 'WSDL1', 'WSDL2', 'GRAPHQL_SDL', 'ASYNC_API',
             ],
+            securityTypes: [
+                'BASIC', 'DIGEST', 'OAUTH2', 'NONE',
+            ],
         };
         return Promise.resolve({ body: response });
     }
