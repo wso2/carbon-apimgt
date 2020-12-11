@@ -44,6 +44,7 @@ const useStyles = makeStyles(() => {
  * Render base for content.
  * @param {JSON} props -  Component properties
  * @param {string} props.title -  Page title
+ * @param {string} props.pageDescription -  Page description
  * @param {object} props.children -  Page content
  * @param {object} props.help -  Page help component
  * @param {string} props.backgroundColor -  Page background color in #xxxxxx format
@@ -54,7 +55,7 @@ const useStyles = makeStyles(() => {
 function ContentBase(props) {
     const classes = useStyles();
     const {
-        title, children, help, width, pageStyle, PaperProps, classes: classesProp, paperLess,
+        title, pageDescription, children, help, width, pageStyle, PaperProps, classes: classesProp, paperLess,
     } = props;
     let size = 8;// default half/medium
     if ([width, pageStyle].includes('small')) {
@@ -77,6 +78,15 @@ function ContentBase(props) {
                                 <Typography color='inherit' variant='h5' component='h1'>
                                     {title}
                                 </Typography>
+                                <Box>
+                                    {
+                                        pageDescription !== null && (
+                                            <Typography variant='body2' color='textSecondary' component='p'>
+                                                {pageDescription}
+                                            </Typography>
+                                        )
+                                    }
+                                </Box>
                             </Grid>
                             <Grid item>
                                 {help}
@@ -104,10 +114,12 @@ ContentBase.defaultProps = {
     classes: {},
     pageStyle: 'half',
     paperLess: false,
+    pageDescription: null,
 };
 ContentBase.propTypes = {
     help: PropTypes.element.isRequired,
     title: PropTypes.string.isRequired,
+    pageDescription: PropTypes.string,
     children: PropTypes.element.isRequired,
     width: PropTypes.oneOf(['medium', 'full', 'small']),
     pageStyle: PropTypes.oneOf(['half', 'full', 'small']), // @deprecated
