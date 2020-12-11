@@ -21,10 +21,10 @@ import javax.validation.Valid;
 public class HistoryEventDTO   {
   
     private String id = null;
-    private String operation = null;
+    private String operationId = null;
     private String description = null;
     private String user = null;
-    private String timestamp = null;
+    private java.util.Date createdTime = null;
 
   /**
    **/
@@ -45,19 +45,19 @@ public class HistoryEventDTO   {
 
   /**
    **/
-  public HistoryEventDTO operation(String operation) {
-    this.operation = operation;
+  public HistoryEventDTO operationId(String operationId) {
+    this.operationId = operationId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5", value = "")
-  @JsonProperty("operation")
-  public String getOperation() {
-    return operation;
+  @ApiModelProperty(example = "updateAPI", value = "")
+  @JsonProperty("operationId")
+  public String getOperationId() {
+    return operationId;
   }
-  public void setOperation(String operation) {
-    this.operation = operation;
+  public void setOperationId(String operationId) {
+    this.operationId = operationId;
   }
 
   /**
@@ -68,7 +68,7 @@ public class HistoryEventDTO   {
   }
 
   
-  @ApiModelProperty(example = "Update API", value = "")
+  @ApiModelProperty(example = "PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -96,19 +96,19 @@ public class HistoryEventDTO   {
 
   /**
    **/
-  public HistoryEventDTO timestamp(String timestamp) {
-    this.timestamp = timestamp;
+  public HistoryEventDTO createdTime(java.util.Date createdTime) {
+    this.createdTime = createdTime;
     return this;
   }
 
   
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229", value = "")
-  @JsonProperty("timestamp")
-  public String getTimestamp() {
-    return timestamp;
+  @ApiModelProperty(value = "")
+  @JsonProperty("createdTime")
+  public java.util.Date getCreatedTime() {
+    return createdTime;
   }
-  public void setTimestamp(String timestamp) {
-    this.timestamp = timestamp;
+  public void setCreatedTime(java.util.Date createdTime) {
+    this.createdTime = createdTime;
   }
 
 
@@ -122,15 +122,15 @@ public class HistoryEventDTO   {
     }
     HistoryEventDTO historyEvent = (HistoryEventDTO) o;
     return Objects.equals(id, historyEvent.id) &&
-        Objects.equals(operation, historyEvent.operation) &&
+        Objects.equals(operationId, historyEvent.operationId) &&
         Objects.equals(description, historyEvent.description) &&
         Objects.equals(user, historyEvent.user) &&
-        Objects.equals(timestamp, historyEvent.timestamp);
+        Objects.equals(createdTime, historyEvent.createdTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, operation, description, user, timestamp);
+    return Objects.hash(id, operationId, description, user, createdTime);
   }
 
   @Override
@@ -139,10 +139,10 @@ public class HistoryEventDTO   {
     sb.append("class HistoryEventDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    operation: ").append(toIndentedString(operation)).append("\n");
+    sb.append("    operationId: ").append(toIndentedString(operationId)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    user: ").append(toIndentedString(user)).append("\n");
-    sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }
