@@ -98,12 +98,6 @@ const useStyles = makeStyles((theme) => ({
     apiUsageStyle: {
         marginTop: theme.spacing(3),
     },
-    moreButtonSansDescription: {
-        marginTop: theme.spacing(10),
-    },
-    expandButton: {
-        marginTop: -7,
-    },
     headingSpacing: {
         marginTop: theme.spacing(3),
     },
@@ -134,6 +128,7 @@ function reducer(state, { field, value }) {
         case 'serviceUrl':
         case 'definitionType':
         case 'securityType':
+        case 'mutualSSLEnabled':
             return { ...state, [field]: value };
         case 'initialize':
             return value;
@@ -143,12 +138,12 @@ function reducer(state, { field, value }) {
 }
 
 /**
- * Service Catalog Overview Page
+ * Service Catalog Overview / Edit Page
  *
  * @param {any} props props
  * @returns {any} Overview page of a service
  */
-function Overview(props) {
+function EditableOverview(props) {
     const classes = useStyles();
     const intl = useIntl();
     const { match, history } = props;
@@ -169,6 +164,7 @@ function Overview(props) {
         serviceUrl: '',
         definitionType: '',
         securityType: '',
+        mutualSSLEnabled: false,
     };
 
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -180,10 +176,15 @@ function Overview(props) {
         serviceUrl,
         definitionType,
         securityType,
+        mutualSSLEnabled,
     } = state;
 
     const handleChange = (e) => {
-        dispatch({ field: e.target.name, value: e.target.value });
+        if (e.target.name === 'mutualSSLEnabled') {
+            dispatch({ field: e.target.name, value: e.target.checked });
+        } else {
+            dispatch({ field: e.target.name, value: e.target.value });
+        }
     };
 
     const validate = (fieldName, value) => {
@@ -278,8 +279,8 @@ function Overview(props) {
             setNotFound(false);
         }).catch(() => {
             Alert.error(intl.formatMessage({
-                defaultMessage: 'Error While Loading Service',
-                id: 'ServiceCatalog.Listing.Edit.error.loading.service',
+                defaultMessage: 'Error while loading service',
+                id: 'ServiceCatalog.Listing.EditableOverview.error.loading.service',
             }));
         });
         return null;
@@ -296,8 +297,8 @@ function Overview(props) {
             setSecurityTypeList(response.securityTypes);
         }).catch(() => {
             Alert.error(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.EditableOverview.error.retrieve.settings.data',
                 defaultMessage: 'Error while retrieving settings data',
-                id: 'ServiceCatalog.Listing.Edit.error.retrieve.service.settings.data',
             }));
         });
     }, []);
@@ -313,19 +314,19 @@ function Overview(props) {
         const updateServicePromise = ServiceCatalog.updateService(id, state);
         updateServicePromise.then(() => {
             Alert.info(intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.service.updated.successfully',
+                id: 'ServiceCatalog.Listing.EditableOverview.service.successful.update',
                 defaultMessage: 'Service updated successfully!',
             }));
         }).catch(() => {
             Alert.error(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.EditableOverview.error.update',
                 defaultMessage: 'Error while updating service',
-                id: 'ServiceCatalog.Listing.Listing.error.update',
             }));
         });
     };
 
     /**
-     * Function for updating a given service entry
+     * Parent function for updating a given service entry
      */
     function doneEditing() {
         const formErrors = getAllFormErrors();
@@ -346,11 +347,18 @@ function Overview(props) {
                         <FormControlLabel
                             control={(
                                 <Switch
+                                    checked={mutualSSLEnabled}
+                                    onChange={handleChange}
                                     inputProps={{ 'aria-label': 'primary checkbox' }}
-                                    name='mutualSslEnabled'
+                                    name='mutualSSLEnabled'
                                 />
                             )}
-                            label='Enable'
+                            label={(
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.EditableOverview.mutual.ssl.enable.label'
+                                    defaultMessage='Enable'
+                                />
+                            )}
                         />
                     </FormGroup>
                 </FormControl>
@@ -358,14 +366,14 @@ function Overview(props) {
         } else if (service.mutualSSLEnabled) {
             return (
                 <FormattedMessage
-                    id='ServiceCatalog.Listing.Overview.mutual.ssl.enabled'
+                    id='ServiceCatalog.Listing.EditableOverview.mutual.ssl.enabled'
                     defaultMessage='Enabled'
                 />
             );
         } else {
             return (
                 <FormattedMessage
-                    id='ServiceCatalog.Listing.Overview.mutual.ssl.disabled'
+                    id='ServiceCatalog.Listing.EditableOverview.mutual.ssl.disabled'
                     defaultMessage='Disabled'
                 />
             );
@@ -393,7 +401,7 @@ function Overview(props) {
                 position='right'
                 title={(
                     <FormattedMessage
-                        id='ServiceCatalog.Listing.Overview.service.type.rest.tooltip'
+                        id='ServiceCatalog.Listing.EditableOverview.service.type.rest.tooltip'
                         defaultMessage='REST Service'
                     />
                 )}
@@ -411,7 +419,7 @@ function Overview(props) {
                 position='right'
                 title={(
                     <FormattedMessage
-                        id='ServiceCatalog.Listing.Overview.service.type.graphql.tooltip'
+                        id='ServiceCatalog.Listing.EditableOverview.service.type.graphql.tooltip'
                         defaultMessage='GraphQL Service'
                     />
                 )}
@@ -429,7 +437,7 @@ function Overview(props) {
                 position='right'
                 title={(
                     <FormattedMessage
-                        id='ServiceCatalog.Listing.Overview.service.type.async.tooltip'
+                        id='ServiceCatalog.Listing.EditableOverview.service.type.async.tooltip'
                         defaultMessage='Async API Service'
                     />
                 )}
@@ -447,7 +455,7 @@ function Overview(props) {
                 position='right'
                 title={(
                     <FormattedMessage
-                        id='ServiceCatalog.Listing.Overview.service.type.soap.tooltip'
+                        id='ServiceCatalog.Listing.EditableOverview.service.type.soap.tooltip'
                         defaultMessage='SOAP Service'
                     />
                 )}
@@ -468,21 +476,21 @@ function Overview(props) {
                     <Breadcrumbs aria-label='breadcrumb'>
                         <Link color='inherit' to='/service-catalog'>
                             <FormattedMessage
-                                id='ServiceCatalog.Listing.Overview.parent.breadcrumb'
+                                id='ServiceCatalog.Listing.EditableOverview.parent.breadcrumb'
                                 defaultMessage='Service Catalog'
                             />
                         </Link>
                         {!isEditing ? (
                             <Typography color='textPrimary'>
                                 <FormattedMessage
-                                    id='ServiceCatalog.Listing.Overview.readonly.breadcrumb'
+                                    id='ServiceCatalog.Listing.EditableOverview.readonly.breadcrumb'
                                     defaultMessage='Overview'
                                 />
                             </Typography>
                         ) : (
                             <Typography color='textPrimary'>
                                 <FormattedMessage
-                                    id='ServiceCatalog.Listing.Overview.edit.breadcrumb'
+                                    id='ServiceCatalog.Listing.EditableOverview.edit.breadcrumb'
                                     defaultMessage='Edit'
                                 />
                             </Typography>
@@ -501,7 +509,7 @@ function Overview(props) {
                                                 {!isEditing ? (
                                                     <Typography className={classes.heading} variant='h5'>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.service.display.name'
+                                                            id='ServiceCatalog.Listing.EditableOverview.display.name'
                                                             defaultMessage='{serviceDisplayName}'
                                                             values={{ serviceDisplayName: service.displayName }}
                                                         />
@@ -518,7 +526,7 @@ function Overview(props) {
                                                             helperText={validity.displayName ? validity.displayName
                                                                 : (
                                                                     <FormattedMessage
-                                                                        id='ServiceCatalog.Listing.Overview.name.helper'
+                                                                        id='ServiceCatalog.Listing.EditableOverview.dn'
                                                                         defaultMessage='Display name of the service'
                                                                     />
                                                                 )}
@@ -538,7 +546,7 @@ function Overview(props) {
                                                 <LocalOfferOutlinedIcon />
                                                 <Typography className={classes.versionStyle}>
                                                     <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.service.version'
+                                                        id='ServiceCatalog.Listing.EditableOverview.service.version'
                                                         defaultMessage='{serviceVersion}'
                                                         values={{ serviceVersion: service.version }}
                                                     />
@@ -547,7 +555,7 @@ function Overview(props) {
                                             <div className={classes.apiUsageStyle} primary>
                                                 <Typography color='primary'>
                                                     <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.service.usage'
+                                                        id='ServiceCatalog.Listing.EditableOverview.service.usage'
                                                         defaultMessage='Used by {usage} API(s)'
                                                         values={{ usage: service.usage }}
                                                     />
@@ -566,7 +574,7 @@ function Overview(props) {
                                             >
                                                 <Typography>
                                                     <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.create.api'
+                                                        id='ServiceCatalog.Listing.EditableOverview.create.api'
                                                         defaultMessage='Create API'
                                                     />
                                                 </Typography>
@@ -580,7 +588,7 @@ function Overview(props) {
                                             >
                                                 <Typography>
                                                     <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.create.api'
+                                                        id='ServiceCatalog.Listing.EditableOverview.create.api'
                                                         defaultMessage='Create API'
                                                     />
                                                 </Typography>
@@ -592,13 +600,13 @@ function Overview(props) {
                         </div>
                         <div className={classes.bodyStyle}>
                             <Grid container spacing={1}>
-                                { service.description && service.description !== '' && (
+                                { (service.description && service.description !== '') ? (
                                     <>
                                         <Grid item md={12}>
                                             {!isEditing ? (
                                                 <Typography>
                                                     <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.service.description'
+                                                        id='ServiceCatalog.Listing.EditableOverview.service.description'
                                                         defaultMessage='{description}'
                                                         values={{ description: service.description }}
                                                     />
@@ -612,7 +620,7 @@ function Overview(props) {
                                                     multiline
                                                     helperText={(
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.description.helper.text'
+                                                            id='ServiceCatalog.Listing.EditableOverview.description.ht'
                                                             defaultMessage='Description of the Service'
                                                         />
                                                     )}
@@ -621,6 +629,25 @@ function Overview(props) {
                                             )}
                                         </Grid>
                                     </>
+                                ) : (
+                                    <Grid item md={12}>
+                                        {isEditing && (
+                                            <TextField
+                                                name='description'
+                                                value={description}
+                                                margin='normal'
+                                                fullWidth
+                                                multiline
+                                                helperText={(
+                                                    <FormattedMessage
+                                                        id='ServiceCatalog.Listing.EditableOverview.no.description.text'
+                                                        defaultMessage='Description of the Service'
+                                                    />
+                                                )}
+                                                onChange={handleChange}
+                                            />
+                                        )}
+                                    </Grid>
                                 )}
                             </Grid>
                             <div className={classes.contentWrapper}>
@@ -632,7 +659,7 @@ function Overview(props) {
                                                     <Icon className={classes.tableIcon}>link</Icon>
                                                     <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.service.url'
+                                                            id='ServiceCatalog.Listing.EditableOverview.service.url'
                                                             defaultMessage='Service URL'
                                                         />
                                                     </span>
@@ -665,7 +692,7 @@ function Overview(props) {
                                                     <Icon className={classes.tableIcon}>code</Icon>
                                                     <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.definition.type'
+                                                            id='ServiceCatalog.Listing.EditableOverview.definition.type'
                                                             defaultMessage='Schema Type'
                                                         />
                                                     </span>
@@ -722,7 +749,7 @@ function Overview(props) {
                                                     <Icon className={classes.tableIcon}>security</Icon>
                                                     <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.security.type'
+                                                            id='ServiceCatalog.Listing.EditableOverview.security.type'
                                                             defaultMessage='Security Type'
                                                         />
                                                     </span>
@@ -779,7 +806,7 @@ function Overview(props) {
                                                     <Icon className={classes.tableIcon}>sync_alt</Icon>
                                                     <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.mutual.ssl'
+                                                            id='ServiceCatalog.Listing.EditableOverview.mutual.ssl'
                                                             defaultMessage='Mutual SSL'
                                                         />
                                                     </span>
@@ -795,7 +822,7 @@ function Overview(props) {
                                                     <Icon className={classes.tableIcon}>timeline</Icon>
                                                     <span className={classes.iconTextWrapper}>
                                                         <FormattedMessage
-                                                            id='ServiceCatalog.Listing.Overview.created.time'
+                                                            id='ServiceCatalog.Listing.EditableOverview.created.time'
                                                             defaultMessage='Created Time'
                                                         />
                                                     </span>
@@ -823,7 +850,7 @@ function Overview(props) {
                                             variant='contained'
                                         >
                                             <FormattedMessage
-                                                id='ServiceCatalog.Listing.Overview.save.btn'
+                                                id='ServiceCatalog.Listing.EditableOverview.save.btn'
                                                 defaultMessage='Save'
                                             />
                                         </Button>
@@ -835,7 +862,7 @@ function Overview(props) {
                                                 variant='outlined'
                                             >
                                                 <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.edit.btn'
+                                                    id='ServiceCatalog.Listing.EditableOverview.edit.btn'
                                                     defaultMessage='Edit'
                                                 />
                                             </Button>
@@ -845,7 +872,7 @@ function Overview(props) {
                                     {isEditing ? (
                                         <Button onClick={overviewRedirect} color='primary'>
                                             <FormattedMessage
-                                                id='ServiceCatalog.Listing.Edit.cancel.btn'
+                                                id='ServiceCatalog.Listing.EditableOverview.cancel.btn'
                                                 defaultMessage='Cancel'
                                             />
                                         </Button>
@@ -853,7 +880,7 @@ function Overview(props) {
                                         : (
                                             <Button onClick={listingRedirect} color='primary'>
                                                 <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Overview.back.btn'
+                                                    id='ServiceCatalog.Listing.EditableOverview.back.btn'
                                                     defaultMessage='Go Back'
                                                 />
                                             </Button>
@@ -868,10 +895,10 @@ function Overview(props) {
     );
 }
 
-Overview.propTypes = {
+EditableOverview.propTypes = {
     match: PropTypes.shape({
         params: PropTypes.object,
     }).isRequired,
 };
 
-export default Overview;
+export default EditableOverview;
