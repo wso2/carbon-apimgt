@@ -409,7 +409,7 @@ public class ImportUtils {
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
         String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
-        return absolutePath + extractedFolderName;
+        return preprocessImportedArtifact(absolutePath + extractedFolderName);
     }
 
     /**
