@@ -409,6 +409,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             throws DocumentationPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
         MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
+                match(eq("_id", new ObjectId(apiId))),
                 unwind("$documentationList"),
                 match(eq("documentationList.docId", new ObjectId(docId))),
                 project(include("documentationList")),
