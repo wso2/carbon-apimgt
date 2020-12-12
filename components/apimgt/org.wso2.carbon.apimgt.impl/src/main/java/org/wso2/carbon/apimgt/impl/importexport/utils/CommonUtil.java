@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
@@ -371,6 +372,40 @@ public class CommonUtil {
         } catch (IOException e) {
             String errorMessage = "Error while moving file from" + source + "to" + dest;
             throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+
+    /**
+     * This method will be used to copy files from source to destination
+     *
+     * @param source String of the source file path
+     * @param dest   String of the destination file path
+     * @throws APIImportExportException If an error occurs when copying files
+     */
+    public static void copyFile(String source, String dest) throws APIImportExportException {
+        try {
+            FileUtils.copyFile(new File(source), new File(dest));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from " + source + " to " + dest;
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    /**
+     * This method will be used to copy a whole directory to a new location preserving the file dates.
+     *
+     * @param sourceDir String of the source Directory path
+     * @param destDir   String of the destination Directory path
+     * @throws APIImportExportException If an error occurs when copying directory
+     */
+    public static void copyDirectory(String sourceDir, String destDir) throws APIImportExportException {
+
+        try {
+            FileUtils.copyDirectory(new File(sourceDir), new File(destDir));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from " + sourceDir + " to " + destDir;
+            throw new APIImportExportException(errorMessage, e);
         }
     }
 }
