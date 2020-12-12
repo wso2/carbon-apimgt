@@ -74,6 +74,20 @@ class ServiceCatalog {
     }
 
     /**
+     * Add sample service
+     * @returns {promise} Add sample promise.
+     */
+    static addSampleService() {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedCatalogSampleService = serviceCatalog.then(client => {
+            // return client.apis['Services'].addSampleService();
+            return MockResponses.addSampleService();
+        });
+        return promisedCatalogSampleService.then(response => response.body);
+    }
+
+    /**
      * Get Settings
      * @returns {promise} Settings promise.
      */

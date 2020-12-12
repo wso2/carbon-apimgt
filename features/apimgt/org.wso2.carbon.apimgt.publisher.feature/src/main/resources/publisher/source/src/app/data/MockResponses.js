@@ -43,6 +43,31 @@ class MockResponses {
 
     /**
     *
+    * Return sample mocked model data for addSampleService
+    * @export
+    * @returns {*} Mocked Service Catalog model
+    */
+    static addSampleService() {
+        const response = {
+            id: '87624513-0123-6274-9013-012345678901',
+            name: 'Sample-Endpoint',
+            displayName: 'Sample-Endpoint',
+            description: 'A sample Catalog Entry that exposes a REST endpoint',
+            version: '1.0.0',
+            serviceUrl: 'http://localhost/sample',
+            definitionType: 'OAS3',
+            securityType: 'BASIC',
+            mutualSSLEnabled: false,
+            usage: 1,
+            createdTime: '2020-02-20T13:57:16.229Z',
+            lastUpdatedTime: '2020-02-20T13:57:16.229Z',
+            etag: '32c890312cfyuc94a7c1153f65a4f100',
+        };
+        return Promise.resolve({ body: response });
+    }
+
+    /**
+    *
     * Return sample mocked model data for searchServices
     * @export
     * @returns {*} Mocked Service Catalog model
