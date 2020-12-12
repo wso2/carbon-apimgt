@@ -664,9 +664,7 @@ public class APIControllerUtil {
                     && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY) == null) {
                 throw new APIManagementException(
                         "Please specify production sandbox or endpoints for the environment and continue...");
-            }
-
-            if (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY).isJsonNull()
+            } else if (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY).isJsonNull()
                     && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY).isJsonNull()) {
                 throw new APIManagementException(
                         "Please specify production or sandbox endpoints for the environment and continue...");
@@ -746,7 +744,8 @@ public class APIControllerUtil {
                 }
             }
             //copy certs file from certificates
-            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.CERTIFICATE_DIRECTORY;
+            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                    + ImportExportConstants.CERTIFICATE_DIRECTORY;
             String sourcePath = userCertificatesTempDirectory + File.separator + certName;
             String destinationPath = clientCertificatesDirectory + File.separator + certName;
             if (Files.notExists(Paths.get(sourcePath))) {
@@ -807,7 +806,8 @@ public class APIControllerUtil {
                 }
             }
             //copy certs file from certificates
-            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.CERTIFICATE_DIRECTORY;
+            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                    + ImportExportConstants.CERTIFICATE_DIRECTORY;
             String sourcePath = userCertificatesTempDirectory + File.separator + certName;
             String destinationPath = endpointCertificatesDirectory + File.separator + certName;
             if (Files.notExists(Paths.get(sourcePath))) {
