@@ -20,7 +20,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Listing from 'AppComponents/ServiceCatalog/Listing/Listing';
 import Edit from 'AppComponents/ServiceCatalog/Listing/Edit';
-import Overview from 'AppComponents/ServiceCatalog/Listing/Overview';
+import EditableOverview from 'AppComponents/ServiceCatalog/Listing/EditableOverview';
 
 /**
  * Have used key={Date.now()} for `Route` element in `/service-catalog`
@@ -38,7 +38,7 @@ const ServiceCatalogComponent = () => {
                 path='/service-catalog/:service_uuid/overview'
                 key='/service-catalog/:service_uuid/overview'
                 // eslint-disable-next-line react/jsx-props-no-spreading
-                component={(props) => <Overview {...props} />}
+                component={(props) => <EditableOverview {...props} />}
             />
             <Route
                 path='/service-catalog/:service_uuid/edit'
