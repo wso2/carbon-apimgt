@@ -53,7 +53,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
-                          ExportFormat format, boolean preserveDocs,boolean preserveCredentials) throws APIManagementException,
+                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials)
+            throws APIManagementException,
             APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -83,7 +84,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPIProduct(String apiId, String name, String version, String providerName,
-            ExportFormat format, boolean preserveStatus, boolean preserveDocs,boolean preserveCredentials)
+                                 ExportFormat format, boolean preserveStatus, boolean preserveDocs,
+                                 boolean preserveCredentials)
             throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;

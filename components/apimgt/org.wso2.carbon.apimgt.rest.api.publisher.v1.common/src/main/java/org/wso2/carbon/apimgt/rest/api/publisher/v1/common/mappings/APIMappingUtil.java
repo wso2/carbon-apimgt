@@ -880,7 +880,7 @@ public class APIMappingUtil {
                                     .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
                             if (StringUtils.isNotEmpty(clientSecret)) {
                                 productionEndpointSecurity.put(APIConstants
-                                        .OAuthConstants.OAUTH_CLIENT_SECRET,
+                                                .OAuthConstants.OAUTH_CLIENT_SECRET,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
                             }
                         }
@@ -918,7 +918,7 @@ public class APIMappingUtil {
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                     }
                     JSONObject jsonObject = handleEndpointSecurity(model,
-                            (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY),preserveCredentials);
+                            (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY), preserveCredentials);
                     endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, jsonObject);
                 }
                 dto.setEndpointConfig(endpointConfigJson);

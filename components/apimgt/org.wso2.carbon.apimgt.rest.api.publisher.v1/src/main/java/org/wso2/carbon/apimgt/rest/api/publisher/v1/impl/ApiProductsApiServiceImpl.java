@@ -617,7 +617,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             File file =
                     importExportAPI.exportAPIProduct(null, name, version, providerName, exportFormat, preserveStatus,
-                            true, false);
+                            true, true);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
