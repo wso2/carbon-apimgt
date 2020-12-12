@@ -87,6 +87,7 @@ import static com.mongodb.client.model.Aggregates.project;
 import static com.mongodb.client.model.Aggregates.unwind;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.elemMatch;
 import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.pull;
@@ -323,19 +324,40 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                                                     String searchQuery, UserContext ctx)
             throws DocumentationPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-        MongoDBPublisherAPI documentation = collection.find(eq("_id", new ObjectId(apiId)))
-                .projection(include("documentationList")).first();
-        Set<APIDocumentation> apiDocumentationList = documentation.getDocumentationList();
+        MongoDBPublisherAPI documentation = null;
+
+        if (searchQuery == null) {
+            documentation = collection.find(eq("_id", new ObjectId(apiId)))
+                    .projection(include("documentationList")).first();
+        } else {
+            String[] splitQuery = searchQuery.split(":");
+            if (splitQuery.length != 2) {
+                throw new DocumentationPersistenceException("Invalid search query ");
+            }
+            MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
+                    match(eq("_id", new ObjectId(apiId))),
+                    unwind("$documentationList"),
+                    match(eq("documentationList.name", splitQuery[1])),
+                    project(include("documentationList")),
+                    group(new ObjectId(), Accumulators.push("documentationList",
+                            "$documentationList"))
+                                                                                        ))
+                    .cursor();
+            while (cursor.hasNext()) {
+                documentation = cursor.next();
+            }
+        }
+
         DocumentSearchResult documentSearchResult = new DocumentSearchResult();
         List<Documentation> documentationList = new ArrayList<>();
-
-        if (apiDocumentationList == null) {
+        if (documentation == null || documentation.getDocumentationList() == null) {
             documentSearchResult.setDocumentationList(documentationList);
             documentSearchResult.setReturnedDocsCount(documentationList.size());
             documentSearchResult.setReturnedDocsCount(0);
             return documentSearchResult;
         }
 
+        Set<APIDocumentation> apiDocumentationList = documentation.getDocumentationList();
         for (APIDocumentation apiDoc : apiDocumentationList) {
             documentationList.add(DocumentationMapper.INSTANCE.toDocumentation(apiDoc));
         }
@@ -485,7 +507,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         InputStream inputStream = resourceFile.getContent();
         GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
         String textContent = null;
-
         String contentType = resourceFile.getContentType();
 
         try {
