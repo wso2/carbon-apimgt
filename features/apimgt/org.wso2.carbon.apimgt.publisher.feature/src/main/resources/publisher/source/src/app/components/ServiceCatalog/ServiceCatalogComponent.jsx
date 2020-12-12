@@ -19,7 +19,6 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Listing from 'AppComponents/ServiceCatalog/Listing/Listing';
-import Edit from 'AppComponents/ServiceCatalog/Listing/Edit';
 import EditableOverview from 'AppComponents/ServiceCatalog/Listing/EditableOverview';
 
 /**
@@ -44,7 +43,7 @@ const ServiceCatalogComponent = () => {
                 path='/service-catalog/:service_uuid/edit'
                 key='/service-catalog/:service_uuid/edit'
                 // eslint-disable-next-line react/jsx-props-no-spreading
-                component={(props) => <Edit {...props} />}
+                component={(props) => <EditableOverview {...props} doEdit />}
             />
         </Switch>
     );
