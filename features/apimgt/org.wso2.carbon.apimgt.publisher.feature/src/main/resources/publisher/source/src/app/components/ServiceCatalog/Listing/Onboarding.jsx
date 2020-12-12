@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -26,6 +26,8 @@ import Button from '@material-ui/core/Button';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
+import ServiceCatalog from 'AppData/ServiceCatalog';
+import Alert from 'AppComponents/Shared/Alert';
 import Configurations from 'Config';
 
 const useStyles = makeStyles((theme) => ({
@@ -71,8 +73,34 @@ const useStyles = makeStyles((theme) => ({
  *
  * @returns {void} Onboarding page for Services
  */
-function Onboarding() {
+function Onboarding(props) {
     const classes = useStyles();
+    const intl = useIntl();
+    const { history } = props;
+
+    /**
+     * Function for adding a sample service
+     */
+    const addSample = () => {
+        const promisedService = ServiceCatalog.addSampleService();
+        promisedService.then(() => {
+            Alert.info(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.Onboarding.add.sample.success',
+                defaultMessage: 'Sample Service added successfully!',
+            }));
+        }).catch(() => {
+            Alert.error(intl.formatMessage({
+                id: 'ServiceCatalog.Listing.Onboarding.error.creating.sample.service',
+                defaultMessage: 'Error while creating Sample Service',
+            }));
+        });
+    };
+
+    const handleOnClick = () => {
+        addSample();
+        // Reload the listing page
+        history.push('/service-catalog');
+    };
 
     return (
         <div className={classes.root}>
@@ -80,7 +108,7 @@ function Onboarding() {
                 <Grid item md={11}>
                     <Typography className={classes.heading} variant='h4'>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.heading'
+                            id='ServiceCatalog.Listing.Onboarding.heading'
                             defaultMessage='Service Catalog'
                         />
                     </Typography>
@@ -90,7 +118,7 @@ function Onboarding() {
                         placement='right'
                         title={(
                             <FormattedMessage
-                                id='ServiceCatalog.Listing.Listing.help.tooltip'
+                                id='ServiceCatalog.Listing.Onboarding.help.tooltip'
                                 defaultMessage='The Service Catalog enables API-first Integration'
                             />
                         )}
@@ -114,19 +142,19 @@ function Onboarding() {
                     </div>
                     <Typography className={classes.heading} variant='h4' align='center'>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading1'
+                            id='ServiceCatalog.Listing.Onboarding.Heading1'
                             defaultMessage='Learn to write your first'
                         />
                     </Typography>
                     <Typography align='center'>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading1.subHeading'
+                            id='ServiceCatalog.Listing.Onboarding.Heading1.subHeading'
                             defaultMessage='Integration Service'
                         />
                     </Typography>
                     <Typography align='center' className={classes.spacing}>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.description1'
+                            id='ServiceCatalog.Listing.Onboarding.description1'
                             defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
                             + ' all aspects of API Management.'}
                         />
@@ -141,7 +169,7 @@ function Onboarding() {
                             <Button className={classes.buttonStyle} variant='outlined'>
                                 <Typography className={classes.heading} variant='h6'>
                                     <FormattedMessage
-                                        id='ServiceCatalog.Listing.Listing.get.started'
+                                        id='ServiceCatalog.Listing.Onboarding.get.started'
                                         defaultMessage='Get Started'
                                     />
                                 </Typography>
@@ -160,28 +188,28 @@ function Onboarding() {
                     </div>
                     <Typography className={classes.heading} variant='h4' align='center'>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading2'
+                            id='ServiceCatalog.Listing.Onboarding.Heading2'
                             defaultMessage='Add a sample'
                         />
                     </Typography>
                     <Typography align='center'>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.Heading2.subHeading'
+                            id='ServiceCatalog.Listing.Onboarding.Heading2.subHeading'
                             defaultMessage='Integration Service'
                         />
                     </Typography>
                     <Typography align='center' className={classes.spacing}>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Listing.description2'
+                            id='ServiceCatalog.Listing.Onboarding.description2'
                             defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
                             + ' all aspects of API Management.'}
                         />
                     </Typography>
                     <div align='center'>
-                        <Button className={classes.buttonStyle} variant='outlined'>
+                        <Button className={classes.buttonStyle} variant='outlined' onClick={handleOnClick}>
                             <Typography className={classes.heading} variant='h6'>
                                 <FormattedMessage
-                                    id='ServiceCatalog.Listing.Listing.add.sample.service'
+                                    id='ServiceCatalog.Listing.Onboarding.add.sample.service'
                                     defaultMessage='Add Sample Service'
                                 />
                             </Typography>
