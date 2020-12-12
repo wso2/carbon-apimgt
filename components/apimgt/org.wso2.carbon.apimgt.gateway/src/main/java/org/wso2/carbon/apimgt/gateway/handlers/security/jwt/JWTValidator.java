@@ -497,7 +497,6 @@ public class JWTValidator {
         }
         return signedJWTInfo.getSignedJWT().getSignature().toString();
     }
-
     protected Cache getGatewayTokenCache() {
 
         return CacheProvider.getGatewayTokenCache();
