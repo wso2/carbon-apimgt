@@ -146,7 +146,7 @@ function reducer(state, { field, value }) {
 function EditableOverview(props) {
     const classes = useStyles();
     const intl = useIntl();
-    const { match, history } = props;
+    const { match, history, doEdit } = props;
     const serviceId = match.params.service_uuid;
     const [service, setService] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -288,6 +288,9 @@ function EditableOverview(props) {
 
     useEffect(() => {
         getService();
+        if (doEdit) {
+            setIsEditing(true);
+        }
     }, []);
 
     useEffect(() => {
@@ -334,8 +337,13 @@ function EditableOverview(props) {
             Alert.error(formErrors);
         } else {
             onEdit(id, state);
-            // Redirect to read only overview page
-            overviewRedirect();
+            if (doEdit) {
+                // Redirect to listing page if edited from listing page
+                listingRedirect();
+            } else {
+                // Redirect to read only overview page
+                overviewRedirect();
+            }
         }
     }
 
@@ -895,10 +903,15 @@ function EditableOverview(props) {
     );
 }
 
+EditableOverview.defaultProps = {
+    doEdit: false,
+};
+
 EditableOverview.propTypes = {
     match: PropTypes.shape({
         params: PropTypes.object,
     }).isRequired,
+    doEdit: PropTypes.bool,
 };
 
 export default EditableOverview;

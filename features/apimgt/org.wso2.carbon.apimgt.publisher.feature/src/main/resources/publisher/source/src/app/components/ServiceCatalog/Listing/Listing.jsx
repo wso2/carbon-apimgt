@@ -85,9 +85,6 @@ const useStyles = makeStyles((theme) => ({
         borderTop: '0px',
         width: '100%',
     },
-    serviceDisplayNameStyle: {
-        color: theme.palette.primary.main,
-    },
     tableStyle: {
         marginTop: theme.spacing(4),
         marginLeft: 'auto',
@@ -108,10 +105,6 @@ const useStyles = makeStyles((theme) => ({
     removePaddingOnLink: {
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
-    },
-    editButtonStyle: {
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
     },
 }));
 
@@ -138,7 +131,7 @@ function Listing() {
             setNotFound(false);
         }).catch(() => {
             Alert.error(intl.formatMessage({
-                defaultMessage: 'Error While Loading Services',
+                defaultMessage: 'Error while loading services',
                 id: 'ServiceCatalog.Listing.Listing.error.loading',
             }));
         }).finally(() => {
@@ -189,7 +182,7 @@ function Listing() {
                         if (dataRow) {
                             return (
                                 <Link
-                                    className={classes.removePaddingOnLink}
+                                    className={classes.serviceNameLink}
                                     to={'/service-catalog/' + serviceId + '/overview'}
                                 >
                                     <span>{dataRow.displayName}</span>
