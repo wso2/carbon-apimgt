@@ -527,12 +527,12 @@ public class PersistenceUtil {
         String tmpFolder = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
                 + APIConstants.DOC_UPLOAD_TMPDIR + File.separator + randomFolderName;
         File docFile = new File(tmpFolder);
+        FileOutputStream outFileStream = null;
+
         boolean folderCreated = docFile.mkdirs();
         if (!folderCreated) {
             throw new PersistenceException("Failed to create temporary folder for document upload ");
         }
-
-        FileOutputStream outFileStream = null;
 
         try {
             outFileStream = new FileOutputStream(new File(docFile.getAbsolutePath(), fileName));
