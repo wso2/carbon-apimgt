@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import java.io.File;
+
 public final class APIConstants {
 
     //Registry lifecycle related info
@@ -338,4 +340,13 @@ public final class APIConstants {
     
     public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
     public static final String NO_CONTENT_UPDATE = "no_content_update";
+    public static final String DOCUMENTATION_DOCX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument" +
+            ".wordprocessingml.document";
+    public static final String DOCUMENTATION_DOC_CONTENT_TYPE = "application/msword";
+    public static final String DOCUMENTATION_PDF_CONTENT_TYPE = "application/pdf";
+    public static final String DOCUMENTATION_TXT_CONTENT_TYPE = "text/plain";
+
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String DOC_UPLOAD_TMPDIR = "restAPI" + File.separator + "documentUpload";
+    public static final String DOC_NAME_DEFAULT = "DEFAULT_DOC_";
 }

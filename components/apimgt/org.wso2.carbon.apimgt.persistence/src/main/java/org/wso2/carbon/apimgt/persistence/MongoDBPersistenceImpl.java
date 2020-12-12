@@ -32,6 +32,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
+import org.apache.commons.io.IOUtils;
 import org.apache.jasper.tagplugins.jstl.core.ForEach;
 import org.bson.BsonNull;
 import org.bson.Document;
@@ -59,6 +60,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceExc
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.apache.commons.logging.Log;
@@ -66,7 +68,12 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentationMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.MongoAPIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.MongoDBPersistenceUtil;
+import org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -469,30 +476,58 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return apiDocumentation;
     }
 
-    private void handleFileTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
+    private void handleFileTypeContent(Organization org, String apiId, String docId, DocumentContent content)
+            throws DocumentationPersistenceException {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
         GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getName());
         ResourceFile resourceFile = content.getResourceFile();
         InputStream inputStream = resourceFile.getContent();
         GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
-        ObjectId gridFsReference = gridFSFilesBucket.uploadFromStream(resourceFile.getName(), inputStream, options);
+        String textContent = null;
 
-        collection.updateOne(
-                and(
-                        eq("_id", new ObjectId(apiId)),
-                        eq("documentationList.docId", new ObjectId(docId))
-                   ),
-                combine(
-                        set("documentationList.$.gridFsReference", gridFsReference),
-                        set("documentationList.$.contentType", resourceFile.getContentType())
-                       )
-                            );
+        String contentType = resourceFile.getContentType();
+
+        try {
+            File file = PersistenceUtil.writeStream(inputStream, resourceFile.getName());
+            InputStream extractStream = PersistenceUtil.readStream(file, resourceFile.getName());
+            if (contentType.equalsIgnoreCase(APIConstants.DOCUMENTATION_PDF_CONTENT_TYPE)) {
+                textContent = PersistenceUtil.extractPDFText(extractStream);
+            }
+            if (contentType.equalsIgnoreCase(APIConstants.DOCUMENTATION_DOC_CONTENT_TYPE)) {
+                textContent = PersistenceUtil.extractDocText(extractStream);
+            }
+            if (contentType.equalsIgnoreCase(APIConstants.DOCUMENTATION_DOCX_CONTENT_TYPE)) {
+                textContent = PersistenceUtil.extractDocXText(extractStream);
+            }
+            if (contentType.equalsIgnoreCase(APIConstants.DOCUMENTATION_TXT_CONTENT_TYPE)) {
+                textContent = PersistenceUtil.extractPlainText(extractStream);
+            }
+
+            InputStream gridFsStream = PersistenceUtil.readStream(file, resourceFile.getName());
+            ObjectId gridFsReference =
+                    gridFSFilesBucket.uploadFromStream(resourceFile.getName(), gridFsStream, options);
+
+            collection.updateOne(
+                    and(
+                            eq("_id", new ObjectId(apiId)),
+                            eq("documentationList.docId", new ObjectId(docId))
+                       ),
+                    combine(
+                            set("documentationList.$.gridFsReference", gridFsReference),
+                            set("documentationList.$.contentType", contentType),
+                            set("documentationList.$.textContent", textContent)
+                           )
+                                );
+        } catch (IOException | PersistenceException e) {
+            log.error("Error when extracting text content from file ", e);
+            throw new DocumentationPersistenceException("Failed to documentation content for " + docId +
+                    " in mongodb, for api " + apiId);
+        }
     }
 
     private void handleInlineMDTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-
         collection.updateOne(
                 and(
                         eq("_id", new ObjectId(apiId)),
