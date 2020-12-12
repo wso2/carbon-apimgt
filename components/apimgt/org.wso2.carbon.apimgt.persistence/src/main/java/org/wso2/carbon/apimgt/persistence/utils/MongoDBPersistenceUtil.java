@@ -20,6 +20,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import net.consensys.cava.toml.Toml;
 import net.consensys.cava.toml.TomlParseResult;
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.wso2.carbon.apimgt.persistence.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -86,10 +88,12 @@ public class MongoDBPersistenceUtil {
                 ClassModel<DevPortalAPI> devPortalAPI = ClassModel.builder(DevPortalAPI.class)
                         .enableDiscriminator(false).build();
                 ClassModel<CORSConfiguration> corsConfiguration =
-                        ClassModel.builder(CORSConfiguration.class).enableDiscriminator(true).build();
+                        ClassModel.builder(CORSConfiguration.class).enableDiscriminator(false).build();
+                ClassModel<APIDocumentation> apiDocumentation =
+                        ClassModel.builder(APIDocumentation.class).enableDiscriminator(false).build();
                 CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
                         .register(publisherAPI, deploymentEnv, corsConfiguration, mongoDBAPIDocument,
-                                mongoDBDevPortalAPI, devPortalAPI).build());
+                                mongoDBDevPortalAPI, devPortalAPI, apiDocumentation).build());
                 CodecRegistry codecRegistry = fromRegistries(MongoClientSettings
                         .getDefaultCodecRegistry(), pojoCodecRegistry);
 
@@ -98,6 +102,7 @@ public class MongoDBPersistenceUtil {
                         .codecRegistry(codecRegistry)
                         .build();
                 mongoClient = MongoClients.create(clientSettings);
+                log.info("mongodb client created ");
             }
         }
     }
@@ -110,8 +115,13 @@ public class MongoDBPersistenceUtil {
     public static MongoClient getMongoClient() {
         if (mongoClient == null) {
             initialize();
-            log.info("mongodb connection created ");
         }
         return mongoClient;
+    }
+
+    public static MongoDatabase getDatabase(){
+        MongoClient mongoClient = getMongoClient();
+        MongoDatabase database = mongoClient.getDatabase("APIM_DB");
+        return database;
     }
 }
