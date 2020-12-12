@@ -25,6 +25,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
+import Link from '@material-ui/core/Link';
 import Configurations from 'Config';
 
 const useStyles = makeStyles((theme) => ({
@@ -131,15 +132,22 @@ function Onboarding() {
                         />
                     </Typography>
                     <div align='center'>
-                        <Button className={classes.buttonStyle} variant='outlined'>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Listing.get.started'
-                                    defaultMessage='Get Started'
-                                />
-                            </Typography>
-                            <OpenInNewIcon className={classes.docLinkStyle} />
-                        </Button>
+                        <Link
+                            target='_blank'
+                            style={{ textDecoration: 'none' }}
+                            href={'https://ei.docs.wso2.com/en/latest/'
+                            + 'micro-integrator/develop/integration-development-kickstart/'}
+                        >
+                            <Button className={classes.buttonStyle} variant='outlined'>
+                                <Typography className={classes.heading} variant='h6'>
+                                    <FormattedMessage
+                                        id='ServiceCatalog.Listing.Listing.get.started'
+                                        defaultMessage='Get Started'
+                                    />
+                                </Typography>
+                                <OpenInNewIcon className={classes.docLinkStyle} />
+                            </Button>
+                        </Link>
                     </div>
                 </Grid>
                 <Grid item md={4}>
