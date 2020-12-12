@@ -52,32 +52,4 @@ public interface DocumentationMapper {
         }
         return null;
     }
-
-//    default String mapVisibilityToString(Documentation.DocumentVisibility visibility){
-//        return visibility.name();
-//    }
-
-//    default Documentation.DocumentVisibility mapVisibilityToString(String visibility){
-//        Documentation.DocumentVisibility[] visibilities = Documentation.DocumentVisibility.values();
-//        for (Documentation.DocumentVisibility item:visibilities) {
-//            if(item.name().equals(visibility)){
-//                return item;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    default String mapTypeToString(Documentation.DocumentVisibility visibility){
-//        return visibility.name();
-//    }
-//
-//    default Documentation.DocumentVisibility mapVisibilityToString(String visibility){
-//        Documentation.DocumentVisibility[] visibilities = Documentation.DocumentVisibility.values();
-//        for (Documentation.DocumentVisibility item:visibilities) {
-//            if(item.name().equals(visibility)){
-//                return item;
-//            }
-//        }
-//        return null;
-//    }
 }
