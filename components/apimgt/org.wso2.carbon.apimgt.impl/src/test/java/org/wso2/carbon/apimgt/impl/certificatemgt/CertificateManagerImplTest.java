@@ -24,6 +24,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -122,10 +123,10 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testAddToPublisherWithExpiredCertificate() {
-
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
+    public void testAddToPublisherWithExpiredCertificate()
+            throws CertificateAliasExistsException, CertificateManagementException {
+        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
+        Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
@@ -134,10 +135,10 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testAddToPublisherWithExistingAlias() {
-
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
+    public void testAddToPublisherWithExistingAlias()
+            throws CertificateAliasExistsException, CertificateManagementException {
+        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
+        Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
