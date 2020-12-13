@@ -70,6 +70,7 @@ function APICreateDefault(props) {
             }
         });
     }, []);
+    const [isRevisioning, setIsRevisioning] = useState(false);
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -218,26 +219,33 @@ function APICreateDefault(props) {
                         defaultMessage: 'API updated successfully',
                     }));
                 }
-                history.push(`/apis/${api.id}/overview`);
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                    setPageError(error.response.body);
-                } else {
-                    const message = 'Something went wrong while publishing the API';
-                    Alert.error(intl.formatMessage({
-                        id: 'Apis.Create.Default.APICreateDefault.error.errorMessage',
-                        defaultMessage: message,
-                    }));
-                    setPageError(message);
-                }
-                console.error(error);
+                setIsPublishing(false);
+                setIsRevisioning(true);
+                const body = {
+                    'description': 'state',
+                };
+                const restApi = new API();
+                restApi.addRevision(api.id, body)
+                    .then(() => {
+                        Alert.info('Revision created succesfully');
+                    })
+                    .catch((error) => {
+                        if (error.response) {
+                            Alert.error(error.response.body.description);
+                        } else {
+                            Alert.error('Something went wrong while updating the environments');
+                        }
+                        console.error(error);
+                    });
+                    setIsRevisioning(false);
+                
             })
             .finally(() => {
-                setIsPublishing(false);
+                
+                history.push(`/apis/${api.id}/overview`);
             }));
     }
+
 
     /**
      *
@@ -358,13 +366,14 @@ function APICreateDefault(props) {
                                     id='itest-id-apicreatedefault-createnpublish'
                                     variant='contained'
                                     color='primary'
-                                    disabled={!isPublishable || isAPICreateDisabled || !apiInputs.isFormValid}
+                                    disabled={isRevisioning || !isPublishable || isAPICreateDisabled || !apiInputs.isFormValid}
                                     onClick={createAndPublish}
                                 >
-                                    {!isPublishing && 'Create & Deploy'}
-                                    {isPublishing && <CircularProgress size={24} />}
+                                    {(!isPublishing) && 'Create & Deploy'}
+                                    {isPublishing || isRevisioning && <CircularProgress size={24} />}
                                     {isCreating && isPublishing && 'Creating API . . .'}
-                                    {!isCreating && isPublishing && 'Publishing API . . .'}
+                                    {!isCreating && isPublishing && !isRevisioning && 'Publishing API . . .'}
+                                    {!isCreating && isPublishing && isRevisioning && 'Create Revision . . .'}
                                 </Button>
                             </Grid>
                         )}

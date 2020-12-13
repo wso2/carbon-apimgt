@@ -537,9 +537,9 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.Design.Time.Overview',
-                                defaultMessage: 'Design-time configuration',
+                                defaultMessage: 'Design configuration',
                             })}
-                            head='xxx'
+                            head='valueOnly'
 
                         />
                         <Box ml={2}>
@@ -547,7 +547,7 @@ class Details extends Component {
                                 className={classes.footeremaillink}
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.design.configs',
-                                    defaultMessage: 'Design',
+                                    defaultMessage: 'Basic info',
                                 })}
                                 route='configuration'
                                 to={pathPrefix + 'configuration'}
@@ -576,7 +576,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.Gateway.Config',
                                 defaultMessage: 'Gateway configuration',
                             })}
-                            head='xxx'
+                            head='valueOnly'
 
                         />
                         <Box ml={2}>
@@ -666,7 +666,9 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
+                        {!isAPIProduct &&
                         <Divider />
+                        }
                         {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -678,7 +680,9 @@ class Details extends Component {
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
+                        {!isAPIProduct &&
                         <Divider />
+                        }
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
                             api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem
