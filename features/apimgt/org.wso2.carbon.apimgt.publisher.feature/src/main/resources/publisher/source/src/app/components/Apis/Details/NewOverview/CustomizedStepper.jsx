@@ -427,9 +427,9 @@ export default function CustomizedSteppers() {
         activeStep = 2;
     } else if (lifecycleState === 'Created') {
         activeStep = 1;
-    } else if (lifecycleState !== 'Created' && api.deploymentEnvironments.length === 0) {
+    } else if (lifecycleState !== 'Created' && api.gatewayEnvironments.length === 0) {
         activeStep = 3;
-    } else if (lifecycleState !== 'Created' && api.deploymentEnvironments.length !== 0) {
+    } else if (lifecycleState !== 'Created' && api.gatewayEnvironments.length !== 0) {
         activeStep = 4;
     }
 
@@ -444,7 +444,7 @@ export default function CustomizedSteppers() {
         step4Class = classes.pointerEndActive;
     } else if (activeStep === 4) {
         step3Class = classes.pointerMiddleCompleted;
-        step4Class = classes.pointerEndActive;
+        step4Class = classes.pointerEndCompleted;
     }
     else {
         step3Class = classes.pointerMiddleDisabled;
@@ -540,7 +540,7 @@ export default function CustomizedSteppers() {
                         <div className={`${classes.pointerEnd} ${step4Class}`}>
                             <Box className={classes.box}>
                             <Grid xs={12} className={classes.gridSmall}>
-                                        {lifecycleState === 'Published' && (api.deploymentEnvironments.length !== 0) ? (
+                                        {lifecycleState === 'Published' && (api.gatewayEnvironments.length !== 0) ? (
                                             <CheckIcon className={classes.iconTrue} />
                                         ) : (
                                             <CloseIcon className={classes.iconFalse} />

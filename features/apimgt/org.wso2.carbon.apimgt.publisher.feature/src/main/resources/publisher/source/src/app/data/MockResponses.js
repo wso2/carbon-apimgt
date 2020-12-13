@@ -96,51 +96,6 @@ class MockResponses {
 
     /**
     *
-    * Return sample mocked model data for createService
-    * @export
-    * @returns {*} Mocked Service Catalog model
-    */
-    static listRevision() {
-        const response = {
-            count: 1,
-            list: [
-                {
-                    id: 1,
-                    uuid: 'c26b2b9b-4632-4ca4-b6f3-521c8863990c',
-                    description: 'removed a post resource',
-                    apiInfo: {
-                        id: '01234567-0123-0123-0123-012345678901',
-                        name: 'CalculatorAPI',
-                        description: 'A calculator API that supports basic operations',
-                        context: 'CalculatorAPI',
-                        version: '1.0.0',
-                        provider: 'admin',
-                        type: 'HTTP',
-                        lifeCycleStatus: 'CREATED',
-                    },
-                },
-                {
-                    id: 2,
-                    uuid: 'c26b2b9b-4632-4ca4-b6f3-521c8863990d',
-                    description: 'removed a post resource and removed a get resource removed a post resource',
-                    apiInfo: {
-                        id: '01234567-0123-0123-0123-012345678901',
-                        name: 'CalculatorAPI',
-                        description: 'A calculator API that supports basic operations',
-                        context: 'CalculatorAPI',
-                        version: '1.0.0',
-                        provider: 'admin',
-                        type: 'HTTP',
-                        lifeCycleStatus: 'CREATED',
-                    },
-                },
-            ],
-        };
-        return Promise.resolve({ body: response });
-    }
-
-    /**
-    *
     * Return sample mocked model data for deleteService
     * @export
     * @returns {*} Mocked Service Catalog model

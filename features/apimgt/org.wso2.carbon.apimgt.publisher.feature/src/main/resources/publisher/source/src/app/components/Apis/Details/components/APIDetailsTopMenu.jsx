@@ -83,6 +83,9 @@ const styles = (theme) => ({
         display: 'flex',
         flexDirection: 'column',
     },
+    Typokk: {
+        color: "red",
+    },
 });
 
 
@@ -91,6 +94,7 @@ const APIDetailsTopMenu = (props) => {
         classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
     const [revision, setRevision] = useState(null);
+    const [revisonid, setRevisionId] = useState(0);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
  * The component for advanced endpoint configurations.
@@ -119,8 +123,8 @@ const APIDetailsTopMenu = (props) => {
 
     React.useEffect(() => {
         const restApi = new API();
-        restApi.getRevisions().then((response) => {
-            setRevision(response.list);
+        restApi.getRevisions(api.id).then((response) => {
+            setRevision(response.body.list);
         })
             .catch((errorMessage) => {
                 console.error(errorMessage);
@@ -177,26 +181,45 @@ const APIDetailsTopMenu = (props) => {
             </div>
 
             <div className={classes.dateWrapper} />
+            {api.isDefaultVersion === true &&
+                <Typography variant='h6' gutterBottom color='red' className={classes.Typokk}>
+                    Read only
+                    </Typography>}
             <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
-                {revision && (
-                    <FormControl 
-                        variant='outlined' 
-                        className={classes.formControl}
+
+                <FormControl
+                    variant='outlined'
+                    className={classes.formControl}
+                >
+                    <Select
+                        defaultValue={revisonid} id="grouped-select"
+                        
                     >
-                        <Select
-                            labelId='demo-simple-select-outlined-label'
-                            id='demo-simple-select-outlined'
-                            defaultValue={10}
-                        >
-                            <MenuItem value={10}>Working copy</MenuItem>
-                            {revision.map((number) =>
-                                <MenuItem value={number.id}>
-                                    {'revision_ ' + number.id}
-                                </MenuItem>
-                            )}
-                        </Select>
-                    </FormControl>
-                )}
+                        <MenuItem value="0">
+                            <Link to={'/apis/' + api.id + '/overview'}>
+                                <Typography variant='body'>
+                                    <FormattedMessage
+                                        id='Apis.Details.components.APIDetailsTopMenu.working.copy'
+                                        defaultMessage='Working copy'
+                                    />
+                                </Typography>
+                            </Link>
+                        </MenuItem>
+                        {revision && revision.map((item) =>
+                            <MenuItem value={item.id}>
+                                <Link to={'/apis/' + item.uuid + '/overview'}>
+                                    <Typography variant='body'>
+                                        <FormattedMessage
+                                            id='Apis.Details.components.APIDetailsTopMenu.revision'
+                                            defaultMessage='Revision '
+                                        />{item.id}
+                                    </Typography>
+                                </Link>
+                            </MenuItem>
+                        )}
+                    </Select>
+                </FormControl>
+
             </div>
 
             <VerticalDivider height={70} />

@@ -161,7 +161,7 @@ function LeftMenuItem(props) {
                             )}
                         />
                     )}
-            {head === 'xxx' ? (
+            {head === 'valueOnly' ? (
             <Typography
                 className={classNames(
                     classes.leftLInkTextHead,

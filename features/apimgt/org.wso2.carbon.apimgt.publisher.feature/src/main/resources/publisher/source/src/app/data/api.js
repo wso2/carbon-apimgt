@@ -2158,31 +2158,36 @@ class API extends Resource {
         });
     }
 
-     getRevisions() {
+    /**
+     * Get list of revisions.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisions(apiId) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-                const promisedRevisions = apiClient.then(client => {
-//                    return client.apis['API Revisions'].getAPIRevisions(
-//                        this._requestMetaData(),
-//                    );
-                    return MockResponses.listRevision();
-                });
-                return promisedRevisions.then(response => response.body);
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions( {
+                    apiId: apiId,
+                },
+            );
+        });
     }
 
     /**
-     * Upload endpoint certificate.
+     * Add revision.
      *
-     * @param {any} certificateFile The certificate file to be uploaded.
-     * @param {string} endpoint The certificate endpoint.
-     * @param {string} alias The certificate alias.
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
      * */
-    static addRevision(apiId) {
+    addRevision(apiId, body) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
-                return client.apis['API Revisions'].createAPIRevision({
-                    apiId: apiId,
-                });
+                return client.apis['API Revisions'].createAPIRevision(
+                    {apiId: apiId},
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
             });    
     }
 
