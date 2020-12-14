@@ -6683,6 +6683,15 @@ components:
         isDefaultVersion:
           type: boolean
           example: false
+        isRevision:
+          type: boolean
+          example: false
+        revisionedApiId:
+          type: string
+          description: |
+            UUID of the api registry artifact
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
         enableSchemaValidation:
           type: boolean
           example: false
@@ -7042,6 +7051,9 @@ components:
         description:
           type: string
           example: removed a post resource
+        createdTime:
+          type: string
+          format: date-time
         apiInfo:
           $ref: '#/components/schemas/APIRevisionAPIInfo'
 
@@ -7055,27 +7067,6 @@ components:
         id:
           type: string
           example: 01234567-0123-0123-0123-012345678901
-        name:
-          type: string
-          example: CalculatorAPI
-        description:
-          type: string
-          example: A calculator API that supports basic operations
-        context:
-          type: string
-          example: CalculatorAPI
-        version:
-          type: string
-          example: 1.0.0
-        provider:
-          type: string
-          example: admin
-        type:
-          type: string
-          example: HTTP
-        lifeCycleStatus:
-          type: string
-          example: CREATED
 
     #-----------------------------------------------------
     # The API Revision List resource

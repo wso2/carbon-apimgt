@@ -120,6 +120,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -839,6 +840,8 @@ public class APIMappingUtil {
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setIsRevision(model.isRevision());
+        dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
         dto.setTestKey(model.getTestKey());
@@ -2759,6 +2762,15 @@ public class APIMappingUtil {
         apiRevisionDTO.setId(model.getId());
         apiRevisionDTO.setUuid(model.getRevisionUUID());
         apiRevisionDTO.setDescription(model.getDescription());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        Date parsedDate;
+        try {
+            parsedDate = dateFormat.parse(model.getCreatedTime());
+        } catch (java.text.ParseException e) {
+            throw new APIManagementException("Error while parsing the created time", e);
+        }
+        Timestamp timestamp = new Timestamp(parsedDate.getTime());
+        apiRevisionDTO.setCreatedTime(timestamp);
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
         apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
