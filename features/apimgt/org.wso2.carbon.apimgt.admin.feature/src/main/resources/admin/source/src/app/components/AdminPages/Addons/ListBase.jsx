@@ -89,6 +89,29 @@ function ListBase(props) {
         setSearchText(event.target.value);
     };
 
+    const sortBy = (field, reverse, primer) => {
+        const key = primer
+            ? (x) => {
+                return primer(x[field]);
+            }
+            : (x) => {
+                return x[field];
+            };
+
+        // eslint-disable-next-line no-param-reassign
+        reverse = !reverse ? 1 : -1;
+
+        return (a, b) => {
+            const aValue = key(a);
+            const bValue = key(b);
+            return reverse * ((aValue > bValue) - (bValue > aValue));
+        };
+    };
+    const onColumnSortChange = (changedColumn, direction) => {
+        const sorted = [...data].sort(sortBy(changedColumn, direction === 'descending'));
+        setData(sorted);
+    };
+
     const fetchData = () => {
         // Fetch data from backend when an apiCall is provided
         setData(null);
@@ -189,6 +212,7 @@ function ListBase(props) {
         customToolbar: null,
         responsive: 'stacked',
         searchText,
+        onColumnSortChange,
     };
 
     // If no apiCall is provided OR,
@@ -244,6 +268,7 @@ function ListBase(props) {
                                                 className: classes.searchInput,
                                             }}
                                             onChange={filterData}
+                                            value={searchText}
                                         />
                                     )}
                                 </Grid>
