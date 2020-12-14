@@ -21,7 +21,7 @@ import java.io.Serializable;
 public class DocumentationInfo implements Serializable {
     private String id;
     private String name;
-    private Documentation.DocumentSourceType sourceType;
+    private DocumentSourceType sourceType;
     private DocumentationType type;
 
     public enum DocumentSourceType {
@@ -65,6 +65,10 @@ public class DocumentationInfo implements Serializable {
 
     public void setSourceType(DocumentationInfo.DocumentSourceType sourceType) {
         this.sourceType = sourceType;
+    }
+
+    public void setType(DocumentationType type) {
+        this.type = type;
     }
 
     @Override
