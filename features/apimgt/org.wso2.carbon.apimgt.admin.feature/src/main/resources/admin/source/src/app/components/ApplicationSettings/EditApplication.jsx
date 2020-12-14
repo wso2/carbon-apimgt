@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
@@ -36,12 +36,16 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
+    switch (field) {
+        case 'name':
+        case 'owner':
+            return { ...state, [field]: value };
+        case 'editDetails':
+            return value;
+        default:
+            return state;
+    }
 }
-
 /**
  * Render a pop-up dialog to change ownership of an Application
  * @param {JSON} props props passed from parent
@@ -53,12 +57,11 @@ function Edit(props) {
     const {
         updateList, dataRow, icon, triggerButtonText, title, applicationList,
     } = props;
-    let id = null;
-    let initialState = {
+    const [initialState, setInitialState] = useState({
         name: '',
         owner: '',
-    };
-
+    });
+    /*
     if (dataRow) {
         const { name: originalName, owner: originalOwner } = dataRow;
         id = dataRow.applicationId;
@@ -68,9 +71,16 @@ function Edit(props) {
             owner: originalOwner,
         };
     }
+    */
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, owner } = state;
 
+    useEffect(() => {
+        setInitialState({
+            name: '',
+            owner: '',
+        });
+    }, []);
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
@@ -113,7 +123,7 @@ function Edit(props) {
 
     const formSaveCallback = () => {
         return validateOwner().then(() => {
-            return restApi.updateApplicationOwner(id, owner)
+            return restApi.updateApplicationOwner(dataRow.id, owner)
                 .then(() => {
                     return (
                         <FormattedMessage
@@ -133,7 +143,12 @@ function Edit(props) {
                 });
         });
     };
-
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            const { name: originalName, owner: originalOwner } = dataRow;
+            dispatch({ field: 'editDetails', value: { name: originalName, owner: originalOwner } });
+        }
+    };
     return (
         <FormDialogBase
             title={title}
@@ -141,6 +156,7 @@ function Edit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <TextField
                 margin='dense'
