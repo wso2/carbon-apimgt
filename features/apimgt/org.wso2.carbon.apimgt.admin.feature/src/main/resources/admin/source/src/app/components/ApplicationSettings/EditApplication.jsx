@@ -61,17 +61,7 @@ function Edit(props) {
         name: '',
         owner: '',
     });
-    /*
-    if (dataRow) {
-        const { name: originalName, owner: originalOwner } = dataRow;
-        id = dataRow.applicationId;
 
-        initialState = {
-            name: originalName,
-            owner: originalOwner,
-        };
-    }
-    */
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, owner } = state;
 
