@@ -3638,4 +3638,29 @@ public class SQLConstants {
         public static final String DELETE_TENANT_THEME = "DELETE FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
         public static final String GET_TENANT_THEME = "SELECT * FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
     }
+
+    /**
+     * Static class to hold database queries related to AM_API_HISTORY table.
+     */
+    public static class HistorySqlConstants {
+
+        public static final String GET_HISTORY_PAYLOAD =
+                "SELECT PAYLOAD FROM AM_API_HISTORY WHERE UUID = ?";
+        public static final String GET_HISTORY_COUNT_FOR_API =
+                "SELECT COUNT(*) COUNT FROM AM_API_HISTORY WHERE API_ID = ?";
+        public static final String GET_HISTORY_COUNT_FOR_API_CREATED_WITHIN =
+                "SELECT COUNT(*) COUNT FROM AM_API_HISTORY WHERE API_ID = ? "
+                        + "AND CREATED_TIME >= ? AND CREATED_TIME <= ?";
+        public static final String GET_HISTORY_COUNT_FOR_API_BY_REVISION =
+                "SELECT COUNT(*) COUNT FROM AM_API_HISTORY WHERE API_ID = ? "
+                        + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_KEY = ?)";
+        public static final String GET_HISTORY_COUNT_FOR_API_BY_REVISION_CREATED_WITHIN =
+                "SELECT COUNT(*) COUNT FROM AM_API_HISTORY WHERE API_ID = ? "
+                        + "AND CREATED_TIME >= ? AND CREATED_TIME <= ? "
+                        + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_KEY = ?)";
+        public static final String ADD_HISTORY_EVENT =
+                "INSERT INTO AM_API_HISTORY (UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, PAYLOAD, "
+                        + "API_ID, USERNAME) VALUES (?,?,?,?,?,?,?,?)";
+    }
+
 }

@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
+import org.wso2.carbon.apimgt.api.model.HistoryEvent;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -81,6 +82,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.HistoryEventListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
@@ -2764,7 +2766,7 @@ public class APIMappingUtil {
      * @param size                max offset
      */
     public static void setAPIHistoryPaginationParams(HistoryEventListDTO historyEventListDTO, String apiId,
-                                                     String revisionId, String startTime, String endTime, int limit,
+                                                     String revisionId, Date startTime, Date endTime, int limit,
                                                      int offset, int size) {
 
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -2804,8 +2806,8 @@ public class APIMappingUtil {
      * @param size                max offset
      */
     public static void setAPIProductHistoryPaginationParams(HistoryEventListDTO historyEventListDTO,
-                                                            String apiProductId, String revisionId, String startTime,
-                                                            String endTime, int limit, int offset, int size) {
+                                                            String apiProductId, String revisionId, Date startTime,
+                                                            Date endTime, int limit, int offset, int size) {
 
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
@@ -2831,4 +2833,29 @@ public class APIMappingUtil {
         historyEventListDTO.setPagination(paginationDTO);
     }
 
+    public static HistoryEventDTO fromHistoryEventToDTO(HistoryEvent historyEvent) {
+
+        HistoryEventDTO historyEventDTO = new HistoryEventDTO();
+        historyEventDTO.setDescription(historyEvent.getDescription());
+        historyEventDTO.setOperationId(historyEvent.getOperationId());
+        historyEventDTO.setId(historyEvent.getId());
+        historyEventDTO.setCreatedTime(historyEvent.getCreatedTime());
+        historyEventDTO.setUser(historyEvent.getUser());
+        return historyEventDTO;
+    }
+
+    public static HistoryEventListDTO fromHistoryEventListToDTO(List<HistoryEvent> historyEventList) {
+
+        HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
+        List<HistoryEventDTO> historyEventDTOList = historyEventListDTO.getList();
+        if (historyEventList == null) {
+            historyEventList = new ArrayList<>();
+            historyEventListDTO.setList(historyEventDTOList);
+        }
+        for (HistoryEvent historyEvent : historyEventList) {
+            historyEventDTOList.add(fromHistoryEventToDTO(historyEvent));
+        }
+        historyEventListDTO.setCount(historyEventDTOList.size());
+        return historyEventListDTO;
+    }
 }

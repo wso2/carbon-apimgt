@@ -35,6 +35,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1534,7 +1535,8 @@ public interface APIProvider extends APIManager {
     /**
      * Get the paginated list of API/API Product history events for the given API/API Product.
      *
-     * @param apiId      API/API Product UUID
+     * @param identifier API/API Product Identifier
+     * @param uuid      API/API Product UUID
      * @param revisionId Revision Id which the history events are up to (optional)
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
@@ -1543,29 +1545,30 @@ public interface APIProvider extends APIManager {
      * @return a list of History events
      * @throws APIManagementException if failed to get the API history events
      */
-    List<HistoryEvent> getHistoryEventsWithPagination(String apiId, String revisionId, String startTime, String endTime,
-                                                      int offset, int limit) throws APIManagementException;
+    List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String uuid, String revisionId,
+                                                               Date startTime, Date endTime, int offset, int limit)
+            throws APIManagementException;
 
     /**
      * Get the payload associated with the given event Id for the given API/API Product.
      *
-     * @param apiId   API/API Product UUID
-     * @param eventId Event Id to get the payload of
+     * @param identifier API/API Product Identifier
+     * @param eventId    Event Id to get the payload of
      * @return event payload
      * @throws APIManagementException if failed to get the event payload
      */
-    String getHistoryEventPayload(String apiId, String eventId) throws APIManagementException;
+    String getAPIOrAPIProductHistoryEventPayload(Identifier identifier, String eventId) throws APIManagementException;
 
     /**
      * Get the count of all API/API Product history events for the given API/API Product.
      *
-     * @param apiId      API/API Product UUID
+     * @param uuid      API/API Product UUID
      * @param revisionId Revision Id which the history events are up to (optional)
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
      * @return count of all history events based on the requested filters
      * @throws APIManagementException if failed to get all events count
      */
-    int getAllHistoryCount(String apiId, String revisionId, String startTime, String endTime)
+    int getAllAPIOrAPIProductHistoryCount(String uuid, String revisionId, Date startTime, Date endTime)
             throws APIManagementException;
 }
