@@ -602,13 +602,10 @@ public class APIDTO   {
    **/
   public APIDTO keyManagers(Object keyManagers) {
     this.keyManagers = keyManagers;
-  }
-  public APIDTO createdTime(String createdTime) {
-    this.createdTime = createdTime;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "API Key Managers ")
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {
@@ -616,7 +613,16 @@ public class APIDTO   {
   }
   public void setKeyManagers(Object keyManagers) {
     this.keyManagers = keyManagers;
+  }
 
+  /**
+   **/
+  public APIDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
   @ApiModelProperty(example = "2020-10-31T13:57:16.229", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
