@@ -257,7 +257,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     @Override
     public void loadXSDs(APIMWSDLReader wsdlReader, String url) {
-        return;
+        throw new UnsupportedOperationException("This method is not implemented");
     }
 
     @Override

@@ -211,7 +211,7 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      *
      * @return true if extracting operations was successful
      */
-    private boolean initModels() {
+    private boolean initModels() throws APIMgtWSDLException {
         wsdlDefinition = getWSDLDefinition();
         boolean canProcess = true;
         targetNamespace = wsdlDefinition.getTargetNamespace();
@@ -285,7 +285,11 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
                     WSDLParamDefinition wsdlParamDefinition = new WSDLParamDefinition();
                     ModelImpl model = new ModelImpl();
                     Property currentProperty = null;
-                    traverseTypeElement(node, null, model, currentProperty);
+                    try {
+                        traverseTypeElement(node, null, model, currentProperty);
+                    } catch (APIManagementException e) {
+                        throw new APIMgtWSDLException(e);
+                    }
                     if (StringUtils.isNotBlank(model.getName())) {
                         parameterModelMap.put(model.getName(), model);
                     }
@@ -327,7 +331,8 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
         return wsdlInfo;
     }
 
-    private void traverseTypeElement(Node element, Node prevNode, ModelImpl model, Property currentProp) {
+    private void traverseTypeElement(Node element, Node prevNode, ModelImpl model, Property currentProp)
+            throws APIManagementException {
 
         if (log.isDebugEnabled()) {
             if (element.hasAttributes()
@@ -339,20 +344,12 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
             }
         }
         if (prevNode != null) {
-            try {
-                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp,
-                        true, prevNode);
-            } catch (APIManagementException e) {
-                log.error("", e);
-            }
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp,
+                    true, prevNode);
             setNamespaceDetails(model, element);
         } else {
-            try {
-                currentProperty = generateSwaggerModelForComplexType(element, model, currentProp,
-                        false, null);
-            } catch (APIManagementException e) {
-                log.error("", e);
-            }
+            currentProperty = generateSwaggerModelForComplexType(element, model, currentProp,
+                    false, null);
             setNamespaceDetails(model, element);
         }
         NodeList nodeList = element.getChildNodes();
@@ -1213,10 +1210,11 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
      */
     private Collection<File> getStandardBaseXSDs() {
         String baseStandardXSDLocation =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "xsds";
+                CarbonUtils.getCarbonHome() + File.separator + SOAPToRESTConstants.REPOSITORY + File.separator +
+                        SOAPToRESTConstants.REP_RESOURCES + File.separator + SOAPToRESTConstants.XSDS;
         File folderToImport = new File(baseStandardXSDLocation);
-        Collection<File> foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, "xsd", false);
+        Collection<File> foundXSDFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport,
+                SOAPToRESTConstants.XSD, false);
         return foundXSDFiles;
     }
 
