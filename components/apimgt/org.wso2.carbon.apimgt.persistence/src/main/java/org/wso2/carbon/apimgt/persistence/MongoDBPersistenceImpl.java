@@ -616,12 +616,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
         return database.getCollection(orgName, MongoDBDevPortalAPI.class);
     }
-    @Override
-    public DocumentContent addDocumentationContent(Organization org, String apiId, String docId,
-            DocumentContent content) throws DocumentationPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+
     @Override
     public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
             int offset, UserContext ctx) throws APIPersistenceException {
