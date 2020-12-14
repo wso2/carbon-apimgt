@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Joi from '@hapi/joi';
@@ -45,10 +45,16 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
+    switch (field) {
+        case 'name':
+        case 'description':
+        case 'hosts':
+            return { ...state, [field]: value };
+        case 'editDetails':
+            return value;
+        default:
+            return state;
+    }
 }
 
 /**
@@ -61,24 +67,11 @@ function AddEditMGLabel(props) {
         updateList, dataRow, icon, triggerButtonText, title,
     } = props;
     const classes = useStyles();
-
-    let id = null;
-    let initialState = {
+    const [initialState, setInitialState] = useState({
         description: '',
         hosts: [],
-    };
-
-    // If the dataRow is there, assign data to initialState
-    if (dataRow) {
-        const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
-        id = dataRow.id;
-
-        initialState = {
-            name: originalName,
-            description: originalDescription,
-            hosts: originalHosts,
-        };
-    }
+    });
+    const [editMode, setIsEditMode] = useState(false);
 
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description, hosts } = state;
@@ -86,6 +79,12 @@ function AddEditMGLabel(props) {
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
+    useEffect(() => {
+        setInitialState({
+            description: '',
+            hosts: [],
+        });
+    }, []);
 
     const handleHostValidation = (hostName) => {
         if (hostName === undefined) {
@@ -167,16 +166,16 @@ function AddEditMGLabel(props) {
         }
         const restApi = new API();
         let promiseAPICall;
-        if (id) {
+        if (dataRow) {
             // assign the update promise to the promiseAPICall
-            promiseAPICall = restApi.updateMicrogatewayLabel(id, name.trim(), description, hosts);
+            promiseAPICall = restApi.updateMicrogatewayLabel(dataRow.id, name.trim(), description, hosts);
         } else {
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.addMicrogatewayLabel(name.trim(), description, hosts);
         }
 
         return promiseAPICall.then(() => {
-            if (id) {
+            if (dataRow) {
                 return (
                     <FormattedMessage
                         id='AdminPages.Gateways.AddEdit.form.info.edit.successful'
@@ -206,6 +205,21 @@ function AddEditMGLabel(props) {
         dispatch({ field: 'hosts', value: userHosts });
     };
 
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
+            setIsEditMode(true);
+            dispatch({
+                field: 'editDetails',
+                value: {
+                    name: originalName,
+                    description: originalDescription,
+                    hosts: originalHosts,
+                },
+            });
+        }
+    };
+
     return (
         <FormDialogBase
             title={title}
@@ -218,6 +232,7 @@ function AddEditMGLabel(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <FormControl component='fieldset' className={classes.addEditFormControl}>
                 <TextField
@@ -236,7 +251,7 @@ function AddEditMGLabel(props) {
                     error={hasErrors('name', name)}
                     helperText={hasErrors('name', name) || 'Name of the Gateway label'}
                     variant='outlined'
-                    disabled={id}
+                    disabled={editMode}
                 />
                 <TextField
                     margin='dense'
@@ -249,7 +264,7 @@ function AddEditMGLabel(props) {
                     helperText='Description of the Gateway label'
                     variant='outlined'
                 />
-                {(id)
+                {(editMode)
                     ? (
                         <ListInput
                             onInputListChange={handleHostChange}
