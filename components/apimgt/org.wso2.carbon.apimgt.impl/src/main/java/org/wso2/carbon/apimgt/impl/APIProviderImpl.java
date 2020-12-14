@@ -372,6 +372,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    /**
+     * Get a list of APIs with the given name, published by the given provider.
+     *
+     * @param providerId provider id
+     * @param apiName name of the API
+     * @return set of API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get set of API
+     */
+    private List<API> getAPIsByNameAndProvider(String providerId, String apiName) throws APIManagementException {
+
+        List<API> apiSortedList = new ArrayList<>();
+
+        try {
+            providerId = APIUtil.replaceEmailDomain(providerId);
+            String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + providerId;
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            Association[] associations = registry.getAssociations(providerPath, APIConstants.PROVIDER_ASSOCIATION);
+            for (Association association : associations) {
+                String apiPath = association.getDestinationPath();
+                if (registry.resourceExists(apiPath)) {
+                    Resource resource = registry.get(apiPath);
+                    String apiArtifactId = resource.getUUID();
+                    if (apiArtifactId != null) {
+                        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                        if (apiArtifact != null) {
+                            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+                            if (!APIConstants.API_PRODUCT.equals(type)) {
+                                API oldAPI = APIUtil.getAPI(apiArtifact, registry);
+                                if (oldAPI != null) {
+                                    if (oldAPI.getId().getApiName().equals(apiName)) {
+                                        checkAccessControlPermission(oldAPI.getId());
+                                        apiSortedList.add(oldAPI);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        throw new GovernanceException("artifact id is null of " + apiPath);
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get APIs for provider : " + providerId, e);
+        }
+        Collections.sort(apiSortedList, new APINameComparator());
+        return apiSortedList;
+    }
+
 
     /**
      * Get a list of all the consumers for all APIs
@@ -2533,7 +2581,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
         List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
-        List<API> apiList = getAPIsByProvider(api.getId().getProviderName());
+        List<API> apiList = getAPIsByNameAndProvider(api.getId().getProviderName(), api.getId().getApiName());
         APIVersionComparator versionComparator = new APIVersionComparator();
         for (API oldAPI : apiList) {
             if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
