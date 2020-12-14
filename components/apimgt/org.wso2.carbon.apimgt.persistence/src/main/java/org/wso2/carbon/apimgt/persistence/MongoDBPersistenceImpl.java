@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.persistence.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -613,5 +615,24 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
         return database.getCollection(orgName, MongoDBDevPortalAPI.class);
+    }
+    @Override
+    public DocumentContent addDocumentationContent(Organization org, String apiId, String docId,
+            DocumentContent content) throws DocumentationPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    @Override
+    public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

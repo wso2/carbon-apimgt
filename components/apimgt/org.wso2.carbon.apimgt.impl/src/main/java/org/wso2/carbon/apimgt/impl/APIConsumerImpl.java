@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -69,6 +70,8 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -95,6 +98,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -112,9 +116,14 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -5922,8 +5931,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
         }
         Organization org = new Organization(tenantDomain);
-        String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, null);
+        String[] roles = APIUtil.getListOfRoles((userNameWithoutChange != null)? userNameWithoutChange: username);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, null, roles);
         try {
             if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
                 // TODO
@@ -6090,5 +6099,62 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String msg = "Failed to get API with uuid " + uuid;
             throw new APIManagementException(msg, e);
         }
+    }
+    @Override
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException {
+
+        ArrayList<Object> compoundResult = new ArrayList<Object>();
+        Map<Documentation, API> docMap = new HashMap<Documentation, API>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        int totalLength = 0;
+        
+        String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        Organization org = new Organization(tenantDomain);
+        Map<String, Object> properties = APIUtil.getUserProperties(userame);
+        String[] roles = APIUtil.getFilteredUserRoles(userame);;
+        UserContext ctx = new UserContext(userame, org, properties, roles);
+        
+        try {
+            DevPortalContentSearchResult sResults = apiPersistenceInstance.searchContentForDevPortal(org, searchQuery,
+                    start, end, ctx);
+            if (sResults != null) {
+                List<SearchContent> resultList = sResults.getResults();
+                for (SearchContent item : resultList) {
+                    if (item instanceof DocumentSearchContent) {
+                        // doc item
+                        DocumentSearchContent docItem = (DocumentSearchContent) item;
+                        Documentation doc = new Documentation(
+                                DocumentationType.valueOf(docItem.getDocType().toString()), docItem.getName());
+                        doc.setSourceType(DocumentSourceType.valueOf(docItem.getSourceType().toString()));
+                        doc.setVisibility(DocumentVisibility.valueOf(docItem.getVisibility().toString()));
+                        doc.setId(docItem.getId());
+                        API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
+                                docItem.getApiVersion()));
+                        api.setUuid(docItem.getApiUUID());
+                        docMap.put(doc, api);
+                    } else {
+                        DevPortalSearchContent publiserAPI = (DevPortalSearchContent) item;
+                        API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
+                                publiserAPI.getVersion()));
+                        api.setUuid(publiserAPI.getId());
+                        api.setContext(publiserAPI.getContext());
+                        api.setContextTemplate(publiserAPI.getContext());
+                        api.setStatus(publiserAPI.getStatus());
+                        api.setRating(0);// need to retrieve from db
+                        apiSet.add(api);
+                    }
+                }
+            }
+            compoundResult.addAll(apiSet);
+            compoundResult.addAll(docMap.entrySet());
+            compoundResult.sort(new ContentSearchResultNameComparator());
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching content ", e);
+        }
+        result.put("apis", compoundResult);
+        result.put("length", totalLength );
+        return result;
     }
 }

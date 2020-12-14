@@ -39,23 +39,33 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent.ContentSourceType;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo.DocumentSourceType;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentationType;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
@@ -70,6 +80,7 @@ import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
+import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -77,6 +88,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -88,6 +100,9 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.indexing.indexer.IndexerException;
+import org.wso2.carbon.registry.indexing.service.ContentBasedSearchService;
+import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -1021,6 +1036,303 @@ public class RegistryPersistenceImpl implements APIPersistence {
         return searchResults;
     }
 
+    
+
+    @Override
+    public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx) throws APIPersistenceException {
+        log.debug("Requested query for publisher content search: " + searchQuery);
+        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
+        //log.info("========================================");
+        modifiedQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(modifiedQuery, ctx);
+        //log.info("query " + modifiedQuery);
+        Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        //log.info("attributes " + attributes);
+        //log.info("========================================");
+        if(log.isDebugEnabled()) {
+            log.debug("Search attributes : " + attributes );
+        }
+        boolean isTenantFlowStarted = false;
+        PublisherContentSearchResult result = null;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(holder.getRegistryUser());
+            
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifactManager docArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.DOCUMENTATION_KEY);
+            int maxPaginationLimit = getMaxPaginationLimit();
+            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            int tenantId = holder.getTenantId();
+            if (tenantId == -1) {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
+            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
+            ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
+            
+            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
+            String errorMsg = resultsBean.getErrorMessage();
+            if (errorMsg != null) {
+                throw new APIPersistenceException("Error while searching " + errorMsg);
+            }
+            ResourceData[] resourceData = resultsBean.getResourceDataList();
+            int totalLength = PaginationContext.getInstance().getLength();
+            
+            if(resourceData != null) {
+                result = new PublisherContentSearchResult();
+                List<SearchContent> contentData = new ArrayList<SearchContent>();
+                if(log.isDebugEnabled()) {
+                    log.debug("Number of records Found: " + resourceData.length);
+                }
+                log.info("Number of records Found: " + resourceData.length);
+                
+                
+                for (ResourceData data : resourceData) {
+
+                    String resourcePath = data.getResourcePath();
+                    if (resourcePath.contains(APIConstants.APIMGT_REGISTRY_LOCATION)) {
+                        int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+                        resourcePath = resourcePath.substring(index);
+                        Resource resource = registry.get(resourcePath);
+                        if (APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE.equals(resource.getMediaType())) {
+                            if (resourcePath.contains(APIConstants.INLINE_DOCUMENT_CONTENT_DIR)) {
+                                int indexOfContents = resourcePath.indexOf(APIConstants.INLINE_DOCUMENT_CONTENT_DIR);
+                                resourcePath = resourcePath.substring(0, indexOfContents) + data.getName();
+                            }
+                            DocumentSearchContent docSearch = new DocumentSearchContent();
+                            Resource docResource = registry.get(resourcePath);
+                            String docArtifactId = docResource.getUUID();
+                            GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+                            //API associatedAPI = null;
+                            //APIProduct associatedAPIProduct = null;
+                            int indexOfDocumentation = resourcePath.indexOf(APIConstants.DOCUMENTATION_KEY);
+                            String apiPath = resourcePath.substring(0, indexOfDocumentation) + APIConstants.API_KEY;
+                            Resource apiResource = registry.get(apiPath);
+                            String apiArtifactId = apiResource.getUUID();
+                            PublisherAPI pubAPI;
+                            if (apiArtifactId != null) {
+                                GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                                String accociatedType;
+                                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                        equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                                    //associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                                    accociatedType = APIConstants.API_PRODUCT;
+                                } else {
+                                    //associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                                    accociatedType = APIConstants.API;
+                                }
+                                pubAPI = RegistryPersistenceUtil.getAPIForSearch(apiArtifact);
+                                docSearch.setApiName(pubAPI.getApiName());
+                                docSearch.setApiProvider(pubAPI.getProviderName());
+                                docSearch.setApiVersion(pubAPI.getVersion());
+                                docSearch.setApiUUID(pubAPI.getId());
+                                docSearch.setAssociatedType(accociatedType);
+                                docSearch.setDocType(doc.getType());
+                                docSearch.setId(doc.getId());
+                                docSearch.setSourceType(doc.getSourceType());
+                                docSearch.setVisibility(doc.getVisibility());
+                                docSearch.setName(doc.getName());
+                                contentData.add(docSearch);
+                            } else {
+                                throw new GovernanceException("artifact id is null of " + apiPath);
+                            }
+                            
+                        } else {
+                            String apiArtifactId = resource.getUUID();
+                            //API api;
+                            //APIProduct apiProduct;
+                            String type;
+                            if (apiArtifactId != null) {
+                                GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                                if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                        equals(APIConstants.API_PRODUCT)) {
+                                    //apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                                    //apiProductSet.add(apiProduct);
+                                    type = APIConstants.API_PRODUCT;
+                                } else {
+                                    //api = APIUtil.getAPI(apiArtifact, registry);
+                                    //apiSet.add(api);
+                                    type = APIConstants.API;
+                                }
+                                PublisherAPI pubAPI = RegistryPersistenceUtil.getAPIForSearch(apiArtifact);
+                                PublisherSearchContent content = new PublisherSearchContent();
+                                content.setContext(pubAPI.getContext());
+                                content.setDescription(pubAPI.getDescription());
+                                content.setId(pubAPI.getId());
+                                content.setName(pubAPI.getApiName());
+                                content.setProvider(
+                                        RegistryPersistenceUtil.replaceEmailDomainBack(pubAPI.getProviderName()));
+                                content.setType(type);
+                                content.setVersion(pubAPI.getVersion());
+                                content.setStatus(pubAPI.getStatus());
+                                contentData.add(content);
+                            } else {
+                                throw new GovernanceException("artifact id is null for " + resourcePath);
+                            }
+                        }
+                    }
+                
+                }
+                result.setTotalCount(totalLength);
+                result.setReturnedCount(contentData.size());
+                result.setResults(contentData);
+            } 
+
+        } catch (RegistryException | IndexerException | DocumentationPersistenceException e) {
+            throw new APIPersistenceException("Error while searching for content ", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx) throws APIPersistenceException {
+        log.debug("Requested query for devportal content search: " + searchQuery);
+        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
+        //log.info("========================================");
+        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
+        //log.info("query " + modifiedQuery);
+        Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        attributes.put(APIConstants.API_OVERVIEW_STATUS, "(published OR prototyped OR null)");
+        //log.info("attributes " + attributes);
+        //log.info("========================================");
+        
+        if(log.isDebugEnabled()) {
+            log.debug("Search attributes : " + attributes );
+        }
+        DevPortalContentSearchResult result = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(holder.getRegistryUser());
+            
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifactManager docArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.DOCUMENTATION_KEY);
+            int maxPaginationLimit = getMaxPaginationLimit();
+            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            int tenantId = holder.getTenantId();
+            if (tenantId == -1) {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
+            UserRegistry systemUserRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME, tenantId);
+            ContentBasedSearchService contentBasedSearchService = new ContentBasedSearchService();
+            
+            SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
+            String errorMsg = resultsBean.getErrorMessage();
+            if (errorMsg != null) {
+                throw new APIPersistenceException("Error while searching " + errorMsg);
+            }
+            ResourceData[] resourceData = resultsBean.getResourceDataList();
+            int totalLength = PaginationContext.getInstance().getLength();
+            
+            if(resourceData != null) {
+                result = new DevPortalContentSearchResult();
+                List<SearchContent> contentData = new ArrayList<SearchContent>();
+                if(log.isDebugEnabled()) {
+                    log.debug("Number of records Found: " + resourceData.length);
+                }
+                log.info("Number of records Found: " + resourceData.length);
+                
+                
+                for (ResourceData data : resourceData) {
+
+                    String resourcePath = data.getResourcePath();
+                    if (resourcePath.contains(APIConstants.APIMGT_REGISTRY_LOCATION)) {
+                        int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+                        resourcePath = resourcePath.substring(index);
+                        Resource resource = registry.get(resourcePath);
+                        if (APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                                APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE.equals(resource.getMediaType())) {
+                            if (resourcePath.contains(APIConstants.INLINE_DOCUMENT_CONTENT_DIR)) {
+                                int indexOfContents = resourcePath.indexOf(APIConstants.INLINE_DOCUMENT_CONTENT_DIR);
+                                resourcePath = resourcePath.substring(0, indexOfContents) + data.getName();
+                            }
+                            DocumentSearchContent docSearch = new DocumentSearchContent();
+                            Resource docResource = registry.get(resourcePath);
+                            String docArtifactId = docResource.getUUID();
+                            GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+                            int indexOfDocumentation = resourcePath.indexOf(APIConstants.DOCUMENTATION_KEY);
+                            String apiPath = resourcePath.substring(0, indexOfDocumentation) + APIConstants.API_KEY;
+                            Resource apiResource = registry.get(apiPath);
+                            String apiArtifactId = apiResource.getUUID();
+                            DevPortalAPI devAPI;
+                            if (apiArtifactId != null) {
+                                GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                                devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+                                docSearch.setApiName(devAPI.getApiName());
+                                docSearch.setApiProvider(devAPI.getProviderName());
+                                docSearch.setApiVersion(devAPI.getVersion());
+                                docSearch.setApiUUID(devAPI.getId());
+                                docSearch.setDocType(doc.getType());
+                                docSearch.setId(doc.getId());
+                                docSearch.setSourceType(doc.getSourceType());
+                                docSearch.setVisibility(doc.getVisibility());
+                                docSearch.setName(doc.getName());
+                                contentData.add(docSearch);
+                            } else {
+                                throw new GovernanceException("artifact id is null of " + apiPath);
+                            }
+                            
+                        } else {
+                            String apiArtifactId = resource.getUUID();
+                            if (apiArtifactId != null) {
+                                GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                                DevPortalAPI devAPI = RegistryPersistenceUtil.getDevPortalAPIForSearch(apiArtifact);
+                                DevPortalSearchContent content = new DevPortalSearchContent();
+                                content.setContext(devAPI.getContext());
+                                content.setDescription(devAPI.getDescription());
+                                content.setId(devAPI.getId());
+                                content.setName(devAPI.getApiName());
+                                content.setProvider(
+                                        RegistryPersistenceUtil.replaceEmailDomainBack(devAPI.getProviderName()));
+                                content.setVersion(devAPI.getVersion());
+                                content.setStatus(devAPI.getStatus());
+                                content.setBusinessOwner(devAPI.getBusinessOwner());
+                                content.setBusinessOwnerEmail(devAPI.getBusinessOwnerEmail());
+                                
+                                contentData.add(content);
+                            } else {
+                                throw new GovernanceException("artifact id is null for " + resourcePath);
+                            }
+                        }
+                    }
+                
+                }
+                result.setTotalCount(totalLength);
+                result.setReturnedCount(contentData.size());
+                result.setResults(contentData);
+            } 
+
+        } catch (RegistryException | IndexerException | DocumentationPersistenceException e) {
+            throw new APIPersistenceException("Error while searching for content ", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
+    }
+    
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
         GenericArtifactManager artifactManager = null;
@@ -1644,8 +1956,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
                 }
-                RegistryPersistenceUtil.setResourcePermissions(RegistryPersistenceUtil.replaceEmailDomain(apiProviderName), visibility, visibleRoles,
-                        filePath, registry);
+                RegistryPersistenceUtil.setResourcePermissions(
+                        RegistryPersistenceUtil.replaceEmailDomain(apiProviderName), visibility, visibleRoles, filePath,
+                        registry);
                 //documentation.setFilePath(addResourceFile(apiId, filePath, icon));
                 String savedFilePath = addResourceFile(filePath, resource, registry, tenantDomain);
                 //doc.setFilePath(savedFilePath);
@@ -1663,7 +1976,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     docContent = registry.get(contentPath);
                 }
                 String text = content.getTextContent();
-                if (!APIConstants.NO_CONTENT_UPDATE.equals(text )) {
+                if (!APIConstants.NO_CONTENT_UPDATE.equals(text)) {
                     docContent.setContent(text);
                 }
                 docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
@@ -2108,4 +2421,5 @@ public class RegistryPersistenceImpl implements APIPersistence {
         holder.setTenantFlowStarted(tenantFlowStarted);
         return holder;
     }
+
 }

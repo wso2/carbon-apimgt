@@ -40,6 +40,7 @@ import org.pdfbox.util.PDFTextStripper;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
@@ -488,6 +489,7 @@ public class PersistenceUtil {
         return false;
     }
 
+
     public static String extractPDFText(InputStream inputStream) throws IOException {
         PDFParser parser = new PDFParser(inputStream);
         parser.parse();
@@ -560,4 +562,22 @@ public class PersistenceUtil {
         }
     }
 
+
+      public static boolean isAdminUser(UserContext userContext) {
+        boolean isAdmin = false;
+        Map<String, Object> properties = userContext.getProperties();
+        if (properties.containsKey(APIConstants.USER_CTX_PROPERTY_ISADMIN)) {
+            isAdmin = (Boolean) properties.get(APIConstants.USER_CTX_PROPERTY_ISADMIN);
+        }
+        return isAdmin;
+    }
+
+    public static String getSkipRoles(UserContext userContext) {
+        String skipRoles = "";
+        Map<String, Object> properties = userContext.getProperties();
+        if (properties.containsKey(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES)) {
+            skipRoles = (String) properties.get(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES);
+        }
+        return skipRoles;
+    }
 }
