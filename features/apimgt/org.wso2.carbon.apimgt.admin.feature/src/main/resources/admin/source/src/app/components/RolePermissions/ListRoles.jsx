@@ -44,6 +44,9 @@ const headCells = [
     },
 ];
 
+const pageDesc = 'Scope assignments are related to internal APIM specific scope assignments and are not related' 
+                + ' to role permission assignments in the management console.'
+
 /**
  *
  * Extract the scope mapping against REST API applications and User roles.
@@ -232,7 +235,7 @@ export default function ListRoles() {
         return <Progress message='Resolving user ...' />;
     }
     return (
-        <ContentBase title='Scope Assignments' pageDescription='Some description for scope mapping'>
+        <ContentBase title='Scope Assignments' pageDescription={pageDesc}>
             <ListAddOns>
                 <Grid item>
                     <Button
