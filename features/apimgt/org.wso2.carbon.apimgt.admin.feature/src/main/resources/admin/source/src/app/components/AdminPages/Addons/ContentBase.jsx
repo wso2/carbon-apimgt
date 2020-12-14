@@ -78,7 +78,7 @@ function ContentBase(props) {
                                 <Typography color='inherit' variant='h5' component='h1'>
                                     {title}
                                 </Typography>
-                                <Box>
+                                <Box pb={1}>
                                     {
                                         pageDescription !== null && (
                                             <Typography variant='body2' color='textSecondary' component='p'>
