@@ -78,7 +78,10 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -145,11 +148,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -160,11 +165,15 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
@@ -10366,7 +10375,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         Organization org = new Organization(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, null);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, null, roles);
         try {
             if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
                 // TODO
@@ -10502,6 +10511,84 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+        ArrayList<Object> compoundResult = new ArrayList<Object>();
+        Map<Documentation, API> docMap = new HashMap<Documentation, API>();
+        Map<Documentation, APIProduct> productDocMap = new HashMap<Documentation, APIProduct>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        int totalLength = 0;
+
+        String userame = userNameWithoutChange;
+        Organization org = new Organization(tenantDomain);
+        Map<String, Object> properties = APIUtil.getUserProperties(userame);
+        String[] roles = APIUtil.getFilteredUserRoles(userame);;
+        UserContext ctx = new UserContext(userame, org, properties, roles);
+
+        
+        try {
+            PublisherContentSearchResult results = apiPersistenceInstance.searchContentForPublisher(org, searchQuery,
+                    start, end, ctx);
+            if (results != null) {
+                List<SearchContent> resultList = results.getResults();
+                for (SearchContent item : resultList) {
+                    if ("API".equals(item.getType())) {
+                        PublisherSearchContent publiserAPI = (PublisherSearchContent) item;
+                        API api = new API(new APIIdentifier(publiserAPI.getProvider(), publiserAPI.getName(),
+                                publiserAPI.getVersion()));
+                        api.setUuid(publiserAPI.getId());
+                        api.setContext(publiserAPI.getContext());
+                        api.setContextTemplate(publiserAPI.getContext());
+                        api.setStatus(publiserAPI.getStatus());
+                        apiSet.add(api);
+                    } else if ("APIProduct".equals(item.getType())) {
+
+                        PublisherSearchContent publiserAPI = (PublisherSearchContent) item;
+                        APIProduct api = new APIProduct(new APIProductIdentifier(publiserAPI.getProvider(),
+                                publiserAPI.getName(), publiserAPI.getVersion()));
+                        api.setUuid(publiserAPI.getId());
+                        api.setContextTemplate(publiserAPI.getContext());
+                        api.setState(publiserAPI.getStatus());
+                        apiProductSet.add(api);
+                    } else if (item instanceof DocumentSearchContent) {
+                        // doc item
+                        DocumentSearchContent docItem = (DocumentSearchContent) item;
+                        Documentation doc = new Documentation(
+                                DocumentationType.valueOf(docItem.getDocType().toString()), docItem.getName());
+                        doc.setSourceType(DocumentSourceType.valueOf(docItem.getSourceType().toString()));
+                        doc.setVisibility(DocumentVisibility.valueOf(docItem.getVisibility().toString()));
+                        doc.setId(docItem.getId());
+                        if ("API".equals(docItem.getAssociatedType())) {
+
+                            API api = new API(new APIIdentifier(docItem.getApiProvider(), docItem.getApiName(),
+                                    docItem.getApiVersion()));
+                            api.setUuid(docItem.getApiUUID());
+                            docMap.put(doc, api);
+                        } else if ("APIProduct".equals(docItem.getAssociatedType())) {
+                            APIProduct api = new APIProduct(new APIProductIdentifier(docItem.getApiProvider(),
+                                    docItem.getApiName(), docItem.getApiVersion()));
+                            api.setUuid(docItem.getApiUUID());
+                            productDocMap.put(doc, api);
+                        }
+                    }
+                }
+                compoundResult.addAll(apiSet);
+                compoundResult.addAll(apiProductSet);
+                compoundResult.addAll(docMap.entrySet());
+                compoundResult.addAll(productDocMap.entrySet());
+                compoundResult.sort(new ContentSearchResultNameComparator());
+            } 
+            
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching content ", e);
+        }
+        result.put("apis", compoundResult);
+        result.put("length", totalLength );
+        return result;
     }
 
 }

@@ -1261,7 +1261,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
         Organization org = new Organization(tenantDomain);
-        UserContext ctx = new UserContext(username, org, null);
+        UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
             DocumentSearchResult list = apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);

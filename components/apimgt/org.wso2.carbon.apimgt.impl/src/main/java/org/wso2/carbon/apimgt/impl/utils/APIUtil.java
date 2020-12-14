@@ -10601,6 +10601,16 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
+    
+    public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
+            properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
+        }
+        properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
+
+        return properties;
+    }
 
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled

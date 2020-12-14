@@ -867,4 +867,16 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException;
+    
+    /**
+     * Search in content of apis, api products and documents and provide the results
+     * @param searchQuery search query 
+     * @param tenantDomain
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException;
 }

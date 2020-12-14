@@ -2471,4 +2471,8 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+    
+    
+    public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
+    public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
 }

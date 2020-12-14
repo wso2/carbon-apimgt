@@ -70,7 +70,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
-
+            String originalQuery = new String(query);
             query = APIUtil.constructNewSearchQuery(query);
 
             if (!(StringUtils.containsIgnoreCase(query, APIConstants.API_STATUS))) {
@@ -89,12 +89,15 @@ public class SearchApiServiceImpl implements SearchApiService {
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-
+            Map<String, Object> result = null;
             // Extracting search queries for the recommendation system
-            apiConsumer.publishSearchQuery(query, username);
+            apiConsumer.publishSearchQuery(query, username);/////////
+            if (originalQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = apiConsumer.searchPaginatedContent(originalQuery, requestedTenantDomain, offset, limit);
+            } else {
+                result = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset, limit, false);
+            }
 
-            Map<String, Object> result = apiConsumer
-                    .searchPaginatedAPIs(query, requestedTenantDomain, offset, limit, false);
             ArrayList<Object> apis;
             /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
             method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,

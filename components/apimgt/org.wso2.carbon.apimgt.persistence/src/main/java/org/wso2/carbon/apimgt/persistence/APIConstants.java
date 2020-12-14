@@ -338,4 +338,8 @@ public final class APIConstants {
     
     public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
     public static final String NO_CONTENT_UPDATE = "no_content_update";
+    
+    public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
+    public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
+    public static final String API = "API";
 }

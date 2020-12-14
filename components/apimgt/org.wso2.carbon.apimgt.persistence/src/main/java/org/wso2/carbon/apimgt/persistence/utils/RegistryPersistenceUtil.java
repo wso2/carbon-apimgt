@@ -39,8 +39,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
@@ -2518,5 +2520,41 @@ public class RegistryPersistenceUtil {
     public static String getAPIBasePath(String provider, String apiName, String version) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(provider)
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + version;
+    }
+
+    public static PublisherAPI getAPIForSearch(GenericArtifact apiArtifact) throws APIPersistenceException {
+        PublisherAPI api = new PublisherAPI();
+        try {
+            
+            api.setContext(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+            api.setDescription(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            api.setId(apiArtifact.getId());
+            api.setStatus(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+            api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));;
+            api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+
+        } catch (GovernanceException e) {
+            throw new APIPersistenceException("Error while extracting api attributes ", e);
+        }
+        return api;
+    }
+    
+    public static DevPortalAPI getDevPortalAPIForSearch(GenericArtifact apiArtifact) throws APIPersistenceException {
+        DevPortalAPI api = new DevPortalAPI();
+        try {
+            
+            api.setContext(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+            api.setDescription(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            api.setId(apiArtifact.getId());
+            api.setStatus(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            api.setApiName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+            api.setProviderName(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));;
+            api.setVersion(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+
+        } catch (GovernanceException e) {
+            throw new APIPersistenceException("Error while extracting api attributes ", e);
+        }
+        return api;
     }
 }

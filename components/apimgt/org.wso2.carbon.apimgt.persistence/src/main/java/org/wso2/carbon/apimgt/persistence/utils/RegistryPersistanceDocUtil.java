@@ -19,8 +19,11 @@ package org.wso2.carbon.apimgt.persistence.utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentationType;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo.DocumentSourceType;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -210,5 +213,45 @@ public class RegistryPersistanceDocUtil {
             throw new DocumentationPersistenceException(msg, e);
         }
         return artifact;
+    }
+    
+    public DocumentSearchContent getPublisherDocSearchResult(GenericArtifact docArtifact, GenericArtifact apiArtifact)
+            throws DocumentationPersistenceException {
+        DocumentSearchContent doc = new DocumentSearchContent();
+        try {
+            doc.setApiName(apiArtifact.getAttribute(""));
+            doc.setApiProvider("admin");
+            doc.setApiVersion("2");
+            doc.setAssociatedType("API");
+            doc.setApiUUID(apiArtifact.getId());
+            
+            
+            doc.setDocType(DocumentationType.HOWTO);
+            doc.setId(docArtifact.getId());
+            doc.setSourceType(DocumentSourceType.INLINE);
+            doc.setVisibility(DocumentVisibility.API_LEVEL);
+            doc.setName(docArtifact.getAttribute(APIConstants.DOC_NAME));
+            
+            
+            
+        } catch (GovernanceException e) {
+            throw new DocumentationPersistenceException("Error while retrieving artifact attributes", e);
+        }
+
+        return doc;
+    }
+    
+    public DocumentSearchContent getDevPortalDocSearchResult(Documentation document) {
+        DocumentSearchContent doc = new DocumentSearchContent();
+        doc.setApiName(document.getName());
+        doc.setApiProvider("admin");
+        doc.setApiVersion("2");
+        doc.setAssociatedType("API");
+        doc.setDocType(DocumentationType.HOWTO);
+        doc.setId("yyyyyyyyyyy");
+        doc.setSourceType(DocumentSourceType.INLINE);
+        doc.setVisibility(DocumentVisibility.API_LEVEL);
+        doc.setName("Mydoc");
+        return doc;
     }
 }
