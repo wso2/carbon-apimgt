@@ -13,38 +13,38 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.wso2.carbon.apimgt.persistence.dto;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-public class UserContext {
-    String username;
-    Organization organization;
-    String[] roles;
-    // domain name, role
+public class DevPortalContentSearchResult {
+    int returnedCount;
+    int totalCount;
+    List<SearchContent> results = new ArrayList<SearchContent>();
 
-    Map<String, Object> properties;
-
-    public UserContext(String userame, Organization organization, Map<String, Object> properties, String[] roles) {
-        this.username = userame;
-        this.organization = organization;
-        this.properties = properties;
-        this.roles = roles;
+    public int getReturnedCount() {
+        return returnedCount;
     }
 
-    public String getUserame() {
-        return username;
+    public void setReturnedCount(int returnedCount) {
+        this.returnedCount = returnedCount;
     }
 
-    public Organization getOrganization() {
-        return organization;
+    public int getTotalCount() {
+        return totalCount;
     }
 
-    public Map<String, Object> getProperties() {
-        return properties;
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
     }
 
-    public String[] getRoles() {
-        return roles;
+    public List<SearchContent> getResults() {
+        return results;
+    }
+
+    public void setResults(List<SearchContent> results) {
+        this.results = results;
     }
 }
