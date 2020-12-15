@@ -247,7 +247,8 @@ function AddEdit(props) {
                         permissionStatus: (result.body.permissions === null)
                             ? 'ALLOW' : result.body.permissions.permissionType,
                         roles: (result.body.permissions === null)
-                            ? 'Internal/everyone' : result.body.permissions.roles.join(','),
+                            ? 'Internal/everyone' : result.body.permissions.roles
+                            && result.body.permissions.roles.join(','),
                     },
                     graphQL: {
                         maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
