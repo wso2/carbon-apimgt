@@ -3142,8 +3142,16 @@ public abstract class AbstractAPIManager implements APIManager {
                                 }
                                 if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
                                         storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
-                                    oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                            storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                    if (storedOAuthApplicationInfo
+                                            .getParameter(APIConstants.JSON_GRANT_TYPES) instanceof String) {
+                                        oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                                ((String) storedOAuthApplicationInfo
+                                                        .getParameter(APIConstants.JSON_GRANT_TYPES))
+                                                        .replace(",", " "));
+                                    } else {
+                                        oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                                storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                    }
                                 }
                                 if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
                                         StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {
