@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -10973,5 +10974,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<APIRevision> getAPIRevisions(String apiUUID) throws APIManagementException {
         return apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
+    }
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Override
+    public void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevisionId));
+        }
+        APITemplateBuilder builder = null;
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        APIIdentifier revisionApiIdentifier = getLightweightAPIByUUID(apiRevisionId, tenantDomain).getId();
+        API api = getRevisionAPI(revisionApiIdentifier, apiRevision);
+        api.setSwaggerDefinition(getOpenAPIDefinition(revisionApiIdentifier));
+        Set<String> environments = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            environments.add(apiRevisionDeployment.getDeployment());
+        }
+        api.setEnvironments(environments);
+        try {
+            builder = getAPITemplateBuilder(api);
+        } catch (Exception e) {
+            handleException("Error while publishing to Gateway ", e);
+        }
+        Map<String, String> failedEnvironment = gatewayManager.deployAPIRevisionToGateway(api, builder, tenantDomain);
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+    }
+
+    @Override
+    public APIRevisionDeployment getAPIRevisionDeployment(String name, String type) throws APIManagementException {
+         return apiMgtDAO.getAPIRevisionDeploymentByNameAndType(name,type);
+    }
+
+    @Override
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentList(String revisionUUID) throws APIManagementException {
+         return apiMgtDAO.getAPIRevisionDeploymentByRevisionUUID(revisionUUID);
     }
 }

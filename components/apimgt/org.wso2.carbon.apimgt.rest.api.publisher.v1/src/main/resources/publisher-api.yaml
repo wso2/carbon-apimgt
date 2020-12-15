@@ -1644,6 +1644,37 @@ paths:
   /apis/{apiId}/deploy-revision:
 
     #--------------------------------------------
+    # List available deployed revision deployment details of an API
+    #--------------------------------------------
+    get:
+      tags:
+        - API Revisions
+      summary: List available deployed revision deployment details of an API
+      description: |
+        List available deployed revision deployment details of an API
+      operationId: getAPIRevisionDeployments
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            List of deployed revision deployment details are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeploymentList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision"'
+
+    #--------------------------------------------
     # Deploy a revision
     #--------------------------------------------
     post:
@@ -1656,10 +1687,24 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/apiRevisionId-Q'
+      requestBody:
+        description: Deployment object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevisionDeploymentList'
       responses:
         200:
           description: |
             OK.
+        201:
+          description: |
+            Created.
+            Successful response with the newly deployed APIRevisionDeploymentList object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeploymentList'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -7444,6 +7489,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/APIRevision'
+    #-----------------------------------------------------
+    # The API Revision Deployment List resource
+    #-----------------------------------------------------
+    APIRevisionDeploymentList:
+      title: API Revision to Deployment mapped object with basic API deployment details
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIRevisionDeployment'
+    #-----------------------------------------------------
+    # The API Revision Deployment resource
+    #-----------------------------------------------------
+    APIRevisionDeployment:
+      title: APIRevisionDeployment Info object with basic API deployment details
+      properties:
+        revisionUuid:
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        deployment:
+          type: string
+          example: production and sandbox
+        type:
+          type: string
+          example: gateway or microgateway
+        displayOnDevportal:
+          type: boolean
+          example: true
+        deployedTime:
+          type: string
+          format: date-time
 
     AuditReport:
       title: Resource for Audit Report

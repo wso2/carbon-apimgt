@@ -1746,4 +1746,162 @@ public class APIGatewayManager {
                 , gatewayAPIDTO.getEndpointEntriesToBeRemove()));
     }
 
+
+    /**
+     * Publishes an API Revision to all configured Gateways.
+     *
+     * @param api          - The API to be published
+     * @param builder      - The template builder
+     * @param tenantDomain - Tenant Domain of the publisher
+     * @return a map of environments that failed to publish the API
+     */
+    public Map<String, String> deployAPIRevisionToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+
+        Map<String, String> failedGatewaysMap = new HashMap<String, String>(0);
+        Set<String> publishedGateways = new HashSet<>();
+
+        if (debugEnabled) {
+            log.debug("API to be published: " + api.getId());
+            if (api.getEnvironments() != null) {
+                log.debug("Number of environments to be published to: " + (api.getEnvironments().size()));
+            }
+            if (api.getGatewayLabels() != null) {
+                log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
+            }
+        }
+
+        if (api.getEnvironments() != null) {
+            for (String environmentName : api.getEnvironments()) {
+                Environment environment = environments.get(environmentName);
+                //If the environment is removed from the configuration, continue without publishing
+                if (environment == null) {
+                    continue;
+                }
+                if (debugEnabled) {
+                    log.debug("API with " + api.getId() + " is publishing to the environment of "
+                            + environment.getName());
+                }
+                failedGatewaysMap = deployAPIRevisionToGatewayEnvironment(environment, api, builder, tenantDomain, false,
+                        publishedGateways, failedGatewaysMap);
+            }
+        }
+
+        if (api.getGatewayLabels() != null) {
+            for (Label label : api.getGatewayLabels()) {
+                Environment environment = getEnvironmentFromLabel(label);
+                if (debugEnabled) {
+                    log.debug("API with " + api.getId() + " is publishing to the label " + label);
+                }
+                failedGatewaysMap = deployAPIRevisionToGatewayEnvironment(environment, api, builder, tenantDomain, true,
+                        publishedGateways, failedGatewaysMap);
+            }
+        }
+
+        DeployAPIInGatewayEvent
+                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
+                api.getUUID(), publishedGateways);
+        APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+        if (debugEnabled) {
+            log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
+                    + "with apiID " +   api.getId() + " at " + deployAPIInGatewayEvent.getTimeStamp());
+        }
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+
+        return failedGatewaysMap;
+    }
+
+    /**
+     * Publishes an API to a given environment
+     *
+     * @param environment               - Gateway environment
+     * @param api                       - The API to be published
+     * @param builder                   - The template builder
+     * @param tenantDomain              - Tenant Domain of the publisher
+     * @param isGatewayDefinedAsALabel  - Whether the environment is from a label or not. If it is from a label,
+     *                                  directly publishing to gateway will not happen
+     * @param failedGatewaysMap         - This map will be updated with the gateway if the publishing failed
+     * @return failedEnvironmentsMap
+     */
+    private Map<String, String> deployAPIRevisionToGatewayEnvironment(Environment environment, API api,
+                                                               APITemplateBuilder builder,
+                                                               String tenantDomain, boolean isGatewayDefinedAsALabel,
+                                                               Set<String> publishedGateways,
+                                                               Map<String,String> failedGatewaysMap) {
+
+        long startTime;
+        long endTime;
+        long startTimePublishToGateway = System.currentTimeMillis();
+
+        GatewayAPIDTO gatewayAPIDTO;
+        try {
+            APIGatewayAdminClient client;
+            startTime = System.currentTimeMillis();
+            if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+                gatewayAPIDTO = createAPIGatewayDTOtoPublishAPI(environment, api, builder, tenantDomain);
+                if (gatewayAPIDTO == null) {
+                    return failedGatewaysMap;
+                } else {
+                    if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
+                        if (!isGatewayDefinedAsALabel) {
+                            client = new APIGatewayAdminClient(environment);
+                            client.deployAPI(gatewayAPIDTO);
+                        }
+                    }
+
+                    if (saveArtifactsToStorage) {
+                        artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
+                                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
+                        publishedGateways.add(environment.getName());
+                        if (debugEnabled) {
+                            log.debug(gatewayAPIDTO.getName() + " details saved to the DB");
+                        }
+                    }
+                }
+            } else {
+                client = new APIGatewayAdminClient(environment);
+                deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
+            }
+            endTime = System.currentTimeMillis();
+            if (debugEnabled) {
+                log.debug("Publishing API (if the API does not exist in the Gateway) took " +
+                        (endTime - startTime) / 1000 + "  seconds");
+            }
+        } catch (AxisFault axisFault) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+            failedGatewaysMap.put(environment.getName(), axisFault.getMessage());
+            log.error("Error occurred when publish to gateway " + environment.getName(), axisFault);
+        } catch (APIManagementException | JSONException ex) {
+            log.error("Error occurred deploying sequences on " + environment.getName(), ex);
+            failedGatewaysMap.put(environment.getName(), ex.getMessage());
+        } catch (CertificateManagementException ex) {
+            log.error("Error occurred while adding/updating client certificate in " + environment.getName(), ex);
+            failedGatewaysMap.put(environment.getName(), ex.getMessage());
+        } catch (APITemplateException | XMLStreamException e) {
+            log.error("Error occurred while Publishing API directly to Gateway", e);
+            failedGatewaysMap.put(environment.getName(), e.getMessage());
+        } catch (ArtifactSynchronizerException e) {
+            failedGatewaysMap.put(environment.getName(), e.getMessage());
+            log.error("Error occurred while saving API artifacts to the Storage");
+        }
+        long endTimePublishToGateway = System.currentTimeMillis();
+        if (debugEnabled) {
+            log.debug("Publishing to gateway : " + environment.getName() + " total time taken : " +
+                    (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
+        }
+        return failedGatewaysMap;
+    }
+
+
+
 }

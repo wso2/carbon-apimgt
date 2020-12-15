@@ -1754,4 +1754,33 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get the related API revision
      */
     List<APIRevision> getAPIRevisions(String apiUUID) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details by providing deployment name and type
+     *
+     * @param name Deployment Name
+     * @param type Deployment type
+     * @return APIRevisionDeployment Object
+     * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
+     */
+    APIRevisionDeployment getAPIRevisionDeployment(String name, String type) throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details by providing revision uuid
+     *
+     * @param revisionUUID Revision UUID
+     * @return List<APIRevisionDeployment> Object
+     * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentList(String revisionUUID) throws APIManagementException;
 }
