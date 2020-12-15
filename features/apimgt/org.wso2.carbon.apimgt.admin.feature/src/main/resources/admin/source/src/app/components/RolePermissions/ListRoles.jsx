@@ -44,8 +44,8 @@ const headCells = [
     },
 ];
 
-const pageDesc = 'Scope assignments are related to internal APIM specific scope assignments and are not related' 
-                + ' to role permission assignments in the management console.'
+const pageDesc = 'Scope assignments are related to internal APIM specific scope assignments and are not related'
+                + ' to role permission assignments in the management console.';
 
 /**
  *

@@ -54,16 +54,17 @@ export default function SelectPermissionsStep(props) {
                     label='Role alias'
                 />
                 {
-                    permissionType === ROLE_ALIAS && 
-                    <Box 
-                        pl={7}
-                        display='inline'
-                        color='warning.main'
-                    >
-                        Please check whether the required permissions are assigned to the role
-                        {' '}
-                        to function with the assigned scope, before proceeding
-                    </Box>
+                    permissionType === ROLE_ALIAS && (
+                        <Box
+                            pl={7}
+                            display='inline'
+                            color='warning.main'
+                        >
+                            Please check whether the required permissions are assigned to the role
+                            {' '}
+                            to function with the assigned scope, before proceeding
+                        </Box>
+                    )
                 }
                 <Box width={400} display='inline' pl={7} pt={2} pb={2}>
                     <Autocomplete
@@ -117,16 +118,17 @@ export default function SelectPermissionsStep(props) {
                     label='Custom scope assignments'
                 />
                 {
-                    permissionType === SELECT_PERMISSIONS && 
-                    <Box 
-                        pl={7}
-                        display='inline'
-                        color='warning.main'
-                    >
-                        Please check whether the required permissions are assigned to the role
-                        {' '}
-                        to function with the assigned scope, before proceeding
-                    </Box>
+                    permissionType === SELECT_PERMISSIONS && (
+                        <Box
+                            pl={7}
+                            display='inline'
+                            color='warning.main'
+                        >
+                            Please check whether the required permissions are assigned to the role
+                            {' '}
+                            to function with the assigned scope, before proceeding
+                        </Box>
+                    )
                 }
                 <Box pl={7} pt={2}>
                     <PermissionTree
