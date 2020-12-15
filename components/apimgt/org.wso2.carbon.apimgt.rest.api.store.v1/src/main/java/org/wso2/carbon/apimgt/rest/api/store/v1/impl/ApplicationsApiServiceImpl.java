@@ -46,10 +46,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
-import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
@@ -343,7 +341,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param withKeys Export keys with application
      * @return Zip file containing exported Application
      */
-    @Override public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format,
+    @Override
+    public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format,
             MessageContext messageContext) throws APIManagementException {
         APIConsumer apiConsumer;
         Application application = null;
@@ -375,7 +374,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         // clear all duplicate keys with tokens
         application.getKeys().clear();
 
-        // export keys for application
+        // Export keys for application
         if (withKeys == null || !withKeys) {
             application.clearOAuthApps();
         } else {

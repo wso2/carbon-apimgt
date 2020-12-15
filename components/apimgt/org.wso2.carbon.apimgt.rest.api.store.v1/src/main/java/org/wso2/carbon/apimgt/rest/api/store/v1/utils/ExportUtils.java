@@ -25,17 +25,23 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedApplication;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,6 +50,9 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil.createDirectory;
@@ -90,28 +99,51 @@ public class ExportUtils {
             // Creates a temporary directory to store the exported application artifact
             File exportFolder = createTempApplicationDirectory(appName, appOwner);
             exportApplicationBasePath = exportFolder.toString();
-            archivePath = exportApplicationBasePath
-                    .concat(File.separator + appOwner + "-" +appName);
+            archivePath = exportApplicationBasePath.concat(File.separator + appOwner + "-" + appName);
             // Files.createDirectories(Paths.get(applicationArtifactBaseDirectoryPath));
         } catch (APIImportExportException e) {
             throw new APIManagementException("Unable to create the temporary directory to export the Application", e);
         }
-        Set<SubscribedAPI> subscriptions = apiConsumer
-                .getSubscribedAPIs(exportApplication.getSubscriber(), appName,
-                        exportApplication.getGroupId());
-        exportApplication.setSubscribedAPIs(subscriptions);
+        ExportedApplication applicationDtoToExport = createApplicationDTOToExport(exportApplication, apiConsumer);
         try {
             createDirectory(archivePath);
             // Export application details
-            CommonUtil.writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION,
-                    exportFormat, ImportExportConstants.TYPE_APPLICATION,
-                    ApplicationMappingUtil.fromApplicationtoDTO(exportApplication));
+            CommonUtil
+                    .writeDtoToFile(archivePath + File.separator + ImportExportConstants.TYPE_APPLICATION, exportFormat,
+                            ImportExportConstants.TYPE_APPLICATION, applicationDtoToExport);
             CommonUtil.archiveDirectory(exportApplicationBasePath);
             FileUtils.deleteQuietly(new File(exportApplicationBasePath));
             return new File(exportApplicationBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (IOException | APIImportExportException e) {
             throw new APIManagementException("Error while exporting Application: " + exportApplication.getName(), e);
         }
+    }
+
+    /**
+     * Create an aggregated Application DTO to be exported.
+     *
+     * @param application Application{@link Application} to be exported
+     * @param apiConsumer API Consumer
+     * @throws APIManagementException If an error occurs while retrieving subscribed APIs
+     */
+    private static ExportedApplication createApplicationDTOToExport(Application application, APIConsumer apiConsumer)
+            throws APIManagementException {
+        ApplicationDTO applicationDto = ApplicationMappingUtil.fromApplicationtoDTO(application);
+
+//        List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
+//        for (APIKey apiKey : application.getKeys()) {
+//            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+//            applicationKeyDTOs.add(applicationKeyDTO);
+//        }
+//        applicationDto.setKeys(applicationKeyDTOs);
+        ExportedApplication exportedApplication = new ExportedApplication(applicationDto);
+
+        Set<SubscribedAPI> subscriptions = apiConsumer
+                .getSubscribedAPIs(application.getSubscriber(), application.getName(), application.getGroupId());
+
+        exportedApplication.setSubscribedAPIs(subscriptions);
+        exportedApplication.setKeyManagerWiseOAuthApp(application.getKeyManagerWiseOAuthApp());
+        return exportedApplication;
     }
 
     /**
