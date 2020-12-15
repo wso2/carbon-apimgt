@@ -124,7 +124,7 @@ export default function AddRoleWizard(props) {
                 .then(() => {
                     Alert.info(
                         <span>
-                            Add permissions for
+                            Added scope mapping for
                             <b>{` ${newRole} `}</b>
                             successfully
                         </span>,
@@ -132,7 +132,7 @@ export default function AddRoleWizard(props) {
                     onClose();
                 })
                 .catch((error) => {
-                    Alert.error('Something went wrong while adding new role permissions');
+                    Alert.error('Something went wrong while adding new scope mapping');
                     console.error(error);
                 })
                 .finally(() => setIsSaving(false));
@@ -171,8 +171,8 @@ export default function AddRoleWizard(props) {
         <AddItem
             onSave={onAddRole}
             onClose={onClose}
-            title='Add new role permissions'
-            buttonText='Add role permissions'
+            title='Add new scope mapping'
+            buttonText='Add scope mapping'
             dialogProps={{ disableBackdropClick: isSaving, maxWidth: 'md' }}
             dialogActions={(
                 <div className={classes.actionsContainer}>
@@ -204,7 +204,7 @@ export default function AddRoleWizard(props) {
         >
             <div className={classes.root}>
                 <Stepper activeStep={activeStep} orientation='vertical'>
-                    {['Provide role name', 'Select permissions'].map((label, index) => (
+                    {['Provide role name', 'Select scope assignments'].map((label, index) => (
                         <Step key={label}>
                             <StepLabel>{label}</StepLabel>
                             <StepContent>

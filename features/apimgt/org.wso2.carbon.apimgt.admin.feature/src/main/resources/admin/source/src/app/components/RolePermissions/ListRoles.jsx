@@ -40,9 +40,12 @@ const headCells = [
         numeric: false, disablePadding: false, label: 'Roles',
     },
     {
-        id: 'permissions', numeric: false, disablePadding: false, label: 'Permissions',
+        id: 'permissions', numeric: false, disablePadding: false, label: 'Scope Assignments',
     },
 ];
+
+const pageDesc = 'Scope assignments are related to internal APIM specific scope assignments and are not related' 
+                + ' to role permission assignments in the management console.'
 
 /**
  *
@@ -209,7 +212,7 @@ export default function ListRoles() {
                     pageStyle: 'half',
                     title: intl.formatMessage({
                         id: 'RolePermissions.ListRoles.title.role.permissions',
-                        defaultMessage: 'Role Permissions',
+                        defaultMessage: 'Scope Assignments',
                     }),
                 }}
                 title={(
@@ -221,7 +224,7 @@ export default function ListRoles() {
                 content={(
                     <FormattedMessage
                         id='RolePermissions.ListRoles.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Role Permissions.'
+                        defaultMessage={'You dont have enough permission to view Scope Assignments.'
                         + ' Please contact the site administrator.'}
                     />
                 )}
@@ -232,7 +235,7 @@ export default function ListRoles() {
         return <Progress message='Resolving user ...' />;
     }
     return (
-        <ContentBase title='Role Permissions'>
+        <ContentBase title='Scope Assignments' pageDescription={pageDesc}>
             <ListAddOns>
                 <Grid item>
                     <Button
@@ -240,7 +243,7 @@ export default function ListRoles() {
                         color='primary'
                         onClick={() => setIsOpen(true)}
                     >
-                        Add role permission
+                        Add scope mappings
                     </Button>
                     {
                         isOpen && (
