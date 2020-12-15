@@ -209,7 +209,7 @@ export default function Environments() {
     const classes = useStyles();
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
-    const [revisionSave, setRevisionsSave] = useState([1, 2, 3]);
+    const revisionCount = 5;
     // const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
     const [isUpdating, setUpdating] = useState(false);
@@ -220,13 +220,23 @@ export default function Environments() {
     const [allDeployments, setAllDeployments] = useState([]);
     const [allRevisions, setRevisions] = useState([]);
     const [open, setOpen] = React.useState(false);
+
+    useEffect(() => {
+        restApi.getDeployments()
+            .then((result) => {
+                setAllDeployments(result.body.list);
+            });
+        restApi.getRevisions(api.id).then((result) => {
+            setRevisions(result.body.list);
+        });
+    }, []);
     const item1 =
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-                <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
                 <Grid className={clsx(classes.shapeInnerComplete, classes.shapeCircle)} />
             </Grid>
             <Grid item className={classes.shapeRecBack} />
@@ -279,6 +289,83 @@ export default function Environments() {
         </Grid>;
 
 
+
+
+    const items = [];
+
+    {
+    allRevisions && allRevisions.length === 0 &&
+        items.push(
+            <Grid item>
+                <Grid className={classes.textShape5}>
+
+                    <Button className={classes.textShape6} type="submit" size='small' color="primary" variant='outlined'>
+                        Create a new revision
+            </Button>
+                </Grid>
+                {item5}
+            </Grid>
+        )
+    }
+
+    {
+        allRevisions && allRevisions.map((row) =>
+            items.push(
+                <Grid item>
+                    <Grid className={classes.textShape4}>
+                    </Grid>
+                    {item1}
+                    <Grid className={classes.textShape2}>Revision 1</Grid>
+                    <Grid>
+                        <Button className={classes.textShape3} size='small' type="submit" startIcon={<RestoreIcon />}>
+                            Restore
+     </Button>
+                        <Button className={classes.textShape7} type="submit" size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
+                            Delete
+     </Button>
+                    </Grid>
+                </Grid>
+            ))
+    }
+
+    if (allRevisions.length !== 0 && allRevisions != revisionCount) {
+        items.push(
+            <Grid item>
+                <Grid className={classes.textShape5}>
+
+                    <Button type="submit" size='small' className={classes.textShape6} variant='outlined'>
+                        Create a new revision
+        </Button>
+                </Grid>
+                {item5}
+            </Grid>
+        )
+    }
+
+
+    for (let i = 0; i < (revisionCount - (allRevisions.length + 1)); i++) {
+        items.push(
+            <Grid item>
+                <Grid className={classes.textShape4}></Grid>
+                {item2}
+            </Grid>
+        )
+    }
+    if (allRevisions.length === 0 || revisionCount !== allRevisions) {
+        items.push(
+            <Grid item>
+                <Grid className={classes.textShape4}></Grid>
+                {item3}
+            </Grid>
+        )
+    }
+
+
+
+
+
+
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -301,15 +388,7 @@ export default function Environments() {
         setChecked(event.target.checked);
     };
 
-    useEffect(() => {
-        restApi.getDeployments()
-            .then((result) => {
-                setAllDeployments(result.body.list);
-            });
-        restApi.getRevisions(api.id).then((result) => {
-            setRevisions(result.body.list);
-        });
-    }, []);
+
 
     /**
      * Handles adding a new comment
@@ -406,62 +485,11 @@ export default function Environments() {
                     direction='row'
                     alignItems='flex-start'
                     xs={12}>
-                    <Grid item className={clsx(classes.shapeCircleBlack, classes.shapeCircle)} />
-                    {allRevisions && allRevisions.length === 0 &&
-                        <Grid item>
-                            <Grid className={classes.textShape5}>
-
-                                <Button className={classes.textShape6} type="submit" size='small' color="primary" variant='outlined'>
-                                    Create a new revision
-                            </Button>
-                            </Grid>
-                            {item5}
-                        </Grid>
-                    }
-
-                    {allRevisions && allRevisions.map((row) =>
-                        <Grid item>
-                            <Grid className={classes.textShape4}>
-                            </Grid>
-                            {item1}
-                            <Grid className={classes.textShape2}>Revision 1</Grid>
-                            <Grid>
-                                <Button className={classes.textShape3} size='small' type="submit" startIcon={<RestoreIcon />}>
-                                    Restore
-                     </Button>
-                                <Button className={classes.textShape7} type="submit" size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
-                                    Delete
-                     </Button>
-                            </Grid>
-                        </Grid>
-                    )}
-
-                    {revisionSave && [1].map((row) =>
-                        <Grid item>
-                            <Grid className={classes.textShape5}>
-
-                                <Button type="submit" size='small' className={classes.textShape6} variant='outlined'>
-                                    Create a new revision
-                        </Button>
-                            </Grid>
-                            {item5}
-                        </Grid>
-                    )}
 
 
-                    {revisionSave && revisionSave.map((row) =>
-                        <Grid item>
-                            <Grid className={classes.textShape4}></Grid>
-                            {item2}
-                        </Grid>
-                    )}
+                    {items}
 
-                    {revisionSave && [1].map((row) =>
-                        <Grid item>
-                            <Grid className={classes.textShape4}></Grid>
-                            {item3}
-                        </Grid>
-                    )}
+
 
                     {/* {allRevisions && allRevisions.map((row) => 
                 <Grid item>
