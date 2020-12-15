@@ -356,8 +356,10 @@ public class ImportUtils {
                         tempDirectoryAbsolutePath);
 
                 //Copy api_params.yaml file to working directory
-                CommonUtil.copyFile(tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME,
-                        newExtractedFolderName + ImportExportConstants.API_PARAMS_FILE_NAME);
+                String srcParamsFilePath = tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME;
+                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
 
                 return tempDirectoryAbsolutePath + newExtractedFolderName;
             }

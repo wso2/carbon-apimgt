@@ -681,11 +681,16 @@ public class APIControllerUtil {
                 throw new APIManagementException(
                         "Please specify production sandbox or endpoints for the environment and continue...",
                         ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else if (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY).isJsonNull()
-                    && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY).isJsonNull()) {
-                throw new APIManagementException(
-                        "Please specify production or sandbox endpoints for the environment and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
+            } else if ((updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY) != null)
+                    && (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY).isJsonNull())) {
+
+                if ((updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY) != null)
+                        && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY)
+                        .isJsonNull()) {
+                    throw new APIManagementException(
+                            "Please specify production or sandbox endpoints for the environment and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                }
             }
         }
     }
