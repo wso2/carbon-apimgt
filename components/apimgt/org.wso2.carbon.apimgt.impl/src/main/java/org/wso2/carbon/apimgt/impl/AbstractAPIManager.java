@@ -3126,13 +3126,6 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
                             OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
                                     , OAuthApplicationInfo.class);
-                            if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
-                                    instanceof String) {
-                                oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                        ((String) storedOAuthApplicationInfo
-                                                .getParameter(APIConstants.JSON_GRANT_TYPES))
-                                                .replace(",", " "));
-                            }
                             if (oAuthApplicationInfo == null) {
                                 oAuthApplicationInfo = storedOAuthApplicationInfo;
                             } else {
