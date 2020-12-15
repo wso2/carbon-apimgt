@@ -55,7 +55,7 @@ export default function DeletePermission(props) {
             .then(() => {
                 Alert.info(
                     <span>
-                        Permissions for
+                        Scope Assignments
                         {' '}
                         <b>{role}</b>
                         {' '}
@@ -65,7 +65,7 @@ export default function DeletePermission(props) {
                 handleClose();
             })
             .catch((error) => {
-                Alert.error('Something went wrong while deleting the permissions');
+                Alert.error('Something went wrong while deleting the scope assignments');
                 console.error(error);
             })
             .finally(() => setIsDeleting(false));
@@ -88,7 +88,7 @@ export default function DeletePermission(props) {
                 aria-labelledby='delete-confirmation'
             >
                 <DialogTitle id='delete-confirmation'>
-                    Delete role permissions of
+                    Delete scope assignments of
                     {' '}
                     <Typography display='inline' variant='subtitle2'>{role}</Typography>
                     {' '}
@@ -96,7 +96,7 @@ export default function DeletePermission(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <Box pl={5} mt={2} mb={2}>
-                        Are you sure you want to delete permissions for
+                        Are you sure you want to delete scope assignments for
                         {' '}
                         <b>{role}</b>
                         {' '}

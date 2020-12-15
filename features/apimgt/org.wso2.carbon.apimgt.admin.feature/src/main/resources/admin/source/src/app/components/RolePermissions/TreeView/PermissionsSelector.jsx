@@ -104,7 +104,7 @@ export default function PermissionsSelector(props) {
                 variant='outlined'
                 color='primary'
             >
-                Permissions
+                Scope Assignments
             </Button>
             <Dialog
                 fullWidth
@@ -118,7 +118,7 @@ export default function PermissionsSelector(props) {
                     <Typography variant='h5' display='block' gutterBottom>
                         {role}
                         <Box display='inline' pl={1}>
-                            <Typography variant='caption' gutterBottom>Select Permissions</Typography>
+                            <Typography variant='caption' gutterBottom>Select Scope Assignments</Typography>
                         </Box>
                     </Typography>
                 </DialogTitle>
