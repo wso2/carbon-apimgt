@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
@@ -1036,7 +1037,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @POST
     @Path("/{apiId}/deploy-revision")
-    
+    @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Deploy a revision", notes = "Deploy a revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -1045,9 +1046,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly deployed APIRevisionDeploymentList object as the entity in the body. ", response = APIRevisionDeploymentListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
-        return delegate.deployAPIRevision(apiId, apiRevisionId, securityContext);
+    public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("apiRevisionId") String apiRevisionId, @ApiParam(value = "Deployment object that needs to be added" ) APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO) throws APIManagementException{
+        return delegate.deployAPIRevision(apiId, apiRevisionId, apIRevisionDeploymentListDTO, securityContext);
     }
 
     @GET
@@ -1100,6 +1102,22 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("apiRevisionId") String apiRevisionId) throws APIManagementException{
         return delegate.getAPIRevision(apiId, apiRevisionId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/deploy-revision")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List available deployed revision deployment details of an API", notes = "List available deployed revision deployment details of an API ", response = APIRevisionDeploymentListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of deployed revision deployment details are returned. ", response = APIRevisionDeploymentListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getAPIRevisionDeployments(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getAPIRevisionDeployments(apiId, securityContext);
     }
 
     @GET
