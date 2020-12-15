@@ -15932,6 +15932,7 @@ public class ApiMgtDAO {
         return apiRevisionDeploymentList;
     }
 
+<<<<<<< HEAD
     /**
      * Remove an API revision Deployment mapping record to the database
      *
@@ -15968,4 +15969,7 @@ public class ApiMgtDAO {
                     + apiRevisionId, e);
         }
     }
+=======
+
+>>>>>>> adding revision-deploy and revision-deployment mapping implementation
 }

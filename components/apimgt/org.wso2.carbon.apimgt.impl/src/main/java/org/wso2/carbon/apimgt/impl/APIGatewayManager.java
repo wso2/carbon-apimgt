@@ -1901,7 +1901,6 @@ public class APIGatewayManager {
         }
         return failedGatewaysMap;
     }
-
     /**
      * Remove an API from the configured Gateways
      *
@@ -2018,7 +2017,6 @@ public class APIGatewayManager {
         }
         return failedEnvironmentsMap;
     }
-
 
 
 }
