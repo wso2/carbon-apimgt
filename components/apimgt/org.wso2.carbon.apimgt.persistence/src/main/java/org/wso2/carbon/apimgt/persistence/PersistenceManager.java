@@ -38,12 +38,12 @@ public class PersistenceManager {
                     apiPersistenceInstance = new MongoDBPersistenceImpl(userName);
                 }
             }
-        }*/
+        }*//*
             synchronized (RegistryPersistenceImpl.class) {
                 if (apiPersistenceInstance == null) {
                     apiPersistenceInstance = new MongoDBPersistenceImpl(userName);
                 }
-            }
+            }*/
         return new RegistryPersistenceImpl(userName);
 //        return apiPersistenceInstance;
     }

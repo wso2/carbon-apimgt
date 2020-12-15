@@ -83,6 +83,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIListDTO apiListDTO = new APIListDTO();
         try {
+            String originalQuery = new String(query);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
@@ -124,7 +125,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 allMatchedApisMap = apiConsumer.searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset,
                         limit, false);
             } else {
-                allMatchedApisMap = apiConsumer.searchPaginatedAPIsNew(newSearchQuery, requestedTenantDomain, offset,
+                allMatchedApisMap = apiConsumer.searchPaginatedAPIsNew(originalQuery, requestedTenantDomain, offset,
                         limit);
             }
 

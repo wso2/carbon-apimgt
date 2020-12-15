@@ -566,7 +566,7 @@ public class PersistenceUtil {
       public static boolean isAdminUser(UserContext userContext) {
         boolean isAdmin = false;
         Map<String, Object> properties = userContext.getProperties();
-        if (properties.containsKey(APIConstants.USER_CTX_PROPERTY_ISADMIN)) {
+        if (properties != null && properties.containsKey(APIConstants.USER_CTX_PROPERTY_ISADMIN)) {
             isAdmin = (Boolean) properties.get(APIConstants.USER_CTX_PROPERTY_ISADMIN);
         }
         return isAdmin;
@@ -575,7 +575,7 @@ public class PersistenceUtil {
     public static String getSkipRoles(UserContext userContext) {
         String skipRoles = "";
         Map<String, Object> properties = userContext.getProperties();
-        if (properties.containsKey(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES)) {
+        if (properties != null && properties.containsKey(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES)) {
             skipRoles = (String) properties.get(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES);
         }
         return skipRoles;

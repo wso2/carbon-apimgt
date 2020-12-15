@@ -10369,41 +10369,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-        searchQuery = getSearchQuery(extractQuery(searchQuery));
-        if (log.isDebugEnabled()) {
-            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
-        }
+
         Organization org = new Organization(tenantDomain);
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, null, roles);
+        Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-            if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
-                // TODO
-            } else {
-                PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
-                        start, end, userCtx);
-                if (log.isDebugEnabled()) {
-                    log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
-                }
-                SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
-                if (searchAPIs != null) {
-                    List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
-                    List<Object> apiList = new ArrayList<>();
-                    for (PublisherAPIInfo publisherAPIInfo : list) {
-                        API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
-                        apiList.add(mappedAPI);
-                    }
-                    apiSet.addAll(apiList);
-                    result.put("apis", apiSet);
-                    result.put("length", searchAPIs.getTotalAPIsCount());
-                    result.put("isMore", true); 
-                } else {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    result.put("isMore", false);
-                }
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, searchQuery,
+                    start, end, userCtx);
+            if (log.isDebugEnabled()) {
+                log.debug("searched APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
             }
-
+            SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                List<Object> apiList = new ArrayList<>();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    apiList.add(mappedAPI);
+                }
+                apiSet.addAll(apiList);
+                result.put("apis", apiSet);
+                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("isMore", true); 
+            } else {
+                result.put("apis", apiSet);
+                result.put("length", 0);
+                result.put("isMore", false);
+            }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }

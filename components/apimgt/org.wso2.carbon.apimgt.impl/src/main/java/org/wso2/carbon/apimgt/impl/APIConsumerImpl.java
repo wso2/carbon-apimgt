@@ -5926,39 +5926,33 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-        searchQuery = getSearchQuery(extractQuery(searchQuery));
-        if (log.isDebugEnabled()) {
-            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
-        }
         Organization org = new Organization(tenantDomain);
-        String[] roles = APIUtil.getListOfRoles((userNameWithoutChange != null)? userNameWithoutChange: username);
+        String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
+        String[] roles = APIUtil.getListOfRoles(username);
+        Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, null, roles);
         try {
-            if (searchQuery != null && searchQuery.contains(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX + "=")) {
-                // TODO
+            DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
+                    start, end, userCtx);
+            if (log.isDebugEnabled()) {
+                log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+            }
+            SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+            if (searchAPIs != null) {
+                List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
+                List<Object> apiList = new ArrayList<>();
+                for (DevPortalAPIInfo devPortalAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                    apiList.add(mappedAPI);
+                }
+                apiSet.addAll(apiList);
+                result.put("apis", apiSet);
+                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("isMore", true);
             } else {
-                DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
-                        start, end, userCtx);
-                if (log.isDebugEnabled()) {
-                    log.debug("searched Devportal APIs for query : " + searchQuery + " :-->: " + searchAPIs.toString());
-                }
-                SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
-                if (searchAPIs != null) {
-                    List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
-                    List<Object> apiList = new ArrayList<>();
-                    for (DevPortalAPIInfo devPortalAPIInfo : list) {
-                        API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                        apiList.add(mappedAPI);
-                    }
-                    apiSet.addAll(apiList);
-                    result.put("apis", apiSet);
-                    result.put("length", searchAPIs.getTotalAPIsCount());
-                    result.put("isMore", true);
-                } else {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    result.put("isMore", false);
-                }
+                result.put("apis", apiSet);
+                result.put("length", 0);
+                result.put("isMore", false);
             }
 
         } catch (APIPersistenceException e) {
