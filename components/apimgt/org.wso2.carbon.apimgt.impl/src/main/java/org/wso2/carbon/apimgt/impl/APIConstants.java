@@ -1985,6 +1985,7 @@ public final class APIConstants {
 
     public static final String APPLICATION_GZIP = "application/gzip";
     public static final String APPLICATION_ZIP = "application/zip";
+    public static final String APPLICATION_X_ZIP_COMPRESSED = "application/x-zip-compressed";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
