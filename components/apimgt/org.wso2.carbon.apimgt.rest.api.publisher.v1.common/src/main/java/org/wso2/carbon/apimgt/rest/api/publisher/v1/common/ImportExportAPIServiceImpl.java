@@ -70,12 +70,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
             api = apiProvider.getAPI(apiIdentifier);
+            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
         }
         if (api != null) {
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
             return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, format, preserveStatus,
                     preserveDocs);
         }
