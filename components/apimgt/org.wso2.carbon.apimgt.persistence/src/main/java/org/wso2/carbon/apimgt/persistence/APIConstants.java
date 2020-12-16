@@ -354,5 +354,9 @@ public final class APIConstants {
     public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
     public static final String API = "API";
+    
+    public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
+    public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
+    public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
 
 }
