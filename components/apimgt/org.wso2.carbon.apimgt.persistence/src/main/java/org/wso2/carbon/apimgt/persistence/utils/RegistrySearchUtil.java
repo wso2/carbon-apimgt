@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -81,13 +82,7 @@ public class RegistrySearchUtil {
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
 
     public static String constructNewSearchQuery(String query) throws APIPersistenceException {
-        if (log.isDebugEnabled()) {
-            log.debug("Requested Search query :" + query);
-        }
         String modifiedQuery = extractQuery(constructQueryWithProvidedCriterias(query.trim()));
-        if (log.isDebugEnabled()) {
-            log.debug("Modified Search query :" + modifiedQuery);
-        }
         return modifiedQuery;
     }
 
@@ -375,6 +370,58 @@ public class RegistrySearchUtil {
         } else {
             return role;
         }
+    }
+
+    /**
+     * Composes OR based search criteria from provided array of values
+     *
+     * @param values
+     * @return
+     */
+    public static String getORBasedSearchCriteria(String[] values) {
+
+        String criteria = "(";
+        if (values != null) {
+            for (int i = 0; i < values.length; i++) {
+                criteria = criteria + values[i];
+                if (i != values.length - 1) {
+                    criteria = criteria + " OR ";
+                } else {
+                    criteria = criteria + ")";
+                }
+            }
+            return criteria;
+        }
+        return null;
+    }
+    
+    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
+        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
+        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
+        if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
+            boolean displayAPIsWithMultipleStatus = true; // APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
+                                                          // this
+            String[] statusList = { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
+                    "null" };
+            if (displayAPIsWithMultipleStatus) {
+                statusList = new String[] { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
+                        APIConstants.DEPRECATED.toLowerCase(), "null" };
+            }
+            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY
+                    + RegistrySearchUtil.getORBasedSearchCriteria(statusList);
+            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+        } else {
+            String searchString = APIConstants.API_STATUS + "=";
+            modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
+                    APIConstants.LCSTATE_SEARCH_TYPE_KEY);
+        }
+        return modifiedQuery;
+    }
+
+    public static String getPublisherSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
+        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
+        modifiedQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(modifiedQuery, ctx);
+        return modifiedQuery;
     }
 
 

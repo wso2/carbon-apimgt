@@ -70,9 +70,14 @@ public class SearchApiServiceImpl implements SearchApiService {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = null;
             if (originalQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiProvider.searchPaginatedContent(query, tenantDomain, offset, limit);
-            } else {
+                result = apiProvider.searchPaginatedContent(originalQuery, tenantDomain, offset, limit);
+            }
+            /*else if (originalQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)
+                    || originalQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
+            }*/ 
+            else {
+                result = apiProvider.searchPaginatedAPIsNew(originalQuery, tenantDomain, offset, limit);
             }
             ArrayList<Object> apis;
             /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs

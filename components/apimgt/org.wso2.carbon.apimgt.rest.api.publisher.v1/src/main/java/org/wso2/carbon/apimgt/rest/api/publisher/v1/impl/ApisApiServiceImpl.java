@@ -230,6 +230,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         expand = expand != null && expand;
         try {
+            String originalQuery = new String(query);
             String newSearchQuery = APIUtil.constructApisGetQuery(query);
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
@@ -251,11 +252,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
             Map<String, Object> result;
             // temporary check. this is done to route only api listing to new impl
-            if (query.contains("content:") || query.contains("subcontext:") || query.contains("doc:")) {
-                result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
-                        offset, limit, false, !expand);
+            if (originalQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = apiProvider.searchPaginatedContent(originalQuery, tenantDomain, offset, limit);
             } else {
-                result = apiProvider.searchPaginatedAPIsNew(newSearchQuery, tenantDomain, offset, limit);
+                result = apiProvider.searchPaginatedAPIsNew(originalQuery, tenantDomain, offset, limit);
             }
 
             Set<API> apis = (Set<API>) result.get("apis");
