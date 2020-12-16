@@ -274,6 +274,21 @@ class ServiceCatalog {
         return promisedService.then(response => response.body);
     }
 
+    // TO DO: This method should ideally be defined as a Publisher REST API. Not a Service Catalog REST API
+    /**
+     * Create API from service
+     * @returns {promise} Add promise.
+     */
+    static createApiFromService(serviceId, apiMetaData) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedServiceResponse = serviceCatalog.then(client => {
+            // return client.apis['APIs'].createApiFromService();
+            return MockResponses.createApiFromService(serviceId, apiMetaData);
+        });
+        return promisedServiceResponse.then(response => response.body);
+    }
+
     
 }
 

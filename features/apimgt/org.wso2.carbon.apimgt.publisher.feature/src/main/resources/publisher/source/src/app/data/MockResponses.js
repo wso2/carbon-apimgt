@@ -43,6 +43,23 @@ class MockResponses {
 
     /**
     *
+    * Return API created from service
+    * @export
+    * @returns {*} Mocked Service Catalog model
+    */
+    static createApiFromService() {
+        const response = {
+            id: '87624513-0123-6274-9013-012345678901',
+            name: 'New-API',
+            context: '/newapi',
+            description: 'This is a new API created from a service',
+            version: '1.0.0',
+        };
+        return Promise.resolve({ body: response });
+    }
+
+    /**
+    *
     * Return sample mocked model data for addSampleService
     * @export
     * @returns {*} Mocked Service Catalog model
