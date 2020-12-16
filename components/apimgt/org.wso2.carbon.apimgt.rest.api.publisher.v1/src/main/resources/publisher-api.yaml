@@ -1499,6 +1499,48 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?apiRevisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
+  /apis/{apiId}/undeploy-revision:
+    #--------------------------------------------
+    # Un-Deploy a revision from deployed gateway
+    #--------------------------------------------
+    post:
+      tags:
+        - API Revisions
+      summary: Un-Deploy a revision
+      description: |
+        Un-Deploy a revision
+      operationId: undeployAPIRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/apiRevisionId-Q'
+      requestBody:
+        description: Deployment object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevisionDeploymentList'
+      responses:
+        200:
+          description: |
+            OK.
+        201:
+          description: |
+            Created.
+            Successful response with the newly undeployed APIRevisionDeploymentList object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeploymentList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?apiRevisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
   /apis/{apiId}/restore-revision:
 
     #--------------------------------------------------------
