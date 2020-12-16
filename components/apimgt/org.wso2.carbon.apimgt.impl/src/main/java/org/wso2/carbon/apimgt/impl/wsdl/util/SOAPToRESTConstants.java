@@ -54,10 +54,6 @@ public class SOAPToRESTConstants {
     public static final String X_WSO2_UNIQUE_NAMESPACE = "x-wso2-empty-namespace";
     public static final String BASE_CONTENT_KEYWORD = "_base";
     public static final String ATTR_CONTENT_KEYWORD = "_attr";
-    public static final String REPOSITORY = "repository";
-    public static final String REP_RESOURCES = "resources";
-    public static final String XSDS = "xsds";
-    public static final String XSD = "xsd";
 
     public final class Swagger {
         public static final String DEFINITIONS = "definitions";
