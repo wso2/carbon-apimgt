@@ -230,13 +230,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         query = query == null ? "" : query;
         expand = expand != null && expand;
         try {
-            String originalQuery = new String(query);
-            String newSearchQuery = APIUtil.constructApisGetQuery(query);
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
-            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
-                newSearchQuery = newSearchQuery
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
+                query = query
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -251,12 +249,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain, username);
             }*/
             Map<String, Object> result;
-            // temporary check. this is done to route only api listing to new impl
-            if (originalQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiProvider.searchPaginatedContent(originalQuery, tenantDomain, offset, limit);
-            } else {
-                result = apiProvider.searchPaginatedAPIsNew(originalQuery, tenantDomain, offset, limit);
-            }
+
+            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);

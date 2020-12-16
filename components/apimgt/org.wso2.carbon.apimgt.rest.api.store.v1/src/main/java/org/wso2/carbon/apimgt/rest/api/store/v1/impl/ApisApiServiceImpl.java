@@ -83,7 +83,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIListDTO apiListDTO = new APIListDTO();
         try {
-            String originalQuery = new String(query);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
@@ -91,43 +90,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
-            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
-            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
-                newSearchQuery = newSearchQuery
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
-            }
-            // Append LC state query criteria if the search is not doc or subcontext
-            // based
-            if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
-                    !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
-                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-
-                String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
-                if (displayAPIsWithMultipleStatus) {
-                    statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
-                            APIConstants.DEPRECATED };
-                }
-
-                String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
-
-                String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
-                lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
-
-                newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
+                query = query
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap;
-            // temporary check. this is done to route only api listing to new impl
-            if (query.contains("content:") || query.contains("subcontext:") || query.contains("doc:")) {
-                allMatchedApisMap = apiConsumer.searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset,
-                        limit, false);
-            } else {
-                allMatchedApisMap = apiConsumer.searchPaginatedAPIsNew(originalQuery, requestedTenantDomain, offset,
-                        limit);
-            }
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset,
+                    limit);
+            
 
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);

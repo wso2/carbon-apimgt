@@ -70,32 +70,16 @@ public class SearchApiServiceImpl implements SearchApiService {
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
-            String originalQuery = new String(query);
-            query = APIUtil.constructNewSearchQuery(query);
-
-            if (!(StringUtils.containsIgnoreCase(query, APIConstants.API_STATUS))) {
-                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-                String[] statusList = {APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(), "null"};
-                if (displayAPIsWithMultipleStatus) {
-                    statusList = new String[]{APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
-                            APIConstants.DEPRECATED.toLowerCase(), "null"};
-                }
-                String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria(statusList);
-                query = query + APIConstants.SEARCH_AND_TAG + lcCriteria;
-            } else {
-                String searchString = APIConstants.API_STATUS + "=" ;
-                query = StringUtils.replaceIgnoreCase(query, searchString, APIConstants.LCSTATE_SEARCH_TYPE_KEY);
-            }
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Map<String, Object> result = null;
             // Extracting search queries for the recommendation system
-            apiConsumer.publishSearchQuery(query, username);/////////
-            if (originalQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiConsumer.searchPaginatedContent(originalQuery, requestedTenantDomain, offset, limit);
+            apiConsumer.publishSearchQuery(query, username);
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = apiConsumer.searchPaginatedContent(query, requestedTenantDomain, offset, limit);
             } else {
-                result = apiConsumer.searchPaginatedAPIsNew(originalQuery, requestedTenantDomain, offset, limit);
+                result = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset, limit);
             }
 
             ArrayList<Object> apis;

@@ -857,15 +857,14 @@ public interface APIManager {
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
     
     /**
-     * Temporary impl. Rename after all the search functionalities are implemented
-     * @param searchQuery
-     * @param tenantDomain
-     * @param start
-     * @param end
+     * @param searchQuery search query. ex : provider:admin
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException;
     
     /**

@@ -787,7 +787,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             
             log.debug("Modified query for publisher search: " + modifiedQuery);
             
-            log.info("+++++++++++++++" + modifiedQuery);
+
             /*
             boolean isTenantMode = (requestedTenantDomain != null);
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
@@ -929,7 +929,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx);
             log.debug("Modified query for devportal search: " + modifiedQuery);
             
-            log.info("============ " + modifiedQuery);
+
             /*
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
@@ -1503,7 +1503,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if(log.isDebugEnabled()) {
                     log.debug("Number of records Found: " + resourceData.length);
                 }
-                log.info("Number of records Found: " + resourceData.length);
+
                 
                 
                 for (ResourceData data : resourceData) {
@@ -1679,7 +1679,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if(log.isDebugEnabled()) {
                     log.debug("Number of records Found: " + resourceData.length);
                 }
-                log.info("Number of records Found: " + resourceData.length);
+
                 
                 
                 for (ResourceData data : resourceData) {
