@@ -38,10 +38,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
+import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperationParam;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
@@ -56,13 +60,14 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Set;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Arrays;
 import java.util.AbstractList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -105,24 +110,8 @@ public class SOAPOperationBindingUtils {
      * @return swagger json string with the soap operation mapping
      * @throws APIManagementException if an error occurs when generating swagger
      */
-    public static String getSoapOperationMapping(String path, String url) throws APIManagementException {
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
-        WSDLInfo wsdlInfo = processor.getWsdlInfo();
-        return getGeneratedSwaggerFromWSDL(wsdlInfo);
-    }
-
-    /**
-     * Gets soap operations to rest resources mapping for a wsdl archive path
-     *
-     * @param path Path of the extracted WSDL archive
-     * @return swagger json string with the soap operation mapping
-     * @throws APIManagementException if an error occurs when generating swagger
-     */
-    public static String getSoapOperationMapping(String path, String url, byte [] wsdlContent)
-            throws APIManagementException {
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path, wsdlReader);
+    public static String getSoapOperationMapping(String path) throws APIManagementException {
+        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractor(path);
         WSDLInfo wsdlInfo = processor.getWsdlInfo();
         return getGeneratedSwaggerFromWSDL(wsdlInfo);
     }
