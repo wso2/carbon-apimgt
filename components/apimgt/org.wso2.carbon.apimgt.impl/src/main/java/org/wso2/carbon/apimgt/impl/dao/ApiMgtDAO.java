@@ -15830,5 +15830,42 @@ public class ApiMgtDAO {
         return apiRevisionDeploymentList;
     }
 
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
+                for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                    statement.setString(1, apiRevisionDeployment.getDeployment());
+                    statement.setString(2, apiRevisionId);
+                    statement.setString(3, apiRevisionDeployment.getType());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                        + apiRevisionId, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                    + apiRevisionId, e);
+        }
+    }
+
 
 }

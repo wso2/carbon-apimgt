@@ -1273,6 +1273,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.restoreAPIRevision(apiId, apiRevisionId, securityContext);
     }
 
+    @POST
+    @Path("/{apiId}/undeploy-revision")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Un-Deploy a revision", notes = "Un-Deploy a revision ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly undeployed APIRevisionDeploymentList object as the entity in the body. ", response = APIRevisionDeploymentListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response undeployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("apiRevisionId") String apiRevisionId, @ApiParam(value = "Deployment object that needs to be added" ) APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO) throws APIManagementException{
+        return delegate.undeployAPIRevision(apiId, apiRevisionId, apIRevisionDeploymentListDTO, securityContext);
+    }
+
     @PUT
     @Path("/{apiId}/thumbnail")
     @Consumes({ "multipart/form-data" })
