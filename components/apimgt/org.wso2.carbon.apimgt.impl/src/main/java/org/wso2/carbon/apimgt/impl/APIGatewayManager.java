@@ -1909,7 +1909,6 @@ public class APIGatewayManager {
      * @return a map of environments that failed to remove the API
      */
     public Map<String, String> removeAPIRevisionFromGateway(API api, String tenantDomain) {
-
         Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
         Set<String> removedGateways = new HashSet<>();
 
