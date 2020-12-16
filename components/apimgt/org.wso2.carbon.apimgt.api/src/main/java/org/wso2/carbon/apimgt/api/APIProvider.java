@@ -1639,5 +1639,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void addWSDLResource(String apiId, ResourceFile resource, String url) throws APIManagementException;
+    
+    /**
+     * Add or update thumbnail image of an api
+     * @param apiId apiid
+     * @param resource image resource
+     * @throws APIManagementException
+     */
+    void setThumbnailToAPI(String apiId, ResourceFile resource) throws APIManagementException;
 
 }

@@ -91,6 +91,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
@@ -1100,11 +1101,13 @@ public abstract class AbstractAPIManager implements APIManager {
                     .getWSDL(new Organization(tenantDomain), apiId);
             if (resource != null) {
                 return new ResourceFile(resource.getContent(), resource.getContentType());
+            } else {
+                String msg = "Failed to get WSDL. Artifact corresponding to artifactId " + apiId + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (WSDLPersistenceException e) {
             throw new APIManagementException("Error while retrieving wsdl resource for api " + apiId, e);
         }
-        return null;
     }
     /**
      * Create a wsdl in the path specified.
@@ -1458,6 +1461,10 @@ public abstract class AbstractAPIManager implements APIManager {
                    log.debug("Retrieved doc: " + doc);
                }
                documentation = DocumentMapper.INSTANCE.toDocumentation(doc);
+            } else {
+                String msg = "Failed to get the document. Artifact corresponding to document id " + docId
+                        + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while retrieving document for id " + docId, e);
@@ -1474,6 +1481,10 @@ public abstract class AbstractAPIManager implements APIManager {
             DocumentationContent docContent = null;
             if (content != null) {
                 docContent = DocumentMapper.INSTANCE.toDocumentationContent(content);
+            } else {
+                String msg = "Failed to get the document content. Artifact corresponding to document id " + docId
+                        + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
             }
             return docContent;
         } catch (DocumentationPersistenceException e) {
@@ -3764,6 +3775,24 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
             api.setApiCategories(categoryList);
+        }
+    }
+    
+    @Override
+    public ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException {
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
+                    .getThumbnail(new Organization(tenantDomain), apiId);
+
+            if (resource != null) {
+                ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
+                return thumbnail;
+            } else {
+                String msg = "Failed to get Image. Artifact corresponding to artifactId " + apiId + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (ThumbnailPersistenceException e) {
+            throw new APIManagementException("Error while accessing thumbnail resource ", e);
         }
     }
 }

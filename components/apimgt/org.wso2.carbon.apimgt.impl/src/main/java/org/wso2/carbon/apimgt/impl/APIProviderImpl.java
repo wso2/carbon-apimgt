@@ -179,6 +179,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
@@ -10363,7 +10364,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
@@ -10584,4 +10585,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return result;
     }
 
+    @Override
+    public void setThumbnailToAPI(String apiId, ResourceFile resource) throws APIManagementException {
+
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
+                    resource.getContent(), resource.getContentType());
+            apiPersistenceInstance.saveThumbnail(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                    iconResourceFile);
+        } catch (ThumbnailPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while saving thumbnail ", e);
+            }
+        }
+    }
 }

@@ -26,11 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.Holder;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -45,7 +43,6 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -59,9 +56,6 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentContent.ContentSourceType;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
-import org.wso2.carbon.apimgt.persistence.dto.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo.DocumentSourceType;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentationType;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
@@ -95,6 +89,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.ResourceData;
+import org.wso2.carbon.registry.common.utils.artifact.manager.ArtifactManager;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
@@ -787,7 +782,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             
             log.debug("Modified query for publisher search: " + modifiedQuery);
             
-            log.info("+++++++++++++++" + modifiedQuery);
+
             /*
             boolean isTenantMode = (requestedTenantDomain != null);
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
@@ -929,7 +924,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx);
             log.debug("Modified query for devportal search: " + modifiedQuery);
             
-            log.info("============ " + modifiedQuery);
+
             /*
             if (isTenantMode && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
@@ -1503,7 +1498,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if(log.isDebugEnabled()) {
                     log.debug("Number of records Found: " + resourceData.length);
                 }
-                log.info("Number of records Found: " + resourceData.length);
+
                 
                 
                 for (ResourceData data : resourceData) {
@@ -1679,7 +1674,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 if(log.isDebugEnabled()) {
                     log.debug("Number of records Found: " + resourceData.length);
                 }
-                log.info("Number of records Found: " + resourceData.length);
+
                 
                 
                 for (ResourceData data : resourceData) {
@@ -1901,6 +1896,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            if (apiArtifact == null) {
+                return null;
+            }
             String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
@@ -2600,20 +2598,140 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void saveThumbnail(Organization org, String apiId, ResourceFile resourceFile)
             throws ThumbnailPersistenceException {
-        // TODO Auto-generated method stub
-        
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            if (apiArtifact == null) {
+                throw new ThumbnailPersistenceException("API not found. ", ExceptionCodes.API_NOT_FOUND);
+            }
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    apiProviderName + RegistryConstants.PATH_SEPARATOR +
+                    apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
+            String filePath =  artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+            
+            String savedFilePath = addResourceFile(filePath, resourceFile, registry, tenantDomain);
+
+            RegistryPersistenceUtil.setResourcePermissions(apiProviderName, null, null, filePath);
+
+            apiArtifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, savedFilePath);
+            apiArtifactManager.updateGenericArtifact(apiArtifact);
+        } catch (APIPersistenceException | GovernanceException | PersistenceException | APIManagementException e) {
+            throw new ThumbnailPersistenceException("Error while saving thumbnail for api " + apiId, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     @Override
     public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-        // TODO Auto-generated method stub
+
+        Registry registry;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            if (apiArtifact == null) {
+                return null;
+            }
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            
+            String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + apiProviderName + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR
+                    + apiVersion;
+            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                    + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
+            
+            String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+            String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+
+            if (registry.resourceExists(thumbPath)) {
+                Resource res = registry.get(thumbPath);
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
+            } else if (registry.resourceExists(oldThumbPath)){
+                Resource res = registry.get(oldThumbPath);
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
+            }
+        } catch (RegistryException | APIPersistenceException e) {
+            String msg = "Error while loading API icon of API " +  apiId + " from the registry";
+            throw new ThumbnailPersistenceException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
         return null;
     }
 
     @Override
     public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-        // TODO Auto-generated method stub
-        
+        Registry registry;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            if (apiArtifact == null) {
+                throw new ThumbnailPersistenceException("API not found for id " + apiId, ExceptionCodes.API_NOT_FOUND);
+            }
+            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            
+            String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + apiProviderName + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR
+                    + apiVersion;
+            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                    + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
+            
+            String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+            String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+
+            if (registry.resourceExists(thumbPath)) {
+                registry.delete(thumbPath);
+            }
+            if (registry.resourceExists(oldThumbPath)) {
+                registry.delete(oldThumbPath);
+            }
+        } catch (RegistryException | APIPersistenceException e) {
+            String msg = "Error while loading API icon of API " +  apiId + " from the registry";
+            throw new ThumbnailPersistenceException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
     
     /**
