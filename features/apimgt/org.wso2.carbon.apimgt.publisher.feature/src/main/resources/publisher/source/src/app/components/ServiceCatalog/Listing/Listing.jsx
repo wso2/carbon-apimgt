@@ -31,6 +31,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
+import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
@@ -64,9 +65,6 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
         marginRight: theme.spacing(2),
-    },
-    textStyle: {
-        fontSize: 11,
     },
     content: {
         display: 'flex',
@@ -114,12 +112,13 @@ const useStyles = makeStyles((theme) => ({
  * @function Listing
  * @returns {any} Listing Page for Services
  */
-function Listing() {
+function Listing(props) {
     const [serviceList, setServiceList] = useState([]);
     const [notFound, setNotFound] = useState(true);
     const [loading, setLoading] = useState(true);
     const intl = useIntl();
     const classes = useStyles();
+    const { history } = props;
 
     // Get Services
     const getData = () => {
@@ -264,31 +263,22 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const serviceId = dataRow.id;
+                        const { id, displayName } = dataRow;
                         return (
                             <>
                                 <Box display='flex' flexDirection='row'>
-                                    <Link>
-                                        <Button color='primary' variant='outlined' className={classes.buttonStyle}>
-                                            <Typography className={classes.textStyle}>
-                                                <FormattedMessage
-                                                    id='ServiceCatalog.Listing.Listing.create.api'
-                                                    defaultMessage='Create API'
-                                                />
-                                            </Typography>
-                                        </Button>
-                                    </Link>
+                                    <CreateApi history={history} serviceId={id} />
                                     <Link
                                         className={classes.removePaddingOnLink}
-                                        to={'/service-catalog/' + serviceId + '/edit'}
+                                        to={'/service-catalog/' + id + '/edit'}
                                     >
                                         <Button>
                                             <Icon>edit</Icon>
                                         </Button>
                                     </Link>
                                     <Delete
-                                        serviceDisplayName={dataRow.displayName}
-                                        serviceId={serviceId}
+                                        serviceDisplayName={displayName}
+                                        serviceId={id}
                                         onDelete={onDelete}
                                     />
                                 </Box>

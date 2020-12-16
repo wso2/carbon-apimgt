@@ -37,6 +37,7 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
@@ -91,9 +92,6 @@ const useStyles = makeStyles((theme) => ({
     },
     versionStyle: {
         marginLeft: theme.spacing(1),
-    },
-    topMarginSpacing: {
-        marginTop: theme.spacing(2),
     },
     apiUsageStyle: {
         marginTop: theme.spacing(3),
@@ -308,6 +306,14 @@ function EditableOverview(props) {
 
     const listingRedirect = () => {
         history.push('/service-catalog');
+    };
+
+    const handleCancel = () => {
+        if (doEdit) {
+            listingRedirect();
+        } else {
+            overviewRedirect();
+        }
     };
 
     /**
@@ -575,32 +581,9 @@ function EditableOverview(props) {
                                 <Grid item md={2}>
                                     <Box display='flex' flexDirection='column'>
                                         { !isEditing ? (
-                                            <Button
-                                                color='primary'
-                                                variant='contained'
-                                                className={classes.topMarginSpacing}
-                                            >
-                                                <Typography>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.EditableOverview.create.api'
-                                                        defaultMessage='Create API'
-                                                    />
-                                                </Typography>
-                                            </Button>
+                                            <CreateApi history={history} serviceId={id} isOverview />
                                         ) : (
-                                            <Button
-                                                color='primary'
-                                                variant='contained'
-                                                className={classes.topMarginSpacing}
-                                                disabled
-                                            >
-                                                <Typography>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.EditableOverview.create.api'
-                                                        defaultMessage='Create API'
-                                                    />
-                                                </Typography>
-                                            </Button>
+                                            <CreateApi history={history} serviceId={id} isOverview isEdit />
                                         )}
                                     </Box>
                                 </Grid>
@@ -878,7 +861,7 @@ function EditableOverview(props) {
                                 </Grid>
                                 <Grid item>
                                     {isEditing ? (
-                                        <Button onClick={overviewRedirect} color='primary'>
+                                        <Button onClick={handleCancel} color='primary'>
                                             <FormattedMessage
                                                 id='ServiceCatalog.Listing.EditableOverview.cancel.btn'
                                                 defaultMessage='Cancel'
