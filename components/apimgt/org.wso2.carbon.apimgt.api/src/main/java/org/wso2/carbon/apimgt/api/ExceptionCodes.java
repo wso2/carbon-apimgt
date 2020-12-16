@@ -405,7 +405,9 @@ ExceptionCodes implements ErrorHandler {
 
     // API import/export related codes
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
-            "Error while reading meta information from the definition");
+            "Error while reading meta information from the definition"),
+    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
+            "Error while reading meta information from the api_params.yaml file");
 
     private final long errorCode;
     private final String errorMessage;

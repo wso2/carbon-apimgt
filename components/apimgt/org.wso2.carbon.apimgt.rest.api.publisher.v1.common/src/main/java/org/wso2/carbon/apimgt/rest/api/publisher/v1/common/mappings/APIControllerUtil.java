@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -138,7 +139,8 @@ public class APIControllerUtil {
         try {
             endpointConfig = mapper.readValue(jsonObject.toString(), HashMap.class);
         } catch (JsonProcessingException e) {
-            throw new APIManagementException(e);
+            String errorMessage = "Error while reading endpointConfig information in the api_params.yaml.";
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
         }
         importedApiDto.setEndpointConfig(endpointConfig);
 
@@ -170,7 +172,7 @@ public class APIControllerUtil {
             } catch (IOException e) {
                 //Error is logged and when generating certificate details and certs in the archive
                 String errorMessage = "Error while generating meta information of client certificates from path.";
-                throw new APIManagementException(errorMessage, e);
+                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
         }
 
@@ -183,7 +185,7 @@ public class APIControllerUtil {
             } catch (IOException e) {
                 //Error is logged and when generating certificate details and certs in the archive
                 String errorMessage = "Error while generating meta information of client certificates from path.";
-                throw new APIManagementException(errorMessage, e);
+                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
         }
 
@@ -224,13 +226,16 @@ public class APIControllerUtil {
 
             if (username == null) {
                 throw new APIManagementException("You have enabled endpoint security but the username is not found "
-                        + "in the api_params.yaml. Please specify username field for and continue...");
+                        + "in the api_params.yaml. Please specify username field for and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else if (password == null) {
                 throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for and continue...");
+                        + "in the api_params.yaml. Please specify password field for and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else if (type == null) {
                 throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for and continue...");
+                        + "in the api_params.yaml. Please specify password field for and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 apiEndpointSecurityDTO.setPassword(password.toString());
                 apiEndpointSecurityDTO.setUsername(username.getAsString());
@@ -243,7 +248,8 @@ public class APIControllerUtil {
                     // If the type is not either basic or digest, return an error
                     throw new APIManagementException("Invalid endpoint security type found in the api_params.yaml. "
                             + "Should be either basic or digest"
-                            + "Please specify correct security types field for and continue...");
+                            + "Please specify correct security types field for and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             }
             importedApiDto.setEndpointSecurity(apiEndpointSecurityDTO);
@@ -331,6 +337,11 @@ public class APIControllerUtil {
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
         }
+        // if the endpoint type is REST or SOAP return null
+        if (ImportExportConstants.REST_TYPE_ENDPOINT.equals(endpointType) || ImportExportConstants.SOAP_TYPE_ENDPOINT
+                .equals(endpointType) || ImportExportConstants.HTTP_TYPE_ENDPOINT.equals(endpointType)) {
+            return null;
+        }
         // if endpoint type is Dynamic
         if (ImportExportConstants.DYNAMIC_TYPE_ENDPOINT.equals(endpointType)) {
             JsonObject updatedDynamicEndpointParams = new JsonObject();
@@ -352,7 +363,8 @@ public class APIControllerUtil {
             //if aws config is not provided
             if (envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
                 throw new APIManagementException(
-                        "Please specify awsLambdaEndpoints field for the environment and continue...");
+                        "Please specify awsLambdaEndpoints field for the environment and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
             JsonObject awsEndpointParams = envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY)
                     .getAsJsonObject();
@@ -379,7 +391,8 @@ public class APIControllerUtil {
             return updatedAwsEndpointParams;
         } else {
             throw new APIManagementException(
-                    "Please specify valid endpoint configurations for the environment and continue...");
+                    "Please specify valid endpoint configurations for the environment and continue...",
+                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
         }
     }
 
@@ -415,7 +428,8 @@ public class APIControllerUtil {
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
                 throw new APIManagementException(
-                        "Please specify loadBalanceEndpoints for the environment and continue...");
+                        "Please specify loadBalanceEndpoints for the environment and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
             }
@@ -456,7 +470,8 @@ public class APIControllerUtil {
             JsonObject failoverConfigs;
             if (failoverConfigElement == null) {
                 throw new APIManagementException(
-                        "Please specify failoverEndpoints field for the environment and continue...");
+                        "Please specify failoverEndpoints field for the environment and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 failoverConfigs = failoverConfigElement.getAsJsonObject();
             }
@@ -473,7 +488,8 @@ public class APIControllerUtil {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
                     throw new APIManagementException(
-                            "Please specify production failover field for the environment and continue...");
+                            "Please specify production failover field for the environment and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             } else if (!productionFailOvers.isJsonNull()) {
                 updatedRESTEndpointParams
@@ -488,7 +504,8 @@ public class APIControllerUtil {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
                     throw new APIManagementException(
-                            "Please specify sandbox failover field for for the environment and continue...");
+                            "Please specify sandbox failover field for for the environment and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
                 updatedRESTEndpointParams
@@ -532,7 +549,8 @@ public class APIControllerUtil {
             JsonObject loadBalancedConfigs;
             if (loadBalancedConfigElement == null) {
                 throw new APIManagementException(
-                        "Please specify loadBalanceEndpoints field for for the environment and continue...");
+                        "Please specify loadBalanceEndpoints field for for the environment and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 loadBalancedConfigs = loadBalancedConfigElement.getAsJsonObject();
             }
@@ -583,7 +601,8 @@ public class APIControllerUtil {
             JsonObject failoverConfigs;
             if (failoverConfigElement == null) {
                 throw new APIManagementException(
-                        "Please specify failoverEndpoints field for the environment and continue...");
+                        "Please specify failoverEndpoints field for the environment and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 failoverConfigs = failoverConfigElement.getAsJsonObject();
             }
@@ -600,7 +619,8 @@ public class APIControllerUtil {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (productionEndpoints != null) {
                     throw new APIManagementException(
-                            "Please specify production failover field for the environment and continue...");
+                            "Please specify production failover field for the environment and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             } else if (!productionFailOvers.isJsonNull()) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY,
@@ -615,7 +635,8 @@ public class APIControllerUtil {
                 //if failover endpoints are not specified but general endpoints are specified
                 if (sandboxEndpoints != null) {
                     throw new APIManagementException(
-                            "Please specify sandbox failover field for the environment and continue...");
+                            "Please specify sandbox failover field for the environment and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
                 }
             } else if (!sandboxFailOvers.isJsonNull()) {
                 updatedSOAPEndpointParams.add(ImportExportConstants.SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY,
@@ -638,7 +659,7 @@ public class APIControllerUtil {
      * @param defaultSandboxEndpoint    Default sandbox endpoint json object
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) {
+            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         //check api params file to get provided endpoints
         if (endpointConfigs == null) {
@@ -654,6 +675,22 @@ public class APIControllerUtil {
             if (endpointConfigs.get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY) != null) {
                 updatedEndpointParams.add(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY,
                         endpointConfigs.get(ImportExportConstants.SANDBOX_ENDPOINTS_JSON_PROPERTY));
+            }
+            if (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY) == null
+                    && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY) == null) {
+                throw new APIManagementException(
+                        "Please specify production sandbox or endpoints for the environment and continue...",
+                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
+            } else if ((updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY) != null)
+                    && (updatedEndpointParams.get(ImportExportConstants.SANDBOX_ENDPOINTS_PROPERTY).isJsonNull())) {
+
+                if ((updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY) != null)
+                        && updatedEndpointParams.get(ImportExportConstants.PRODUCTION_ENDPOINTS_PROPERTY)
+                        .isJsonNull()) {
+                    throw new APIManagementException(
+                            "Please specify production or sandbox endpoints for the environment and continue...",
+                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                }
             }
         }
     }
@@ -730,13 +767,14 @@ public class APIControllerUtil {
                 }
             }
             //copy certs file from certificates
-            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.CERTIFICATE_DIRECTORY;
+            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                    + ImportExportConstants.CERTIFICATE_DIRECTORY;
             String sourcePath = userCertificatesTempDirectory + File.separator + certName;
             String destinationPath = clientCertificatesDirectory + File.separator + certName;
             if (Files.notExists(Paths.get(sourcePath))) {
                 String errorMessage =
                         "The mentioned certificate file " + certName + " is not in the certificates directory";
-                throw new IOException(errorMessage);
+                throw new APIManagementException(errorMessage, ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
             CommonUtil.moveFile(sourcePath, destinationPath);
         }
@@ -791,13 +829,14 @@ public class APIControllerUtil {
                 }
             }
             //copy certs file from certificates
-            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.CERTIFICATE_DIRECTORY;
+            String userCertificatesTempDirectory = pathToArchive + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                    + ImportExportConstants.CERTIFICATE_DIRECTORY;
             String sourcePath = userCertificatesTempDirectory + File.separator + certName;
             String destinationPath = endpointCertificatesDirectory + File.separator + certName;
             if (Files.notExists(Paths.get(sourcePath))) {
                 String errorMessage =
                         "The mentioned certificate file " + certName + " is not in the certificates directory";
-                throw new APIManagementException(errorMessage);
+                throw new APIManagementException(errorMessage, ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
             CommonUtil.moveFile(sourcePath, destinationPath);
         }

@@ -262,4 +262,9 @@ public final class ImportExportConstants {
     public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
             CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "client_certificates";
 
+    //Deployment directory related constants
+    public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";
+    public static final String DEPLOYMENT_DIRECTORY= File.separator + DEPLOYMENT_DIRECTORY_NAME;
+    public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
+    public static final String API_PARAMS_FILE_NAME = "api_params.yaml";
 }
