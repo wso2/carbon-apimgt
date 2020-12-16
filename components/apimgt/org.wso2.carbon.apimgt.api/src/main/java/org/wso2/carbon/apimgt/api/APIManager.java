@@ -374,6 +374,16 @@ public interface APIManager {
     ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException;
 
     /**
+     * Retrieves the icon image associated with a particular API as a stream.
+     *
+     * @param apiId ID representing the API
+     * @param tenantDomain tenant
+     * @return an Icon containing image content and content type information
+     * @throws APIManagementException if an error occurs while retrieving the image
+     */
+    ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException;
+
+    /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended
      * to call this method once the APIManager instance is no longer required.
      *
