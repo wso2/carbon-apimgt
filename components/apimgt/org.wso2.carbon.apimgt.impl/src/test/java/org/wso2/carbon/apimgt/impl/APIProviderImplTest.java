@@ -1305,7 +1305,6 @@ public class APIProviderImplTest {
                     + apiId.getVersion(), e.getMessage());
         }
     }*/
-
     /* NOT USED
     @Test(expected = APIManagementException.class)
     public void testUpdateAPIStatus_WithFaultyGateways() throws Exception {
@@ -2830,7 +2829,6 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenThrow(APIManagementException.class);
         apiProvider.updateAPI(api, oldApi);
     }*/
-
     @Test(expected = FaultGatewaysException.class)
     public void testUpdateAPI_WithFailedGWs() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
@@ -2970,7 +2968,6 @@ public class APIProviderImplTest {
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         apiProvider.updateAPI(api, oldApi);
     }
-
     @Test
     public void testDeleteAPI() throws RegistryException, UserStoreException, APIManagementException,
             WorkflowException {
