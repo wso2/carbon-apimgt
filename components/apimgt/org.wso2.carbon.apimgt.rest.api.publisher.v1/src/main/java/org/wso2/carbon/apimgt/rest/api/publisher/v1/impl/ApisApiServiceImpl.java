@@ -3963,6 +3963,26 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiRevisionDeploymentListDTOResponse).build();
     }
 
+    @Override
+    public Response undeployAPIRevision(String apiId, String apiRevisionId, APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO: apIRevisionDeploymentListDTO.getList()) {
+            APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+            apiRevisionDeployment.setRevisionUUID(apiRevisionId);
+            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getDeployment());
+            apiRevisionDeployment.setType(apiRevisionDeploymentDTO.getType());
+            apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
+            apiRevisionDeployments.add(apiRevisionDeployment);
+        }
+        apiProvider.undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(apiRevisionId);
+        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTOResponse = APIMappingUtil
+                .fromListAPIRevisionDeploymentToDTO(apiRevisionDeploymentsResponse);
+        Response.Status status = Response.Status.CREATED;
+        return Response.status(status).entity(apiRevisionDeploymentListDTOResponse).build();
+    }
+
     /**
      * Restore a revision to the working copy of the API
      *

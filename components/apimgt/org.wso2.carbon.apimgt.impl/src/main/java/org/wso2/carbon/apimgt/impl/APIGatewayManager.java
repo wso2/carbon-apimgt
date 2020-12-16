@@ -1806,6 +1806,123 @@ public class APIGatewayManager {
         return failedGatewaysMap;
     }
 
+    /**
+     * Remove an API from the configured Gateways
+     *
+     * @param api          - The API to be removed
+     * @param tenantDomain - Tenant Domain of the publisher
+     * @return a map of environments that failed to remove the API
+     */
+    public Map<String, String> removeAPIRevisionFromGateway(API api, String tenantDomain) {
+
+        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+        Set<String> removedGateways = new HashSet<>();
+
+        if (debugEnabled) {
+            log.debug("API to be published: " + api.getId());
+            if (api.getEnvironments() != null) {
+                log.debug("Number of environments to be published to: " + (api.getEnvironments().size()));
+            }
+            if (api.getGatewayLabels() != null) {
+                log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
+            }
+        }
+
+        if (api.getEnvironments() != null) {
+            for (String environmentName : api.getEnvironments()) {
+                Environment environment = environments.get(environmentName);
+                //If the environment is removed from the configuration, continue without removing
+                if (environment == null) {
+                    continue;
+                }
+                if (debugEnabled) {
+                    log.debug("API with " + api.getId() + " is removing from the environment of "
+                            + environment.getName());
+                }
+                failedEnvironmentsMap = removeAPIRevisionFromGatewayEnvironment(api, tenantDomain, environment,
+                        false, removedGateways, failedEnvironmentsMap);
+            }
+        }
+
+        if (api.getGatewayLabels() != null) {
+            for (Label label : api.getGatewayLabels()) {
+                Environment environment = getEnvironmentFromLabel(label);
+                if (debugEnabled) {
+                    log.debug("API with " + api.getId() + " is removing from the label " + label);
+                }
+                failedEnvironmentsMap = removeAPIRevisionFromGatewayEnvironment(api, tenantDomain, environment,
+                        true, removedGateways, failedEnvironmentsMap);
+            }
+        }
+
+        DeployAPIInGatewayEvent
+                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
+                api.getUUID(), removedGateways);
+        APIUtil.sendNotification(deployAPIInGatewayEvent,
+                APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
+
+        updateRemovedClientCertificates(api, tenantDomain);
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+        return failedEnvironmentsMap;
+    }
+
+    /**
+     * Remove an API from a given environment
+     *
+     * @param api                       - The API to be published
+     * @param tenantDomain              - Tenant Domain of the publisher
+     * @param environment               - Gateway environment
+     * @param isGatewayDefinedAsALabel  - Whether the environment is from a label or not
+     * @param failedEnvironmentsMap     - This map will be updated with the environment if the publishing failed
+     * @return failedEnvironmentsMap
+     */
+    public Map<String, String> removeAPIRevisionFromGatewayEnvironment(API api, String tenantDomain, Environment environment,
+                                                               boolean isGatewayDefinedAsALabel,
+                                                               Set<String> removedGateways,
+                                                               Map<String, String> failedEnvironmentsMap) {
+
+        try {
+            GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTOtoRemoveAPI(api, tenantDomain, environment);
+            if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()
+                    && !isGatewayDefinedAsALabel) {
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                client.unDeployAPI(gatewayAPIDTO);
+            }
+
+            if (saveArtifactsToStorage) {
+                artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
+                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
+                removedGateways.add(environment.getName());
+                if (debugEnabled) {
+                    log.debug("Status of " + api.getId() + " has been updated to DB");
+                }
+            }
+        } catch (AxisFault axisFault) {
+            /*
+            didn't throw this exception to handle multiple gateway publishing if gateway is unreachable we collect
+            that environments into map with issue and show on popup in ui therefore this didn't break the gateway
+            unpublisihing if one gateway unreachable
+            */
+            log.error("Error occurred when removing API directly from the gateway " + environment.getName(),
+                    axisFault);
+            failedEnvironmentsMap.put(environment.getName(), axisFault.getMessage());
+        } catch (CertificateManagementException ex) {
+            log.error("Error occurred when deleting certificate from gateway" + environment.getName(), ex);
+            failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
+        } catch (ArtifactSynchronizerException e) {
+            log.error("Error occurred when updating the remove instruction in the storage " + environment.getName(), e);
+            failedEnvironmentsMap.put(environment.getName(), e.getMessage());
+        }
+        return failedEnvironmentsMap;
+    }
+
 
 
 }
