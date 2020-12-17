@@ -2391,16 +2391,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> claimMap = new HashMap<>();
         try {
             tenantId = getTenantId(tenantDomain);
-        SortedMap<String, String> subscriberClaims =
-                APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
-        APIManagerConfiguration configuration = getAPIManagerConfiguration();
-        String configuredClaims = configuration
-                .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
-        if (subscriberClaims != null) {
-            for (String claimURI : configuredClaims.split(",")) {
-                claimMap.put(claimURI, subscriberClaims.get(claimURI));
+            SortedMap<String, String> subscriberClaims =
+                    APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
+            APIManagerConfiguration configuration = getAPIManagerConfiguration();
+            String configuredClaims = configuration
+                    .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
+            if (subscriberClaims != null) {
+                for (String claimURI : configuredClaims.split(",")) {
+                    claimMap.put(claimURI, subscriberClaims.get(claimURI));
+                }
             }
-        }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for tenant domain "
                     + tenantDomain, e);
@@ -2878,6 +2878,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if (APIUtil.isCORSEnabled()) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                     , corsProperties);
+        }
+        if (APIConstants.PROTOTYPED.equals(api.getStatus())) {
+            String extensionHandlerPosition = getExtensionHandlerPosition();
+            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+                vtb.addHandlerPriority(
+                        "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                        Collections.<String, String>emptyMap(), 0);
+            } else {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                        Collections.<String, String>emptyMap());
+            }
         }
         if(!APIConstants.PROTOTYPED.equals(api.getStatus())) {
 
@@ -4327,7 +4338,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " from Key Manager : " + keyManagerDtoEntry.getKey() + ".");
                     }
                 } catch (APIManagementException e) {
-                    log.error("Error while Detach and Delete Scope from Key Manager " + keyManagerDtoEntry.getKey());
+                    log.error("Error while Detach and Delete Scope from Key Manager " + keyManagerDtoEntry.getKey(), e);
                 }
             }
         }

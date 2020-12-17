@@ -2876,9 +2876,7 @@ public abstract class AbstractAPIManager implements APIManager {
             if (documentIndexer != null && documentIndexer instanceof DocumentIndexer) {
                 //field check on document_indexed was added to prevent unindexed(by new DocumentIndexer) from coming up as search results
                 //on indexed documents this property is always set to true
-                complexAttribute = ClientUtils
-                        .escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + " OR " +
-                        ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR mediaType_s:("  + ClientUtils
+                complexAttribute = ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " OR mediaType_s:("  + ClientUtils
                         .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND document_indexed_s:true)";
 
                 //construct query such that publisher roles is checked in properties for api artifacts and in fields for document artifacts
@@ -2887,8 +2885,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     complexAttribute =
                             "(" + ClientUtils.escapeQueryChars(APIConstants.API_RXT_MEDIA_TYPE) + " AND publisher_roles_ss:"
                                     + publisherRoles + ") OR mediaType_s:("  + ClientUtils
-                                    .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ") OR mediaType_s:("  + ClientUtils
-                                    .escapeQueryChars(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
+                                    .escapeQueryChars(APIConstants.DOCUMENT_RXT_MEDIA_TYPE) + " AND publisher_roles_s:" + publisherRoles + ")";
                 }
             } else {
                 //document indexer required for document content search is not engaged, therefore carry out the search only for api artifact contents
@@ -2902,7 +2899,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
 
             attributes.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, complexAttribute);
-            attributes.put(APIConstants.API_OVERVIEW_STATUS, "");
+            attributes.put(APIConstants.API_OVERVIEW_STATUS, apiState);
 
             SearchResultsBean resultsBean = contentBasedSearchService.searchByAttribute(attributes, systemUserRegistry);
             String errorMsg = resultsBean.getErrorMessage();
@@ -2972,18 +2969,13 @@ public abstract class AbstractAPIManager implements APIManager {
                         APIProduct apiProduct;
                         if (apiArtifactId != null) {
                             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                            if (apiArtifact != null) {
-                                if (!(apiState.contains("(published OR prototyped OR null)")
-                                        && apiArtifact.getLifecycleState().equalsIgnoreCase("Created")) || apiState.equalsIgnoreCase("")) {
-                                    if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
-                                            equals(APIConstants.API_PRODUCT)) {
-                                        apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
-                                        apiProductSet.add(apiProduct);
-                                    } else {
-                                        api = APIUtil.getAPI(apiArtifact, registry);
-                                        apiSet.add(api);
-                                    }
-                                }
+                            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                    equals(APIConstants.API_PRODUCT)) {
+                                apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                                apiProductSet.add(apiProduct);
+                            } else {
+                                api = APIUtil.getAPI(apiArtifact, registry);
+                                apiSet.add(api);
                             }
                         } else {
                             throw new GovernanceException("artifact id is null for " + resourcePath);
@@ -3127,13 +3119,6 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
                             OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
                                     , OAuthApplicationInfo.class);
-                            if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
-                                    instanceof String) {
-                                oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                        ((String) storedOAuthApplicationInfo
-                                                .getParameter(APIConstants.JSON_GRANT_TYPES))
-                                                .replace(",", " "));
-                            }
                             if (oAuthApplicationInfo == null) {
                                 oAuthApplicationInfo = storedOAuthApplicationInfo;
                             } else {
@@ -3143,8 +3128,16 @@ public abstract class AbstractAPIManager implements APIManager {
                                 }
                                 if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
                                         storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
-                                    oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                            storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                    if (storedOAuthApplicationInfo
+                                            .getParameter(APIConstants.JSON_GRANT_TYPES) instanceof String) {
+                                        oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                                ((String) storedOAuthApplicationInfo
+                                                        .getParameter(APIConstants.JSON_GRANT_TYPES))
+                                                        .replace(",", " "));
+                                    } else {
+                                        oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                                storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                    }
                                 }
                                 if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
                                         StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {

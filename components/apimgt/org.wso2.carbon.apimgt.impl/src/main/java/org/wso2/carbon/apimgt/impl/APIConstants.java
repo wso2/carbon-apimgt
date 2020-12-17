@@ -512,6 +512,11 @@ public final class APIConstants {
     public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
     public static final String GOVERNANCE = "governance";
 
+    public static final String DEFAULT_CARBON_DIALECT = "http://wso2.org/claims";
+    public static final String FULL_NAME = DEFAULT_CARBON_DIALECT + "/fullname";
+    public static final String FIRST_NAME = DEFAULT_CARBON_DIALECT + "/givenname";
+    public static final String LAST_NAME = DEFAULT_CARBON_DIALECT + "/lastname";
+
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     //Registry lifecycle related info
