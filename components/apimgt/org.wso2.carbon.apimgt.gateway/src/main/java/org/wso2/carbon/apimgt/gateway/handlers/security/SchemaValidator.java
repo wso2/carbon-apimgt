@@ -118,7 +118,7 @@ public class SchemaValidator extends AbstractHandler {
                 if (getMessageContent(messageContext) == null) {
                     String payloadContent = IOUtils.toString(pipe.getInputStream());
                     JsonUtil.getNewJsonPayload(axis2MC, payloadContent, true, true);
-                    messageContext.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+                    axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
                 }
             }
             JsonElement payloadObject = getMessageContent(messageContext);
