@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
@@ -919,6 +920,21 @@ public class APIManagerComponent {
     protected void removeArtifactSaver(ArtifactSaver artifactSaver) {
         ServiceReferenceHolder.getInstance().getArtifactSaver().disconnect();
         ServiceReferenceHolder.getInstance().setArtifactSaver(null);
+    }
+
+    @Reference(
+            name = "import.export.implementation",
+            service = ImportExportAPI.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetImportExportService")
+    protected void setImportExportService (ImportExportAPI importExportService) {
+
+        ServiceReferenceHolder.getInstance().setImportExportAPI(importExportService);
+    }
+
+    protected void unsetImportExportService(ImportExportAPI importExportAPI) {
+        ServiceReferenceHolder.getInstance().setImportExportAPI(null);
     }
 
     /**

@@ -7,10 +7,9 @@ const AppThemes = {
     light: {
         palette: {
             primary: {
-                // light: will be calculated from palette.primary.main,
-                main: '#15b8cf',
-                // dark: will be calculated from palette.primary.main,
-                // contrastText: will be calculated to contrast with palette.primary.main
+                light: '#63ccff',
+                main: '#009be5',
+                dark: '#006db3',
             },
             secondary: {
                 light: '#0066ff',
@@ -34,11 +33,119 @@ const AppThemes = {
             h4: {
                 fontSize: '1.3rem',
             },
+            h5: {
+                fontWeight: 500,
+                fontSize: 26,
+                letterSpacing: 0.5,
+            },
+        },
+        shape: {
+            borderRadius: 8,
+        },
+        props: {
+            MuiTab: {
+                disableRipple: true,
+            },
+        },
+        mixins: {
+            toolbar: {
+                minHeight: 48,
+            },
         },
         custom: {
-            logo: '/site/public/images/logo-inverse.svg', // todo: change logo here
-            logoHeight: 30,
-            logoWidth: 222,
+            drawerWidth: 256,
+            logo: '/site/public/images/logo.svg',
+            logoWidth: 180,
+        },
+        overrides: {
+            MuiRadio: {
+                colorSecondary: {
+                    '&$checked': { color: '#009be5' },
+                    '&$disabled': {
+                        color: 'rgba(0, 0, 0, 0.26)',
+                    },
+                },
+            },
+            MuiButton: {
+                label: {
+                    textTransform: 'none',
+                },
+                contained: {
+                    boxShadow: 'none',
+                    '&:active': {
+                        boxShadow: 'none',
+                    },
+                },
+            },
+            MuiTabs: {
+                root: {
+                    marginLeft: 8,
+                },
+                indicator: {
+                    height: 3,
+                    borderTopLeftRadius: 3,
+                    borderTopRightRadius: 3,
+                    backgroundColor: '#ffffff',
+                },
+            },
+            MuiTab: {
+                root: {
+                    textTransform: 'none',
+                    margin: '0 16px',
+                    minWidth: 0,
+                    padding: 0,
+                },
+            },
+            MuiIconButton: {
+                root: {
+                    padding: 8,
+                },
+            },
+            MuiTooltip: {
+                tooltip: {
+                    borderRadius: 4,
+                },
+            },
+            MuiDivider: {
+                root: {
+                    backgroundColor: '#404854',
+                },
+            },
+            MuiListItemText: {
+                primary: {
+                    fontWeight: 500,
+                },
+            },
+            MuiListItemIcon: {
+                root: {
+                    color: 'inherit',
+                    marginRight: 0,
+                    '& svg': {
+                        fontSize: 20,
+                    },
+                },
+            },
+            MuiAvatar: {
+                root: {
+                    width: 32,
+                    height: 32,
+                },
+            },
+            MuiDrawer: {
+                paper: {
+                    backgroundColor: '#18202c',
+                },
+            },
+            MuiListItem: {
+                root: {
+                    '&.itemCategory': {
+                        backgroundColor: '#232f3e',
+                        boxShadow: '0 -1px 0 #404854 inset',
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                    },
+                },
+            },
         },
     },
 };

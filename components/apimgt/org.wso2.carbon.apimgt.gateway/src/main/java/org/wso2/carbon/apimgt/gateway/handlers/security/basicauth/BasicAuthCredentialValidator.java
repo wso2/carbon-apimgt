@@ -49,7 +49,6 @@ import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +119,7 @@ public class BasicAuthCredentialValidator {
                     .get(username);
             if (cachedValidationInfoObj != null) {
                 cachedPasswordHash = cachedValidationInfoObj.getHashedPassword();
+                cachedValidationInfoObj.setCached(true);
             }
             if (cachedPasswordHash != null && cachedPasswordHash.equals(providedPasswordHash)) {
                 log.debug("Basic Authentication: <Valid Username Cache> Username & password authenticated");
@@ -128,6 +128,7 @@ public class BasicAuthCredentialValidator {
                 BasicAuthValidationInfoDTO invalidCacheValidationInfoObj = (BasicAuthValidationInfoDTO) getInvalidUsernameCache()
                         .get(username);
                 if (invalidCacheValidationInfoObj != null) {
+                    invalidCacheValidationInfoObj.setCached(true);
                     invalidCachedPasswordHash = invalidCacheValidationInfoObj.getHashedPassword();
                     if (invalidCachedPasswordHash != null && invalidCachedPasswordHash.equals(providedPasswordHash)) {
                         log.debug(
@@ -189,7 +190,9 @@ public class BasicAuthCredentialValidator {
      */
     @MethodStats
     public boolean validateScopes(String username, OpenAPI openAPI, MessageContext synCtx,
-            String[] userRoleList) throws APISecurityException {
+                                  BasicAuthValidationInfoDTO basicAuthValidationInfoDTO) throws APISecurityException {
+
+        String[] userRoleList = basicAuthValidationInfoDTO.getUserRoleList();
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -201,52 +204,48 @@ public class BasicAuthCredentialValidator {
         Map<String, Scope> scopeMap = apiKeyValidator.retrieveScopes(tenantDomain);
         String resourceCacheKey = resourceKey + ":" + username;
 
-        if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
+        if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null &&
+                basicAuthValidationInfoDTO.isCached()) {
             return true;
         }
 
         if (openAPI != null) {
             // retrieve the user roles related to the scope of the API resource
             List<String> resourceScopes = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
-            List<String> resourceRolesList = new ArrayList<>();
             if (resourceScopes != null && resourceScopes.size() > 0) {
                 for (String resourceScope : resourceScopes) {
                     Scope scope = scopeMap.get(resourceScope);
                     if (scope != null) {
                         if (scope.getRoles().isEmpty()) {
                             log.debug("Scope " + resourceScope + " didn't have roles");
+                            if (gatewayKeyCacheEnabled) {
+                                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                            }
                             return true;
                         } else {
-                            resourceRolesList.addAll(scope.getRoles());
+                            //check if the roles related to the API resource contains internal role which matches
+                            // any of the role of the user
+                            //check if the roles related to the API resource contains internal role which matches
+                            // any of the role of the user
+                            if (validateInternalUserRoles(scope.getRoles(), userRoleList)) {
+                                if (gatewayKeyCacheEnabled) {
+                                    getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                                }
+                                return true;
+                            }
+                            // check if the roles related to the API resource contains any of the role of the user
+                            for (String role : userRoleList) {
+                                if (scope.getRoles().contains(role)) {
+                                    if (gatewayKeyCacheEnabled) {
+                                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                                    }
+                                    return true;
+                                }
+                            }
                         }
-                    }
-                }
-            }
-
-            if (!resourceRolesList.isEmpty()) {
-                //check if the roles related to the API resource contains internal role which matches
-                // any of the role of the user
-                if (validateInternalUserRoles(resourceRolesList, userRoleList)) {
-                    if (gatewayKeyCacheEnabled) {
-                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                    }
-                    return true;
-                }
-
-                // check if the roles related to the API resource contains any of the role of the user
-                for (String role : userRoleList) {
-                    if (resourceRolesList.contains(role)) {
-                        if (gatewayKeyCacheEnabled) {
-                            getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                        }
-                        return true;
                     }
                 }
             } else {
-                // No scopes for the requested resource
-                if (gatewayKeyCacheEnabled) {
-                    getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                }
                 if (log.isDebugEnabled()) {
                     log.debug("Basic Authentication: No scopes for the API resource: ".concat(resourceKey));
                 }

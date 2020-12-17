@@ -138,4 +138,5 @@ public final class APIImportExportConstants {
         // To identify thumbnail icons
         fileExtensionMapping.put("application/json", "json");
     }
+
 }

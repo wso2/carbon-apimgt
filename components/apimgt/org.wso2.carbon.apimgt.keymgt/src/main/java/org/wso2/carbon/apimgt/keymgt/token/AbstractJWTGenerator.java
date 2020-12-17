@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.UUID;
 
 /**
  * This class represents the JSON Web Token generator.
@@ -244,6 +245,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                         jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
                 }
+                //Adding JTI standard claim
+                jwtClaimsSetBuilder.jwtID(UUID.randomUUID().toString());
             }
             return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
         }
