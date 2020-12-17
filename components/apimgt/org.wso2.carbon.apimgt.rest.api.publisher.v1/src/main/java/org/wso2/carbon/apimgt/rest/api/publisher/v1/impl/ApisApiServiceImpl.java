@@ -4343,6 +4343,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
                 api.setRevision(true);
                 api.setRevisionedApiId(apiRevision.getApiUUID());
+                api.setRevisionId(apiRevision.getId());
             }
             return APIMappingUtil.fromAPItoDTO(api);
         } catch (APIManagementException e) {

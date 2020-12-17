@@ -845,6 +845,7 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());
+        dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
         dto.setTestKey(model.getTestKey());
