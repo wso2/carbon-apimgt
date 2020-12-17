@@ -1,9 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
@@ -448,6 +450,24 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response applicationsGet( @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query,  @ApiParam(value = "", allowableValues="name, throttlingPolicy, status")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.applicationsGet(groupId, query, sortBy, sortOrder, limit, offset, ifNoneMatch, securityContext);
+    }
+
+    @POST
+    @Path("/import")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an application. ", response = ApplicationInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations")
+        })
+    }, tags={ "Application (Individual)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with the updated object information as entity in the body. ", response = ApplicationInfoDTO.class),
+        @ApiResponse(code = 207, message = "Multi Status. Partially successful response with skipped APIs information object as entity in the body. ", response = APIInfoListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response applicationsImportPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Creator of the Application ")  @QueryParam("preserveOwner") Boolean preserveOwner,  @ApiParam(value = "Skip importing Subscriptions of the Application ")  @QueryParam("skipSubscriptions") Boolean skipSubscriptions,  @ApiParam(value = "Expected Owner of the Application in the Import Environment ")  @QueryParam("appOwner") String appOwner,  @ApiParam(value = "Skip importing Keys of the Application ")  @QueryParam("skipApplicationKeys") Boolean skipApplicationKeys,  @ApiParam(value = "Update if application exists ")  @QueryParam("update") Boolean update) throws APIManagementException{
+        return delegate.applicationsImportPost(fileInputStream, fileDetail, preserveOwner, skipSubscriptions, appOwner, skipApplicationKeys, update, securityContext);
     }
 
     @POST

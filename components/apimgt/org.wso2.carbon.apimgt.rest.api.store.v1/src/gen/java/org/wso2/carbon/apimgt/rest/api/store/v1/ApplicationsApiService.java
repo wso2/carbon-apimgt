@@ -9,10 +9,12 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
@@ -55,5 +57,6 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO applicationDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format, MessageContext messageContext) throws APIManagementException;
       public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, MessageContext messageContext) throws APIManagementException;
       public Response applicationsPost(ApplicationDTO applicationDTO, MessageContext messageContext) throws APIManagementException;
 }

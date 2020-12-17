@@ -469,4 +469,22 @@ public class CommonUtil {
         String jsonContent = gson.toJson(jsonObject);
         writeToYamlOrJson(filePath, exportFormat, jsonContent);
     }
+
+    /**
+     * Extract the imported archive to a temporary folder and return the folder path of it
+     *
+     * @param uploadedInputStream Input stream from the REST request
+     * @return Path to the extracted directory
+     * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
+     *                                  extracting the content
+     */
+    public static String getArchivePathOfExtractedDirectory(InputStream uploadedInputStream, String uploadFileName)
+            throws APIImportExportException {
+        // Temporary directory is used to create the required folders
+        File importFolder = CommonUtil.createTempDirectory(null);
+        String absolutePath = importFolder.getAbsolutePath() + File.separator;
+        CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+        String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
+        return absolutePath + extractedFolderName;
+    }
 }
