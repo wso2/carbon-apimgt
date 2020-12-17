@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -167,6 +168,7 @@ import org.wso2.carbon.apimgt.persistence.LCManagerFactory;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
@@ -177,6 +179,7 @@ import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
@@ -10601,5 +10604,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException("Error while saving thumbnail ", e);
             }
         }
+    }
+
+    @Override
+    public List<Mediation> getAllApiSpecificMediationPolicies(String apiId) throws APIManagementException {
+        List<Mediation> mappedList = new ArrayList<Mediation>();
+        try {
+            List<MediationInfo> list = apiPersistenceInstance.getAllMediationPolicies(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId);
+            if (list != null) {
+                for (MediationInfo mediationInfo : list) {
+                    Mediation mediation = new Mediation();
+                    mediation.setName(mediationInfo.getName());
+                    mediation.setUuid(mediationInfo.getId());
+                    mediation.setType(mediationInfo.getType());
+                    mappedList.add(mediation);
+                }
+            }
+        } catch (MediationPolicyPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while accessing mediation policies ", e);
+            }
+        }
+        return mappedList;
+    }
+
+    @Override
+    public Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId)
+            throws APIManagementException {
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.Mediation policy = apiPersistenceInstance.getMediationPolicy(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, policyId);
+            if (policy != null) {
+                Mediation mediation = new Mediation();
+                mediation.setName(policy.getName());
+                mediation.setUuid(policy.getId());
+                mediation.setType(policy.getType());
+                mediation.setConfig(policy.getConfig());
+                return mediation;
+            }
+        } catch (MediationPolicyPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while accessing mediation policies ", e);
+            }
+        }
+        return null;
     }
 }

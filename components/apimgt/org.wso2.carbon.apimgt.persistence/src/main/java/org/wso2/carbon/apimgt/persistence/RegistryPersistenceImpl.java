@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.persistence;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,14 +29,18 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
+import org.apache.axiom.om.OMAttribute;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -91,6 +96,7 @@ import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.common.utils.artifact.manager.ArtifactManager;
 import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -2577,15 +2583,165 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
             throws MediationPolicyPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        boolean isTenantFlowStarted = false;
+        Mediation mediation = null;
+
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            BasicAPI api = getbasicAPIInfo(apiId, registry);
+            if (api == null) {
+                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
+            }
+            String apiResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
+                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR
+                    + api.apiVersion;
+
+            // apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            // Getting API registry resource
+            Resource resource = registry.get(apiResourcePath);
+            // resource eg: /_system/governance/apimgt/applicationdata/provider/admin/calculatorAPI/2.0
+            if (resource instanceof Collection) {
+                Collection typeCollection = (Collection) resource;
+                String[] typeArray = typeCollection.getChildren();
+                for (String type : typeArray) {
+                    // Check for mediation policy resource
+                    if ((type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
+                            + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN))
+                            || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
+                                    + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT))
+                            || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
+                                    + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))) {
+                        Resource sequenceType = registry.get(type);
+                        // sequenceType eg: in / out /fault
+                        if (sequenceType instanceof Collection) {
+                            String[] mediationPolicyArr = ((Collection) sequenceType).getChildren();
+                            for (String mediationPolicy : mediationPolicyArr) {
+                                Resource mediationResource = registry.get(mediationPolicy);
+                                String resourceId = mediationResource.getUUID();
+                                if (resourceId.equalsIgnoreCase(mediationPolicyId)) {
+                                    // Get mediation policy config content
+                                    String contentString = IOUtils.toString(mediationResource.getContentStream(),
+                                            RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                                    // Extracting name specified in the mediation config
+                                    OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                                    OMAttribute attribute = omElement.getAttribute(new QName("name"));
+                                    String mediationPolicyName = attribute.getAttributeValue();
+
+                                    String resourcePath = mediationResource.getPath();
+                                    String[] path = resourcePath.split(RegistryConstants.PATH_SEPARATOR);
+                                    String resourceType = path[(path.length - 2)];
+                                    mediation = new Mediation();
+                                    mediation.setConfig(contentString);
+                                    mediation.setType(resourceType);
+                                    mediation.setId(mediationResource.getUUID());
+                                    mediation.setName(mediationPolicyName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException | APIPersistenceException | IOException | XMLStreamException e) {
+            String msg = "Error occurred  while getting Api Specific mediation policies ";
+            throw new MediationPolicyPersistenceException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return mediation;
     }
 
     @Override
     public List<MediationInfo> getAllMediationPolicies(Organization org, String apiId)
             throws MediationPolicyPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        boolean isTenantFlowStarted = false;
+        List<MediationInfo> mediationList = new ArrayList<MediationInfo>();
+        MediationInfo mediation;
+
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            BasicAPI api = getbasicAPIInfo(apiId, registry);
+            if (api == null) {
+                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
+            }
+            String apiResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
+                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR
+                    + api.apiVersion;
+
+            // apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            // Getting API registry resource
+            Resource resource = registry.get(apiResourcePath);
+            // resource eg: /_system/governance/apimgt/applicationdata/provider/admin/calculatorAPI/2.0
+            if (resource instanceof Collection) {
+                Collection typeCollection = (Collection) resource;
+                String[] typeArray = typeCollection.getChildren();
+                for (String type : typeArray) {
+                    // Check for mediation policy sequences
+                    if ((type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
+                            + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN))
+                            || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
+                                    + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT))
+                            || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
+                                    + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))) {
+                        Resource typeResource = registry.get(type);
+                        // typeResource : in / out / fault
+                        if (typeResource instanceof Collection) {
+                            String[] mediationPolicyArr = ((Collection) typeResource).getChildren();
+                            if (mediationPolicyArr.length > 0) {
+                                for (String mediationPolicy : mediationPolicyArr) {
+                                    Resource policyResource = registry.get(mediationPolicy);
+                                    // policyResource eg: custom_in_message
+
+                                    // Get uuid of the registry resource
+                                    String resourceId = policyResource.getUUID();
+
+                                    // Get mediation policy config
+                                    try {
+                                        String contentString = IOUtils.toString(policyResource.getContentStream(),
+                                                RegistryConstants.DEFAULT_CHARSET_ENCODING);
+                                        // Extract name from the policy config
+                                        OMElement omElement = AXIOMUtil.stringToOM(contentString);
+                                        OMAttribute attribute = omElement.getAttribute(new QName("name"));
+                                        String mediationPolicyName = attribute.getAttributeValue();
+                                        mediation = new MediationInfo();
+                                        mediation.setId(resourceId);
+                                        mediation.setName(mediationPolicyName);
+                                        // Extracting mediation policy type from the registry resource path
+                                        String resourceType = type.substring(type.lastIndexOf("/") + 1);
+                                        mediation.setType(resourceType);
+                                        mediationList.add(mediation);
+                                    } catch (XMLStreamException e) {
+                                        // If exception been caught flow will continue with next mediation policy
+                                        log.error(
+                                                "Error occurred while getting omElement out of" + " mediation content",
+                                                e);
+                                    } catch (IOException e) {
+                                        log.error("Error occurred while converting the content "
+                                                + "stream of mediation " + mediationPolicy + " to string", e);
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (RegistryException | APIPersistenceException e) {
+            String msg = "Error occurred  while getting Api Specific mediation policies ";
+            throw new MediationPolicyPersistenceException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return mediationList;
     }
 
     @Override
@@ -2967,6 +3123,37 @@ public class RegistryPersistenceImpl implements APIPersistence {
         holder.setRegistry(registry);
         holder.setTenantFlowStarted(tenantFlowStarted);
         return holder;
+    }
+    
+    private BasicAPI getbasicAPIInfo(String uuid, Registry registry)
+            throws APIPersistenceException, GovernanceException {
+        BasicAPI api = new BasicAPI();
+        GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+
+        GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(uuid);
+        if (apiArtifact == null) {
+            return null;
+        }
+        String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        api.apiProvider = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        api.apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        api.apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+        if (visibleRolesList != null) {
+            api.visibleRoles = visibleRolesList.split(",");
+        }
+        api.visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+
+        return api;
+    }
+
+    private class BasicAPI {
+        String apiName;
+        String apiVersion;
+        String apiProvider;
+        String visibility;
+        String[] visibleRoles;
     }
 
 }

@@ -1647,5 +1647,23 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void setThumbnailToAPI(String apiId, ResourceFile resource) throws APIManagementException;
+    
+    /**
+     * List all the mediation policies for the api
+     * @param apiId api id
+     * @return
+     * @throws APIManagementException
+     */
+    List<Mediation> getAllApiSpecificMediationPolicies(String apiId) throws APIManagementException;
 
+    /**
+     * The mediation policies for the api
+     * @param apiId api id
+     * @param policyId policy id
+     * @return
+     * @throws APIManagementException
+     */
+    Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId) throws APIManagementException;
+
+    
 }
