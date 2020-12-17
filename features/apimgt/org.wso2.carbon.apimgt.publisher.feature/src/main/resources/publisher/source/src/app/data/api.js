@@ -2775,9 +2775,15 @@ class API extends Resource {
             file: asyncAPIData,
             'Content-Type': 'multipart/form-data',
         };
+        const requestBody = {
+            requestBody: {
+                file: asyncAPIData
+            },
+        };
         promisedValidate = apiClient.then(client => {
             return client.apis.Validation.validateAsyncAPISpecification(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
                 }),
@@ -2789,13 +2795,18 @@ class API extends Resource {
     static validateAsyncAPIByUrl(url, params = {returnContent: false}) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
-            url: url,
             'Content-Type': 'multipart/form-data',
             ...params
+        };
+        const requestBody = {
+            requestBody: {
+                url: url,
+            },
         };
         return apiClient.then(client => {
            return client.apis['Validation'].validateAsyncAPISpecification(
                payload,
+               requestBody,
                this._requestMetaData({
                    'Content-Type': 'multipart/form-data',
                }),
@@ -2809,11 +2820,14 @@ class API extends Resource {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
-                file: asyncAPIData,
-                additionalProperties: JSON.stringify(apiData),
+                requestBody: {
+                    file: asyncAPIData,
+                    additionalProperties: JSON.stringify(apiData),
+                }
             };
 
             const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                null,
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -2831,11 +2845,14 @@ class API extends Resource {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
-                url: asyncAPIUrl,
-                additionalProperties: JSON.stringify(apiData),
+                requestBody: {
+                    url: asyncAPIUrl,
+                    additionalProperties: JSON.stringify(apiData),
+                }
             };
 
             const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                null,
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
@@ -2872,11 +2889,16 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: this.id,
-                apiDefinition: JSON.stringify(asyncAPI),
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': 'multipart/form-data',
+            };
+            const requestBody = {
+                requestBody: {
+                    apiDefinition :JSON.stringify(asyncAPI)
+                }
             };
             return client.apis['APIs'].put_apis__apiId__asyncapi(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -2899,11 +2921,18 @@ class API extends Resource {
 
             payload = {
                 apiId: apiId,
-                url: AsyncAPIUrl,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    url: AsyncAPIUrl,
+                }
             };
 
             const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -2920,6 +2949,9 @@ class API extends Resource {
      * @returns {boolean|*}
      */
     updateAsyncAPIDefinitionByFile(apiId, AsyncAPIFile) {
+        console.log('hello');
+        console.log(apiId);
+        console.log(AsyncAPIFile);
         let payload, promise_updated;
 
         promise_updated = this.client.then(client => {
@@ -2927,11 +2959,18 @@ class API extends Resource {
 
             payload = {
                 apiId: apiId,
-                file: AsyncAPIFile,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    file: AsyncAPIFile,
+                }
             };
 
             const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),

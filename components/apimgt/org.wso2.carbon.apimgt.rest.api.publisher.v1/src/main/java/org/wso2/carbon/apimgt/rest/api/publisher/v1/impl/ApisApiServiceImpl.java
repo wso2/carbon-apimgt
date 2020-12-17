@@ -73,9 +73,7 @@ import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-<<<<<<< HEAD
 import org.wso2.carbon.apimgt.api.model.*;
-=======
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -97,7 +95,6 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
->>>>>>> upstream/master
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -105,9 +102,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-<<<<<<< HEAD
 import org.wso2.carbon.apimgt.impl.definitions.*;
-=======
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
@@ -116,7 +111,6 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
->>>>>>> upstream/master
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
@@ -136,48 +130,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.Documentatio
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
-<<<<<<< HEAD
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.*;
+/*import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
-=======
+import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;*/
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
->>>>>>> upstream/master
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
@@ -186,8 +145,6 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
-<<<<<<< HEAD
-=======
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -217,8 +174,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
->>>>>>> upstream/master
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
@@ -1141,13 +1096,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            String asyncAPIString = apiProvider.getAsyncAPIDefinition(apiIdentifier);
-            //API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            return Response.ok().entity(asyncAPIString).header("Content-Disposition",
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            //String asyncAPIString = apiProvider.getAsyncAPIDefinition(apiIdentifier);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String updatedDefinition = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
+            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; fileNme=\"" + "asyncapi.json" + "\"").build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant acessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -1177,11 +1133,11 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated AsyncAPI document of the API
      */
     @Override
-    public Response apisApiIdAsyncapiPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
-             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream,
+                                         Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
         try {
             String updatedAsyncAPIDefinition;
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //Handle URL and file based definition imports
             if (url != null || fileInputStream != null){
                 //Validate and retrieve the AsyncAPI definition
@@ -1216,6 +1172,58 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
+
+    /**
+     * Updates the AsyncAPI definition opf an existing API
+     *
+     * @param apiId             API identifier
+     * @param apiDefinition     AsyncAPI definition
+     * @param url               AsyncAPI definition URL
+     * @param fileInputStream   AsyncAPI definition input file content
+     * @param fileDetail        file meta information as attachment
+     * @param ifMatch           If-match header value
+     * @return updated AsyncAPI document of the API
+     */
+    /*@Override
+    public Response apisApiIdAsyncapiPut(String apiId, String apiDefinition, String url, InputStream fileInputStream,
+             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
+        try {
+            String updatedAsyncAPIDefinition;
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            //Handle URL and file based definition imports
+            if (url != null || fileInputStream != null){
+                //Validate and retrieve the AsyncAPI definition
+                Map validationResponseMap = validateAsyncAPISpecification(url, fileInputStream,
+                        fileDetail, true);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+                updatedAsyncAPIDefinition = updateAsyncAPIDefinition(apiId, validationResponse);
+            } else {
+                updatedAsyncAPIDefinition = updateAsyncAPIDefinition(apiId, apiDefinition);
+            }
+            return Response.ok().entity(updatedAsyncAPIDefinition).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating AsyncAPI definition of API: " + apiId, e, log);
+            } else {
+                String errorMessage = "Error while updating the AsyncAPI definition of the API: " + apiId + " - "
+                        + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }*/
 
     /**
      * Method to retrieve Security Audit Report
@@ -3523,6 +3531,32 @@ public class ApisApiServiceImpl implements ApisApiService {
                 Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    /**
+     * Validate AsyncAPI Specification and retrieve as the response
+     *
+     * @param url URL of the AsyncAPI Specification
+     * @param fileInputStream InputStream for the provided file
+     * @param fileDetail File meta-data
+     * @param returnContent Whether to return the definition content
+     * @param messageContext CXF message context
+     * @return AsyncAPI Specification Validation response
+     */
+    @Override
+    public Response validateAsyncAPISpecification(Boolean returnContent, String url, InputStream fileInputStream,
+                                                  Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
+        //validate and retrieve the AsyncAPI specification
+        Map validationResponseMap = null;
+        try {
+            validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, returnContent);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
+
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
+                (AsyncAPISpecificationValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        return Response.ok().entity(validationResponseDTO).build();
+    }
+
     @Override
     public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) {
         if (StringUtils.isEmpty(name) || StringUtils.isEmpty(apiId)) {
@@ -3747,7 +3781,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param messageContext CXF message context
      * @return AsyncAPI Specification Validation response
      */
-    @Override
+    /*@Override
     public Response validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail, 
           Boolean returnContent, MessageContext messageContext){
             
@@ -3762,7 +3796,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
                 (AsyncAPISpecificationValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
         return Response.ok().entity(validationResponseDTO).build();
-    }
+    }*/
 
     /**
      * Importing and AsyncAPI Specification and create and API
@@ -3822,7 +3856,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //Import the API and Definition
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
             String definitionToAdd = validationResponse.getJsonContent();
             apiProvider.addAPI(apiToAdd);
@@ -4914,8 +4948,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
             throws APIManagementException, FaultGatewaysException {
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fall if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         String apiDefinition = response.getJsonContent();

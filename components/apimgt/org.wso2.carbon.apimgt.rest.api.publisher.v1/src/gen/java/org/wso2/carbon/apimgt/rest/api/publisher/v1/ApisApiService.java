@@ -55,7 +55,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApisApiService {
       public Response apisApiIdAmznResourceNamesGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdAsyncapiPut(String apiId, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasContentGet(String apiId, String alias, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasDelete(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
@@ -118,7 +118,7 @@ public interface ApisApiService {
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;
       public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail, Boolean returnContent, MessageContext messageContext) throws APIManagementException;
+      public Response validateAsyncAPISpecification(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;

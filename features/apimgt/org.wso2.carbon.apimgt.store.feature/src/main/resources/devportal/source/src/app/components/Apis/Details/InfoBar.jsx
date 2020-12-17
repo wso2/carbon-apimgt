@@ -43,14 +43,10 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import Environments from './Environments';
 import Labels from './Labels';
-<<<<<<< HEAD
-import CloudDownloadRounded from "@material-ui/icons/CloudDownloadRounded";
 import Utils from "AppData/Utils";
-import Alert from "AppComponents/Shared/Alert";
-=======
+import Alert from 'AppComponents/Shared/Alert';
 
 const propertyDisplaySuffix = Settings.app.propertyDisplaySuffix || '__display';
->>>>>>> upstream/master
 /**
  *
  *

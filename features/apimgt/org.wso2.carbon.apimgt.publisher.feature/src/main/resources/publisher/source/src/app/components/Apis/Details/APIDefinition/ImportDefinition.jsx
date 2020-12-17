@@ -165,7 +165,7 @@ export default function ImportDefinition(props) {
         }
         const newAPI = new API();
         const promisedResponse = isFileInput ? newAPI.updateAsyncAPIDefinitionByFile(api.id, inputValue)
-            : newAPI.updateAsyncAPIDefinitionByUrl(api.Id, inputValue);
+            : newAPI.updateAsyncAPIDefinitionByUrl(api.id, inputValue);
         promisedResponse
             .then(() => {
                 Alert.success(intl.formatMessage({
@@ -376,9 +376,6 @@ export default function ImportDefinition(props) {
             />
         );
     }
-
-    console.log(isWebSocket);
-    console.log(apiInputs);
 
     return (
         <>

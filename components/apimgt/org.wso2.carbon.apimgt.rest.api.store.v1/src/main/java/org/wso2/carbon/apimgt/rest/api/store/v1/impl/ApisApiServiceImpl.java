@@ -305,7 +305,7 @@ public class ApisApiServiceImpl implements ApisApiService {
              String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
             if (StringUtils.isNotEmpty(labelName) ?
                     StringUtils.isNotEmpty(environmentName) || StringUtils.isNotEmpty(clusterName) :

@@ -1441,7 +1441,7 @@ public class AsyncApiParser extends APIDefinition {
             AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             validationErrorMessages = new ArrayList<>();
             if (asyncApiDocument.getServers().size() == 1) {
-                if (!APIConstants.WS_PROTOCOL.toUpperCase().equals(asyncApiDocument.getServers().get(0).protocol.toUpperCase())) {
+                if (!APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
                     validationErrorMessages.add("#:The protocol of the server should be 'ws' for websockets");
                 }
             }

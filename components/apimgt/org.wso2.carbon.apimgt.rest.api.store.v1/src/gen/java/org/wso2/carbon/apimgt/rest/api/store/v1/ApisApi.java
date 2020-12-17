@@ -65,7 +65,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/{apiId}/asyncapi")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get AsyncAPI definition ", notes = "You can use this operation to retrieve the AsyncAPI definition of an API.   `X-WSO2-Tenant` header can be used to retrive the AsyncAPI definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.   **NOTE:**  * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -75,9 +75,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested AsyncAPI document of the API is returned ", response = String.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
-        @ApiResponse(code = 404, message = "NotFound. Requested API does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apisApiIdAsyncapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API microgateway labels ")  @QueryParam("labelName") String labelName,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Name of the container managed cluster name. ")  @QueryParam("clusterName") String clusterName, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response apisApiIdAsyncapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Name of the API microgateway labels ")  @QueryParam("labelName") String labelName,  @ApiParam(value = "Name of the API gateway environment. ")  @QueryParam("environmentName") String environmentName,  @ApiParam(value = "Name of the container managed cluster name. ")  @QueryParam("clusterName") String clusterName,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.apisApiIdAsyncapiGet(apiId, labelName, environmentName, clusterName, ifNoneMatch, xWSO2Tenant, securityContext);
     }
 

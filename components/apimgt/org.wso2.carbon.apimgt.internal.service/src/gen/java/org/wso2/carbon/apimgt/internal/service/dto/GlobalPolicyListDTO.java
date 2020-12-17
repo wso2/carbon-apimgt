@@ -13,11 +13,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-<<<<<<< HEAD
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
-=======
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
->>>>>>> upstream/master
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 

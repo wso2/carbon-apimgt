@@ -111,13 +111,8 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-<<<<<<< HEAD
-    public Response endpointCertificatesAliasPut( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail,  @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias) throws APIManagementException{
-        return delegate.endpointCertificatesAliasPut(certificateInputStream, certificateDetail, alias, securityContext);
-=======
     public Response endpointCertificatesAliasPut( @Size(min=1,max=30)@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias,  @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail) throws APIManagementException{
         return delegate.endpointCertificatesAliasPut(alias, certificateInputStream, certificateDetail, securityContext);
->>>>>>> upstream/master
     }
 
     @GET
@@ -153,9 +148,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  @Size(min=1,max=30) 
-  String alias, @Multipart(value = "endpoint")  
-  String endpoint) throws APIManagementException{
+    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "endpoint")  String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesPost(certificateInputStream, certificateDetail, alias, endpoint, securityContext);
     }
 }

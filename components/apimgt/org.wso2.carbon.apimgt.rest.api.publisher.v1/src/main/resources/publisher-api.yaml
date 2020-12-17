@@ -535,153 +535,6 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
         412:
-<<<<<<< HEAD
-          $ref: '#/responses/PreconditionFailed'
-
-  ################################################################
-  # AsyncAPI specification management for 'Individual APIs'
-  ################################################################
-
-  /apis/{apiId}/asyncapi:
-    #-----------------------------------------------------
-    #Retrieve the API's AsyncAPI definition
-    #-----------------------------------------------------
-    get:
-      summary: Get AsyncAPI definition
-      description: |
-        This operation can be used to retrieve the AsyncAPI definition of an API.
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/If-None-Match'
-      tags:
-        - APIs
-      responses:
-        200:
-          schema:
-            type: string
-            example: ""
-          description: |
-            OK.
-            Requested AsyncAPI definition of the API is returned
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Willl= be supported in future).
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has beed modified the last time.
-                Used by caches, or in conditional request (Will be supported in future).
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-        404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
-    #-----------------------------------------------------
-    # Update the API's AsyncAPI definition
-    #-----------------------------------------------------
-    put:
-      consumes:
-        - multipart/form-data
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      summary: Update AsyncAPI definition
-      description: |
-        This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'.
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: formData
-          name: apiDefinition
-          description: AsyncAPI definition of the API
-          type: string
-        - in: formData
-          name: url
-          description: AsyncAPI definition URL of the API
-          type: string
-        - in: formData
-          name: file
-          description: AsyncAPI definition as a file
-          type: file
-          required: false
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - APIs
-      responses:
-        200:
-          schema:
-            type: string
-            example: ""
-          description: |
-            OK.
-            Successful response with updated AsyncAPI definition
-          headers:
-            Location:
-              description: |
-                The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-            Last-Mpdified:
-              description: |
-                Date and time the resource has beed modified the last time.
-                Use =d by caches, or in conditional requests (Will be supported in future).
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: "#/definitions/Error"
-        403:
-          description: |
-            Forbidden.
-            The request must be conditional but no condition has been specified.
-          schema:
-            $ref: "#/definitions/Error"
-        404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-  ################################################################
-  # Generates Mock/Sample Payloads from Examples in API Definition
-  ################################################################
-=======
           $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
@@ -690,7 +543,6 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F apiDefinition=@swagger.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/swagger"'
->>>>>>> upstream/master
 
   /apis/{apiId}/generate-mock-scripts:
     post:
@@ -1487,86 +1339,6 @@ paths:
         400:
           $ref: '#/components/responses/BadRequest'
         415:
-<<<<<<< HEAD
-          $ref: '#/responses/UnsupportedMediaType'
-
-  ######################################################
-  # The "Import API from AsyncAPI Specification" resource API
-  ######################################################
-
-  /apis/import-asyncapi:
-
-    #--------------------------------------------------------------------
-    # Import API from API Definition
-    #--------------------------------------------------------------------
-    post:
-      consumes:
-        - multipart/form-data
-      security:
-        - OAuth2Security:
-            - apim:api_create
-      summary: import an AsyncAPI Specification
-      description: 
-        This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file'
-        to specify the definition.
-
-        Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
-      operationId: importAsyncAPISpecification
-      parameters:
-        - in: formData
-          name: file
-          description: Definition to upload as a file
-          type: file
-          required: false
-        - in: formData
-          name: url
-          description: Definition url
-          type: string
-          required: false
-        - in: formData
-          name: additionalProperties
-          description: Additional attributes specified as a stringified JSON with API's schema
-          type: string
-          required: false
-      tags:
-        - APIs
-      responses:
-        201:
-          description: 
-            Created. Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/API'
-          headers:
-            Location:
-              description: 
-                The URL of the newly created resource.
-              type: string
-            Content-type:
-              description:
-                The content type of the body.
-              type: string
-            Etag:
-              description:
-                Entity Tag of the respons resource. Used by caches, or in conditional requests (Will be supported in the future).
-              type: string
-        400:
-          description:
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description:
-            Unsupported Media Type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
-            
-  ######################################################
-  # The "Import API from a WSDL Definition"  resource API
-  ######################################################
-=======
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
       - OAuth2Security:
@@ -1577,7 +1349,6 @@ paths:
           -F file=@openapi.json -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/import-openapi"'
       x-examples:
         $ref: docs/examples/apis/import_openapi_post.yaml
->>>>>>> upstream/master
 
   /apis/import-wsdl:
     post:
@@ -1787,64 +1558,6 @@ paths:
           -F file=@openapi.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/validate-openapi"'
       x-examples:
         $ref: docs/examples/apis/validate_openapi_post.yaml
-
-  /apis/validate-asyncapi:
-    post:
-      consumes:
-        - multipart/form-data
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      summary: Validate an AsyncAPI Specification
-      operationId: validateAsyncAPISpecification
-      description:
-        This operation can be used to validate and AsyncAPI Specification and retrieve a summary. Provide either 'url'
-        or 'file' to specify the definition.
-      parameters: 
-        - in: formData
-          name: url
-          description: AsyncAPI specification url
-          type: string
-          required: false
-        - in: formData
-          name: file
-          description: AsyncAPI specification as a file
-          type: file
-          required: false
-        - in: query
-          name: returnContent
-          description: 
-            Specify whether to return the full content of the AsyncAPI specification in the response. This is only
-            applicable when using url based validation
-          type: boolean
-          default: false
-          required: false
-      tags:
-        - Validation
-      responses:
-        200:
-          description: 
-            OK.
-            API definition validation information is returned
-          schema:  
-            $ref: '#/definitions/AsyncAPISpecificationValidationResponse'
-          headers:
-            Content-Type:
-              description:
-                The content type of the body.
-              type: string
-        400:
-          description: 
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description:
-            Not Found.
-            Workflow for the given reference is not found.
-          schema:
-            $ref: '#/definitions/Error'
 
   /apis/validate-endpoint:
     post:
@@ -6628,6 +6341,237 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/92bc1330-1848-4fe8-b992-c792186c212e/deployments/"'
 
+  /apis/{apiId}/asyncapi:
+    get:
+      tags:
+      - APIs
+      summary: Get AsyncAPI definition
+      description: |
+        This operation can be used to retrieve the AsyncAPI definition of an API.
+      parameters:
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested AsyncAPI definition of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Willl= be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has beed modified the last time.
+                Used by caches, or in conditional request (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+      - OAuth2Security:
+        - apim:api_view
+
+    put:
+      tags:
+        - APIs
+      summary: Update AsyncAPI definition
+      description: |
+        This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                apiDefinition:
+                  type: string
+                  description: AsyncAPI definition of the API
+                url:
+                  type: string
+                  description: AsyncAPI definition URL of the API
+                file:
+                  type: string
+                  description: AsyncAPI definition as a file
+                  format: binary
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated AsyncAPI definition
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has beed modified the last time.
+                Use =d by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+
+  /apis/import-asyncapi:
+    post:
+      tags:
+        - APIs
+      summary: import an AsyncAPI Specification
+      description:
+        This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file'
+        to specify the definition.
+
+        Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
+      operationId: importAsyncAPISpecification
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  description: Definition to upload as a file
+                  format: binary
+                url:
+                  type: string
+                  description: Definition url
+                additionalProperties:
+                  type: string
+                  description: Additional attributes specified as a stringified JSON with API's schema
+      responses:
+        201:
+          description:
+            Created. Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          headers:
+            Etag:
+              description:
+                Entity Tag of the respons resource. Used by caches, or in conditional requests (Will be supported in the future).
+              schema:
+                type: string
+            Location:
+              description:
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-type:
+              description:
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+
+  /apis/validate-asyncapi:
+    post:
+      tags:
+        - Validation
+      summary: Validate an AsyncAPI Specification
+      description:
+        This operation can be used to validate and AsyncAPI Specification and retrieve a summary. Provide either 'url'
+        or 'file' to specify the definition.
+      operationId: validateAsyncAPISpecification
+      parameters:
+        - name: returnContent
+          in: query
+          description:
+            Specify whether to return the full content of the AsyncAPI specification in the response. This is only
+            applicable when using url based validation
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                url:
+                  type: string
+                  description: AsyncAPI definition url
+                file:
+                  type: string
+                  description: AsyncAPI definition as a file
+                  format: binary
+      responses:
+        200:
+          description:
+            OK.
+            API definition validation information is returned
+          headers:
+            Content-Type:
+              description:
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncAPISpecificationValidationResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+
+
 components:
   schemas:
     APIList:
@@ -8658,115 +8602,6 @@ components:
           properties:
             name:
               type: string
-<<<<<<< HEAD
-              example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
-      errors:
-        type: array
-        description: |
-          If there are more than one error list them out.
-          For example, list out validation errors by each field.
-        items:
-          $ref: '#/definitions/ErrorListItem'
-
-  #-----------------------------------------------------
-  # The AsyncAPI Specification Validation Response
-  #-----------------------------------------------------
-  AsyncAPISpecificationValidationResponse:
-    title: AsyncAPI Specification Validation Response
-    required: 
-      - isValid
-    properties:
-      isValid:
-        description: 
-          This attribute declares whether this definition is valid or not.
-        type: boolean
-        example: true
-      content:
-        description:
-          AsyncAPI specification content
-        type: string
-      info:
-        description:
-          API definition information
-        properties:
-          name: 
-            type: string
-            example: "Streetlights"
-          version:
-            type: string
-            example:  "1.0.0"
-          context:
-            type: string
-            example: "/streetlights"
-          description:
-            type: string
-            example: "A sample API that uses a streetlights as an example to demonstrate AsyncAPI specifications"
-          asyncAPIVersion:
-            type: string
-            example: "2.0"
-          endpoints:
-            type: array
-            description: 
-              contains host/servers specified in the AsyncAPI file/URL
-            items:
-              type: string
-              example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
-      errors:
-        type: array
-        description:
-          If there are more than one error list them out.
-          For example, list out validation error by each field.
-        items:
-          $ref: '#/definitions/ErrorListItem'
-
-  #-----------------------------------------------------
-  # The WSDL Definition Validation Response
-  #-----------------------------------------------------
-  WSDLValidationResponse:
-    title: WSDL Definition Validation Response
-    required:
-      - isValid
-    properties:
-      isValid:
-        description: |
-          This attribute declares whether this definition is valid or not.
-        type: boolean
-        example: true
-      errors:
-        type: array
-        description: |
-          If there are more than one error list them out.
-          For example, list out validation errors by each field.
-        items:
-          $ref: '#/definitions/ErrorListItem'
-      wsdlInfo:
-        description:
-          Summary of the WSDL including the basic information
-        properties:
-          version:
-            description: |
-              WSDL version
-            type: string
-            example: "1.1"
-          endpoints:
-            description: |
-              A list of endpoints the service exposes
-            type: array
-            items:
-              properties:
-                name:
-                  type: string
-                  description: "Name of the endpoint"
-                  example: "StockQuoteSoap"
-                location:
-                  type: string
-                  description: "Endpoint URL"
-                  example: "http://www.webservicex.net/stockquote.asmx"
-
-  GraphQLValidationResponse:
-    title: GraphQL API definition validation Response
-    required:
-=======
               example: PetStore
             version:
               type: string
@@ -8800,7 +8635,6 @@ components:
     WSDLValidationResponse:
       title: WSDL Definition Validation Response
       required:
->>>>>>> upstream/master
       - isValid
       type: object
       properties:
@@ -9637,6 +9471,55 @@ components:
         creationTimestamp:
           type: string
           example: 2020-05-12T06:12:00Z
+    AsyncAPISpecificationValidationResponse:
+      title: AsyncAPI Specification Validation Response
+      required:
+        - isValid
+      type: object
+      properties:
+        isValid:
+          type: boolean
+          description:
+            This attribute declares whether this definition is valid or not.
+          example: true
+        content:
+          type: string
+          description:
+            AsyncAPI specification content
+        info:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Streetlights
+            version:
+              type: string
+              example: 1.0.0
+            context:
+              type: string
+              example: /streetlights
+            description:
+              type: string
+              example: A sample API that uses a streetlights as an example to demonstrate AsyncAPI specifications
+            asyncAPIVersion:
+              type: string
+              example: 2.0
+            endpoints:
+              type: array
+              description:
+                contains host/servers specified in the AsyncAPI file/URL
+              items:
+                type: string
+                example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+          description:
+            API definition information
+        errors:
+          type: array
+          description:
+            If there are more than one error list them out.
+            For example, list out validation error by each field.
+          items:
+            $ref: '#/components/schemas/ErrorListItem'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
