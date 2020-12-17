@@ -6900,6 +6900,9 @@ components:
             UUID of the api registry artifact
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
+        revisionId:
+          type: integer
+          example: 1
         enableSchemaValidation:
           type: boolean
           example: false

@@ -183,9 +183,14 @@ public class API implements Serializable {
     private boolean isRevision = false;
 
     /**
-     * Property to indicate whether this is a revision.
+     * Property to hold api id of a revision.
      */
     private String revisionedApiId;
+
+    /**
+     * Property to hold revision id
+     */
+    private int revisionId;
 
 
     public void setEnvironmentList(Set<String> environmentList) {
@@ -1079,6 +1084,14 @@ public class API implements Serializable {
 
     public void setRevisionedApiId(String revisionedApiId) {
         this.revisionedApiId = revisionedApiId;
+    }
+
+    public int getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(int revisionId) {
+        this.revisionId = revisionId;
     }
 
     @Override
