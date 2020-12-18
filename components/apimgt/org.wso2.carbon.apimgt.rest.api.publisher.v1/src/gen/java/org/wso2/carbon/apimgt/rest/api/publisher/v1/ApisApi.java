@@ -950,6 +950,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
+    @Path("/import")
+    @Consumes({ "multipart/form-data" })
+    
+    @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+        })
+    }, tags={ "Import Export",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. API Imported Successfully. ", response = Void.class),
+        @ApiResponse(code = 403, message = "", response = Void.class),
+        @ApiResponse(code = 404, message = "", response = Void.class),
+        @ApiResponse(code = 409, message = "", response = Void.class),
+        @ApiResponse(code = 500, message = "", response = Void.class) })
+    public Response apisImportPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
+        return delegate.apisImportPost(fileInputStream, fileDetail, preserveProvider, overwrite, securityContext);
+    }
+
+    @POST
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })

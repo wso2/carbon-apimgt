@@ -48,6 +48,7 @@ public class DocumentationMappingUtil {
         documentDTO.setSummary(documentation.getSummary());
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentation.getType().toString()));
         documentDTO.setOtherTypeName(documentation.getOtherTypeName());
+        documentDTO.setFileName(documentation.getFilePath());
         if (documentation.getSourceType() != null)
             documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.fromValue(documentation.getSourceType().toString()));
         documentDTO.setSourceUrl(documentation.getSourceUrl());
@@ -72,6 +73,7 @@ public class DocumentationMappingUtil {
                     .setSourceType(Documentation.DocumentSourceType.valueOf(documentDTO.getSourceType().toString()));
         documentation.setSourceUrl(documentDTO.getSourceUrl());
         documentation.setOtherTypeName(documentDTO.getOtherTypeName());
+        documentation.setFilePath(documentDTO.getFileName());
         if (documentDTO.getVisibility() != null)
             documentation
                     .setVisibility(Documentation.DocumentVisibility.valueOf(documentDTO.getVisibility().toString()));
