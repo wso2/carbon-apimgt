@@ -54,6 +54,7 @@ public class APIDTO   {
     private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
     private String revisionedApiId = null;
+    private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private Boolean enableStore = null;
@@ -557,6 +558,23 @@ return null;
   }
   public void setRevisionedApiId(String revisionedApiId) {
     this.revisionedApiId = revisionedApiId;
+  }
+
+  /**
+   **/
+  public APIDTO revisionId(Integer revisionId) {
+    this.revisionId = revisionId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("revisionId")
+  public Integer getRevisionId() {
+    return revisionId;
+  }
+  public void setRevisionId(Integer revisionId) {
+    this.revisionId = revisionId;
   }
 
   /**
@@ -1227,6 +1245,7 @@ return null;
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(isRevision, API.isRevision) &&
         Objects.equals(revisionedApiId, API.revisionedApiId) &&
+        Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(enableStore, API.enableStore) &&
         Objects.equals(type, API.type) &&
@@ -1267,7 +1286,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
   }
 
   @Override
@@ -1292,6 +1311,7 @@ return null;
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
+    sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

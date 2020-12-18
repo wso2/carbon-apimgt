@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
@@ -106,10 +107,11 @@ public interface ApisApiService {
       public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) throws APIManagementException;
-      public Response deployAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) throws APIManagementException;
+      public Response deployAPIRevision(String apiId, String apiRevisionId, APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO, MessageContext messageContext) throws APIManagementException;
       public Response deploymentsGetStatus(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevisions(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -119,6 +121,7 @@ public interface ApisApiService {
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
       public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response restoreAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) throws APIManagementException;
+      public Response undeployAPIRevision(String apiId, String apiRevisionId, APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;
       public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

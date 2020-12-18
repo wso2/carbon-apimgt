@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -79,6 +80,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
@@ -842,6 +845,7 @@ public class APIMappingUtil {
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());
+        dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
         dto.setTestKey(model.getTestKey());
@@ -2786,5 +2790,34 @@ public class APIMappingUtil {
         apiRevisionListDTO.setCount(apiRevisionList.size());
         apiRevisionListDTO.setList(apiRevisionDTOS);
         return apiRevisionListDTO;
+    }
+
+    public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) throws APIManagementException {
+        APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
+        apiRevisionDeploymentDTO.setDeployment(model.getDeployment());
+        apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
+        apiRevisionDeploymentDTO.setType(model.getType());
+        apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        Date parsedDate;
+        try {
+            parsedDate = dateFormat.parse(model.getDeployedTime());
+        } catch (java.text.ParseException e) {
+            throw new APIManagementException("Error while parsing the created time", e);
+        }
+        Timestamp timestamp = new Timestamp(parsedDate.getTime());
+        apiRevisionDeploymentDTO.setDeployedTime(timestamp);
+        return apiRevisionDeploymentDTO;
+    }
+
+    public static APIRevisionDeploymentListDTO fromListAPIRevisionDeploymentToDTO(List<APIRevisionDeployment> apiRevisionDeploymentList)
+            throws APIManagementException {
+        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTO = new APIRevisionDeploymentListDTO();
+        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
+        for (APIRevisionDeployment apiRevisionDeployment: apiRevisionDeploymentList) {
+            apiRevisionDeploymentDTOS.add(fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
+        }
+        apiRevisionDeploymentListDTO.setList(apiRevisionDeploymentDTOS);
+        return apiRevisionDeploymentListDTO;
     }
 }
