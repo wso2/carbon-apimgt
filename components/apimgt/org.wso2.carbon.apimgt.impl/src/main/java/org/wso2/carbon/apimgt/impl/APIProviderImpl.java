@@ -10885,7 +10885,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
-    public void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException {
+    public void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -10900,7 +10901,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         APIIdentifier revisionApiIdentifier = getLightweightAPIByUUID(apiRevisionId, tenantDomain).getId();
         API api = getRevisionAPI(revisionApiIdentifier, apiRevision);
-        api.setSwaggerDefinition(getOpenAPIDefinition(revisionApiIdentifier));
         Set<String> environments = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environments.add(apiRevisionDeployment.getDeployment());
@@ -10948,7 +10948,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         APIIdentifier revisionApiIdentifier = getLightweightAPIByUUID(apiRevisionId, tenantDomain).getId();
         API api = getRevisionAPI(revisionApiIdentifier, apiRevision);
-        api.setSwaggerDefinition(getOpenAPIDefinition(revisionApiIdentifier));
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
