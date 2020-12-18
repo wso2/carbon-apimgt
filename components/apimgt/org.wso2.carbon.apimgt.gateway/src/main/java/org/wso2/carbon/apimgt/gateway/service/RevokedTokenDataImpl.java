@@ -35,13 +35,12 @@ public class RevokedTokenDataImpl implements RevokedTokenService {
     }
 
     @Override
-    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
+    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken, String tenantDomain) {
         String cachedTenantDomain;
         String apiKeyCachedTenantDomain;
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             cachedTenantDomain = Utils.getCachedTenantDomain(accessToken);
             apiKeyCachedTenantDomain = Utils.getApiKeyCachedTenantDomain(accessToken);
             if (cachedTenantDomain == null && apiKeyCachedTenantDomain == null) { //the token is not in cache

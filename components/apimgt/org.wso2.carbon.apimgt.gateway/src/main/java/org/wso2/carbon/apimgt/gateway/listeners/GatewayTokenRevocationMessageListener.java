@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
+                        int tenantId = (int) map.get(APIConstants.NotificationEvent.TENANT_ID);
                         if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
                                 null) {
                             /*
@@ -64,7 +66,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                              */
                             handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
                                     (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME),
-                                    (String) map.get(APIConstants.REVOKED_TOKEN_TYPE));
+                                    (String) map.get(APIConstants.REVOKED_TOKEN_TYPE), tenantId);
                         }
 
                     }
@@ -79,9 +81,10 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType) {
+    private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType, int tenantId) {
 
         boolean isJwtToken = false;
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
@@ -94,6 +97,6 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
             isJwtToken = true;
         }
         ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+                .removeTokenFromGatewayCache(revokedToken, isJwtToken, tenantDomain);
     }
 }
