@@ -20,9 +20,12 @@ package org.wso2.carbon.apimgt.gateway.service;
 
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+
+import javax.cache.Cache;
 
 public class RevokedTokenDataImpl implements RevokedTokenService {
 
@@ -34,16 +37,20 @@ public class RevokedTokenDataImpl implements RevokedTokenService {
     @Override
     public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
         String cachedTenantDomain;
+        String apiKeyCachedTenantDomain;
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             cachedTenantDomain = Utils.getCachedTenantDomain(accessToken);
-            if (cachedTenantDomain == null) { //the token is not in cache
+            apiKeyCachedTenantDomain = Utils.getApiKeyCachedTenantDomain(accessToken);
+            if (cachedTenantDomain == null && apiKeyCachedTenantDomain == null) { //the token is not in cache
                 return;
             }
-            Utils.removeCacheEntryFromGatewayCache(accessToken);
-            Utils.putInvalidTokenEntryIntoInvalidTokenCache(accessToken, cachedTenantDomain);
+            if (cachedTenantDomain != null) {
+                Utils.removeCacheEntryFromGatewayCache(accessToken);
+                Utils.putInvalidTokenEntryIntoInvalidTokenCache(accessToken, cachedTenantDomain);
+            }
             //Clear the API Key cache if revoked token is in the JWT format
             if (isJwtToken) {
                 Utils.removeCacheEntryFromGatewayAPiKeyCache(accessToken);

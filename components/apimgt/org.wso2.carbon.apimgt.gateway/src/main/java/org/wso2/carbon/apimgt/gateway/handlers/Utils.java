@@ -369,6 +369,17 @@ public class Utils {
                 .getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
     }
 
+    /**
+     * Get the tenant domain of a cached api key
+     *
+     * @param token Cached access token
+     * @return Tenant domain
+     */
+    public static String getApiKeyCachedTenantDomain(String token) {
+        return (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.GATEWAY_API_KEY_CACHE_NAME).get(token);
+    }
+
     public static String getClientCertificateHeader() {
 
         APIManagerConfiguration apiManagerConfiguration =
