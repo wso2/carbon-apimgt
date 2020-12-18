@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -31,22 +32,19 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedSubscribedAPI;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +52,8 @@ import java.util.Set;
 
 public class ImportUtils {
     private static final Log log = LogFactory.getLog(ImportUtils.class);
-    private static final String GRANT_TYPES = "grant_types";
     private static final String GRANT_TYPE_IMPLICIT = "implicit";
     private static final String GRANT_TYPE_CODE = "code";
-    private static final String REDIRECT_URIS = "redirect_uris";
     private static final String DEFAULT_TOKEN_SCOPE = "am_application_scope default";
 
     /**
@@ -112,22 +108,21 @@ public class ImportUtils {
     /**
      * This extracts information for creating an APIKey from an OAuthApplication
      *
-     * @param type                 Type of the OAuthApp(SANDBOX or PRODUCTION)
-     * @param oAuthApplicationInfo OAuth Application information
+     * @param applicationKeyDto Application Key DTO
      * @return An APIKey containing keys from OAuthApplication
      */
-    public static APIKey getAPIKeyFromOauthApp(String type, OAuthApplicationInfo oAuthApplicationInfo) {
+    public static APIKey getAPIKeyFromApplicationKeyDTO(ApplicationKeyDTO applicationKeyDto) {
         APIKey apiKey = new APIKey();
-        apiKey.setType(type);
-        apiKey.setConsumerKey(oAuthApplicationInfo.getClientId());
-        apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
-        apiKey.setGrantTypes((String) oAuthApplicationInfo.getParameter(GRANT_TYPES));
+        apiKey.setType(String.valueOf(applicationKeyDto.getKeyType()));
+        apiKey.setConsumerKey(applicationKeyDto.getConsumerKey());
+        apiKey.setConsumerSecret(new String(Base64.decodeBase64(applicationKeyDto.getConsumerSecret())));
+        apiKey.setKeyManager(applicationKeyDto.getKeyManager());
+        apiKey.setGrantTypes(StringUtils.join(applicationKeyDto.getSupportedGrantTypes(), ", "));
         if (apiKey.getGrantTypes() != null && apiKey.getGrantTypes().contains(GRANT_TYPE_IMPLICIT) && apiKey
                 .getGrantTypes().contains(GRANT_TYPE_CODE)) {
-            apiKey.setCallbackUrl((String) oAuthApplicationInfo.getParameter(REDIRECT_URIS));
+            apiKey.setCallbackUrl(applicationKeyDto.getCallbackUrl());
         }
-        long validityPeriod = OAuthServerConfiguration.getInstance().getApplicationAccessTokenValidityPeriodInSeconds();
-        apiKey.setValidityPeriod(validityPeriod);
+        apiKey.setValidityPeriod(applicationKeyDto.getToken().getValidityTime());
         apiKey.setTokenScope(DEFAULT_TOKEN_SCOPE);
         return apiKey;
     }
@@ -142,17 +137,17 @@ public class ImportUtils {
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      */
-    public static List<APIIdentifier> importSubscriptions(Set<SubscribedAPI> subscribedAPIs, String userId, int appId,
-            Boolean update, APIConsumer apiConsumer) throws APIManagementException, UserStoreException {
+    public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
+            int appId, Boolean update, APIConsumer apiConsumer) throws APIManagementException, UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
-        for (SubscribedAPI subscribedAPI : subscribedAPIs) {
+        for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
             if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
                 String name = apiIdentifier.getApiName();
                 String version = apiIdentifier.getVersion();
-                //creating a solr compatible search query, here we will execute a search query without wildcard *s
+                // Creating a solr compatible search query, here we will execute a search query without wildcard *s
                 StringBuilder searchQuery = new StringBuilder();
                 String[] searchCriteria = { name, "version:" + version };
                 for (int i = 0; i < searchCriteria.length; i++) {
@@ -179,14 +174,14 @@ public class ImportUtils {
                         API api = (API) apiSet.iterator().next();
                         apiTypeWrapper = new ApiTypeWrapper(api);
                     }
-                    //tier of the imported subscription
-                    Tier tier = subscribedAPI.getTier();
-                    //checking whether the target tier is available
-                    if (isTierAvailable(tier, apiTypeWrapper) && apiTypeWrapper.getStatus() != null
+                    // Tier of the imported subscription
+                    String targetTier = subscribedAPI.getThrottlingPolicy();
+                    // Checking whether the target tier is available
+                    if (isTierAvailable(targetTier, apiTypeWrapper) && apiTypeWrapper.getStatus() != null
                             && APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
-                        apiTypeWrapper.setTier(tier.getName());
-                        // add subscription if update flag is not specified
-                        // it will throw an error if subscriber already exists
+                        apiTypeWrapper.setTier(targetTier);
+                        // Add subscription if update flag is not specified
+                        // It will throw an error if subscriber already exists
                         if (update == null || !update) {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
                         } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
@@ -224,12 +219,12 @@ public class ImportUtils {
     /**
      * Check whether a target Tier is available to subscribe
      *
-     * @param targetTier     Target Tier
+     * @param targetTierName Target Tier Name
      * @param apiTypeWrapper - {@link ApiTypeWrapper}
      * @return true, if the target tier is available
      */
-    private static boolean isTierAvailable(Tier targetTier, ApiTypeWrapper apiTypeWrapper) {
-        Set<Tier> availableTiers = null;
+    private static boolean isTierAvailable(String targetTierName, ApiTypeWrapper apiTypeWrapper) {
+        Set<Tier> availableTiers;
         API api = null;
         APIProduct apiProduct = null;
         if (!apiTypeWrapper.isAPIProduct()) {
@@ -239,18 +234,20 @@ public class ImportUtils {
             apiProduct = apiTypeWrapper.getApiProduct();
             availableTiers = apiProduct.getAvailableTiers();
         }
-        if (availableTiers.contains(targetTier)) {
-            return true;
-        } else {
-            if (!apiTypeWrapper.isAPIProduct()) {
-                log.error("Tier:" + targetTier.getName() + " is not available for API " + api.getId().getApiName() + "-"
-                        + api.getId().getVersion());
-            } else {
-                log.error("Tier:" + targetTier.getName() + " is not available for API Product " + apiProduct.getId()
-                        .getName() + "-" + apiProduct.getId().getVersion());
+        for (Tier tier : availableTiers) {
+            if (StringUtils.equals(tier.getName(), targetTierName)) {
+                return true;
             }
-            return false;
         }
+        if (!apiTypeWrapper.isAPIProduct()) {
+            log.error("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
+                    .getId().getVersion());
+        } else {
+            log.error(
+                    "Tier:" + targetTierName + " is not available for API Product " + apiProduct.getId().getName() + "-"
+                            + apiProduct.getId().getVersion());
+        }
+        return false;
     }
 
     /**
@@ -263,8 +260,7 @@ public class ImportUtils {
      * @throws APIManagementException
      */
     public static void addApplicationKey(String username, Application application, APIKey apiKey,
-            APIConsumer apiConsumer)
-            throws APIManagementException {
+            APIConsumer apiConsumer) throws APIManagementException {
         String[] accessAllowDomainsArray = { "ALL" };
         JSONObject jsonParamObj = new JSONObject();
         jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);

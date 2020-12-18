@@ -36,7 +36,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -103,6 +102,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.validation.Valid;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -227,42 +227,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application = preProcessAndAddApplication(ownerId, applicationDTO);
             }
 
-            Map<String, Map<String, OAuthApplicationInfo>> oauthApplicationInfo = exportedApplication
-                    .getKeyManagerWiseOAuthApp();
-
-            // Decode Oauth secrets
-            Map<String, OAuthApplicationInfo> keyManagerWiseProductionOauthApplicationInfo = oauthApplicationInfo
-                    .get(ImportExportConstants.APPLICATION_KEY_TYPE_PRODUCTION);
-            if (keyManagerWiseProductionOauthApplicationInfo != null) {
-                keyManagerWiseProductionOauthApplicationInfo.forEach((keyManagerName, oAuthApplicationInfo) -> {
-                    String encodedConsumerSecretBytes = oAuthApplicationInfo.getClientSecret();
-                    String decodedConsumerSecret = new String(
-                            org.apache.commons.codec.binary.Base64.decodeBase64(encodedConsumerSecretBytes));
-                    oAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
-                    APIKey apiKeyFromOauthApp = ImportUtils
-                            .getAPIKeyFromOauthApp(ImportExportConstants.APPLICATION_KEY_TYPE_PRODUCTION,
-                                    oAuthApplicationInfo);
-                    apiKeyFromOauthApp.setKeyManager(keyManagerName);
-                    application.addKey(apiKeyFromOauthApp);
-                });
-
+            // Get keys to import
+            List<ApplicationKeyDTO> applicationKeys = applicationDTO.getKeys();
+            for (ApplicationKeyDTO applicationKey : applicationKeys) {
+                application.addKey(ImportUtils.getAPIKeyFromApplicationKeyDTO(applicationKey));
             }
-            Map<String, OAuthApplicationInfo> keyManagerWiseSandboxOauthApplicationInfo = oauthApplicationInfo
-                    .get(ImportExportConstants.APPLICATION_KEY_TYPE_SANDBOX);
-            if (keyManagerWiseSandboxOauthApplicationInfo != null) {
-                keyManagerWiseSandboxOauthApplicationInfo.forEach((keyManagerName, sandboxOAuthApplicationInfo) -> {
-                    String encodedConsumerSecretBytes = sandboxOAuthApplicationInfo.getClientSecret();
-                    String decodedConsumerSecret = new String(
-                            org.apache.commons.codec.binary.Base64.decodeBase64(encodedConsumerSecretBytes));
-                    sandboxOAuthApplicationInfo.setClientSecret(decodedConsumerSecret);
-                    APIKey apiKeyFromOauthApp = ImportUtils
-                            .getAPIKeyFromOauthApp(ImportExportConstants.APPLICATION_KEY_TYPE_SANDBOX,
-                                    sandboxOAuthApplicationInfo);
-                    apiKeyFromOauthApp.setKeyManager(keyManagerName);
-                    application.addKey(apiKeyFromOauthApp);
-                });
-            }
-
+            // Update the application to add keys
             apiConsumer.updateApplication(application);
 
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
@@ -548,35 +518,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
         }
 
-        // clear all duplicate keys with tokens
-        application.getKeys().clear();
-
-        // Export keys for application
-        if (withKeys == null || !withKeys) {
-            application.clearOAuthApps();
-        } else {
-            // encode Oauth secrets
-            Map<String, OAuthApplicationInfo> keyManagerWiseProductionOAuthApplicationInfoMap = application
-                    .getOAuthApp(ImportExportConstants.APPLICATION_KEY_TYPE_PRODUCTION);
-            if (keyManagerWiseProductionOAuthApplicationInfoMap != null) {
-                keyManagerWiseProductionOAuthApplicationInfoMap.forEach((keyManagerName, oAuthApplicationInfo) -> {
-                    byte[] consumerSecretBytes = oAuthApplicationInfo.getClientSecret()
-                            .getBytes(Charset.defaultCharset());
-                    oAuthApplicationInfo.setClientSecret(
-                            new String(org.apache.commons.codec.binary.Base64.encodeBase64(consumerSecretBytes)));
-                });
-            }
-            Map<String, OAuthApplicationInfo> keyManagerWiseSandboxOAuthApplicationInfoMap = application.getOAuthApp(ImportExportConstants.APPLICATION_KEY_TYPE_SANDBOX);
-            if (keyManagerWiseSandboxOAuthApplicationInfoMap != null) {
-                keyManagerWiseSandboxOAuthApplicationInfoMap.forEach((keyManagerName, oAuthApplicationInfo) -> {
-                    byte[] consumerSecretBytes = oAuthApplicationInfo.getClientSecret()
-                            .getBytes(Charset.defaultCharset());
-                    oAuthApplicationInfo.setClientSecret(
-                            new String(org.apache.commons.codec.binary.Base64.encodeBase64(consumerSecretBytes)));
-                });
-            }
-        }
-        File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat);
+        File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat, withKeys);
         return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getName() + "\"").build();
     }

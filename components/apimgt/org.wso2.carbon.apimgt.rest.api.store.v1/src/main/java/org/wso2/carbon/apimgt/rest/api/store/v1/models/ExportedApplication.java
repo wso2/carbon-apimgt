@@ -18,11 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.models;
 
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,18 +29,18 @@ import java.util.Set;
 public class ExportedApplication {
 
     private ApplicationDTO applicationInfo;
-    private Set<SubscribedAPI> subscribedAPIs;
-    private Map<String, Map<String, OAuthApplicationInfo>> keyManagerWiseOAuthApp;
+    private Set<ExportedSubscribedAPI> subscribedAPIs;
+    private Set<ApplicationKeyDTO> applicationKeys;
 
     public ExportedApplication(ApplicationDTO applicationDto) {
         this.applicationInfo = applicationDto;
     }
 
-    public Set<SubscribedAPI> getSubscribedAPIs() {
+    public Set<ExportedSubscribedAPI> getSubscribedAPIs() {
         return subscribedAPIs;
     }
 
-    public void setSubscribedAPIs(Set<SubscribedAPI> subscribedAPIs) {
+    public void setSubscribedAPIs(Set<ExportedSubscribedAPI> subscribedAPIs) {
         this.subscribedAPIs = subscribedAPIs;
     }
 
@@ -54,11 +52,11 @@ public class ExportedApplication {
         this.applicationInfo = applicationInfo;
     }
 
-    public Map<String, Map<String, OAuthApplicationInfo>> getKeyManagerWiseOAuthApp() {
-        return keyManagerWiseOAuthApp;
+    public Set<ApplicationKeyDTO> getApplicationKeys() {
+        return applicationKeys;
     }
 
-    public void setKeyManagerWiseOAuthApp(Map<String, Map<String, OAuthApplicationInfo>> keyManagerWiseOAuthApp) {
-        this.keyManagerWiseOAuthApp = keyManagerWiseOAuthApp;
+    public void setApplicationKeys(Set<ApplicationKeyDTO> applicationKeys) {
+        this.applicationKeys = applicationKeys;
     }
 }
