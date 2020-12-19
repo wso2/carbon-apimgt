@@ -358,5 +358,9 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";
+    
+    public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
+    public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
+    public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
 
 }

@@ -39,6 +39,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.entity.ContentType;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.wso2.carbon.CarbonConstants;
@@ -2079,14 +2080,84 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {
-        // TODO Auto-generated method stub
-        
+        boolean tenantFlowStarted = false;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            BasicAPI api = getbasicAPIInfo(apiId, registry);
+            if (api == null) {
+                throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
+            }
+            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
+                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR + api.apiVersion
+                    + RegistryConstants.PATH_SEPARATOR;
+
+            String saveResourcePath = path + api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR
+                    + api.apiName + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            Resource resource;
+            if (!registry.resourceExists(saveResourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(saveResourcePath);
+            }
+
+            resource.setContent(schemaDefinition);
+            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
+            registry.put(saveResourcePath, resource);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully imported the schema: " + schemaDefinition);
+            }
+
+            // Need to set anonymous if the visibility is public
+            RegistryPersistenceUtil.clearResourcePermissions(saveResourcePath,
+                    new APIIdentifier(api.apiProvider, api.apiName, api.apiVersion),
+                    ((UserRegistry) registry).getTenantId());
+            RegistryPersistenceUtil.setResourcePermissions(api.apiProvider, api.visibility, api.visibleRoles,
+                    saveResourcePath);
+
+        } catch (RegistryException | APIManagementException | APIPersistenceException e) {
+            throw new GraphQLPersistenceException("Error while adding Graphql Definition for api " + apiId, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
     }
 
     @Override
     public String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        boolean tenantFlowStarted = false;
+        String schemaDoc = null;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            Registry registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
+            BasicAPI api = getbasicAPIInfo(apiId, registry);
+            if (api == null) {
+                throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
+            }
+            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
+                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR + api.apiVersion
+                    + RegistryConstants.PATH_SEPARATOR;
+            String schemaName = api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + api.apiName
+                    + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            String schemaResourePath = path + schemaName;
+            if (registry.resourceExists(schemaResourePath)) {
+                Resource schemaResource = registry.get(schemaResourePath);
+                schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+            }
+        } catch (APIPersistenceException | RegistryException | IOException e) {
+            throw new GraphQLPersistenceException("Error while accessing graphql schema definition ", e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
+        return schemaDoc;
     }
 
     @Override
