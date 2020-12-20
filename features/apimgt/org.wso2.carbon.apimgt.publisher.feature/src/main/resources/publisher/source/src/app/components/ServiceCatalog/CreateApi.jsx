@@ -319,6 +319,7 @@ function CreateApi(props) {
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
+                                autoFocus
                                 name='name'
                                 label={(
                                     <>
