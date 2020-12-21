@@ -23,5 +23,5 @@ public interface RevokedTokenService {
 
     public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken);
 
-    public void removeApiKeyFromGatewayCache(String tokenIdentifier, String tenantDomain);
+    public void removeApiKeyFromGatewayCache(String tokenIdentifier);
 }

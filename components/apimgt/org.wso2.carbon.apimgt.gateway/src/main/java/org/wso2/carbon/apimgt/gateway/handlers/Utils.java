@@ -301,6 +301,33 @@ public class Utils {
     }
 
     /**
+     * Removes the apikey that was cached in the tenant's cache space and adds it to the invalid apiKey token cache.
+     *
+     * @param tokenIdentifier        - Token Identifier to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the apikey should be removed.
+     */
+    public static void invalidateApiKeyInTenantCache(String tokenIdentifier, String cachedTenantDomain) {
+        //If the apiKey is cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Removing cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+            }
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(cachedTenantDomain, true);
+                removeCacheEntryFromGatewayAPiKeyCache(tokenIdentifier);
+                putInvalidApiKeyEntryIntoInvalidApiKeyCache(tokenIdentifier, cachedTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+                }
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
      * Put the access token that was cached in the tenant's cache space into invalid token cache
      *
      * @param accessToken        - Invalid token that should be added to the invalid token cache

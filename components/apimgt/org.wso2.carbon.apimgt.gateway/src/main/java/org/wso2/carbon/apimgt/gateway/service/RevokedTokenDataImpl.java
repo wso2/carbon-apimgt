@@ -58,19 +58,21 @@ public class RevokedTokenDataImpl implements RevokedTokenService {
     }
 
     @Override
-    public void removeApiKeyFromGatewayCache(String tokenIdentifier, String tenantDomain) {
+    public void removeApiKeyFromGatewayCache(String tokenIdentifier) {
         String cachedTenantDomain;
         try {
             PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             cachedTenantDomain = Utils.getApiKeyCachedTenantDomain(tokenIdentifier);
             if (cachedTenantDomain == null) {
                 return;
             }
             Utils.removeCacheEntryFromGatewayAPiKeyCache(tokenIdentifier);
-            Utils.putInvalidApiKeyEntryIntoInvalidApiKeyCache(tokenIdentifier, tenantDomain);
+            Utils.putInvalidApiKeyEntryIntoInvalidApiKeyCache(tokenIdentifier, cachedTenantDomain);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+        Utils.invalidateApiKeyInTenantCache(tokenIdentifier, cachedTenantDomain);
     }
 }

@@ -56,7 +56,6 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                         map.put(key, mapMessage.getObject(key));
                     }
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        int tenantId = (int) map.get(APIConstants.NotificationEvent.TENANT_ID);
                         if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
                                 null) {
                             /*
@@ -66,7 +65,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                              */
                             handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
                                     (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME),
-                                    (String) map.get(APIConstants.REVOKED_TOKEN_TYPE), tenantId);
+                                    (String) map.get(APIConstants.REVOKED_TOKEN_TYPE));
                         }
 
                     }
@@ -81,10 +80,9 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
     }
 
-    private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType, int tenantId) {
+    private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType) {
 
         boolean isJwtToken = false;
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
@@ -98,7 +96,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
         }
         if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType)) {
             ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                    .removeApiKeyFromGatewayCache(revokedToken, tenantDomain);
+                    .removeApiKeyFromGatewayCache(revokedToken);
         } else {
             ServiceReferenceHolder.getInstance().getRevokedTokenService()
                     .removeTokenFromGatewayCache(revokedToken, isJwtToken);
