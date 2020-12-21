@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -365,8 +366,7 @@ public class Utils {
      * @param tenantDomain  Tenant domain of the apikey
      */
     public static void putInvalidApiKeyEntryIntoInvalidApiKeyCache(String tokenIdentifier, String tenantDomain) {
-        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
-                .GATEWAY_INVALID_API_KEY_CACHE_NAME).put(tokenIdentifier, tenantDomain);
+        CacheProvider.getInvalidGatewayApiKeyCache().put(tokenIdentifier, tenantDomain);
     }
 
     /**

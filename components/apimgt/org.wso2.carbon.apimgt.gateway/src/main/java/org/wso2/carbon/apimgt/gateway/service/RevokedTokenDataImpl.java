@@ -32,16 +32,7 @@ public class RevokedTokenDataImpl implements RevokedTokenService {
     }
 
     @Override
-    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken, String tenantDomain,
-                                            boolean isApiKey) {
-        if (isApiKey) {
-            removeApiKeyFromGatewayCache(accessToken, tenantDomain);
-        } else {
-            removeTokenFromGatewayCache(accessToken, isJwtToken);
-        }
-    }
-
-    private void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
+    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken) {
         String cachedTenantDomain;
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -66,7 +57,8 @@ public class RevokedTokenDataImpl implements RevokedTokenService {
         Utils.putInvalidTokenIntoTenantInvalidTokenCache(accessToken, cachedTenantDomain);
     }
 
-    private void removeApiKeyFromGatewayCache(String tokenIdentifier, String tenantDomain) {
+    @Override
+    public void removeApiKeyFromGatewayCache(String tokenIdentifier, String tenantDomain) {
         String cachedTenantDomain;
         try {
             PrivilegedCarbonContext.startTenantFlow();

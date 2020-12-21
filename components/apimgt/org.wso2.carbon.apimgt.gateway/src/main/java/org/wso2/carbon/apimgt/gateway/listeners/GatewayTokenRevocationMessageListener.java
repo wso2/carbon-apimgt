@@ -84,7 +84,6 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
     private void handleRevokedTokenMessage(String revokedToken, long expiryTime,String tokenType, int tenantId) {
 
         boolean isJwtToken = false;
-        boolean isApiKey = false;
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         if (StringUtils.isEmpty(revokedToken)) {
             return;
@@ -98,9 +97,11 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
             isJwtToken = true;
         }
         if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType)) {
-            isApiKey = true;
+            ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                    .removeApiKeyFromGatewayCache(revokedToken, tenantDomain);
+        } else {
+            ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                    .removeTokenFromGatewayCache(revokedToken, isJwtToken);
         }
-        ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .removeTokenFromGatewayCache(revokedToken, isJwtToken, tenantDomain, isApiKey);
     }
 }
