@@ -176,10 +176,6 @@ public final class ImportExportConstants {
 
     public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
 
-    public static final String APPLICATION_KEY_TYPE_SANDBOX = "SANDBOX";
-
-    public static final String APPLICATION_KEY_TYPE_PRODUCTION = "PRODUCTION";
-
     public static final String UPLOAD_APPLICATION_FILE_NAME = "ApplicationArchive.zip";
 
     // Location of the Application YAML file
