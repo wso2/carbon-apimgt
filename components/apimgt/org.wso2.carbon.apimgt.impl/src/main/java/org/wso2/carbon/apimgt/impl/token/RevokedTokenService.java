@@ -21,5 +21,6 @@ public interface RevokedTokenService {
 
     public void addRevokedJWTIntoMap(String revokedToken, Long expiryTime);
 
-    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken, String tenantDomain);
+    public void removeTokenFromGatewayCache(String accessToken, boolean isJwtToken, String tenantDomain,
+                                            boolean isApiKey);
 }

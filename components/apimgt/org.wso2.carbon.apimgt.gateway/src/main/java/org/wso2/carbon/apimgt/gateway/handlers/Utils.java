@@ -359,6 +359,17 @@ public class Utils {
     }
 
     /**
+     * Add a token identifier to the invalid apikey cache of the given tenant domain
+     *
+     * @param tokenIdentifier   Token identifier to be added to the invalid token cache
+     * @param tenantDomain  Tenant domain of the apikey
+     */
+    public static void putInvalidApiKeyEntryIntoInvalidApiKeyCache(String tokenIdentifier, String tenantDomain) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                .GATEWAY_INVALID_API_KEY_CACHE_NAME).put(tokenIdentifier, tenantDomain);
+    }
+
+    /**
      * Get the tenant domain of a cached token
      *
      * @param token Cached access token
