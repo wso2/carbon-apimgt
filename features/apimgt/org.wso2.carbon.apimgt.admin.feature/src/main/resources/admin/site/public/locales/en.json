@@ -332,7 +332,7 @@
   "Manage.Alerts.unsubscribe.confirm.dialog.message": "This will remove all the existing alert subscriptions and emails. This action cannot be undone.",
   "Manage.Alerts.unsubscribe.error.msg": "Error occurred while unsubscribing.",
   "Manage.Alerts.unsubscribe.success.msg": "Unsubscribed from all alerts successfully.",
-  "RolePermissions.ListRoles.permission.denied.content": "You dont have enough permission to view Scope Assignments. Please contact the site administrator.",
+  "RolePermissions.ListRoles.permission.denied.content": "You do not have enough permission to view Scope Assignments. Please contact the site administrator.",
   "RolePermissions.ListRoles.permission.denied.title": "Permission Denied",
   "RolePermissions.ListRoles.title.role.permissions": "Scope Assignments",
   "TenantTheme.Upload.Theme.browse.files.to.upload": "Browse File to Upload",

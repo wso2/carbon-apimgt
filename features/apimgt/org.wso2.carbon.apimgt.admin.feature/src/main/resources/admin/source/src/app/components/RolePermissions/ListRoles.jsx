@@ -44,8 +44,8 @@ const headCells = [
     },
 ];
 
-const pageDesc = 'Scope assignments are related to internal APIM specific scope assignments and are not related'
-                + ' to role permission assignments in the management console.';
+const pageDesc = 'Scope assignments are only related to internal, APIM-specific scope assignments. They are not'
+                + ' related to role permission assignments in the Management Console.';
 
 /**
  *
@@ -224,7 +224,7 @@ export default function ListRoles() {
                 content={(
                     <FormattedMessage
                         id='RolePermissions.ListRoles.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Scope Assignments.'
+                        defaultMessage={'You do not have enough permission to view Scope Assignments.'
                         + ' Please contact the site administrator.'}
                     />
                 )}
