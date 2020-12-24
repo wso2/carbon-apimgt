@@ -72,19 +72,15 @@ public class RegistrySearchUtil {
     public static final String ENABLE_STORE = "enableStore";
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
-    public static final String[] API_SEARCH_PREFIXES = {DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
+    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
-            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase()};
+            CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase() };
     
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
 
-    public static String constructNewSearchQuery(String query) throws APIPersistenceException {
-        String modifiedQuery = extractQuery(constructQueryWithProvidedCriterias(query.trim()));
-        return modifiedQuery;
-    }
 
     /**
      * @param inputSearchQuery search Query
@@ -182,7 +178,7 @@ public class RegistrySearchUtil {
         return searchKey + "=" + searchValue;
     }
 
-    public static Map<String, String> getSearchAttributes(String searchQuery) {
+    private static Map<String, String> getSearchAttributes(String searchQuery) {
         String[] searchQueries = searchQuery.split("&");
 
         String apiState = "";
@@ -241,7 +237,7 @@ public class RegistrySearchUtil {
     }
     
 
-    public static String extractQuery(String searchQuery) {
+    private static String extractQuery(String searchQuery) {
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
 
@@ -291,7 +287,7 @@ public class RegistrySearchUtil {
         return filteredQuery.toString();
     }
     
-    public static String getPublisherRolesWrappedQuery(String query, UserContext context) {
+    private static String getPublisherRolesWrappedQuery(String query, UserContext context) {
 
         if (PersistenceUtil.isAdminUser(context)) {
             log.debug("Admin user. no modifications to the query");
@@ -308,7 +304,7 @@ public class RegistrySearchUtil {
         return criteria;
     }
     
-    public static String getDevPortalRolesWrappedQuery(String query, UserContext context) {
+    private static String getDevPortalRolesWrappedQuery(String query, UserContext context) {
         if (PersistenceUtil.isAdminUser(context)) {
             log.debug("Admin user. no modifications to the query");
             return query;
@@ -378,7 +374,7 @@ public class RegistrySearchUtil {
      * @param values
      * @return
      */
-    public static String getORBasedSearchCriteria(String[] values) {
+    private static String getORBasedSearchCriteria(String[] values) {
 
         String criteria = "(";
         if (values != null) {
@@ -397,7 +393,81 @@ public class RegistrySearchUtil {
     
     public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
-        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
+        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery) &&
+                !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(modifiedQuery)) {
+            boolean displayAPIsWithMultipleStatus = false; //APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
+
+            String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
+            if (displayAPIsWithMultipleStatus) {
+                statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
+                        APIConstants.DEPRECATED };
+            }
+            if ("".equals(searchQuery)) { // normal listing
+                String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
+                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+            }
+            
+            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
+            lcCriteria = lcCriteria + getORBasedSearchCriteria(statusList);
+
+            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+        }
+        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery), ctx);
+       /* if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
+            boolean displayAPIsWithMultipleStatus = false; // APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
+                                                          // this
+            String[] statusList = { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
+                    "null" };
+            if (displayAPIsWithMultipleStatus) {
+                statusList = new String[] { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
+                        APIConstants.DEPRECATED.toLowerCase(), "null" };
+            }
+            if ("".equals(searchQuery)) { // normal listing
+                String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
+                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
+            }
+            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY
+                    + RegistrySearchUtil.getORBasedSearchCriteria(statusList);
+            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+        } else {
+            String searchString = APIConstants.API_STATUS + "=";
+            modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
+                    APIConstants.LCSTATE_SEARCH_TYPE_KEY);
+        }*/
+        return modifiedQuery;
+    }
+
+    public static String getPublisherSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
+        String newSearchQuery = constructNewSearchQuery(searchQuery);
+        if ("".equals(searchQuery)) {// if (!query.contains(APIConstants.TYPE)) {
+            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY
+                    + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST);
+            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        }
+        newSearchQuery = extractQuery(newSearchQuery);
+
+        newSearchQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(newSearchQuery, ctx);
+        return newSearchQuery;
+    }
+
+    
+    /**
+     * Used to reconstruct the input search query as sub context and doc content doesn't support AND search
+     *
+     * @param query Input search query
+     * @return Reconstructed new search query
+     * @throws APIManagementException If there is an error in the search query
+     */
+    private static String constructNewSearchQuery(String query) throws APIPersistenceException {
+
+        return constructQueryWithProvidedCriterias(query.trim());
+    }
+
+    
+    public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx)
+            throws APIPersistenceException {
+        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
+
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
             boolean displayAPIsWithMultipleStatus = true; // APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
                                                           // this
@@ -415,14 +485,18 @@ public class RegistrySearchUtil {
             modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
         }
-        return modifiedQuery;
+        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
+        Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        return attributes;
     }
+    
 
-    public static String getPublisherSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
+    public static Map<String, String> getPublisherSearchAttributes(String searchQuery, UserContext ctx)
+            throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
         modifiedQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(modifiedQuery, ctx);
-        return modifiedQuery;
+        Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        return attributes;
     }
-
 
 }
