@@ -1457,13 +1457,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
             int offset, UserContext ctx) throws APIPersistenceException {
         log.debug("Requested query for publisher content search: " + searchQuery);
-        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
-        //log.info("========================================");
-        modifiedQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(modifiedQuery, ctx);
-        //log.info("query " + modifiedQuery);
-        Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
-        //log.info("attributes " + attributes);
-        //log.info("========================================");
+        Map<String, String> attributes = RegistrySearchUtil.getPublisherSearchAttributes(searchQuery, ctx);
         if(log.isDebugEnabled()) {
             log.debug("Search attributes : " + attributes );
         }
@@ -1615,31 +1609,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
             int offset, UserContext ctx) throws APIPersistenceException {
         log.debug("Requested query for devportal content search: " + searchQuery);
-        String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
-        
-        if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
-            boolean displayAPIsWithMultipleStatus = true; //APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check this
-            String[] statusList = {APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(), "null"};
-            if (displayAPIsWithMultipleStatus) {
-                statusList = new String[]{APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
-                        APIConstants.DEPRECATED.toLowerCase(), "null"};
-            }
-            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY + RegistrySearchUtil.getORBasedSearchCriteria(statusList);
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
-        } else {
-            String searchString = APIConstants.API_STATUS + "=" ;
-            modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString, APIConstants.LCSTATE_SEARCH_TYPE_KEY);
-        }
-        
-        //log.info("========================================");
-        modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
-        //log.info("query " + modifiedQuery);
-        Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
+        Map<String, String> attributes = RegistrySearchUtil.getDevPortalSearchAttributes(searchQuery, ctx);
 
-        
-        //log.info("attributes " + attributes);
-        //log.info("========================================");
-        
         if(log.isDebugEnabled()) {
             log.debug("Search attributes : " + attributes );
         }
