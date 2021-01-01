@@ -1665,5 +1665,31 @@ public interface APIProvider extends APIManager {
      */
     Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId) throws APIManagementException;
 
+    /**
+     * upload mediation policy to api
+     * @param apiId apiid
+     * @param mediationPolicy poilicy
+     * @return added policy
+     * @throws APIManagementException
+     */
+    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy) throws APIManagementException;
+    
+    /**
+     * update mediation policy content
+     * @param apiId apiid
+     * @param mediationPolicy poilicy
+     * @return added policy
+     * @throws APIManagementException
+     */
+    Mediation updateApiSpecificMediationPolicyContent(String apiId, Mediation mediationPolicy)
+            throws APIManagementException;
+
+    /**
+     * delete mediation policy
+     * @param apiId apiId
+     * @param mediationPolicyId mediation Policy Id
+     * @throws APIManagementException
+     */
+    void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId) throws APIManagementException;
     
 }
