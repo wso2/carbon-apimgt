@@ -341,7 +341,7 @@ public class PublisherCommonUtils {
 
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
-
+        apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
             String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
