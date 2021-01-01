@@ -49,15 +49,6 @@ public class RegistryPersistenceImplTestCase {
     }
 
     @Test
-    public void normal() throws Exception {
-        String username = "admin";
-        Registry registry = Mockito.mock(Registry.class);
-        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(username, registry);
-        System.out.println(apiPersistenceInstance
-                .addMediationPolicy(new Organization(SUPER_TENANT_DOMAIN), "xxxxx", null).getName());
-    }
-
-    @Test
     public void testRegistrySelectionForSuperTenantUser() throws Exception {
 
         RegistryService registryService = Mockito.mock(RegistryService.class);

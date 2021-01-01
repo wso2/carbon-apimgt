@@ -10665,4 +10665,79 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return null;
     }
+
+    @Override
+    public Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy) throws APIManagementException {
+        if (StringUtils.isNotBlank(mediationPolicy.getName())
+                && mediationPolicy.getName().length() > APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME) {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.MEDIATION_POLICY_NAME_TOO_LONG,
+                    APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME + ""));
+        }
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.Mediation mappedPolicy = 
+                    new org.wso2.carbon.apimgt.persistence.dto.Mediation();
+            mappedPolicy.setConfig(mediationPolicy.getConfig());
+            mappedPolicy.setName(mediationPolicy.getName());
+            mappedPolicy.setType(mediationPolicy.getType());
+            org.wso2.carbon.apimgt.persistence.dto.Mediation returnedMappedPolicy = apiPersistenceInstance
+                    .addMediationPolicy(new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                            apiId, mappedPolicy);
+            if (returnedMappedPolicy != null) {
+                mediationPolicy.setUuid(returnedMappedPolicy.getId());
+                return mediationPolicy;
+            }
+        } catch (MediationPolicyPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else if (e.getErrorHandler() == ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS) {
+                throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
+            } else {
+                throw new APIManagementException("Error while saving mediation policy ", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Mediation updateApiSpecificMediationPolicyContent(String apiId, Mediation mediationPolicy)
+            throws APIManagementException {
+
+        try {
+            org.wso2.carbon.apimgt.persistence.dto.Mediation mappedPolicy = 
+                    new org.wso2.carbon.apimgt.persistence.dto.Mediation();
+            mappedPolicy.setConfig(mediationPolicy.getConfig());
+            mappedPolicy.setName(mediationPolicy.getName());
+            mappedPolicy.setType(mediationPolicy.getType());
+            mappedPolicy.setId(mediationPolicy.getUuid());
+            org.wso2.carbon.apimgt.persistence.dto.Mediation returnedMappedPolicy = apiPersistenceInstance
+                    .updateMediationPolicy(new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                            apiId, mappedPolicy);
+            if (returnedMappedPolicy != null) {
+                return mediationPolicy;
+            }
+        } catch (MediationPolicyPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while saving mediation policy ", e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId) throws APIManagementException {
+        try {
+            apiPersistenceInstance.deleteMediationPolicy(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                    mediationPolicyId);
+        } catch (MediationPolicyPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while saving mediation policy ", e);
+            }
+        }
+
+    }
 }

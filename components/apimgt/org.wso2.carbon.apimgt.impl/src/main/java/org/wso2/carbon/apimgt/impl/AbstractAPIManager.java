@@ -3780,12 +3780,10 @@ public abstract class AbstractAPIManager implements APIManager {
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;
-            } else {
-                String msg = "Failed to get Image. Artifact corresponding to artifactId " + apiId + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (ThumbnailPersistenceException e) {
             throw new APIManagementException("Error while accessing thumbnail resource ", e);
         }
+        return null;
     }
 }

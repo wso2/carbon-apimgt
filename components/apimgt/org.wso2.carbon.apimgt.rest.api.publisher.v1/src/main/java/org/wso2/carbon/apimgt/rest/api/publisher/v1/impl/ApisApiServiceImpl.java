@@ -1774,26 +1774,23 @@ public class ApisApiServiceImpl implements ApisApiService {
                     tenantDomain);
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+            //String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out apiResourcePath
-            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
             //Getting specified mediation policy
             Mediation mediation =
-                    apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, mediationPolicyId);
+                    apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId);
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
-                    apiProvider.updateAPI(api);
+                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain); // TODO do a deep copy 
+                    apiProvider.updateAPI(oldAPI, api);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
-            boolean deletionStatus =
-                    apiProvider.deleteApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, mediationPolicyId);
-            if (deletionStatus) {
-                return Response.ok().build();
-            } else {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
-            }
+            
+            apiProvider.deleteApiSpecificMediationPolicy(apiId, mediationPolicyId);
+
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -1874,38 +1871,47 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String apiId, String mediationPolicyId,
                                 String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
                                                           String inlineContent, MessageContext messageContext) {
-
-        InputStream contentStream = null;
-        APIIdentifier apiIdentifier;
-        Mediation updatedMediation;
-        String resourcePath = "";
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
-            //Getting the api base path out of apiResourcePath
-            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-            //Getting resource correspond to the given uuid
-            Resource mediationResource = apiProvider
-                    .getApiSpecificMediationResourceFromUuid(apiIdentifier, mediationPolicyId, apiResourcePath);
+
+            Mediation mediationResource = apiProvider
+                    .getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId);
             if (mediationResource != null) {
-                ResourceFile contentFile = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
 
-                //Getting path to the existing resource
-                resourcePath = mediationResource.getPath();
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                IOUtils.copy(fileInputStream, outputStream);
+                byte[] sequenceBytes = outputStream.toByteArray();
+                InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                String content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
+                OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
+                String localName = seqElement.getLocalName();
 
-                //Updating the existing mediation policy
-                String updatedPolicyUrl = apiProvider.addResourceFile(apiIdentifier, resourcePath, contentFile);
-                if (StringUtils.isNotBlank(updatedPolicyUrl)) {
-                    String uuid = apiProvider.getCreatedResourceUuid(resourcePath);
-                    //Getting the updated mediation policy
-                    updatedMediation = apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, uuid);
-                    MediationDTO updatedMediationDTO =
-                            MediationMappingUtil.fromMediationToDTO(updatedMediation);
-                    URI uploadedMediationUri = new URI(updatedPolicyUrl);
-                    return Response.ok(uploadedMediationUri).entity(updatedMediationDTO).build();
+                Mediation returnedPolicy;
+                if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
+                    Mediation mediationPolicy = new Mediation();
+                    mediationPolicy.setConfig(content);
+                    mediationPolicy.setName(localName);
+                    mediationPolicy.setType(type);
+                    mediationPolicy.setUuid(mediationPolicyId);
+                    //Adding api specific mediation policy
+                    returnedPolicy  = apiProvider.updateApiSpecificMediationPolicyContent(apiId, mediationPolicy);
+                } else {
+                    throw new APIManagementException("Sequence is malformed");
                 }
+                
+                if (returnedPolicy != null) {
+                    String uuid = returnedPolicy.getUuid();
+                    String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
+                            .replace(RestApiConstants.APIID_PARAM, apiId) + "/" + uuid;
+                    URI uri = new URI(uriString);
+                    MediationDTO updatedMediationDTO =
+                            MediationMappingUtil.fromMediationToDTO(returnedPolicy);
+                    
+                    return Response.ok(uri).entity(updatedMediationDTO).build();
+                }
+
             } else {
                 //If registry resource not exists
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
@@ -1926,10 +1932,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while getting location header for uploaded " +
-                    "mediation policy " + resourcePath;
+                    "mediation policy " + mediationPolicyId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (Exception e) {
+            RestApiUtil.handleInternalServerError("An Error has occurred while adding mediation policy", e, log);
         } finally {
-            IOUtils.closeQuietly(contentStream);
+            IOUtils.closeQuietly(fileInputStream);
         }
         return null;
     }
@@ -1996,14 +2004,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
 
         String fileName = "";
-        String mediationPolicyUrl = "";
-        String mediationResourcePath = "";
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
-                    tenantDomain);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
             if (fileInputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
             }
@@ -2013,16 +2016,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 type = "in";
             }
-
-            String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
-            //Getting registry Api base path out of apiResourcePath
-            apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-
+            
+            Mediation returnedPolicy = null;
             if (fileInputStream != null) {
                 fileName = fileDetail.getDataHandler().getName();
-                //Constructing mediation resource path
-                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR +
-                        type + RegistryConstants.PATH_SEPARATOR;
+
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -2033,16 +2031,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 IOUtils.copy(fileInputStream, outputStream);
                 byte[] sequenceBytes = outputStream.toByteArray();
                 InputStream inSequenceStream = new ByteArrayInputStream(sequenceBytes);
+                String content = IOUtils.toString(inSequenceStream, StandardCharsets.UTF_8.name());
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
                 fileName = seqElement.getAttributeValue(new QName("name"));
-                //Constructing mediation resource path
-                mediationResourcePath = mediationResourcePath + fileName;
-                checkMediationPolicy(apiProvider, mediationResourcePath, fileName);
+                
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
-                    ResourceFile contentFile = new ResourceFile(inSequenceStream, fileContentType);
+                    Mediation mediationPolicy = new Mediation();
+                    mediationPolicy.setConfig(content);
+                    mediationPolicy.setName(localName);
+                    mediationPolicy.setType(type);
                     //Adding api specific mediation policy
-                    mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+                    returnedPolicy  = apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy);
                 } else {
                     throw new APIManagementException("Sequence is malformed");
                 }
@@ -2050,27 +2050,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (inlineContent != null) {
                 //Extracting the file name specified in the config
                 fileName = this.getMediationNameFromConfig(inlineContent);
-                //Constructing mediation resource path
-                mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type +
-                        RegistryConstants.PATH_SEPARATOR + fileName;
-                checkMediationPolicy(apiProvider,mediationResourcePath, fileName);
-                InputStream contentStream = new ByteArrayInputStream(inlineContent.getBytes(StandardCharsets.UTF_8));
-                String contentType = URLConnection.guessContentTypeFromName(fileName);
-                ResourceFile contentFile = new ResourceFile(contentStream, contentType);
-                //Adding api specific mediation policy
-                mediationPolicyUrl = apiProvider.addResourceFile(apiIdentifier, mediationResourcePath, contentFile);
+                Mediation mediationPolicy = new Mediation();
+                mediationPolicy.setConfig(inlineContent);
+                mediationPolicy.setName(fileName.replace(APIConstants.MEDIATION_CONFIG_EXT, ""));
+                mediationPolicy.setType(type);
+                returnedPolicy  = apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy);
             }
 
-            if (StringUtils.isNotBlank(mediationPolicyUrl)) {
-                //Getting the uuid of created mediation policy
-                String uuid = apiProvider.getCreatedResourceUuid(mediationResourcePath);
-                //Getting created Api specific mediation policy
-                Mediation createdMediation =
-                        apiProvider.getApiSpecificMediationPolicy(apiIdentifier, apiResourcePath, uuid);
+            if (returnedPolicy != null) {
+                String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
+                        .replace(RestApiConstants.APIID_PARAM, apiId)  + "/" + returnedPolicy.getUuid();
+                URI uri = new URI(uriString);
                 MediationDTO createdPolicy =
-                        MediationMappingUtil.fromMediationToDTO(createdMediation);
-                URI uploadedMediationUri = new URI(mediationPolicyUrl);
-                return Response.created(uploadedMediationUri).entity(createdPolicy).build();
+                        MediationMappingUtil.fromMediationToDTO(returnedPolicy);
+                return Response.created(uri).entity(createdPolicy).build();
             }
 
         } catch (APIManagementException e) {
