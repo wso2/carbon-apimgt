@@ -10953,4 +10953,148 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> failedEnvironment = gatewayManager.removeAPIRevisionFromGateway(api,tenantDomain);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
     }
+
+    /**
+     * Restore a provided API Revision as the working copy of the API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to restore APIRevision
+     */
+    @Override
+    public void restoreAPIRevision(String apiId, String apiRevisionId) throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevisionId));
+        }
+        restoreAPIRevisionRegistryArtifacts(apiId,apiRevision,apiIdentifier);
+        apiMgtDAO.restoreAPIRevision(apiRevision);
+    }
+
+    /**
+     * Restore registry artifacts of API Revision to API registry location
+     *
+     * @param apiUUID API UUID
+     * @param apiRevision API Revision Object
+     * @param apiId API Identifier Object
+     * @throws APIManagementException if failed to copy API registry artifacts
+     */
+    protected void restoreAPIRevisionRegistryArtifacts(String apiUUID, APIRevision apiRevision, APIIdentifier apiId)
+            throws APIManagementException {
+        String apiPath = APIUtil.getAPIPath(apiId);
+        int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+        String apiSourcePath = apiPath.substring(0, prependIndex );
+        String revisionTargetPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiUUID +
+                RegistryConstants.PATH_SEPARATOR + apiRevision.getId() +
+                RegistryConstants.PATH_SEPARATOR;
+
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            registry.delete(apiSourcePath);
+            registry.copy(revisionTargetPath,apiSourcePath);
+            Resource newAPIArtifact = registry.get(apiPath);
+            newAPIArtifact.setUUID(apiUUID);
+            registry.put(apiPath, newAPIArtifact);
+            registry.commitTransaction();
+            transactionCommitted = true;
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "Revision for API Name: " + apiId.getApiName() + ", API Version " + apiId.getVersion()
+                                + " restored";
+                log.debug(logMessage);
+            }
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for revision restore for API : " + apiId.getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for revision restore for API: " + apiId.getApiName(), ex);
+            }
+        }
+    }
+
+    /**
+     * Delete an API Revision
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to delete APIRevision
+     */
+    @Override
+    public void deleteAPIRevision(String apiId, String apiRevisionId) throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevisionId));
+        }
+        deleteAPIRevisionRegistryArtifacts(apiId,apiRevision,apiIdentifier);
+        apiMgtDAO.deleteAPIRevision(apiRevision);
+    }
+
+    /**
+     * Delete registry artifacts of an API Revision
+     *
+     * @param apiUUID API UUID
+     * @param apiRevision API Revision Object
+     * @param apiId API Identifier Object
+     * @throws APIManagementException if failed to copy API registry artifacts
+     */
+    protected void deleteAPIRevisionRegistryArtifacts(String apiUUID, APIRevision apiRevision, APIIdentifier apiId)
+            throws APIManagementException {
+        String revisionTargetPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiUUID +
+                RegistryConstants.PATH_SEPARATOR + apiRevision.getId();
+        boolean transactionCommitted = false;
+        try {
+            registry.beginTransaction();
+            registry.delete(revisionTargetPath);
+            registry.commitTransaction();
+            transactionCommitted = true;
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "Revision for API Name: " + apiId.getApiName() + ", API Version " + apiId.getVersion()
+                                + " deleted";
+                log.debug(logMessage);
+            }
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for revision delete for API : " + apiId.getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for revision delete for API: " + apiId.getApiName(), ex);
+            }
+        }
+    }
+
 }

@@ -1793,4 +1793,24 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add APIRevision
      */
     void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Restore a provided API Revision as the working copy of the API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to restore APIRevision
+     */
+    void restoreAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+
+    /**
+     * Delete an API Revision
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to delete APIRevision
+     */
+    void deleteAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+
+
 }
