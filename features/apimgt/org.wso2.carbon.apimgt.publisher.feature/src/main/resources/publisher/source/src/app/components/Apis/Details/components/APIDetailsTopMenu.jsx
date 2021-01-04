@@ -123,7 +123,8 @@ const APIDetailsTopMenu = (props) => {
 
     React.useEffect(() => {
         const restApi = new API();
-        restApi.getRevisions(api.id).then((response) => {
+        let apiid = api.isRevision ? api.revisionedApiId : api.id;
+        restApi.getRevisions(apiid).then((response) => {
             setRevision(response.body.list);
         })
             .catch((errorMessage) => {
@@ -131,6 +132,10 @@ const APIDetailsTopMenu = (props) => {
                 Alert.error(JSON.stringify(errorMessage));
             });
     }, []);
+
+    const handleChange = (event) => {
+        setRevisionId(event.target.value);
+      };
 
     const isDownlodable = ['API'].includes(api.apiType);
     const { settings, user } = useAppContext();
@@ -193,10 +198,10 @@ const APIDetailsTopMenu = (props) => {
                 >
                     <Select
                         defaultValue={revisonid} id="grouped-select"
-                        
+                        onChange={handleChange}
                     >
                         <MenuItem value="0">
-                            <Link to={'/apis/' + api.id + '/overview'}>
+                            <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
                                 <Typography variant='body'>
                                     <FormattedMessage
                                         id='Apis.Details.components.APIDetailsTopMenu.working.copy'

@@ -58,6 +58,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Checkbox from '@material-ui/core/Checkbox';
 import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
@@ -113,14 +114,31 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: 6,
         placeSelf: 'middle',
     },
+    shapeDottedStart1: {
+        backgroundColor: '#1CB1BF',
+        width: 50,
+        height: 50,
+        marginTop: 6,
+        marginLeft: 6.5,
+        placeSelf: 'middle',
+    },
     textShape: {
         marginTop: 5.5,
         marginLeft: 6.5,
     },
     textShape2: {
         marginTop: 8,
-        marginLeft: 150,
+        marginLeft: 140,
         fontFamily: 'sans-serif',
+    },
+    textDelete: {
+        marginTop: 8,
+        marginLeft: 120,
+        fontFamily: 'sans-serif',
+        fontSize: 'small'
+    },
+    textShapeMiddle: {
+        marginTop: 18,
     },
     textShape3: {
         color: '#38536c',
@@ -136,10 +154,10 @@ const useStyles = makeStyles((theme) => ({
         color: '#415A85',
     },
     textShape4: {
-        marginTop: 50
+        marginTop: 55
     },
     textShape5: {
-        marginTop: 13,
+        marginTop: 10,
         marginLeft: 110,
         marginBottom: 10
     },
@@ -197,6 +215,10 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: '100%',
         cursor: 'pointer',
         '&:hover': { overflow: 'visible' },
+    },
+    gridOverflow: {
+        overflow: 'scroll',
+        width: '100%',
     }
 }));
 
@@ -218,7 +240,7 @@ export default function Environments() {
     const restApi = new API();
     const isdeploy = true;
     const [allDeployments, setAllDeployments] = useState([]);
-    const [allRevisions, setRevisions] = useState([]);
+    const [allRevisions, setRevisions] = useState(null);
     const [open, setOpen] = React.useState(false);
 
     useEffect(() => {
@@ -230,6 +252,61 @@ export default function Environments() {
             setRevisions(result.body.list);
         });
     }, []);
+
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+    const [open1, setOpen1] = React.useState(false);
+
+    const handleClickOpen1 = () => {
+        setOpen1(true);
+    };
+
+    const handleClose1 = () => {
+        setOpen1(false);
+    };
+
+    const [checked, setChecked] = React.useState([]);
+    const handleChange = (event) => {
+        setChecked(event.target.checked);
+    };
+
+    /**
+      * Handles adding a new comment
+      * @memberof CommentAdd
+      */
+    function handleClickAddRevision() {
+
+        const body = {
+            'description': 'state',
+        };
+        const restApi = new API();
+        restApi.addRevision(api.id, body)
+            .then(() => {
+                Alert.info('Revision Create Successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while updating the environments');
+                }
+                console.error(error);
+            }).finally(() => {
+                restApi.getRevisions(api.id).then((result) => {
+                    setRevisions(result.body.list);
+                });
+
+            });
+        setOpen(false);
+    }
+
+
     const item1 =
         <Grid
             container
@@ -288,76 +365,153 @@ export default function Environments() {
             </Grid>
         </Grid>;
 
+    const item7 =
+        <Grid
+            container
+            direction='container'
+        >
+            <Grid item className={classes.shapeRec} />
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+                <Grid className={clsx(classes.shapeDottedStart, classes.shapeCircle)} />
+            </Grid>
 
+        </Grid>;
+
+const item8 =
+        <Grid
+            container
+            direction='container'
+        >
+            <Grid item className={classes.shapeRec} />
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+                <Grid className={clsx(classes.shapeDottedStart1, classes.shapeCircle)} />
+            </Grid>
+            <Grid item className={classes.shapeRecBack} />
+        </Grid>;
 
 
     const items = [];
 
-    {
-    allRevisions && allRevisions.length === 0 &&
-        items.push(
-            <Grid item>
-                <Grid className={classes.textShape5}>
-
-                    <Button className={classes.textShape6} type="submit" size='small' color="primary" variant='outlined'>
-                        Create a new revision
-            </Button>
-                </Grid>
-                {item5}
-            </Grid>
-        )
+    if (allRevisions && allRevisions.length !== 0) {
+        {
+            for (let i = 0; i < (allRevisions.length); i++) {
+                if (i % 2 === 0) {
+                items.push(
+                    <Grid item>
+                        <Grid className={classes.textShape4}>
+                        </Grid>
+                        {item1}
+                        <Grid className={classes.textShape2}>Revision {allRevisions[i].id}</Grid>
+                        <Grid>
+                            <Button className={classes.textShape3} size='small' type="submit" startIcon={<RestoreIcon />}>
+                                Restore
+     </Button>
+                            <Button className={classes.textShape7} type="submit" size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
+                                Delete
+     </Button>
+                        </Grid>
+                    </Grid>
+                )} else {
+                    items.push(
+                    <Grid item>
+                    <Grid className={classes.textShape5}>
+                    </Grid>
+                    <Grid className={classes.textShape2}>Revision {allRevisions[i].id}</Grid>
+                    <Grid>
+                            <Button className={classes.textShape3} size='small' type="submit" startIcon={<RestoreIcon />}>
+                                Restore
+     </Button>
+                            <Button className={classes.textShape7} type="submit" size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
+                                Delete
+     </Button>
+                        </Grid>
+                    {item8}
+                    </Grid>
+                )}
+                
+        }
     }
 
-    {
-        allRevisions && allRevisions.map((row) =>
+        if (allRevisions.length !== revisionCount) {
             items.push(
                 <Grid item>
-                    <Grid className={classes.textShape4}>
+                    <Grid className={classes.textShape5}>
+
+                        <Button type="submit" size='small' onClick={handleClickOpen} className={classes.textShape6} variant='outlined'>
+                            Create a new revision
+        </Button>
                     </Grid>
-                    {item1}
-                    <Grid className={classes.textShape2}>Revision 1</Grid>
-                    <Grid>
-                        <Button className={classes.textShape3} size='small' type="submit" startIcon={<RestoreIcon />}>
-                            Restore
-     </Button>
-                        <Button className={classes.textShape7} type="submit" size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
-                            Delete
-     </Button>
+                    <Grid className={classes.textShapeMiddle}>
+                    {item5}
                     </Grid>
                 </Grid>
-            ))
-    }
+            )
+        }
+        if (allRevisions.length === revisionCount) {
+            items.push(
+                <Grid item>
+                    <Grid className={classes.textShape5}>
 
-    if (allRevisions.length !== 0 && allRevisions != revisionCount) {
+                        <Button type="submit" size='small' onClick={handleClickOpen} className={classes.textShape6} variant='outlined'>
+                            Create a new revision
+        </Button>
+                    </Grid>
+                    <Grid className={classes.textShapeMiddle}>
+                    {item7}</Grid>
+                    <Grid className={classes.textDelete}>Revision 1 will be deleted</Grid>
+                </Grid>
+            )
+        }
+
+
+        for (let i = 0; i < (revisionCount - (allRevisions.length + 1)); i++) {
+            items.push(
+                <Grid item>
+                    <Grid className={classes.textShape4}></Grid>
+                    {item2}
+                </Grid>
+            )
+        }
+        if (allRevisions.lenght !== revisionCount) {
+            items.push(
+                <Grid item>
+                    <Grid className={classes.textShape4}></Grid>
+                    {item3}
+                </Grid>
+            )
+        }
+
+    } 
+    
+    if(allRevisions && allRevisions.length === 0){
         items.push(
             <Grid item>
                 <Grid className={classes.textShape5}>
 
-                    <Button type="submit" size='small' className={classes.textShape6} variant='outlined'>
+                    <Button type="submit" size='small' onClick={handleClickOpen} className={classes.textShape6} variant='outlined'>
                         Create a new revision
-        </Button>
+    </Button>
                 </Grid>
+                <Grid className={classes.textShapeMiddle}>
                 {item5}
+                </Grid>
             </Grid>
         )
-    }
-
-
-    for (let i = 0; i < (revisionCount - (allRevisions.length + 1)); i++) {
-        items.push(
-            <Grid item>
-                <Grid className={classes.textShape4}></Grid>
-                {item2}
-            </Grid>
-        )
-    }
-    if (allRevisions.length === 0 || revisionCount !== allRevisions) {
+        for (let i = 0; i < (revisionCount - (allRevisions.length + 1)); i++) {
+            items.push(
+                <Grid item>
+                    <Grid className={classes.textShape4}></Grid>
+                    {item2}
+                </Grid>
+            )
+        }
         items.push(
             <Grid item>
                 <Grid className={classes.textShape4}></Grid>
                 {item3}
             </Grid>
         )
+
     }
 
 
@@ -366,59 +520,8 @@ export default function Environments() {
 
 
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-    const [open1, setOpen1] = React.useState(false);
-
-    const handleClickOpen1 = () => {
-        setOpen1(true);
-    };
-
-    const handleClose1 = () => {
-        setOpen1(false);
-    };
-
-    const [checked, setChecked] = React.useState([]);
-    const handleChange = (event) => {
-        setChecked(event.target.checked);
-    };
 
 
-
-    /**
-     * Handles adding a new comment
-     * @memberof CommentAdd
-     */
-    function handleClickAddRevision() {
-
-        const body = {
-            'description': 'state',
-        };
-        const restApi = new API();
-        restApi.addRevision(api.id, body)
-            .then(() => {
-                Alert.info('Revision Create Successfully');
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while updating the environments');
-                }
-                console.error(error);
-            }).finally(() => {
-                restApi.getRevisions(api.id).then((result) => {
-                    setRevisions(result.body.list);
-                });
-
-            });
-        setOpen1(false);
-    }
 
 
     /**
@@ -480,8 +583,8 @@ export default function Environments() {
             </Grid>
 
 
-            <Box ml={6}>
-                <Grid container
+            <Box ml={6} lassName={classes.gridOverflow}>
+                <Grid container c
                     direction='row'
                     alignItems='flex-start'
                     xs={12}>
@@ -540,23 +643,8 @@ export default function Environments() {
 
 
 
-            {/* <Grid container>
+            <Grid container>
 
-                    <Button
-                        className={classes.saveButton}
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) || isUpdating}
-                        type='submit'
-                        variant='contained'
-                        color='primary'
-
-                        onClick={handleClickOpen}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Environments.Environments.New.Deployment'
-                            defaultMessage='New Deployment'
-                        />
-                        {isUpdating && <CircularProgress size={20} />}
-                    </Button>
                     <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" fullWidth >
                         <DialogTitle id="form-dialog-title">Deploy</DialogTitle>
                         <DialogContent className={classes.dialgContent}>
@@ -653,14 +741,20 @@ export default function Environments() {
                             <Button onClick={handleClose} >
                                 Cancel
         </Button>
-                            <Button onClick={handleClose} type='submit'
+                            <Button onClick={handleClickAddRevision} type='submit'
                                 variant='contained'
                                 color='primary'>
+                                Create
+        </Button>
+        <Button  type='submit'
+                                variant='contained'
+                                color='defalut'
+                                disabled>
                                 Deploy
         </Button>
                         </DialogActions>
                     </Dialog>
-                </Grid> */}
+                </Grid>
 
             <Box mx="auto" mt={5}>
                 <Typography variant='h6' gutterBottom >
