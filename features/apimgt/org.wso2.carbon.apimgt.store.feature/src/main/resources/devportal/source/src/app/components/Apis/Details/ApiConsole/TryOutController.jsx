@@ -599,7 +599,7 @@ function TryOutController(props) {
                                     </Box>
                                 </Grid>
                             ) : (
-                                !ksGenerated && (
+                                (!ksGenerated && securitySchemeType === 'OAUTH') && (
                                     <Grid x={8} md={6} className={classes.tokenType} item>
                                         <Box mb={1} alignItems='center'>
                                             <Typography variant='body1'>
@@ -711,7 +711,8 @@ function TryOutController(props) {
                                                     : generateAccessToken}
                                                 variant='contained'
                                                 className={classes.genKeyButton}
-                                                disabled={!user || (subscriptions && subscriptions.length === 0) || !ksGenerated}
+                                                disabled={!user || (subscriptions && subscriptions.length === 0)
+                                                    || (!ksGenerated && securitySchemeType === 'OAUTH')}
                                             >
                                                 {isUpdating && (
                                                     <CircularProgress size={15} />
