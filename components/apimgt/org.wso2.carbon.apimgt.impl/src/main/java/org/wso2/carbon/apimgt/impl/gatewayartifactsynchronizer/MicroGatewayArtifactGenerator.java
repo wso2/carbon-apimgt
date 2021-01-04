@@ -43,7 +43,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                 }
             }
             CommonUtil.archiveDirectory(tempDirectory.getAbsolutePath());
-//            FileUtils.deleteQuietly(tempDirectory);
+            FileUtils.deleteQuietly(tempDirectory);
             RuntimeArtifactDto runtimeArtifactDto = new RuntimeArtifactDto();
             runtimeArtifactDto.setArtifact(new File(tempDirectory.getAbsolutePath() + APIConstants.ZIP_FILE_EXTENSION));
             runtimeArtifactDto.setFile(true);
@@ -53,18 +53,6 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
         }
     }
 
-    public static void main(String[] args) throws APIManagementException, FileNotFoundException {
-
-        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtos = new ArrayList<>();
-        APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
-        apiRuntimeArtifactDto.setFile(true);
-        apiRuntimeArtifactDto.setApiId(UUID.randomUUID().toString());
-        apiRuntimeArtifactDto.setRevision("revision1");
-        apiRuntimeArtifactDto.setArtifact(new FileInputStream("/home/tharindud/Downloads/PizzaShackAPI_1.0.0.zip"));
-
-        apiRuntimeArtifactDtos.add(apiRuntimeArtifactDto);
-        new MicroGatewayArtifactGenerator().generateGatewayArtifact(apiRuntimeArtifactDtos);
-    }
 
     @Override
     public String getType() {
