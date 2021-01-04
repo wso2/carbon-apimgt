@@ -488,7 +488,7 @@ public class GatewayArtifactsMgtDAO {
     public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String label)
             throws APIManagementException {
 
-        String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
+        String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
