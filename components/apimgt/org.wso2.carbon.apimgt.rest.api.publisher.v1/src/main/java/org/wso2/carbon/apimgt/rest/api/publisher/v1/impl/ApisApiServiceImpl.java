@@ -3903,13 +3903,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response deleteAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            apiProvider.deleteAPIRevision(apiId, apiRevisionId);
+            Response.Status status = Response.Status.OK;
+            return Response.status(status).entity("API Revision deleted successfully").build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting API Revision for API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     /**
@@ -3987,19 +3990,22 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Restore a revision to the working copy of the API
      *
-     * @param apiId             UUID of the API
-     * @param apiRevisionId     Revision ID of the API
-     * @param messageContext    message context object
+     * @param apiId          UUID of the API
+     * @param apiRevisionId  Revision ID of the API
+     * @param messageContext message context object
      * @return response with 200 status code
      */
     @Override
     public Response restoreAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            apiProvider.restoreAPIRevision(apiId, apiRevisionId);
+            Response.Status status = Response.Status.OK;
+            return Response.status(status).entity("API Revision restored successfully").build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while restoring API Revision for API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 }
