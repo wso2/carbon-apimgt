@@ -59,6 +59,9 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: theme.spacing(10),
         paddingRight: theme.spacing(10),
     },
+    space: {
+        marginBottom: theme.spacing(5),
+    },
     buttonStyle: {
         color: theme.custom.serviceCatalog.onboarding.buttonText,
         borderColor: theme.custom.serviceCatalog.onboarding.buttonBorder,
@@ -146,19 +149,19 @@ function Onboarding(props) {
                             defaultMessage='Learn to write your first'
                         />
                     </Typography>
-                    <Typography align='center'>
+                    <Typography align='center' className={classes.space}>
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Onboarding.Heading1.subHeading'
                             defaultMessage='Integration Service'
                         />
                     </Typography>
-                    <Typography align='center' className={classes.spacing}>
+                    {/* <Typography align='center' className={classes.spacing}>
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Onboarding.description1'
                             defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
                             + ' all aspects of API Management.'}
                         />
-                    </Typography>
+                    </Typography> */}
                     <div align='center'>
                         <Link
                             target='_blank'
@@ -166,7 +169,7 @@ function Onboarding(props) {
                             href={'https://ei.docs.wso2.com/en/latest/'
                             + 'micro-integrator/develop/integration-development-kickstart/'}
                         >
-                            <Button className={classes.buttonStyle} variant='outlined'>
+                            <Button variant='contained' size='small' color='primary'>
                                 <Typography className={classes.heading} variant='h6'>
                                     <FormattedMessage
                                         id='ServiceCatalog.Listing.Onboarding.get.started'
@@ -192,21 +195,21 @@ function Onboarding(props) {
                             defaultMessage='Add a sample'
                         />
                     </Typography>
-                    <Typography align='center'>
+                    <Typography align='center' className={classes.space}>
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Onboarding.Heading2.subHeading'
                             defaultMessage='Integration Service'
                         />
                     </Typography>
-                    <Typography align='center' className={classes.spacing}>
+                    {/* <Typography align='center' className={classes.spacing}>
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Onboarding.description2'
                             defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
                             + ' all aspects of API Management.'}
                         />
-                    </Typography>
+                    </Typography> */}
                     <div align='center'>
-                        <Button className={classes.buttonStyle} variant='outlined' onClick={handleOnClick}>
+                        <Button variant='contained' size='small' color='primary' onClick={handleOnClick}>
                             <Typography className={classes.heading} variant='h6'>
                                 <FormattedMessage
                                     id='ServiceCatalog.Listing.Onboarding.add.sample.service'

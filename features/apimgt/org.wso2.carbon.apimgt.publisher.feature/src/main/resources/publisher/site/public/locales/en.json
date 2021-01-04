@@ -1143,8 +1143,6 @@
   "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": "Integration Service",
   "ServiceCatalog.Listing.Onboarding.add.sample.service": "Add Sample Service",
   "ServiceCatalog.Listing.Onboarding.add.sample.success": "Sample Service added successfully!",
-  "ServiceCatalog.Listing.Onboarding.description1": "From creating and publishing an API to securing, rate-limiting, addresses all aspects of API Management.",
-  "ServiceCatalog.Listing.Onboarding.description2": "From creating and publishing an API to securing, rate-limiting, addresses all aspects of API Management.",
   "ServiceCatalog.Listing.Onboarding.error.creating.sample.service": "Error while creating Sample Service",
   "ServiceCatalog.Listing.Onboarding.get.started": "Get Started",
   "ServiceCatalog.Listing.Onboarding.heading": "Service Catalog",
