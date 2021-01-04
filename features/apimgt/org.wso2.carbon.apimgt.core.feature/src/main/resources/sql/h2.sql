@@ -1,4 +1,3 @@
-AM_KEY_MANAGER-- Start of IDN Tables --
 -- Start of IDN Tables --
 CREATE TABLE IF NOT EXISTS IDN_BASE_TABLE (
             PRODUCT_NAME VARCHAR (20),

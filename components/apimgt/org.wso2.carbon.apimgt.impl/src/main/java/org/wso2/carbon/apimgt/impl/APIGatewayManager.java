@@ -1735,7 +1735,7 @@ public class APIGatewayManager {
         if (saveArtifactsToStorage) {
             try {
                 File artifact = ServiceReferenceHolder.getInstance().getImportExportService()
-                        .exportApiProduct(apiId, null, null, null, ExportFormat.JSON, true, false, true);
+                        .exportAPIProduct(apiId, null, null, null, ExportFormat.JSON, true, false, true);
                 artifactSaver.saveArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), "Current",
                         tenantDomain, artifact, gateways.toArray(new String[0]));
 
