@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeArtifactGeneratorUtil {
@@ -20,21 +21,23 @@ public class RuntimeArtifactGeneratorUtil {
         GatewayArtifactGenerator gatewayArtifactGenerator =
                 ServiceReferenceHolder.getInstance().getGatewayArtifactGenerator(type);
         if (gatewayArtifactGenerator != null) {
+            List<APIRuntimeArtifactDto> gatewayArtifacts;
             if (StringUtils.isNotEmpty(gatewayLabel)) {
-                List<APIRuntimeArtifactDto> gatewayArtifacts;
                 if (StringUtils.isNotEmpty(apiId)) {
                     gatewayArtifacts =
                             gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabel);
                 } else {
                     gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabel);
                 }
-                if (gatewayArtifacts != null){
-                    if (gatewayArtifacts.isEmpty()){
-                        throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
-                    }
-                }
-                return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+            } else {
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts();
             }
+            if (gatewayArtifacts != null){
+                if (gatewayArtifacts.isEmpty()){
+                    throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
+                }
+            }
+            return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
         }
         return null;
     }
