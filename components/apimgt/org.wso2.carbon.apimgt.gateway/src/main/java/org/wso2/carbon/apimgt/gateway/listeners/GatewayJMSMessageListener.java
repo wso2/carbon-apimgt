@@ -133,7 +133,8 @@ public class GatewayJMSMessageListener implements MessageListener {
                                 tenantFlowStarted = true;
                                 inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
                             } catch (ArtifactSynchronizerException e) {
-                                log.error("Error in deploying artifacts");
+                                log.error("Error in deploying artifacts for "  + gatewayEvent.getApiId() +
+                                        "in the Gateway");
                             } finally {
                                 if (tenantFlowStarted){
                                     endTenantFlow();
