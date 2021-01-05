@@ -17,11 +17,10 @@
  */
 
 import React, { useState, Suspense, lazy } from 'react';
-import { withRouter } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { makeStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
@@ -37,7 +36,7 @@ import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "MDMonacoEditor" */));
 const ReactMarkdown = lazy(() => import('react-markdown' /* webpackChunkName: "MDReactMarkdown" */));
 
-const styles = {
+const useStyles = makeStyles(() => ({
     flex: {
         flex: 1,
     },
@@ -61,13 +60,19 @@ const styles = {
         height: 30,
         marginLeft: 30,
     },
-};
+}));
 
 function Transition(props) {
     return <Slide direction='up' {...props} />;
 }
 
-function MarkdownEditor(props) {
+/**
+ * MarkdownEditor for API Description
+ * @param {*} props properties
+ * @returns {*} MarkdownEditor component
+ */
+export default function MarkdownEditor(props) {
+    const classes = useStyles();
     const { api, configDispatcher } = props;
     const [open, setOpen] = useState(false);
     const [description, setDescription] = useState(null);
@@ -91,7 +96,6 @@ function MarkdownEditor(props) {
         editor.focus();
     };
 
-    const { classes } = props;
     return (
         <div>
             <Link onClick={toggleOpen}>
@@ -177,8 +181,4 @@ function MarkdownEditor(props) {
 MarkdownEditor.propTypes = {
     api: PropTypes.shape({}).isRequired,
     configDispatcher: PropTypes.func.isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
 };
-
-export default injectIntl(withRouter(withStyles(styles)(MarkdownEditor)));
