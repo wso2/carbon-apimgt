@@ -803,6 +803,21 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
         assertEquals(1, apiConsumer.addApplication(application, "userID"));
     }
+
+    @Test
+    public void testAddApplicationWithSpecialCharacter() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        String appName = "ÅÄÖÅÄÖ";
+        Application application = Mockito.mock(Application.class);
+        Mockito.when(application.getName()).thenReturn(appName);
+        PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
+        PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
+        PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
+                thenReturn(false);
+        Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID"));
+    }
+
     @Test
     public void testGetScopesBySubscribedAPIs() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);

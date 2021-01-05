@@ -106,6 +106,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         String applicationName = oAuthApplicationInfo.getClientName();
+        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
@@ -113,21 +114,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
-                    getTenantAwareUsername(userId)), applicationName, keyType);
+            oauthClientName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), oauthClientName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application creation.");
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Trying to create OAuth application :" + applicationName);
+            log.debug("Trying to create OAuth application : " + oauthClientName + " for application: " + applicationName
+                    + " and key type: " + keyType);
         }
 
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
 
-        ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, false);
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, false);
         ClientInfo createdClient;
 
         try {
@@ -140,7 +142,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return oAuthApplicationInfo;
 
         } catch (KeyManagerClientException e) {
-            handleException("Cannot create OAuth application  : " + applicationName, e);
+            handleException(
+                    "Can not create OAuth application  : " + oauthClientName + " for application: " + applicationName
+                            + " and key type: " + keyType, e);
             return null;
         }
     }
