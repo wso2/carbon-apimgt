@@ -11825,16 +11825,6 @@ public final class APIUtil {
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
-    
-    public static String getconvertedId(Identifier apiId) {
-        String id = null;
-        if (apiId instanceof APIIdentifier) {
-            id = APIType.API + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
-        } else if (apiId instanceof APIProductIdentifier) {
-            id = APIType.API_PRODUCT + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
-        }
-        return id;
-    }
 
     public static String[] getFilteredUserRoles(String username) throws APIManagementException {
         String[] userRoles = APIUtil.getListOfRoles(username);
