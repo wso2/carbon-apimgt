@@ -1597,7 +1597,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
 
-            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+            }
+                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                 boolean isAPIPublished = false;
                 // gatewayType check is required when API Management is deployed on other servers to avoid synapse
                 if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
@@ -1629,11 +1630,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
                             }
                         }
+                    } else {
+                        log.debug("Gateway is not existed for the current API Provider");
                     }
                 }
 
+            //If gateway(s) exist, remove resource paths saved on the cache.
 
-            if (isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
+            if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
 
 
@@ -3560,31 +3564,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        return gatewayManager.isAPIDeployed(api);
-    }
-
-    private void deployToGateWay(API api) throws APIManagementException {
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.deployToGateway(api, tenantDomain);
-    }
-
-    private void deployToGateWay(APIProduct apiproduct) throws APIManagementException {
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.deployToGateway(apiproduct, tenantDomain);
-    }
-
-    private void unDeployFromGateWay(API api) throws APIManagementException {
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.removeFromGateway(api, tenantDomain);
-    }
-
-    private void unDeployFromGateway(APIProduct apiproduct) throws APIManagementException {
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(apiproduct, tenantDomain);
+        return gatewayManager.isAPIPublished(api, tenantDomain);
     }
 
     private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
