@@ -268,8 +268,6 @@ public class GatewayArtifactsMgtDAO {
         return false;
     }
 
-
-
     private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
