@@ -267,7 +267,6 @@ public class APIControllerUtil {
      *
      * @param importedApiDto API DTO object to be updated
      * @param policies       policies with the values
-     * @throws APIManagementException If an error occurs when setting policies
      */
     private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto) {
         JsonArray definedPolicies = policies.getAsJsonArray();
