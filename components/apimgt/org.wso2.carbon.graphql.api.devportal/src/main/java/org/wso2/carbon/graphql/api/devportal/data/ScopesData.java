@@ -27,13 +27,13 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.replaceEm
 
 public class ScopesData {
 
-    public List<ScopesDTO> getScopesData(String Id) throws APIManagementException, GovernanceException , UserStoreException {
-        //RegistryData registryData = new RegistryData();
-//        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
+    public List<ScopesDTO> getScopesData(String Id) throws APIManagementException{
 
         ArtifactData artifactData = new ArtifactData();
 
         List<String> identifierParams = artifactData.getApiIdentifireParams(Id);
+
+
 
         String apiVersion = identifierParams.get(2);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
         String providerName = identifierParams.get(1);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
@@ -59,38 +59,6 @@ public class ScopesData {
 
             scopeData.add(new ScopesDTO(key,name,role,description));
         }
-
-
-        //////////
-        //String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-//        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-//                .getTenantId(tenantDomainName);
-//        try (Connection connection = APIMgtDBUtil.getConnection()) {
-//            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.GET_SCOPE_SQL)) {
-//                preparedStatement.setString(1, apiName);
-//                preparedStatement.setInt(2, tenantId);
-//                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-//                    if (resultSet.next()) {
-//                        String displayName = resultSet.getString("DISPLAY_NAME");
-//                        String description = resultSet.getString("DESCRIPTION");
-//                        Scope scope = new Scope();
-//                        scope.setName(displayName);
-//                        scope.setDescription(description);
-//                        scope.setKey(name);
-//                        scope.setRoles(String.join(",", getScopeBindings(connection, name, tenantId)));
-//                        return scope;
-//                    }
-//                }
-//            } catch (SQLException e) {
-//                String msg = String.format("Error while retrieving scope %s from db", name);
-//                log.error(msg, e);
-//                throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
-//            }
-//        } catch (SQLException e) {
-//            throw new APIManagementException("Error while retrieving database connection", e,
-//                    ExceptionCodes.INTERNAL_ERROR);
-//        }
-//        return null;
 
         return  scopeData;
     }
