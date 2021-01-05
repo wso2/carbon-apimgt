@@ -10741,10 +10741,10 @@ public class ApiMgtDAO {
                           .ThrottleSQLConstants.DELETE_CONDITION_GROUP_SQL);
                   PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
                 if (selectQuery.equals(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL)) {
-                    selectStatement .setString(1, policy.getPolicyName());
-                    selectStatement .setInt(2, policy.getTenantId());
+                    selectStatement.setString(1, policy.getPolicyName());
+                    selectStatement.setInt(2, policy.getTenantId());
                 } else {
-                    selectStatement .setString(1, policy.getUUID());
+                    selectStatement.setString(1, policy.getUUID());
                 }
                 try (ResultSet resultSet = selectStatement.executeQuery()) {
                     if (resultSet.next()) {
