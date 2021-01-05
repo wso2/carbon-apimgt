@@ -21,14 +21,12 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import Grid from '@material-ui/core/Grid';
+import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
-import Help from '@material-ui/icons/Help';
-import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Alert from 'AppComponents/Shared/Alert';
-import Configurations from 'Config';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -63,11 +61,22 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(5),
     },
     buttonStyle: {
-        color: theme.custom.serviceCatalog.onboarding.buttonText,
-        borderColor: theme.custom.serviceCatalog.onboarding.buttonBorder,
-    },
-    docLinkStyle: {
         paddingLeft: theme.spacing(1),
+    },
+    head: {
+        paddingBottom: theme.spacing(2),
+        fontWeight: 200,
+    },
+    content: {
+        paddingBottom: theme.spacing(2),
+    },
+    contentSpacing: {
+        padding: theme.spacing(3),
+        paddingTop: theme.spacing(2),
+        width: '100%',
+    },
+    buttonLeft: {
+        marginRight: theme.spacing(1),
     },
 }));
 
@@ -106,121 +115,50 @@ function Onboarding(props) {
     };
 
     return (
-        <div className={classes.root}>
-            <Grid container direction='row' spacing={10}>
-                <Grid item md={11}>
-                    <Typography className={classes.heading} variant='h4'>
+        <div className={classes.contentSpacing}>
+            <InlineMessage type='info' height={140} elevation={0}>
+                <div className={classes.contentWrapper}>
+                    <Typography variant='h5' component='h3' className={classes.head}>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.heading'
-                            defaultMessage='Service Catalog'
+                            id='ServiceCatalog.Listing.Onboarding.welcome.msg'
+                            defaultMessage='Welcome to WSO2 API Manager'
                         />
                     </Typography>
-                </Grid>
-                <Grid item md={1}>
-                    <Tooltip
-                        placement='right'
-                        title={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Onboarding.help.tooltip'
-                                defaultMessage='The Service Catalog enables API-first Integration'
-                            />
-                        )}
-                    >
-                        <div className={classes.helpDiv}>
-                            <Help className={classes.helpIcon} />
-                        </div>
-                    </Tooltip>
-                </Grid>
-            </Grid>
-            <hr className={classes.horizontalDivider} />
-            <Grid container direction='row'>
-                <Grid item md={2} />
-                <Grid item md={4}>
-                    <div align='center'>
-                        <img
-                            className={classes.preview}
-                            src={Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'}
-                            alt='Get Started'
-                        />
-                    </div>
-                    <Typography className={classes.heading} variant='h4' align='center'>
+                    <Typography component='p' className={classes.content}>
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.Heading1'
-                            defaultMessage='Learn to write your first'
+                            id='ServiceCatalog.Listing.Onboarding.welcome.description'
+                            defaultMessage={
+                                'The Service Catalog enables API-First Integration.'
+                                + ' Through this, integration services are made discoverable to the'
+                                + ' API Management layer so that API proxies can directly be created using them.'
+                            }
                         />
                     </Typography>
-                    <Typography align='center' className={classes.space}>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.Heading1.subHeading'
-                            defaultMessage='Integration Service'
-                        />
-                    </Typography>
-                    {/* <Typography align='center' className={classes.spacing}>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.description1'
-                            defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
-                            + ' all aspects of API Management.'}
-                        />
-                    </Typography> */}
-                    <div align='center'>
+                    <div className={classes.actions}>
                         <Link
                             target='_blank'
                             style={{ textDecoration: 'none' }}
                             href={'https://ei.docs.wso2.com/en/latest/'
                             + 'micro-integrator/develop/integration-development-kickstart/'}
                         >
-                            <Button variant='contained' size='small' color='primary'>
-                                <Typography className={classes.heading} variant='h6'>
-                                    <FormattedMessage
-                                        id='ServiceCatalog.Listing.Onboarding.get.started'
-                                        defaultMessage='Get Started'
-                                    />
-                                </Typography>
-                                <OpenInNewIcon className={classes.docLinkStyle} />
+                            <Button variant='contained' size='small' color='primary' className={classes.buttonLeft}>
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Onboarding.get.started'
+                                    defaultMessage='Get Started'
+                                />
+                                <OpenInNewIcon size='small' className={classes.buttonStyle} />
                             </Button>
                         </Link>
-                    </div>
-                </Grid>
-                <Grid item md={4}>
-                    <div align='center'>
-                        <img
-                            className={classes.preview}
-                            src={Configurations.app.context + '/site/public/images/wso2-intg-service-sample-icon.svg'}
-                            alt='Add Sample Service'
-                        />
-                    </div>
-                    <Typography className={classes.heading} variant='h4' align='center'>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.Heading2'
-                            defaultMessage='Add a sample'
-                        />
-                    </Typography>
-                    <Typography align='center' className={classes.space}>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.Heading2.subHeading'
-                            defaultMessage='Integration Service'
-                        />
-                    </Typography>
-                    {/* <Typography align='center' className={classes.spacing}>
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.description2'
-                            defaultMessage={'From creating and publishing an API to securing, rate-limiting, addresses'
-                            + ' all aspects of API Management.'}
-                        />
-                    </Typography> */}
-                    <div align='center'>
                         <Button variant='contained' size='small' color='primary' onClick={handleOnClick}>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Onboarding.add.sample.service'
-                                    defaultMessage='Add Sample Service'
-                                />
-                            </Typography>
+                            <AddIcon size='small' />
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Onboarding.add.sample.service'
+                                defaultMessage='Add Sample Service'
+                            />
                         </Button>
                     </div>
-                </Grid>
-                <Grid item md={2} />
-            </Grid>
+                </div>
+            </InlineMessage>
         </div>
     );
 }
