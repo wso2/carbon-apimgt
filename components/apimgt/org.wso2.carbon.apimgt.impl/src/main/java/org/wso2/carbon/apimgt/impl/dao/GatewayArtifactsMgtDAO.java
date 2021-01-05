@@ -542,7 +542,7 @@ public class GatewayArtifactsMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway Artifact for label : " + label, e);
+            handleException("Failed to retrieve Gateway Artifact", e);
         }
 
         return apiRuntimeArtifactDtoList;
