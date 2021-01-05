@@ -1191,7 +1191,6 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiId.getUUID();
         } else {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
-            log.info("++++++templog+++++ OSA Def GET: uuid not set ");
         }
         try {
             definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);

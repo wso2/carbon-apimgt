@@ -5928,7 +5928,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         Organization org = new Organization(tenantDomain);
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
-        String[] roles = APIUtil.getListOfRoles(username);
+        String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, null, roles);
         try {
