@@ -4,6 +4,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
@@ -23,8 +25,16 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 import static org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantAwareUsername;
 
 public class ArtifactData {
@@ -134,6 +144,45 @@ public class ArtifactData {
             }
         }
         return allGenericArtifact;
+    }
+//    public static final String GET_API_VERSIONS = "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
+//    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+//        Set<String> versions = new HashSet<String>();
+//
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS)) {
+//            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+//            statement.setString(2, apiName);
+//            ResultSet resultSet = statement.executeQuery();
+//            while (resultSet.next()) {
+//                versions.add(resultSet.getString("API_VERSION"));
+//            }
+//        } catch (SQLException e) {
+//            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+//                    e);
+//        }
+//        return versions;
+//    }
+    public static final String GET_API_IDENTIFIRE_PARAMS = "SELECT API.API_NAME,API.API_PROVIDER,API.API_VERSION FROM AM_API API WHERE API.API_UUID = ? ";
+
+    public List<String> getApiIdentifireParams(String Id){
+        List<String> IdentifireParams = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(GET_API_IDENTIFIRE_PARAMS)) {
+            statement.setString(1, Id);
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                IdentifireParams.add(resultSet.getString("API_NAME"));
+                IdentifireParams.add(resultSet.getString("API_PROVIDER"));
+                IdentifireParams.add(resultSet.getString("API_VERSION"));
+            }
+        } catch (SQLException e) {
+
+        }
+
+        return IdentifireParams;
+
     }
 
 }

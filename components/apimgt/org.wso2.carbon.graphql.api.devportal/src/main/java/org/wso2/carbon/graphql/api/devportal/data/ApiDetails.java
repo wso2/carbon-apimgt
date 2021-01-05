@@ -341,11 +341,26 @@ public class ApiDetails {
     public Float getApiRating(String Id) throws GovernanceException, APIManagementException {
         ArtifactData artifactData = new ArtifactData();
 
-        String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
+        //Set<String> ratings = artifactData.getAPIVersions();
 
-        String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        //String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
 
+//        String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
+//        String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+
+//        Set<String> ratingset = artifactData.getAPIVersions(name,provider);
+//
+//        String x = "";
+//        for (String value : ratingset){
+//            x+=value;
+//
+//        }
+//        System.out.println(x);
+
+        List<String> IdentifireParams = artifactData.getApiIdentifireParams(Id);
+        String name = IdentifireParams.get(0);
+        String provider = IdentifireParams.get(1);
+        String version = IdentifireParams.get(2);
         APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
         int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
         Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);//APIUtil.getAverageRating(apiId);
