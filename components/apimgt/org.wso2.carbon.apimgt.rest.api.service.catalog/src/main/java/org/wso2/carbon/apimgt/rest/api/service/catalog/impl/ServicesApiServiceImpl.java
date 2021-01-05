@@ -11,13 +11,14 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ETagValueGenerator;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
@@ -90,7 +91,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH + UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
         File file = new File(pathToExportDir);
         file.mkdir();
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String exportedFileName = null;
         ExportArchive exportArchive = null;
 
@@ -99,7 +100,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         }
 
         try {
-            consumer = RestApiUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(username);
             FileBasedServicesImportExportManager importExportManager =
                     new FileBasedServicesImportExportManager(consumer, pathToExportDir);
             exportArchive = importExportManager.createArchiveFromExportedServices(RESOURCE_FOLDER_LOCATION,
@@ -147,7 +148,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             ifMatch = null;
         }
         APIConsumer consumer;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH
                 + UUID.randomUUID().toString();
         File file = new File(tempDirPath);
@@ -164,7 +165,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         try {
-            consumer = RestApiUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(username);
             FileBasedServicesImportExportManager importExportManager =
                     new FileBasedServicesImportExportManager(consumer, tempDirPath);
             importExportManager.importService(fileInputStream);
