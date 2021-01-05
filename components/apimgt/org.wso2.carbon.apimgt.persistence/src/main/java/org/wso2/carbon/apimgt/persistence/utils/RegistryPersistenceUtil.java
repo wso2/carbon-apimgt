@@ -1284,7 +1284,7 @@ public class RegistryPersistenceUtil {
                                                                         .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
                                                                         api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
         String wsdlResourcePathFile = APIConstants.API_WSDL_RESOURCE_LOCATION +
-                                        PersistenceUtil.createWsdlFileName(api.getId().getProviderName(),
+                                        createWsdlFileName(api.getId().getProviderName(),
                                                                         api.getId().getApiName(),
                                                                         api.getId().getVersion());
 
@@ -2044,7 +2044,7 @@ public class RegistryPersistenceUtil {
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
             try {
-                api.setEnvironmentList(PersistenceUtil.extractEnvironmentListForAPI(
+                api.setEnvironmentList(extractEnvironmentListForAPI(
                                                 artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG)));
             } catch (ParseException e) {
                 String msg = "Failed to parse endpoint config JSON of API: " + apiName + " " + apiVersion;

@@ -293,7 +293,8 @@ public class RegistrySearchUtil {
             log.debug("Admin user. no modifications to the query");
             return query;
         }
-        String criteria = PUBLISHER_ROLES + "=" + getUserRolesQuery(context.getRoles());
+        String criteria = PUBLISHER_ROLES + "="
+                + getUserRolesQuery(context.getRoles(), PersistenceUtil.getSkipRoles(context));
         if (query != null && !query.trim().isEmpty()) {
             criteria = criteria + "&" + query;
         }
@@ -309,7 +310,8 @@ public class RegistrySearchUtil {
             log.debug("Admin user. no modifications to the query");
             return query;
         }
-        String criteria = STORE_VIEW_ROLES + "=" + getUserRolesQuery(context.getRoles());
+        String criteria = STORE_VIEW_ROLES + "="
+                + getUserRolesQuery(context.getRoles(), PersistenceUtil.getSkipRoles(context));
         if (query != null && !query.trim().isEmpty()) {
             criteria = criteria + "&" + query;
         }
@@ -320,12 +322,12 @@ public class RegistrySearchUtil {
         return criteria;
     }
 
-    private static String getUserRolesQuery(String[] userRoles) {
+    private static String getUserRolesQuery(String[] userRoles, String skippedRoles) {
 
         StringBuilder rolesQuery = new StringBuilder();
         rolesQuery.append('(');
         rolesQuery.append(NULL_USER_ROLE_LIST);
-        String skipRolesByRegex = PersistenceUtil.getSkipRolesByRegex();
+        String skipRolesByRegex = skippedRoles;
         if (StringUtils.isNotEmpty(skipRolesByRegex)) {
             List<String> filteredUserRoles = new ArrayList<>(Arrays.asList(userRoles));
             String[] regexList = skipRolesByRegex.split(",");
