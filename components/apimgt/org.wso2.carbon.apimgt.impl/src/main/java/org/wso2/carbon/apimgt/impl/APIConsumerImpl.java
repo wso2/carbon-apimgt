@@ -3588,13 +3588,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setApplicationAttributes(null);
         }
         application.setUUID(UUID.randomUUID().toString());
-        String regex = "^[a-zA-Z0-9 ._-]*$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(application.getName());
-        if (!matcher.find()) {
-            handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
-        }
-
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
@@ -3723,13 +3716,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
             handleApplicationNameContainSpacesException("Application name " +
                     "cannot contain leading or trailing white spaces");
-        }
-
-        String regex = "^[a-zA-Z0-9 ._-]*$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(application.getName());
-        if (!matcher.find()) {
-            handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
         }
 
         Subscriber subscriber = application.getSubscriber();
