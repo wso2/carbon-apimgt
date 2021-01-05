@@ -58,8 +58,7 @@ public class DBRetriever implements ArtifactRetriever {
     protected GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
             ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                     .getGatewayArtifactSynchronizerProperties();
-    private String baseURL = eventHubConfigurationDto.getServiceUrl() +
-            APIConstants.INTERNAL_WEB_APP_EP ;
+    private String baseURL = eventHubConfigurationDto.getServiceUrl() +  APIConstants.INTERNAL_WEB_APP_EP ;
 
     @Override
     public void init() throws ArtifactSynchronizerException {
