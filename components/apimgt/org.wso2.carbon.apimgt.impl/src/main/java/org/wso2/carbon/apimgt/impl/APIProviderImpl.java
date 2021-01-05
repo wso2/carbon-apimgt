@@ -839,7 +839,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to add API
      */
-    @Override
+
     public API addAPI(API api) throws APIManagementException {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
@@ -6432,7 +6432,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 uuid = apiId.getUUID();
             } else {
                 uuid = apiMgtDAO.getUUIDFromIdentifier(apiId);
-                log.info("++++++templog+++++ OSA Def identifier Save: uuid not set ");
             }
             saveSwaggerDefinition(uuid, jsonText);
         } finally {
@@ -6452,7 +6451,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiId = api.getId().getUUID();
             } else {
                 apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
-                log.info("++++++templog+++++ OSA Def API Save: uuid not set ");
             }
             saveSwaggerDefinition(apiId, jsonText);
 
@@ -10281,7 +10279,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
-
+            checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, requestedTenantDomain, org, api);
            
@@ -10350,7 +10348,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
-                
+                checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /// populate relavant external info
                 // environment
                 String environmentString = null;
@@ -10655,6 +10653,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } else {
                 throw new APIManagementException("Error while saving mediation policy ", e);
             }
+        }
+
+    }
+    
+    protected void checkAccessControlPermission(String userNameWithTenantDomain, String accessControlProperty,
+            String publisherAccessControlRoles) throws APIManagementException {
+
+        // String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+
+        if (accessControlProperty == null || accessControlProperty.trim().isEmpty()
+                || accessControlProperty.equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+            if (log.isDebugEnabled()) {
+                log.debug("API does not have any access control restriction");
+            }
+            return;
+        }
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
+            return;
+        }
+
+        if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
+            String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+            if (log.isDebugEnabled()) {
+                log.debug("API has restricted access to creators and publishers with the roles : "
+                        + Arrays.toString(accessControlRoleList));
+            }
+            String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+            }
+            for (String role : accessControlRoleList) {
+                if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
+                        && APIUtil.compareRoleList(userRoleList, role)) {
+                    return;
+                }
+            }
+
+            throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
         }
 
     }
