@@ -77,7 +77,6 @@ public class DBSaver implements ArtifactSaver {
         } catch (APIManagementException e) {
             throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", e);
         }
-
     }
 
     @Override

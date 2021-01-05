@@ -197,6 +197,5 @@ public class GatewayStartupListener implements ServerStartupObserver, Runnable, 
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
             webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
         }
-
     }
 }
