@@ -249,7 +249,9 @@ public class InMemoryAPIDeployer {
         if (artifactRetriever != null) {
             try {
                 apiAttributes = artifactRetriever.retrieveAttributes(apiName, version, tenantDomain);
-                log.debug("API Attributes retrieved for " + apiName + "  from storage");
+                if (debugEnabled) {
+                    log.debug("API Attributes retrieved for " + apiName + "  from storage");
+                }
             } catch (ArtifactSynchronizerException e) {
                 String msg = "Error retrieving artifacts of " + apiName + " from storage";
                 log.error(msg, e);
