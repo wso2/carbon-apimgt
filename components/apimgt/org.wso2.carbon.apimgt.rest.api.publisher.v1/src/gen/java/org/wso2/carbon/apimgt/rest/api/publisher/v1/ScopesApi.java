@@ -115,7 +115,7 @@ ScopesApiService delegate = new ScopesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Shared Scope list is returned. ", response = ScopeListDTO.class),
         @ApiResponse(code = 500, message = "Internal server error while retrieving shared scope list", response = ErrorDTO.class) })
-    public Response getSharedScopes( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+    public Response getSharedScopes( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="80") @DefaultValue("80") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
         return delegate.getSharedScopes(limit, offset, securityContext);
     }
 
