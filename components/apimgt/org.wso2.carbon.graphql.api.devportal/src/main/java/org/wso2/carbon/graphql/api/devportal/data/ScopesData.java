@@ -33,10 +33,11 @@ public class ScopesData {
 
         ArtifactData artifactData = new ArtifactData();
 
+        List<String> identifierParams = artifactData.getApiIdentifireParams(Id);
 
-        String apiVersion = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        String providerName = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        String apiName = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = identifierParams.get(2);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String providerName = identifierParams.get(1);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        String apiName = identifierParams.get(0);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
 
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
         String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));

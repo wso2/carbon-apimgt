@@ -27,6 +27,8 @@ public class TierData {
 
         ArtifactData artifactData = new ArtifactData();
 
+        //List<String> tierParams = artifactData.getApiIdentifireParams(Id);
+
         String  apiname = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
         String  provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
         String  version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);

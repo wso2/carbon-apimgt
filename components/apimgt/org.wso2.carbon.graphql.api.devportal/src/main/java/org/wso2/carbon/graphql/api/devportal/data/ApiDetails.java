@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.graphql.api.devportal.ApisGet;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
@@ -49,31 +50,34 @@ public class ApiDetails {
         ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
 
 
-        //ArtifactData artifactData = new ArtifactData();
+        ArtifactData artifactData = new ArtifactData();
+
+        GenericArtifact[] artifacts = artifactData.getAllApis();;
 
         //ApisGet apisGet = new ApisGet();
         //List<Object> allMatchedApis = apisGet.getAllapiData();
         List<Api> apiDTOList = new ArrayList<Api>();
 
-        for (int i =0;i<getApiCount();i++){
 
-            ArtifactData artifactData = new ArtifactData();
+        for (GenericArtifact artifact : artifacts) {
+
+            //ArtifactData artifactData = new ArtifactData();
             //String Id = artifactData.getTotalApisCount().
 
             //API api = (API) allMatchedApis.get(i);
             //APIIdentifier Id = api.getId();
-            List<String> allIds = StringListtoArray();
+            //List<String> allIds = StringListtoArray();
 
-            String Id = allIds.get(i);
-            String id = artifactData.getDevportalApis(Id).getId();;
+           // String Id = allIds.get(i);
+            String id = artifact.getId();
 
 
 
-            String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
-            String description = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION); //
-            String context = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-            String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String name = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String description = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION); //
+            String context = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+            String version = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            String provider = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
 
 
 
@@ -82,12 +86,12 @@ public class ApiDetails {
             Organization org = new Organization(TenantDomain);
             String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id); //
 
-            String type = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE);
-            String transport = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS); //
+            String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+            String transport = artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS); //
 
 
 
-            String thumbnailUrl  = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
+            String thumbnailUrl  = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
             boolean hasthumbnail = HasThumbnail(thumbnailUrl);//
 
             //Map<String, String> additionalProperties = ""; //
@@ -95,15 +99,15 @@ public class ApiDetails {
 
             String environments = getEnvironmentList(id);////
 
-            String wsdUrl   = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_WSDL);;
-            String status  = getLcStateFromArtifact(artifactData.getDevportalApis(Id));
+            String wsdUrl   = artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL);;
+            String status  = getLcStateFromArtifact(artifact);
 
 
 
 
             boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(id);////
 
-            String  tiers = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_TIER);
+            String  tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
@@ -115,8 +119,8 @@ public class ApiDetails {
             boolean isDefault = Boolean.parseBoolean(artifactData.getDevportalApis(id).getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION));
 
-            String authorizationHeader = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER);;
-            String apiSecurity = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+            String authorizationHeader = artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER);;
+            String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
 
             //String tags = ""; //
             Registry registry = artifactData.getRegistry();
@@ -143,12 +147,12 @@ public class ApiDetails {
 
 
 
-            String categories = getCatogories(getAPICategoriesFromAPIGovernanceArtifact(artifactData.getDevportalApis(id)));
+            String categories = getCatogories(getAPICategoriesFromAPIGovernanceArtifact(artifact));
 
 
 //            String categories = "";
 //            String keyManagers = "";
-            String keyManagers = artifactData.getDevportalApis(id).getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+            String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
             List<String> keyManagersList = null;
             if (StringUtils.isNotEmpty(keyManagers)) {
                 keyManagersList =  new Gson().fromJson(keyManagers, List.class);
@@ -316,57 +320,22 @@ public class ApiDetails {
     public int getApiCount() throws UserStoreException, RegistryException, APIManagementException {
 
        ArtifactData artifactData = new ArtifactData();
-//
-//        List<GovernanceArtifact> governanceArtifacts = artifactData.searchdDevPortalAPIs();
-//
-//        return governanceArtifacts.size();
-//        ApisGet apisGet = new ApisGet();
-//        List<Object> allMatchedApis = apisGet.getAllapiData();
-//
-//        return allMatchedApis.size();
-
-        return artifactData.getTotalApisCount().length;
+       return artifactData.getAllApis().length;
     }
 
-    public List<String> StringListtoArray() throws UserStoreException, RegistryException, APIManagementException{
-
+    public Float getApiRating(String Id) throws APIManagementException {
         ArtifactData artifactData = new ArtifactData();
-        String[] allIds = artifactData.getTotalApisCount();
-
-        List<String> IdList = Arrays.asList(allIds);
-
-        return IdList;
-    }
-
-    public Float getApiRating(String Id) throws GovernanceException, APIManagementException {
-        ArtifactData artifactData = new ArtifactData();
-
-        //Set<String> ratings = artifactData.getAPIVersions();
-
-        //String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
-
-//        String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-//        String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-
-//        Set<String> ratingset = artifactData.getAPIVersions(name,provider);
-//
-//        String x = "";
-//        for (String value : ratingset){
-//            x+=value;
-//
-//        }
-//        System.out.println(x);
-
         List<String> IdentifireParams = artifactData.getApiIdentifireParams(Id);
         String name = IdentifireParams.get(0);
         String provider = IdentifireParams.get(1);
         String version = IdentifireParams.get(2);
         APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
         int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
-        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);//APIUtil.getAverageRating(apiId);
+        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);
 
         return rating;
     }
+
 
 
     public Api getApi(String Id) throws APIManagementException, RegistryException, OASPersistenceException, UserStoreException {

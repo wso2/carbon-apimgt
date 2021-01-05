@@ -23,13 +23,19 @@ public class OperationData {
 
         ArtifactData artifactData = new ArtifactData();
 
-        String providerName = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        String apiName = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
-        String apiVersion = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        List<String> operationParams = artifactData.getApiIdentifireParams(Id);
+
+        String providerName = operationParams.get(1);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        String apiName = operationParams.get(0);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = operationParams.get(2);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
 
+        String type = operationParams.get(3);
+
+        //artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE
+
         List<OperationDTO> operationList = null;
-        if (APIConstants.APITransportType.GRAPHQL.toString().equals(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
+        if (APIConstants.APITransportType.GRAPHQL.toString().equals(type)) {
             operationList = new ArrayList<>();
             Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiIdentifier);
             for (URITemplate template : uriTemplates) {

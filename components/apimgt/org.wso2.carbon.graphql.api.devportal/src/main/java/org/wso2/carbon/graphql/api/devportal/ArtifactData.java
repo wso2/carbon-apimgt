@@ -119,7 +119,7 @@ public class ArtifactData {
         return registry;
     }
 
-    public String[] getTotalApisCount() throws APIManagementException, RegistryException, UserStoreException {
+    public GenericArtifact[] getAllApis() throws APIManagementException, RegistryException, UserStoreException {
         //ArtifactData artifactData = new ArtifactData();
 
         boolean tenantFlowStarted = false;
@@ -127,6 +127,7 @@ public class ArtifactData {
         String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
         Organization org = new Organization(TenantDomain);
         String[] allGenericArtifact=null;
+        GenericArtifact[] artifacts = null;
 
         try {
             Registry registry = getRegistry();
@@ -134,6 +135,7 @@ public class ArtifactData {
                     APIConstants.API_KEY);
 
             allGenericArtifact = artifactManager.getAllGenericArtifactIds();
+            artifacts = artifactManager.getAllGenericArtifacts();
 
 
         } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e) {
@@ -143,7 +145,7 @@ public class ArtifactData {
                 RegistryPersistenceUtil.endTenantFlow();
             }
         }
-        return allGenericArtifact;
+        return artifacts;
     }
 //    public static final String GET_API_VERSIONS = "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
 //    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
@@ -163,7 +165,7 @@ public class ArtifactData {
 //        }
 //        return versions;
 //    }
-    public static final String GET_API_IDENTIFIRE_PARAMS = "SELECT API.API_NAME,API.API_PROVIDER,API.API_VERSION FROM AM_API API WHERE API.API_UUID = ? ";
+    public static final String GET_API_IDENTIFIRE_PARAMS = "SELECT API.API_NAME,API.API_PROVIDER,API.API_VERSION,API.API_TYPE FROM AM_API API WHERE API.API_UUID = ? ";
 
     public List<String> getApiIdentifireParams(String Id){
         List<String> IdentifireParams = new ArrayList<>();
@@ -176,6 +178,8 @@ public class ArtifactData {
                 IdentifireParams.add(resultSet.getString("API_NAME"));
                 IdentifireParams.add(resultSet.getString("API_PROVIDER"));
                 IdentifireParams.add(resultSet.getString("API_VERSION"));
+                IdentifireParams.add(resultSet.getString("API_TYPE"));
+
             }
         } catch (SQLException e) {
 

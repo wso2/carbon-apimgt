@@ -193,7 +193,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             e.printStackTrace();
         } catch (APIPersistenceException e) {
             e.printStackTrace();
-       } */ 
+       } */
        this.username = username;
     }
 
