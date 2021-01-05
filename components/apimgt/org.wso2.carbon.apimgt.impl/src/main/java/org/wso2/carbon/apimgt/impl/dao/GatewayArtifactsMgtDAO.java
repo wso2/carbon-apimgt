@@ -517,4 +517,34 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifacts()
+            throws APIManagementException {
+
+        String query = SQLConstants.RETRIEVE_ARTIFACTS;
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
+                    apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
+                    apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
+                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
+                    apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
+                    apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
+                    apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
+                    apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
+                    InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
+                    apiRuntimeArtifactDto.setArtifact(artifact);
+                    apiRuntimeArtifactDto.setFile(true);
+                    apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Gateway Artifact for label : " + label, e);
+        }
+
+        return apiRuntimeArtifactDtoList;
+    }
 }
