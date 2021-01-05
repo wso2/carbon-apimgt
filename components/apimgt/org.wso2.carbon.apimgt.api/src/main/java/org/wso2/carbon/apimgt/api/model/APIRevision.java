@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class APIRevision implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -27,6 +28,7 @@ public class APIRevision implements Serializable {
     private String description;
     private String createdBy;
     private String createdTime;
+    private List<APIRevisionDeployment>  apiRevisionDeploymentList;
 
     public int getId() {
         return id;
@@ -74,5 +76,13 @@ public class APIRevision implements Serializable {
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public List<APIRevisionDeployment> getApiRevisionDeploymentList() {
+        return apiRevisionDeploymentList;
+    }
+
+    public void setApiRevisionDeploymentList(List<APIRevisionDeployment> apiRevisionDeploymentList) {
+        this.apiRevisionDeploymentList = apiRevisionDeploymentList;
     }
 }

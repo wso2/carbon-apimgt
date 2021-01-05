@@ -8888,6 +8888,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public String addAPIRevision(APIRevision apiRevision) throws APIManagementException {
+        int revisionCountPerAPI = apiMgtDAO.getRevisionCountByAPI(apiRevision.getApiUUID());
+        if (revisionCountPerAPI > 4) {
+            String errorMessage = "Maximum number of revisions per API has reached. " +
+                    "Need to remove stale revision to create a new Revision for API with API UUID:"
+                    + apiRevision.getApiUUID();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
         int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
         apiRevision.setId(revisionId);
         APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
@@ -8931,7 +8939,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String revisionUUID = null;
         String apiPath = APIUtil.getAPIPath(apiId);
         int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
-        String apiSourcePath = apiPath.substring(0, prependIndex );
+        String apiSourcePath = apiPath.substring(0, prependIndex);
         String revisionTargetPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiUUID +
                 RegistryConstants.PATH_SEPARATOR + revisionId +
@@ -9028,8 +9036,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIRevisionDeployment getAPIRevisionDeployment(String name, String type) throws APIManagementException {
-         return apiMgtDAO.getAPIRevisionDeploymentByNameAndType(name,type);
+    public APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException {
+         return apiMgtDAO.getAPIRevisionDeploymentByName(name);
     }
 
     @Override
@@ -9065,7 +9073,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         api.setEnvironments(environmentsToRemove);
-        Map<String, String> failedEnvironment = gatewayManager.removeAPIRevisionFromGateway(api,tenantDomain);
+        Map<String, String> failedEnvironment = gatewayManager.removeAPIRevisionFromGateway(api, tenantDomain);
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
     }
 
@@ -9088,7 +9096,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevisionId));
         }
-        restoreAPIRevisionRegistryArtifacts(apiId,apiRevision,apiIdentifier);
+        restoreAPIRevisionRegistryArtifacts(apiId, apiRevision, apiIdentifier);
         apiMgtDAO.restoreAPIRevision(apiRevision);
     }
 
@@ -9104,7 +9112,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(apiId);
         int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
-        String apiSourcePath = apiPath.substring(0, prependIndex );
+        String apiSourcePath = apiPath.substring(0, prependIndex);
         String revisionTargetPath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiUUID +
                 RegistryConstants.PATH_SEPARATOR + apiRevision.getId() +
@@ -9114,7 +9122,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             registry.beginTransaction();
             registry.delete(apiSourcePath);
-            registry.copy(revisionTargetPath,apiSourcePath);
+            registry.copy(revisionTargetPath, apiSourcePath);
             Resource newAPIArtifact = registry.get(apiPath);
             newAPIArtifact.setUUID(apiUUID);
             registry.put(apiPath, newAPIArtifact);
@@ -9164,7 +9172,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevisionId));
         }
-        deleteAPIRevisionRegistryArtifacts(apiId,apiRevision,apiIdentifier);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = getAPIRevisionDeploymentList(apiRevisionId);
+        if (apiRevisionDeploymentsResponse.size() != 0) {
+            String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway." +
+                    "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "
+                    + apiRevision.getRevisionUUID();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+        deleteAPIRevisionRegistryArtifacts(apiId, apiRevision, apiIdentifier);
         apiMgtDAO.deleteAPIRevision(apiRevision);
     }
 

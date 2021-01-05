@@ -25,7 +25,6 @@ public class APIRevisionDeployment implements Serializable {
     private int id;
     private String revisionUUID;
     private String deployment;
-    private String type;
     private boolean isDisplayOnDevportal;
     private String deployedTime;
 
@@ -51,14 +50,6 @@ public class APIRevisionDeployment implements Serializable {
 
     public void setDeployment(String deployment) {
         this.deployment = deployment;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public boolean isDisplayOnDevportal() {

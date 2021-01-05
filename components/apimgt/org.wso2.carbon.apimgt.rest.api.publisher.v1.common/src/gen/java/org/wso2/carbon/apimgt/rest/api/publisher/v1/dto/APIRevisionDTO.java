@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,44 +24,45 @@ import javax.validation.Valid;
 
 public class APIRevisionDTO   {
   
-    private Integer id = null;
-    private String uuid = null;
+    private String key = null;
+    private String id = null;
     private String description = null;
     private java.util.Date createdTime = null;
     private APIRevisionAPIInfoDTO apiInfo = null;
+    private List<APIRevisionDeploymentDTO> deploymentInfo = new ArrayList<APIRevisionDeploymentDTO>();
 
   /**
    **/
-  public APIRevisionDTO id(Integer id) {
-    this.id = id;
+  public APIRevisionDTO key(String key) {
+    this.key = key;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "")
-  @JsonProperty("id")
-  public Integer getId() {
-    return id;
+  @ApiModelProperty(example = "REVISION 1", value = "")
+  @JsonProperty("key")
+  public String getKey() {
+    return key;
   }
-  public void setId(Integer id) {
-    this.id = id;
+  public void setKey(String key) {
+    this.key = key;
   }
 
   /**
    **/
-  public APIRevisionDTO uuid(String uuid) {
-    this.uuid = uuid;
+  public APIRevisionDTO id(String id) {
+    this.id = id;
     return this;
   }
 
   
   @ApiModelProperty(example = "c26b2b9b-4632-4ca4-b6f3-521c8863990c", value = "")
-  @JsonProperty("uuid")
-  public String getUuid() {
-    return uuid;
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**
@@ -113,6 +117,24 @@ public class APIRevisionDTO   {
     this.apiInfo = apiInfo;
   }
 
+  /**
+   **/
+  public APIRevisionDTO deploymentInfo(List<APIRevisionDeploymentDTO> deploymentInfo) {
+    this.deploymentInfo = deploymentInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("deploymentInfo")
+  public List<APIRevisionDeploymentDTO> getDeploymentInfo() {
+    return deploymentInfo;
+  }
+  public void setDeploymentInfo(List<APIRevisionDeploymentDTO> deploymentInfo) {
+    this.deploymentInfo = deploymentInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -123,16 +145,17 @@ public class APIRevisionDTO   {
       return false;
     }
     APIRevisionDTO apIRevision = (APIRevisionDTO) o;
-    return Objects.equals(id, apIRevision.id) &&
-        Objects.equals(uuid, apIRevision.uuid) &&
+    return Objects.equals(key, apIRevision.key) &&
+        Objects.equals(id, apIRevision.id) &&
         Objects.equals(description, apIRevision.description) &&
         Objects.equals(createdTime, apIRevision.createdTime) &&
-        Objects.equals(apiInfo, apIRevision.apiInfo);
+        Objects.equals(apiInfo, apIRevision.apiInfo) &&
+        Objects.equals(deploymentInfo, apIRevision.deploymentInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, uuid, description, createdTime, apiInfo);
+    return Objects.hash(key, id, description, createdTime, apiInfo, deploymentInfo);
   }
 
   @Override
@@ -140,11 +163,12 @@ public class APIRevisionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIRevisionDTO {\n");
     
+    sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
+    sb.append("    deploymentInfo: ").append(toIndentedString(deploymentInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
