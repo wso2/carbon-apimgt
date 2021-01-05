@@ -76,11 +76,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
         }
-        if (api != null) {
-            return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, format, preserveStatus,
-                    preserveDocs);
-        }
-        return null;
+        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, format, preserveStatus,
+                preserveDocs);
     }
 
     @Override
