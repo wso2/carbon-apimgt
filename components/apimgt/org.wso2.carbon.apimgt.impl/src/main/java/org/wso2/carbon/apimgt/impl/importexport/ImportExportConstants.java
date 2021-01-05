@@ -111,17 +111,29 @@ public final class ImportExportConstants {
     // Sequences resource
     public static final String SEQUENCES_RESOURCE = "Sequences";
 
+    // Sequence location post fix
+    public static final String SEQUENCE_LOCATION_POSTFIX = "-sequence";
+
+    // Location of the in sequence
+    public static final String IN_SEQUENCE_PREFIX = "in";
+
+    // Location of the out sequence
+    public static final String OUT_SEQUENCE_PREFIX = "out";
+
+    // Location of the fault sequence
+    public static final String FAULT_SEQUENCE_PREFIX = "fault";
+
     // Location of the in sequence
     public static final String IN_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
-            + File.separator + "in-sequence" + File.separator;
+            + File.separator + IN_SEQUENCE_PREFIX + SEQUENCE_LOCATION_POSTFIX + File.separator;
 
     // Location of the out sequence
     public static final String OUT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
-            + File.separator + "out-sequence" + File.separator;
+            + File.separator + OUT_SEQUENCE_PREFIX + SEQUENCE_LOCATION_POSTFIX + File.separator;
 
-    //Location of the fault sequence
+    // Location of the fault sequence
     public static final String FAULT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
-            + File.separator + "fault-sequence" + File.separator;
+            + File.separator + FAULT_SEQUENCE_PREFIX + SEQUENCE_LOCATION_POSTFIX + File.separator;
 
     public static final String CERTIFICATE_CONTENT_JSON_KEY = "certificate";
 
@@ -172,6 +184,7 @@ public final class ImportExportConstants {
     public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "mutualSslCerts";
     public static final String ENDPOINT_CERTIFICATES_FIELD = "certs";
     public static final String ENDPOINT_SECURITY_FIELD = "security";
+    public static final String POLICIES_FIELD = "policies";
     public static final String ROUTING_POLICY_FIELD = "endpointRoutingPolicy";
     public static final String ENDPOINTS_FIELD = "endpoints";
     public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
@@ -250,4 +263,9 @@ public final class ImportExportConstants {
     public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
             CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "client_certificates";
 
+    //Deployment directory related constants
+    public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";
+    public static final String DEPLOYMENT_DIRECTORY= File.separator + DEPLOYMENT_DIRECTORY_NAME;
+    public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
+    public static final String API_PARAMS_FILE_NAME = "api_params.yaml";
 }

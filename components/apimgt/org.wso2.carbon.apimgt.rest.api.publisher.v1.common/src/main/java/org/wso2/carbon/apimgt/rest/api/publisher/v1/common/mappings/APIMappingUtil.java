@@ -817,6 +817,11 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
+        return fromAPItoDTO(model, false);
+    }
+
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials) throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String uuid = "uuid";
         String path = "path";
@@ -878,7 +883,7 @@ public class APIMappingUtil {
                                     .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
                             if (StringUtils.isNotEmpty(clientSecret)) {
                                 productionEndpointSecurity.put(APIConstants
-                                        .OAuthConstants.OAUTH_CLIENT_SECRET,
+                                                .OAuthConstants.OAUTH_CLIENT_SECRET,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
                             }
                         }
@@ -916,7 +921,7 @@ public class APIMappingUtil {
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                     }
                     JSONObject jsonObject = handleEndpointSecurity(model,
-                            (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY));
+                            (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY), preserveCredentials);
                     endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, jsonObject);
                 }
                 dto.setEndpointConfig(endpointConfigJson);
@@ -2718,10 +2723,10 @@ public class APIMappingUtil {
         }
     }
 
-    private static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity) throws APIManagementException {
+    private static JSONObject handleEndpointSecurity(API api, JSONObject endpointSecurity, boolean preserveCredentials) throws APIManagementException {
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                 .getProviderName()));
-        if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+        if (checkEndpointSecurityPasswordEnabled(tenantDomain) | preserveCredentials) {
             return endpointSecurity;
         }
         JSONObject endpointSecurityElement = new JSONObject();

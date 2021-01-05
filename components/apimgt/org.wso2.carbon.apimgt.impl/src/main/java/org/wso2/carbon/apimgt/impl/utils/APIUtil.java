@@ -11020,7 +11020,6 @@ public final class APIUtil {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
     }
 
     /**
@@ -11299,6 +11298,12 @@ public final class APIUtil {
         }
         if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_HYBRID)) {
             return map.get(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION)) {
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION);
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_SANDBOX)) {
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX);
         }
         return map.get(type);
     }

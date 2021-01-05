@@ -3376,7 +3376,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             File file = importExportAPI
-                    .exportAPI(apiId, name, version, providerName, preserveStatus, exportFormat, true);
+                    .exportAPI(apiId, name, version, providerName, preserveStatus, exportFormat, true, true);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {

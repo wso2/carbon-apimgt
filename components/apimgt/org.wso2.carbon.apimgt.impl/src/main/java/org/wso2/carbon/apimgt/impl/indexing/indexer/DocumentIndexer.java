@@ -47,7 +47,6 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.indexers.RXTIndexer;
 
-import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -130,13 +129,9 @@ public class DocumentIndexer extends RXTIndexer {
      */
     private void fetchRequiredDetailsFromAssociatedAPI(Registry registry, Resource documentResource,
             Map<String, List<String>> fields) throws RegistryException, APIManagementException {
-        Association apiAssociations[] = registry
-                .getAssociations(documentResource.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
-
-        //a document can have one api association
-        Association apiAssociation = apiAssociations[0];
-        String apiPath = apiAssociation.getSourcePath();
-
+        String pathToDocFile = documentResource.getPath();
+        String apiPath = pathToDocFile.substring(0, pathToDocFile.indexOf(APIConstants.DOC_DIR))
+                + APIConstants.API_KEY;
         if (registry.resourceExists(apiPath)) {
             Resource apiResource = registry.get(apiPath);
             GenericArtifactManager apiArtifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
@@ -169,29 +164,13 @@ public class DocumentIndexer extends RXTIndexer {
 
         String contentString = null;
         if (Documentation.DocumentSourceType.FILE.name().equals(sourceType)) {
-            Association fileAssociations[] = registry
-                    .getAssociations(documentResource.getPath(), APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
-            Association fileAssociation;
-
-            if (fileAssociations.length < 1) {
-                String error = "No document associated to API";
-                log.error(error);
-                throw new APIManagementException(error);
-            }
-
-            //a file document can have one file association
-            fileAssociation = fileAssociations[0];
-            String contentPath = fileAssociation.getDestinationPath();
-
-            if (!registry.resourceExists(contentPath)) {
-                String error = "API not found at " + contentPath;
-                log.error(error);
-                throw new APIManagementException(error);
-            }
-
-            Resource contentResource = registry.get(contentPath);
-
-            String fileName = ((ResourceImpl) contentResource).getName();
+            String path = documentArtifact.getAttribute(APIConstants.DOC_FILE_PATH);
+            int indexOfApimgt  = path.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+            String filepath = path.substring(indexOfApimgt);
+            Resource contentResource = registry.get(filepath);
+            int indexOfFiles = filepath.indexOf(APIConstants.DOCUMENT_FILE_DIR)
+                    + APIConstants.DOCUMENT_FILE_DIR.length() + 1;
+            String fileName = filepath.substring(indexOfFiles);
             String extension = FilenameUtils.getExtension(fileName);
             InputStream inputStream = null;
             try {
@@ -255,33 +234,29 @@ public class DocumentIndexer extends RXTIndexer {
 
 
         } else if (Documentation.DocumentSourceType.INLINE.name().equals(sourceType)) {
-            Association contentAssociations[] = registry
-                    .getAssociations(documentResource.getPath(), APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
-            Association contentAssociation;
+            String fileName = ((ResourceImpl) documentResource).getName();
+            String pathToDocFile = documentResource.getPath();
+            String pathToContent = pathToDocFile.substring(0, pathToDocFile.lastIndexOf(fileName))
+                    + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+                    RegistryConstants.PATH_SEPARATOR + fileName;
 
-            //an inline document can have one or no content associations
-            if (contentAssociations.length == 1) {
-                contentAssociation = contentAssociations[0];
-                String contentPath = contentAssociation.getDestinationPath();
+            if (registry.resourceExists(pathToContent)) {
+                Resource contentResource = registry.get(pathToContent);
 
-                if (registry.resourceExists(contentPath)) {
-                    Resource contentResource = registry.get(contentPath);
-
-                    InputStream instream = null;
-                    BufferedReader reader = null;
-                    String line;
-                    try {
-                        instream = contentResource.getContentStream();
-                        reader = new BufferedReader(new InputStreamReader(instream));
-                        StringBuilder contentBuilder = new StringBuilder();
-                        while ((line = reader.readLine()) != null) {
-                            contentBuilder.append(line);
-                        }
-                        contentString = contentBuilder.toString();
-                    } finally {
-                        if (reader != null) {
-                            IOUtils.closeQuietly(reader);
-                        }
+                InputStream instream = null;
+                BufferedReader reader = null;
+                String line;
+                try {
+                    instream = contentResource.getContentStream();
+                    reader = new BufferedReader(new InputStreamReader(instream));
+                    StringBuilder contentBuilder = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        contentBuilder.append(line);
+                    }
+                    contentString = contentBuilder.toString();
+                } finally {
+                    if (reader != null) {
+                        IOUtils.closeQuietly(reader);
                     }
                 }
             }

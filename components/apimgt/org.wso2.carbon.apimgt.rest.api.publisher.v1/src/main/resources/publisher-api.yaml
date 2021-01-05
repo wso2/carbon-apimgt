@@ -1369,7 +1369,16 @@ paths:
               properties:
                 file:
                   type: string
-                  description: WSDL definition as a file
+                  description: |
+                    WSDL definition as a file or archive
+
+                    **Sample cURL to Upload WSDL File**
+
+                    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@api.wsdl -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/import-wsdl"
+
+                    **Sample cURL to Upload WSDL Archive**
+
+                    curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file="@wsdl.zip;type=application/zip" -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/import-wsdl"
                   format: binary
                 url:
                   type: string
@@ -2455,27 +2464,13 @@ paths:
         200:
           description: |
             OK.
-            Successful response if the api name exist.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Document'
+            Successful response if the document name exists.
         400:
           $ref: '#/components/responses/BadRequest'
         404:
-          $ref: '#/components/responses/NotFound'
+          description: |
+            Not Found.
+            The specified resource does not exist.
       security:
       - OAuth2Security:
         - apim:api_create

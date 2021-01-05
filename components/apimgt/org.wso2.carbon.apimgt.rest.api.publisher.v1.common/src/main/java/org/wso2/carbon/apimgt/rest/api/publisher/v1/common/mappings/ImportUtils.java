@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
@@ -189,6 +190,13 @@ public class ImportUtils {
                 currentStatus = targetApi.getStatus();
                 // Set the status of imported API to current status of target API when updating
                 importedApiDTO.setLifeCycleStatus(currentStatus);
+
+                // If the set of operations are not set in the DTO, those should be set explicitly. Otherwise when
+                // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
+                // when updating an API from the UI there is at least one resource (operation) inside the DTO.
+                if (importedApiDTO.getOperations().isEmpty()) {
+                    setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
+                }
                 importedApi = PublisherCommonUtils
                         .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
             } else {
@@ -227,7 +235,7 @@ public class ImportUtils {
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addAPISequences(extractedFolderPath, importedApi, registry);
-            addAPISpecificSequences(extractedFolderPath, importedApi, registry);
+            addAPISpecificSequences(extractedFolderPath, registry, importedApi.getId());
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider, registry);
             addEndpointCertificates(extractedFolderPath, importedApi, apiProvider, tenantId);
             addSOAPToREST(extractedFolderPath, importedApi, registry);
@@ -278,6 +286,21 @@ public class ImportUtils {
     }
 
     /**
+     * This method sets the operations which were retrieved from the swagger definition to the API DTO.
+     *
+     * @param apiDto   API DTO
+     * @param response API Validation Response
+     * @throws APIManagementException If an error occurs when retrieving the URI templates
+     */
+    private static void setOperationsToDTO(APIDTO apiDto, APIDefinitionValidationResponse response)
+            throws APIManagementException {
+        List<URITemplate> uriTemplates = new ArrayList<>();
+        uriTemplates.addAll(response.getParser().getURITemplates(response.getJsonContent()));
+        List<APIOperationsDTO> apiOperationsDtos = APIMappingUtil.fromURITemplateListToOprationList(uriTemplates);
+        apiDto.setOperations(apiOperationsDtos);
+    }
+
+    /**
      * This method retrieves an API to overwrite in the current tenant domain.
      *
      * @param apiName             API Name
@@ -306,6 +329,73 @@ public class ImportUtils {
     }
 
     /**
+     * Process the extracted temporary directory in order to detect the flow and alter the directory structure
+     * according to the flow
+     *
+     * @param tempDirectory String of the temporary directory path value
+     * @return Path to the extracted directory
+     * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
+     *                                  extracting the content
+     */
+    public static String preprocessImportedArtifact(String tempDirectory) throws APIImportExportException {
+
+        String tempDirectoryAbsolutePath = tempDirectory + File.separator;
+        boolean isParamsFileAvailable = CommonUtil
+                .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME);
+        boolean isDeploymentDirectoryAvailable = CommonUtil
+                .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME);
+
+        //When api controller is provided with api_params.file
+        if (isParamsFileAvailable) {
+            if (!CommonUtil
+                    .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
+                throw new APIImportExportException("The source artifact is not provided properly");
+            } else {
+                String newExtractedFolderName = CommonUtil.extractArchive(
+                        new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
+                        tempDirectoryAbsolutePath);
+
+                //Copy api_params.yaml file to working directory
+                String srcParamsFilePath = tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME;
+                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
+
+                return tempDirectoryAbsolutePath + newExtractedFolderName;
+            }
+        }
+        //When api controller is provided with the "Deployment" directory
+        if (isDeploymentDirectoryAvailable) {
+            if (!CommonUtil
+                    .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
+                throw new APIImportExportException("The source artifact is not provided properly");
+            } else {
+                String newExtractedFolderName = CommonUtil.extractArchive(
+                        new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
+                        tempDirectoryAbsolutePath);
+
+                //Copy api_params.yaml file to working directory
+                String srcParamsFilePath =
+                        tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME + File.separator
+                                + ImportExportConstants.API_PARAMS_FILE_NAME;
+                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
+
+                //move deployment directory into working directory
+                String srcDeploymentDirectoryPath =
+                        tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME;
+                String destDeploymentDirectoryPath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME;
+                CommonUtil.copyDirectory(srcDeploymentDirectoryPath, destDeploymentDirectoryPath);
+
+                return tempDirectoryAbsolutePath + newExtractedFolderName;
+            }
+        }
+        return tempDirectory;
+    }
+
+    /**
      * Extract the imported archive to a temporary folder and return the folder path of it
      *
      * @param uploadedInputStream Input stream from the REST request
@@ -321,7 +411,7 @@ public class ImportUtils {
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
         String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
-        return absolutePath + extractedFolderName;
+        return preprocessImportedArtifact(absolutePath + extractedFolderName);
     }
 
     /**
@@ -843,7 +933,8 @@ public class ImportUtils {
     private static void addAPISequences(String pathToArchive, API importedApi, Registry registry) {
 
         String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
-        String inSequenceFileLocation = pathToArchive + ImportExportConstants.IN_SEQUENCE_LOCATION + inSequenceFileName;
+        String inSequenceFileLocation =
+                pathToArchive + ImportExportConstants.IN_SEQUENCE_LOCATION + inSequenceFileName;
         String regResourcePath;
 
         //Adding in-sequence, if any
@@ -878,45 +969,49 @@ public class ImportUtils {
      * sequence already exists, it is updated.
      *
      * @param pathToArchive Location of the extracted folder of the API
-     * @param importedApi   The imported API object
      * @param registry      Registry
+     * @param apiIdentifier API Identifier
      */
-    private static void addAPISpecificSequences(String pathToArchive, API importedApi, Registry registry) {
+    private static void addAPISpecificSequences(String pathToArchive, Registry registry, APIIdentifier apiIdentifier) {
 
-        String regResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + importedApi.getId()
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + importedApi.getId().getApiName()
-                + RegistryConstants.PATH_SEPARATOR + importedApi.getId().getVersion()
-                + RegistryConstants.PATH_SEPARATOR;
+        String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
+        // Getting registry API base path out of apiResourcePath
+        apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+        String sequencesDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.SEQUENCES_RESOURCE;
 
-        // Add custom in-sequence
-        addCustomSequenceToRegistry(pathToArchive, registry, regResourcePath, importedApi.getInSequence(),
-                ImportExportConstants.IN_SEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-        // Add custom out-sequence
-        addCustomSequenceToRegistry(pathToArchive, registry, regResourcePath, importedApi.getOutSequence(),
-                ImportExportConstants.OUT_SEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-        // Add custom fault-sequence
-        addCustomSequenceToRegistry(pathToArchive, registry, regResourcePath, importedApi.getFaultSequence(),
-                ImportExportConstants.FAULT_SEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+        // Add multiple custom sequences to registry for each type in/out/fault
+        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
+                ImportExportConstants.IN_SEQUENCE_PREFIX);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
+                ImportExportConstants.OUT_SEQUENCE_PREFIX);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
+                ImportExportConstants.FAULT_SEQUENCE_PREFIX);
     }
 
     /**
-     * @param pathToArchive         Location of the extracted folder of the API
-     * @param registry              Registry
-     * @param regResourcePath       Resource path in the registry
-     * @param sequenceFileName      File name of the sequence
-     * @param sequenceLocation      Location of the sequence file
-     * @param apiCustomSequenceType Custom sequence type (can be in, out or fault)
+     * @param sequencesDirectoryPath Location of the sequences directory inside the extracted folder of the API
+     * @param apiResourcePath        API resource path in the registry
+     * @param registry               Registry
+     * @param type                   Sequence type (in/out/fault)
      */
-    private static void addCustomSequenceToRegistry(String pathToArchive, Registry registry, String regResourcePath,
-            String sequenceFileName, String sequenceLocation, String apiCustomSequenceType) {
-        String sequenceFileLocation =
-                pathToArchive + sequenceLocation + ImportExportConstants.CUSTOM_TYPE + File.separator
-                        + sequenceFileName;
-        // Adding sequence, if any
-        if (CommonUtil.checkFileExistence(sequenceFileLocation + APIConstants.XML_EXTENSION)) {
-            String sequencePath = apiCustomSequenceType + RegistryConstants.PATH_SEPARATOR + sequenceFileName;
-            addSequenceToRegistry(true, registry, sequenceFileLocation + APIConstants.XML_EXTENSION,
-                    regResourcePath + sequencePath);
+    private static void addCustomSequencesToRegistry(String sequencesDirectoryPath, String apiResourcePath,
+            Registry registry, String type) {
+        String apiSpecificSequenceFilePath =
+                sequencesDirectoryPath + File.separator + type + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX
+                        + File.separator + ImportExportConstants.CUSTOM_TYPE;
+        if (CommonUtil.checkFileExistence(apiSpecificSequenceFilePath)) {
+            File apiSpecificSequencesDirectory = new File(apiSpecificSequenceFilePath);
+            File[] apiSpecificSequencesDirectoryListing = apiSpecificSequencesDirectory.listFiles();
+            if (apiSpecificSequencesDirectoryListing != null) {
+                for (File apiSpecificSequence : apiSpecificSequencesDirectoryListing) {
+                    String individualSequenceLocation =
+                            apiSpecificSequenceFilePath + File.separator + apiSpecificSequence.getName();
+                    // Constructing mediation resource path
+                    String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type
+                            + RegistryConstants.PATH_SEPARATOR + apiSpecificSequence.getName();
+                    addSequenceToRegistry(true, registry, individualSequenceLocation, mediationResourcePath);
+                }
+            }
         }
     }
 
@@ -1083,8 +1178,8 @@ public class ImportUtils {
                 if (StringUtils.equals(certificateFileName, endpointsCertificate.getName())) {
                     certificateContent = FileUtils.readFileToString(
                             new File(pathToCertificatesDirectory + File.separator + certificateFileName));
-                    certificateContent = certificateContent.replace(APIConstants.BEGIN_CERTIFICATE_STRING, "");
-                    certificateContent = certificateContent.replace(APIConstants.END_CERTIFICATE_STRING, "");
+                    certificateContent = StringUtils.substringBetween(certificateContent,
+                            APIConstants.BEGIN_CERTIFICATE_STRING, APIConstants.END_CERTIFICATE_STRING);
                 }
             }
         }

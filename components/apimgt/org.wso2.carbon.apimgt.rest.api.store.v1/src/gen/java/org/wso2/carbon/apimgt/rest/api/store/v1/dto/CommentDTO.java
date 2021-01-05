@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,6 +25,7 @@ public class CommentDTO   {
     private String content = null;
     private java.util.Date createdTime = null;
     private String createdBy = null;
+    private CommenterInfoDTO commenterInfo = null;
 
   /**
    **/
@@ -94,6 +96,24 @@ public class CommentDTO   {
     this.createdBy = createdBy;
   }
 
+  /**
+   **/
+  public CommentDTO commenterInfo(CommenterInfoDTO commenterInfo) {
+    this.commenterInfo = commenterInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("commenterInfo")
+  public CommenterInfoDTO getCommenterInfo() {
+    return commenterInfo;
+  }
+  public void setCommenterInfo(CommenterInfoDTO commenterInfo) {
+    this.commenterInfo = commenterInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -107,12 +127,13 @@ public class CommentDTO   {
     return Objects.equals(id, comment.id) &&
         Objects.equals(content, comment.content) &&
         Objects.equals(createdTime, comment.createdTime) &&
-        Objects.equals(createdBy, comment.createdBy);
+        Objects.equals(createdBy, comment.createdBy) &&
+        Objects.equals(commenterInfo, comment.commenterInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, content, createdTime, createdBy);
+    return Objects.hash(id, content, createdTime, createdBy, commenterInfo);
   }
 
   @Override
@@ -124,6 +145,7 @@ public class CommentDTO   {
     sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
+    sb.append("    commenterInfo: ").append(toIndentedString(commenterInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

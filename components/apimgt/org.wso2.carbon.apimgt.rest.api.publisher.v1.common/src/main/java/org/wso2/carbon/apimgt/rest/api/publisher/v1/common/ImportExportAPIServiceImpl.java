@@ -17,7 +17,7 @@
  */
 
 
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
+package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -53,7 +53,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
-                          ExportFormat format, boolean preserveDocs) throws APIManagementException,
+                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials)
+            throws APIManagementException,
             APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -69,12 +70,13 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
             api = apiProvider.getAPI(apiIdentifier);
+            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
         }
         if (api != null) {
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
             return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, format, preserveStatus,
                     preserveDocs);
         }
@@ -83,7 +85,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPIProduct(String apiId, String name, String version, String providerName,
-            ExportFormat format, boolean preserveStatus, boolean preserveDocs)
+                                 ExportFormat format, boolean preserveStatus, boolean preserveDocs,
+                                 boolean preserveCredentials)
             throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;
@@ -107,7 +110,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return ExportUtils
                     .exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName, format,
-                            preserveStatus, preserveDocs);
+                            preserveStatus, preserveDocs, preserveCredentials);
         }
         return null;
 

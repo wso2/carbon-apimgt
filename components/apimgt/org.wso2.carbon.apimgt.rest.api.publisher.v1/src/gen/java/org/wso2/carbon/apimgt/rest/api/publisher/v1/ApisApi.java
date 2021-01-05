@@ -1250,16 +1250,16 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/documents/validate")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Check Whether a Document with the Provided Name Exist", notes = "This operation can be used to verify the document name exists or not. ", response = DocumentDTO.class, authorizations = {
+    @ApiOperation(value = "Check Whether a Document with the Provided Name Exist", notes = "This operation can be used to verify the document name exists or not. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
         })
     }, tags={ "API Documents",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response if the api name exist. ", response = DocumentDTO.class),
+        @ApiResponse(code = 200, message = "OK. Successful response if the document name exists. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist. ", response = Void.class) })
     public Response validateDocument(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "The name of the document which needs to be checked for the existance. ",required=true)  @QueryParam("name") String name,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.validateDocument(apiId, name, ifMatch, securityContext);
     }
