@@ -895,6 +895,9 @@ public class PublisherCommonUtils {
         }
 
         API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
+        if (organizationId != null) {
+            apiToAdd.setOrganizationId(organizationId);
+        }
         //Overriding some properties:
         //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
         if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
