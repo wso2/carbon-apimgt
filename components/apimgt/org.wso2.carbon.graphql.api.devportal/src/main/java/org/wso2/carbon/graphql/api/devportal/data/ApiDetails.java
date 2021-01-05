@@ -54,21 +54,11 @@ public class ApiDetails {
 
         GenericArtifact[] artifacts = artifactData.getAllApis();;
 
-        //ApisGet apisGet = new ApisGet();
-        //List<Object> allMatchedApis = apisGet.getAllapiData();
         List<Api> apiDTOList = new ArrayList<Api>();
 
 
         for (GenericArtifact artifact : artifacts) {
 
-            //ArtifactData artifactData = new ArtifactData();
-            //String Id = artifactData.getTotalApisCount().
-
-            //API api = (API) allMatchedApis.get(i);
-            //APIIdentifier Id = api.getId();
-            //List<String> allIds = StringListtoArray();
-
-           // String Id = allIds.get(i);
             String id = artifact.getId();
 
 
