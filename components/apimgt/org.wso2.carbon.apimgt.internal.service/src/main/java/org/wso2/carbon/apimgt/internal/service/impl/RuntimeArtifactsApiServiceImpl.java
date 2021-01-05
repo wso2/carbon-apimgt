@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RuntimeArtifactsApiService;
@@ -49,7 +50,9 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
                     FileInputStream fileInputStream = new FileInputStream(artifact);
 
                     return Response.ok(fileInputStream).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                            "attachment; filename=apis.zip").build();
+                            "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                            APIConstants.APPLICATION_ZIP).build();
+
                 } catch (FileNotFoundException e) {
                     throw new APIManagementException("Error while sending api achieve", e);
                 }
