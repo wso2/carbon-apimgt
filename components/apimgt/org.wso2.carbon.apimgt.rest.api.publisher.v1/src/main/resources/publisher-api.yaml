@@ -202,6 +202,7 @@ paths:
 
         There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: openAPIVersion
         in: query
         description: Open api version
@@ -269,6 +270,7 @@ paths:
       description: |
         Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
@@ -327,6 +329,7 @@ paths:
         This operation can be used to update an existing API.
         But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -393,6 +396,7 @@ paths:
       description: |
         This operation can be used to delete an existing API proving the Id of the API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       responses:
@@ -426,6 +430,7 @@ paths:
       description: |
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -479,6 +484,7 @@ paths:
       description: |
         This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -553,6 +559,7 @@ paths:
         This operation can be used to generate mock responses from examples of swagger definition of an API.
       operationId: generateMockScripts
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -608,6 +615,7 @@ paths:
         This operation can be used to get generated mock responses from examples of swagger definition of an API.
       operationId: getGeneratedMockScriptsOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -731,6 +739,7 @@ paths:
       description: |
         This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/resourcePolicyId'
       - $ref: '#/components/parameters/If-None-Match'
@@ -787,6 +796,7 @@ paths:
       description: |
         This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter `content`.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/resourcePolicyId'
       - $ref: '#/components/parameters/If-Match'
@@ -852,6 +862,7 @@ paths:
       description: |
         This operation can be used to download a thumbnail image of an API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -903,6 +914,7 @@ paths:
         This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
       operationId: updateAPIThumbnail
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -975,6 +987,7 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrive API subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
@@ -1080,6 +1093,7 @@ paths:
 
         Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: action
         in: query
         description: |
@@ -1165,6 +1179,7 @@ paths:
       description: |
         This operation can be used to retrieve Lifecycle state change history of the API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -1211,6 +1226,7 @@ paths:
       description: |
         This operation can be used to retrieve Lifecycle state data of the API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -1265,6 +1281,7 @@ paths:
       description: |
         This operation can be used to remove pending lifecycle state change requests that are in pending state
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -1289,6 +1306,8 @@ paths:
       tags:
       - APIs
       summary: Import an OpenAPI Definition
+      parameters:
+      - $ref: '#/components/parameters/organizationId'
       description: |
         This operation can be used to create an API from an OpenAPI definition. Provide either `url` or `file`
         to specify the definition.
@@ -1355,6 +1374,8 @@ paths:
       tags:
       - APIs
       summary: Import a WSDL Definition
+      parameters:
+      - $ref: '#/components/parameters/organizationId'
       description: |
         This operation can be used to create an API using a WSDL definition. Provide either `url` or `file`
         to specify the definition.
@@ -1440,6 +1461,7 @@ paths:
 
         API definition is GraphQL Schema
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: If-Match
         in: header
         description: |
@@ -1762,6 +1784,7 @@ paths:
       description: |
         This operation can be used to retrieve the Schema definition of a GraphQL API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/Accept'
       - $ref: '#/components/parameters/If-None-Match'
@@ -1880,6 +1903,7 @@ paths:
       description: |
         This operation can be use to retrieve ARNs of AWS Lambda function for a given AWS credentials.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -1924,6 +1948,7 @@ paths:
       description: |
         This operation can be used to configure monetization for a given API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       requestBody:
         description: Monetization data object
@@ -1960,6 +1985,7 @@ paths:
       description: |
         This operation can be used to get monetization status for each tier in a given API
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -1989,6 +2015,7 @@ paths:
       description: |
         This operation can be used to get details of total revenue details of a given monetized API with meterd billing.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -2037,6 +2064,7 @@ paths:
       description: |
         This operation can be used to retrieve a list of documents belonging to an API by providing the id of the API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
@@ -2085,6 +2113,7 @@ paths:
       description: |
         This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -2142,6 +2171,7 @@ paths:
       description: |
         This operation can be used to retrieve a particular document's metadata associated with an API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-None-Match'
@@ -2196,6 +2226,7 @@ paths:
       description: |
         This operation can be used to update metadata of an API's document.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-Match'
@@ -2260,6 +2291,7 @@ paths:
       description: |
         This operation can be used to delete a document associated with an API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-Match'
@@ -2301,6 +2333,7 @@ paths:
         3. **URL type**:
             The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-None-Match'
@@ -2371,6 +2404,7 @@ paths:
         * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
         * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-Match'
@@ -2442,6 +2476,7 @@ paths:
         This operation can be used to verify the document name exists or not.
       operationId: validateDocument
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - name: name
         in: query
@@ -2497,6 +2532,7 @@ paths:
         This operation provides you a list of available mediation policies of an API.
       operationId: apisApiIdMediationPoliciesGet
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
@@ -2551,6 +2587,7 @@ paths:
         This operation can be used to add an API specifc mediation policy.
       operationId: apisApiIdMediationPoliciesPost
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -2630,6 +2667,7 @@ paths:
         This operation can be used to retrieve a particular API specific mediation policy.
       operationId: apisApiIdMediationPoliciesMediationPolicyIdGet
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/mediationPolicyId'
       - $ref: '#/components/parameters/If-None-Match'
@@ -2688,6 +2726,7 @@ paths:
         This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
       operationId: apisApiIdMediationPoliciesMediationPolicyIdDelete
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/mediationPolicyId'
       - $ref: '#/components/parameters/If-Match'
@@ -2723,6 +2762,7 @@ paths:
         This operation can be used to download a particular API specific mediation policy.
       operationId: apisApiIdMediationPoliciesMediationPolicyIdContentGet
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/mediationPolicyId'
       - $ref: '#/components/parameters/If-None-Match'
@@ -2776,6 +2816,7 @@ paths:
         This operation can be used to update an existing mediation policy of an API.
       operationId: apisApiIdMediationPoliciesMediationPolicyIdContentPut
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/mediationPolicyId'
       - $ref: '#/components/parameters/If-Match'
@@ -2857,6 +2898,7 @@ paths:
         API. If the API is a SOAP API, it states whether it has a single WSDL or a WSDL archive.
       operationId: getWSDLInfoOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -2892,6 +2934,7 @@ paths:
         The type of the WSDL of the API is indicated at the "wsdlInfo" element of the API payload definition.
       operationId: getWSDLOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -3009,6 +3052,7 @@ paths:
       description: |
         This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -3034,6 +3078,7 @@ paths:
       description: |
         This operation can be used to update complexity details belonging to an API by providing the id of the API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       requestBody:
         description: Role-depth mapping that needs to be added
@@ -3065,6 +3110,7 @@ paths:
       description: |
         This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -3101,6 +3147,7 @@ paths:
       description: |
         This operation can be used to retrieve resource paths defined for a specific api.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
@@ -3157,6 +3204,7 @@ paths:
       description: |
         Retrieve the Security Audit Report of the Audit API
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/Accept'
       - $ref: '#/components/parameters/apiId'
       responses:
@@ -3196,6 +3244,7 @@ paths:
         This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API.
       operationId: getAllPublishedExternalStoresByAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -3241,6 +3290,7 @@ paths:
         This operation can be used to publish an API to a list of external stores.
       operationId: publishAPIToExternalStores
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - name: externalStoreIds
         in: query
@@ -3896,6 +3946,7 @@ paths:
       description: |
         This operation can be used to retrieve and search the uploaded client certificates.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - name: alias
@@ -4003,6 +4054,7 @@ paths:
       description: |
         This operation can be used to get the information about a certificate.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: alias
         in: path
         required: true
@@ -4045,6 +4097,7 @@ paths:
       description: |
         This operation can be used to update an uploaded certificate.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: alias
         in: path
         description: Alias for the certificate
@@ -4109,6 +4162,7 @@ paths:
       description: |
         This operation can be used to delete an uploaded certificate.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: alias
         in: path
         description: |
@@ -4152,6 +4206,7 @@ paths:
       description: |
         This operation can be used to download a certificate which matches the given alias.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - name: alias
         in: path
@@ -4495,6 +4550,7 @@ paths:
       description: |
         This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - name: query
@@ -6433,6 +6489,7 @@ paths:
         With that you can get the status of the deployed APIs in cloud environments.
       operationId: deploymentsGetStatus
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -9502,6 +9559,13 @@ components:
         The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
         Should be formatted as **provider-name-version**.
       required: true
+      schema:
+        type: string
+    organizationId:
+      name: organizationId
+      in: query
+      description: |
+        The Organization which the API belongs to.
       schema:
         type: string
     apiId-Q-Opt:

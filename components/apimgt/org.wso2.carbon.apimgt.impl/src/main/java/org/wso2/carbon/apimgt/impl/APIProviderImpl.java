@@ -838,6 +838,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        if (api.getOrganizationId() != null  && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            handleException("APIs should be deployed in the super tenant space");
+        }
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -913,6 +916,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //notify key manager with API addition
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
+    }
+
+    /**
+     * Returns the full list of APIs of an Organization
+     *
+     * @param organizationId  Organization UUID
+     * @return All APIs of the given organization
+     * @throws APIManagementException if failed to get APIs
+     */
+    public List<API> getAPIsOfOrganization(String organizationId) throws APIManagementException {
+        return apiMgtDAO.getAPIsOfOrganization(organizationId);
     }
 
     /**

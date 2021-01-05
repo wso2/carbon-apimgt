@@ -133,7 +133,7 @@ public class ImportUtils {
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-            Boolean overwrite, String[] tokenScopes) throws APIManagementException {
+            Boolean overwrite, String[] tokenScopes, String organizationID) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -209,7 +209,7 @@ public class ImportUtils {
                 importedApiDTO.setLifeCycleStatus(currentStatus);
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider());
+                                importedApiDTO.getProvider(), organizationID);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -1453,7 +1453,7 @@ public class ImportUtils {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
                 importedApiProductDTO = importDependentAPIs(extractedFolderPath, userName, preserveProvider,
-                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes);
+                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes, null);
             } else {
                 // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are already in the APIM
                 importedApiProductDTO = updateDependentApiUuids(importedApiProductDTO, apiProvider,
@@ -1615,7 +1615,7 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes)
+            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes, String organizationId)
             throws IOException, APIManagementException {
 
         String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
@@ -1644,12 +1644,12 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes);
+                                    Boolean.TRUE, tokenScopes, organizationId);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes);
+                                Boolean.FALSE, tokenScopes, organizationId);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -1664,13 +1664,13 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes);
+                                Boolean.FALSE, tokenScopes, organizationId);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes);
+                                    Boolean.TRUE, tokenScopes, organizationId);
                         }
                     }
                 }

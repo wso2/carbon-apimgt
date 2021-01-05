@@ -34,6 +34,9 @@ public class SQLConstants {
     public static final String GET_VERSIONS_MATCHES_API_NAME_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ?";
 
+    public static final String GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL=
+            "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ? AND ORGANIZATION_UUID = ?";
+
     public static final String GET_USER_ID_FROM_CONSUMER_KEY_SQL =
             " SELECT " +
             "   SUBS.USER_ID " +
@@ -1863,8 +1866,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+                    "CREATED_TIME, API_TIER, API_TYPE, API_UUID, ORGANIZATION_UUID)" +
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -2242,6 +2245,9 @@ public class SQLConstants {
 
     public static final String GET_API_CONTEXT_BY_API_NAME_SQL =
             "SELECT CONTEXT FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION  = ?";
+
+    public static final String GET_API_CONTEXT_BY_ORGANIZATION_UUID =
+            "SELECT API_PROVIDER,API_NAME,API_VERSION FROM AM_API WHERE ORGANIZATION_UUID = ?";
 
     public static final String GET_ALL_CONTEXT_SQL = "SELECT CONTEXT FROM AM_API ";
 

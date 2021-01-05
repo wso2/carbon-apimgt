@@ -172,18 +172,27 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
-    public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
+    public List<String> getAPIVersionsMatchingApiName(String apiName, String username, String organizationId)
+            throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         List<String> versionList = new ArrayList<String>();
         ResultSet resultSet = null;
+        String sqlQuery = null;
 
-        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
+        if (organizationId != null) {
+            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL;
+        } else {
+            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
+        }
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiName);
             ps.setString(2, username);
+            if (organizationId != null) {
+                ps.setString(3, organizationId);
+            }
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 versionList.add(resultSet.getString("API_VERSION"));
@@ -194,6 +203,40 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return versionList;
+    }
+
+    /**
+     * @param organizationID  UUID of the organization
+     * @return All APIs of a given Organization
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public List<API> getAPIsOfOrganization(String organizationID) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+        List<API> apis = new ArrayList<>();
+
+        try {
+            String sqlQuery = SQLConstants. GET_API_CONTEXT_BY_ORGANIZATION_UUID ;
+            connection = APIMgtDBUtil.getConnection();
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, organizationID);
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
+                        result.getString("API_NAME"),
+                        result.getString("API_VERSION"));
+                API api = new API(apiId);
+                apis.add(api);
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching APIS", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return apis;
     }
 
 
@@ -5714,6 +5757,11 @@ public class ApiMgtDAO {
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUUID());
+            if (api.getOrganizationId() != null) {
+                prepStmt.setString(11, api.getOrganizationId());
+            } else {
+                prepStmt.setNull(11, Types.VARCHAR);
+            }
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();

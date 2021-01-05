@@ -177,6 +177,8 @@ public class API implements Serializable {
 
     private String testKey;
 
+    private String organizationId;
+
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -459,6 +461,13 @@ public class API implements Serializable {
         this.businessOwnerEmail = businessOwnerEmail;
     }
 
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
+    }
 
     public String getDescription() {
         return description;

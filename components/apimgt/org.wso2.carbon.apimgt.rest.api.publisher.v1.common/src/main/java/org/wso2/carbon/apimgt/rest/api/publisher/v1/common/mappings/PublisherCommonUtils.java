@@ -669,11 +669,13 @@ public class PublisherCommonUtils {
      * @param apiDto     API DTO of the API
      * @param oasVersion Open API Definition version
      * @param username   Username
+     * @param organizationId  Organization ID Of the API
      * @return Created API object
      * @throws APIManagementException Error while creating the API
      * @throws CryptoException        Error while encrypting
      */
-    public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
+    public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
+                                                           String organizationId)
             throws APIManagementException, CryptoException {
         boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
@@ -699,7 +701,12 @@ public class PublisherCommonUtils {
             }
         }
 
-        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
+        API apiToAdd;
+        if (organizationId != null) {
+            apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organizationId);
+        } else {
+            apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, null);
+        }
         validateScopes(apiToAdd);
         //validate API categories
         List<APICategory> apiCategories = apiToAdd.getApiCategories();
@@ -762,7 +769,8 @@ public class PublisherCommonUtils {
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
-    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username)
+    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username,
+                                              String organizationId)
             throws APIManagementException {
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
         String context = body.getContext();
@@ -822,7 +830,7 @@ public class PublisherCommonUtils {
         }
 
         //Get all existing versions of  api been adding
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username, organizationId);
         if (apiVersions.size() > 0) {
             //If any previous version exists
             for (String version : apiVersions) {
