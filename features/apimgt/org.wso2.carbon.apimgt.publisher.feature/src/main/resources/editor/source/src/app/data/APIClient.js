@@ -116,7 +116,7 @@ class APIClient {
         const updatedSpec = spec;
         const url = new URL(spec.servers[0].url);
         //url.host = this.environment.host;
-        url.host="localhost:1234";//"localhost:8080";//url.host="localhost:1234";
+        url.host="localhost:8080";//"localhost:8080";//url.host="localhost:1234";
         url.protocol = "http";//this.environment.host;
         updatedSpec.servers[0].url = String(url);
         return updatedSpec;
