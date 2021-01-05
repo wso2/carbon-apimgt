@@ -117,6 +117,7 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import sun.security.krb5.internal.APRep;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15536,6 +15537,29 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get count of the revisions created for a particular API.
+     *
+     * @return revision count
+     * @throws APIManagementException if an error occurs while retrieving revision count
+     */
+    public int getRevisionCountByAPI(String apiUUID) throws APIManagementException {
+        int count = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_COUNT_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revisions count for API UUID: " + apiUUID, e);
+        }
+        return count;
+    }
+
+    /**
      * Get most recent revision id of the revisions created for a particular API.
      *
      * @return revision id
@@ -15793,12 +15817,28 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevision apiRevision = new APIRevision();
+                    List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    for (APIRevision apiRevisionObject : revisionList) {
+                        if (apiRevisionObject.getId() == rs.getInt(1)) {
+                            apiRevisionDeploymentList = apiRevisionObject.getApiRevisionDeploymentList();
+                            revisionList.remove(apiRevisionObject);
+                        }
+                    }
                     apiRevision.setId(rs.getInt(1));
                     apiRevision.setApiUUID(rs.getString(2));
                     apiRevision.setRevisionUUID(rs.getString(3));
                     apiRevision.setDescription(rs.getString(4));
                     apiRevision.setCreatedTime(rs.getString(5));
                     apiRevision.setCreatedBy(rs.getString(6));
+                    if (!StringUtils.isEmpty(rs.getString(7))) {
+                        apiRevisionDeployment.setDeployment(rs.getString(7));
+                        apiRevisionDeployment.setRevisionUUID(rs.getString(8));
+                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(9));
+                        apiRevisionDeployment.setDeployedTime(rs.getString(10));
+                        apiRevisionDeploymentList.add(apiRevisionDeployment);
+                    }
+                    apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
                     revisionList.add(apiRevision);
                 }
             }
@@ -15853,7 +15893,6 @@ public class ApiMgtDAO {
                     statement.setString(1, apiRevisionDeployment.getDeployment());
                     statement.setString(2, apiRevisionId);
                     statement.setBoolean(3, apiRevisionDeployment.isDisplayOnDevportal());
-                    statement.setString(4, apiRevisionDeployment.getType());
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -15866,37 +15905,33 @@ public class ApiMgtDAO {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID "
-                    + apiRevisionId, e);
+            handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID " + apiRevisionId, e);
         }
     }
 
     /**
-     * Get APIRevisionDeployment details by providing deployment name and type
+     * Get APIRevisionDeployment details by providing deployment name
      *
      * @return APIRevisionDeployment object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    public APIRevisionDeployment getAPIRevisionDeploymentByNameAndType(String name, String type) throws APIManagementException {
+    public APIRevisionDeployment getAPIRevisionDeploymentByName(String name) throws APIManagementException {
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.
                              APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE)) {
             statement.setString(1, name);
-            statement.setString(2, type);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     apiRevisionDeployment.setDeployment(rs.getString(1));
                     apiRevisionDeployment.setRevisionUUID(rs.getString(2));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(3));
-                    apiRevisionDeployment.setType(rs.getString(4));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(4));
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get API Revision deployment mapping details for deployment name: " +
-                    name +" and type: " + type, e);
+            handleException("Failed to get API Revision deployment mapping details for deployment name: " + name, e);
         }
         return apiRevisionDeployment;
     }
@@ -15920,8 +15955,7 @@ public class ApiMgtDAO {
                     apiRevisionDeployment.setDeployment(rs.getString(1));
                     apiRevisionDeployment.setRevisionUUID(rs.getString(2));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(3));
-                    apiRevisionDeployment.setType(rs.getString(4));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(4));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -15950,7 +15984,6 @@ public class ApiMgtDAO {
                 for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
                     statement.setString(1, apiRevisionDeployment.getDeployment());
                     statement.setString(2, apiRevisionId);
-                    statement.setString(3, apiRevisionDeployment.getType());
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -16140,7 +16173,7 @@ public class ApiMgtDAO {
                 insertGraphQLComplexityStatement.executeBatch();
 
                 connection.commit();
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to restore API Revision entry of API UUID "
                         + apiRevision.getApiUUID(), e);
@@ -16199,7 +16232,7 @@ public class ApiMgtDAO {
                 removeGraphQLComplexityStatement.executeUpdate();
 
                 connection.commit();
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to delete API Revision entry of API UUID "
                         + apiRevision.getApiUUID(), e);

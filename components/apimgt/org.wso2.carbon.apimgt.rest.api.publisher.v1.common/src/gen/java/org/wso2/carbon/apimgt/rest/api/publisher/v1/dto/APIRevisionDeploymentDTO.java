@@ -21,8 +21,7 @@ import javax.validation.Valid;
 public class APIRevisionDeploymentDTO   {
   
     private String revisionUuid = null;
-    private String deployment = null;
-    private String type = null;
+    private String name = null;
     private Boolean displayOnDevportal = null;
     private java.util.Date deployedTime = null;
 
@@ -45,36 +44,19 @@ public class APIRevisionDeploymentDTO   {
 
   /**
    **/
-  public APIRevisionDeploymentDTO deployment(String deployment) {
-    this.deployment = deployment;
+  public APIRevisionDeploymentDTO name(String name) {
+    this.name = name;
     return this;
   }
 
   
   @ApiModelProperty(example = "production and sandbox", value = "")
-  @JsonProperty("deployment")
-  public String getDeployment() {
-    return deployment;
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
-  public void setDeployment(String deployment) {
-    this.deployment = deployment;
-  }
-
-  /**
-   **/
-  public APIRevisionDeploymentDTO type(String type) {
-    this.type = type;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "gateway or microgateway", value = "")
-  @JsonProperty("type")
-  public String getType() {
-    return type;
-  }
-  public void setType(String type) {
-    this.type = type;
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**
@@ -122,15 +104,14 @@ public class APIRevisionDeploymentDTO   {
     }
     APIRevisionDeploymentDTO apIRevisionDeployment = (APIRevisionDeploymentDTO) o;
     return Objects.equals(revisionUuid, apIRevisionDeployment.revisionUuid) &&
-        Objects.equals(deployment, apIRevisionDeployment.deployment) &&
-        Objects.equals(type, apIRevisionDeployment.type) &&
+        Objects.equals(name, apIRevisionDeployment.name) &&
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
         Objects.equals(deployedTime, apIRevisionDeployment.deployedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, deployment, type, displayOnDevportal, deployedTime);
+    return Objects.hash(revisionUuid, name, displayOnDevportal, deployedTime);
   }
 
   @Override
@@ -139,8 +120,7 @@ public class APIRevisionDeploymentDTO   {
     sb.append("class APIRevisionDeploymentDTO {\n");
     
     sb.append("    revisionUuid: ").append(toIndentedString(revisionUuid)).append("\n");
-    sb.append("    deployment: ").append(toIndentedString(deployment)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
     sb.append("}");

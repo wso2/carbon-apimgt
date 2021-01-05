@@ -1766,14 +1766,13 @@ public interface APIProvider extends APIManager {
     void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
 
     /**
-     * Get an API Revisions Deployment mapping details by providing deployment name and type
+     * Get an API Revisions Deployment mapping details by providing deployment name
      *
      * @param name Deployment Name
-     * @param type Deployment type
      * @return APIRevisionDeployment Object
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
-    APIRevisionDeployment getAPIRevisionDeployment(String name, String type) throws APIManagementException;
+    APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details by providing revision uuid
