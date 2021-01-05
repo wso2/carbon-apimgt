@@ -194,6 +194,12 @@ public class APIControllerUtil {
         if (securityConfigs != null) {
             handleEndpointSecurityConfigs(envParams, importedApiDto);
         }
+
+        // handle available subscription policies
+        JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
+        if (!policies.isJsonNull()) {
+            handleSubscriptionPolicies(policies, importedApiDto);
+        }
         return importedApiDto;
     }
 
@@ -253,6 +259,31 @@ public class APIControllerUtil {
                 }
             }
             importedApiDto.setEndpointSecurity(apiEndpointSecurityDTO);
+        }
+    }
+
+    /**
+     * This method will add the defined available subscription policies in an environment to the particular imported API
+     *
+     * @param importedApiDto API DTO object to be updated
+     * @param policies       policies with the values
+     */
+    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto) {
+        JsonArray definedPolicies = policies.getAsJsonArray();
+        List<String> policiesListToAdd = new ArrayList<>();
+        for (JsonElement definedPolicy : definedPolicies) {
+            if (!definedPolicy.isJsonNull()) {
+                String policyToAdd = definedPolicy.getAsString();
+                if (!StringUtils.isEmpty(policyToAdd)) {
+                    policiesListToAdd.add(definedPolicy.getAsString());
+                }
+            }
+        }
+        // If the policies are not defined in api_params.yaml, the values in the api.yaml should be considered.
+        // Hence, this if statement will prevent setting the policies in api.yaml to an empty array if the policies
+        // are not properly defined in the api_params.yaml
+        if (policiesListToAdd.size() > 0) {
+            importedApiDto.setPolicies(policiesListToAdd);
         }
     }
 
