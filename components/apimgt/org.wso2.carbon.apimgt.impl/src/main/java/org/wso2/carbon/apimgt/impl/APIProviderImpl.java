@@ -1665,10 +1665,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        boolean isValid = true;//isAPIUpdateValid(api);//////////////////////// handled from rest api
-        if (!isValid) {
-            throw new APIManagementException(" User doesn't have permission for update");
-        }
+
         validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = existingAPI;
@@ -1700,7 +1697,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
             
-            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);///////////////has registry access /////////////////
+            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);//TODO has registry access
 
             updateEndpointSecurity(oldApi, api);
 
@@ -1817,12 +1814,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
-
-            //need to be moved to persistent layer
-
-            updateWSDL(oldApi);///////////////has registry access /////////////////
-
-            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
 
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
@@ -1962,11 +1953,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateWSDL(API api) throws APIManagementException {
         
         //Update WSDL in the registry
-        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {////////////////////////
+        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
             updateWsdlFromUrl(api);
         }
 
-        if (api.getWsdlResource() != null) {//////////////////////////////////////
+        if (api.getWsdlResource() != null) {
             updateWsdlFromResourceFile(api);
         }
         
