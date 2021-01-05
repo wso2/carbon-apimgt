@@ -181,7 +181,9 @@ class Utils {
      * @memberof Utils
      */
     static getSwaggerURL() {
-        return 'http://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
+        //console.log(Utils.getCurrentEnvironment().host);
+        return 'http://' + 'localhost:8080' + Utils.CONST.SWAGGER_YAML;
+        //return 'http://' + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
 
     /**
@@ -352,7 +354,7 @@ Utils.CONST = {
     INTROSPECT: '/services/auth/introspect',
     // SERVICE_CATALOG_SWAGGER_YAML: '/api/service-catalog/v1/swagger.yaml',
     SERVICE_CATALOG_SWAGGER_YAML: '../../../../../publisher/site/public/serviceCatalog.yaml',
-    SWAGGER_YAML: '/site/public/swagger/swagger.yaml',
+    SWAGGER_YAML: '/api/am/publisher/v1/swagger.yaml',
     PROTOCOL: 'http://',
     API_CLIENT: 'apiClient',
     SERVICE_CATALOG_CLIENT: 'serviceCatalogClient',

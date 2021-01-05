@@ -87,7 +87,7 @@ export default class Protected extends Component {
         if (user) {
             this.setState({ user });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
-            this.checkSession();
+            //this.checkSession();
             if (user.name && user.name.indexOf('@') !== -1) {
                 const tenant = user.name.split('@')[user.name.split('@').length - 1];
                 this.setTenantTheme(tenant);
@@ -110,6 +110,7 @@ export default class Protected extends Component {
             });
             settingPromise.then((settingsNew) => this.setState({ settings: settingsNew }));
         }
+        
     }
 
     /**

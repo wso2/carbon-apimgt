@@ -584,6 +584,8 @@ class API extends Resource {
         const promisedSettings = this.client.then(client => {
             return client.apis['Settings'].get_settings();
         });
+        console.log("promisedSettings show");
+        console.log(promisedSettings.then(response => response.body));
         return promisedSettings.then(response => response.body);
     }
 
