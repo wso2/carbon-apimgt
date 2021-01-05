@@ -1303,8 +1303,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (registry.resourceExists(apiOrAPIProductDocPath)) {
                 Resource resource = registry.get(apiOrAPIProductDocPath);
                 if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
-                    for (String docPath : docsPaths) {
+                    List<String> docPaths = getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
+                            apiOrAPIProductDocPath);
+                    for (String docPath : docPaths) {
                         if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
                             Resource docResource = registry.get(docPath);
                             GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
@@ -1337,6 +1338,40 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return documentationList;
+    }
+
+    /**
+     * Get API Documents within the provided registry collection
+     * In case the document names contained '/' character, need to get only leaf node documents within them
+     *
+     * @param docCollection registry collection
+     * @param apiOrAPIProductDocPath base api/api product document path
+     * @return
+     * @throws APIManagementException
+     */
+    private List<String> getDocPaths(org.wso2.carbon.registry.core.Collection docCollection,
+            String apiOrAPIProductDocPath) throws APIManagementException {
+        List<String> docPaths = new ArrayList<>();
+        String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+        String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
+        try {
+            String[] resourcePaths = docCollection.getChildren();
+            for (String resourcePath : resourcePaths) {
+                if (!(resourcePath.equals(pathToContent) || resourcePath.equals(pathToDocFile))) {
+                    Resource resource = registry.get(resourcePath);
+                    if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                        docPaths.addAll(getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
+                                apiOrAPIProductDocPath));
+                    } else {
+                        docPaths.add(resourcePath);
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get documents for api/product";
+            throw new APIManagementException(msg, e);
+        }
+        return docPaths;
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {
