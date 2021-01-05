@@ -184,6 +184,7 @@ public final class ImportExportConstants {
     public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "mutualSslCerts";
     public static final String ENDPOINT_CERTIFICATES_FIELD = "certs";
     public static final String ENDPOINT_SECURITY_FIELD = "security";
+    public static final String POLICIES_FIELD = "policies";
     public static final String ROUTING_POLICY_FIELD = "endpointRoutingPolicy";
     public static final String ENDPOINTS_FIELD = "endpoints";
     public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
