@@ -270,9 +270,6 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when setting policies
      */
     private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto) {
-        if (policies == null) {
-            return;
-        }
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
         for (JsonElement definedPolicy : definedPolicies) {
