@@ -93,7 +93,6 @@ public class ExportUtils {
             File exportFolder = createTempApplicationDirectory(appName, appOwner);
             exportApplicationBasePath = exportFolder.toString();
             archivePath = exportApplicationBasePath.concat(File.separator + appOwner + "-" + appName);
-            // Files.createDirectories(Paths.get(applicationArtifactBaseDirectoryPath));
         } catch (APIImportExportException e) {
             throw new APIManagementException("Unable to create the temporary directory to export the Application", e);
         }
