@@ -1,0 +1,119 @@
+type Api{
+    id:String
+    name:String
+    description:String
+    context : String
+    version:String
+    provider:String
+    apiDefinition:String
+    type:String
+    transport:String
+    hasthumbnail:Boolean
+    additionalProperties:String
+    environments:String
+    wsdUrl:String
+    status:String
+    isSubscriptionAvailable:Boolean
+    monetizationLabel:String
+    businessInformation:BusinessInformation
+    label:[Label]
+    scope:[Scope]
+    apiEndPointInformation:[APIEndpointURLsDTO]
+    tierInformation:[Tier]
+    isDefault:Boolean
+    authorizationHeader:String
+    apiSecurity:String
+    tags:String
+    operationInformation:[Operation]
+    isMonetizationEnabled:Boolean
+    ingressUrl:[IngressUrl]
+    rating:Float
+    throttlingPolicies:String
+    thumbnailUrl:String
+    categories:String
+    keyManagers:String
+    advertiseInfo:Advertise
+    createdTime:String
+    lastUpdate:String
+}
+type Label{
+    name:String
+    description:String
+    accessUrls:String
+}
+
+type IngressUrl{
+    deploymentEnvironmentName:String
+    clusterDetails:[DeploymentClusterInformation]
+
+}
+
+
+type DeploymentClusterInformation{
+    clusterName:String
+    clusterDisplayName:String
+    ingressURL:String
+}
+type Tier{
+    name:String
+    tierPlan:String
+    monetizationAttributes:String
+}
+
+type Operation{
+    target:String
+    verb:String
+}
+
+type Advertise{
+    advertised:Boolean
+    originalStoreUrl:String
+    apiOwner:String
+}
+
+
+type BusinessInformation{
+    businessOwner:String
+    businessOwnerEmail:String
+    technicalOwner:String
+    technicalOwnerEmail:String
+}
+type Scope{
+    key:String
+    name:String
+    role:String
+    description:String
+}
+type APIEndpointURLsDTO{
+    environmentName:String
+    environmentType:String
+    urLs:URL
+    defaultUrls:DefaultURL
+
+}
+
+type URL{
+    http:String
+    https:String
+    ws:String
+    wss:String
+}
+type DefaultURL{
+    http:String
+    https:String
+    ws:String
+    wss:String
+}
+type Pagination{
+    offset:Int
+    limit:Int
+    total:Int
+    next:String
+    previous:String
+}
+type Query{
+    getApi(id:String):Api
+    getApis:[Api]
+    getApisCount:Int
+    getPagination:Pagination
+}
