@@ -127,7 +127,8 @@ public class InMemoryAPIDeployer {
                                     apiGatewayAdminClient.deployAPI(gatewayAPIDTO);
                                 }
                             } catch (AxisFault axisFault) {
-                                log.error("Error in deploying" + gatewayAPIDTO.getName()+ " to the Gateway ");
+                                log.error("Error in deploying " + gatewayAPIDTO.getName()+ " to the Gateway ",
+                                        axisFault);
                                 continue;
                             }
                         }

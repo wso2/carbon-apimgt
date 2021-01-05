@@ -39,9 +39,9 @@ public interface ArtifactRetriever {
     /**
      * This method is used to retrieve data from the storage
      *
-     * @param APIId              - UUID of the API
-     * @param gatewayLabel       - Label subscribed by the gateway
-     * @param gatewayInstruction - Whether this is to publish or remove the API from gateway
+     * @param APIId               UUID of the API
+     * @param gatewayLabel        Label subscribed by the gateway
+     * @param gatewayInstruction  Whether this is to publish or remove the API from gateway
      * @return A String contains all the information about the API and gateway artifacts
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */
@@ -51,9 +51,9 @@ public interface ArtifactRetriever {
     /**
      * This method is used to retrieve data from the storage
      *
-     * @param apiName        - Name of the API
-     * @param version        - version of the API
-     * @param tenantDomain   - Tenant Domain of the API
+     * @param apiName         Name of the API
+     * @param version         version of the API
+     * @param tenantDomain    Tenant Domain of the API
      * @return A Map conatin APIId and label associated with
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Attributes
      */
@@ -63,7 +63,7 @@ public interface ArtifactRetriever {
     /**
      * This method is used to retrieve data from the storage
      *
-     * @param gatewayLabel       - Label subscribed by the gateway
+     * @param gatewayLabel       Label subscribed by the gateway
      * @return A List of String contains all the information about the APIs and their corresponding gateway artifacts
      * @throws ArtifactSynchronizerException if there are any errors when retrieving the Artifacts
      */

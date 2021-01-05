@@ -635,7 +635,7 @@ public class APIGatewayManagerTest {
         Map<String, String> failedEnvironmentsMap2 = gatewayManager
                 .publishToGateway(api, apiTemplateBuilder, tenantDomain);
         Assert.assertEquals(failedEnvironmentsMap2.size(), 1);
-        Assert.assertTrue(failedEnvironmentsMap2.keySet().contains(prodEnvironmentName ));
+        Assert.assertTrue(failedEnvironmentsMap2.keySet().contains(prodEnvironmentName));
 
         //Test failure to deploy API when fault sequence deployment failed
         api.setFaultSequence(faultSequenceName);
