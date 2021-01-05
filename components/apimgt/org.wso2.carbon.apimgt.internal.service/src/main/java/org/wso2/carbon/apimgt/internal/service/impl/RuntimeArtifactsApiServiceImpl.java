@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
@@ -46,14 +46,11 @@ public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiServic
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();
-                try {
-                    FileInputStream fileInputStream = new FileInputStream(artifact);
-
+                try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
                     return Response.ok(fileInputStream).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                             "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
                             APIConstants.APPLICATION_ZIP).build();
-
-                } catch (FileNotFoundException e) {
+                } catch (IOException e) {
                     throw new APIManagementException("Error while sending api achieve", e);
                 }
             } else {
