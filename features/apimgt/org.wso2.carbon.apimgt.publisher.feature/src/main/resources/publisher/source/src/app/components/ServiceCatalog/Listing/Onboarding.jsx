@@ -29,37 +29,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        marginTop: theme.spacing(4),
-        marginLeft: theme.spacing(3),
-        marginRight: theme.spacing(3),
-        width: '100%',
-    },
-    helpDiv: {
-        marginTop: theme.spacing(0.5),
-    },
-    helpIcon: {
-        fontSize: 20,
-    },
-    horizontalDivider: {
-        marginTop: theme.spacing(4),
-        borderTop: '0px',
-        width: '100%',
-    },
-    preview: {
-        height: theme.spacing(18),
-        marginBottom: theme.spacing(5),
-        marginTop: theme.spacing(10),
-    },
-    spacing: {
-        paddingTop: theme.spacing(5),
-        paddingBottom: theme.spacing(5),
-        paddingLeft: theme.spacing(10),
-        paddingRight: theme.spacing(10),
-    },
-    space: {
-        marginBottom: theme.spacing(5),
-    },
     buttonStyle: {
         paddingLeft: theme.spacing(1),
     },
