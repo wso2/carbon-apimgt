@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
@@ -27,14 +28,15 @@ public class RuntimeArtifactGeneratorUtil {
                 } else {
                     gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabel);
                 }
+                if (gatewayArtifacts != null){
+                    if (gatewayArtifacts.isEmpty()){
+                        throw new APIManagementException("No API Artifacts", ExceptionCodes.NO_API_ARTIFACT_FOUND);
+                    }
+                }
                 return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
             }
         }
         return null;
     }
 
-    public static boolean isArtifactAvailable(String apiId, String gatewayLabel) {
-        // need to implement based on dao layer
-        return true;
-    }
 }
