@@ -1838,6 +1838,7 @@ paths:
       description: |
         This operation can be used to add a GraphQL Schema definition to an existing GraphQL API.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:

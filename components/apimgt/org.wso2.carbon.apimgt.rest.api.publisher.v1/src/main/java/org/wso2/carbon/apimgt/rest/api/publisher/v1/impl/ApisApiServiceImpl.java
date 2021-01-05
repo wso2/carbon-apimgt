@@ -270,7 +270,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API createdApi = PublisherCommonUtils
                     .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
                             organizationId);
@@ -316,6 +315,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (organizationId != null && !organizationId.equals(api.getOrganizationId())) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -363,6 +367,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (organizationId != null && !organizationId.equals(api.getOrganizationId())) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 apiProvider.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
                 return Response.ok().build();
@@ -398,7 +407,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGraphqlSchemaGet(String apiId, String organizationId, String accept, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            checkAPIInOrganization(apiId, organizationId);
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
@@ -434,14 +443,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return
      */
     @Override
-    public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String organizationId,
+                                              String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId
-                                                                                 );
-
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (organizationId != null && !organizationId.equals(originalAPI.getOrganizationId())) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
             originalAPI = PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
             APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
             return Response.ok().entity(modifiedAPI.getOperations()).build();
@@ -471,6 +484,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (organizationId != null && !organizationId.equals(originalAPI.getOrganizationId())) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
@@ -512,6 +530,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (organizationId != null && !organizationId.equals(api.getOrganizationId())) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -2587,7 +2610,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                        String organizationId, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            checkAPIInOrganization(apiId, organizationId);
             String fileName = fileDetail.getDataHandler().getName();
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -3686,6 +3709,24 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.error("Parser Error occurred while parsing config json string in to json object", e);
         }
         return null;
+    }
+
+    /**
+     * Validate whether the provided API exists in the specific organization
+     * @param apiId API UUID
+     * @param organizationId UUID of the Organization which the API belongs to
+     *
+     */
+    private void checkAPIInOrganization(String apiId, String organizationId) throws APIManagementException {
+        if (organizationId != null) {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            API api = RestApiCommonUtil.getLoggedInUserProvider().getAPIbyUUID(apiId, tenantDomain);
+            if (!organizationId.equals(api.getOrganizationId())) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+        }
     }
 
     /**

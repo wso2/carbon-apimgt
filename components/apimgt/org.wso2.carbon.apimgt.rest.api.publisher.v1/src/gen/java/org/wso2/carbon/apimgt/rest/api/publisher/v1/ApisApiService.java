@@ -73,7 +73,7 @@ public interface ApisApiService {
       public Response apisApiIdGraphqlPoliciesComplexityPut(String apiId, String organizationId, GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlPoliciesComplexityTypesGet(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlSchemaGet(String apiId, String organizationId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdLifecycleHistoryGet(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdLifecycleStateGet(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
