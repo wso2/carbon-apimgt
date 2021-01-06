@@ -20,8 +20,16 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RuntimeArtifactsApiService;
-import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
@@ -30,11 +38,25 @@ import javax.ws.rs.core.Response;
  */
 public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiService {
 
-    public Response runtimeArtifactsGet(String apiId, String gatewayLabel, String type, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setMessage(status.toString());
-        return Response.status(status).entity(errorObject).build();
+    public Response runtimeArtifactsGet(String apiId, String gatewayLabel, String type, MessageContext messageContext)
+            throws APIManagementException {
+
+        RuntimeArtifactDto runtimeArtifactDto =
+                RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayLabel, type);
+        if (runtimeArtifactDto != null) {
+            if (runtimeArtifactDto.isFile()) {
+                File artifact = (File) runtimeArtifactDto.getArtifact();
+                try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
+                    return Response.ok(fileInputStream).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                            "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                            APIConstants.APPLICATION_ZIP).build();
+                } catch (IOException e) {
+                    throw new APIManagementException("Error while sending api achieve", e);
+                }
+            } else {
+                return Response.ok().entity(runtimeArtifactDto.getArtifact()).build();
+            }
+        }
+        return Response.noContent().build();
     }
 }

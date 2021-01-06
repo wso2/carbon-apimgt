@@ -18,16 +18,17 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class DBSaver implements ArtifactSaver {
 
@@ -48,39 +49,61 @@ public class DBSaver implements ArtifactSaver {
     public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
             throws ArtifactSynchronizerException {
 
-        try {
-            JSONObject artifactObject = new JSONObject(gatewayRuntimeArtifacts);
-            String apiId = (String) artifactObject.get("apiId");
-            String apiName = (String) artifactObject.get("name");
-            String version = (String) artifactObject.get("version");
-            String tenantDomain = (String) artifactObject.get("tenantDomain");
+    }
 
-            byte[] gatewayRuntimeArtifactsAsBytes = gatewayRuntimeArtifacts.getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
+    @Override
+    public void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain,
+                             File artifact, String[] gatewayLabels) throws ArtifactSynchronizerException {
+
+        try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
             if (!gatewayArtifactsMgtDAO.isAPIDetailsExists(apiId)) {
-                gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
+                gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiId, name,
                         version, tenantDomain);
             }
 
-            String dbQuery;
-            if (gatewayArtifactsMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
-                dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
+            if (gatewayArtifactsMgtDAO.isAPIArtifactExists(apiId, revision)) {
+                gatewayArtifactsMgtDAO
+                        .updateGatewayPublishedAPIArtifacts(apiId, revision, fileInputStream);
             } else {
-                dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
+                gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiId, revision, fileInputStream);
             }
-            gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
-                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
-
+            gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(apiId, revision, gatewayLabels);
             if (log.isDebugEnabled()) {
-                log.debug("Successfully saved Artifacts of " + apiName);
+                log.debug("Successfully saved Artifacts of " + name);
+            }
+        } catch (IOException | APIManagementException ex) {
+            throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", ex);
+        }
+    }
+
+    @Override
+    public void removeArtifact(String apiId, String name, String version, String revision, String tenantDomain)
+            throws ArtifactSynchronizerException {
+
+        try {
+            if (gatewayArtifactsMgtDAO.isAPIDetailsExists(apiId)) {
+                if (StringUtils.isNotEmpty(apiId)) {
+                    if (StringUtils.isNotEmpty(revision)) {
+                        // Delete Specific revision.
+                        gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiId, revision);
+                    } else {
+                        // Delete API.
+                        gatewayArtifactsMgtDAO.deleteGatewayArtifacts(apiId);
+                    }
+                }
             }
         } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", e);
+            throw new ArtifactSynchronizerException("Error removing Artifacts from db", e);
         }
 
     }
 
     @Override
+    public boolean isAPIPublished(String apiId, String revision) throws ArtifactSynchronizerException{
+
+        return false;
+    }
+
     public boolean isAPIPublished(String apiId) {
 
         try {

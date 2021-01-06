@@ -50,7 +50,6 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
@@ -128,10 +127,10 @@ import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
@@ -2435,6 +2434,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        gatewayManager.deployToGateway(api, tenantDomain);
         failedEnvironment = gatewayManager.publishToGateway(api, builder, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
@@ -2500,7 +2500,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
             apisWithoutEndpoints.toString()));
         }
-
+        gatewayManager.deployToGateway(apiProduct, tenantDomain);
         failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
@@ -7224,6 +7224,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        gatewayManager.deployToGateway(api, tenantDomain);
         return gatewayManager.publishToGateway(api, builder, tenantDomain);
     }
 

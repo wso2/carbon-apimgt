@@ -26,8 +26,7 @@ import java.util.Arrays;
  * This enum class holds error codes that we need to pass to upper level. For example, to the UI.
  * You have to define your custom error codes here.
  */
-public enum
-ExceptionCodes implements ErrorHandler {
+public enum ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
@@ -407,7 +406,9 @@ ExceptionCodes implements ErrorHandler {
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
     ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
-            "Error while reading meta information from the api_params.yaml file");
+            "Error while reading meta information from the api_params.yaml file"),
+    NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
+            "No Api artifacts found for given criteria");
 
     private final long errorCode;
     private final String errorMessage;
