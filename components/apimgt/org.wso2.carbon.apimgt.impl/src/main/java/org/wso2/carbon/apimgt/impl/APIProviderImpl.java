@@ -1697,7 +1697,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
                     if (resourceVerbs != null) {
-                        log.info("++++++++++++++++++++++===================+++++++++++++++++++++++++++++++");
                             invalidateResourceCache(api.getContext(), api.getId().getVersion(),resourceVerbs);
                             if (log.isDebugEnabled()) {
                                 log.debug("Calling invalidation cache");
@@ -1871,7 +1870,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
                 if (resourceVerbs != null) {
-                    log.info("++++++++++++++++++++++===================+++++++++++++++++++++++++++++++");
                     invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
                     if (log.isDebugEnabled()) {
                         log.debug("Calling invalidation cache");
