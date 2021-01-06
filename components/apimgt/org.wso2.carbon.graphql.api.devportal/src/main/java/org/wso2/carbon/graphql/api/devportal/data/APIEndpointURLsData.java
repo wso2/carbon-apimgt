@@ -17,8 +17,6 @@ public class APIEndpointURLsData {
     public List<APIEndpointURLsDTO> apiEndpointURLsDTO(String Id) throws GovernanceException {
 
         String env = "";
-//        RegistryData registryData = new RegistryData();
-//        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
 
         ArtifactData artifactData = new ArtifactData();
 
@@ -29,7 +27,6 @@ public class APIEndpointURLsData {
         Set<String> environmentsPublishedByAPI = ApiDetails.getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));//new HashSet<>(apiTypeWrapper.getApi().getEnvironments());
         environmentsPublishedByAPI.remove("none");
 
-        //Set<String> apiTransports = new HashSet<>(Arrays.asList(apiTypeWrapper.getApi().getTransports().split(",")));
 
         List<APIEndpointURLsDTO> apiEndpointURLsDTOS = new ArrayList<APIEndpointURLsDTO>();
         for (String environmentName : environmentsPublishedByAPI) {

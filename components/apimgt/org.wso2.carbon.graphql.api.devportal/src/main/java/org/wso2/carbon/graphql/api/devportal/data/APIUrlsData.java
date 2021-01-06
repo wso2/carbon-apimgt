@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.APIURLsDTO;
 import org.wso2.carbon.graphql.api.devportal.RegistryData;
@@ -29,25 +30,26 @@ public class APIUrlsData {
 //        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
 
         ArtifactData artifactData = new ArtifactData();
+        GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
         String tenantDomain="";
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
 
-        Set<String> environmentsPublishedByAPI = ApiDetails.getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));;
+        Set<String> environmentsPublishedByAPI = ApiDetails.getEnvironments(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));;
         environmentsPublishedByAPI.remove("none");
 
         String http = null;
         String https = null;
         String ws = null;
         String wss = null;
-        Set<String> apiTransports = new HashSet<>(Arrays.asList(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS).split(",")));
+        Set<String> apiTransports = new HashSet<>(Arrays.asList(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS).split(",")));
         //APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if(environment !=null){
                 String[] gwEndpoints = null;//environment.getApiGatewayEndpoint().split(",");
-                if ("WS".equalsIgnoreCase(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
+                if ("WS".equalsIgnoreCase(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
                     gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
                 } else {
                     gwEndpoints = environment.getApiGatewayEndpoint().split(",");
@@ -64,7 +66,7 @@ public class APIUrlsData {
 //                }
                 for (String gwEndpoint : gwEndpoints) {
                     StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
-                    endpointBuilder.append(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+                    endpointBuilder.append(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
 //                    if (customGatewayUrl != null) {
 //                        int index = endpointBuilder.indexOf("//");
 //                        endpointBuilder.replace(index + 2, endpointBuilder.length(), customGatewayUrl);

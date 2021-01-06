@@ -12,13 +12,7 @@ import java.util.Map;
 
 public class PaginationData {
 
-    List<Pagination> paginationList = Arrays.asList(
-            new Pagination(1,25,2,"x1","x1")
-    );
 
-    public List<Pagination> apiPagination(){
-        return paginationList;
-    }
 
     public Pagination getPaginationData() throws UserStoreException, RegistryException {
         ApiDetails apiDetails = new ApiDetails();

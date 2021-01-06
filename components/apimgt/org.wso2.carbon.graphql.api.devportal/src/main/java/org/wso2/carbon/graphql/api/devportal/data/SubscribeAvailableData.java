@@ -1,6 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.RegistryData;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -14,9 +15,10 @@ public class SubscribeAvailableData {
 
     public boolean getSubscriptionAvailable(String Id) throws GovernanceException {
         ArtifactData artifactData = new ArtifactData();
-        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(artifactData.getDevportalApis(Id).getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_PROVIDER)));
-        String subscriptionAvailability = artifactData.getDevportalApis(Id).getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY);
-        String subscriptionAllowedTenants = artifactData.getDevportalApis(Id).getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS);
+        GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
+        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_PROVIDER)));
+        String subscriptionAvailability = apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY);
+        String subscriptionAllowedTenants = apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS);
         boolean IsSubscriptionAvailability = isSubscriptionAvailable(apiTenant,subscriptionAvailability,subscriptionAllowedTenants);
         return IsSubscriptionAvailability;
     }
