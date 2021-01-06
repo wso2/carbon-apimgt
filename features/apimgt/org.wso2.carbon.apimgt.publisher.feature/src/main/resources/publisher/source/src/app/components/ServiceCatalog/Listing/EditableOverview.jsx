@@ -818,7 +818,14 @@ function EditableOverview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{moment(service.createdTime).fromNow()}</TableCell>
+                                            <TableCell>
+                                                <Tooltip
+                                                    placement='right'
+                                                    title={moment(service.createdTime).format('lll')}
+                                                >
+                                                    <span>{moment(service.createdTime).fromNow()}</span>
+                                                </Tooltip>
+                                            </TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>

@@ -239,7 +239,13 @@ function Listing(props) {
                         const { createdTime } = dataRow;
                         if (dataRow) {
                             return (
-                                <span>{moment(createdTime).fromNow()}</span>
+                                <Tooltip
+                                    placement='right'
+                                    title={moment(createdTime).format('lll')}
+                                    aria-label='add'
+                                >
+                                    <span>{moment(createdTime).fromNow()}</span>
+                                </Tooltip>
                             );
                         }
                     }
