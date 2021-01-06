@@ -19,7 +19,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import MUIDataTable from 'mui-datatables';
@@ -33,7 +32,6 @@ import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
-import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -100,10 +98,6 @@ const useStyles = makeStyles((theme) => ({
         '& th': {
             minWidth: '150px',
         },
-    },
-    removePaddingOnLink: {
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1),
     },
 }));
 
@@ -288,14 +282,6 @@ function Listing(props) {
                             <>
                                 <Box display='flex' flexDirection='row'>
                                     <CreateApi history={history} serviceId={id} serviceDisplayName={displayName} />
-                                    <Link
-                                        className={classes.removePaddingOnLink}
-                                        to={'/service-catalog/' + id + '/edit'}
-                                    >
-                                        <Button>
-                                            <Icon>edit</Icon>
-                                        </Button>
-                                    </Link>
                                     <Delete
                                         serviceDisplayName={displayName}
                                         serviceId={id}
