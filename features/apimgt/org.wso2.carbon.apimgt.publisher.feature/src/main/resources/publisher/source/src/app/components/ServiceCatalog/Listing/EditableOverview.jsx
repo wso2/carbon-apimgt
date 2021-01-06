@@ -38,6 +38,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
+import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import Switch from '@material-ui/core/Switch';
 import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
@@ -566,15 +567,13 @@ function EditableOverview(props) {
                                                     />
                                                 </Typography>
                                             </div>
-                                            <div className={classes.apiUsageStyle} primary>
-                                                <Typography color='primary'>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.EditableOverview.service.usage'
-                                                        defaultMessage='Used by {usage} API(s)'
-                                                        values={{ usage: service.usage }}
-                                                    />
-                                                </Typography>
-                                            </div>
+                                            <Usages
+                                                usageNumber={service.usage}
+                                                serviceDisplayName={displayName}
+                                                serviceId={id}
+                                                isOverview
+                                                classes={classes}
+                                            />
                                         </div>
                                     </div>
                                 </Grid>

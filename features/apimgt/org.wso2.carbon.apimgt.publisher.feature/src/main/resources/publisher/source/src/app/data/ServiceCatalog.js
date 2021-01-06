@@ -254,6 +254,26 @@ class ServiceCatalog {
     }
 
     /**
+     * Get the usages of a service
+     * @param id {string} UUID of the service.
+     * @returns {promise} Service Entry API promise.
+     */
+    static getAPIUsages(id) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedServices = serviceCatalog.then(client => {
+            // return client.apis['Services'].getAPIUsages(
+            //     {
+            //         serviceId: id,
+            //     },
+            //     this._requestMetaData()
+            // );
+            return MockResponses.getAPIUsages();
+        });
+        return promisedServices.then(response => response.body);
+    }
+
+    /**
      * Update a Service
      * @param body {Object} Service body.
      * @returns {promise} Promise.

@@ -31,6 +31,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
+import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
@@ -252,10 +253,23 @@ function Listing(props) {
             name: 'usage',
             label: intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Listing.usage',
-                defaultMessage: 'No. Of APIs',
+                defaultMessage: 'Number of Usages',
             }),
             options: {
+                customBodyRender: (value, tableMeta = this) => {
+                    if (tableMeta.rowData) {
+                        const dataRow = serviceList[tableMeta.rowIndex];
+                        const { usage, id, displayName } = dataRow;
+                        if (dataRow) {
+                            return (
+                                <Usages usageNumber={usage} serviceDisplayName={displayName} serviceId={id} />
+                            );
+                        }
+                    }
+                    return <span />;
+                },
                 sort: false,
+                filter: false,
             },
         },
         {
@@ -267,7 +281,7 @@ function Listing(props) {
                         return (
                             <>
                                 <Box display='flex' flexDirection='row'>
-                                    <CreateApi history={history} serviceId={id} />
+                                    <CreateApi history={history} serviceId={id} serviceDisplayName={displayName} />
                                     <Link
                                         className={classes.removePaddingOnLink}
                                         to={'/service-catalog/' + id + '/edit'}

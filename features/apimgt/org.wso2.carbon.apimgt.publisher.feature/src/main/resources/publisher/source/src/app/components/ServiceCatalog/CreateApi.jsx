@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -23,18 +23,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
 import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, useIntl } from 'react-intl';
-import API from 'AppData/api';
-import Checkbox from '@material-ui/core/Checkbox';
 import ServiceCatalog from 'AppData/ServiceCatalog';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
     buttonStyle: {
@@ -108,7 +103,6 @@ function reducer(state, { field, value }) {
         case 'name':
         case 'context':
         case 'version':
-        case 'apiPolicies':
             return { ...state, [field]: value };
         default:
             return state;
@@ -123,11 +117,10 @@ function reducer(state, { field, value }) {
 function CreateApi(props) {
     const {
         serviceId,
-        multiple,
-        helperText,
         history,
         isOverview,
         isEdit,
+        serviceDisplayName,
     } = props;
     const classes = useStyles();
     const intl = useIntl();
@@ -140,18 +133,12 @@ function CreateApi(props) {
         setOpen(false);
     };
 
-    const [policies, setPolicies] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
-
-    useEffect(() => {
-        API.policies('subscription').then((response) => setPolicies(response.body));
-    }, []);
 
     const initialState = {
         name: '',
         context: '',
         version: '',
-        apiPolicies: [],
     };
 
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -160,7 +147,6 @@ function CreateApi(props) {
         name,
         context,
         version,
-        apiPolicies,
     } = state;
 
     const handleChange = (e) => {
@@ -273,10 +259,6 @@ function CreateApi(props) {
         });
     };
 
-    if (!policies.list) {
-        return <CircularProgress />;
-    }
-
     return (
         <>
             <Button
@@ -310,9 +292,9 @@ function CreateApi(props) {
                     <Typography variant='caption'>
                         <FormattedMessage
                             id='ServiceCatalog.CreateApi.create.api.dialog.helper'
-                            defaultMessage='Required fields are marked with an asterisk '
+                            defaultMessage='Create API from service {serviceName}'
+                            values={{ serviceName: serviceDisplayName }}
                         />
-                        <sup className={classes.mandatoryStar}>*</sup>
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
@@ -418,59 +400,6 @@ function CreateApi(props) {
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                fullWidth
-                                select
-                                label={(
-                                    <>
-                                        <FormattedMessage
-                                            id='Apis.Create.Components.SelectPolicies.business.plans'
-                                            defaultMessage='Business plan(s)'
-                                        />
-                                    </>
-                                )}
-                                value={apiPolicies}
-                                name='apiPolicies'
-                                onChange={handleChange}
-                                SelectProps={{
-                                    MenuProps: {
-                                        anchorOrigin: {
-                                            vertical: 'bottom',
-                                            horizontal: 'left',
-                                        },
-                                        getContentAnchorEl: null,
-                                    },
-                                    multiple,
-                                    renderValue: (selected) => (Array.isArray(selected)
-                                        ? selected.join(', ') : selected),
-                                }}
-                                helperText={helperText + 'API'}
-                                variant='outlined'
-                                InputProps={{
-                                    id: 'itest-id-apipolicies-input',
-                                }}
-                            >
-                                {policies.list.map((policy) => (
-                                    <MenuItem
-                                        dense
-                                        disableGutters={multiple}
-                                        id={policy.name}
-                                        key={policy.name}
-                                        value={policy.displayName}
-                                    >
-                                        {multiple
-                                            && (
-                                                <Checkbox
-                                                    color='primary'
-                                                    checked={apiPolicies.includes(policy.name)}
-                                                />
-                                            )}
-                                        <ListItemText primary={policy.displayName} secondary={policy.description} />
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
                     </Grid>
                 </DialogContent>
                 <DialogActions className={classes.actionButtonStyle}>
@@ -498,16 +427,12 @@ function CreateApi(props) {
 }
 
 CreateApi.defaultProps = {
-    multiple: true,
-    helperText: 'Select one or more throttling policies for the ',
     isOverview: false,
     isEdit: false,
 };
 
 CreateApi.propTypes = {
     serviceId: PropTypes.string.isRequired,
-    multiple: PropTypes.bool,
-    helperText: PropTypes.string,
     isOverview: PropTypes.bool,
     isEdit: PropTypes.bool,
 };

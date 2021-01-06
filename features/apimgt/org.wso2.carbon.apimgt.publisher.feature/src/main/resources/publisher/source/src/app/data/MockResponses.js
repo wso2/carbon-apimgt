@@ -263,6 +263,42 @@ class MockResponses {
 
     /**
     *
+    * Return sample mocked model data for getAPIUsages
+    * @export
+    * @returns {*} Mocked Service Catalog model
+    */
+    static getAPIUsages() {
+        const response = {
+            limit: 0,
+            offset: 0,
+            total: 1,
+            list: [
+                {
+                    id: '7abe3fc3-1abe-47de-894a-696a7f4bb052',
+                    name: 'PizzaShackAPI',
+                    description: 'This is a simple API for Pizza Shack online pizza delivery store.',
+                    context: '/pizzashack',
+                    version: '1.0.0',
+                    provider: 'admin',
+                    lifeCycleStatus: 'CREATED',
+                    type: 'HTTP',
+                    createdTime: 1609821955163,
+                    lastUpdatedTime: 1609821972343,
+                },
+            ],
+            pagination: {
+                offset: 0,
+                limit: 1,
+                total: 10,
+                next: 'string',
+                previous: 'string',
+            },
+        };
+        return Promise.resolve({ body: response });
+    }
+
+    /**
+    *
     * Return sample mocked model data for getServiceDefinition
     * @export
     * @returns {*} Mocked Service Catalog model
