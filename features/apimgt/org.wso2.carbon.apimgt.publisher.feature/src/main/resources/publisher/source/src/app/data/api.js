@@ -340,7 +340,7 @@ class API extends Resource {
                 body: data,
                 'Content-Type': 'application/json',
             };
-            return client.apis['API Products'].post_api_products(payload, this._requestMetaData());
+            return client.apis['API Products'].createAPIProduct(payload, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
             return new API(response.body);
@@ -379,7 +379,7 @@ class API extends Resource {
      */
     getProduct(id, callback = null) {
         const promise_get = this.client.then(client => {
-            return client.apis['API Products'].get_api_products__apiProductId_(
+            return client.apis['API Products'].getAPIProduct(
                 {
                     apiProductId: id,
                 },
@@ -534,28 +534,6 @@ class API extends Resource {
     }
 
     /**
-     * Get the scopes of an API
-     * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getScopes(id = this.id, callback = null) {
-        const promise_get = this.client.then(client => {
-            return client.apis['API Scopes'].get_apis__apiId__scopes(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
-    }
-
-    /**
      * Get all the scopes
      * @param offset {String} offset of the scopes list which needs to be retrieved
      * @param limit {String} limit of the scopes list which needs to be retrieved
@@ -582,7 +560,7 @@ class API extends Resource {
      */
     getSettings() {
         const promisedSettings = this.client.then(client => {
-            return client.apis['Settings'].get_settings();
+            return client.apis['Settings'].getSettings();
         });
         return promisedSettings.then(response => response.body);
     }
@@ -631,7 +609,7 @@ class API extends Resource {
      */
     getMonetizationInvoice(id, callback = null) {
         const promiseInvoice = this.client.then(client => {
-            return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
+            return client.apis['API Monetization'].getSubscriptionUsage(
                 {
                     subscriptionId: id,
                 },
@@ -654,30 +632,6 @@ class API extends Resource {
             );
         });
         return promised_status;
-    }
-
-    /**
-     * Get the detail of scope of an API
-     * @param {String} api_id - UUID of the API in which the scopes is needed
-     * @param {String} scopeName - Name of the scope
-     * @param {function} callback - Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getScopeDetail(api_id, scopeName, callback = null) {
-        const promise_get_Scope_detail = this.client.then(client => {
-            return client.apis['API Scopes'].get_apis__apiId__scopes__name_(
-                {
-                    apiId: api_id,
-                    name: scopeName,
-                },
-                this._requestMetaData(),
-            );
-        });
-        if (callback) {
-            return promise_get_Scope_detail.then(callback);
-        } else {
-            return promise_get_Scope_detail;
-        }
     }
 
     getDeployments() {
@@ -727,37 +681,6 @@ class API extends Resource {
     }
 
     /**
-     * Update a scope of an API
-     * @param {String} api_id - UUID of the API in which the scopes is needed
-     * @param {String} scopeName - Name of the scope
-     * @param {Object} body - Scope details
-     */
-    updateScope(api_id, scopeName, body) {
-        const promised_updateScope = this.client.then(client => {
-            const payload = {
-                apiId: api_id,
-                body,
-                name: scopeName,
-                'Content-Type': 'application/json',
-            };
-            return client.apis['API Scopes'].put_apis__apiId__scopes__name_(payload, this._requestMetaData());
-        });
-        return promised_updateScope;
-    }
-
-    addScope(api_id, body) {
-        const promised_addScope = this.client.then(client => {
-            const payload = {
-                apiId: api_id,
-                body,
-                'Content-Type': 'application/json',
-            };
-            return client.apis['API Scopes'].post_apis__apiId__scopes(payload, this._requestMetaData());
-        });
-        return promised_addScope;
-    }
-
-    /**
      * Add a shared scope
      * @param body {any} body of the shared scope details
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
@@ -799,19 +722,6 @@ class API extends Resource {
             );
         });
         return promised_updateSharedScope;
-    }
-
-    deleteScope(api_id, scope_name) {
-        const promise_deleteScope = this.client.then(client => {
-            return client.apis['API Scopes'].delete_apis__apiId__scopes__name_(
-                {
-                    apiId: api_id,
-                    name: scope_name,
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promise_deleteScope;
     }
 
     /**
@@ -988,7 +898,7 @@ class API extends Resource {
      */
     deleteProduct() {
         return this.client.then(client => {
-            return client.apis['API Products'].delete_api_products__apiProductId_(
+            return client.apis['API Products'].deleteAPIProduct(
                 {
                     apiProductId: this.id,
                 },
@@ -1131,7 +1041,7 @@ class API extends Resource {
             const requestBody = {
                 'requestBody': api,
             };
-            return client.apis['API Products'].put_api_products__apiProductId_(payload, requestBody);
+            return client.apis['API Products'].updateAPIProduct(payload, requestBody);
         });
         return promised_update;
     }
@@ -1142,7 +1052,7 @@ class API extends Resource {
      */
     subscriptions(apiId, offset = null, limit = null, query = null, callback = null) {
         const promise_subscription = this.client.then(client => {
-            return client.apis['Subscriptions'].get_subscriptions(
+            return client.apis['Subscriptions'].getSubscriptions(
                 { apiId, limit, offset, query },
                 this._requestMetaData(),
             );
@@ -1161,7 +1071,7 @@ class API extends Resource {
      */
     blockSubscriptions(id, state, callback = null) {
         const promise_subscription = this.client.then(client => {
-            return client.apis['Subscriptions'].post_subscriptions_block_subscription(
+            return client.apis['Subscriptions'].blockSubscription(
                 {
                     subscriptionId: id,
                     blockState: state,
@@ -1183,7 +1093,7 @@ class API extends Resource {
      */
     unblockSubscriptions(id, callback = null) {
         const promise_subscription = this.client.then(client => {
-            return client.apis['Subscriptions'].post_subscriptions_unblock_subscription(
+            return client.apis['Subscriptions'].unBlockSubscription(
                 {
                     subscriptionId: id,
                 },
@@ -1204,7 +1114,7 @@ class API extends Resource {
      */
     getSubscriberInfo(id) {
         const promise_subscription = this.client.then(client => {
-            return client.apis['Subscriber'].get_subscriptions__subscriptionId__subscriber_info(
+            return client.apis['Subscriber'].getSubscriberInfoBySubscriptionId(
                 {
                     subscriptionId: id,
                 },
@@ -1212,21 +1122,6 @@ class API extends Resource {
             );
         });
         return promise_subscription;
-    }
-
-    /**
-     * Discovered Service Endpoints.
-     * @returns {Promise} Promised list of discovered services
-     *
-     * TODO: remove
-     */
-    discoverServices() {
-        return this.client.then(client => {
-            return client.apis['External Resources (Collection)'].get_external_resources_services(
-                {},
-                this._requestMetaData(),
-            );
-        });
     }
 
     addDocument(api_id, body) {
@@ -1395,7 +1290,7 @@ class API extends Resource {
      */
     labels() {
         const promise_labels = this.client.then(client => {
-            return client.apis['Label (Collection)'].get_labels({}, this._requestMetaData());
+            return client.apis['Label (Collection)'].getLabels({}, this._requestMetaData());
         });
         return promise_labels;
     }
@@ -1599,45 +1494,6 @@ class API extends Resource {
     }
 
     /**
-     * Update HasOwnGateway property of an API
-     * @param apiId APIId
-     * @param body  body which contains update details
-     * TODO: remove
-     */
-    updateHasOwnGateway(api_id, body) {
-        const promised_updateDedicatedGateway = this.client.then(client => {
-            const payload = {
-                apiId: api_id,
-                body,
-                'Content-Type': 'application/json',
-            };
-            return client.apis['DedicatedGateway (Individual)'].put_apis__apiId__dedicated_gateway(
-                payload,
-                this._requestMetaData(),
-            );
-        });
-        return promised_updateDedicatedGateway;
-    }
-
-    /**
-     * Get the HasOwnGateway property of an API
-     * @param id {string} UUID of the api
-     * @param callback {function} Callback function which needs to be executed in the success call
-     * TODO: remove
-     */
-    getHasOwnGateway(id) {
-        const promised_getDedicatedGateway = this.client.then(client => {
-            return client.apis['DedicatedGateway (Individual)'].get_apis__apiId__dedicated_gateway(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promised_getDedicatedGateway;
-    }
-
-    /**
      * Get the thumnail of an API
      *
      * @param id {string} UUID of the api
@@ -1834,7 +1690,7 @@ class API extends Resource {
      */
     microgatewayLabelsGet() {
         return this.client.then(client => {
-            return client.apis['Label Collection'].get_labels();
+            return client.apis['Label Collection'].getLabels();
         });
     }
 
@@ -1937,7 +1793,7 @@ class API extends Resource {
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
+            return client.apis['API Products'].getAllAPIProducts(params, Resource._requestMetaData());
         });
     }
 
@@ -1993,7 +1849,7 @@ class API extends Resource {
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedGet = apiClient.then((client) => {
-            return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
+            return client.apis.Subscriptions.getSubscriptions(payload, this._requestMetaData());
         });
         if (callback) {
             return promisedGet.then(callback);
@@ -2137,7 +1993,7 @@ class API extends Resource {
     static getSettings() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedSettings = apiClient.then(client => {
-            return client.apis['Settings'].get_settings();
+            return client.apis['Settings'].getSettings();
         });
         return promisedSettings.then(response => response.body);
     }
@@ -2153,7 +2009,7 @@ class API extends Resource {
     static search(params) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
+            return client.apis['Unified Search'].search(params, Resource._requestMetaData());
         });
     }
 
@@ -2187,7 +2043,7 @@ class API extends Resource {
     static getProduct(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPI = apiClient.then(client => {
-            return client.apis['API Products'].get_api_products__apiProductId_(
+            return client.apis['API Products'].getAPIProduct(
                 {
                     apiProductId: id,
                 },
@@ -2230,7 +2086,7 @@ class API extends Resource {
     static deleteProduct(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['API Products'].delete_api_products__apiProductId_(
+            return client.apis['API Products'].deleteAPIProduct(
                 {
                     apiProductId: id,
                 },
@@ -2264,7 +2120,7 @@ class API extends Resource {
     static getEndpointCertificates() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].get_endpoint_certificates();
+            return client.apis['Endpoint Certificates'].getEndpointCertificates();
         });
     }
 
@@ -2279,7 +2135,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
-                return client.apis['Endpoint Certificates'].post_endpoint_certificates(
+                return client.apis['Endpoint Certificates'].addEndpointCertificate(
                     {},
                     {
                         requestBody: {
@@ -2386,7 +2242,7 @@ class API extends Resource {
     static getCertificateStatus(alias) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].get_endpoint_certificates__alias_({
+            return client.apis['Endpoint Certificates'].getEndpointCertificateByAlias({
                 alias: alias,
             });
         }, this._requestMetaData());
@@ -2400,7 +2256,7 @@ class API extends Resource {
     static deleteEndpointCertificate(alias) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].delete_endpoint_certificates__alias_({
+            return client.apis['Endpoint Certificates'].deleteEndpointCertificateByAlias({
                 alias,
             });
         }, this._requestMetaData());
@@ -2754,7 +2610,7 @@ class API extends Resource {
     static apiCategories() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis["API Category (Collection)"].get_api_categories(
+            return client.apis["API Category (Collection)"].getAllAPICategories(
                 this._requestMetaData(),
             );
         });
@@ -2762,7 +2618,7 @@ class API extends Resource {
     static keyManagers() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis["Key Managers (Collection)"].get_key_managers(
+            return client.apis["Key Managers (Collection)"].getAllKeyManagers(
                 this._requestMetaData(),
             );
         });
