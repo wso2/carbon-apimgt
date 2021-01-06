@@ -2768,8 +2768,9 @@ public class APIMappingUtil {
 
     public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {
         APIRevisionDTO apiRevisionDTO = new APIRevisionDTO();
-        apiRevisionDTO.setId(model.getId());
-        apiRevisionDTO.setUuid(model.getRevisionUUID());
+        apiRevisionDTO.setId(model.getRevisionUUID());
+        String key = "REVISION " + model.getId();
+        apiRevisionDTO.setKey(key);
         apiRevisionDTO.setDescription(model.getDescription());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         Date parsedDate;
@@ -2783,6 +2784,13 @@ public class APIMappingUtil {
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
         apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
+        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
+        if (model.getApiRevisionDeploymentList() != null) {
+            for (APIRevisionDeployment apiRevisionDeployment : model.getApiRevisionDeploymentList()) {
+                apiRevisionDeploymentDTOS.add(fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
+            }
+        }
+        apiRevisionDTO.setDeploymentInfo(apiRevisionDeploymentDTOS);
         return  apiRevisionDTO;
     }
 
@@ -2799,9 +2807,8 @@ public class APIMappingUtil {
 
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) throws APIManagementException {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
-        apiRevisionDeploymentDTO.setDeployment(model.getDeployment());
+        apiRevisionDeploymentDTO.setName(model.getDeployment());
         apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
-        apiRevisionDeploymentDTO.setType(model.getType());
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         Date parsedDate;

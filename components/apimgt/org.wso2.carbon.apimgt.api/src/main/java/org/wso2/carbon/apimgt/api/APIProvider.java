@@ -1568,14 +1568,13 @@ public interface APIProvider extends APIManager {
     void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
 
     /**
-     * Get an API Revisions Deployment mapping details by providing deployment name and type
+     * Get an API Revisions Deployment mapping details by providing deployment name
      *
      * @param name Deployment Name
-     * @param type Deployment type
      * @return APIRevisionDeployment Object
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
-    APIRevisionDeployment getAPIRevisionDeployment(String name, String type) throws APIManagementException;
+    APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details by providing revision uuid
@@ -1595,4 +1594,24 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add APIRevision
      */
     void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Restore a provided API Revision as the working copy of the API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to restore APIRevision
+     */
+    void restoreAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+
+    /**
+     * Delete an API Revision
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to delete APIRevision
+     */
+    void deleteAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+
+
 }

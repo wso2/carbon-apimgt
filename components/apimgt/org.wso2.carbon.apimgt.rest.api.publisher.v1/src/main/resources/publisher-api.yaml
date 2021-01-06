@@ -1301,6 +1301,10 @@ paths:
       operationId: getAPIRevisions
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - name: query
+          in: query
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -1318,7 +1322,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
+            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
 
     #--------------------------------------------
     # Create a new API revision
@@ -1363,7 +1367,7 @@ paths:
   ######################################################
   # The "API Revisions" individual resource API
   ######################################################
-  /apis/{apiId}/revisions/{apiRevisionId}:
+  /apis/{apiId}/revisions/{revisionId}:
 
     #--------------------------------------------
     # Get a revision
@@ -1377,7 +1381,7 @@ paths:
       operationId: getAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiRevisionId'
+        - $ref: '#/components/parameters/revisionId'
       responses:
         200:
           description: |
@@ -1409,7 +1413,7 @@ paths:
       operationId: deleteAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiRevisionId'
+        - $ref: '#/components/parameters/revisionId'
       responses:
         204:
           description: |
@@ -1470,13 +1474,15 @@ paths:
       operationId: deployAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiRevisionId-Q'
+        - $ref: '#/components/parameters/revisionId-Q'
       requestBody:
         description: Deployment object that needs to be added
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIRevisionDeploymentList'
+              type: array
+              items:
+                $ref: '#/components/schemas/APIRevisionDeployment'
       responses:
         200:
           description: |
@@ -1484,11 +1490,13 @@ paths:
         201:
           description: |
             Created.
-            Successful response with the newly deployed APIRevisionDeploymentList object as the entity in the body.
+            Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIRevisionDeploymentList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIRevisionDeployment'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1497,7 +1505,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?apiRevisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/undeploy-revision:
     #--------------------------------------------
@@ -1512,13 +1520,15 @@ paths:
       operationId: undeployAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiRevisionId-Q'
+        - $ref: '#/components/parameters/revisionId-Q'
       requestBody:
         description: Deployment object that needs to be added
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIRevisionDeploymentList'
+              type: array
+              items:
+                $ref: '#/components/schemas/APIRevisionDeployment'
       responses:
         200:
           description: |
@@ -1530,7 +1540,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIRevisionDeploymentList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIRevisionDeployment'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1539,7 +1551,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?apiRevisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+                "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/restore-revision:
 
@@ -1555,7 +1567,7 @@ paths:
       operationId: restoreAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/apiRevisionId-Q'
+        - $ref: '#/components/parameters/revisionId-Q'
       responses:
         200:
           description: |
@@ -1568,7 +1580,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?apiRevisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/import-openapi:
     post:
@@ -7254,10 +7266,10 @@ components:
     APIRevision:
       title: API Info object with basic API details
       properties:
+        key:
+          type: string
+          example: REVISION 1
         id:
-          type: integer
-          example: 1
-        uuid:
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         description:
@@ -7268,6 +7280,10 @@ components:
           format: date-time
         apiInfo:
           $ref: '#/components/schemas/APIRevisionAPIInfo'
+        deploymentInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIRevisionDeployment'
 
     #-----------------------------------------------------
     # The API Revision - API Info resource
@@ -7314,12 +7330,9 @@ components:
         revisionUuid:
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-        deployment:
+        name:
           type: string
           example: production and sandbox
-        type:
-          type: string
-          example: gateway or microgateway
         displayOnDevportal:
           type: boolean
           example: true
@@ -9967,8 +9980,8 @@ components:
 
     # API Revision Identifier
     # Specified as part of the path expression
-    apiRevisionId:
-      name: apiRevisionId
+    revisionId:
+      name: revisionId
       in: path
       description: |
         Revision ID of an API
@@ -9978,8 +9991,8 @@ components:
 
     # API Revision Identifier
     # Specified as part of the query string
-    apiRevisionId-Q:
-      name: apiRevisionId
+    revisionId-Q:
+      name: revisionId
       in: query
       description: |
         Revision ID of an API

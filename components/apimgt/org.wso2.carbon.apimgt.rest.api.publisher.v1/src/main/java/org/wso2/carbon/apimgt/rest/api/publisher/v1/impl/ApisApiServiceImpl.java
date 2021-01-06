@@ -3822,16 +3822,28 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Retrieve available revisions of an API
      *
-     * @param apiId             UUID of the API
+     * @param apiId UUID of the API
+     * @param query Search query string
      * @param messageContext    message context object
      * @return response containing list of API revisions
      */
     @Override
-    public Response getAPIRevisions(String apiId, MessageContext messageContext) {
+    public Response getAPIRevisions(String apiId, String query, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIRevisionListDTO apiRevisionListDTO;
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
-            APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+            if (StringUtils.equalsIgnoreCase(query, "deployed:true")) {
+                List<APIRevision> apiDeployedRevisions = new ArrayList<>();
+                for (APIRevision apiRevision : apiRevisions) {
+                    if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                        apiDeployedRevisions.add(apiRevision);
+                    }
+                }
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiDeployedRevisions);
+            } else {
+                apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+            }
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding retrieving API Revision for api id : " + apiId + " - " + e.getMessage();
@@ -3878,12 +3890,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieve a revision of an API
      *
      * @param apiId             UUID of the API
-     * @param apiRevisionId     Revision ID of the API
+     * @param revisionId     Revision ID of the API
      * @param messageContext    message context object
      * @return response containing APIRevision object
      */
     @Override
-    public Response getAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
+    public Response getAPIRevision(String apiId, String revisionId, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -3897,48 +3909,48 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Delete a revision of an API
      *
      * @param apiId             UUID of the API
-     * @param apiRevisionId     Revision ID of the API
+     * @param revisionId     Revision ID of the API
      * @param messageContext    message context object
      * @return response with 204 status code and no content
      */
     @Override
-    public Response deleteAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.deleteAPIRevision(apiId, revisionId);
+        List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
+        APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
+        return Response.ok().entity(apiRevisionListDTO).build();
     }
 
     /**
      * Deploy a revision
      *
      * @param apiId             UUID of the API
-     * @param apiRevisionId     Revision ID of the API
+     * @param revisionId     Revision ID of the API
      * @param messageContext    message context object
      * @return response with 200 status code
      */
     @Override
-    public Response deployAPIRevision(String apiId, String apiRevisionId, APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO,
+    public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO: apIRevisionDeploymentListDTO.getList()) {
+        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-            apiRevisionDeployment.setRevisionUUID(apiRevisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getDeployment());
-            apiRevisionDeployment.setType(apiRevisionDeploymentDTO.getType());
+            apiRevisionDeployment.setRevisionUUID(revisionId);
+            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.addAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments);
-        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(apiRevisionId);
-        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTOResponse = APIMappingUtil
-                .fromListAPIRevisionDeploymentToDTO(apiRevisionDeploymentsResponse);
+        apiProvider.addAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
+            apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
+        }
         Response.Status status = Response.Status.CREATED;
-        return Response.status(status).entity(apiRevisionDeploymentListDTOResponse).build();
+        return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 
     /**
@@ -3953,53 +3965,55 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
-        for (APIRevision apiRevision: apiRevisions) {
+        for (APIRevision apiRevision : apiRevisions) {
             List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(apiRevision.getRevisionUUID());
-            for (APIRevisionDeployment apiRevisionDeployment: apiRevisionDeploymentsResponse) {
+            for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
                 apiRevisionDeploymentsList.add(apiRevisionDeployment);
             }
         }
-        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTOResponse = APIMappingUtil
-                .fromListAPIRevisionDeploymentToDTO(apiRevisionDeploymentsList);
-        return Response.ok().entity(apiRevisionDeploymentListDTOResponse).build();
+        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsList) {
+            apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
+        }
+        return Response.ok().entity(apiRevisionDeploymentDTOS).build();
     }
 
     @Override
-    public Response undeployAPIRevision(String apiId, String apiRevisionId, APIRevisionDeploymentListDTO apIRevisionDeploymentListDTO, MessageContext messageContext) throws APIManagementException {
+    public Response undeployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+                                        MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO: apIRevisionDeploymentListDTO.getList()) {
+        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-            apiRevisionDeployment.setRevisionUUID(apiRevisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getDeployment());
-            apiRevisionDeployment.setType(apiRevisionDeploymentDTO.getType());
+            apiRevisionDeployment.setRevisionUUID(revisionId);
+            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.undeployAPIRevisionDeployment(apiId, apiRevisionId, apiRevisionDeployments);
-        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(apiRevisionId);
-        APIRevisionDeploymentListDTO apiRevisionDeploymentListDTOResponse = APIMappingUtil
-                .fromListAPIRevisionDeploymentToDTO(apiRevisionDeploymentsResponse);
+        apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
+            apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
+        }
         Response.Status status = Response.Status.CREATED;
-        return Response.status(status).entity(apiRevisionDeploymentListDTOResponse).build();
+        return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 
     /**
      * Restore a revision to the working copy of the API
      *
-     * @param apiId             UUID of the API
-     * @param apiRevisionId     Revision ID of the API
-     * @param messageContext    message context object
+     * @param apiId          UUID of the API
+     * @param revisionId  Revision ID of the API
+     * @param messageContext message context object
      * @return response with 200 status code
      */
     @Override
-    public Response restoreAPIRevision(String apiId, String apiRevisionId, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.restoreAPIRevision(apiId, revisionId);
+        APIDTO apiToReturn = getAPIByID(apiId);
+        return Response.ok().entity(apiToReturn).build();
     }
 }
