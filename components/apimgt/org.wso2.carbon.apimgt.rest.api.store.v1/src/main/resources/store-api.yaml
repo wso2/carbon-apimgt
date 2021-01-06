@@ -1368,6 +1368,7 @@ paths:
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Applications
       responses:
@@ -1548,6 +1549,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Application Keys
       responses:
@@ -1989,6 +1991,7 @@ paths:
         Retrieve keys (Consumer key/secret) of application
       parameters:
         - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - Application Keys
       responses:

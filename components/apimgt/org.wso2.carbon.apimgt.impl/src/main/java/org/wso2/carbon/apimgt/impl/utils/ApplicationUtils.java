@@ -96,6 +96,7 @@ public class ApplicationUtils {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
+            // TODO: 2021-01-04 The key Manager name here is the id. Need to sort this out
             KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
             if (keyManagerInstance != null) {
                 authApplicationInfo = keyManagerInstance.buildFromJSON(authApplicationInfo, clientDetails);
@@ -154,10 +155,10 @@ public class ApplicationUtils {
 
 
     public static void updateOAuthAppAssociation(Application application, String keyType,
-                                                 OAuthApplicationInfo oAuthApplication, String keyManagerName)
+                                                 OAuthApplicationInfo oAuthApplication, String keyManagerId)
             throws APIManagementException {
-        application.addOAuthApp(keyType,keyManagerName,oAuthApplication);
-        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType,keyManagerName);
+        application.addOAuthApp(keyType,keyManagerId,oAuthApplication);
+        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType,keyManagerId);
     }
 
     /**
