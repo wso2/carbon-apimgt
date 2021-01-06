@@ -3367,7 +3367,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
         List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
-        List<API> apiList = getAPIsByProvider(api.getId().getProviderName());
+        List<API> apiList = getAPIVersionsByProviderAndName(api.getId().getProviderName(), api.getId().getName());
         APIVersionComparator versionComparator = new APIVersionComparator();
         for (API oldAPI : apiList) {
             if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
@@ -4083,6 +4083,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIIdentifier existingAPIId = existingAPI.getId();
         String existingAPIStatus = existingAPI.getStatus();
         boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
+        String existingContext = existingAPI.getContext();
         
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
@@ -4148,7 +4149,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // revert back to old values before update.
         existingAPI.setStatus(existingAPIStatus);
         existingAPI.setId(existingAPIId);
-        existingAPI.setContext(existingAPIContextTemplate);
+        existingAPI.setContext(existingContext);
         // update existing api with setLatest to false
         existingAPI.setLatest(false);
         if (isDefaultVersion) {
@@ -7034,7 +7035,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     
                     //Sending Notifications to existing subscribers
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
-                        sendEmailNotification(api);// TODO has registry access
+                        sendEmailNotification(api);
                     }
                     
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
@@ -7241,8 +7242,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             if (deprecateOldVersions) {
                 String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
-
-                List<API> apiList = getAPIsByProvider(provider);
+                String apiName = api.getId().getName();
+                List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName);
                 APIVersionComparator versionComparator = new APIVersionComparator();
                 for (API oldAPI : apiList) {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
@@ -7258,6 +7259,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 publishInPrivateJet(api, api.getId());
             }
         }
+    }
+    
+    private List<API> getAPIVersionsByProviderAndName(String provider, String apiName) throws APIManagementException {
+        Set<String> list = apiMgtDAO.getUUIDsOfAPIVersions(apiName, provider);
+        List<API> apiVersions = new ArrayList<API>();
+        for (String uuid : list) {
+            try {
+                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid);
+                if (APIConstants.API_PRODUCT.equals(publisherAPI.getType())) {
+                    // skip api products
+                    continue;
+                }
+                API api = new API(new APIIdentifier(publisherAPI.getProviderName(), publisherAPI.getApiName(),
+                        publisherAPI.getVersion()));
+
+                api.setUuid(uuid);
+                api.setStatus(publisherAPI.getStatus());
+                apiVersions.add(api);
+            } catch (APIPersistenceException e) {
+                throw new APIManagementException("Error while retrieving the api ", e);
+            }
+        }
+        return apiVersions;
     }
     /**
      * To get the API artifact from the registry
