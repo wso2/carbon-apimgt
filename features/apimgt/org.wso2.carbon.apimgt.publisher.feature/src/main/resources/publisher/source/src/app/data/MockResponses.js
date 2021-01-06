@@ -60,36 +60,6 @@ class MockResponses {
 
     /**
     *
-    * Return updated API
-    * @export
-    * @returns {*} Mocked Service Catalog model
-    */
-    static updateApiFromService() {
-        const response = {
-            id: '32624545-8723-6274-9013-089345678901',
-            name: 'Updated-API',
-            context: '/updatedapi',
-            description: 'This is an updated API',
-            version: '1.0.0',
-        };
-        return Promise.resolve({ body: response });
-    }
-
-    /**
-    *
-    * Return API outdated status
-    * @export
-    * @returns {*} Mocked Service Catalog model
-    */
-    static checkApiOutdated() {
-        const response = {
-            outdated: true,
-        };
-        return Promise.resolve({ body: response });
-    }
-
-    /**
-    *
     * Return sample mocked model data for addSampleService
     * @export
     * @returns {*} Mocked Service Catalog model

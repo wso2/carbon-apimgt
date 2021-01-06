@@ -40,10 +40,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import YAML from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
-import Chip from '@material-ui/core/Chip';
-import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import ServiceCatalog from 'AppData/ServiceCatalog';
-import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
 import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { withRouter } from 'react-router';
@@ -112,7 +108,6 @@ class APIDefinition extends React.Component {
         super(props);
         this.state = {
             openEditor: false,
-            openUpdateDialog: false,
             swagger: null,
             swaggerModified: null,
             graphQL: null,
@@ -122,7 +117,6 @@ class APIDefinition extends React.Component {
             securityAuditProperties: [],
             isSwaggerValid: true,
             isUpdating: false,
-            isOutdated: false,
         };
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
@@ -394,62 +388,16 @@ class APIDefinition extends React.Component {
     }
 
     /**
-     * This method checks if the API is outdated if the API was created from a service entry
-     */
-    checkIfApiOutdated() {
-        const { api, intl } = this.props;
-        const updatedApiPromise = ServiceCatalog.checkApiOutdated(api);
-        updatedApiPromise.then((data) => {
-            const { outdated } = data;
-            this.setState({ isOutdated: outdated });
-        }).catch(() => {
-            // error loading API definition
-            Alert.error(intl.formatMessage({
-                id: 'Apis.Details.APIDefinition.APIDefinition.error.checking.outdated.api',
-                defaultMessage: 'Error loading API outdated status',
-            }));
-        });
-    }
-
-    /**
      * @inheritdoc
      */
     render() {
         const {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
-            securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating, openUpdateDialog,
-            isOutdated,
+            securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
         } = this.state;
         const {
             classes, resourceNotFountMessage, api,
-            intl,
         } = this.props;
-        const toggleOpenUpdateDialog = () => {
-            this.setState({ openUpdateDialog: !openUpdateDialog });
-        };
-        const handleUpdateOutdatedApi = (confirm) => {
-            if (confirm) {
-                const updatedApiPromise = ServiceCatalog.updateApiFromService(api);
-                updatedApiPromise.then(() => {
-                    Alert.info(intl.formatMessage({
-                        id: 'Apis.Details.APIDefinition.APIDefinition.update.outdated.api.success',
-                        defaultMessage: 'Successfully updated the API!',
-                    }));
-                    // Must reload the page with following after successful update
-                    // this.updateAPI();
-                    // this.setState({ isUpdating: false });
-                }).catch(() => {
-                    Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.APIDefinition.APIDefinition.error.updating.outdated.api',
-                        defaultMessage: 'Error updating the API',
-                    }));
-                    // this.setState({ isUpdating: false });
-                });
-            }
-            toggleOpenUpdateDialog();
-        };
-        // check if the API is outdated if it is created from a service entry in the service catalog
-        this.checkIfApiOutdated();
 
         let downloadLink;
         let fileName;
@@ -555,53 +503,6 @@ class APIDefinition extends React.Component {
                             </Button>
                         </div>
                     )}
-                    {isOutdated && (
-                        <div className={classes.titleWrapper}>
-                            <Chip
-                                label={(
-                                    <FormattedMessage
-                                        id='Apis.Details.APIDefinition.APIDefinition.update.api'
-                                        defaultMessage='This API definition is outdated'
-                                    />
-                                )}
-                                variant='outlined'
-                                onClick={toggleOpenUpdateDialog}
-                                className={classes.updateApiWarning}
-                                icon={<WarningRoundedIcon className={classes.warningIconStyle} />}
-                            />
-                        </div>
-                    )}
-                    <ConfirmDialog
-                        key='key-dialog'
-                        labelCancel={(
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.cancel.updating.api'
-                                defaultMessage='No'
-                            />
-                        )}
-                        title={(
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.confirm.updating.api'
-                                defaultMessage='Do you want to update the API?'
-                            />
-                        )}
-                        message={(
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.confirm.updating.api.description'
-                                defaultMessage={'The service definition from which this API was created has been '
-                                + 'modified. Do you want to update this API to reflect the new changes done to'
-                                + ' the service?'}
-                            />
-                        )}
-                        labelOk={(
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.Delete.ok.yes'
-                                defaultMessage='Yes, Update'
-                            />
-                        )}
-                        callback={handleUpdateOutdatedApi}
-                        open={openUpdateDialog}
-                    />
                 </div>
                 <div>
                     <Suspense fallback={<Progress />}>

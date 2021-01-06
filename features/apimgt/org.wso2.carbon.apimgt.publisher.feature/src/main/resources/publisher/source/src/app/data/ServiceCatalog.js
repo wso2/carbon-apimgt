@@ -308,38 +308,6 @@ class ServiceCatalog {
         });
         return promisedServiceResponse.then(response => response.body);
     }
-
-    // TO DO: This method should ideally be defined as a Publisher REST API. Not a Service Catalog REST API
-    /**
-     * Update Outdated API
-     * @returns {promise} Update response.
-     */
-    static updateApiFromService(api) {
-        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedServiceResponse = serviceCatalog.then(client => {
-            // return client.apis['APIs'].updateApiFromService(api);
-            return MockResponses.updateApiFromService(api);
-        });
-        return promisedServiceResponse.then(response => response.body);
-    }
-
-    // TO DO: This method should ideally be defined as a Publisher REST API. Not a Service Catalog REST API
-    /**
-     * Check if API is outdated
-     * @returns {promise} Outdated status response.
-     */
-    static checkApiOutdated(api) {
-        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedServiceResponse = serviceCatalog.then(client => {
-            // return client.apis['APIs'].checkApiOutdated(api);
-            return MockResponses.checkApiOutdated(api);
-        });
-        return promisedServiceResponse.then(response => response.body);
-    }
-
-    
 }
 
 export default ServiceCatalog;
