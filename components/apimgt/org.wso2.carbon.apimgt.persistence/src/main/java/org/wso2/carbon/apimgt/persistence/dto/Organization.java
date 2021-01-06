@@ -1,9 +1,10 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 public class Organization {
-    String id;
-    String name; // tenant domain or organization name
-    String type; // Tenant or Org
+    private String id;
+    private String name; // tenant domain or organization name
+    private String type; // Tenant or Org
+    private String organizationId; // Tenant or Org
 
     public Organization(String name, String id, String type) {
         this.name = name;
@@ -11,8 +12,8 @@ public class Organization {
         this.type = type;
     }
 
-    public Organization(String name) {
-        this.name = name;
+    public Organization(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public String getName() {
@@ -37,5 +38,13 @@ public class Organization {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 }

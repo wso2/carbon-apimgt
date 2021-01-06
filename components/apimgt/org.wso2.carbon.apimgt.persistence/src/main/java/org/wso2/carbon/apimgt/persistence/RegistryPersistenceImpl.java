@@ -154,7 +154,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean tenantFlowStarted = false;
         Registry registry = null;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
@@ -284,7 +284,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean tenantFlowStarted = false;
         Registry registry = null;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             registry = holder.getRegistry();
             tenantFlowStarted  = holder.isTenantFlowStarted();
             
@@ -424,7 +424,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         //test();
         boolean tenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             tenantFlowStarted  = holder.isTenantFlowStarted();
             Registry registry = holder.getRegistry();
 
@@ -464,7 +464,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
         boolean tenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
@@ -531,7 +531,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean tenantFlowStarted = false;
         Registry registry = null;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             registry = holder.getRegistry();
             tenantFlowStarted  = holder.isTenantFlowStarted();
@@ -636,7 +636,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
-        String requestedTenantDomain = org.getName();
+        String requestedTenantDomain = org.getOrganizationId();
         
         boolean isTenantFlowStarted = false;
         PublisherAPISearchResult result = null;
@@ -748,7 +748,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
             UserContext ctx) throws APIPersistenceException {
-        String requestedTenantDomain = org.getName();
+        String requestedTenantDomain = org.getOrganizationId();
         boolean isTenantFlowStarted = false;
         DevPortalAPISearchResult result = null;
         try {
@@ -1260,7 +1260,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherContentSearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(holder.getRegistryUser());
@@ -1411,7 +1411,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         DevPortalContentSearchResult result = null;
         boolean isTenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(holder.getRegistryUser());
@@ -1532,7 +1532,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         GenericArtifactManager artifactManager = null;
         boolean isTenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted   = holder.isTenantFlowStarted();
 
@@ -1568,7 +1568,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws WSDLPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -1654,7 +1654,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -1724,7 +1724,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         boolean isTenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted  = holder.isTenantFlowStarted();
 
@@ -1777,7 +1777,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public String getOASDefinition(Organization org, String apiId) throws OASPersistenceException {
-        String apiTenantDomain = org.getName();
+        String apiTenantDomain = org.getOrganizationId();
         String definition = null;
         boolean tenantFlowStarted = false;
         try {
@@ -1821,7 +1821,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws GraphQLPersistenceException {
         boolean tenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
@@ -1870,7 +1870,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean tenantFlowStarted = false;
         String schemaDoc = null;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
@@ -1904,7 +1904,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws DocumentationPersistenceException {
         boolean tenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
@@ -1965,7 +1965,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws DocumentationPersistenceException {
         boolean tenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
@@ -2035,7 +2035,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         Documentation documentation = null;
         boolean tenantFlowStarted = false;
         try {
-            String requestedTenantDomain = org.getName();
+            String requestedTenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(requestedTenantDomain);
             Registry registryType = holder.getRegistry();
             tenantFlowStarted  = holder.isTenantFlowStarted();
@@ -2072,7 +2072,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         DocumentContent documentContent = null;
         boolean tenantFlowStarted = false;
         try {
-            String requestedTenantDomain = org.getName();
+            String requestedTenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(requestedTenantDomain);
             Registry registryType = holder.getRegistry();
             tenantFlowStarted  = holder.isTenantFlowStarted();
@@ -2150,7 +2150,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             DocumentContent content) throws DocumentationPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2239,7 +2239,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         DocumentSearchResult result = null;
         Registry registryType;
-        String requestedTenantDomain = org.getName();
+        String requestedTenantDomain = org.getOrganizationId();
         boolean isTenantFlowStarted = false;
         try {
             
@@ -2307,7 +2307,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws DocumentationPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrganizationId());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
             GenericArtifactManager artifactManager = RegistryPersistanceDocUtil.getDocumentArtifactManager(registry);
@@ -2339,7 +2339,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws MediationPolicyPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2379,7 +2379,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws MediationPolicyPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2413,7 +2413,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         Mediation mediation = null;
 
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2489,7 +2489,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         MediationInfo mediation;
 
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2575,7 +2575,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws MediationPolicyPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2633,7 +2633,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws ThumbnailPersistenceException {
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2676,7 +2676,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         Registry registry;
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -2725,7 +2725,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         Registry registry;
         boolean isTenantFlowStarted = false;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrganizationId();
             RegistryHolder holder = getRegistry(tenantDomain);
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();

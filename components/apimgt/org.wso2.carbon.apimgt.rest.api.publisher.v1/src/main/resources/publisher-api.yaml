@@ -1636,6 +1636,7 @@ paths:
         Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
       operationId: validateAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: query
         in: query
         description: |
@@ -2985,6 +2986,7 @@ paths:
         and its dependencies (eg: XSDs)
       operationId: updateWSDLOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -3422,6 +3424,7 @@ paths:
       description: |
         This operation can be used to import an API.
       parameters:
+        - $ref: '#/components/parameters/organizationId'
         - name: preserveProvider
           in: query
           description: |

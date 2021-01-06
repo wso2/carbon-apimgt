@@ -100,7 +100,7 @@ public interface ApisApiService {
       public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisImportGraphqlSchemaPost(String organizationId, String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;
-      public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
+      public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail, String organizationId, Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
       public Response apisPost(APIDTO APIDTO, String organizationId, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response deploymentsGetStatus(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
@@ -113,8 +113,8 @@ public interface ApisApiService {
       public Response importWSDLDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
       public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;
-      public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response updateWSDLOfAPI(String apiId, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;
+      public Response validateAPI(String query, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateDocument(String apiId, String name, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;

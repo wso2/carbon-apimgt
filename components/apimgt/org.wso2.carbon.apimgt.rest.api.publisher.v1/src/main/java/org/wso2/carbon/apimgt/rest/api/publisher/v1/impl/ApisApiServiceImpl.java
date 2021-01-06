@@ -2649,7 +2649,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) {
+    public Response validateAPI(String query, String organizationId, String ifNoneMatch, MessageContext messageContext) {
 
         boolean isSearchArtifactExists = false;
         if (StringUtils.isEmpty(query)) {
@@ -3213,7 +3213,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
      */
     @Override
-    public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+    public Response updateWSDLOfAPI(String apiId, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
                                     String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
@@ -3453,7 +3453,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API import response
      * @throws APIManagementException when error occurred while trying to import the API
      */
-    @Override public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail,
+    @Override public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail, String organizationId,
             Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;

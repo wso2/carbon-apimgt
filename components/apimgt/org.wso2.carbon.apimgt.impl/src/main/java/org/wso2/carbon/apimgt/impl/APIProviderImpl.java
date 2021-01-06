@@ -982,7 +982,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(tenantDomain),
+            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganizationId()),
                     APIMapper.INSTANCE.toPublisherApi(api));
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
@@ -1909,16 +1909,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             try {
                 api.setCreatedTime(oldApi.getCreatedTime());
-                apiPersistenceInstance.updateAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
+                apiPersistenceInstance.updateAPI(new Organization(api.getOrganizationId()), APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
 
             //need to be moved to persistent layer
-
-            updateWSDL(oldApi);///////////////has registry access /////////////////
-
-            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
+//
+//            updateWSDL(oldApi);///////////////has registry access /////////////////
+//
+//            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
 
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
@@ -3017,7 +3017,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
                     try {
-                        apiPersistenceInstance.updateAPI(new Organization(tenantDomain), publisherAPI);
+                        apiPersistenceInstance.updateAPI(new Organization(api.getOrganizationId()), publisherAPI);
                     } catch (APIPersistenceException e) {
                         handleException("Error while persisting the updated API ", e); 
                     }
