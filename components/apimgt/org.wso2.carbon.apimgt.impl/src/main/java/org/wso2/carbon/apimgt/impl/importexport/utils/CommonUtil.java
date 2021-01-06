@@ -422,6 +422,7 @@ public class CommonUtil {
      * @param type        Type of the artifact to be exported
      * @param version     API Manager version
      * @param jsonElement JSON element to be added as data
+     * @return The artifact object with the type and version added to it
      */
     public static JsonObject addTypeAndVersionToFile(String type, String version, JsonElement jsonElement) {
 
