@@ -1023,6 +1023,52 @@ public class APIGatewayManager {
             log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
         }
     }
+    
+    /**
+     * add new api version at the API Gateway
+     *
+     * @param artifact
+     * @param api
+     */
+    public void createNewWebsocketApiVersion(API api) {
+
+        try {
+            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+            APIGatewayAdminClient client;
+            /*
+            Set<String> environments = APIUtil.extractEnvironmentsForAPI(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
+            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
+            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            */
+            Set<String> environments = api.getEnvironments();
+            for (String environmentName : environments) {
+                Environment environment = this.environments.get(environmentName);
+                client = new APIGatewayAdminClient(environment);
+                boolean isGatewayDefinedAsALabel = api.getEnvironments() != null;
+                Set<String> publishedGateways = new HashSet<>();
+                try {
+                    gatewayManager.deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
+                } catch (JSONException ex) {
+                    /*
+                    didn't throw this exception to handle multiple gateway publishing
+                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                    therefore this didn't break the gateway publishing if one gateway unreachable
+                    */
+                    log.error("Error occurred deploying sequences on " + environmentName, ex);
+                }
+            }
+        } catch (APIManagementException ex) {
+            /*
+            didn't throw this exception to handle multiple gateway publishing
+            if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+            therefore this didn't break the gateway unpublisihing if one gateway unreachable
+            */
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        } catch (AxisFault ex) {
+            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
+        } 
+    }
 
     /**
      * create body of sequence
