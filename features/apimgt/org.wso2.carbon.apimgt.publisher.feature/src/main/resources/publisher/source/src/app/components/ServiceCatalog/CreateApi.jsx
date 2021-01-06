@@ -119,7 +119,6 @@ function CreateApi(props) {
         serviceId,
         history,
         isOverview,
-        isEdit,
         serviceDisplayName,
     } = props;
     const classes = useStyles();
@@ -266,7 +265,6 @@ function CreateApi(props) {
                 variant={isOverview ? 'contained' : 'outlined'}
                 className={isOverview ? classes.topMarginSpacing : classes.buttonStyle}
                 onClick={toggleOpen}
-                disabled={isOverview && isEdit}
             >
                 <Typography className={!isOverview && classes.textStyle}>
                     <FormattedMessage
@@ -428,13 +426,12 @@ function CreateApi(props) {
 
 CreateApi.defaultProps = {
     isOverview: false,
-    isEdit: false,
 };
 
 CreateApi.propTypes = {
     serviceId: PropTypes.string.isRequired,
+    serviceDisplayName: PropTypes.string.isRequired,
     isOverview: PropTypes.bool,
-    isEdit: PropTypes.bool,
 };
 
 export default CreateApi;

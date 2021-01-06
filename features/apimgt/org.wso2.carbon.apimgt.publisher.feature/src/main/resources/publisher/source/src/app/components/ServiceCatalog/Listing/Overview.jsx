@@ -36,6 +36,7 @@ import Container from '@material-ui/core/Container';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
+import Listing from 'AppComponents/ServiceCatalog/Listing/Listing';
 import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import { Link } from 'react-router-dom';
@@ -166,6 +167,40 @@ function Overview(props) {
     if (notFound) {
         return <ResourceNotFound />;
     }
+
+    const getDefinitionTypeDisplayName = (definitionType) => {
+        switch (definitionType) {
+            case 'OAS2':
+                return Listing.CONST.OAS2;
+            case 'OAS3':
+                return Listing.CONST.OAS3;
+            case 'WSDL1':
+                return Listing.CONST.WSDL1;
+            case 'WSDL2':
+                return Listing.CONST.WSDL2;
+            case 'GRAPHQL_SDL':
+                return Listing.CONST.GRAPHQL_SDL;
+            case 'ASYNC_API':
+                return Listing.CONST.ASYNC_API;
+            default:
+                return definitionType;
+        }
+    };
+
+    const getSecurityTypeDisplayName = (securityType) => {
+        switch (securityType) {
+            case 'BASIC':
+                return Listing.CONST.BASIC;
+            case 'DIGEST':
+                return Listing.CONST.DIGEST;
+            case 'OAUTH2':
+                return Listing.CONST.OAUTH2;
+            case 'NONE':
+                return Listing.CONST.NONE;
+            default:
+                return securityType;
+        }
+    };
 
     let serviceTypeIcon = (
         <img
@@ -356,7 +391,9 @@ function Overview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{service.definitionType}</TableCell>
+                                            <TableCell>
+                                                {getDefinitionTypeDisplayName(service.definitionType)}
+                                            </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>
@@ -370,7 +407,9 @@ function Overview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{service.securityType}</TableCell>
+                                            <TableCell>
+                                                {getSecurityTypeDisplayName(service.securityType)}
+                                            </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>

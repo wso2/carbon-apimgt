@@ -154,6 +154,25 @@ function Listing(props) {
         });
     };
 
+    const getDefinitionTypeDisplayName = (definitionType) => {
+        switch (definitionType) {
+            case 'OAS2':
+                return Listing.CONST.OAS2;
+            case 'OAS3':
+                return Listing.CONST.OAS3;
+            case 'WSDL1':
+                return Listing.CONST.WSDL1;
+            case 'WSDL2':
+                return Listing.CONST.WSDL2;
+            case 'GRAPHQL_SDL':
+                return Listing.CONST.GRAPHQL_SDL;
+            case 'ASYNC_API':
+                return Listing.CONST.ASYNC_API;
+            default:
+                return definitionType;
+        }
+    };
+
     const columns = [
         {
             name: 'id',
@@ -207,7 +226,20 @@ function Listing(props) {
                 defaultMessage: 'Schema Type',
             }),
             options: {
+                customBodyRender: (value, tableMeta = this) => {
+                    if (tableMeta.rowData) {
+                        const dataRow = serviceList[tableMeta.rowIndex];
+                        const { definitionType } = dataRow;
+                        if (dataRow) {
+                            return (
+                                <span>{getDefinitionTypeDisplayName(definitionType)}</span>
+                            );
+                        }
+                    }
+                    return <span />;
+                },
                 sort: false,
+                filter: false,
             },
         },
         {
@@ -362,5 +394,19 @@ function Listing(props) {
         </>
     );
 }
+
+Listing.CONST = {
+    OAS2: 'Swagger',
+    OAS3: 'Open API V3',
+    WSDL1: 'WSDL 1',
+    WSDL2: 'WSDL 2',
+    GRAPHQL_SDL: 'GraphQL SDL',
+    ASYNC_API: 'AsyncAPI',
+    BASIC: 'Basic',
+    DIGEST: 'Digest',
+    OAUTH2: 'OAuth2',
+    NONE: 'None',
+
+};
 
 export default Listing;
