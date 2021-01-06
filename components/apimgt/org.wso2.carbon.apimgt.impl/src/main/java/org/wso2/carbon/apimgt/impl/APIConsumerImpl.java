@@ -5920,7 +5920,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {

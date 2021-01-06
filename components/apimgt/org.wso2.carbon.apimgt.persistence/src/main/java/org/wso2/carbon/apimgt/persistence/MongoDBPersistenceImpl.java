@@ -179,7 +179,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         searchQuery = "";
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(ctx.getOrganization().getName());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
         MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
@@ -238,7 +238,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         //published prototyped only
         searchQuery = "";
-        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(ctx.getOrganization().getName());
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(org.getOrganizationId());
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
         DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
         List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
@@ -607,14 +607,17 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
-    private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {
+    private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String organizationId) {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-        return database.getCollection(orgName, MongoDBPublisherAPI.class);
+        if (organizationId == null){
+            organizationId = "test";
+        }
+        return database.getCollection(organizationId, MongoDBPublisherAPI.class);
     }
 
-    private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
+    private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgnizationId) {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-        return database.getCollection(orgName, MongoDBDevPortalAPI.class);
+        return database.getCollection(orgnizationId, MongoDBDevPortalAPI.class);
     }
 
     @Override

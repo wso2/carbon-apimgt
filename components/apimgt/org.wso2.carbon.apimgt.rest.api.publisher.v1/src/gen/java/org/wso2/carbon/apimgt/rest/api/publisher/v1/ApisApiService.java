@@ -98,7 +98,7 @@ public interface ApisApiService {
       public Response apisChangeLifecyclePost(String action, String apiId, String organizationId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
       public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
-      public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response apisGet(String organizationId, Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisImportGraphqlSchemaPost(String organizationId, String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response apisImportPost(InputStream fileInputStream, Attachment fileDetail, String organizationId, Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
       public Response apisPost(APIDTO APIDTO, String organizationId, String openAPIVersion, MessageContext messageContext) throws APIManagementException;

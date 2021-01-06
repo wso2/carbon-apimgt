@@ -877,7 +877,7 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+    Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException;
     
     /**

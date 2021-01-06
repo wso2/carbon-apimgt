@@ -197,7 +197,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
 
     @Override
-    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query,
+    public Response apisGet(String organizationId, Integer limit, Integer offset, String xWSO2Tenant, String query,
                             String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
@@ -230,7 +230,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }*/
             Map<String, Object> result;
 
-            result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+            result = apiProvider.searchPaginatedAPIs(organizationId, query, tenantDomain, offset, limit);
 
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
