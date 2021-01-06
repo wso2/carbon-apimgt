@@ -179,6 +179,7 @@ import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
@@ -1696,6 +1697,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
                     if (resourceVerbs != null) {
+                        log.info("++++++++++++++++++++++===================+++++++++++++++++++++++++++++++");
                             invalidateResourceCache(api.getContext(), api.getId().getVersion(),resourceVerbs);
                             if (log.isDebugEnabled()) {
                                 log.debug("Calling invalidation cache");
@@ -1869,6 +1871,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
                 if (resourceVerbs != null) {
+                    log.info("++++++++++++++++++++++===================+++++++++++++++++++++++++++++++");
                     invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
                     if (log.isDebugEnabled()) {
                         log.debug("Calling invalidation cache");
@@ -10775,5 +10778,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
         }
 
+    }
+    
+    @Override
+    public void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException {
+
+        try {
+            apiPersistenceInstance.saveGraphQLSchemaDefinition(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, definition);
+
+        } catch (GraphQLPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while saving graphql definition ", e);
+            }
+        }
     }
 }

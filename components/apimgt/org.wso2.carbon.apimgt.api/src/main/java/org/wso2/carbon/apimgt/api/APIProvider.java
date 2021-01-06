@@ -1692,4 +1692,12 @@ public interface APIProvider extends APIManager {
      */
     void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId) throws APIManagementException;
     
+    /**
+     * Add or update graphql definition
+     * @param apiId
+     * @param definition
+     * @throws APIManagementException
+     */
+    void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException;
+    
 }

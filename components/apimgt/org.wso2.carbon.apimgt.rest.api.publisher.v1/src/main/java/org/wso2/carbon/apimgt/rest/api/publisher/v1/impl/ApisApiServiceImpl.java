@@ -3375,20 +3375,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
 
-            //adding the api
-            apiProvider.addAPI(apiToAdd);
 
             //Save swagger definition of graphQL
             APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
+            apiToAdd.setSwaggerDefinition(apiDefinition);
+            //adding the api
+            API createdApi = apiProvider.addAPI(apiToAdd);
 
-            APIIdentifier createdApiId = apiToAdd.getId();
-            apiProvider.saveGraphqlSchemaDefinition(apiToAdd, schema);
-
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
+            apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema);
 
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
