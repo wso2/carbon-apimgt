@@ -220,7 +220,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
                     requestedTenantDomain);
-            String graphQLSchema = apiConsumer.getGraphqlSchema(apiIdentifier);
+            String graphQLSchema = apiConsumer.getGraphqlSchemaDefinition(apiId, requestedTenantDomain);
             return Response.ok().entity(graphQLSchema).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
@@ -1175,6 +1176,17 @@ public abstract class AbstractAPIManager implements APIManager {
         return schema;
     }
 
+    @Override
+    public String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException {
+        String definition = null;
+        try {
+            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+        } catch (GraphQLPersistenceException e) {
+            throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
+                    e);
+        }
+        return definition;
+    }
     /**
      * Returns the swagger 2.0 definition of the given API
      *
