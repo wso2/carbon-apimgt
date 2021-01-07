@@ -78,10 +78,16 @@ public class DataPublisherUtil {
             if (idx > -1) {
                 clientIp = clientIp.substring(0, idx);
             }
-        }else{
+        } else {
          clientIp = (String) axis2MsgContext.getProperty(MessageContext.REMOTE_ADDR);
         }
-        return clientIp;
+        if (clientIp.contains(":") && clientIp.split(":").length == 2) {
+            log.warn("Client port will be ignored and only the IP address will concern from " + clientIp);
+            clientIp = clientIp.split(":")[0];
+            return clientIp;
+        } else {
+            return clientIp;
+        }
     }
 
 
