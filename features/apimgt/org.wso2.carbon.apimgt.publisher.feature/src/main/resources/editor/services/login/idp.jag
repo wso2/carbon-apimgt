@@ -1,0 +1,149 @@
+<%
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+    var log = new Log();
+    log.debug("Services login DCR request");
+    var app = require("/site/public/conf/settings.js").AppConfig.app;
+    var appUtils = require("/services/utils.js");
+    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    include("/services/constants.jag");
+
+    var serverUrl = '';
+    var forwarded_for = request.getHeader(app.customUrl.forwardedHeader);
+    if (app.customUrl.enabled && forwarded_for) {
+        serverUrl = "https://" + forwarded_for;
+    } else {
+        serverUrl = utils.getServerURL();
+    }
+    var authorizeEndpoint = serverUrl + AUTHORIZE_ENDPOINT_SUFFIX;
+
+    var idpConfig = utils.getIdentityProviderConfig();
+    if (idpConfig != null) {
+        authorizeEndpoint = idpConfig.getAuthorizeEndpoint();
+    }
+
+    var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
+    var serviceCatalogSettingsAPIUrl = appUtils.getLoopbackOrigin() + SERVICE_CATALOG_SETTINGS_REST_API_URL_SUFFIX
+    var settingsResponse = get(settingsAPIUrl, {}, "json");
+    var serviceCatalogSettingsResponse = get(serviceCatalogSettingsAPIUrl, {}, "json");
+
+    var responseFailed = false;
+    var erroLogin = serverUrl + app.context +"/error-pages?code="
+
+    var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
+    var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
+    if (loginCallbackUrl == null) {
+	    loginCallbackUrl = serverUrl + app.context + LOGIN_CALLBACK_URL_SUFFIX;
+    }
+
+    var logoutCallbackUrl = appUtils.getTenantBasedLogoutCallBack();
+    if (logoutCallbackUrl == null) {
+         logoutCallbackUrl = serverUrl + app.context + LOGOUT_CALLBACK_URL_SUFFIX;
+    }
+
+    var callbackUrl = "regexp=(" + loginCallbackUrl + "|" + logoutCallbackUrl + ")";
+    var scopes = "";
+    if (settingsResponse.data && serviceCatalogSettingsResponse.data) {
+         scopes = settingsResponse.data.scopes.join(" ");
+         // var catalogScopes = serviceCatalogSettingsResponse.data.scopes.join(" ");
+         var catalogScopes = "string";
+         scopes = scopes + " " + catalogScopes;
+    } else {
+        response.sendRedirect(erroLogin + "500");
+        responseFailed = true;
+    }
+
+    var referer = request.getHeader("Referer");
+    var state = "";
+    // get the pathname from query param 'referrer'
+    if (referer !== null) {
+        var context = app.context.charAt(0) === '/' ? app.context.substring(1) : app.context;
+        var hostnamePattern = "(https?:\/\/.*):?(\\d*)(\/" + context + ")";
+        var re = new RegExp(hostnamePattern);
+        state = encodeURI(referer.replace(re, ''));
+    }
+
+    var authorizationHeader = "Basic " + utils.getBase64EncodedAdminCredentials();
+    var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+    var systemApplicationDAO = new SystemApplicationDAO();
+    var clientId;
+    var serviceProviderTenantDomain = appUtils.getServiceProviderTenantDomain();
+
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, serviceProviderTenantDomain);
+    if (systemApplicationDTO === null) {
+        systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, serviceProviderTenantDomain);
+    }
+    var lock = SystemApplicationDAO.getLock();
+    if (systemApplicationDTO !== null) {
+        clientId = systemApplicationDTO.getConsumerKey();
+    } else {
+        try {
+            lock.acquire();
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME, serviceProviderTenantDomain);
+            if (systemApplicationDTO === null) {
+                systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME_OLD, serviceProviderTenantDomain);
+            }
+            if (systemApplicationDTO == null) {
+                var dcrRequestData = {
+                    "callbackUrl": callbackUrl,
+                    "clientName": PUBLISHER_CLIENT_APP_NAME,
+                    "owner": String(utils.getTenantAdminUserName(serviceProviderTenantDomain)),
+                    "grantType": "authorization_code refresh_token",
+                    "saasApp": true
+                };
+
+                var result = post(dcrUrl, JSON.stringify(dcrRequestData), {
+                    "Authorization": authorizationHeader,
+                    "Content-Type": "application/json"
+                }, "json");
+                clientId = result.data.clientId;
+                var clientSecret = result.data.clientSecret;
+
+                var addApplicationKey = systemApplicationDAO
+                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret, serviceProviderTenantDomain);
+                if (!addApplicationKey) {
+                    log.error("Error while persisting application information in system application DB table!!");
+                    log.error("Client ID = " + clientId);
+                }
+            }
+        } finally {
+            lock.release();
+        }
+    }
+
+    if (request.getQueryString() == "not-Login") {
+        var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl+"&prompt=none";
+    } else {
+        var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
+    }  
+
+    log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
+    var cookie = {
+        'name': 'CLIENT_ID',
+        'value': clientId,
+        'path': app.context + "/",
+        "secure": true,
+        "maxAge": -1
+    };
+     if (responseFailed === false) {
+         response.addCookie(cookie);
+         response.sendRedirect(authorizeEndpoint + authRequestParams);
+     }
+
+%>

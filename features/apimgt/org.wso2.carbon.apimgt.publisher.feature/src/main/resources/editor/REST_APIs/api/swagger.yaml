@@ -1,0 +1,54 @@
+---
+swagger: "2.0"
+info:
+  description: "Implementation of REST APIs for API editor"
+  version: "1.0.0"
+  title: "API Editor"
+host: "localhost"
+basePath: "/"
+schemes:
+- "http"
+paths:
+  /api/am/publisher/v1/swagger.yaml:
+    get:
+      summary: "Returns swagger.yaml"
+      description: "Returns swagger.yaml"
+      operationId: "apiAmPublisherV1Swagger_yamlGET"
+      produces:
+      - "text/yaml"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+      x-swagger-router-controller: "Default"
+  /api/am/publisher/v1/settings:
+    get:
+      summary: "Returns settings"
+      description: "Returns settings"
+      operationId: "apiAmPublisherV1SettingsGET"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+        default:
+          description: "CORS headers for all operations"
+          headers:
+            Access-Control-Allow-Origin:
+              type: "string"
+              default: "http://localhost:8080"
+      x-swagger-router-controller: "Default"
+  /test:
+    get:
+      summary: "Returns swagger.yaml"
+      description: "Returns swagger.yaml"
+      operationId: "testGET"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "OK"
+      x-swagger-router-controller: "Default"
+definitions: {}
