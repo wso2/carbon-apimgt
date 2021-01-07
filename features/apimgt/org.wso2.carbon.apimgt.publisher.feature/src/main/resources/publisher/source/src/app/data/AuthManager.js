@@ -19,7 +19,6 @@
 import qs from 'qs';
 import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
-import API from 'AppData/api';
 import Utils from './Utils';
 import User from './User';
 
@@ -170,7 +169,7 @@ class AuthManager {
      */
     static isRestricted(scopesAllowedToEdit, api = {}) {
         // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
-        if (api.apiType === API.CONSTS.APIProduct) {
+        if (api.apiType === 'APIPRODUCT') {
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else {
