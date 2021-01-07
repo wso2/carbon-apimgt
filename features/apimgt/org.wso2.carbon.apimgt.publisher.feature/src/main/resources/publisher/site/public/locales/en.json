@@ -213,6 +213,8 @@
   "Apis.Details.Configuration.components.KeyManager.configuration": "Key Manager Configuration",
   "Apis.Details.Configuration.components.KeyManager.more.than.one.error": "Select at least one Key Manager",
   "Apis.Details.Configuration.components.KeyManager.more.than.one.info": "Select one or more Key Managers",
+  "Apis.Details.Configuration.components.MarkdownEditor.add.description.button": "Add Description",
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.button": "Edit Description",
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": "Maximum backend transactions per second in integers",
   "Apis.Details.Configuration.components.MaxBackendTps.tooltip": "Limits the total number of calls the API Manager is allowed to make to the backend",
   "Apis.Details.Configuration.components.ResponseCaching.tooltip": "If enabled, the API response will be cached at the gateway level to improve the response time and minimize the backend load",
