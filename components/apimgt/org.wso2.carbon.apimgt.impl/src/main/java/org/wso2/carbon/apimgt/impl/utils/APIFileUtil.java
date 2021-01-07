@@ -185,14 +185,10 @@ public class APIFileUtil {
                 zis.closeEntry();
                 entries++;
                 if (entries > maxEntryCount) {
-                    String errorMsg = "Too many files to unzip.";
-                    log.error(errorMsg);
-                    throw new APIManagementException(errorMsg);
+                    throw new APIManagementException("Too many files to unzip.");
                 }
                 if (total + bufferSize > sizeLimit) {
-                    String errorMsg = "File being unzipped is too big.";
-                    log.error(errorMsg);
-                    throw new APIManagementException(errorMsg);
+                    throw new APIManagementException("File being unzipped is too big.");
                 }
             }
             return archiveName;
