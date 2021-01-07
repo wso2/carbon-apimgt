@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import API from 'AppData/api';
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 
@@ -47,7 +48,7 @@ export default class Resource {
      * @memberof Resource
      */
     isAPIProduct() {
-        return this.apiType === 'APIProduct';
+        return this.apiType === API.CONSTS.APIProduct;
     }
 
     /**

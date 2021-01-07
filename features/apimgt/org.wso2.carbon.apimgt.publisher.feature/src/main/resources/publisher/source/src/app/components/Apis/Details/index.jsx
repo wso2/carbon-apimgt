@@ -404,7 +404,7 @@ class Details extends Component {
     updateAPI(_updatedProperties = {}) {
         const { api } = this.state;
         let isAPIProduct = false;
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === API.CONSTS.APIProduct) {
             isAPIProduct = true;
         }
         const updatedProperties = _updatedProperties instanceof API ? _updatedProperties.toJson() : _updatedProperties;

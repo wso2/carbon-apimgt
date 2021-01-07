@@ -284,7 +284,7 @@ export default function DesignConfigurations() {
                                         <Social api={apiConfig} configDispatcher={configDispatcher} />
                                     </Box>
                                     <Box py={1}>
-                                        {api.apiType !== 'APIProduct' && (
+                                        {api.apiType !== API.CONSTS.APIProduct && (
                                             <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
                                         )}
                                     </Box>
