@@ -65,8 +65,8 @@ public class ApiDetails {
 
             String name = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String description = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION); //
-            String context = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-            String version = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            //String context = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+            //String version = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             String provider = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
 
 
@@ -76,7 +76,7 @@ public class ApiDetails {
             Organization org = new Organization(TenantDomain);
             String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id); //
 
-            String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+           // String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String transport = artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS); //
 
 
@@ -152,17 +152,18 @@ public class ApiDetails {
             String allkeyManagers = getKeymanagers(keyManagersList);
 
 
+            
 
 //            String createdTime = api.getCreatedTime();
 //            String lastUpdate = String.valueOf(api.getLastUpdated());
-            String createdTime = String.valueOf(registry.get(artifactPath).getCreatedTime().getTime());
+           // String createdTime = String.valueOf(registry.get(artifactPath).getCreatedTime().getTime());
 
-            String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
+            //String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
 
             String additionalPropertiesString = getResourceProperties(registry,artifactPath);
 
 
-            Api api1 = new Api(id,name,description, context,version,provider,apiDefinition,type,transport,hasthumbnail,additionalPropertiesString,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,createdTime,lastUpdate);
+            Api api1 = new Api(id,description,apiDefinition,transport,hasthumbnail,additionalPropertiesString,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
             apiDTOList.add(api1);
         }
 
@@ -342,9 +343,9 @@ public class ApiDetails {
         String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
 
         String description = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
-        String context = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+        //String context = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
 
-        String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        //String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
         String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
 
 
@@ -358,7 +359,7 @@ public class ApiDetails {
         //String apiDefinition = apiTypeWrapper.getApi().getSwaggerDefinition();
 
 
-        String type = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE);
+        //String type = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE);
         String transport = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
 
 
@@ -426,9 +427,9 @@ public class ApiDetails {
         Registry registry = artifactData.getRegistry();
 
         String artifactPath = GovernanceUtils.getArtifactPath(registry, artifactData.getDevportalApis(Id).getId());
-        String createdTime = String.valueOf(registry.get(artifactPath).getCreatedTime().getTime());
+       // String createdTime = String.valueOf(registry.get(artifactPath).getCreatedTime().getTime());
 
-        String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
+        //String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
 
         Set<String> tagSet = new HashSet<String>();
         org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
@@ -440,7 +441,7 @@ public class ApiDetails {
         String additionalPropertiesString = getResourceProperties(registry,artifactPath);
 
 
-        return new Api(id,name,description, context,version,provider,apiDefinition,type,transport,hasthumbnail,additionalPropertiesString,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,createdTime,lastUpdate);
+        return new Api(id,description,apiDefinition,transport,hasthumbnail,additionalPropertiesString,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
     }
 
 

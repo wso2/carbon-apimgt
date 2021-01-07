@@ -11,6 +11,7 @@ import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.RegistryData;
 import org.wso2.carbon.graphql.api.devportal.modules.TierDTO;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.graphql.api.devportal.modules.TierNameDTO;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -22,7 +23,7 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.replaceEm
 
 public class TierData {
 
-    public List<TierDTO> getTierData(String Id) throws APIManagementException, GovernanceException, UserStoreException {
+    public List<TierDTO> getTierData(String Id, String name) throws APIManagementException, GovernanceException, UserStoreException {
 
 
         ArtifactData artifactData = new ArtifactData();
@@ -49,21 +50,46 @@ public class TierData {
 
 
         List<TierDTO> tierList = new ArrayList<TierDTO>();
+        String tierPlan=null;
+        String monetizationAttributes = null;
 
         for (int i=0;i< nameList.size();i++){
-            String name = nameList.get(i).getName();
+            //String name = getTierName(i);
 
-            String tierPlan = nameList.get(i).getTierPlan();
+            if(name.equals(nameList.get(i).getName())){
+                tierPlan = nameList.get(i).getTierPlan();
 
-            Map<String,String> monetizationAttributesList = nameList.get(i).getMonetizationAttributes();
-            String monetizationAttributes = null;
-            if(monetizationAttributesList!=null){
-                monetizationAttributes = monetizationAttributesList.toString();
+                Map<String,String> monetizationAttributesList = nameList.get(i).getMonetizationAttributes();
+
+                if(monetizationAttributesList!=null){
+                    monetizationAttributes = monetizationAttributesList.toString();
+                }
             }
 
-            tierList.add(new TierDTO(name, tierPlan,monetizationAttributes));
+
+
+
         }
+        tierList.add(new TierDTO(tierPlan,monetizationAttributes));
         return tierList;
+
+    }
+
+    public List<TierNameDTO> getTierName(String Id) throws GovernanceException {
+        ArtifactData artifactData = new ArtifactData();
+
+        List<TierNameDTO> tierNameDTOS = new ArrayList<>();
+
+
+        String  tiers = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TIER);
+        String[] tierNames = tiers.split("\\|\\|");
+
+        for (String tierName : tierNames) {
+            tierNameDTOS.add(new TierNameDTO(Id,tierName));
+        }
+
+        return tierNameDTOS;
+
 
     }
 }

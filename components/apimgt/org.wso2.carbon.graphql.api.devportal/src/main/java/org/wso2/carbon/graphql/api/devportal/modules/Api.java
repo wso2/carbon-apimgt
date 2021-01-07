@@ -2,14 +2,14 @@ package org.wso2.carbon.graphql.api.devportal.modules;
 
 
 public class Api {
-    private String id;
-    private String name;
+   private String id;
+//    private String name;
     private String description;
-    private String context;
-    private String version;
-    private String provider;
+    //private String context;
+    //private String version;
+   // private String provider;
     private String apiDefinition;
-    private String type;
+    //private String type;
     private String transport;
     private boolean hasthumbnail;
     private String additionalProperties;
@@ -28,18 +28,18 @@ public class Api {
     private  String thumbnailUrl;
     private String categories;
     private String keyManagers;
-    private String createdTime;
-    private String lastUpdate;
+    //private String createdTime;
+    //private String lastUpdate;
 
-    public Api(String id,String name,String description,String context,String version,String provider,String apiDefinition, String type,String transport,boolean hasthumbnail,String additionalProperties,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,String tags,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers,String createdTime,String lastUpdate) {
+    public Api(String id,String description,String apiDefinition,String transport,boolean hasthumbnail,String additionalProperties,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,String tags,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
         this.id = id;
-        this.name = name;
+
         this.description = description;
-        this.context = context;
-        this.version = version;
-        this.provider = provider;
+//        this.context = context;
+//        this.version = version;
+//        this.provider = provider;
         this.apiDefinition = apiDefinition;
-        this.type = type;
+       // this.type = type;
         this.transport=transport;
         this.hasthumbnail = hasthumbnail;
         this.additionalProperties = additionalProperties;
@@ -58,8 +58,8 @@ public class Api {
         this.thumbnailUrl = thumbnailUrl;
         this.categories = categories;
         this.keyManagers = keyManagers;
-        this.createdTime = createdTime;
-        this.lastUpdate = lastUpdate;
+//        this.createdTime = createdTime;
+//        this.lastUpdate = lastUpdate;
 
     }
 

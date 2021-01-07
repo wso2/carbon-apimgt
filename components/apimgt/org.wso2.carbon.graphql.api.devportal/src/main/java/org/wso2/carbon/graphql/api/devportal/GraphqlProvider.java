@@ -57,10 +57,19 @@ public class GraphqlProvider {
         return RuntimeWiring.newRuntimeWiring()
                 .type(queryBuilder())
                 .type(queryApi())
+                //.type(queryApiDetails())
+                .type(queryApiName())
+                .type(queryApiContext())
+                .type(queryApiVersion())
+                .type(queryApiProvider())
+                .type(queryApiType())
+                .type(queryApiCreateTime())
+                .type(queryApiUpdateTime())
                 .type(queryApiCount())
                 .type(queryApiRating())
                 .type(queryOperationInformation())
                 .type(queryTier())
+                .type(queryTierDetails())
                 .type(queryIngressUrl())
                 .type(queryClusterInformation())
                 .type(queryBusinessInformation())
@@ -83,6 +92,39 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getApi", apiService.getApi());
     }
+
+//    private TypeRuntimeWiring.Builder queryApiDetails(){
+//        return TypeRuntimeWiring.newTypeWiring("Api")
+//                .dataFetcher("apiDetails",apiService.getApiDetails());
+//    }
+    private TypeRuntimeWiring.Builder queryApiName(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("name",apiService.getApiName());
+    }
+    private TypeRuntimeWiring.Builder queryApiContext(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("context",apiService.getApiContext());
+    }
+    private TypeRuntimeWiring.Builder queryApiVersion(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("version",apiService.getApiVersion());
+    }
+    private TypeRuntimeWiring.Builder queryApiProvider(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("provider",apiService.getApiProvider());
+    }
+    private TypeRuntimeWiring.Builder queryApiType(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("type",apiService.getApiType());
+    }
+    private TypeRuntimeWiring.Builder queryApiCreateTime(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("createdTime",apiService.getApiCreatedTime());
+    }
+    private TypeRuntimeWiring.Builder queryApiUpdateTime(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("lastUpdate",apiService.getApiUpdatedTime());
+    }
     private TypeRuntimeWiring.Builder queryApiCount(){
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getApisCount",apiService.getApiCount());
@@ -96,6 +138,10 @@ public class GraphqlProvider {
     private TypeRuntimeWiring.Builder queryTier(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("tierInformation",apiService.getTierInformation());
+    }
+    private TypeRuntimeWiring.Builder queryTierDetails(){
+        return TypeRuntimeWiring.newTypeWiring("Tier")
+                .dataFetcher("tierDetails",apiService.getTiers());
     }
 
     private TypeRuntimeWiring.Builder queryIngressUrl(){

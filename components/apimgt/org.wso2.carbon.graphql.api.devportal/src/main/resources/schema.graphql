@@ -1,12 +1,11 @@
 type Api{
-    id:String
     name:String
     description:String
-    context : String
+    context:String
     version:String
     provider:String
-    apiDefinition:String
     type:String
+    apiDefinition:String
     transport:String
     hasthumbnail:Boolean
     additionalProperties:String
@@ -54,8 +53,12 @@ type DeploymentClusterInformation{
     clusterDisplayName:String
     ingressURL:String
 }
+
 type Tier{
     name:String
+    tierDetails:[TierDetails]
+}
+type TierDetails{
     tierPlan:String
     monetizationAttributes:String
 }
@@ -110,6 +113,17 @@ type Pagination{
     total:Int
     next:String
     previous:String
+}
+
+type ApiDTO{
+    id:String
+    name:String
+    context:String
+    version:String
+    provider:String
+    type:String
+    createdTime:String
+    lastUpdate:String
 }
 type Query{
     getApi(id:String):Api
