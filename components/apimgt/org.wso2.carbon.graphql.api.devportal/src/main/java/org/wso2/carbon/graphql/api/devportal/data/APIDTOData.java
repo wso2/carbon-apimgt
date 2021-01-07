@@ -1,14 +1,20 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.APIDTO;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class APIDTOData {
     public static final String GET_API_DATA = "SELECT * FROM AM_API API WHERE API.API_UUID = ? ";
@@ -168,5 +174,49 @@ public class APIDTOData {
 
         }
         return lastUpdate;
+    }
+
+    public String getAdditionalProperties(String Id) throws UserStoreException, RegistryException {
+
+        ArtifactData artifactData = new ArtifactData();
+        Registry registry = artifactData.getRegistry();
+
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, Id);
+
+        Map<String,String> additionalProperties = new HashMap<>();
+
+
+        Resource apiResource = registry.get(artifactPath);
+        Properties properties = apiResource.getProperties();
+
+        if (properties != null) {
+            Enumeration propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    additionalProperties.put(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                            apiResource.getProperty(propertyName));
+                }
+            }
+        }
+        return getAdditionalPropertiesFromMap(additionalProperties);
+    }
+
+    public String getAdditionalPropertiesFromMap(Map<String, String> additionalProperties){
+        //Map<String, String> additionalProperties = apiTypeWrapper.getApi().getAdditionalProperties();
+
+        List<String> additionalPropertiesList = new ArrayList<>();
+
+        String alladditionalProperties= null;
+
+        for (String key : additionalProperties.keySet()) {
+            String properties = key + ":" + additionalProperties.get(key);
+            additionalPropertiesList.add(properties);
+        }
+        if(additionalPropertiesList!=null){
+            alladditionalProperties= String.join(",",additionalPropertiesList);
+
+        }
+        return alladditionalProperties;
     }
 }

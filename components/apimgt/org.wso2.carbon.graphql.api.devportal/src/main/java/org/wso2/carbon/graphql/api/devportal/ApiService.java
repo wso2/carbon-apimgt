@@ -89,6 +89,14 @@ public class ApiService {
 
         };
     }
+
+    public DataFetcher getAdditionalProperties(){
+        return env->{
+            Api api = env.getSource();
+            return apidtoData.getAdditionalProperties(api.getId());
+
+        };
+    }
     public DataFetcher getApis(){
 
 

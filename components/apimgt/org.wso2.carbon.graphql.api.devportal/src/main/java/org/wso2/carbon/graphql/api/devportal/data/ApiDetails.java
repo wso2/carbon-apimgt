@@ -160,10 +160,10 @@ public class ApiDetails {
 
             //String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
 
-            String additionalPropertiesString = getResourceProperties(registry,artifactPath);
+            //String additionalPropertiesString = getResourceProperties(registry,artifactPath);
 
 
-            Api api1 = new Api(id,description,apiDefinition,transport,hasthumbnail,additionalPropertiesString,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+            Api api1 = new Api(id,description,apiDefinition,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
             apiDTOList.add(api1);
         }
 
@@ -194,7 +194,10 @@ public class ApiDetails {
         return keyManagers;
 
     }
+
     public String getResourceProperties(Registry registry, String artifactPath) throws RegistryException {
+
+
 
         Map<String,String> additionalProperties = new HashMap<>();
 
@@ -438,10 +441,10 @@ public class ApiDetails {
         }
         String tags = getTags(tagSet);
 
-        String additionalPropertiesString = getResourceProperties(registry,artifactPath);
+        //String additionalPropertiesString = getResourceProperties(registry,artifactPath);
 
 
-        return new Api(id,description,apiDefinition,transport,hasthumbnail,additionalPropertiesString,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+        return new Api(id,description,apiDefinition,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
     }
 
 

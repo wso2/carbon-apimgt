@@ -65,6 +65,7 @@ public class GraphqlProvider {
                 .type(queryApiType())
                 .type(queryApiCreateTime())
                 .type(queryApiUpdateTime())
+                .type(queryApiAdditionalProperties())
                 .type(queryApiCount())
                 .type(queryApiRating())
                 .type(queryOperationInformation())
@@ -125,6 +126,13 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("lastUpdate",apiService.getApiUpdatedTime());
     }
+    private TypeRuntimeWiring.Builder queryApiAdditionalProperties(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("additionalProperties",apiService.getAdditionalProperties());
+    }
+
+
+
     private TypeRuntimeWiring.Builder queryApiCount(){
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getApisCount",apiService.getApiCount());
