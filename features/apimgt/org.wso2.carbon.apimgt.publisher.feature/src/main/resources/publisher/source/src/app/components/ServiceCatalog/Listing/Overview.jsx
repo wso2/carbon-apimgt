@@ -377,7 +377,9 @@ function Overview(props) {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{service.serviceUrl}</TableCell>
+                                            <TableCell style={{ maxWidth: '220px', wordWrap: 'break-word' }}>
+                                                {service.serviceUrl}
+                                            </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell component='th' scope='row'>

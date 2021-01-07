@@ -216,7 +216,29 @@ function Listing(props) {
                 defaultMessage: 'Service URL',
             }),
             options: {
+                customBodyRender: (value, tableMeta = this) => {
+                    if (tableMeta.rowData) {
+                        const dataRow = serviceList[tableMeta.rowIndex];
+                        const { serviceUrl } = dataRow;
+                        if (dataRow) {
+                            return (
+                                <span style={{
+                                    whiteSpace: 'nowrap',
+                                    textOverflow: 'ellipsis',
+                                    width: '300px',
+                                    display: 'block',
+                                    overflow: 'hidden',
+                                }}
+                                >
+                                    {serviceUrl}
+                                </span>
+                            );
+                        }
+                    }
+                    return <span />;
+                },
                 sort: false,
+                filter: false,
             },
         },
         {
