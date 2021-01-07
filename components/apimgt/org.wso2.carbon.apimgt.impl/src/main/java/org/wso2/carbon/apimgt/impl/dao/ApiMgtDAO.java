@@ -14245,6 +14245,7 @@ public class ApiMgtDAO {
                         APIProductResource resource = new APIProductResource();
                         APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
                                 rs.getString("API_VERSION"));
+                        apiId.setUuid(rs.getString("API_UUID"));
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
                         resource.setApiName(rs.getString("API_NAME"));

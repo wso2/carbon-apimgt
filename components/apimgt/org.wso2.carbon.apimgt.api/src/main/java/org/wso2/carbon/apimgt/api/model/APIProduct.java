@@ -32,8 +32,8 @@ import org.json.simple.JSONObject;
 public class APIProduct {
     // TODO add rest of the properties
     private APIProductIdentifier id;
-    private String uuid;
-    private String type;
+    private String uuid;//
+    private String type;//
     private int productId;
     private String context;
     private String description;
@@ -110,7 +110,11 @@ public class APIProduct {
     private boolean enableStore = true;
 
     public APIProduct(){}
-
+/*
+    @Default
+    public APIProduct(String providerName, String apiProductName, String version) {
+        this.id = new APIProductIdentifier(providerName, apiProductName, version);
+    }*/
     public APIProduct(APIProductIdentifier id) {
         this.id = id;
     }

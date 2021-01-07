@@ -72,6 +72,7 @@ public class RegistrySearchUtil {
     public static final String ENABLE_STORE = "enableStore";
     public static final String API_CATEGORIES_CATEGORY_NAME = "apiCategories_categoryName";
     public static final String NULL_USER_ROLE_LIST = "null";
+    public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
@@ -450,6 +451,16 @@ public class RegistrySearchUtil {
         return newSearchQuery;
     }
 
+    public static String getPublisherProductSearchQuery(String searchQuery, UserContext ctx)
+            throws APIPersistenceException {
+        //for now one criterea is supported
+        String newSearchQuery = StringUtils.replace(searchQuery, ":", "=");
+        newSearchQuery = searchQuery.equals("") ? GET_API_PRODUCT_QUERY : searchQuery + SEARCH_AND_TAG +
+                GET_API_PRODUCT_QUERY;
+
+        newSearchQuery = RegistrySearchUtil.getPublisherRolesWrappedQuery(newSearchQuery, ctx);
+        return newSearchQuery;
+    }
     
     /**
      * Used to reconstruct the input search query as sub context and doc content doesn't support AND search

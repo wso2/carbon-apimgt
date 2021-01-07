@@ -642,18 +642,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         query = query == null ? "" : query;
 
         try {
-            //for now one criterea is supported
-            String searchQuery = StringUtils.replace(query, ":", "=");
-            searchQuery = searchQuery.equals("") ? RestApiConstants.GET_API_PRODUCT_QUERY : query + SEARCH_AND_TAG +
-                    RestApiConstants.GET_API_PRODUCT_QUERY;
-
             String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (log.isDebugEnabled()) {
                 log.debug("API Product list request by " + username);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(searchQuery, tenantDomain, offset, limit);
+            Map<String, Object> result = apiProvider.searchPaginatedAPIProducts(query, tenantDomain, offset, limit);
 
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
             allMatchedProducts.addAll(apiProducts);

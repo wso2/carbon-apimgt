@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -67,6 +68,9 @@ import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
@@ -84,6 +88,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
@@ -421,7 +426,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
-        //test();
+
         boolean tenantFlowStarted = false;
         try {
             RegistryHolder holder = getRegistry(org.getName());
@@ -3006,6 +3011,221 @@ public class RegistryPersistenceImpl implements APIPersistence {
         String apiProvider;
         String visibility;
         String[] visibleRoles;
+    }
+
+    @Override
+    public PublisherAPIProduct addPublisherAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
+        
+        Registry registry = null;
+        boolean isTenantFlowStarted = false;
+        boolean transactionCommitted = false;
+        APIProduct apiProduct;
+        try {
+            String tenantDomain = org.getName();
+            RegistryHolder holder = getRegistry(tenantDomain);
+            registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            registry.beginTransaction();
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifact genericArtifact =
+                    artifactManager.newGovernanceArtifact(new QName(publisherAPIProduct.getApiProductName()));
+            apiProduct = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+            APIProductIdentifier id = new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+                    publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion());
+            apiProduct.setID(id);
+            if (genericArtifact == null) {
+                String errorMessage = "Generic artifact is null when creating API Product" + apiProduct.getId().getName();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+            GenericArtifact artifact = RegistryPersistenceUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
+            artifactManager.addGenericArtifact(artifact);
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + id.getProviderName();
+            //provider ------provides----> APIProduct
+            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+
+            // Make the LC status of the API Product published by default
+            saveAPIStatus(registry, artifactPath, APIConstants.PUBLISHED);
+
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
+
+            String visibleRolesList = apiProduct.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+
+            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+            updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
+                    apiProduct.getAdditionalProperties());
+            RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
+                    apiProduct.getVisibility(), visibleRoles, artifactPath, registry);
+
+            registry.commitTransaction();
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Product Name: " + apiProduct.getId().getName() + ", API Product Version "
+                                + apiProduct.getId().getVersion() + " created";
+                log.debug(logMessage);
+            }
+            //changeLifeCycleStatusToPublish(apiProduct.getId());
+            artifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+            publisherAPIProduct.setCreatedTime(String.valueOf(new Date().getTime()));
+            publisherAPIProduct.setId(artifact.getId());
+            return publisherAPIProduct;
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API Product : "
+                        + publisherAPIProduct.getApiProductName(), re);
+            }
+            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while creating API Product", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                throw new APIPersistenceException("Error while rolling back the transaction for API Product : "
+                        + publisherAPIProduct.getApiProductName(), ex);
+            }
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    @Override
+    public PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId)
+            throws APIPersistenceException {
+        boolean tenantFlowStarted = false;
+        try {
+            RegistryHolder holder = getRegistry(org.getName());
+            tenantFlowStarted  = holder.isTenantFlowStarted();
+            Registry registry = holder.getRegistry();
+
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                                            APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiProductId);
+            if (apiArtifact != null) {
+                APIProduct apiProduct = RegistryPersistenceUtil.getAPIProduct(apiArtifact, registry);
+                apiProduct.setDefinition(this.getOASDefinition(org, apiProductId));
+                PublisherAPIProduct pubApi = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct) ; 
+                pubApi.setApiProductName(apiProduct.getId().getName());
+                pubApi.setProviderName(apiProduct.getId().getProviderName());
+                pubApi.setVersion(apiProduct.getId().getVersion());
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("API Product for id " + apiProductId + " : " + pubApi.toString());
+                }
+                return pubApi;
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + apiProductId
+                        + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get API";
+            throw new APIPersistenceException(msg, e);
+        } catch (APIManagementException e) {
+            String msg = "Failed to get API";
+            throw new APIPersistenceException(msg, e);
+        } catch (OASPersistenceException e) {
+            String msg = "Failed to retrieve OpenAPI definition for the API";
+            throw new APIPersistenceException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
+    }
+
+    @Override
+    public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery,
+            int start, int offset, UserContext ctx) throws APIPersistenceException {
+        String requestedTenantDomain = org.getName();
+        
+        boolean isTenantFlowStarted = false;
+        PublisherAPIProductSearchResult result = new PublisherAPIProductSearchResult();
+        try {
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry userRegistry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+
+            log.debug("Requested query for publisher product search: " + searchQuery);
+            
+            String modifiedQuery = RegistrySearchUtil.getPublisherProductSearchQuery(searchQuery, ctx);
+            
+            log.debug("Modified query for publisher product search: " + modifiedQuery);
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(holder.getRegistryUser());
+
+            final int maxPaginationLimit = getMaxPaginationLimit();
+
+            PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+
+            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
+                    .findGovernanceArtifacts(modifiedQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
+                            true);
+            int totalLength = PaginationContext.getInstance().getLength();
+
+            // Check to see if we can speculate that there are more APIs to be loaded
+            if (maxPaginationLimit == totalLength) {
+                --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+            }
+
+            int tempLength = 0;
+            List<PublisherAPIProductInfo> publisherAPIProductInfoList = new ArrayList<PublisherAPIProductInfo>();
+            for (GovernanceArtifact artifact : governanceArtifacts) {
+                
+                PublisherAPIProductInfo info = new PublisherAPIProductInfo();
+                info.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+                info.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+                info.setId(artifact.getId());
+                info.setApiProductName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+                info.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+                info.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+                info.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+
+                publisherAPIProductInfoList.add(info);
+
+                // Ensure the APIs returned matches the length, there could be an additional API
+                // returned due incrementing the pagination limit when getting from registry
+                tempLength++;
+                if (tempLength >= totalLength) {
+                    break;
+                }
+            }
+            
+            result.setPublisherAPIProductInfoList(publisherAPIProductInfoList);
+            result.setReturnedAPIsCount(publisherAPIProductInfoList.size());
+            result.setTotalAPIsCount(totalLength);
+
+        } catch (GovernanceException e) {
+            throw new APIPersistenceException("Error while searching APIs " , e);
+        } finally {
+            PaginationContext.destroy();
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return result;
     }
 
 }

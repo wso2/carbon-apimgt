@@ -1713,5 +1713,15 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException;
+
+    /**
+     * Get API product by uuid
+     * @param uuid id of the api product
+     * @param requestedTenantDomain domain
+     * @return APIProduct product
+     * @throws APIManagementException
+     */
+    APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    
     
 }

@@ -172,6 +172,9 @@ import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
@@ -186,6 +189,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.context.CarbonContext;
@@ -10477,15 +10481,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
     @Override
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-            Organization org = new Organization(requestedTenantDomain);
+        Organization org = new Organization(requestedTenantDomain);
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-            
+
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, requestedTenantDomain, org, api);
-           
+
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
@@ -10493,6 +10497,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
+        }
+    }
+    
+    public APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        try {
+            Organization org = new Organization(requestedTenantDomain);
+            PublisherAPIProduct publisherAPIProduct = apiPersistenceInstance.getPublisherAPIProduct(org, uuid);
+            if (publisherAPIProduct != null) {
+                APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+                product.setID(new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+                        publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion()));
+                populateAPIProductInformation(uuid, requestedTenantDomain, org, product);
+                return product;
+            } else {
+                String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
+                        + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+            String msg = "Failed to get API Product";
+            throw new APIManagementException(msg, e);
         }
     }
 
@@ -10913,4 +10938,60 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+    
+    /**
+     * Returns APIProduct Search result based on the provided query.
+     *
+     * @param registry
+     * @param searchQuery Ex: provider=*admin*
+     * @return APIProduct result
+     * @throws APIManagementException
+     */
+
+    public Map<String, Object> searchPaginatedAPIProducts(Registry registry, String searchQuery, int start, int end)
+            throws APIManagementException {
+        SortedSet<APIProduct> productSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        List<APIProduct> productList = new ArrayList<APIProduct>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
+        Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
+        try {
+            PublisherAPIProductSearchResult searchAPIs = apiPersistenceInstance.searchAPIProductsForPublisher(org,
+                    searchQuery, start, end, userCtx);
+            if (log.isDebugEnabled()) {
+                log.debug("searched API products for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+            }
+
+            if (searchAPIs != null) {
+                List<PublisherAPIProductInfo> list = searchAPIs.getPublisherAPIProductInfoList();
+                List<Object> apiList = new ArrayList<>();
+                for (PublisherAPIProductInfo publisherAPIInfo : list) {
+                    APIProduct mappedAPI = new APIProduct(new APIProductIdentifier(publisherAPIInfo.getProviderName(),
+                            publisherAPIInfo.getApiProductName(), publisherAPIInfo.getVersion()));
+                    mappedAPI.setUuid(publisherAPIInfo.getId());
+                    mappedAPI.setState(publisherAPIInfo.getState());
+                    mappedAPI.setContext(publisherAPIInfo.getContext());
+                    productList.add(mappedAPI);
+                }
+                productSet.addAll(productList);
+                result.put("products", productSet);
+                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("isMore", true);
+            } else {
+                result.put("products", productSet);
+                result.put("length", 0);
+                result.put("isMore", false);
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
+        }
+        return result ;
+    }
+
 }
