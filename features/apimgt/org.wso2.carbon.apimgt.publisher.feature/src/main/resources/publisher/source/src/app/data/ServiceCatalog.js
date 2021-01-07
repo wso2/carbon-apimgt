@@ -175,16 +175,19 @@ class ServiceCatalog {
 
     /**
      * Export a Service
-     * @param id {string} UUID of the service.
+     *
+     * @param name {string} Name of the service.
+     * @param version {string} Version of the service.
      * @returns {promise} Service Entry promise.
      */
-    static exportService(id) {
+    static exportService(name, version) {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
         const promisedServices = serviceCatalog.then(client => {
             // return client.apis['Services'].exportService(
             //     {
-            //         serviceId: id,
+            //         name: id,
+            //         version: version
             //     },
             //     this._requestMetaData()
             // );

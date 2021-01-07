@@ -33,6 +33,8 @@ import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Container from '@material-ui/core/Container';
+import Utils from 'AppData/Utils';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
@@ -103,6 +105,14 @@ const useStyles = makeStyles((theme) => ({
     paperStyle: {
         marginBottom: theme.spacing(3),
     },
+    downloadServiceFlex: {
+        display: 'flex',
+        flexDirection: 'row',
+        marginLeft: -8,
+    },
+    iconSpacing: {
+        marginRight: theme.spacing(1),
+    },
 }));
 
 /**
@@ -133,6 +143,27 @@ function Overview(props) {
         });
         return null;
     };
+
+    /**
+     * Export Service as a zipped archive
+     * @param {string} serviceName The name of the service
+     * @param {string} serviceVersion Version of the service
+     * @returns {zip} Zip file containing the Service.
+     */
+    function exportService(serviceName, serviceVersion) {
+        return ServiceCatalog.exportService(serviceName, serviceVersion).then((zipFile) => {
+            return Utils.forceDownload(zipFile);
+        }).catch((error) => {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.Overview.download.service.zip.error',
+                    defaultMessage: 'Something went wrong while downloading the Service Definition.',
+                }));
+            }
+        });
+    }
 
     useEffect(() => {
         getService();
@@ -395,6 +426,36 @@ function Overview(props) {
                                             </TableCell>
                                             <TableCell>
                                                 {getDefinitionTypeDisplayName(service.definitionType)}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component='th' scope='row'>
+                                                <div className={classes.iconAligner}>
+                                                    <Icon className={classes.tableIcon}>description</Icon>
+                                                    <span className={classes.iconTextWrapper}>
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.definition.download'
+                                                            defaultMessage='Service Definition'
+                                                        />
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div>
+                                                    <Button
+                                                        onClick={
+                                                            () => exportService(service.displayName, service.version)
+                                                        }
+                                                        color='primary'
+                                                        className={classes.downloadServiceFlex}
+                                                    >
+                                                        <CloudDownloadRounded className={classes.iconSpacing} />
+                                                        <FormattedMessage
+                                                            id='ServiceCatalog.Listing.Overview.download.service'
+                                                            defaultMessage='Download'
+                                                        />
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>

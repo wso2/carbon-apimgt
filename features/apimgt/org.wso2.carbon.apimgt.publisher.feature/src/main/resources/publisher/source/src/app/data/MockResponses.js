@@ -185,7 +185,18 @@ class MockResponses {
     * @returns {*} Mocked Service Catalog model
     */
     static exportService() {
-        const response = 'string';
+        const response = {
+            id: '7abe3fc3-1abe-47de-894a-696a7f4bb052',
+            name: 'PizzaShackAPI',
+            description: 'This is a simple API for Pizza Shack online pizza delivery store.',
+            context: '/pizzashack',
+            version: '1.0.0',
+            provider: 'admin',
+            lifeCycleStatus: 'CREATED',
+            type: 'HTTP',
+            createdTime: 1609821955163,
+            lastUpdatedTime: 1609821972343,
+        };
         return Promise.resolve({ body: response });
     }
 
@@ -268,7 +279,94 @@ class MockResponses {
     * @returns {*} Mocked Service Catalog model
     */
     static getServiceDefinition() {
-        const response = 'string';
+        const response = {
+            openapi: '3.0.0',
+            info: {
+                title: 'Callback Example',
+                version: '1.0.0',
+            },
+            paths: {
+                '/streams': {
+                    post: {
+                        description: 'subscribes a client to receive out-of-band data',
+                        parameters: [
+                            {
+                                name: 'callbackUrl',
+                                in: 'query',
+                                required: true,
+                                description: 'the location where data will be sent.'
+                                + ' Must be network accessible\nby the source server\n',
+                                schema: {
+                                    type: 'string',
+                                    format: 'uri',
+                                    example: 'https://tonys-server.com',
+                                },
+                            },
+                        ],
+                        responses: {
+                            201: {
+                                description: 'subscription successfully created',
+                                content: {
+                                    'application/json': {
+                                        schema: {
+                                            description: 'subscription information',
+                                            required: [
+                                                'subscriptionId',
+                                            ],
+                                            properties: {
+                                                subscriptionId: {
+                                                    description: 'this unique identifier allows'
+                                                    + ' management of the subscription',
+                                                    type: 'string',
+                                                    example: '2531329f-fb09-4ef7-887e-84e648214436',
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        callbacks: {
+                            onData: {
+                                '{$request.query.callbackUrl}/data': {
+                                    post: {
+                                        requestBody: {
+                                            description: 'subscription payload',
+                                            content: {
+                                                'application/json': {
+                                                    schema: {
+                                                        type: 'object',
+                                                        properties: {
+                                                            timestamp: {
+                                                                type: 'string',
+                                                                format: 'date-time',
+                                                            },
+                                                            userData: {
+                                                                type: 'string',
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        responses: {
+                                            202: {
+                                                description: 'Your server implementation should return'
+                                                + ' this HTTP status code\nif the data was received successfully\n',
+                                            },
+                                            204: {
+                                                description: 'Your server should return this HTTP status'
+                                                + ' code if no longer interested\nin further updates\n',
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        };
         return Promise.resolve({ body: response });
     }
 
