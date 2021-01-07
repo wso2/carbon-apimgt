@@ -30,6 +30,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import ArrowForwardIcon from '@material-ui/icons/SettingsEthernet';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
+import API from 'AppData/api';
 import Endpoints from './components/Endpoints';
 import KeyManager from './components/KeyManager';
 import APILevelRateLimitingPolicies from './components/APILevelRateLimitingPolicies';
@@ -105,7 +106,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
-    const keyManagers = api.apiType === 'APIProduct' ? ['all'] : [...api.keyManagers];
+    const keyManagers = api.apiType === API.CONSTS.APIProduct ? ['all'] : [...api.keyManagers];
     return {
         id: api.id,
         name: api.name,
