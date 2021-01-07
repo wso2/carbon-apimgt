@@ -1,6 +1,6 @@
 {
   "APis.Details.tryout.help.main": "Test APIs while in the Development stage.",
-  "Api.category.dropdown.tooltip": "API categories can be added via the Admin portal UI or the Admin REST API. There has to be pre-defined API categories in the environment in order to be attached to an API.",
+  "Api.category.dropdown.tooltip": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API.",
   "Apis.Create.APIProduct.APIProductCreateWrapper.back": "Back",
   "Apis.Create.APIProduct.APIProductCreateWrapper.cancel": "Cancel",
   "Apis.Create.APIProduct.APIProductCreateWrapper.defineProvide": "Define API Product",
@@ -242,7 +242,7 @@
   "Apis.Details.Configuration.components.transport.empty": "Please select at least one transport!",
   "Apis.Details.Configuration.components.transport.sslHttps": "Please select Https as transport with mutual SSL!",
   "Apis.Details.Configurations.api.categories": "API Categories",
-  "Apis.Details.Configurations.api.categories.empty": "No API Categories defined yet. Please create an API Category first.",
+  "Apis.Details.Configurations.api.categories.empty": "No API Categories defined.",
   "Apis.Details.Documents.Create.heading": "Documents",
   "Apis.Details.Documents.Create.markdown.editor.add.document.button": "Add Document",
   "Apis.Details.Documents.Create.markdown.editor.add.document.cancel.button": "Cancel",
