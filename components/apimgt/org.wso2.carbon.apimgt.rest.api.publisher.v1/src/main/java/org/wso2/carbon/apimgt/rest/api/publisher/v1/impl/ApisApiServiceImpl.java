@@ -3267,21 +3267,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO newVersionedApi;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            api.setAsDefaultVersion(true);
+            API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion);
 
-            //creates the new version
-            apiProvider.createNewAPIVersion(api, newVersion);
-
-            //get newly created API to return as response
-            APIIdentifier apiNewVersionedIdentifier =
-                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
-            newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+            newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
-                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + versionedAPI.getUuid());
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException | DuplicateAPIException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {

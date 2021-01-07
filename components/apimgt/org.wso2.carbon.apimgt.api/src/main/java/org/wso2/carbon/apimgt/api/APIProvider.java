@@ -424,6 +424,20 @@ public interface APIProvider extends APIManager {
      *                                the new version of the API
      */
     void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException;
+    
+    /**
+     * Create a new version of the <code>api</code>, with version <code>newVersion</code>
+     *
+     * @param apiid        The id of the API to be copied
+     * @param newVersion The version of the new API
+     * @param defaultVersion whether this version is default or not 
+     * @return api created api
+     * @throws DuplicateAPIException  If the API trying to be created already exists
+     * @throws APIManagementException If an error occurs while trying to create
+     *                                the new version of the API
+     */
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion)
+            throws DuplicateAPIException, APIManagementException;
 
     /**
      * Removes a given documentation

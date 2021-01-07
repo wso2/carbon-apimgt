@@ -192,7 +192,14 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException {
         // TODO Auto-generated method stub
         return null;
