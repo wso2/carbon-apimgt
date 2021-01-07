@@ -179,6 +179,7 @@ import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
@@ -3380,7 +3381,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
         List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
-        List<API> apiList = getAPIsByProvider(api.getId().getProviderName());
+        List<API> apiList = getAPIVersionsByProviderAndName(api.getId().getProviderName(), api.getId().getName());
         APIVersionComparator versionComparator = new APIVersionComparator();
         for (API oldAPI : apiList) {
             if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
@@ -4083,6 +4084,102 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + "'s Source type is not FILE.";
             handleException(errorMsg);
         }
+    }
+
+    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion)
+            throws DuplicateAPIException, APIManagementException {
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
+
+        if (existingAPI == null) {
+            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
+        }
+        APIIdentifier existingAPIId = existingAPI.getId();
+        String existingAPIStatus = existingAPI.getStatus();
+        boolean isExsitingAPIdefaultVersion = existingAPI.isDefaultVersion();
+        String existingContext = existingAPI.getContext();
+        
+        APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
+                existingAPI.getId().getApiName(), newVersion);
+        existingAPI.setId(newApiId);
+        existingAPI.setStatus(APIConstants.CREATED);
+        existingAPI.setDefaultVersion(isDefaultVersion);
+
+        // We need to change the context by setting the new version
+        // This is a change that is coming with the context version strategy
+        String existingAPIContextTemplate = existingAPI.getContextTemplate();
+        existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
+        
+        if (APIConstants.APITransportType.WS.toString().equals(existingAPI.getType())){
+            APIGatewayManager.getInstance().createNewWebsocketApiVersion(existingAPI);
+        }
+        
+        API newAPI = addAPI(existingAPI);
+        String newAPIId = newAPI.getUuid();
+        
+        // copy docs
+        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain);
+
+        if (existingDocs != null) {
+            for (Documentation documentation : existingDocs) {
+                Documentation newDoc = addDocumentation(newAPIId, documentation);
+                DocumentationContent content = getDocumentationContent(existingApiId, documentation.getId(),
+                        tenantDomain); // TODO see whether we can optimize this
+                if (content != null) {
+                    addDocumentationContent(newAPIId, newDoc.getId(), content);
+                }
+            }
+        }
+        
+        // copy icon
+        ResourceFile icon = getIcon(existingApiId, tenantDomain);
+        if (icon != null) {
+            setThumbnailToAPI(newAPIId, icon);
+        }
+
+        // copy sequences
+        List<Mediation> mediationPolicies = getAllApiSpecificMediationPolicies(existingApiId);
+        if (mediationPolicies != null) {
+            for (Mediation mediation : mediationPolicies) {
+                addApiSpecificMediationPolicy(newAPIId, mediation);
+            }
+        }
+        
+        // copy wsdl 
+        if (existingAPI.getWsdlUrl() != null) {
+            ResourceFile wsdl = getWSDL(existingApiId, tenantDomain);
+            if (wsdl != null) {
+                addWSDLResource(newAPIId, wsdl, null);
+            }
+        }
+        
+        // copy graphql definition
+        String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, tenantDomain);
+        if(graphQLSchema != null) {
+            saveGraphqlSchemaDefinition(newAPIId, graphQLSchema);
+        }
+        
+        // update old api
+        // revert back to old values before update.
+        existingAPI.setStatus(existingAPIStatus);
+        existingAPI.setId(existingAPIId);
+        existingAPI.setContext(existingContext);
+        // update existing api with setLatest to false
+        existingAPI.setLatest(false);
+        if (isDefaultVersion) {
+            existingAPI.setDefaultVersion(false);
+        } else {
+            existingAPI.setDefaultVersion(isExsitingAPIdefaultVersion);
+        }
+
+        try {
+            apiPersistenceInstance.updateAPI(new Organization(tenantDomain),
+                    APIMapper.INSTANCE.toPublisherApi(existingAPI));
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while updating API details", e);
+        }
+
+        return newAPI;
     }
 
     /**
@@ -6953,7 +7050,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     
                     //Sending Notifications to existing subscribers
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
-                        sendEmailNotification(api);// TODO has registry access
+                        sendEmailNotification(api);
                     }
                     
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
@@ -7160,8 +7257,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             if (deprecateOldVersions) {
                 String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
-
-                List<API> apiList = getAPIsByProvider(provider);
+                String apiName = api.getId().getName();
+                List<API> apiList = getAPIVersionsByProviderAndName(provider, apiName);
                 APIVersionComparator versionComparator = new APIVersionComparator();
                 for (API oldAPI : apiList) {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
@@ -7177,6 +7274,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 publishInPrivateJet(api, api.getId());
             }
         }
+    }
+    
+    private List<API> getAPIVersionsByProviderAndName(String provider, String apiName) throws APIManagementException {
+        Set<String> list = apiMgtDAO.getUUIDsOfAPIVersions(apiName, provider);
+        List<API> apiVersions = new ArrayList<API>();
+        for (String uuid : list) {
+            try {
+                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid);
+                if (APIConstants.API_PRODUCT.equals(publisherAPI.getType())) {
+                    // skip api products
+                    continue;
+                }
+                API api = new API(new APIIdentifier(publisherAPI.getProviderName(), publisherAPI.getApiName(),
+                        publisherAPI.getVersion()));
+
+                api.setUuid(uuid);
+                api.setStatus(publisherAPI.getStatus());
+                apiVersions.add(api);
+            } catch (APIPersistenceException e) {
+                throw new APIManagementException("Error while retrieving the api ", e);
+            }
+        }
+        return apiVersions;
     }
     /**
      * To get the API artifact from the registry
@@ -10794,5 +10915,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
         }
 
+    }
+    
+    @Override
+    public void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException {
+
+        try {
+            apiPersistenceInstance.saveGraphQLSchemaDefinition(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, definition);
+
+        } catch (GraphQLPersistenceException e) {
+            if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
+                throw new APIMgtResourceNotFoundException(e);
+            } else {
+                throw new APIManagementException("Error while saving graphql definition ", e);
+            }
+        }
     }
 }

@@ -179,6 +179,15 @@ public interface APIManager {
     String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
+     * Get graphql schema definition
+     * @param apiId
+     * @param tenantDomain
+     * @return
+     * @throws APIManagementException
+     */
+    String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException;
+
+    /**
      * Returns the swagger v2.0 definition as a string
      *
      * @param apiId id of the APIIdentifier
