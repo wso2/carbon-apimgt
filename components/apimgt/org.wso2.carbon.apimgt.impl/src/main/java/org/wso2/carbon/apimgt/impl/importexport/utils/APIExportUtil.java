@@ -529,7 +529,7 @@ public class APIExportUtil {
                     apiToReturn.setUriTemplates(new LinkedHashSet<>());
                 }
                 APIIdentifier apiIdentifier = apiToReturn.getId();
-                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier, apiToReturn.getOrganizationId());
                 APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
                 String formattedSwaggerJson = parser.getOASDefinitionForPublisher(apiToReturn, apiSwagger);
 

@@ -1179,11 +1179,12 @@ public abstract class AbstractAPIManager implements APIManager {
      * Returns the swagger 2.0 definition of the given API
      *
      * @param apiId id of the APIIdentifier
+     * @param organizationId UUId of the organization
      * @return An String containing the swagger 2.0 definition
      * @throws APIManagementException
      */
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String organizationId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
         String id;
@@ -1193,7 +1194,7 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }

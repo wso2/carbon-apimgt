@@ -1909,7 +1909,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             try {
                 api.setCreatedTime(oldApi.getCreatedTime());
-                apiPersistenceInstance.updateAPI(new Organization(api.getOrganizationId()), APIMapper.INSTANCE.toPublisherApi(api));
+                apiPersistenceInstance.updateAPI(new Organization(existingAPI.getOrganizationId()), APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
@@ -3282,7 +3282,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api.getUuid() != null) {
                 swagger = getOpenAPIDefinition(api.getUuid(), tenantDomain); 
             } else {
-                swagger = getOpenAPIDefinition(api.getId()); // TODO this needs to be changed to uuid based one
+                swagger = getOpenAPIDefinition(api.getId(), api.getOrganizationId()); // TODO this needs to be changed to uuid based one
             }
         } else {
             swagger = api.getSwaggerDefinition();
@@ -3312,7 +3312,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilder builder = null;
         APIProductIdentifier apiProductId = apiProduct.getId();
 
-        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId()));
+        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId(), null));
 
         String provider = apiProductId.getProviderName();
         if (provider.contains("AT")) {
@@ -8600,7 +8600,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             api.setType(APIConstants.GRAPHQL_API);
         }
-        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId(), api.getOrganizationId()));
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.publishToGateway(api, builder, tenantDomain);
     }
@@ -9110,7 +9110,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 validateApiLifeCycleForApiProducts(api);
 
-                api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+                api.setSwaggerDefinition(getOpenAPIDefinition(api.getId(), api.getOrganizationId()));
                 if (!apiToProductResourceMapping.containsKey(api)) {
                     apiToProductResourceMapping.put(api, new ArrayList<>());
                 }
@@ -9325,7 +9325,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
             }
 
-            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId(), api.getOrganizationId()));
 
             if (!apiToProductResourceMapping.containsKey(api)) {
                 apiToProductResourceMapping.put(api, new ArrayList<>());

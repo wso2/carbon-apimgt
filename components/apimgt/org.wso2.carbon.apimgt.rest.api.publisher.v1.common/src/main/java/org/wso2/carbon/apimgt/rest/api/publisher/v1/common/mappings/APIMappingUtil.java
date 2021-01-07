@@ -1010,7 +1010,7 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), model.getOrganizationId());
             }
             
             apiOperationsDTO = getOperationsFromAPI(model);
@@ -2055,7 +2055,7 @@ public class APIMappingUtil {
             }
         }
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId());
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(), null);
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 

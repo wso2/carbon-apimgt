@@ -186,14 +186,22 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        // TODO Auto-generated method stub
+    public Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
         return null;
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIsNew(String searchQuery, String tenantDomain, int start, int end)
-            throws APIManagementException {
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         // TODO Auto-generated method stub
         return null;
     }

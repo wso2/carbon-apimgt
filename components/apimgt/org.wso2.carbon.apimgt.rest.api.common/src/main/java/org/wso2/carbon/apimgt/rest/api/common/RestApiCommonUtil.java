@@ -368,9 +368,9 @@ public class RestApiCommonUtil {
         String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
         String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
         if (api.getUuid() != null) {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), providerTenantDomain);
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), api.getOrganizationId());
         } else {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), api.getOrganizationId());
         }
          
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);

@@ -652,7 +652,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API api = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
-            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier,organizationId);
             // Get configuration file, retrieve API token and collection id
             JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
             String apiToken = (String) securityAuditPropertyObject.get("apiToken");
@@ -1611,7 +1611,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
         APIIdentifier apiIdentifier = originalAPI.getId();
-        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, organizationId);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
@@ -2473,6 +2473,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
+            if (organizationId != null) {
+                api.setOrganizationId(organizationId);
+            }
             String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
@@ -2551,6 +2554,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId API Id
      * @param apiDefinition swagger definition
+     * @param organizationId Organization UUID
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway

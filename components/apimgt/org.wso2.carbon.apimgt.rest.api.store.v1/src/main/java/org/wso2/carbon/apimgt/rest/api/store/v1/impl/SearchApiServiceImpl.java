@@ -48,6 +48,7 @@ import javax.ws.rs.core.Response;
 
 public class SearchApiServiceImpl implements SearchApiService {
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
+    String organizationId = null;
 
     @Override
     public Response searchGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
@@ -79,7 +80,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = apiConsumer.searchPaginatedContent(query, requestedTenantDomain, offset, limit);
             } else {
-                result = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset, limit);
+                result = apiConsumer.searchPaginatedAPIs(organizationId, query, requestedTenantDomain, offset, limit);
             }
 
             ArrayList<Object> apis;

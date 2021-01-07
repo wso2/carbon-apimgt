@@ -5423,8 +5423,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId);
+    public String getOpenAPIDefinition(Identifier apiId, String organizationId) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, organizationId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
     
@@ -5490,7 +5490,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiTenantDomain;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId);
+        String definition = super.getOpenAPIDefinition(apiId,null);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);

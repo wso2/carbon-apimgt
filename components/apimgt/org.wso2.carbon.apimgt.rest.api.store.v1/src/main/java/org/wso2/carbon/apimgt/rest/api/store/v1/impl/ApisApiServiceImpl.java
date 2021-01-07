@@ -74,6 +74,7 @@ import javax.ws.rs.core.Response;
 public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+    String organizationId = null;
 
     @Override
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
@@ -98,7 +99,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset,
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(organizationId, query, requestedTenantDomain, offset,
                     limit);
             
 
@@ -154,7 +155,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getAPIbyUUID(organizationId, apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -186,7 +187,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getAPIbyUUID(organizationId, apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);

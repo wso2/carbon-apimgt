@@ -343,7 +343,7 @@ public class PublisherCommonUtils {
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, apiToUpdate.getOrganizationId());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -978,9 +978,18 @@ public class PublisherCommonUtils {
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
+        if (organizationId != null) {
+            unModifiedAPI.setOrganizationId(organizationId);
+        }
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
+        String apiSwagger;
+        if (organizationId != null) {
+            apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organizationId);
+        } else {
+            apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain);
+        }
+         // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
