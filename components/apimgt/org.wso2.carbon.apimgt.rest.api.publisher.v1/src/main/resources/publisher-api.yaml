@@ -7135,11 +7135,11 @@ components:
             type: string
         apiType:
           type: string
-          description: The API type to be used. Accepted values are API, APIProduct
-          example: APIProduct
+          description: The API type to be used. Accepted values are API, APIPRODUCT
+          example: APIPRODUCT
           enum:
           - API
-          - APIProduct
+          - APIPRODUCT
         transport:
           type: array
           description: |
