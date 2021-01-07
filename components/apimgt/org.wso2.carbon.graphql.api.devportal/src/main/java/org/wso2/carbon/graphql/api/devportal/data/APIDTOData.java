@@ -2,6 +2,11 @@ package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.PersistenceManager;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.APIDTO;
@@ -17,6 +22,10 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class APIDTOData {
+
+    APIPersistence apiPersistenceInstance;
+
+
     public static final String GET_API_DATA = "SELECT * FROM AM_API API WHERE API.API_UUID = ? ";
     public static final String GET_API_NAME = "SELECT API.API_NAME FROM AM_API API WHERE API.API_UUID = ? ";
     public static final String GET_API_CONTEXT = "SELECT API.CONTEXT FROM AM_API API WHERE API.API_UUID = ? ";
@@ -218,5 +227,17 @@ public class APIDTOData {
 
         }
         return alladditionalProperties;
+    }
+
+    public String getApiDefinition(String Id) throws OASPersistenceException {
+
+
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
+        Organization org = new Organization(TenantDomain);
+        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, Id); //
+
+        return apiDefinition;
+
     }
 }

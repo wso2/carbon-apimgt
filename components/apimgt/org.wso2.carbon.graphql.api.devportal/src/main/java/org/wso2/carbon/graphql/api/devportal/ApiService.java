@@ -97,6 +97,13 @@ public class ApiService {
 
         };
     }
+    public DataFetcher getApiDefinition(){
+        return env->{
+            Api api = env.getSource();
+            return apidtoData.getApiDefinition(api.getId());
+
+        };
+    }
     public DataFetcher getApis(){
 
 

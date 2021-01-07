@@ -8,7 +8,7 @@ public class Api {
     //private String context;
     //private String version;
    // private String provider;
-    private String apiDefinition;
+    //private String apiDefinition;
     //private String type;
     private String transport;
     private boolean hasthumbnail;
@@ -31,14 +31,14 @@ public class Api {
     //private String createdTime;
     //private String lastUpdate;
 
-    public Api(String id,String description,String apiDefinition,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,String tags,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
+    public Api(String id,String description,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,String tags,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
         this.id = id;
 
         this.description = description;
 //        this.context = context;
 //        this.version = version;
 //        this.provider = provider;
-        this.apiDefinition = apiDefinition;
+        //this.apiDefinition = apiDefinition;
        // this.type = type;
         this.transport=transport;
         this.hasthumbnail = hasthumbnail;

@@ -71,10 +71,10 @@ public class ApiDetails {
 
 
 
-            apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
-            String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-            Organization org = new Organization(TenantDomain);
-            String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id); //
+//            apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+//            String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
+//            Organization org = new Organization(TenantDomain);
+//            String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id); //
 
            // String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String transport = artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS); //
@@ -163,7 +163,7 @@ public class ApiDetails {
             //String additionalPropertiesString = getResourceProperties(registry,artifactPath);
 
 
-            Api api1 = new Api(id,description,apiDefinition,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+            Api api1 = new Api(id,description,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
             apiDTOList.add(api1);
         }
 
@@ -354,10 +354,10 @@ public class ApiDetails {
 
 
 
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
-        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-        Organization org = new Organization(TenantDomain);
-        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id);
+//        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+//        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
+//        Organization org = new Organization(TenantDomain);
+//        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id);
 
         //String apiDefinition = apiTypeWrapper.getApi().getSwaggerDefinition();
 
@@ -444,7 +444,7 @@ public class ApiDetails {
         //String additionalPropertiesString = getResourceProperties(registry,artifactPath);
 
 
-        return new Api(id,description,apiDefinition,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+        return new Api(id,description,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
     }
 
 
