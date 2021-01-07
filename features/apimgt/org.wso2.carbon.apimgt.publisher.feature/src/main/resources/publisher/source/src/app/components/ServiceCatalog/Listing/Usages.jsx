@@ -208,7 +208,7 @@ Usages.defaultProps = {
 Usages.propTypes = {
     serviceDisplayName: PropTypes.string.isRequired,
     serviceId: PropTypes.string.isRequired,
-    usageNumber: PropTypes.string.isRequired,
+    usageNumber: PropTypes.number.isRequired,
     isOverview: PropTypes.string,
 };
 

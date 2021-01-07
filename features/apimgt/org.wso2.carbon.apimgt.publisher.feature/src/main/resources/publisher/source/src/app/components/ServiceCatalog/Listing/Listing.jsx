@@ -146,11 +146,15 @@ function Listing(props) {
             }));
             // Reload the services list
             getData();
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while deleting service',
-                id: 'ServiceCatalog.Listing.Listing.error.delete',
-            }));
+        }).catch((errorResponse) => {
+            if (errorResponse.response.body.description !== null) {
+                Alert.error(errorResponse.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error while deleting service',
+                    id: 'ServiceCatalog.Listing.Listing.error.delete',
+                }));
+            }
         });
     };
 
