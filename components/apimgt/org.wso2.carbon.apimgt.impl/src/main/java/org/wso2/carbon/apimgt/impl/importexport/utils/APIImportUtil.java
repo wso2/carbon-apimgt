@@ -342,7 +342,7 @@ public final class APIImportUtil {
                             checklistMap.put(APIImportExportConstants.REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC, true);
                 }
                 
-                apiProvider.changeLifeCycleStatus(uuid, lifecycleAction, checklistMap);
+                apiProvider.changeLifeCycleStatus(null, uuid, lifecycleAction, checklistMap);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
             }

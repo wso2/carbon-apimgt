@@ -365,7 +365,7 @@ public class PublisherCommonUtils {
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
+        return apiProvider.getAPIbyUUID(originalAPI.getOrganizationId(), originalAPI.getUuid(),
                 CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
     }
 
@@ -923,17 +923,18 @@ public class PublisherCommonUtils {
      * update swagger definition of the given api
      *
      * @param apiId    API Id
+     * @param organizationId   Organization WHich the API belongs to
      * @param response response of a swagger definition validation call
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, String organizationId,APIDefinitionValidationResponse response)
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        API existingAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         apiDefinition = OASParserUtil.preProcess(apiDefinition);
@@ -976,7 +977,7 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        API unModifiedAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same

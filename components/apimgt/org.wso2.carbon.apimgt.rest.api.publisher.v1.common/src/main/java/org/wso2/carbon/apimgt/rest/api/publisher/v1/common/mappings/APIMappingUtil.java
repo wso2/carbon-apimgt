@@ -2637,13 +2637,13 @@ public class APIMappingUtil {
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static API getAPIFromApiIdOrUUID(String apiId, String organizationId, String requestedTenantDomain)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+            api = apiProvider.getAPIbyUUID(organizationId, apiId, requestedTenantDomain);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
             //Checks whether the logged in user's tenant and the API's tenant is equal

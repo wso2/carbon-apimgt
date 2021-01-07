@@ -219,7 +219,7 @@ public class ImportUtils {
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), swaggerDefinitionValidationResponse);
+                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), importedApi.getOrganizationId(), swaggerDefinitionValidationResponse);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {

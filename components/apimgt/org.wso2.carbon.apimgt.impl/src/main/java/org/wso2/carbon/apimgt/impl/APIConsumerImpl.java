@@ -5960,7 +5960,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return result ;
     }
-    
+
+    @Override
+    public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
+        return null;
+    }
+
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
             throws APIManagementException {

@@ -75,13 +75,13 @@ public interface APIManager {
 
     /**
      * Returns details of an API
-     *
+     * @param organizationId                UUID of the organization
      * @param uuid                  UUID of the API's registry artifact
      * @param requestedTenantDomain tenantDomain for the registry
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id

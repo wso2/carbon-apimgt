@@ -59,7 +59,7 @@ public interface ApisApiService {
       public Response apisApiIdClientCertificatesAliasGet(String alias, String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesAliasPut(String alias, String apiId, String organizationId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesGet(String apiId, String organizationId, Integer limit, Integer offset, String alias, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDelete(String apiId, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
@@ -96,7 +96,7 @@ public interface ApisApiService {
       public Response apisApiIdSwaggerPut(String apiId, String organizationId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdThumbnailGet(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisChangeLifecyclePost(String action, String apiId, String organizationId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
+      public Response apisCopyApiPost(String newVersion, String apiId, String organizationId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
       public Response apisExportGet(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(String organizationId, Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, MessageContext messageContext) throws APIManagementException;
       public Response apisImportGraphqlSchemaPost(String organizationId, String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;

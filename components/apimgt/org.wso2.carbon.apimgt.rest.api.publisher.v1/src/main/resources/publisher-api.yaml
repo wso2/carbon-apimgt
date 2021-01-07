@@ -1039,6 +1039,7 @@ paths:
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - name: newVersion
         in: query
         description: Version of the new API.
@@ -3994,6 +3995,7 @@ paths:
       description: |
         This operation can be used to upload a new certificate for an endpoint.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       requestBody:
         content:

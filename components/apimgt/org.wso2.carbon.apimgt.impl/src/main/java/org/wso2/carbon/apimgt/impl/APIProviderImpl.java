@@ -6864,8 +6864,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return response;
     }
 
+
     @Override
-    public APIStateChangeResponse changeLifeCycleStatus(String uuid, String action, Map<String, Boolean> checklist)
+    public APIStateChangeResponse changeLifeCycleStatus(String organizationId, String uuid, String action, Map<String, Boolean> checklist)
             throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
@@ -6947,7 +6948,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-                    apiPersistenceInstance.changeAPILifeCycle(new Organization(tenantDomain), uuid, targetStatus);
+                    apiPersistenceInstance.changeAPILifeCycle(new Organization(organizationId), uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     
                     //Sending Notifications to existing subscribers
@@ -7166,7 +7167,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (oldAPI.getId().getApiName().equals(api.getId().getApiName())
                             && versionComparator.compare(oldAPI, api) < 0
                             && (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                        changeLifeCycleStatus(oldAPI.getUuid(), APIConstants.API_LC_ACTION_DEPRECATE, null);
+                        changeLifeCycleStatus(oldAPI.getOrganizationId(), oldAPI.getUuid(), APIConstants.API_LC_ACTION_DEPRECATE, null);
 
                     }
                 }
@@ -10369,9 +10370,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
     
     @Override
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-            Organization org = new Organization(requestedTenantDomain);
+    public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
+
+        Organization org = null;
         try {
+            if (organizationId != null) {
+                org = new Organization(organizationId);
+            }
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             
             API api = APIMapper.INSTANCE.toApi(publisherAPI);

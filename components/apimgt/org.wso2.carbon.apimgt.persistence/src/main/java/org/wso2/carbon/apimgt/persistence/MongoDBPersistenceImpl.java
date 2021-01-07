@@ -16,11 +16,7 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
@@ -180,7 +176,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         searchQuery = "";
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
-        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        AggregateIterable<MongoDBPublisherAPI> aggregateIterable = collection.aggregate(getSearchAggregate(searchQuery));
+        MongoCursor<MongoDBPublisherAPI> aggregate = aggregateIterable.cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
 
@@ -609,9 +606,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String organizationId) {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-        if (organizationId == null){
-            organizationId = "test";
-        }
         return database.getCollection(organizationId, MongoDBPublisherAPI.class);
     }
 

@@ -923,7 +923,7 @@ public interface APIProvider extends APIManager {
      * @param  checklist checklist items
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-    APIStateChangeResponse changeLifeCycleStatus(String uuid, String action, Map<String, Boolean> checklist)
+    APIStateChangeResponse changeLifeCycleStatus(String organizationId, String uuid, String action, Map<String, Boolean> checklist)
              throws APIManagementException, FaultGatewaysException;
     
     /**
