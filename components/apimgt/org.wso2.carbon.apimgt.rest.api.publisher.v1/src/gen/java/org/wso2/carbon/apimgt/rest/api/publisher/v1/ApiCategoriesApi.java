@@ -46,7 +46,7 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     }, tags={ "API Category (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Categories returned ", response = APICategoryListDTO.class) })
-    public Response apiCategoriesGet() throws APIManagementException{
-        return delegate.apiCategoriesGet(securityContext);
+    public Response getAllAPICategories() throws APIManagementException{
+        return delegate.getAllAPICategories(securityContext);
     }
 }
