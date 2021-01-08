@@ -132,7 +132,7 @@ export default function MicroGateway(props) {
                                         {row.name}
                                     </TableCell>
                                     <TableCell align='left'>{row.description}</TableCell>
-                                    <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
+                                    <TableCell align='left'>{row.accessUrls.join(', ')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

@@ -146,7 +146,7 @@ return null;
     @XmlEnum(String.class)
     public enum ApiTypeEnum {
         API("API"),
-        APIPRODUCT("APIProduct");
+        APIPRODUCT("APIPRODUCT");
         private String value;
 
         ApiTypeEnum (String v) {
@@ -542,7 +542,7 @@ return null;
   }
 
   /**
-   * The API type to be used. Accepted values are API, APIProduct
+   * The API type to be used. Accepted values are API, APIPRODUCT
    **/
   public APIProductDTO apiType(ApiTypeEnum apiType) {
     this.apiType = apiType;
@@ -550,7 +550,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "APIProduct", value = "The API type to be used. Accepted values are API, APIProduct")
+  @ApiModelProperty(example = "APIPRODUCT", value = "The API type to be used. Accepted values are API, APIPRODUCT")
   @JsonProperty("apiType")
   public ApiTypeEnum getApiType() {
     return apiType;
