@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.gateway.listeners;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
@@ -55,11 +58,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
+import javax.jms.*;
 
 public class GatewayJMSMessageListener implements MessageListener {
 
@@ -79,16 +78,13 @@ public class GatewayJMSMessageListener implements MessageListener {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
                 Topic jmsDestination = (Topic) message.getJMSDestination();
-                if (message instanceof MapMessage) {
-                    MapMessage mapMessage = (MapMessage) message;
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    Enumeration enumeration = mapMessage.getMapNames();
-                    while (enumeration.hasMoreElements()) {
-                        String key = (String) enumeration.nextElement();
-                        map.put(key, mapMessage.getObject(key));
-                    }
+                if (message instanceof TextMessage) {
+                    String textMessage = ((TextMessage) message).getText();
+                    JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                            path(APIConstants.EVENT_PAYLOAD_DATA);
+
                     if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.EVENT_TYPE) != null) {
+                        if (payloadData.get(APIConstants.EVENT_TYPE).asText() != null) {
                             /*
                              * This message contains notification
                              * eventType - type of the event
@@ -98,9 +94,9 @@ public class GatewayJMSMessageListener implements MessageListener {
                             if (debugEnabled) {
                                 log.debug("Event received from the topic of " + jmsDestination.getTopicName());
                             }
-                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
-                                    (Long) map.get(APIConstants.EVENT_TIMESTAMP),
-                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
+                            handleNotificationMessage(payloadData.get(APIConstants.EVENT_TYPE).asText(),
+                                    payloadData.get(APIConstants.EVENT_TIMESTAMP).asLong(),
+                                    payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
                         }
                     }
 
@@ -110,7 +106,7 @@ public class GatewayJMSMessageListener implements MessageListener {
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
         }
     }
