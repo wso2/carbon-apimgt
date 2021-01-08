@@ -483,11 +483,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
-            if (organizationId != null && !organizationId.equals(originalAPI.getOrganizationId())) {
-                String errorMessage =
-                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
-            }
             originalAPI.setOrganizationId(organizationId);
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
