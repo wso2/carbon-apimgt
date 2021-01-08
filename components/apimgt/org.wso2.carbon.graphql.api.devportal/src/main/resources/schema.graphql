@@ -1,4 +1,5 @@
 type Api{
+    id:String
     name:String
     description:String
     context:String

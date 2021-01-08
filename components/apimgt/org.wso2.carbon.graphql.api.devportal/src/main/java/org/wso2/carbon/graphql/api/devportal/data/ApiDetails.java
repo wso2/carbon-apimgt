@@ -60,40 +60,18 @@ public class ApiDetails {
         for (GenericArtifact artifact : artifacts) {
 
             String id = artifact.getId();
-
-
-
             String name = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String description = artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION); //
-            //String context = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-            //String version = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
             String provider = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
 
-
-
-//            apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
-//            String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-//            Organization org = new Organization(TenantDomain);
-//            String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id); //
-
-           // String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String transport = artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS); //
-
-
-
             String thumbnailUrl  = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
-            boolean hasthumbnail = HasThumbnail(thumbnailUrl);//
-
-            //Map<String, String> additionalProperties = ""; //
-
-
+            boolean hasthumbnail = HasThumbnail(thumbnailUrl);
             String environments = getEnvironmentList(id);////
 
             String wsdUrl   = artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL);;
             String status  = getLcStateFromArtifact(artifact);
-
-
-
 
             boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(id);////
 
@@ -104,8 +82,6 @@ public class ApiDetails {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             String monetizationLabel = monetizationLabelData.getMonetizationLabelData(definedTiers,tiers,name);
 
-
-            //boolean isDefault = api.isDefaultVersion();
             boolean isDefault = Boolean.parseBoolean(artifactData.getDevportalApis(id).getAttribute(
                     APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION));
 
@@ -113,35 +89,22 @@ public class ApiDetails {
             String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
 
             //String tags = ""; //
-            Registry registry = artifactData.getRegistry();
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifactData.getDevportalApis(id).getId());
-
-            Set<String> tagSet = new HashSet<String>();
-            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-            for (Tag tag1 : tag) {
-                tagSet.add(tag1.getTagName());
-            }
-            String tags = getTags(tagSet);
-
+//            Registry registry = artifactData.getRegistry();
+//            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifactData.getDevportalApis(id).getId());
+//
+//            Set<String> tagSet = new HashSet<String>();
+//            org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+//            for (Tag tag1 : tag) {
+//                tagSet.add(tag1.getTagName());
+//            }
+//            String tags = getTags(tagSet);
 
             boolean isMonetizationEnabled = Boolean.parseBoolean(artifactData.getDevportalApis(id).getAttribute
                     (APIConstants.Monetization.API_MONETIZATION_STATUS));
 
-            //Float rating = api.getRating();
-//            APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
-//            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
-//            Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);//APIUtil.getAverageRating(apiId);
-
-
             String throttlingPolicies = throttlingPoliciesData.getThrottlingPoliciesData(definedTiers,tiers,name);
 
-
-
             String categories = getCatogories(getAPICategoriesFromAPIGovernanceArtifact(artifact));
-
-
-//            String categories = "";
-//            String keyManagers = "";
             String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
             List<String> keyManagersList = null;
             if (StringUtils.isNotEmpty(keyManagers)) {
@@ -151,35 +114,20 @@ public class ApiDetails {
             }
             String allkeyManagers = getKeymanagers(keyManagersList);
 
-
-            
-
-//            String createdTime = api.getCreatedTime();
-//            String lastUpdate = String.valueOf(api.getLastUpdated());
-           // String createdTime = String.valueOf(registry.get(artifactPath).getCreatedTime().getTime());
-
-            //String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
-
-            //String additionalPropertiesString = getResourceProperties(registry,artifactPath);
-
-
-            Api api1 = new Api(id,description,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+            Api api1 = new Api(id,description,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
             apiDTOList.add(api1);
         }
-
-
         return apiDTOList;
     }
-    public String getTags(Set<String> tagset){
-
-        //Set<String> tagset = apiTypeWrapper.getApi().getTags();
-        String tags = null;
-        if (tagset!=null){
-            List<String> tagList = new ArrayList<>(tagset);
-            tags = String.join(",",tagList);
-        }
-        return tags;
-    }
+//    public String getTags(Set<String> tagset){
+//
+//        String tags = null;
+//        if (tagset!=null){
+//            List<String> tagList = new ArrayList<>(tagset);
+//            tags = String.join(",",tagList);
+//        }
+//        return tags;
+//    }
     public String getKeymanagers(List<String> keyManagersList){
 
         //List<String> keyManagersList = apiTypeWrapper.getApi().getKeyManagers();
@@ -193,49 +141,6 @@ public class ApiDetails {
 
         return keyManagers;
 
-    }
-
-    public String getResourceProperties(Registry registry, String artifactPath) throws RegistryException {
-
-
-
-        Map<String,String> additionalProperties = new HashMap<>();
-
-
-        Resource apiResource = registry.get(artifactPath);
-        Properties properties = apiResource.getProperties();
-
-        if (properties != null) {
-            Enumeration propertyNames = properties.propertyNames();
-            while (propertyNames.hasMoreElements()) {
-                String propertyName = (String) propertyNames.nextElement();
-                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
-                    additionalProperties.put(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
-                            apiResource.getProperty(propertyName));
-                }
-            }
-        }
-
-        return getAdditionalProperties(additionalProperties);
-
-    }
-
-    public String getAdditionalProperties(Map<String, String> additionalProperties){
-        //Map<String, String> additionalProperties = apiTypeWrapper.getApi().getAdditionalProperties();
-
-        List<String> additionalPropertiesList = new ArrayList<>();
-
-        String alladditionalProperties= null;
-
-        for (String key : additionalProperties.keySet()) {
-            String properties = key + ":" + additionalProperties.get(key);
-            additionalPropertiesList.add(properties);
-        }
-        if(additionalPropertiesList!=null){
-            alladditionalProperties= String.join(",",additionalPropertiesList);
-
-        }
-        return alladditionalProperties;
     }
 
     public boolean HasThumbnail(String thumbnailUrl){
@@ -337,8 +242,6 @@ public class ApiDetails {
         MonetizationLabelData monetizationLabelData = new MonetizationLabelData();
         ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
 
-
-        //for new Implementation
         ArtifactData artifactData = new ArtifactData();
 
 
@@ -346,32 +249,15 @@ public class ApiDetails {
         String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
 
         String description = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
-        //String context = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
 
-        //String version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
         String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
 
-
-
-
-//        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
-//        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-//        Organization org = new Organization(TenantDomain);
-//        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, id);
-
-        //String apiDefinition = apiTypeWrapper.getApi().getSwaggerDefinition();
-
-
-        //String type = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE);
         String transport = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
 
 
         String thumbnailUrl = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
         boolean hasthumbnail = HasThumbnail(thumbnailUrl);
 
-        //not completed
-        //String additionalPropertiesString = "";
-        //
 
         String environments = getEnvironmentList(Id);
 
@@ -402,18 +288,7 @@ public class ApiDetails {
 
         boolean isMonetizationEnabled = Boolean.parseBoolean(artifactData.getDevportalApis(Id).getAttribute
                 (APIConstants.Monetization.API_MONETIZATION_STATUS));
-
-
-        //
-//        APIIdentifier apiIdentifier = new APIIdentifier(provider, name, version);
-//        int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
-//        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);//APIUtil.getAverageRating(apiId);
-
-
         String throttlingPolicies = throttlingPoliciesData.getThrottlingPoliciesData(definedTiers,tiers,name);
-
-        //String thumbnailUrl = apiTypeWrapper.getApi().getThumbnailUrl();
-
 
         String categories = getCatogories(getAPICategoriesFromAPIGovernanceArtifact(artifactData.getDevportalApis(Id)));
 
@@ -427,24 +302,18 @@ public class ApiDetails {
         }
         String allkeyManagers = getKeymanagers(keyManagersList);
 
-        Registry registry = artifactData.getRegistry();
+//        Registry registry = artifactData.getRegistry();
+//
+//        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifactData.getDevportalApis(Id).getId());
+//
+//        Set<String> tagSet = new HashSet<String>();
+//        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+//        for (Tag tag1 : tag) {
+//            tagSet.add(tag1.getTagName());
+//        }
+//        String tags = getTags(tagSet);
 
-        String artifactPath = GovernanceUtils.getArtifactPath(registry, artifactData.getDevportalApis(Id).getId());
-       // String createdTime = String.valueOf(registry.get(artifactPath).getCreatedTime().getTime());
-
-        //String lastUpdate = String.valueOf(registry.get(artifactPath).getLastModified());
-
-        Set<String> tagSet = new HashSet<String>();
-        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-        for (Tag tag1 : tag) {
-            tagSet.add(tag1.getTagName());
-        }
-        String tags = getTags(tagSet);
-
-        //String additionalPropertiesString = getResourceProperties(registry,artifactPath);
-
-
-        return new Api(id,description,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,tags,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+        return new Api(id,description,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
     }
 
 

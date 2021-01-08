@@ -21,7 +21,7 @@ public class Api {
     private boolean isDefault;
     private String authorizationHeader;
     private String apiSecurity;
-    private String tags;
+    //private String tags;
     private boolean isMonetizationEnabled;
     //private Float rating;
     private String throttlingPolicies;
@@ -31,7 +31,7 @@ public class Api {
     //private String createdTime;
     //private String lastUpdate;
 
-    public Api(String id,String description,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,String tags,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
+    public Api(String id,String description,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
         this.id = id;
 
         this.description = description;
@@ -51,7 +51,7 @@ public class Api {
         this.isDefault = isDefault;
         this.authorizationHeader = authorizationHeader;
         this.apiSecurity = apiSecurity;
-        this.tags = tags;
+        //this.tags = tags;
         this.isMonetizationEnabled = isMonetizationEnabled;
         //this.rating = rating;
         this.throttlingPolicies = throttlingPolicies;

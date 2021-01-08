@@ -104,14 +104,22 @@ public class ApiService {
 
         };
     }
-    public DataFetcher getApis(){
+
+    public DataFetcher getApiTags(){
+        return env->{
+            Api api = env.getSource();
+            return apidtoData.getTags(api.getId());
+
+        };
+    }
+    public DataFetcher getApisFromArtifact(){
 
 
         return env-> apiDetails.getAllApis();
 
     }
 
-    public DataFetcher getApi(){
+    public DataFetcher getApiFromArtifact(){
         return env->{
             String Id = env.getArgument("id");
             return apiDetails.getApi(Id);

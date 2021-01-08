@@ -58,109 +58,115 @@ public class GraphqlProvider {
                 .type(queryBuilder())
                 .type(queryApi())
                 //.type(queryApiDetails())
-                .type(queryApiName())
-                .type(queryApiContext())
-                .type(queryApiVersion())
-                .type(queryApiProvider())
-                .type(queryApiType())
-                .type(queryApiCreateTime())
-                .type(queryApiUpdateTime())
-                .type(queryApiAdditionalProperties())
-                .type(queryApiDefinition())
+                .type(ApiNameDataFetcher())
+                .type(ApiContextDataFetcher())
+                .type(ApiVersionDataFetcher())
+                .type(ApiProviderDataFetcher())
+                .type(ApiTypeDataFetcher())
+                .type(ApiCreateTimeDataFetcher())
+                .type(ApiUpdateTimeDataFetcher())
+                .type(ApiAdditionalPropertiesDataFetcher())
+                .type(ApiDefinitionDataFetcher())
+                .type(ApiTagsDataFetcher())
                 .type(queryApiCount())
-                .type(queryApiRating())
-                .type(queryOperationInformation())
-                .type(queryTier())
-                .type(queryTierDetails())
-                .type(queryIngressUrl())
-                .type(queryClusterInformation())
-                .type(queryBusinessInformation())
-                .type(queryLabelInformation())
-                .type(queryScopeInformation())
-                .type(queryAdvertiseInformation())
-                .type(queryApiEndPointUrlsInformation())
-                .type(queryAPIURLsDTO())
-                .type(queryDefaultAPIURLsDTO())
-                .type(queryPagination())
+                .type(ApiRatingDataFetcher())
+                .type(OperationInformationDataFetcher())
+                .type(TierDataFetcher())
+                .type(TierDetailsDataFetcher())
+                .type(IngressUrlDataFetcher())
+                .type(ClusterInformationDataFetcher())
+                .type(BusinessInformationDataFetcher())
+                .type(LabelInformationDataFetcher())
+                .type(ScopeInformationDataFetcher())
+                .type(AdvertiseInformationDataFetcher())
+                .type(ApiEndPointUrlsInformationDataFetcher())
+                .type(APIURLsDTODataFetcher())
+                .type(DefaultAPIURLsDTODataFetcher())
+                .type(PaginationDataFetcher())
                 .build();
     }
 
 
     private TypeRuntimeWiring.Builder queryBuilder(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApis",apiService.getApis());
+                .dataFetcher("getApis",apiService.getApisFromArtifact());
     }
     private TypeRuntimeWiring.Builder queryApi(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApi", apiService.getApi());
+                .dataFetcher("getApi", apiService.getApiFromArtifact());
+    }
+    private TypeRuntimeWiring.Builder queryApiCount(){
+        return TypeRuntimeWiring.newTypeWiring("Query")
+                .dataFetcher("getApisCount",apiService.getApiCount());
     }
 
 //    private TypeRuntimeWiring.Builder queryApiDetails(){
 //        return TypeRuntimeWiring.newTypeWiring("Api")
 //                .dataFetcher("apiDetails",apiService.getApiDetails());
 //    }
-    private TypeRuntimeWiring.Builder queryApiName(){
+    private TypeRuntimeWiring.Builder ApiNameDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("name",apiService.getApiName());
     }
-    private TypeRuntimeWiring.Builder queryApiContext(){
+    private TypeRuntimeWiring.Builder ApiContextDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("context",apiService.getApiContext());
     }
-    private TypeRuntimeWiring.Builder queryApiVersion(){
+    private TypeRuntimeWiring.Builder ApiVersionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("version",apiService.getApiVersion());
     }
-    private TypeRuntimeWiring.Builder queryApiProvider(){
+    private TypeRuntimeWiring.Builder ApiProviderDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("provider",apiService.getApiProvider());
     }
-    private TypeRuntimeWiring.Builder queryApiType(){
+    private TypeRuntimeWiring.Builder ApiTypeDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("type",apiService.getApiType());
     }
-    private TypeRuntimeWiring.Builder queryApiCreateTime(){
+    private TypeRuntimeWiring.Builder ApiCreateTimeDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("createdTime",apiService.getApiCreatedTime());
     }
-    private TypeRuntimeWiring.Builder queryApiUpdateTime(){
+    private TypeRuntimeWiring.Builder ApiUpdateTimeDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("lastUpdate",apiService.getApiUpdatedTime());
     }
-    private TypeRuntimeWiring.Builder queryApiAdditionalProperties(){
+    private TypeRuntimeWiring.Builder ApiAdditionalPropertiesDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("additionalProperties",apiService.getAdditionalProperties());
     }
-    private TypeRuntimeWiring.Builder queryApiDefinition(){
+    private TypeRuntimeWiring.Builder ApiDefinitionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiDefinition",apiService.getApiDefinition());
     }
-
-
-    private TypeRuntimeWiring.Builder queryApiCount(){
-        return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApisCount",apiService.getApiCount());
+    private TypeRuntimeWiring.Builder ApiTagsDataFetcher(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("tags",apiService.getApiTags());
     }
 
-    private TypeRuntimeWiring.Builder queryApiRating(){
+
+
+
+    private TypeRuntimeWiring.Builder ApiRatingDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("rating",apiService.getApiRating());
     }
 
-    private TypeRuntimeWiring.Builder queryTier(){
+    private TypeRuntimeWiring.Builder TierDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("tierInformation",apiService.getTierInformation());
     }
-    private TypeRuntimeWiring.Builder queryTierDetails(){
+    private TypeRuntimeWiring.Builder TierDetailsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Tier")
                 .dataFetcher("tierDetails",apiService.getTiers());
     }
 
-    private TypeRuntimeWiring.Builder queryIngressUrl(){
+    private TypeRuntimeWiring.Builder IngressUrlDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("ingressUrl",apiService.getDeploymentEnvironmentName());
     }
-    private TypeRuntimeWiring.Builder queryClusterInformation(){
+    private TypeRuntimeWiring.Builder ClusterInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("IngressUrl")
                 .dataFetcher("clusterDetails",apiService.getDeploymentClusterInformation());
     }
@@ -168,7 +174,7 @@ public class GraphqlProvider {
 //        return TypeRuntimeWiring.newTypeWiring("Api")
 //                .dataFetcher("tagList",apiService.getTagsInformatio());
 //    }
-    private TypeRuntimeWiring.Builder queryOperationInformation(){
+    private TypeRuntimeWiring.Builder OperationInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("operationInformation",apiService.getOperationInformation());
     }
@@ -176,39 +182,39 @@ public class GraphqlProvider {
 //        return TypeRuntimeWiring.newTypeWiring("Api")
 //                .dataFetcher("url",apiService.getEndPoint());
 //    }
-    private TypeRuntimeWiring.Builder queryBusinessInformation(){
+    private TypeRuntimeWiring.Builder BusinessInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("businessInformation",apiService.getBusinessInformation());
     }
 
-    private TypeRuntimeWiring.Builder queryLabelInformation(){
+    private TypeRuntimeWiring.Builder LabelInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("label",apiService.getLabelInformation());
     }
 
-    private TypeRuntimeWiring.Builder queryScopeInformation(){
+    private TypeRuntimeWiring.Builder ScopeInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("scope",apiService.getScopeInformation());
     }
 
-    private TypeRuntimeWiring.Builder queryAdvertiseInformation(){
+    private TypeRuntimeWiring.Builder AdvertiseInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("advertiseInfo",apiService.getAdvertiseInformation());
     }
 
-    private TypeRuntimeWiring.Builder queryApiEndPointUrlsInformation(){
+    private TypeRuntimeWiring.Builder ApiEndPointUrlsInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiEndPointInformation",apiService.getApiUrlsEndPoint());
     }
-    private TypeRuntimeWiring.Builder queryAPIURLsDTO(){
+    private TypeRuntimeWiring.Builder APIURLsDTODataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("APIEndpointURLsDTO")
                 .dataFetcher("urLs",apiService.getApiUrlsDTO());
     }
-    private TypeRuntimeWiring.Builder queryDefaultAPIURLsDTO(){
+    private TypeRuntimeWiring.Builder DefaultAPIURLsDTODataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("APIEndpointURLsDTO")
                 .dataFetcher("defaultUrls",apiService.getDefaultApiUrlsDTO());
     }
-    private TypeRuntimeWiring.Builder queryPagination(){
+    private TypeRuntimeWiring.Builder PaginationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getPagination", apiService.getPagination());
     }

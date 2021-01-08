@@ -9,9 +9,10 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
-import org.wso2.carbon.graphql.api.devportal.modules.APIDTO;
+//import org.wso2.carbon.graphql.api.devportal.modules.APIDTO;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -239,5 +240,27 @@ public class APIDTOData {
 
         return apiDefinition;
 
+    }
+    public String getTags(String Id) throws UserStoreException, RegistryException {
+
+        ArtifactData artifactData = new ArtifactData();
+        Registry registry = artifactData.getRegistry();
+        String artifactPath = GovernanceUtils.getArtifactPath(registry, Id);
+
+        Set<String> tagSet = new HashSet<String>();
+        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
+        for (Tag tag1 : tag) {
+            tagSet.add(tag1.getTagName());
+        }
+        return getTags(tagSet);
+    }
+    public String getTags(Set<String> tagset){
+
+        String tags = null;
+        if (tagset!=null){
+            List<String> tagList = new ArrayList<>(tagset);
+            tags = String.join(",",tagList);
+        }
+        return tags;
     }
 }
