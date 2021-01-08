@@ -44,8 +44,13 @@ const headCells = [
     },
 ];
 
-const pageDesc = 'Scope assignments are only related to internal, APIM-specific scope assignments. They are not'
-                + ' related to role permission assignments in the Management Console.';
+const pageDesc = (
+    <FormattedMessage
+        id='RolePermissions.ListRoles.page.description'
+        defaultMessage={'Scope assignments are only related to internal, APIM-specific scope assignments. They are not'
+        + ' related to role permission assignments in the Management Console.'}
+    />
+);
 
 /**
  *
@@ -243,7 +248,10 @@ export default function ListRoles() {
                         color='primary'
                         onClick={() => setIsOpen(true)}
                     >
-                        Add scope mappings
+                        <FormattedMessage
+                            id='RolePermissions.ListRoles.scope.assignment.button'
+                            defaultMessage='Add scope mappings'
+                        />
                     </Button>
                     {
                         isOpen && (

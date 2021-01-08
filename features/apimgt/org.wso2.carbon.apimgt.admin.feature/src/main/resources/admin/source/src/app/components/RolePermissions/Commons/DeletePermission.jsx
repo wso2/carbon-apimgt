@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
+import { useIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -40,6 +41,7 @@ export default function DeletePermission(props) {
     } = props;
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const intl = useIntl();
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -65,7 +67,12 @@ export default function DeletePermission(props) {
                 handleClose();
             })
             .catch((error) => {
-                Alert.error('Something went wrong while deleting the scope assignments');
+                Alert.error(
+                    intl.formatMessage({
+                        id: 'RolePermissions.Common.DeletePermission.delete.scope.error',
+                        defaultMessage: 'Something went wrong while deleting the scope assignments',
+                    }),
+                );
                 console.error(error);
             })
             .finally(() => setIsDeleting(false));

@@ -17,6 +17,7 @@
  */
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
@@ -62,6 +63,7 @@ export default function AddRoleWizard(props) {
     } = props;
 
     const classes = useStyles();
+    const intl = useIntl();
     const [newRole, setNewRole] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [validation, setValidation] = useState({});
@@ -132,7 +134,12 @@ export default function AddRoleWizard(props) {
                     onClose();
                 })
                 .catch((error) => {
-                    Alert.error('Something went wrong while adding new scope mapping');
+                    Alert.error(
+                        intl.formatMessage({
+                            id: 'RolePermissions.Common.AddRoleWizard.add.scope.error',
+                            defaultMessage: 'Something went wrong while adding new scope mapping',
+                        }),
+                    );
                     console.error(error);
                 })
                 .finally(() => setIsSaving(false));
@@ -171,8 +178,18 @@ export default function AddRoleWizard(props) {
         <AddItem
             onSave={onAddRole}
             onClose={onClose}
-            title='Add new scope mapping'
-            buttonText='Add scope mapping'
+            title={(
+                <FormattedMessage
+                    id='RolePermissions.Common.AddRoleWizard.add.mapping.title'
+                    defaultMessage='Add new scope mapping'
+                />
+            )}
+            buttonText={(
+                <FormattedMessage
+                    id='RolePermissions.Common.AddRoleWizard.add.mapping.button'
+                    defaultMessage='Add scope mapping'
+                />
+            )}
             dialogProps={{ disableBackdropClick: isSaving, maxWidth: 'md' }}
             dialogActions={(
                 <div className={classes.actionsContainer}>

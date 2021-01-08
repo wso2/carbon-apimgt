@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -43,6 +44,7 @@ export default function PermissionsSelector(props) {
     const [open, setOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [localAppMappings, setLocalAppMappings] = useState({ ...appMappings });
+    const intl = useIntl();
     useEffect(() => {
         setLocalAppMappings(cloneDeep(appMappings));
     }, [appMappings]);
@@ -91,7 +93,12 @@ export default function PermissionsSelector(props) {
                 setOpen(false);
             })
             .catch((error) => {
-                Alert.error('Something went wrong while updating the permissions');
+                Alert.error(
+                    intl.formatMessage({
+                        id: 'RolePermissions.TreeView.PermissionsSelector.update.scope.error',
+                        defaultMessage: 'Something went wrong while updating the permission',
+                    }),
+                );
                 console.error(error);
             })
             .finally(() => setIsSaving(false));
@@ -104,7 +111,10 @@ export default function PermissionsSelector(props) {
                 variant='outlined'
                 color='primary'
             >
-                Scope Assignments
+                <FormattedMessage
+                    id='RolePermissions.TreeView.PermissionsSelector.scope.assignment.button'
+                    defaultMessage='Scope Assignments'
+                />
             </Button>
             <Dialog
                 fullWidth
@@ -118,7 +128,12 @@ export default function PermissionsSelector(props) {
                     <Typography variant='h5' display='block' gutterBottom>
                         {role}
                         <Box display='inline' pl={1}>
-                            <Typography variant='caption' gutterBottom>Select Scope Assignments</Typography>
+                            <Typography variant='caption' gutterBottom>
+                                <FormattedMessage
+                                    id='RolePermissions.TreeView.PermissionsSelector.scope.assignment.title'
+                                    defaultMessage='Select Scope Assignments'
+                                />
+                            </Typography>
                         </Box>
                     </Typography>
                 </DialogTitle>

@@ -16,6 +16,7 @@
  * under the License.
  */
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -60,9 +61,11 @@ export default function SelectPermissionsStep(props) {
                             display='inline'
                             color='warning.main'
                         >
-                            Please check whether the required permissions are assigned to the role
-                            {' '}
-                            to function with the assigned scope, before proceeding
+                            <FormattedMessage
+                                id='RolePermissions.Common.SelectPermissionsStep.scope.select.warning'
+                                defaultMessage={'Please check whether the required permissions are assigned to the role'
+                                + ' to function with the assigned scope, before proceeding'}
+                            />
                         </Box>
                     )
                 }
@@ -124,9 +127,11 @@ export default function SelectPermissionsStep(props) {
                             display='inline'
                             color='warning.main'
                         >
-                            Please check whether the required permissions are assigned to the role
-                            {' '}
-                            to function with the assigned scope, before proceeding
+                            <FormattedMessage
+                                id='RolePermissions.Common.SelectPermissionsStep.scope.select.custom.warning'
+                                defaultMessage={'Please check whether the required permissions are assigned to the role'
+                                + ' to function with the assigned scope, before proceeding'}
+                            />
                         </Box>
                     )
                 }
