@@ -1720,6 +1720,7 @@ public final class APIConstants {
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
+    public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
