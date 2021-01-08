@@ -15432,7 +15432,7 @@ public class ApiMgtDAO {
     /**
      * Get History Events for given API.
      *
-     * @param apiId      UUID of API
+     * @param apiIdentifier      Identifier of API
      * @param revisionId Revision Id to filter history events
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
@@ -15440,11 +15440,13 @@ public class ApiMgtDAO {
      * @param offset     Start index
      * @throws APIManagementException if an error occurs while getting API history from database
      */
-    public List<HistoryEvent> getHistoryEvents(String apiId, String revisionId, Date startTime, Date endTime,
+    public List<HistoryEvent> getHistoryEvents(Identifier apiIdentifier, String revisionId, Date startTime,
+                                               Date endTime,
                                                int offset, int limit) throws APIManagementException {
 
         List<HistoryEvent> historyEvents = null;
         String sqlQuery;
+        int apiId = -1;
         if (StringUtils.isNotBlank(revisionId) && startTime != null && endTime != null) {
             sqlQuery = SQLConstantManagerFactory.getSQlString("GET_HISTORY_FOR_API_BY_REVISION_CREATED_WITHIN");
         } else if (StringUtils.isNotBlank(revisionId)) {
@@ -15456,7 +15458,8 @@ public class ApiMgtDAO {
         }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
-            statement.setString(1, apiId);
+            apiId = getAPIID(apiIdentifier, connection);
+            statement.setInt(1, apiId);
             if (StringUtils.isNotBlank(revisionId) && startTime != null && endTime != null) {
                 statement.setTimestamp(2, new Timestamp(startTime.getTime()));
                 statement.setTimestamp(3, new Timestamp(endTime.getTime()));
@@ -15481,10 +15484,10 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     HistoryEvent historyEvent = new HistoryEvent();
                     historyEvent.setId(rs.getString("UUID"));
-                    historyEvent.setCreatedTime(rs.getDate("CREATED_TIME"));
+                    historyEvent.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
                     historyEvent.setOperationId(rs.getString("OPERATION_ID"));
                     historyEvent.setDescription(rs.getString("DESCRIPTION"));
-                    historyEvent.setRevisionKey(rs.getString("REVISION_KEY"));
+                    historyEvent.setRevisionKey(rs.getString("REVISION_UUID"));
                     historyEvent.setApiId(rs.getString("API_ID"));
                     historyEvent.setUser(rs.getString("USERNAME"));
                     historyEvents.add(historyEvent);
@@ -15528,18 +15531,19 @@ public class ApiMgtDAO {
     /**
      * Get the count of all history records for the given API.
      *
-     * @param apiId      API UUID
+     * @param apiIdentifier      API Identifier
      * @param revisionId Revision Id to filter history events
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
      * @return count of history records
      * @throws APIManagementException if failed get count
      */
-    public int getAllHistoryEventsCount(String apiId, String revisionId, Date startTime, Date endTime)
+    public int getAllHistoryEventsCount(Identifier apiIdentifier, String revisionId, Date startTime, Date endTime)
             throws APIManagementException {
 
         int historyCount = 0;
         String sqlQuery;
+        int apiId = -1;
         if (StringUtils.isNotBlank(revisionId) && startTime != null && endTime != null) {
             sqlQuery = SQLConstants.HistorySqlConstants.GET_HISTORY_COUNT_FOR_API_BY_REVISION_CREATED_WITHIN;
         } else if (StringUtils.isNotBlank(revisionId)) {
@@ -15551,7 +15555,8 @@ public class ApiMgtDAO {
         }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
-            statement.setString(1, apiId);
+            apiId = getAPIID(apiIdentifier, connection);
+            statement.setInt(1, apiId);
             if (startTime != null && endTime != null) {
                 statement.setTimestamp(2, new Timestamp(startTime.getTime()));
                 statement.setTimestamp(3, new Timestamp(endTime.getTime()));

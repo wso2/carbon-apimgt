@@ -2844,7 +2844,8 @@ public class APIMappingUtil {
         historyEventDTO.setDescription(historyEvent.getDescription());
         historyEventDTO.setOperationId(historyEvent.getOperationId());
         historyEventDTO.setId(historyEvent.getId());
-        historyEventDTO.setCreatedTime(historyEvent.getCreatedTime());
+        Timestamp createdTimestamp = new Timestamp(historyEvent.getCreatedTime().getTime());
+        historyEventDTO.setCreatedTime(createdTimestamp);
         historyEventDTO.setUser(historyEvent.getUser());
         return historyEventDTO;
     }

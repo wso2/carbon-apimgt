@@ -8997,7 +8997,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Get the paginated list of API/API Product history events for the given API/API Product.
      *
      * @param identifier API/API Product Identifier
-     * @param uuid      API/API Product UUID
      * @param revisionId Revision Id which the history events are up to (optional)
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
@@ -9007,18 +9006,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to get the API history events
      */
     @Override
-    public List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String uuid,
-                                                                      String revisionId, Date startTime,
-                                                                      Date endTime, int offset, int limit)
-            throws APIManagementException {
+    public List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String revisionId,
+                                                                      Date startTime, Date endTime, int offset,
+                                                                      int limit) throws APIManagementException {
 
-        return apiMgtDAO.getHistoryEvents(uuid, revisionId, startTime, endTime, offset, limit);
+        return apiMgtDAO.getHistoryEvents(identifier, revisionId, startTime, endTime, offset, limit);
     }
 
     /**
      * Get the count of all API/API Product history events for the given API/API Product.
      *
-     * @param uuid       API/API Product UUID
+     * @param identifier       API/API Product Identifier
      * @param revisionId Revision Id which the history events are up to (optional)
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
@@ -9026,10 +9024,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to get all events count
      */
     @Override
-    public int getAllAPIOrAPIProductHistoryCount(String uuid, String revisionId, Date startTime, Date endTime)
+    public int getAllAPIOrAPIProductHistoryCount(Identifier identifier, String revisionId, Date startTime, Date endTime)
             throws APIManagementException {
 
-        return apiMgtDAO.getAllHistoryEventsCount(uuid, revisionId, startTime, endTime);
+        return apiMgtDAO.getAllHistoryEventsCount(identifier, revisionId, startTime, endTime);
     }
 
     /**

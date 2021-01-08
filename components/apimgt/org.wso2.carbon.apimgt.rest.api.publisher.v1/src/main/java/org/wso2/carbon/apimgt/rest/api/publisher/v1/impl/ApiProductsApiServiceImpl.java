@@ -785,10 +785,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 //TODO: check if revision exists
             }
             List<HistoryEvent> historyEvents = apiProvider
-                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, apiProductId, revisionId, startTime,
-                            endTime, offset, limit);
+                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionId, startTime, endTime,
+                            offset, limit);
             int eventCount =
-                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductId, revisionId, startTime, endTime);
+                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionId, startTime, endTime);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIProductHistoryPaginationParams(historyEventListDTO, apiProductId, revisionId, startTime,

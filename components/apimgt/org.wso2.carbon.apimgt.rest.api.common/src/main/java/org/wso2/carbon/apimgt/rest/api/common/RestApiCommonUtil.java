@@ -346,8 +346,14 @@ public class RestApiCommonUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
         paginatedURL = paginatedURL.replace(RestApiConstants.REVISIONID_PARAM, revisionId);
-        paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime.toInstant().toString());
-        paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime.toInstant().toString());
+        if (startTime != null) {
+            paginatedURL += RestApiConstants.APIS_HISTORY_EVENTS_GET_START_TIME_PARAM;
+            paginatedURL = paginatedURL.replace(RestApiConstants.STARTTIME_PARAM, startTime.toInstant().toString());
+        }
+        if (endTime != null) {
+            paginatedURL += RestApiConstants.APIS_HISTORY_EVENTS_GET_END_TIME_PARAM;
+            paginatedURL = paginatedURL.replace(RestApiConstants.ENDTIME_PARAM, endTime.toInstant().toString());
+        }
         return paginatedURL;
     }
 

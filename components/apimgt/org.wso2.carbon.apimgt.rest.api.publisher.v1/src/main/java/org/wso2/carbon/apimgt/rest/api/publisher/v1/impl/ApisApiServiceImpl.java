@@ -3807,6 +3807,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        revisionId = revisionId == null ? "" : revisionId;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
 
         try {
@@ -3816,10 +3817,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //TODO: check if revision exists
             }
             List<HistoryEvent> historyEvents = apiProvider
-                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, apiId, revisionId, startTime, endTime,
-                            offset,
+                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionId, startTime, endTime, offset,
                             limit);
-            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiId, revisionId, startTime, endTime);
+            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiIdentifier, revisionId, startTime, endTime);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIHistoryPaginationParams(historyEventListDTO, apiId, revisionId, startTime, endTime, limit,

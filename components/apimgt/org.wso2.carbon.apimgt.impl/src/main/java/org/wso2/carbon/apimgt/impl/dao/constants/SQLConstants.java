@@ -3653,13 +3653,13 @@ public class SQLConstants {
                         + "AND CREATED_TIME >= ? AND CREATED_TIME <= ?";
         public static final String GET_HISTORY_COUNT_FOR_API_BY_REVISION =
                 "SELECT COUNT(*) COUNT FROM AM_API_HISTORY WHERE API_ID = ? "
-                        + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_KEY = ?)";
+                        + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_UUID = ?)";
         public static final String GET_HISTORY_COUNT_FOR_API_BY_REVISION_CREATED_WITHIN =
                 "SELECT COUNT(*) COUNT FROM AM_API_HISTORY WHERE API_ID = ? "
                         + "AND CREATED_TIME >= ? AND CREATED_TIME <= ? "
-                        + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_KEY = ?)";
+                        + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_UUID = ?)";
         public static final String ADD_HISTORY_EVENT =
-                "INSERT INTO AM_API_HISTORY (UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, PAYLOAD, "
+                "INSERT INTO AM_API_HISTORY (UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_UUID, PAYLOAD, "
                         + "API_ID, USERNAME) VALUES (?,?,?,?,?,?,?,?)";
     }
 
