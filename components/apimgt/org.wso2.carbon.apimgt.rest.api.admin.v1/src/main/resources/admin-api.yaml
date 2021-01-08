@@ -3910,8 +3910,11 @@ components:
           type: boolean
           description: Indicates whether the policy is deployed successfully or not.
           default: false
+        type:
+          type: string
+          description: Indicates the type of throttle policy
       discriminator:
-        propertyName: policyName
+        propertyName: type
     AdvancedThrottlePolicyInfo:
       title: Advanced Throttling Policy
       allOf:
