@@ -220,7 +220,10 @@ public final class RestApiConstants {
 
     public static final String APIS_HISTORY_EVENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_API_HISTORY + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&revisionId="
-                    + REVISIONID_PARAM + "&startTime=" + STARTTIME_PARAM + "&endTime=" + ENDTIME_PARAM;
+                    + REVISIONID_PARAM;
+
+    public static final String APIS_HISTORY_EVENTS_GET_START_TIME_PARAM =  "&startTime=" + STARTTIME_PARAM ;
+    public static final String APIS_HISTORY_EVENTS_GET_END_TIME_PARAM = "&endTime=" + ENDTIME_PARAM;
 
     public static final String API_PRODUCTS_HISTORY_EVENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_PRODUCT_HISTORY + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&revisionId="

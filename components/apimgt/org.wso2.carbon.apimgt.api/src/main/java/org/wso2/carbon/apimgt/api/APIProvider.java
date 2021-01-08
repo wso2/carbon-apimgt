@@ -1536,8 +1536,7 @@ public interface APIProvider extends APIManager {
      * Get the paginated list of API/API Product history events for the given API/API Product.
      *
      * @param identifier API/API Product Identifier
-     * @param uuid      API/API Product UUID
-     * @param revisionId Revision Id which the history events are up to (optional)
+     * @param revisionKey Revision Key which the history events are up to (optional)
      * @param startTime  Starting timestamp to show history from
      * @param endTime    Ending timestamp to show history upto
      * @param offset     Start index
@@ -1545,7 +1544,7 @@ public interface APIProvider extends APIManager {
      * @return a list of History events
      * @throws APIManagementException if failed to get the API history events
      */
-    List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String uuid, String revisionId,
+    List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String revisionKey,
                                                                Date startTime, Date endTime, int offset, int limit)
             throws APIManagementException;
 
@@ -1562,13 +1561,22 @@ public interface APIProvider extends APIManager {
     /**
      * Get the count of all API/API Product history events for the given API/API Product.
      *
-     * @param uuid      API/API Product UUID
-     * @param revisionId Revision Id which the history events are up to (optional)
-     * @param startTime  Starting timestamp to show history from
-     * @param endTime    Ending timestamp to show history upto
+     * @param identifier      API/API Product Identifier
+     * @param revisionKey Revision Key which the history events are up to (optional)
+     * @param startTime  Starting timestamp to show history from (optional)
+     * @param endTime    Ending timestamp to show history upto (optional)
      * @return count of all history events based on the requested filters
      * @throws APIManagementException if failed to get all events count
      */
-    int getAllAPIOrAPIProductHistoryCount(String uuid, String revisionId, Date startTime, Date endTime)
+    int getAllAPIOrAPIProductHistoryCount(Identifier identifier, String revisionKey, Date startTime, Date endTime)
             throws APIManagementException;
+
+    /**
+     * Get revision key from revision uuid.
+     *
+     * @param revisionUUID Revision UUID
+     * @return Revision Key in the format "REVISION {id}"
+     * @throws APIManagementException if failed to get revision key
+     */
+    String getRevisionKeyFromRevisionUUID(String revisionUUID) throws APIManagementException;
 }

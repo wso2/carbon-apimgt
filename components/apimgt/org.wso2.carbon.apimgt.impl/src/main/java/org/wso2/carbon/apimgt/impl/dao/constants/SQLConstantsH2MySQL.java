@@ -231,16 +231,16 @@ public class SQLConstantsH2MySQL extends SQLConstants{
 
     public static final String GET_HISTORY_FOR_API =
             "SELECT UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, API_ID, USERNAME "
-                    + "FROM AM_API_HISTORY WHERE API_ID = ? limit ? ?";
+                    + "FROM AM_API_HISTORY WHERE API_ID = ? limit ? , ?";
     public static final String GET_HISTORY_FOR_API_BY_REVISION =
             "SELECT UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, API_ID, USERNAME "
                     + "FROM AM_API_HISTORY WHERE API_ID = ? AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE "
-                    + "REVISION_KEY = ?) limit ? ?";
+                    + "REVISION_KEY = ?) limit ? , ?";
     public static final String GET_HISTORY_FOR_API_CREATED_WITHIN =
             "SELECT UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, API_ID, USERNAME "
-                    + "FROM AM_API_HISTORY WHERE API_ID = ? AND CREATED_TIME >= ? AND CREATED_TIME <= ? limit ? ?";
+                    + "FROM AM_API_HISTORY WHERE API_ID = ? AND CREATED_TIME >= ? AND CREATED_TIME <= ? limit ? , ?";
     public static final String GET_HISTORY_FOR_API_BY_REVISION_CREATED_WITHIN =
             "SELECT UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, API_ID, USERNAME "
                     + "FROM AM_API_HISTORY WHERE API_ID = ? AND CREATED_TIME >= ? AND CREATED_TIME <= ? "
-                    + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE " + "REVISION_KEY = ?) limit ? ?";
+                    + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE " + "REVISION_KEY = ?) limit ? , ?";
 }

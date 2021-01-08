@@ -3663,4 +3663,6 @@ public class SQLConstants {
                         + "API_ID, USERNAME) VALUES (?,?,?,?,?,?,?,?)";
     }
 
+    public static final String GET_REVISION_ID_BY_REVISION_UUID = "SELECT ID FROM AM_REVISION WHERE REVISION_UUID = ?";
+
 }
