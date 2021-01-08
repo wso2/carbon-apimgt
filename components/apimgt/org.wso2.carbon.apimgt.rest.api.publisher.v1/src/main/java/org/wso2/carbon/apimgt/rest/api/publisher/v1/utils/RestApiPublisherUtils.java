@@ -182,15 +182,21 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
-            APIProductIdentifier productIdentifier = APIMappingUtil
-                    .getAPIProductIdentifierFromUUID(productId, tenantDomain);
+            //APIProductIdentifier productIdentifier = APIMappingUtil
+            //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
-            apiProvider.updateDocumentation(productIdentifier, documentation);
+            DocumentationContent content = new DocumentationContent();
+            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
+            resourceFile.setName(filename);
+            content.setResourceFile(resourceFile);
+            content.setSourceType(ContentSourceType.FILE);
+            //apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
+            //apiProvider.updateDocumentation(productIdentifier, documentation);
+            apiProvider.addDocumentationContent(productId, documentId, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
