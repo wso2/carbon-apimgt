@@ -1723,5 +1723,11 @@ public interface APIProvider extends APIManager {
      */
     APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
     
+    /**
+     * Delete API Product
+     * @param apiProduct
+     */
+    void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException;
+    
     
 }

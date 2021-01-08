@@ -459,5 +459,14 @@ public interface APIPersistence {
      */
     PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery, int start,
             int offset, UserContext ctx) throws APIPersistenceException;
+    
+    /**
+     * Delete API Product
+     *
+     * @param org   Organization the API product is owned by
+     * @param apiId API ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
 
 }

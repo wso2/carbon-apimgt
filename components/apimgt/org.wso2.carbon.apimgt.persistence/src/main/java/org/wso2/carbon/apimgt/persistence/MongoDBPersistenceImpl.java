@@ -660,4 +660,10 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -9303,15 +9303,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    @Override
-    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
-        //this is the product resource collection path
-        String productResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+    public void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException {
 
-        //this is the product rxt instance path
-        String apiProductArtifactPath = APIUtil.getAPIProductPath(identifier);
+        APIProductIdentifier identifier = apiProduct.getId();
 
         try {
             //int apiId = apiMgtDAO.getAPIID(identifier, null);
@@ -9323,61 +9317,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
 
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when deleting API Product" + identifier;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-
-            Resource apiProductResource = registry.get(productResourcePath);
-            String productResourceUUID = apiProductResource.getUUID();
-
-            if (productResourceUUID == null) {
-                throw new APIManagementException("artifact id is null for : " + productResourcePath);
-            }
-
-            Resource apiArtifactResource = registry.get(apiProductArtifactPath);
-            String apiArtifactResourceUUID = apiArtifactResource.getUUID();
-
-            if (apiArtifactResourceUUID == null) {
-                throw new APIManagementException("artifact id is null for : " + apiProductArtifactPath);
-            }
-
-            GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
-            String environments = apiProductArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-
             APIManagerConfiguration config = getAPIManagerConfiguration();
             boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-            APIProduct apiProduct = new APIProduct(identifier);
-            apiProduct.setUuid(apiProductUUID);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
-                apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-                List<APIProductResource> resourceMappings = apiMgtDAO.getAPIProductResourceMappings(identifier);
-                apiProduct.setProductResources(resourceMappings);
                 removeFromGateway(apiProduct);
 
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }
 
-            //Delete the dependencies associated  with the api product artifact
-            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
-            if (dependenciesArray.length > 0) {
-                for (GovernanceArtifact artifact : dependenciesArray) {
-                    registry.delete(artifact.getPath());
-                }
-            }
-
-            //delete registry resources
-            artifactManager.removeGenericArtifact(apiProductArtifact);
-            artifactManager.removeGenericArtifact(productResourceUUID);
-
+            apiPersistenceInstance.deleteAPIProduct(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                    apiProduct.getUuid());
             apiMgtDAO.deleteAPIProduct(identifier);
             if (log.isDebugEnabled()) {
                 String logMessage =
@@ -9394,34 +9349,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
-            /*remove empty directories*/
-            String apiProductCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
-            if (registry.resourceExists(apiProductCollectionPath)) {
-                //at the moment product versioning is not supported so we are directly deleting this collection as
-                // this is known to be empty
-                registry.delete(apiProductCollectionPath);
-            }
 
-            String productProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
-
-            if (registry.resourceExists(productProviderPath)) {
-                Resource providerCollection = registry.get(productProviderPath);
-                CollectionImpl collection = (CollectionImpl) providerCollection;
-                //if there is no api product for given provider delete the provider directory
-                if (collection.getChildCount() == 0) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No more API Products from the provider " + identifier.getProviderName() + " found. " +
-                                "Removing provider collection from registry");
-                    }
-                    registry.delete(productProviderPath);
-                }
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to remove the API from : " + productResourcePath, e);
+        } catch (APIPersistenceException e) {
+            handleException("Failed to remove the API product", e);
         }
+    
+    }
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
+        if (StringUtils.isEmpty(apiProductUUID)) {
+            if (identifier.getUUID() != null) {
+                apiProductUUID = identifier.getUUID();
+            } else {
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier);
+            }
+        }
+        deleteAPIProduct(
+                getAPIProductbyUUID(apiProductUUID, CarbonContext.getThreadLocalCarbonContext().getTenantDomain()));
     }
 
     @Override
