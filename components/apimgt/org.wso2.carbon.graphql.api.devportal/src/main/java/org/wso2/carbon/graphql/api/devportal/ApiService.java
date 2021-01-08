@@ -127,7 +127,7 @@ public class ApiService {
         };
     }
     public DataFetcher getApiCount(){
-        return env-> apiDetails.getApiCount();
+        return env-> apidtoData.getApiCount();
     }
 
     public DataFetcher  getApiRating(){

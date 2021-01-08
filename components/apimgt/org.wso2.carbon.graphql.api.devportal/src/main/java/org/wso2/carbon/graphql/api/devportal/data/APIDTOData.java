@@ -36,6 +36,9 @@ public class APIDTOData {
     public static final String GET_API_CREATED_TIME = "SELECT API.CREATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
     public static final String GET_API_UPDATED_TIME = "SELECT API.UPDATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
 
+
+    public static final String GET_API_ID = "SELECT API.API_ID FROM AM_API API ";
+
 //    public APIDTO getApiData(String Id){
 //        //List<APIDTO> apidtos = new ArrayList<>();
 //
@@ -72,6 +75,24 @@ public class APIDTOData {
 //        return new APIDTO(uuid,apiName,context,version,provider,type,createdTime,lastUpdate);
 //
 //    }
+    public int getApiCount(){
+        int count = 0;
+        //int apiId = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(GET_API_ID)) {
+            //statement.setString(1, Id);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                //apiId = resultSet.getInt("API_ID");
+                count = count+1;
+            }
+        } catch (SQLException e) {
+
+        }
+        return count;
+    }
 
     public String getApiName(String Id){
         String apiName = null;
