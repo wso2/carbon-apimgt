@@ -7543,6 +7543,9 @@ components:
           type: string
           format: date-time
           example: 2017-02-20T13:57:16.229
+        revisionKey:
+          type: string
+          example: REVISION 1
     ResourcePathList:
       title: ResourcePath List
       type: object

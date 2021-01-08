@@ -621,13 +621,13 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String revisionId,
+    public List<HistoryEvent> getAPIOrAPIProductHistoryWithPagination(Identifier identifier, String revisionKey,
                                                                       Date startTime, Date endTime, int offset,
                                                                       int limit) throws APIManagementException {
 
         checkAccessControlPermission(identifier);
         return super
-                .getAPIOrAPIProductHistoryWithPagination(identifier, revisionId, startTime, endTime, offset, limit);
+                .getAPIOrAPIProductHistoryWithPagination(identifier, revisionKey, startTime, endTime, offset, limit);
     }
 
     @Override

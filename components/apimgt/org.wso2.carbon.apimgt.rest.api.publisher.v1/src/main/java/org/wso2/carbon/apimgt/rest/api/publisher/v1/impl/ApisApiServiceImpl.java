@@ -3809,17 +3809,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         revisionId = revisionId == null ? "" : revisionId;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
+        String revisionKey = null;
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (revisionId != null) {
-                //TODO: check if revision exists
+            if (StringUtils.isNotBlank(revisionId)) {
+                revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
             }
             List<HistoryEvent> historyEvents = apiProvider
-                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionId, startTime, endTime, offset,
+                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionKey, startTime, endTime, offset,
                             limit);
-            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiIdentifier, revisionId, startTime, endTime);
+            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiIdentifier, revisionKey, startTime,
+                    endTime);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIHistoryPaginationParams(historyEventListDTO, apiId, revisionId, startTime, endTime, limit,
@@ -3827,7 +3829,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(historyEventListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
-                //this is not an error of the user as he does not know the total number of applications available.
+                // This is not an error of the user as he does not know the total number of events available.
                 // Thus sends an empty response
                 historyEventListDTO.setCount(0);
                 historyEventListDTO.setPagination(new PaginationDTO());

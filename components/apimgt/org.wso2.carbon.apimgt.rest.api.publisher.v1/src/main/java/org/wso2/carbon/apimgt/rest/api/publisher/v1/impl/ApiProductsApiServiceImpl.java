@@ -776,19 +776,21 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        revisionId = revisionId == null ? "" : revisionId;
+        String revisionKey = null;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
-            if (revisionId != null) {
-                //TODO: check if revision exists
+            if (StringUtils.isNotBlank(revisionId)) {
+                revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
             }
             List<HistoryEvent> historyEvents = apiProvider
-                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionId, startTime, endTime,
+                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionKey, startTime, endTime,
                             offset, limit);
             int eventCount =
-                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionId, startTime, endTime);
+                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionKey, startTime, endTime);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIProductHistoryPaginationParams(historyEventListDTO, apiProductId, revisionId, startTime,
@@ -796,7 +798,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             return Response.ok().entity(historyEventListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
-                //this is not an error of the user as he does not know the total number of applications available.
+                // This is not an error of the user as he does not know the total number of events available.
                 // Thus sends an empty response
                 historyEventListDTO.setCount(0);
                 historyEventListDTO.setPagination(new PaginationDTO());

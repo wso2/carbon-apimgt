@@ -25,6 +25,7 @@ public class HistoryEventDTO   {
     private String description = null;
     private String user = null;
     private java.util.Date createdTime = null;
+    private String revisionKey = null;
 
   /**
    **/
@@ -111,6 +112,23 @@ public class HistoryEventDTO   {
     this.createdTime = createdTime;
   }
 
+  /**
+   **/
+  public HistoryEventDTO revisionKey(String revisionKey) {
+    this.revisionKey = revisionKey;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "REVISION 1", value = "")
+  @JsonProperty("revisionKey")
+  public String getRevisionKey() {
+    return revisionKey;
+  }
+  public void setRevisionKey(String revisionKey) {
+    this.revisionKey = revisionKey;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -125,12 +143,13 @@ public class HistoryEventDTO   {
         Objects.equals(operationId, historyEvent.operationId) &&
         Objects.equals(description, historyEvent.description) &&
         Objects.equals(user, historyEvent.user) &&
-        Objects.equals(createdTime, historyEvent.createdTime);
+        Objects.equals(createdTime, historyEvent.createdTime) &&
+        Objects.equals(revisionKey, historyEvent.revisionKey);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, operationId, description, user, createdTime);
+    return Objects.hash(id, operationId, description, user, createdTime, revisionKey);
   }
 
   @Override
@@ -143,6 +162,7 @@ public class HistoryEventDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    user: ").append(toIndentedString(user)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    revisionKey: ").append(toIndentedString(revisionKey)).append("\n");
     sb.append("}");
     return sb.toString();
   }
