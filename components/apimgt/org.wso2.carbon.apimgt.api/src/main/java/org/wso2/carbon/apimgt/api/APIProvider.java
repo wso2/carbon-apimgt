@@ -932,6 +932,7 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to change registry lifecycle states for an API artifact
      *
+     * @param organizationId UUID of the organization
      * @param  uuid uuid of the API
      * @param  action  Action which need to execute from registry lifecycle
      * @param  checklist checklist items

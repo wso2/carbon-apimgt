@@ -839,9 +839,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiInfo(api);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (api.getOrganizationId() != null  && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            handleException("APIs should be deployed in the super tenant space");
-        }
         validateResourceThrottlingTiers(api, tenantDomain);
         validateKeyManagers(api);
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -983,8 +980,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganizationId()),
-                    APIMapper.INSTANCE.toPublisherApi(api));
+            Organization org = null;
+            if (api.getOrganizationId() != null) {
+                org = new Organization(api.getOrganizationId());
+            } else {
+                org = new Organization(tenantDomain);
+            }
+            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {
@@ -1909,8 +1911,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             try {
+                Organization org = null;
+                if (existingAPI.getOrganizationId() != null) {
+                    org = new Organization(existingAPI.getOrganizationId());
+                } else {
+                    org = new Organization(tenantDomain);
+                }
                 api.setCreatedTime(oldApi.getCreatedTime());
-                apiPersistenceInstance.updateAPI(new Organization(existingAPI.getOrganizationId()), APIMapper.INSTANCE.toPublisherApi(api));
+                apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
@@ -3017,8 +3025,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
+
                     try {
-                        apiPersistenceInstance.updateAPI(new Organization(api.getOrganizationId()), publisherAPI);
+                        Organization org;
+                        if (api.getOrganizationId() != null) {
+                            org = new Organization(api.getOrganizationId());
+                        } else {
+                            org = new Organization(tenantDomain);
+                        }
+                        apiPersistenceInstance.updateAPI(org, publisherAPI);
                     } catch (APIPersistenceException e) {
                         handleException("Error while persisting the updated API ", e); 
                     }
@@ -7045,7 +7060,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-                    apiPersistenceInstance.changeAPILifeCycle(new Organization(organizationId), uuid, targetStatus);
+                    Organization org;
+                    if (api.getOrganizationId() != null) {
+                        org = new Organization(api.getOrganizationId());
+                    } else {
+                        org = new Organization(tenantDomain);
+                    }
+                    apiPersistenceInstance.changeAPILifeCycle(org, uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     
                     //Sending Notifications to existing subscribers
@@ -10493,10 +10514,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
 
-        Organization org = null;
+        Organization org;
         try {
             if (organizationId != null) {
                 org = new Organization(organizationId);
+            } else {
+                org = new Organization(tenantDomain);
             }
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             
@@ -10523,7 +10546,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Original search query received : " + searchQuery);
         }
 
-        Organization org = new Organization(organizationId);
+        Organization org;
+        if (organizationId != null) {
+            org = new Organization(organizationId);
+        } else {
+            org = new Organization(tenantDomain);
+        }
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);

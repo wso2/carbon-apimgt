@@ -1206,7 +1206,13 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), id);
+            Organization org;
+            if (organizationId != null) {
+                org = new Organization(organizationId);
+            } else {
+                org = new Organization(tenantDomain);
+            }
+            definition = apiPersistenceInstance.getOASDefinition(org, id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }

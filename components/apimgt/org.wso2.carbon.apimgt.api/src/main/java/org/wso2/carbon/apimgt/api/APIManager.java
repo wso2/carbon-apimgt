@@ -190,8 +190,8 @@ public interface APIManager {
     /**
      * Returns the swagger v2.0 definition as a string
      *
-     * @param apiId id of the APIIdentifier
-     * @param organizationId UUId of the organization
+     * @param apiId           id of the APIIdentifier
+     * @param organizationId  UUID of the organization
      * @return swagger string
      * @throws APIManagementException
      */
@@ -695,8 +695,8 @@ public interface APIManager {
     /**
      * Returns a list of api versions that matches the given context template
      *
-     * @param apiName api name in the payload
-     * @param username logged in user name of the user
+     * @param apiName        API name in the payload
+     * @param username       logged in user name of the user
      * @param organizationId UUID of the organization to which the API belongs to
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
@@ -880,6 +880,7 @@ public interface APIManager {
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
     
     /**
+     * @param organizationId  UUID of the organization
      * @param searchQuery search query. ex : provider:admin
      * @param tenantDomain tenant domain
      * @param start starting number
@@ -887,7 +888,8 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end)
+    Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start,
+                                            int end)
             throws APIManagementException;
     
     /**

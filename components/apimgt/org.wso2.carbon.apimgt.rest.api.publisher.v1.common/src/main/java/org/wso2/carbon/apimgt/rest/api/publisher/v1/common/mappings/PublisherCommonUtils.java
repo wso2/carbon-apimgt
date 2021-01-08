@@ -701,12 +701,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        API apiToAdd;
-        if (organizationId != null) {
-            apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organizationId);
-        } else {
-            apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, null);
-        }
+        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organizationId);
         validateScopes(apiToAdd);
         //validate API categories
         List<APICategory> apiCategories = apiToAdd.getApiCategories();
@@ -716,7 +711,6 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        
 
         if (!isWSAPI) {
             APIDefinition oasParser;

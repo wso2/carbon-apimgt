@@ -765,7 +765,7 @@ public class AbstractAPIManagerTestCase {
         
         Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN), swaggerContent);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier), swaggerContent);
+        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier,null), swaggerContent);
     }
 
     @Test
