@@ -750,11 +750,17 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
-                endpointId: JSON.stringify(swagger),
                 'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    apiDefinition: JSON.stringify(swagger),
+                }
             };
             return client.apis['APIs'].updateAPISwagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -770,18 +776,23 @@ class API extends Resource {
      * @returns {boolean|*}
      */
     updateAPIDefinitionByUrl(apiId, openAPIUrl) {
-        let payload, promise_updated;
+        let payload, requestBody, promise_updated;
 
         promise_updated = this.client.then(client => {
-            const apiData = this.getDataFromSpecFields(client);
-
             payload = {
-                apiId: apiId,
-                url: openAPIUrl,
+                apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            requestBody = {
+                requestBody: {
+                    url: openAPIUrl,
+                }
             };
 
             const promisedResponse = client.apis['APIs'].updateAPISwagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -798,18 +809,23 @@ class API extends Resource {
      * @returns {boolean|*}
      */
     updateAPIDefinitionByFile(apiId, openAPIFile) {
-        let payload, promise_updated;
+        let payload, requestBody, promise_updated;
 
         promise_updated = this.client.then(client => {
-            const apiData = this.getDataFromSpecFields(client);
-
             payload = {
-                apiId: apiId,
-                file: openAPIFile,
+                apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            requestBody = {
+                requestBody: {
+                    file: openAPIFile,
+                }
             };
 
             const promisedResponse = client.apis['APIs'].updateAPISwagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
