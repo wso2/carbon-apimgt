@@ -634,7 +634,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public PublisherAPIProduct addPublisherAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+    public PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException {
         // TODO Auto-generated method stub
         return null;
@@ -650,6 +650,13 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery,
             int start, int offset, UserContext ctx) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
         // TODO Auto-generated method stub
         return null;
     }

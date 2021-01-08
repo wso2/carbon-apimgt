@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,6 +57,10 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String thumbnail;
     private String createdTime;
     private String lastUpdated;
+    private Set<String> tags = new LinkedHashSet<>();
+    private String accessControl; // publisher accessControl : 'restricted', 'all'
+    private Set<String> accessControlRoles; // reg has a just String
+    
     public String getDescription() {
         return description;
     }
@@ -218,6 +223,25 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     public void setLastUpdated(String lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
+    public Set<String> getTags() {
+        return tags;
+    }
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
+    }
+    public String getAccessControl() {
+        return accessControl;
+    }
+    public void setAccessControl(String accessControl) {
+        this.accessControl = accessControl;
+    }
+    public Set<String> getAccessControlRoles() {
+        return accessControlRoles;
+    }
+    public void setAccessControlRoles(Set<String> accessControlRoles) {
+        this.accessControlRoles = accessControlRoles;
+    }
+    
     
     /*
     private String inSequence;
@@ -235,9 +259,7 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private Set<String> gatewayLabels;
     private List<String> keyManagers = new ArrayList<>();
     private Set<DeploymentEnvironments> deploymentEnvironments;
-    private Set<String> tags = new LinkedHashSet<>();
-    private String accessControl; // publisher accessControl : 'restricted', 'all'
-    private Set<String> accessControlRoles; // reg has a just String
+
     private Map<String, String> additionalProperties;
     */
 

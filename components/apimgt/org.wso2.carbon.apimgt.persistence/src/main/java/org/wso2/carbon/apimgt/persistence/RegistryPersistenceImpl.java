@@ -3014,7 +3014,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public PublisherAPIProduct addPublisherAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+    public PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException {
         
         Registry registry = null;
@@ -3080,7 +3080,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.debug(logMessage);
             }
             //changeLifeCycleStatusToPublish(apiProduct.getId());
-            artifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifact.getId());
+            apiArtifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+            
             publisherAPIProduct.setCreatedTime(String.valueOf(new Date().getTime()));
             publisherAPIProduct.setId(artifact.getId());
             return publisherAPIProduct;
@@ -3226,6 +3228,89 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
         return result;
+    }
+
+    @Override
+    public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
+        String requestedTenantDomain = org.getName();
+        boolean isTenantFlowStarted = false;
+        boolean transactionCommitted = false;
+        APIProduct apiProduct;
+        Registry registry = null;
+        try {
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            registry = holder.getRegistry();
+            isTenantFlowStarted = holder.isTenantFlowStarted();
+            registry.beginTransaction();
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            if (artifactManager == null) {
+                String errorMessage = "Artifact manager is null when updating API Product with artifact ID "
+                        + publisherAPIProduct.getId();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
+            }
+            GenericArtifact artifact = artifactManager.getGenericArtifact(publisherAPIProduct.getId());
+
+            apiProduct = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+            APIProductIdentifier id = new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+                    publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion());
+            apiProduct.setID(id);
+            GenericArtifact updateApiProductArtifact = RegistryPersistenceUtil.createAPIProductArtifactContent(artifact,
+                    apiProduct);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiProductArtifact.getId());
+
+            artifactManager.updateGenericArtifact(updateApiProductArtifact);
+
+            String visibleRolesList = apiProduct.getVisibleRoles();
+            String[] visibleRoles = new String[0];
+            if (visibleRolesList != null) {
+                visibleRoles = visibleRolesList.split(",");
+            }
+            org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
+            if (oldTags != null) {
+                for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
+                    registry.removeTag(artifactPath, tag.getTagName());
+                }
+            }
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
+            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+
+            updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
+                    apiProduct.getAdditionalProperties());
+            RegistryPersistenceUtil.setResourcePermissions(apiProduct.getId().getProviderName(),
+                    apiProduct.getVisibility(), visibleRoles, artifactPath, registry);
+            registry.commitTransaction();
+            transactionCommitted = true;
+            return publisherAPIProduct;
+        } catch (Exception e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error from this level will mask the original exception
+                log.error("Error while rolling back the transaction for API Product: "
+                        + publisherAPIProduct.getApiProductName(), re);
+            }
+            throw new APIPersistenceException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+
+            } catch (RegistryException ex) {
+                throw new APIPersistenceException("Error occurred while rolling back the transaction.", ex);
+            }
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
 }

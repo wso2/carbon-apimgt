@@ -422,10 +422,21 @@ public interface APIPersistence {
      * @return ID of Added API Product
      * @throws APIPersistenceException
      */
-    PublisherAPIProduct addPublisherAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+    PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException;
     
 
+    /**
+     * Update API product to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPIProduct API product to add
+     * @return ID of Added API Product
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException;
+    
     /**
      * Get the API product information stored in persistence layer, that is used for publisher operations
      *

@@ -458,8 +458,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return Response.ok().entity(createdApiProductDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId ;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
+            } else {
+                String errorMessage = "Error while retrieving API Product from Id  : " + apiProductId ;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }
@@ -485,8 +489,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();
         } catch (APIManagementException | FaultGatewaysException e) {
-            String errorMessage = "Error while updating API Product : " + apiProductId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
+            } else {
+                String errorMessage = "Error while updating API Product : " + apiProductId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }

@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.persistence.mapper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -146,5 +147,20 @@ public interface APIProductMapper {
             }
         }
         return mappedTiers;
+    }
+    default String mapAccessControlRolesToString(Set<String> accessControlRoles) {
+        if (accessControlRoles != null) {
+            return String.join(",", accessControlRoles);
+        } else {
+            return null;
+        }
+    }
+
+    default Set<String> mapAccessControlRolesToSet(String accessControlRoles){
+        if (accessControlRoles != null && !"null".equalsIgnoreCase(accessControlRoles)) {
+            return  new HashSet<>(Arrays.asList(accessControlRoles.split(",")));
+        } else {
+            return null;
+        }
     }
 }

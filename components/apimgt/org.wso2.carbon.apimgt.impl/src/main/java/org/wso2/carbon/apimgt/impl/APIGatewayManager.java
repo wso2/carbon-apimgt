@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -62,6 +63,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -1247,8 +1249,13 @@ public class APIGatewayManager {
             throws APIManagementException {
 
         for (APIProductResource resource : apiProduct.getProductResources()) {
-            APIIdentifier apiIdentifier = resource.getApiIdentifier();
-            API api = apiProvider.getAPI(apiIdentifier);
+            String uuid = resource.getApiId();
+            if (StringUtils.isEmpty(uuid)) {
+                APIIdentifier apiIdentifier = resource.getApiIdentifier();
+                uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
+            }
+
+            API api = apiProvider.getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
 
             String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
             if (APIUtil.isSequenceDefined(api.getInSequence())) {
