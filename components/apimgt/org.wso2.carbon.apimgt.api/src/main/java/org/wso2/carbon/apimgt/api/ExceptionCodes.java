@@ -407,7 +407,11 @@ ExceptionCodes implements ErrorHandler {
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
     ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
-            "Error while reading meta information from the api_params.yaml file");
+            "Error while reading meta information from the api_params.yaml file"),
+
+    // API History related codes
+    INVALID_TIMESTAMP_FORMAT(901000, "Invalid timestamp format for startTime/endTime", 400,
+            "Timestamp format should be in ISO8601 format.");
 
     private final long errorCode;
     private final String errorMessage;

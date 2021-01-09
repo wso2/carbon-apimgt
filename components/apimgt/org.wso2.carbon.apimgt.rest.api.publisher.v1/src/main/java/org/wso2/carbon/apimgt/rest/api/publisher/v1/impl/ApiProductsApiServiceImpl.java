@@ -27,6 +27,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -64,6 +65,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -773,32 +775,37 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                          String startTime, String endTime, MessageContext messageContext)
             throws APIManagementException {
 
-        // pre-processing
-        // setting default limit and offset values if they are not set
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        revisionId = revisionId == null ? "" : revisionId;
-        String revisionKey = null;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
-        Date startDate = Date.from(OffsetDateTime.parse(startTime).toInstant());
-        Date endDate = Date.from(OffsetDateTime.parse(endTime).toInstant());
-
+        Date startDate;
+        Date endDate;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
-            if (StringUtils.isNotBlank(revisionId)) {
-                revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
-            }
+            // pre-processing
+            // setting default limit and offset values if they are not set
+            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+            revisionId = revisionId == null ? "" : revisionId;
+            startDate = StringUtils.isNotBlank(startTime) ?
+                    Date.from(OffsetDateTime.parse(startTime).toInstant()) : null;
+            endDate = StringUtils.isNotBlank(endTime) ?
+                    Date.from(OffsetDateTime.parse(endTime).toInstant()) : null;
+            String revisionKey = (StringUtils.isNotBlank(revisionId)) ?
+                    apiProvider.getRevisionKeyFromRevisionUUID(revisionId) : null;
             List<HistoryEvent> historyEvents = apiProvider
                     .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionKey, startDate, endDate,
                             offset, limit);
             int eventCount =
-                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionKey, startDate, endDate);
+                    apiProvider
+                            .getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionKey, startDate, endDate);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIProductHistoryPaginationParams(historyEventListDTO, apiProductId, revisionId, startTime,
                             endTime, limit, offset, eventCount);
             return Response.ok().entity(historyEventListDTO).build();
+        } catch (DateTimeParseException e) {
+            throw new APIManagementException("Invalid timestamp format. Timestamp format must be in ISO8601 standard " +
+                    "(YYYY-MM-DDThh:mm:ss.fff±hh:mm).", ExceptionCodes.from(ExceptionCodes.INVALID_TIMESTAMP_FORMAT));
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
                 // This is not an error of the user as he does not know the total number of events available.
