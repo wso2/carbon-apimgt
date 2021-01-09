@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
@@ -410,4 +412,61 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
+    
+    
+    /**
+     * Add API product to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPIProduct API product to add
+     * @return ID of Added API Product
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException;
+    
+
+    /**
+     * Update API product to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPIProduct API product to add
+     * @return ID of Added API Product
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException;
+    
+    /**
+     * Get the API product information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org   Organization the API is owned by
+     * @param apiProductId API product ID
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId) throws APIPersistenceException;
+    
+    /**
+     * Search API Products to be displayed on Publisher API product listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @return Publisher API product Search Result
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx) throws APIPersistenceException;
+    
+    /**
+     * Delete API Product
+     *
+     * @param org   Organization the API product is owned by
+     * @param apiId API ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
+
 }

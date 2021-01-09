@@ -35,9 +35,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
@@ -67,6 +70,7 @@ import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
+import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -89,7 +93,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -247,7 +254,7 @@ public class RegistryPersistenceUtil {
                 i++;
 
             }
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api.getEnvironments()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                                             RegistryPersistenceUtil.getCorsConfigurationJsonFromDto(
@@ -375,12 +382,11 @@ public class RegistryPersistenceUtil {
     /**
      * This method used to set environment values to governance artifact of API .
      *
-     * @param api API object with the attributes value
+     * @param environment set
      */
-    public static String writeEnvironmentsToArtifact(API api) {
+    public static String writeEnvironmentsToArtifact(Set<String> apiEnvironments) {
 
         StringBuilder publishedEnvironments = new StringBuilder();
-        Set<String> apiEnvironments = api.getEnvironments();
         if (apiEnvironments != null) {
             for (String environmentName : apiEnvironments) {
                 publishedEnvironments.append(environmentName).append(',');
@@ -396,6 +402,7 @@ public class RegistryPersistenceUtil {
         }
         return publishedEnvironments.toString();
     }
+    
 
     /**
      * this method used to initialized the ArtifactManager
@@ -891,6 +898,56 @@ public class RegistryPersistenceUtil {
         return api;
     }
 
+    /**
+     * To set the resource properties to the API Product.
+     *
+     * @param apiProduct   API Product that need to set the resource properties.
+     * @param registry     Registry to get the resource from.
+     * @param artifactPath Path of the API Product artifact.
+     * @return Updated API.
+     * @throws RegistryException Registry Exception.
+     */
+    private static APIProduct setResourceProperties(APIProduct apiProduct, Registry registry, String artifactPath)
+            throws RegistryException {
+
+        Resource productResource = registry.get(artifactPath);
+        Properties properties = productResource.getProperties();
+        if (properties != null) {
+            Enumeration propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API Product '" + apiProduct.getId().toString() + "' " + "has the property " + propertyName);
+                }
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    apiProduct.addProperty(propertyName.substring(
+                            APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                            productResource.getProperty(propertyName));
+                }
+            }
+        }
+        apiProduct.setAccessControl(productResource.getProperty(APIConstants.ACCESS_CONTROL));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = productResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = productResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        productResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : productResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        apiProduct.setAccessControlRoles(accessControlRoles);
+        return apiProduct;
+    }
     protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType)
                                     throws APIPersistenceException {
         return getArtifactManager(registry, keyType);
@@ -1616,4 +1673,231 @@ public class RegistryPersistenceUtil {
         }
         return api;
     }
+    
+    /**
+     * Create Governance artifact from given attributes
+     *
+     * @param artifact   initial governance artifact
+     * @param apiProduct APIProduct object with the attributes value
+     * @return GenericArtifact
+     * @throws APIManagementException if failed to create API Product
+     */
+    public static GenericArtifact createAPIProductArtifactContent(GenericArtifact artifact, APIProduct apiProduct)
+            throws APIManagementException {
+
+        try {
+            //todo : review and add missing fields
+            artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, apiProduct.getId().getName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, apiProduct.getId().getVersion());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, apiProduct.getContext());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, APIConstants.AuditLogConstants.API_PRODUCT);
+            artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiProduct.getState());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, apiProduct.getVisibleRoles());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, apiProduct.getVisibleTenants());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER, apiProduct.getTechnicalOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL, apiProduct.getTechnicalOwnerEmail());
+            artifact.setAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
+            artifact.setAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
+            artifact.setAttribute(
+                    APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(apiProduct.getCacheTimeout()));
+
+            StringBuilder policyBuilder = new StringBuilder();
+            for (Tier tier : apiProduct.getAvailableTiers()) {
+                policyBuilder.append(tier.getName());
+                policyBuilder.append("||");
+            }
+
+            String policies = policyBuilder.toString();
+
+            if (!"".equals(policies)) {
+                policies = policies.substring(0, policies.length() - 2);
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
+            } else {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, policies);
+            }
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS,
+                    writeEnvironmentsToArtifact(apiProduct.getEnvironments()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, apiProduct.getTransports());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                    getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, apiProduct.getAuthorizationHeader());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, apiProduct.getApiSecurity());
+
+            //Validate if the API has an unsupported context before setting it in the artifact
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+                String invalidContext = File.separator + APIConstants.VERSION_PLACEHOLDER;
+                if (invalidContext.equals(apiProduct.getContextTemplate())) {
+                    throw new APIManagementException("API : " + apiProduct.getId() + " has an unsupported context : " +
+                            apiProduct.getContextTemplate());
+                }
+            } else {
+                String invalidContext =
+                        APIConstants.TENANT_PREFIX + tenantDomain + File.separator + APIConstants.VERSION_PLACEHOLDER;
+                if (invalidContext.equals(apiProduct.getContextTemplate())) {
+                    throw new APIManagementException("API : " + apiProduct.getId() + " has an unsupported context : " +
+                            apiProduct.getContextTemplate());
+                }
+            }
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA, Boolean.toString(apiProduct.
+                    isEnabledSchemaValidation()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE, Boolean.toString(apiProduct.isEnableStore()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING, apiProduct.getResponseCache());
+            // This is to support the pluggable version strategy.
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
+
+            //set monetization status (i.e - enabled or disabled)
+            artifact.setAttribute(
+                    APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(apiProduct.getMonetizationStatus()));
+            //set additional monetization data
+            if (apiProduct.getMonetizationProperties() != null) {
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
+                        apiProduct.getMonetizationProperties().toJSONString());
+            }
+
+            //attaching api categories to the API
+            List<APICategory> attachedApiCategories = apiProduct.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
+            }
+        } catch (GovernanceException e) {
+            String msg = "Failed to create API for : " + apiProduct.getId().getName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return artifact;
+    }
+
+    /**
+     * Retrieves api product artifact from registry
+     *
+     * @param artifact
+     * @param registry
+     * @return APIProduct
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public static APIProduct getAPIProduct(GovernanceArtifact artifact, Registry registry)
+            throws APIManagementException {
+
+        APIProduct apiProduct;
+        try {
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+            String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
+                    productVersion);
+            apiProduct = new APIProduct(apiProductIdentifier);
+            setResourceProperties(apiProduct, registry, artifactPath);
+
+            //set uuid
+            apiProduct.setUuid(artifact.getId());
+            apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+            apiProduct.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+            apiProduct.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
+            apiProduct.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+            apiProduct.setVisibility(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY));
+            apiProduct.setVisibleRoles(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES));
+            apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
+            apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+            apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            apiProduct.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            apiProduct.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+            apiProduct.setSubscriptionAvailability(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+            apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
+            apiProduct.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
+            apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+            apiProduct.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+            apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+            apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
+            apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
+            apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+            String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+            apiProduct.setTenantDomain(tenantDomainName);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomainName);
+
+            
+            String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+            Set<Tier> availableTiers = new HashSet<Tier>();
+            if(tiers != null) {
+                String[] tiersArray = tiers.split("\\|\\|");
+                for(String tierName : tiersArray) {
+                    availableTiers.add(new Tier(tierName));
+                }
+            }
+            apiProduct.setAvailableTiers(availableTiers );
+
+            // We set the context template here
+            apiProduct.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
+            apiProduct.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
+            apiProduct.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENABLE_STORE)));
+            apiProduct.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
+            apiProduct.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
+
+            int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
+            try {
+                cacheTimeout = Integer.parseInt(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT));
+            } catch (NumberFormatException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error in converting cache time out due to " + e.getMessage());
+                }
+            }
+            apiProduct.setCacheTimeout(cacheTimeout);
+
+            Set<String> tags = new HashSet<String>();
+            Tag[] tag = registry.getTags(artifactPath);
+            for (Tag tag1 : tag) {
+                tags.add(tag1.getTagName());
+            }
+            apiProduct.addTags(tags);
+            /*
+            
+
+            */
+            //set data and status related to monetization
+            apiProduct.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+            if (StringUtils.isNotBlank(monetizationInfo)) {
+                JSONParser parser = new JSONParser();
+                JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
+                apiProduct.setMonetizationProperties(jsonObj);
+            }
+            apiProduct.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
+        } catch (GovernanceException e) {
+            String msg = "Failed to get API Product for artifact ";
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get LastAccess time or Rating";
+            throw new APIManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "Failed to get User Realm of API Product Provider";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException e) {
+            String msg = "Failed to get parse monetization information.";
+            throw new APIManagementException(msg, e);
+        }
+        return apiProduct;
+    }
+
 }

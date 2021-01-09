@@ -53,6 +53,8 @@ import org.wso2.carbon.apimgt.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
@@ -629,5 +631,39 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             int offset, UserContext ctx) throws APIPersistenceException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId)
+            throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery,
+            int start, int offset, UserContext ctx) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -172,6 +172,9 @@ import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
@@ -186,6 +189,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.context.CarbonContext;
@@ -3299,14 +3303,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilder builder = null;
         APIProductIdentifier apiProductId = apiProduct.getId();
 
-        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId()));
-
         String provider = apiProductId.getProviderName();
         if (provider.contains("AT")) {
             provider = provider.replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        }
+        if (apiProduct.getDefinition() == null) {
+            apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getUuid(), tenantDomain));
         }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
@@ -3351,7 +3356,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<API> apis = new HashSet<>();
 
         for (APIProductResource productResource : productResources) {
-            API api = getAPI(productResource.getApiIdentifier());
+            API api = getAPIbyUUID(productResource.getApiId(),
+                    CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
             apis.add(api);
         }
 
@@ -9203,20 +9209,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIProductResource> validResources = new ArrayList<APIProductResource>();
         for (APIProductResource apiProductResource : resources) {
             API api;
+            String apiUUID;
             if (apiProductResource.getProductIdentifier() != null) {
                 APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
                 String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                api = super.getAPI(emailReplacedAPIIdentifier);
+                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier);
+                api = getAPIbyUUID(apiUUID, tenantDomain);
             } else {
-                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
+                apiUUID = apiProductResource.getApiId();
+                api = getAPIbyUUID(apiUUID, tenantDomain);
                 // if API does not exist, getLightweightAPIByUUID() method throws exception.
             }
             if (api != null) {
                 validateApiLifeCycleForApiProducts(api);
+                if (api.getSwaggerDefinition() != null) {
+                    api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, tenantDomain));
+                }
 
-                api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
                 if (!apiToProductResourceMapping.containsKey(api)) {
                     apiToProductResourceMapping.put(api, new ArrayList<>());
                 }
@@ -9292,15 +9303,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    @Override
-    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
-        //this is the product resource collection path
-        String productResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+    public void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException {
 
-        //this is the product rxt instance path
-        String apiProductArtifactPath = APIUtil.getAPIProductPath(identifier);
+        APIProductIdentifier identifier = apiProduct.getId();
 
         try {
             //int apiId = apiMgtDAO.getAPIID(identifier, null);
@@ -9312,61 +9317,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
 
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when deleting API Product" + identifier;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-
-            Resource apiProductResource = registry.get(productResourcePath);
-            String productResourceUUID = apiProductResource.getUUID();
-
-            if (productResourceUUID == null) {
-                throw new APIManagementException("artifact id is null for : " + productResourcePath);
-            }
-
-            Resource apiArtifactResource = registry.get(apiProductArtifactPath);
-            String apiArtifactResourceUUID = apiArtifactResource.getUUID();
-
-            if (apiArtifactResourceUUID == null) {
-                throw new APIManagementException("artifact id is null for : " + apiProductArtifactPath);
-            }
-
-            GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(apiArtifactResourceUUID);
-            String environments = apiProductArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-
             APIManagerConfiguration config = getAPIManagerConfiguration();
             boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
-            APIProduct apiProduct = new APIProduct(identifier);
-            apiProduct.setUuid(apiProductUUID);
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
-                apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-                List<APIProductResource> resourceMappings = apiMgtDAO.getAPIProductResourceMappings(identifier);
-                apiProduct.setProductResources(resourceMappings);
                 removeFromGateway(apiProduct);
 
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
             }
 
-            //Delete the dependencies associated  with the api product artifact
-            GovernanceArtifact[] dependenciesArray = apiProductArtifact.getDependencies();
-            if (dependenciesArray.length > 0) {
-                for (GovernanceArtifact artifact : dependenciesArray) {
-                    registry.delete(artifact.getPath());
-                }
-            }
-
-            //delete registry resources
-            artifactManager.removeGenericArtifact(apiProductArtifact);
-            artifactManager.removeGenericArtifact(productResourceUUID);
-
+            apiPersistenceInstance.deleteAPIProduct(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                    apiProduct.getUuid());
             apiMgtDAO.deleteAPIProduct(identifier);
             if (log.isDebugEnabled()) {
                 String logMessage =
@@ -9383,34 +9349,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
-            /*remove empty directories*/
-            String apiProductCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
-            if (registry.resourceExists(apiProductCollectionPath)) {
-                //at the moment product versioning is not supported so we are directly deleting this collection as
-                // this is known to be empty
-                registry.delete(apiProductCollectionPath);
-            }
 
-            String productProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
-
-            if (registry.resourceExists(productProviderPath)) {
-                Resource providerCollection = registry.get(productProviderPath);
-                CollectionImpl collection = (CollectionImpl) providerCollection;
-                //if there is no api product for given provider delete the provider directory
-                if (collection.getChildCount() == 0) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No more API Products from the provider " + identifier.getProviderName() + " found. " +
-                                "Removing provider collection from registry");
-                    }
-                    registry.delete(productProviderPath);
-                }
-            }
-
-        } catch (RegistryException e) {
-            handleException("Failed to remove the API from : " + productResourcePath, e);
+        } catch (APIPersistenceException e) {
+            handleException("Failed to remove the API product", e);
         }
+    
+    }
+
+    @Override
+    public void deleteAPIProduct(APIProductIdentifier identifier, String apiProductUUID) throws APIManagementException {
+        if (StringUtils.isEmpty(apiProductUUID)) {
+            if (identifier.getUUID() != null) {
+                apiProductUUID = identifier.getUUID();
+            } else {
+                apiProductUUID = apiMgtDAO.getUUIDFromIdentifier(identifier);
+            }
+        }
+        deleteAPIProduct(
+                getAPIProductbyUUID(apiProductUUID, CarbonContext.getThreadLocalCarbonContext().getTenantDomain()));
     }
 
     @Override
@@ -9421,17 +9377,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (APIProductResource apiProductResource : resources) {
             API api;
             APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
+            String apiUUID;
             if (productIdentifier != null) {
                 APIIdentifier productAPIIdentifier = apiProductResource.getApiIdentifier();
                 String emailReplacedAPIProviderName = APIUtil.replaceEmailDomain(productAPIIdentifier.getProviderName());
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
-                api = super.getAPI(emailReplacedAPIIdentifier);
+                apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier);
+                api = getAPIbyUUID(apiUUID, tenantDomain);
             } else {
-                api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
+                apiUUID = apiProductResource.getApiId();
+                api = getAPIbyUUID(apiUUID, tenantDomain);
             }
-
-            api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
+            if (api.getSwaggerDefinition() != null) {
+                api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, tenantDomain));
+            }
 
             if (!apiToProductResourceMapping.containsKey(api)) {
                 apiToProductResourceMapping.put(api, new ArrayList<>());
@@ -9479,7 +9439,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        APIProduct oldApi = getAPIProduct(product.getId());
+        APIProduct oldApi = getAPIProductbyUUID(product.getUuid(),
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
@@ -9586,7 +9547,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ExceptionCodes.LENGTH_EXCEEDS);
         }
     }
-
     /**
      * Create an Api Product
      *
@@ -9594,91 +9554,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to create APIProduct
      */
     protected String createAPIProduct(APIProduct apiProduct) throws APIManagementException {
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-
-        if (artifactManager == null) {
-            String errorMessage = "Failed to retrieve artifact manager when creating API Product" + apiProduct.getId().getName();
-            log.error(errorMessage);
-            throw new APIManagementException(errorMessage);
-        }
-
-        //Validate Transports and Security
+        String apiProductUUID = null;
+        // Validate Transports and Security
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
 
-        boolean transactionCommitted = false;
-        String apiProductUUID = null;
+        PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+        PublisherAPIProduct addedAPIProduct;
         try {
-            registry.beginTransaction();
-            GenericArtifact genericArtifact =
-                    artifactManager.newGovernanceArtifact(new QName(apiProduct.getId().getName()));
-            if (genericArtifact == null) {
-                String errorMessage = "Generic artifact is null when creating API Product" + apiProduct.getId().getName();
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
-            artifactManager.addGenericArtifact(artifact);
-            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
-            //provider ------provides----> APIProduct
-            registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
-
-            // Make the LC status of the API Product published by default
-            saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
-
-            Set<String> tagSet = apiProduct.getTags();
-            if (tagSet != null) {
-                for (String tag : tagSet) {
-                    registry.applyTag(artifactPath, tag);
-                }
-            }
-
-            String visibleRolesList = apiProduct.getVisibleRoles();
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
-            }
-
-            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
-                    apiProduct.getAdditionalProperties());
-            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
-                    artifactPath, registry);
-
-            registry.commitTransaction();
-            transactionCommitted = true;
-
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API Product Name: " + apiProduct.getId().getName() + ", API Product Version " + apiProduct.getId().getVersion()
-                                + " created";
-                log.debug(logMessage);
-            }
-            changeLifeCycleStatusToPublish(apiProduct.getId());
-            apiProductUUID = artifact.getId();
-        } catch (RegistryException e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error here would mask the original exception
-                log.error("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), re);
-            }
-            handleException("Error while performing registry transaction operation", e);
-        } catch (APIManagementException e) {
-            handleException("Error while creating API Product", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
-            }
+            publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
+            publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
+            publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
+            addedAPIProduct = apiPersistenceInstance.addAPIProduct(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                    publisherAPIProduct);
+            
+            apiProductUUID = addedAPIProduct.getId();
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while creating API product ", e);
         }
+       
+
         return apiProductUUID;
     }
+
 
     private void changeLifeCycleStatusToPublish(APIProductIdentifier apiIdentifier) throws APIManagementException {
         try {
@@ -9720,65 +9619,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports and Security
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
-
-        boolean transactionCommitted = false;
+        
+        PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+        PublisherAPIProduct addedAPIProduct;
         try {
-            registry.beginTransaction();
-            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(productArtifactId);
-            if (artifactManager == null) {
-                String errorMessage =
-                        "Artifact manager is null when updating API Product with artifact ID " + apiProduct.getId();
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-
-            GenericArtifact updateApiProductArtifact = APIUtil.createAPIProductArtifactContent(artifact, apiProduct);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiProductArtifact.getId());
-
-            artifactManager.updateGenericArtifact(updateApiProductArtifact);
-
-            String visibleRolesList = apiProduct.getVisibleRoles();
-            String[] visibleRoles = new String[0];
-            if (visibleRolesList != null) {
-                visibleRoles = visibleRolesList.split(",");
-            }
-            org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
-            if (oldTags != null) {
-                for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
-                    registry.removeTag(artifactPath, tag.getTagName());
-                }
-            }
-            Set<String> tagSet = apiProduct.getTags();
-            if (tagSet != null) {
-                for (String tag : tagSet) {
-                    registry.applyTag(artifactPath, tag);
-                }
-            }
-            String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
-            updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
-                    apiProduct.getAdditionalProperties());
-            APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,
-                    artifactPath, registry);
-            registry.commitTransaction();
-            transactionCommitted = true;
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error from this level will mask the original exception
-                log.error("Error while rolling back the transaction for API Product: " + apiProduct.getId().getName(), re);
-            }
-            handleException("Error while performing registry transaction operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                handleException("Error occurred while rolling back the transaction.", ex);
-            }
+            publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
+            publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
+            publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
+            addedAPIProduct = apiPersistenceInstance.updateAPIProduct(
+                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
+                    publisherAPIProduct);
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while creating API product ");
         }
     }
 
@@ -10477,15 +10329,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
     @Override
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-            Organization org = new Organization(requestedTenantDomain);
+        Organization org = new Organization(requestedTenantDomain);
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-            
+
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, requestedTenantDomain, org, api);
-           
+
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
@@ -10493,6 +10345,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
+        }
+    }
+    
+    public APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        try {
+            Organization org = new Organization(requestedTenantDomain);
+            PublisherAPIProduct publisherAPIProduct = apiPersistenceInstance.getPublisherAPIProduct(org, uuid);
+            if (publisherAPIProduct != null) {
+                APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+                product.setID(new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+                        publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion()));
+                checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
+                        product.getAccessControlRoles());
+                populateAPIProductInformation(uuid, requestedTenantDomain, org, product);
+                return product;
+            } else {
+                String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
+                        + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+            String msg = "Failed to get API Product";
+            throw new APIManagementException(msg, e);
         }
     }
 
@@ -10913,4 +10788,60 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
+    
+    /**
+     * Returns APIProduct Search result based on the provided query.
+     *
+     * @param registry
+     * @param searchQuery Ex: provider=*admin*
+     * @return APIProduct result
+     * @throws APIManagementException
+     */
+
+    public Map<String, Object> searchPaginatedAPIProducts(Registry registry, String searchQuery, int start, int end)
+            throws APIManagementException {
+        SortedSet<APIProduct> productSet = new TreeSet<APIProduct>(new APIProductNameComparator());
+        List<APIProduct> productList = new ArrayList<APIProduct>();
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
+        Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
+        try {
+            PublisherAPIProductSearchResult searchAPIs = apiPersistenceInstance.searchAPIProductsForPublisher(org,
+                    searchQuery, start, end, userCtx);
+            if (log.isDebugEnabled()) {
+                log.debug("searched API products for query : " + searchQuery + " :-->: " + searchAPIs.toString());
+            }
+
+            if (searchAPIs != null) {
+                List<PublisherAPIProductInfo> list = searchAPIs.getPublisherAPIProductInfoList();
+                List<Object> apiList = new ArrayList<>();
+                for (PublisherAPIProductInfo publisherAPIInfo : list) {
+                    APIProduct mappedAPI = new APIProduct(new APIProductIdentifier(publisherAPIInfo.getProviderName(),
+                            publisherAPIInfo.getApiProductName(), publisherAPIInfo.getVersion()));
+                    mappedAPI.setUuid(publisherAPIInfo.getId());
+                    mappedAPI.setState(publisherAPIInfo.getState());
+                    mappedAPI.setContext(publisherAPIInfo.getContext());
+                    productList.add(mappedAPI);
+                }
+                productSet.addAll(productList);
+                result.put("products", productSet);
+                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("isMore", true);
+            } else {
+                result.put("products", productSet);
+                result.put("length", 0);
+                result.put("isMore", false);
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
+        }
+        return result ;
+    }
+
 }
