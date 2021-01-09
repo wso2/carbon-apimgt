@@ -184,6 +184,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -3805,26 +3806,23 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String startTime,
                                   String endTime, MessageContext messageContext) throws APIManagementException {
 
-
-//        ISODateTimeFormat.dateTime().print(new DateTime(new Timestamp(Date.from(Instant.parse(startTime)).getTime())))
-        // pre-processing
-        // setting default limit and offset values if they are not set
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        revisionId = revisionId == null ? "" : revisionId;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
-        String revisionKey = null;
-        Date startDate = StringUtils.isNotBlank(startTime) ?
-                Date.from(OffsetDateTime.parse(startTime).toInstant()) : null;
-        Date endDate = StringUtils.isNotBlank(endTime) ?
-                Date.from(OffsetDateTime.parse(endTime).toInstant()) : null;
-
+        Date startDate;
+        Date endDate;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (StringUtils.isNotBlank(revisionId)) {
-                revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
-            }
+            // pre-processing
+            // setting default limit and offset values if they are not set
+            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+            revisionId = revisionId == null ? "" : revisionId;
+            startDate = StringUtils.isNotBlank(startTime) ?
+                    Date.from(OffsetDateTime.parse(startTime).toInstant()) : null;
+            endDate = StringUtils.isNotBlank(endTime) ?
+                    Date.from(OffsetDateTime.parse(endTime).toInstant()) : null;
+            String revisionKey = (StringUtils.isNotBlank(revisionId)) ?
+                    apiProvider.getRevisionKeyFromRevisionUUID(revisionId) : null;
             List<HistoryEvent> historyEvents = apiProvider
                     .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionKey, startDate, endDate, offset,
                             limit);
@@ -3835,6 +3833,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .setAPIHistoryPaginationParams(historyEventListDTO, apiId, revisionId, startTime, endTime, limit,
                             offset, eventCount);
             return Response.ok().entity(historyEventListDTO).build();
+        } catch (DateTimeParseException e) {
+            throw new APIManagementException("Invalid timestamp format. Timestamp format must be in ISO8601 standard " +
+                    "(YYYY-MM-DDThh:mm:ss.fff±hh:mm).", ExceptionCodes.from(ExceptionCodes.INVALID_TIMESTAMP_FORMAT));
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
                 // This is not an error of the user as he does not know the total number of events available.
