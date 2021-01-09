@@ -120,17 +120,13 @@ function CreateApi(props) {
         history,
         isOverview,
         serviceDisplayName,
+        definitionType,
     } = props;
     const classes = useStyles();
     const intl = useIntl();
+    // const [serviceDefinition, setServiceDefinition] = useState(null);
 
     const [open, setOpen] = useState(false);
-    const toggleOpen = () => {
-        setOpen(!open);
-    };
-    const handleClose = () => {
-        setOpen(false);
-    };
 
     const [isFormValid, setIsFormValid] = useState(false);
 
@@ -141,6 +137,34 @@ function CreateApi(props) {
     };
 
     const [state, dispatch] = useReducer(reducer, initialState);
+
+    const getServiceDefinition = () => {
+        const promisedServiceDefinition = ServiceCatalog.getServiceDefinition(serviceId);
+        promisedServiceDefinition.then((data) => {
+            if (data && (definitionType === 'OAS3' || definitionType === 'OAS2')) {
+                const apiDetails = JSON.parse(data);
+                dispatch({ field: 'name', value: apiDetails.info.title.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '') });
+                dispatch({ field: 'version', value: apiDetails.info.version });
+            }
+        }).catch((error) => {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    id: 'ServiceCatalog.Listing.CreateApi.get.service.def.error',
+                    defaultMessage: 'Something went wrong while retrieving the Service Definition.',
+                }));
+            }
+        });
+    };
+
+    const toggleOpen = () => {
+        getServiceDefinition();
+        setOpen(!open);
+    };
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const {
         name,
@@ -431,6 +455,7 @@ CreateApi.defaultProps = {
 CreateApi.propTypes = {
     serviceId: PropTypes.string.isRequired,
     serviceDisplayName: PropTypes.string.isRequired,
+    definitionType: PropTypes.string.isRequired,
     isOverview: PropTypes.bool,
 };
 

@@ -335,11 +335,16 @@ function Listing(props) {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const { id, displayName } = dataRow;
+                        const { id, displayName, definitionType } = dataRow;
                         return (
                             <>
                                 <Box display='flex' flexDirection='row'>
-                                    <CreateApi history={history} serviceId={id} serviceDisplayName={displayName} />
+                                    <CreateApi
+                                        history={history}
+                                        serviceId={id}
+                                        serviceDisplayName={displayName}
+                                        definitionType={definitionType}
+                                    />
                                     <Delete
                                         serviceDisplayName={displayName}
                                         serviceId={id}

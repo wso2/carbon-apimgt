@@ -241,7 +241,7 @@ function Overview(props) {
                     Alert.error(error.response.body.description);
                 } else {
                     Alert.error(intl.formatMessage({
-                        id: 'ServiceCatalog.Listing.Overview.download.service.def.error',
+                        id: 'ServiceCatalog.Listing.Overview.retrieve.service.def.error',
                         defaultMessage: 'Something went wrong while retrieving the Service Definition.',
                     }));
                 }
@@ -465,7 +465,13 @@ function Overview(props) {
                                 </Grid>
                                 <Grid item md={2}>
                                     <Box display='flex' flexDirection='column'>
-                                        <CreateApi history={history} serviceId={service.id} isOverview />
+                                        <CreateApi
+                                            history={history}
+                                            serviceId={service.id}
+                                            serviceDisplayName={service.displayName}
+                                            definitionType={service.definitionType}
+                                            isOverview
+                                        />
                                     </Box>
                                 </Grid>
                             </Grid>
