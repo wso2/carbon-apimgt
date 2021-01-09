@@ -63,6 +63,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -769,7 +770,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     @Override
     public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId,
-                                         Date startTime, Date endTime, MessageContext messageContext)
+                                         String startTime, String endTime, MessageContext messageContext)
             throws APIManagementException {
 
         // pre-processing
@@ -779,6 +780,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         revisionId = revisionId == null ? "" : revisionId;
         String revisionKey = null;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
+        Date startDate = Date.from(OffsetDateTime.parse(startTime).toInstant());
+        Date endDate = Date.from(OffsetDateTime.parse(endTime).toInstant());
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -787,10 +790,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
             }
             List<HistoryEvent> historyEvents = apiProvider
-                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionKey, startTime, endTime,
+                    .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionKey, startDate, endDate,
                             offset, limit);
             int eventCount =
-                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionKey, startTime, endTime);
+                    apiProvider.getAllAPIOrAPIProductHistoryCount(apiProductIdentifier, revisionKey, startDate, endDate);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIProductHistoryPaginationParams(historyEventListDTO, apiProductId, revisionId, startTime,
