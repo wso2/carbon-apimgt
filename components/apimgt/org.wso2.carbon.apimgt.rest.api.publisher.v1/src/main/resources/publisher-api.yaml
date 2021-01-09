@@ -6486,8 +6486,7 @@ paths:
         - name: startTime
           schema:
             type: string
-            format: date-time
-            example: 2019-02-31T23:59:60Z
+            example: 2021-01-08T19:32:11+00:00
           in: query
           description: |
             Specify the starting timestamp to show history from.
@@ -6496,8 +6495,7 @@ paths:
         - name: endTime
           schema:
             type: string
-            format: date-time
-            example: 2020-02-31T23:59:60Z
+            example: 2021-01-09T19:32:11+00:00
           in: query
           description: |
             Specify the ending timestamp to show history upto.
@@ -6600,8 +6598,7 @@ paths:
         - name: startTime
           schema:
             type: string
-            format: date-time
-            example: 2019-02-31T23:59:60Z
+            example: 2021-01-09T19:32:11+00:00
           in: query
           description: |
             Specify the starting timestamp to show history from.
@@ -6610,8 +6607,7 @@ paths:
         - name: endTime
           schema:
             type: string
-            format: date-time
-            example: 2020-02-31T23:59:60Z
+            example: 2021-01-10T19:32:11+00:00
           in: query
           description: |
             Specify the ending timestamp to show history upto.
@@ -7541,8 +7537,7 @@ components:
           example: user1
         createdTime:
           type: string
-          format: date-time
-          example: 2017-02-20T13:57:16.229
+          example: 2021-01-09T19:32:11+00:00
         revisionKey:
           type: string
           example: REVISION 1

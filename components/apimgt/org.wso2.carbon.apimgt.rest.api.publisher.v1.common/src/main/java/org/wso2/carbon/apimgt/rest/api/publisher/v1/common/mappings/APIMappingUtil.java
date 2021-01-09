@@ -2771,7 +2771,7 @@ public class APIMappingUtil {
      * @param size                max offset
      */
     public static void setAPIHistoryPaginationParams(HistoryEventListDTO historyEventListDTO, String apiId,
-                                                     String revisionId, Date startTime, Date endTime, int limit,
+                                                     String revisionId, String startTime, String endTime, int limit,
                                                      int offset, int size) {
 
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -2811,8 +2811,8 @@ public class APIMappingUtil {
      * @param size                max offset
      */
     public static void setAPIProductHistoryPaginationParams(HistoryEventListDTO historyEventListDTO,
-                                                            String apiProductId, String revisionId, Date startTime,
-                                                            Date endTime, int limit, int offset, int size) {
+                                                            String apiProductId, String revisionId, String startTime,
+                                                            String endTime, int limit, int offset, int size) {
 
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
@@ -2844,7 +2844,8 @@ public class APIMappingUtil {
         historyEventDTO.setDescription(historyEvent.getDescription());
         historyEventDTO.setOperationId(historyEvent.getOperationId());
         historyEventDTO.setId(historyEvent.getId());
-        Timestamp createdTimestamp = new Timestamp(historyEvent.getCreatedTime().getTime());
+        //Convert to RFC33339 ISO8601 format with server timezone : YYYY-MM-DDThh:mm:ss.fff±hh:mm
+        String createdTimestamp = RestApiCommonUtil.getRFC3339Date(historyEvent.getCreatedTime());
         historyEventDTO.setCreatedTime(createdTimestamp);
         historyEventDTO.setUser(historyEvent.getUser());
         historyEventDTO.setRevisionKey(historyEvent.getRevisionKey());

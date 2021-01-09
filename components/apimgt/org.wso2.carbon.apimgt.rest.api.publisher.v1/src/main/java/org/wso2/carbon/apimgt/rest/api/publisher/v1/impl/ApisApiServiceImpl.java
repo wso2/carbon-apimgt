@@ -182,6 +182,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -3800,9 +3802,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, Date startTime,
-                                  Date endTime, MessageContext messageContext) throws APIManagementException {
+    public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String startTime,
+                                  String endTime, MessageContext messageContext) throws APIManagementException {
 
+
+//        ISODateTimeFormat.dateTime().print(new DateTime(new Timestamp(Date.from(Instant.parse(startTime)).getTime())))
         // pre-processing
         // setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -3810,6 +3814,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         revisionId = revisionId == null ? "" : revisionId;
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
         String revisionKey = null;
+        Date startDate = StringUtils.isNotBlank(startTime) ?
+                Date.from(OffsetDateTime.parse(startTime).toInstant()) : null;
+        Date endDate = StringUtils.isNotBlank(endTime) ?
+                Date.from(OffsetDateTime.parse(endTime).toInstant()) : null;
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -3818,10 +3826,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
             }
             List<HistoryEvent> historyEvents = apiProvider
-                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionKey, startTime, endTime, offset,
+                    .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionKey, startDate, endDate, offset,
                             limit);
-            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiIdentifier, revisionKey, startTime,
-                    endTime);
+            int eventCount = apiProvider.getAllAPIOrAPIProductHistoryCount(apiIdentifier, revisionKey, startDate,
+                    endDate);
             historyEventListDTO = APIMappingUtil.fromHistoryEventListToDTO(historyEvents);
             APIMappingUtil
                     .setAPIHistoryPaginationParams(historyEventListDTO, apiId, revisionId, startTime, endTime, limit,

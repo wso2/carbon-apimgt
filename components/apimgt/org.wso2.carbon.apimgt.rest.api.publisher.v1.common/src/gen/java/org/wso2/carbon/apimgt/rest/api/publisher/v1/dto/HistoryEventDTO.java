@@ -24,7 +24,7 @@ public class HistoryEventDTO   {
     private String operationId = null;
     private String description = null;
     private String user = null;
-    private java.util.Date createdTime = null;
+    private String createdTime = null;
     private String revisionKey = null;
 
   /**
@@ -97,18 +97,18 @@ public class HistoryEventDTO   {
 
   /**
    **/
-  public HistoryEventDTO createdTime(java.util.Date createdTime) {
+  public HistoryEventDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "2021-01-09T19:32:11+00:00", value = "")
   @JsonProperty("createdTime")
-  public java.util.Date getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(java.util.Date createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 
