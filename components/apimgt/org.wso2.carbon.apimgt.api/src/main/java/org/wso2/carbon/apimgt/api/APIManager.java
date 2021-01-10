@@ -75,13 +75,20 @@ public interface APIManager {
 
     /**
      * Returns details of an API
-     * @param organizationId                UUID of the organization
-     * @param uuid                  UUID of the API's registry artifact
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param uuid   UUID of the API's registry artifact
+     * @param orgId  Identifier of an organization
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
+
+    /**
+     * Returns the UUID of the organization which the API belongs to
+     * @param apiUUID UUID of the API's registry artifact
+     * @return Organization UUID of the given artifact id or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id
@@ -190,12 +197,12 @@ public interface APIManager {
     /**
      * Returns the swagger v2.0 definition as a string
      *
-     * @param apiId           id of the APIIdentifier
-     * @param organizationId  UUID of the organization
+     * @param apiId  ID of the APIIdentifier
+     * @param orgId  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(Identifier apiId, String organizationId) throws APIManagementException;
+    String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException;
 
     /**
      * Returns the OpenAPI definition as a string
@@ -387,11 +394,11 @@ public interface APIManager {
      * Retrieves the icon image associated with a particular API as a stream.
      *
      * @param apiId ID representing the API
-     * @param tenantDomain tenant
+     * @param orgId  Identifier of an organization
      * @return an Icon containing image content and content type information
      * @throws APIManagementException if an error occurs while retrieving the image
      */
-    ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException;
+    ResourceFile getIcon(String apiId, String orgId) throws APIManagementException;
 
     /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended
@@ -563,7 +570,7 @@ public interface APIManager {
      * search in multiple fields.
      *
      * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
-     * @param tenantDomain    tenant domain
+     * @param orgId identifier of an organization
      * @param start           starting number
      * @param end             ending number
      * @param limitAttributes whether or not to limit attributes in the search result
@@ -571,7 +578,7 @@ public interface APIManager {
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end,
             boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
     
     /**
@@ -880,27 +887,26 @@ public interface APIManager {
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
     
     /**
-     * @param organizationId  UUID of the organization
      * @param searchQuery search query. ex : provider:admin
-     * @param tenantDomain tenant domain
+     * @param orgId identifier of an organization
      * @param start starting number
      * @param end ending number
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start,
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start,
                                             int end)
             throws APIManagementException;
     
     /**
      * Search in content of apis, api products and documents and provide the results
      * @param searchQuery search query 
-     * @param tenantDomain
+     * @param orgId identifier of an organization
      * @param start
      * @param end
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+    Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
 }

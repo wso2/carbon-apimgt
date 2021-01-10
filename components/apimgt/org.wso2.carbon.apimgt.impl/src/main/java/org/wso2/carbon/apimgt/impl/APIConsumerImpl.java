@@ -5435,6 +5435,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
         return getOpenAPIDefinitionForDeployment(api, environmentName, null);
@@ -5920,13 +5930,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
             throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-        Organization org = new Organization(tenantDomain);
+        Organization org = Organization.getInstance(orgId);
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
@@ -5962,7 +5972,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
+    public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
         return null;
     }
 

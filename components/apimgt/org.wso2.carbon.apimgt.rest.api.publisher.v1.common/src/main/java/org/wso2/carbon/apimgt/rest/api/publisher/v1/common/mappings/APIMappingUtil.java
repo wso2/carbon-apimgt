@@ -2643,7 +2643,7 @@ public class APIMappingUtil {
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(organizationId, apiId, requestedTenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
             //Checks whether the logged in user's tenant and the API's tenant is equal

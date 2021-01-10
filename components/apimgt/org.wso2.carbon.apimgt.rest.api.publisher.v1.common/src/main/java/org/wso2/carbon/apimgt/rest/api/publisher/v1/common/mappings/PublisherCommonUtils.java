@@ -369,8 +369,8 @@ public class PublisherCommonUtils {
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         
-        return apiProvider.getAPIbyUUID(originalAPI.getOrganizationId(), originalAPI.getUuid(),
-                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
+                originalAPI.getOrganizationId());// TODO use returend api
     }
 
     /**
@@ -932,7 +932,7 @@ public class PublisherCommonUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         apiDefinition = OASParserUtil.preProcess(apiDefinition);
@@ -975,7 +975,7 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(organizationId, apiId, tenantDomain);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         if (organizationId != null) {
             unModifiedAPI.setOrganizationId(organizationId);
         }
@@ -1099,19 +1099,18 @@ public class PublisherCommonUtils {
 
     /**
      * Add document DTO.
-     *
+     * @param organizationId UUID of the organization
      * @param documentDto Document DTO
      * @param apiId       API UUID
      * @return Added documentation
      * @throws APIManagementException If an error occurs when retrieving API Identifier,
      *                                when checking whether the documentation exists and when adding the documentation
      */
-    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId)
+    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String organizationId)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (documentDto.getType() == null) {
             throw new APIManagementException("Documentation type cannot be empty",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
@@ -1133,7 +1132,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        documentation = apiProvider.addDocumentation(apiId, documentation);
+        documentation = apiProvider.addDocumentation(apiId, documentation, organizationId);
 
         return documentation;
     }

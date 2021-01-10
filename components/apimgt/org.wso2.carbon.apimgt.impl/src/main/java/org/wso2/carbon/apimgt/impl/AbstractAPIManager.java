@@ -1191,12 +1191,12 @@ public abstract class AbstractAPIManager implements APIManager {
      * Returns the swagger 2.0 definition of the given API
      *
      * @param apiId id of the APIIdentifier
-     * @param organizationId UUId of the organization
+     * @param orgId UUId of the organization
      * @return An String containing the swagger 2.0 definition
      * @throws APIManagementException
      */
     @Override
-    public String getOpenAPIDefinition(Identifier apiId, String organizationId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
         String id;
@@ -1206,12 +1206,7 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
         try {
-            Organization org;
-            if (organizationId != null) {
-                org = new Organization(organizationId);
-            } else {
-                org = new Organization(tenantDomain);
-            }
+            Organization org = Organization.getInstance(orgId);
             definition = apiPersistenceInstance.getOASDefinition(org, id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
@@ -1278,10 +1273,15 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
     
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain, String organizationId) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = new Organization(tenantDomain);
+        Organization org;
+        if (organizationId != null) {
+            org = new Organization(organizationId);
+        } else {
+            org = new Organization(tenantDomain);
+        }
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
@@ -1468,12 +1468,18 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain, String organizationId)
             throws APIManagementException {
         Documentation documentation = null;
         try {
+            Organization org;
+            if (organizationId != null) {
+                org = new Organization(organizationId);
+            } else {
+                org = new Organization(tenantDomain);
+            }
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(new Organization(requestedTenantDomain), apiId, docId);
+                    .getDocumentation(org, apiId, docId);
             if (doc != null) {
                if(log.isDebugEnabled()) {
                    log.debug("Retrieved doc: " + doc);
@@ -3793,11 +3799,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
     
     @Override
-    public ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException {
+    public ResourceFile getIcon(String apiId, String orgId) throws APIManagementException {
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
-                    .getThumbnail(new Organization(tenantDomain), apiId);
-
+            Organization org = Organization.getInstance(orgId);
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getThumbnail(org,
+                    apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;

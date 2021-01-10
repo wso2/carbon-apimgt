@@ -4101,8 +4101,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion)
-            throws DuplicateAPIException, APIManagementException {
+    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
+                                   String organizationId) throws DuplicateAPIException, APIManagementException {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
@@ -4133,11 +4133,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String newAPIId = newAPI.getUuid();
         
         // copy docs
-        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain);
+        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain, organizationId);
 
         if (existingDocs != null) {
             for (Documentation documentation : existingDocs) {
-                Documentation newDoc = addDocumentation(newAPIId, documentation);
+                Documentation newDoc = addDocumentation(newAPIId, documentation, organizationId);
                 DocumentationContent content = getDocumentationContent(existingApiId, documentation.getId(),
                         tenantDomain); // TODO see whether we can optimize this
                 if (content != null) {
@@ -4572,17 +4572,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         removeDocumentation(uuid, docId);
     }
 
-
     @Override
     public void removeDocumentation(String apiId, String docId) throws APIManagementException {
         try {
-            apiPersistenceInstance.deleteDocumentation(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, docId);
+            apiPersistenceInstance.deleteDocumentation(getOrganizationForRegistry(apiId), apiId, docId);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
-
     }
+
+
 
     /**
      * Adds Documentation to an API/Product
@@ -4751,9 +4750,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
-                        .updateDocumentation(
-                                new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
-                                mappedDoc);
+                        .updateDocumentation(getOrganizationForRegistry(apiId), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
@@ -4966,14 +4963,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Documentation addDocumentation(String uuid, Documentation documentation) throws APIManagementException {
+    public Documentation addDocumentation(String uuid, Documentation documentation, String organizationId) throws APIManagementException {
         if (documentation != null) {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
-                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid,
-                        mappedDoc);
+                        getOrganizationForRegistry(uuid), uuid, mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
                 }
@@ -4990,8 +4986,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         UserContext ctx = null;
         try {
             DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid, 0, 0,
-                    "name:" + docName, ctx);
+                    getOrganizationForRegistry(uuid), uuid, 0, 0, "name:" + docName, ctx);
             if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
                 String returnDocName = result.getDocumentationList().get(0).getName();
                 if (returnDocName != null && returnDocName.equals(docName)) {
@@ -5396,7 +5391,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            apiPersistenceInstance.deleteAPI(new Organization(tenantDomain), api.getUuid());
+            apiPersistenceInstance.deleteAPI(getOrganizationForRegistry(api.getUuid()), api.getUuid());
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
                     api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
@@ -6673,7 +6668,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             //OASParserUtil.saveAPIDefinition(api, jsonText, registry);
-            apiPersistenceInstance.saveOASDefinition(new Organization(tenantDomain), apiId, jsonText);
+            apiPersistenceInstance.saveOASDefinition(getOrganizationForRegistry(apiId), apiId, jsonText);
 
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while persisting OAS definition ", e);
@@ -7060,13 +7055,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-                    Organization org;
-                    if (api.getOrganizationId() != null) {
-                        org = new Organization(api.getOrganizationId());
-                    } else {
-                        org = new Organization(tenantDomain);
-                    }
-                    apiPersistenceInstance.changeAPILifeCycle(org, uuid, targetStatus);
+                    apiPersistenceInstance.changeAPILifeCycle(getOrganizationForRegistry(uuid), uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
                     
                     //Sending Notifications to existing subscribers
@@ -7302,8 +7291,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<API> apiVersions = new ArrayList<API>();
         for (String uuid : list) {
             try {
-                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(
-                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid);
+                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(getOrganizationForRegistry(uuid), uuid);
                 if (APIConstants.API_PRODUCT.equals(publisherAPI.getType())) {
                     // skip api products
                     continue;
@@ -10512,22 +10500,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
     
     @Override
-    public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
-
-        Organization org;
+    public API getAPIbyUUID(String uuid, String orgId) throws APIManagementException {
         try {
-            if (organizationId != null) {
-                org = new Organization(organizationId);
-            } else {
-                org = new Organization(tenantDomain);
-            }
+            Organization org = Organization.getInstance(orgId);
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-            
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
-            populateAPIInformation(uuid, requestedTenantDomain, org, api);
-           
+            populateAPIInformation(uuid, tenantDomain, getOrganizationForRegistry(uuid), api);
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
@@ -10539,19 +10519,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end)
+    public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getOrganizationIDbyAPIUUID(apiUUID);
+    }
+
+    public Organization getOrganizationForRegistry(String apiId) throws APIManagementException {
+        String organizationId = getOrganizationIDbyAPIUUID(apiId);
+        Organization organization;
+        if (organizationId != null) {
+            organization = new Organization(organizationId);
+        } else {
+            organization = new Organization(tenantDomain);
+        }
+        return organization;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
             throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
 
-        Organization org;
-        if (organizationId != null) {
-            org = new Organization(organizationId);
-        } else {
-            org = new Organization(tenantDomain);
-        }
+        Organization org = Organization.getInstance(orgId);
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
@@ -10594,8 +10585,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
-            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(getOrganizationForRegistry(uuid), uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
@@ -10622,6 +10612,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {
         List<APIResource> usedProductResources = new ArrayList<>();
         Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiId);
@@ -10643,8 +10643,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), uuid, docId,
-                    mappedContent);
+                    getOrganizationForRegistry(uuid), uuid, docId, mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
         }
@@ -10668,8 +10667,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     wsdlContent, null);
             try {
-                apiPersistenceInstance.saveWSDL(
-                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                apiPersistenceInstance.saveWSDL(getOrganizationForRegistry(apiId), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
@@ -10678,8 +10676,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             try {
-                apiPersistenceInstance.saveWSDL(
-                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
+                apiPersistenceInstance.saveWSDL(getOrganizationForRegistry(apiId), apiId,
                         wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
@@ -10772,8 +10769,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             apiPersistenceInstance.saveThumbnail(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
-                    iconResourceFile);
+                    getOrganizationForRegistry(apiId), apiId, iconResourceFile);
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
@@ -10788,7 +10784,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<Mediation> mappedList = new ArrayList<Mediation>();
         try {
             List<MediationInfo> list = apiPersistenceInstance.getAllMediationPolicies(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId);
+                    getOrganizationForRegistry(apiId), apiId);
             if (list != null) {
                 for (MediationInfo mediationInfo : list) {
                     Mediation mediation = new Mediation();
@@ -10813,7 +10809,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         try {
             org.wso2.carbon.apimgt.persistence.dto.Mediation policy = apiPersistenceInstance.getMediationPolicy(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, policyId);
+            getOrganizationForRegistry(apiId), apiId, policyId);
             if (policy != null) {
                 Mediation mediation = new Mediation();
                 mediation.setName(policy.getName());
@@ -10846,8 +10842,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             mappedPolicy.setName(mediationPolicy.getName());
             mappedPolicy.setType(mediationPolicy.getType());
             org.wso2.carbon.apimgt.persistence.dto.Mediation returnedMappedPolicy = apiPersistenceInstance
-                    .addMediationPolicy(new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
-                            apiId, mappedPolicy);
+                    .addMediationPolicy(getOrganizationForRegistry(apiId), apiId, mappedPolicy);
             if (returnedMappedPolicy != null) {
                 mediationPolicy.setUuid(returnedMappedPolicy.getId());
                 return mediationPolicy;
@@ -10876,8 +10871,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             mappedPolicy.setType(mediationPolicy.getType());
             mappedPolicy.setId(mediationPolicy.getUuid());
             org.wso2.carbon.apimgt.persistence.dto.Mediation returnedMappedPolicy = apiPersistenceInstance
-                    .updateMediationPolicy(new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
-                            apiId, mappedPolicy);
+                    .updateMediationPolicy(getOrganizationForRegistry(apiId), apiId, mappedPolicy);
             if (returnedMappedPolicy != null) {
                 return mediationPolicy;
             }
@@ -10895,8 +10889,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId) throws APIManagementException {
         try {
             apiPersistenceInstance.deleteMediationPolicy(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
-                    mediationPolicyId);
+                    getOrganizationForRegistry(apiId), apiId, mediationPolicyId);
         } catch (MediationPolicyPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
@@ -10949,8 +10942,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException {
 
         try {
-            apiPersistenceInstance.saveGraphQLSchemaDefinition(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, definition);
+            apiPersistenceInstance.saveGraphQLSchemaDefinition(getOrganizationForRegistry(apiId), apiId, definition);
 
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {

@@ -488,7 +488,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
             //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, requestedTenantDomain);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, requestedTenantDomain, organizationId);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 

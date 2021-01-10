@@ -217,7 +217,7 @@ public class ApiMgtDAO {
         List<API> apis = new ArrayList<>();
 
         try {
-            String sqlQuery = SQLConstants. GET_API_CONTEXT_BY_ORGANIZATION_UUID ;
+            String sqlQuery = SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_UUID;
             connection = APIMgtDBUtil.getConnection();
 
             ps = connection.prepareStatement(sqlQuery);
@@ -237,6 +237,36 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
         return apis;
+    }
+
+    /**
+     * @param apiId  UUID of the API
+     * @return organization of the API
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     */
+    public String getOrganizationIDbyAPIUUID(String apiId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+        String organizationId = null;
+
+        try {
+            String sqlQuery = SQLConstants.GET_ORGANIZATION_ID_BY_API_ID;
+            connection = APIMgtDBUtil.getConnection();
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, apiId);
+            result = ps.executeQuery();
+
+            while (result.next()) {
+                organizationId = result.getString("ORGANIZATION_UUID");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while fetching organization ID from database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+        return organizationId;
     }
 
 

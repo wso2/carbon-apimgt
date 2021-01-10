@@ -860,8 +860,9 @@ public class ImportUtils {
                     // Add the documentation DTO
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
-                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid()) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID());
+                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
+                                            null) :
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID(), null);
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();

@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -30,8 +29,6 @@ import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -428,7 +425,7 @@ public interface APIProvider extends APIManager {
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param apiid        The id of the API to be copied
+     * @param apiId      The id of the API to be copied
      * @param newVersion The version of the new API
      * @param defaultVersion whether this version is default or not 
      * @return api created api
@@ -436,7 +433,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion)
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String organizationId)
             throws DuplicateAPIException, APIManagementException;
 
     /**
@@ -453,8 +450,7 @@ public interface APIProvider extends APIManager {
      * Removes a given documentation
      *
      * @param apiId   api uuid
-     * @param docType the type of the documentation
-     * @param docName name of the document
+     * @param documentId ID of the documentation
      * @throws APIManagementException if failed to remove documentation
      */
     void removeDocumentation(String apiId, String documentId) throws APIManagementException;
@@ -469,8 +465,8 @@ public interface APIProvider extends APIManager {
     /**
      * Adds Documentation to an API/Product
      *
-     * @param id         API/Product Identifier
-     * @param documentation Documentation
+     * @param id                  API/Product Identifier
+     * @param documentation       Documentation
      * @throws APIManagementException if failed to add documentation
      */
     void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
@@ -478,12 +474,13 @@ public interface APIProvider extends APIManager {
     /**
      * Adds Documentation to an API/Product
      *
-     * @param id         API/Product Identifier
-     * @param documentation Documentation
-     * @return created documentation Documentation
+     * @param uuid                API/Product Identifier
+     * @param documentation       Documentation
+     * @param organizationId      UUID of the Organization
+     * @return                    created documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    Documentation addDocumentation(String uuid, Documentation documentation) throws APIManagementException;
+    Documentation addDocumentation(String uuid, Documentation documentation, String organizationId) throws APIManagementException;
 
 
     /**

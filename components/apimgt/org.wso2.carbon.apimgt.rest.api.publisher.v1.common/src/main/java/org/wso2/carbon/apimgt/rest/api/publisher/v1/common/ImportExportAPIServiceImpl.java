@@ -73,7 +73,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            api = apiProvider.getAPIbyUUID(null, apiId, tenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
         }
         if (api != null) {

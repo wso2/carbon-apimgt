@@ -104,7 +104,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         publisherAPI.setCreatedTime(String.valueOf(new Date().getTime()));
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
         InsertOneResult insertOneResult = collection.insertOne(mongoDBPublisherAPI);
@@ -116,7 +116,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI)
             throws APIPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
         String swaggerDefinition = mongoDBPublisherAPI.getSwaggerDefinition();
         String apiId = mongoDBPublisherAPI.getId();
@@ -139,7 +139,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         MongoDBPublisherAPI mongoDBAPIDocument =
                 collection.find(eq("_id", new ObjectId(apiId)))
                         .projection(exclude("swaggerDefinition")).first();
@@ -154,7 +154,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
-        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(org.getOrganizationId());
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(org.getOrgId());
         MongoDBDevPortalAPI mongoDBAPIDocument = collection.find(eq("_id", new ObjectId(apiId))).first();
         if (mongoDBAPIDocument == null) {
             String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
@@ -166,7 +166,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         collection.deleteOne(eq("_id", new ObjectId(apiId)));
         log.info("successfully deleted " + apiId + " from mongodb");
     }
@@ -175,7 +175,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         searchQuery = "";
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         AggregateIterable<MongoDBPublisherAPI> aggregateIterable = collection.aggregate(getSearchAggregate(searchQuery));
         MongoCursor<MongoDBPublisherAPI> aggregate = aggregateIterable.cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
@@ -235,7 +235,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         //published prototyped only
         searchQuery = "";
-        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(org.getOrganizationId());
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(org.getOrgId());
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
         DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
         List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
@@ -253,7 +253,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status)
             throws APIPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         collection.updateOne(eq("_id", new ObjectId(apiId)), set("status", status));
     }
 
@@ -271,13 +271,13 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition)
             throws OASPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         collection.updateOne(eq("_id", new ObjectId(apiId)), set("swaggerDefinition", apiDefinition));
     }
 
     @Override
     public String getOASDefinition(Organization org, String apiId) throws OASPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         MongoDBPublisherAPI api = collection.find(eq("_id", new ObjectId(apiId)))
                 .projection(include("swaggerDefinition")).first();
         if (api == null) {
@@ -301,7 +301,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         ObjectId docId = new ObjectId();
         APIDocumentation apiDocumentation = DocumentationMapper.INSTANCE.toAPIDocumentation(documentation);
         apiDocumentation.setId(docId);
@@ -322,7 +322,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     public DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset,
                                                     String searchQuery, UserContext ctx)
             throws DocumentationPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         MongoDBPublisherAPI documentation = null;
 
         if (searchQuery == null) {
@@ -381,7 +381,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         APIDocumentation apiDocumentation = DocumentationMapper.INSTANCE.toAPIDocumentation(documentation);
         ObjectId docId = apiDocumentation.getId();
         FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
@@ -406,7 +406,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public Documentation getDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
                 match(eq("_id", new ObjectId(apiId))),
                 unwind("$documentationList"),
@@ -437,7 +437,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
         if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType) && gridFsReference != null) {
             MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-            GridFSBucket gridFSBucket = GridFSBuckets.create(database, org.getOrganizationId());
+            GridFSBucket gridFSBucket = GridFSBuckets.create(database, org.getOrgId());
             GridFSDownloadStream downloadStream = gridFSBucket.openDownloadStream(gridFsReference);
             ResourceFile resourceFile = new ResourceFile(downloadStream, apiDocumentation.getContentType());
             resourceFile.setName(downloadStream.getGridFSFile().getFilename());
@@ -451,13 +451,13 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         APIDocumentation apiDocumentation = getMongodbDocUsingId(org, apiId, docId);
         String sourceType = apiDocumentation.getSourceType().name();
         ObjectId gridFsReference = apiDocumentation.getGridFsReference();
         if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType) && gridFsReference != null) {
             MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-            GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getOrganizationId());
+            GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getOrgId());
             gridFSFilesBucket.delete(apiDocumentation.getGridFsReference());
         }
 
@@ -473,7 +473,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private APIDocumentation getMongodbDocUsingId(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
         APIDocumentation apiDocumentation = null;
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
 
         MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
                 match(eq("_id", new ObjectId(apiId))),
@@ -501,8 +501,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private void handleFileTypeContent(Organization org, String apiId, String docId, DocumentContent content)
             throws DocumentationPersistenceException {
         MongoDatabase database = MongoDBPersistenceUtil.getDatabase();
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
-        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
+        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getOrgId());
         ResourceFile resourceFile = content.getResourceFile();
         InputStream inputStream = resourceFile.getContent();
         GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
@@ -548,7 +548,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     private void handleInlineMDTypeContent(Organization org, String apiId, String docId, DocumentContent content) {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrganizationId());
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getOrgId());
         collection.updateOne(
                 and(
                         eq("_id", new ObjectId(apiId)),
