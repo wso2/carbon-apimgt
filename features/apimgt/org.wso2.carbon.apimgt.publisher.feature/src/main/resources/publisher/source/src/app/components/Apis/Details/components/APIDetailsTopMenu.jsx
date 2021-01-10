@@ -186,7 +186,7 @@ const APIDetailsTopMenu = (props) => {
             </div>
 
             <div className={classes.dateWrapper} />
-            {api.isDefaultVersion === true &&
+            {api.isRevision &&
                 <Typography variant='h6' gutterBottom color='red' className={classes.Typokk}>
                     Read only
                     </Typography>}
@@ -205,19 +205,16 @@ const APIDetailsTopMenu = (props) => {
                                 <Typography variant='body'>
                                     <FormattedMessage
                                         id='Apis.Details.components.APIDetailsTopMenu.working.copy'
-                                        defaultMessage='Working copy'
+                                        defaultMessage={'Working copy'}
                                     />
                                 </Typography>
                             </Link>
                         </MenuItem>
                         {revision && revision.map((item) =>
                             <MenuItem value={item.id}>
-                                <Link to={'/apis/' + item.uuid + '/overview'}>
+                                <Link to={'/apis/' + item.id + '/overview'}>
                                     <Typography variant='body'>
-                                        <FormattedMessage
-                                            id='Apis.Details.components.APIDetailsTopMenu.revision'
-                                            defaultMessage='Revision '
-                                        />{item.id}
+                                        {item.key}
                                     </Typography>
                                 </Link>
                             </MenuItem>
