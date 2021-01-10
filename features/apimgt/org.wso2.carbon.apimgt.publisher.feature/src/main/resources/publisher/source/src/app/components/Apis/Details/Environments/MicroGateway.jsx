@@ -32,8 +32,14 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Switch from '@material-ui/core/Switch';
 import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Chip from '@material-ui/core/Chip';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -63,6 +69,19 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(),
         textAlign: 'center',
     },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 130,
+    },
+    button1: {
+        color: '#1B3A57',
+        marginLeft: 7
+    },
+    button2: {
+        color: '#1B3A57',
+        marginLeft: 7,
+        marginTop: 10
+    },
 }));
 
 /**
@@ -76,12 +95,78 @@ export default function MicroGateway(props) {
     const { selectedMgLabel, setSelectedMgLabel, api } = props;
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState(null);
+    const [allRevisions, setRevisions] = useState(null);
+    const [allEnvRevision, setEnvRevision] = useState(null);
+    const [selectedRevision, setRevision] = useState(null);
     useEffect(() => {
         restApi.microgatewayLabelsGet()
             .then((result) => {
                 setMgLabels(result.body.list);
             });
+        restApi.getRevisions(api.id).then((result) => {
+            setRevisions(result.body.list);
+        });
+
+        restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
+            setEnvRevision(result.body.list);
+        });
     }, []);
+
+    const handleSelect = (event) => {
+        setRevision(event.target.value);
+    };
+
+    /**
+      * Handles undeploy a revision
+      * @memberof Revisions
+      */
+     function undeployRevision(revisionId, envName) {
+        const body = [{
+            'name': envName,
+            'displayOnDevportal': 'false'
+        }];
+        const restApi = new API();
+        restApi.undeployRevision(api.id, revisionId, body)
+            .then(() => {
+                Alert.info('Undeploy revision Successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while undeploy the revision');
+                }
+                console.error(error);
+            }).finally(() => {
+                updateAPI();
+            });
+    }
+
+    /**
+      * Handles deploy a revision
+      * @memberof Revisions
+      */
+    function deployRevision(revisionId, envName) {
+        const body = [{
+            'name': envName,
+            'displayOnDevportal': 'true'
+        }];
+        const restApi = new API();
+        restApi.deployRevision(api.id, revisionId, body)
+            .then(() => {
+                Alert.info('Deploy revision Successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while deploy the revision');
+                }
+                console.error(error);
+            }).finally(() => {
+                updateAPI();
+            });
+    }
     if (!mgLabels) {
         return (
             <div className={classes.progressWrapper}>
@@ -114,42 +199,70 @@ export default function MicroGateway(props) {
                         <TableBody>
                             {mgLabels.map((row) => (
                                 <TableRow key={row.name}>
-                                    {/* <TableCell padding='checkbox'>
-                                        <Checkbox
-                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                            checked={selectedMgLabel.includes(row.name)}
-                                            onChange={
-                                                (event) => {
-                                                    const { checked, name } = event.target;
-                                                    if (checked) {
-                                                        setSelectedMgLabel([...selectedMgLabel, name]);
-                                                    } else {
-                                                        setSelectedMgLabel(
-                                                            selectedMgLabel.filter((env) => env !== name),
-                                                        );
-                                                    }
-                                                }
-                                            }
-                                            name={row.name}
-                                            color='primary'
-                                        />
-                                    </TableCell> */}
                                     <TableCell component='th' scope='row' align='left'>
                                         {row.name}
                                     </TableCell>
                                     <TableCell align='left'>{row.description}</TableCell>
                                     <TableCell align='left'>
-                                        {row.access_urls.map((host) => (
+                                        {row.accessUrls.map((host) => (
                                             <div>{host}</div>
                                         ))}
 
                                     </TableCell>
-                                    <TableCell align='left'>N/A</TableCell>
+                                    <TableCell align='left'>
+                                        {allEnvRevision && (allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).length) !== 0 ? (
+                                            allEnvRevision && allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).map(o3 =>
+                                                <div>
+                                                    <Chip
+                                                        label={o3.key}
+                                                        style={{ backgroundColor: '#15B8CF' }}
+                                                    />
+                                                    <Button
+
+                                                        className={classes.button1}
+                                                        variant="outlined"
+                                                        disabled={api.isRevision}
+                                                        onClick={() => undeployRevision(o3.id, row.name)}
+                                                        size="small"
+                                                    >
+                                                        Undepoly
+                                        </Button></div>
+                                            )) : (
+                                                <div>
+                                                    <FormControl
+                                                        className={classes.formControl}
+                                                        variant='outlined'
+                                                        margin='dense'
+                                                        size='small'>
+                                                        <InputLabel disabled={allRevisions} id="demo-simple-select-label">Select Revision</InputLabel>
+                                                        <Select
+                                                            labelId="demo-simple-select-helper-label"
+                                                            id="demo-simple-select-helper"
+                                                            disabled={api.isRevision}
+                                                            onChange={handleSelect}
+                                                        >
+                                                            {allRevisions && allRevisions.map((number) =>
+                                                                <MenuItem value={number.id}>{number.key}</MenuItem>
+                                                            )}
+
+                                                        </Select></FormControl>
+                                                    <Button
+                                                        className={classes.button2}
+                                                        disabled={api.isRevision || !selectedRevision}
+                                                        variant="outlined"
+                                                        onClick={() => deployRevision(selectedRevision, row.name)}
+
+                                                    >
+                                                        Depoly
+                                        </Button></div>
+                                            )}
+                                    </TableCell>
+
                                     <TableCell align='left'>
                                         <Switch
-
+                                            checked={row.showInApiConsole}
+                                            disabled={api.isRevision}
                                             name="checkedA"
-
                                         />
 
                                     </TableCell>
