@@ -25,6 +25,7 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import API from 'AppData/api';
 
 /**
  *
@@ -37,7 +38,7 @@ export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
     const [apiFromContext] = useAPI();
     let hasResourceWithSecurity;
-    if (apiFromContext.apiType === 'APIProduct') {
+    if (apiFromContext.apiType === API.CONSTS.APIProduct) {
         const apiList = apiFromContext.apis;
         for (const apiInProduct in apiList) {
             if (Object.prototype.hasOwnProperty.call(apiList, apiInProduct)) {

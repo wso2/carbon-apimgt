@@ -82,7 +82,7 @@ function APICategories(props) {
                         <ListItemText primary={(
                             <FormattedMessage
                                 id='Apis.Details.Configurations.api.categories.empty'
-                                defaultMessage='No API Categories defined yet. Please create an API Category first.'
+                                defaultMessage='No API Categories defined.'
                             />
                         )}
                         />
@@ -138,8 +138,8 @@ function APICategories(props) {
                             <p>
                                 <FormattedMessage
                                     id='Api.category.dropdown.tooltip'
-                                    defaultMessage={'API categories can be added via the Admin portal UI or the'
-                                        + ' Admin REST API. There has to be pre-defined API categories in the'
+                                    defaultMessage={'Allow to group APIs that have similar attributes.'
+                                        + ' There has to be pre-defined API categories in the'
                                         + ' environment in order to be attached to an API.'}
                                 />
                             </p>

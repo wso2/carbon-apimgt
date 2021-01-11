@@ -2005,6 +2005,160 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/store/v1/applications/16cd2684-9657-4a01-a956-4efd89e96077/api-keys/PRODUCTION/revoke"'
 
+  /applications/export:
+    get:
+      tags:
+        - Import Export
+      summary: Export an Application
+      description: |
+        This operation can be used to export the details of a particular application as a zip file.
+      parameters:
+        - name: appName
+          in: query
+          description: |
+            Application Name
+          required: true
+          schema:
+            type: string
+        - name: appOwner
+          in: query
+          description: |
+            Owner of the Application
+          required: true
+          schema:
+            type: string
+        - name: withKeys
+          in: query
+          description: |
+            Export application keys
+          schema:
+            type: boolean
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          schema:
+            type: string
+            enum:
+              - JSON
+              - YAML
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:app_import_export
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/store/v1/applications/import?appName=sampleApp&appOwner=admin&withKeys=true"
+          > exportedApplication.zip'
+
+  /applications/import:
+    post:
+      tags:
+        - Application (Individual)
+      summary: Import an Application
+      description: |
+        This operation can be used to import an application.
+      parameters:
+        - name: preserveOwner
+          in: query
+          description: |
+            Preserve Original Creator of the Application
+          schema:
+            type: boolean
+        - name: skipSubscriptions
+          in: query
+          description: |
+            Skip importing Subscriptions of the Application
+          schema:
+            type: boolean
+        - name: appOwner
+          in: query
+          description: |
+            Expected Owner of the Application in the Import Environment
+          schema:
+            type: string
+        - name: skipApplicationKeys
+          in: query
+          description: |
+            Skip importing Keys of the Application
+          schema:
+            type: boolean
+        - name: update
+          in: query
+          description: |
+            Update if application exists
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    Zip archive consisting of exported Application Configuration.
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object information as entity in the body.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationInfo'
+        207:
+          description: |
+            Multi Status.
+            Partially successful response with skipped APIs information object as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIInfoList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:app_import_export
+      x-code-samples:
+        - lang: Shell
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -F file=@exportedApplication.zip "https://127.0.0.1:9443/api/am/store/v1/applications/import?preserveOwner=true&skipSubscriptions=false&appOwner=admin&skipApplicationKeys=false&update=true"'
+
   ######################################################
   # The "Subscription Collection" resource APIs
   ######################################################
@@ -3332,6 +3486,19 @@ components:
         monetizationLabel:
           type: string
           example: Free
+    APIInfoList:
+      title: API Info List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API Info objects returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIInfo'
     API:
       title: API object
       required:
@@ -3634,7 +3801,6 @@ components:
           maxLength: 70
           minLength: 1
           type: string
-          pattern: '^[a-zA-Z0-9 ._-]*$'
           example: CalculatorApp
         throttlingPolicy:
           minLength: 1

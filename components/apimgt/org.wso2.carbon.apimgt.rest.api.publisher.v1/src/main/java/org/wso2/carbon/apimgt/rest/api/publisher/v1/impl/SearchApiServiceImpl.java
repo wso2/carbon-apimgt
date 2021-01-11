@@ -49,7 +49,7 @@ public class SearchApiServiceImpl implements SearchApiService {
 
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
 
-    public Response searchGet(Integer limit, Integer offset, String query, String ifNoneMatch,
+    public Response search(Integer limit, Integer offset, String query, String ifNoneMatch,
                               MessageContext messageContext) {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
