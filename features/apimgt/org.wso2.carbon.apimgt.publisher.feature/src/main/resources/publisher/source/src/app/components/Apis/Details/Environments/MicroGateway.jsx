@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import 'react-tagsinput/react-tagsinput.css';
@@ -98,25 +98,15 @@ export default function MicroGateway(props) {
         // setSelectedMgLabel,
         api,
         updateAPI,
+        mgLabels,
+        allRevisions,
+        allEnvRevision,
     } = props;
     const restApi = new API();
-    const [mgLabels, setMgLabels] = useState(null);
-    const [allRevisions, setRevisions] = useState(null);
-    const [allEnvRevision, setEnvRevision] = useState(null);
+    // const [mgLabels, setMgLabels] = useState(null);
+    // const [allRevisions, setRevisions] = useState(null);
+    // const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState(null);
-    useEffect(() => {
-        restApi.microgatewayLabelsGet()
-            .then((result) => {
-                setMgLabels(result.body.list);
-            });
-        restApi.getRevisions(api.id).then((result) => {
-            setRevisions(result.body.list);
-        });
-
-        restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-            setEnvRevision(result.body.list);
-        });
-    }, []);
 
     const handleSelect = (event) => {
         setRevision(event.target.value);
@@ -319,4 +309,7 @@ MicroGateway.propTypes = {
     // setSelectedMgLabel: PropTypes.func.isRequired,
     api: PropTypes.shape({}).isRequired,
     updateAPI: PropTypes.func.isRequired,
+    mgLabels: PropTypes.shape({}).isRequired,
+    allRevisions: PropTypes.shape({}).isRequired,
+    allEnvRevision: PropTypes.shape({}).isRequired,
 };

@@ -1160,6 +1160,9 @@ export default function Environments() {
                         <MicroGateway
                             selectedMgLabel={selectedMgLabel}
                             setSelectedMgLabel={setSelectedMgLabel}
+                            mgLabels={mgLabels}
+                            allRevisions={allRevisions}
+                            allEnvRevision={allEnvRevision}
                             api={api}
                             updateAPI={updateAPI}
                         />
