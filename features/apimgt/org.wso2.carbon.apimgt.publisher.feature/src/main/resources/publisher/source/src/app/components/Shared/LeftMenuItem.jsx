@@ -94,7 +94,7 @@ function LeftMenuItem(props) {
     const [selected, setSelected] = useState(false);
 
     const {
-        classes, theme, Icon, to, history, text, route, head
+        classes, theme, Icon, to, history, text, route, head,
     } = props;
     const routeToCheck = route || text;
     const { leftMenu } = theme.custom;
@@ -146,39 +146,45 @@ function LeftMenuItem(props) {
                         ),
                     })
                 ) : (
-                        // We can also add custom icons
-                        <CustomIcon
-                            strokeColor={strokeColor}
-                            width={iconSize}
-                            height={iconSize}
-                            icon={props.iconText}
-                            className={classNames(
-                                classes.leftLInk,
-                                {
-                                    [classes.noIcon]: leftMenu === 'no icon',
-                                },
-                                'leftLink_Icon',
-                            )}
-                        />
-                    )}
+                // We can also add custom icons
+                    <CustomIcon
+                        strokeColor={strokeColor}
+                        width={iconSize}
+                        height={iconSize}
+                        icon={props.iconText}
+                        className={classNames(
+                            classes.leftLInk,
+                            {
+                                [classes.noIcon]: leftMenu === 'no icon',
+                            },
+                            'leftLink_Icon',
+                        )}
+                    />
+                )
+            }
             {head === 'valueOnly' ? (
-            <Typography
-                className={classNames(
-                    classes.leftLInkTextHead,
-                )}
-            >{text}</Typography>)
-                : (<Typography
+                <Typography
                     className={classNames(
-                        classes.leftLInkText,
-                        {
-                            [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
-                            [classes.leftLInkText_NoText]: leftMenu === 'no text',
-                        },
-                        'leftLInkText',
+                        classes.leftLInkTextHead,
                     )}
                 >
                     {text}
-                </Typography>)}
+                </Typography>
+            )
+                : (
+                    <Typography
+                        className={classNames(
+                            classes.leftLInkText,
+                            {
+                                [classes.leftLInkText_IconLeft]: leftMenu === 'icon left',
+                                [classes.leftLInkText_NoText]: leftMenu === 'no text',
+                            },
+                            'leftLInkText',
+                        )}
+                    >
+                        {text}
+                    </Typography>
+                )}
         </Link>
     );
 }

@@ -666,9 +666,7 @@ class Details extends Component {
                                 Icon={<LifeCycleIcon />}
                             />
                         )}
-                        {!isAPIProduct &&
-                        <Divider />
-                        }
+                        {!isAPIProduct && <Divider />}
                         {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
@@ -680,9 +678,7 @@ class Details extends Component {
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
-                        {!isAPIProduct &&
-                        <Divider />
-                        }
+                        {!isAPIProduct && <Divider />}
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
                             api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem

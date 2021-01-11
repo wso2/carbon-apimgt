@@ -439,14 +439,12 @@ export default function CustomizedSteppers() {
     if (activeStep === 2) {
         step3Class = classes.pointerMiddleActive;
         step4Class = '';
-        
     } else if (activeStep === 3) {
         step4Class = classes.pointerEndActive;
     } else if (activeStep === 4) {
         step3Class = classes.pointerMiddleCompleted;
         step4Class = classes.pointerEndCompleted;
-    }
-    else {
+    } else {
         step3Class = classes.pointerMiddleDisabled;
         step4Class = '';
     }
@@ -539,33 +537,34 @@ export default function CustomizedSteppers() {
                     <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
                         <div className={`${classes.pointerEnd} ${step4Class}`}>
                             <Box className={classes.box}>
-                            <Grid xs={12} className={classes.gridSmall}>
-                                        {lifecycleState === 'Published' && (api.gatewayEnvironments.length !== 0) ? (
-                                            <CheckIcon className={classes.iconTrue} />
-                                        ) : (
-                                            <CloseIcon className={classes.iconFalse} />
-                                        )}
-                                        <Typography variant='h7'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.CustomizedStepper.Deployments'
-                                                defaultMessage=' Deployments'
-                                            />
-                                        </Typography>
-                                        {lifecycleState === 'Published' ? (
+                                <Grid xs={12} className={classes.gridSmall}>
+                                    {lifecycleState === 'Published' && (api.gatewayEnvironments.length !== 0) ? (
+                                        <CheckIcon className={classes.iconTrue} />
+                                    ) : (
+                                        <CloseIcon className={classes.iconFalse} />
+                                    )}
+                                    <Typography variant='h7'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.CustomizedStepper.Deployments'
+                                            defaultMessage=' Deployments'
+                                        />
+                                    </Typography>
+                                    {lifecycleState === 'Published' ? (
                                         <Link to={'/apis/' + api.id + '/environments'}>
                                             <LaunchIcon
                                                 style={{ marginLeft: '5px' }}
                                                 color='primary'
                                                 fontSize='small'
                                             />
-                                        </Link> ) : (
-                                            <LaunchIcon
+                                        </Link>
+                                    ) : (
+                                        <LaunchIcon
                                             style={{ marginLeft: '5px' }}
                                             color='default'
                                             fontSize='small'
                                         />
-                                        )}
-                                    </Grid>
+                                    )}
+                                </Grid>
                             </Box>
                         </div>
                     </StepLabel>

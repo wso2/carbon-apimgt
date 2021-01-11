@@ -24,7 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
+// import CircularProgress from '@material-ui/core/CircularProgress';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -37,7 +37,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
-import { isRestricted } from 'AppData/AuthManager';
+// import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
@@ -135,14 +135,14 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 8,
         marginLeft: 120,
         fontFamily: 'sans-serif',
-        fontSize: 'small'
+        fontSize: 'small',
     },
     textShapeMiddle: {
         marginTop: 18,
     },
     textShape3: {
         color: '#38536c',
-        marginLeft: 110
+        marginLeft: 110,
     },
     textShape7: {
         color: '#38536c',
@@ -154,33 +154,33 @@ const useStyles = makeStyles((theme) => ({
         color: '#415A85',
     },
     textShape4: {
-        marginTop: 55
+        marginTop: 55,
     },
     textShape8: {
-        marginTop: 80
+        marginTop: 80,
     },
     textShape5: {
         marginTop: 10,
         marginLeft: 110,
-        marginBottom: 10
+        marginBottom: 10,
     },
     textShape6: {
         color: '#1B3A57',
     },
     button1: {
         color: '#1B3A57',
-        marginLeft: 7
+        marginLeft: 7,
     },
     button2: {
         color: '#1B3A57',
         marginLeft: 7,
-        marginTop: 10
+        marginTop: 10,
     },
     shapeRecBack: {
-        backgroundColor: "black",
-        alignSelf: "center",
+        backgroundColor: 'black',
+        alignSelf: 'center',
         width: 40,
-        height: 3
+        height: 3,
     },
     shapeCircle: {
         borderRadius: '50%',
@@ -250,11 +250,11 @@ export default function Environments() {
     const revisionCount = 5;
     // const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
-    const [isUpdating, setUpdating] = useState(false);
+    // const [isUpdating, setUpdating] = useState(false);
     const [selectedDeployments, setSelectedDeployments] = useState([...api.deploymentEnvironments]);
 
     const restApi = new API();
-    const isdeploy = true;
+    // const isdeploy = true;
     const [allDeployments, setAllDeployments] = useState([]);
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
@@ -272,7 +272,7 @@ export default function Environments() {
         restApi.microgatewayLabelsGet()
             .then((result) => {
                 setMgLabels(result.body.list);
-        });
+            });
         restApi.getRevisions(api.id).then((result) => {
             setRevisions(result.body.list);
         });
@@ -313,11 +313,9 @@ export default function Environments() {
       * @memberof Revisions
       */
     function handleClickAddRevision() {
-
         const body = {
-            'description': 'state',
+            description: 'state',
         };
-        const restApi = new API();
         restApi.createRevision(api.id, body)
             .then(() => {
                 Alert.info('Revision Create Successfully');
@@ -342,7 +340,6 @@ export default function Environments() {
       * @memberof Revisions
       */
     function deleteRevision(revisionId) {
-        const restApi = new API();
         restApi.deleteRevision(api.id, revisionId)
             .then(() => {
                 Alert.info('Revision Create Successfully');
@@ -366,7 +363,6 @@ export default function Environments() {
       * @memberof Revisions
       */
     function restoreRevision(revisionId) {
-        const restApi = new API();
         restApi.restoreRevision(api.id, revisionId)
             .then(() => {
                 Alert.info('Revision Restore Successfully');
@@ -389,10 +385,9 @@ export default function Environments() {
       */
     function undeployRevision(revisionId, envName) {
         const body = [{
-            'name': envName,
-            'displayOnDevportal': 'false'
+            name: envName,
+            displayOnDevportal: false,
         }];
-        const restApi = new API();
         restApi.undeployRevision(api.id, revisionId, body)
             .then(() => {
                 Alert.info('Undeploy revision Successfully');
@@ -415,10 +410,9 @@ export default function Environments() {
       */
     function deployRevision(revisionId, envName) {
         const body = [{
-            'name': envName,
-            'displayOnDevportal': 'true'
+            name: envName,
+            displayOnDevportal: true,
         }];
-        const restApi = new API();
         restApi.deployRevision(api.id, revisionId, body)
             .then(() => {
                 Alert.info('Deploy revision Successfully');
@@ -439,19 +433,18 @@ export default function Environments() {
       * Handles adding a new revision and deploy
       * @memberof Revisions
       */
-    function createDeployRevision(envList, lenght1) {
+    function createDeployRevision(envList, length1) {
         const body = {
-            'description': 'state',
+            description: 'state',
         };
-        const restApi = new API();
         restApi.createRevision(api.id, body)
             .then((response) => {
                 Alert.info('Revision Create Successfully');
-                let body1 = [];
-                for (var i = 0; i < lenght1; i++) {
+                const body1 = [];
+                for (let i = 0; i < length1; i++) {
                     body1.push({
-                        'name': envList[i],
-                        'displayOnDevportal': 'true'
+                        name: envList[i],
+                        displayOnDevportal: true,
                     });
                 }
                 restApi.deployRevision(api.id, response.body.id, body1)
@@ -465,121 +458,139 @@ export default function Environments() {
                             Alert.error('Something went wrong while deploy the revision');
                         }
                         console.error(error);
-                    })
+                    });
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 } else {
-                    Alert.error('Something went wrong while cretaing the revision');
+                    Alert.error('Something went wrong while creating the revision');
                 }
                 console.error(error);
             })
             .finally(() => {
                 updateAPI();
-            })
+            });
         setOpen(false);
     }
 
 
-    const item1 =
+    const item1 = (
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeInnerComplete, classes.shapeCircle)} />
             </Grid>
             <Grid item className={classes.shapeRecBack} />
-        </Grid>;
-    const item2 =
+        </Grid>
+    );
+    const item2 = (
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeInnerInactive, classes.shapeCircle)} />
             </Grid>
             <Grid item className={classes.shapeRecBack} />
-        </Grid>;
-    const item3 =
+        </Grid>
+    );
+    const item3 = (
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeDottedEnd, classes.shapeCircle)} />
             </Grid>
-        </Grid>;
-    const item4 =
+        </Grid>
+    );
+    const item4 = (
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeDottedStart, classes.shapeCircle)} />
             </Grid>
             <Grid item className={classes.shapeRecBack} />
-        </Grid>;
-    const item5 =
+        </Grid>
+    );
+    const item5 = (
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeDottedStart, classes.shapeCircle)} />
             </Grid>
 
-        </Grid>;
-    const item6 =
+        </Grid>
+    );
+    const item6 = (
         <Grid
             container
             direction='container'
         >
             <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)} >
+            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeDottedStart1, classes.shapeCircle)} />
             </Grid>
             <Grid item className={classes.shapeRecBack} />
-        </Grid>;
+        </Grid>
+    );
 
 
     const items = [];
     if (!api.isRevision) {
         if (allRevisions && allRevisions.length !== 0) {
             items.push(
-                <Grid item className={clsx(classes.shapeCircleBlack, classes.shapeCircle)} />
-            )
+                <Grid item className={clsx(classes.shapeCircleBlack, classes.shapeCircle)} />,
+            );
             for (let revision = 0; revision < (allRevisions.length); revision++) {
                 if (revision % 2 === 0) {
                     items.push(
                         <Grid item>
-                            <Grid className={classes.textShape4}/>
+                            <Grid className={classes.textShape4} />
                             {item1}
                             <Grid className={classes.textShape2}>
                                 {allRevisions[revision].key}
                             </Grid>
                             <Grid>
-                                <Button className={classes.textShape3} onClick={() => restoreRevision(allRevisions[revision].id)} size='small' type="submit" startIcon={<RestoreIcon />}>
+                                <Button
+                                    className={classes.textShape3}
+                                    onClick={() => restoreRevision(allRevisions[revision].id)}
+                                    size='small'
+                                    type='submit'
+                                    startIcon={<RestoreIcon />}
+                                >
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.Deployments.restore'
                                         defaultMessage='Restore'
                                     />
                                 </Button>
-                                <Button className={classes.textShape7} onClick={() => deleteRevision(allRevisions[revision].id)} size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
+                                <Button
+                                    className={classes.textShape7}
+                                    onClick={() => deleteRevision(allRevisions[revision].id)}
+                                    size='small'
+                                    color='#38536c'
+                                    startIcon={<DeleteForeverIcon />}
+                                >
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.Deployments.delete'
                                         defaultMessage='Delete'
                                     />
                                 </Button>
                             </Grid>
-                        </Grid>
-                    )
+                        </Grid>,
+                    );
                 } else {
                     items.push(
                         <Grid item>
@@ -588,13 +599,25 @@ export default function Environments() {
                                 {allRevisions[revision].key}
                             </Grid>
                             <Grid>
-                                <Button className={classes.textShape3} onClick={() => restoreRevision(allRevisions[revision].id)} size='small' type="submit" startIcon={<RestoreIcon />}>
+                                <Button
+                                    className={classes.textShape3}
+                                    onClick={() => restoreRevision(allRevisions[revision].id)}
+                                    size='small'
+                                    type='submit'
+                                    startIcon={<RestoreIcon />}
+                                >
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.Deployments.restore.up'
                                         defaultMessage='Restore'
                                     />
                                 </Button>
-                                <Button className={classes.textShape7} onClick={() => deleteRevision(allRevisions[revision].id)} size='small' color="#38536c" startIcon={<DeleteForeverIcon />}>
+                                <Button
+                                    className={classes.textShape7}
+                                    onClick={() => deleteRevision(allRevisions[revision].id)}
+                                    size='small'
+                                    color='#38536c'
+                                    startIcon={<DeleteForeverIcon />}
+                                >
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.Deployments.delete.up'
                                         defaultMessage='Delete'
@@ -602,15 +625,21 @@ export default function Environments() {
                                 </Button>
                             </Grid>
                             {item6}
-                        </Grid>
-                    )
+                        </Grid>,
+                    );
                 }
             }
             if (allRevisions.length !== revisionCount) {
                 items.push(
                     <Grid item>
                         <Grid className={classes.textShape5}>
-                            <Button type="submit" size='small' onClick={handleClickOpen} className={classes.textShape6} variant='outlined'>
+                            <Button
+                                type='submit'
+                                size='small'
+                                onClick={handleClickOpen}
+                                className={classes.textShape6}
+                                variant='outlined'
+                            >
                                 <FormattedMessage
                                     id='Apis.Details.Environments.Environments.Deployments.create.new.revision'
                                     defaultMessage='Create a new revision'
@@ -620,14 +649,20 @@ export default function Environments() {
                         <Grid className={classes.textShapeMiddle}>
                             {item4}
                         </Grid>
-                    </Grid>
-                )
+                    </Grid>,
+                );
             }
             if (allRevisions.length === revisionCount) {
                 items.push(
                     <Grid item>
                         <Grid className={classes.textShape5}>
-                            <Button type="submit" size='small' onClick={handleClickOpen} className={classes.textShape6} variant='outlined'>
+                            <Button
+                                type='submit'
+                                size='small'
+                                onClick={handleClickOpen}
+                                className={classes.textShape6}
+                                variant='outlined'
+                            >
                                 <FormattedMessage
                                     id='Apis.Details.Environments.Environments.Deployments.create.last.revision'
                                     defaultMessage='Create a new revision'
@@ -639,28 +674,29 @@ export default function Environments() {
                         </Grid>
                         <Grid className={classes.textDelete}>
                             <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.Deployments.delete.first.revision'
-                                    defaultMessage='Revision 1 will be deleted'
+                                id='Apis.Details.Environments.Environments.Deployments.delete.first.revision'
+                                defaultMessage='Revision 1 will be deleted'
                             />
                         </Grid>
-                    </Grid>
-                )
+                    </Grid>,
+                );
             }
-            for (let unassignRevision = 0; unassignRevision < (revisionCount - (allRevisions.length + 1)); unassignRevision++) {
+            for (let unassignRevision = 0; unassignRevision
+                < (revisionCount - (allRevisions.length + 1)); unassignRevision++) {
                 items.push(
                     <Grid item>
-                        <Grid className={classes.textShape4}></Grid>
+                        <Grid className={classes.textShape4} />
                         {item2}
-                    </Grid>
-                )
+                    </Grid>,
+                );
             }
-            if (revisionCount !== allRevisions.lenght) {
+            if (revisionCount !== allRevisions.length) {
                 items.push(
                     <Grid item>
                         <Grid className={classes.textShape4} />
                         {item3}
-                    </Grid>
-                )
+                    </Grid>,
+                );
             }
         }
 
@@ -669,12 +705,18 @@ export default function Environments() {
                 <div>
                     <Grid className={classes.textShape8} />
                     <Grid item className={clsx(classes.shapeCircleBlack, classes.shapeCircle)} />
-                </div>
-            )
+                </div>,
+            );
             items.push(
                 <Grid item>
                     <Grid className={classes.textShape5}>
-                        <Button type="submit" size='small' onClick={handleClickOpen} className={classes.textShape6} variant='outlined'>
+                        <Button
+                            type='submit'
+                            size='small'
+                            onClick={handleClickOpen}
+                            className={classes.textShape6}
+                            variant='outlined'
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.Deployments.create.first.revision'
                                 defaultMessage='Create a new revision'
@@ -684,22 +726,22 @@ export default function Environments() {
                     <Grid className={classes.textShapeMiddle}>
                         {item4}
                     </Grid>
-                </Grid>
-            )
+                </Grid>,
+            );
             for (let revision = 0; revision < (revisionCount - (allRevisions.length + 1)); revision++) {
                 items.push(
                     <Grid item>
                         <Grid className={classes.textShape4} />
                         {item2}
-                    </Grid>
-                )
+                    </Grid>,
+                );
             }
             items.push(
                 <Grid item>
                     <Grid className={classes.textShape4} />
                     {item3}
-                </Grid>
-            )
+                </Grid>,
+            );
         }
     }
     return (
@@ -737,29 +779,35 @@ export default function Environments() {
 
             </Grid>
             <Box ml={6} lassName={classes.gridOverflow}>
-                <Grid container
+                <Grid
+                    container
                     direction='row'
                     alignItems='flex-start'
-                    xs={12}>
-                {items}           
+                    xs={12}
+                >
+                    {items}
                 </Grid>
             </Box>
             <Grid container>
-                <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" classes={{ paper: classes.dialogPaper }} >  >
-                        <DialogTitle id="form-dialog-title" variant='h2'>Deploy</DialogTitle>
+                <Dialog
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby='form-dialog-title'
+                    classes={{ paper: classes.dialogPaper }}
+                >
+                    <DialogTitle id='form-dialog-title' variant='h2'>Deploy</DialogTitle>
                     <DialogContent className={classes.dialgContent}>
-
-                        <Typography variant='h6' gutterBottom >
-                            {/* Revision {(allRevisions && allRevisions.lenght !== 0) ? (parseInt(allRevisions[allRevisions.length-1].key.slice(-1)) +1) : 0} */}
+                        <Typography variant='h6' gutterBottom>
+                            {/* Revision {(allRevisions && allRevisions.length !== 0) ?
+                                (parseInt(allRevisions[allRevisions.length-1].key.slice(-1)) +1) : 0} */}
                         </Typography>
-
                         <Box mb={3}>
                             <TextField
-                                margin="dense"
+                                margin='dense'
                                 autoFocus
-                                id="name"
-                                label="Description"
-                                type="email"
+                                id='name'
+                                label='Description'
+                                type='email'
                                 variant='outlined'
                                 helperText={(
                                     <FormattedMessage
@@ -774,139 +822,185 @@ export default function Environments() {
                             />
                         </Box>
                         <Box mt={2}>
-
-                            <Typography variant='h6' gutterBottom >
-                                API Gateways</Typography>
+                            <Typography variant='h6' gutterBottom>
+                                API Gateways
+                            </Typography>
                             <Grid
                                 container
                                 spacing={3}
                             >
-                                {settings.environment.map((row) =>
+                                {settings.environment.map((row) => (
                                     <Grid item xs={4}>
-                                        <Card className={clsx(SelectedEnvironment && SelectedEnvironment.includes(row.name) ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)} variant="outlined">
-                                            <Box height="70%">
+                                        <Card
+                                            className={clsx(SelectedEnvironment
+                                                && SelectedEnvironment.includes(row.name)
+                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
+                                            variant='outlined'
+                                        >
+                                            <Box height='70%'>
                                                 <CardContent className={classes.cardContentHeight}>
                                                     <Grid
                                                         container
                                                         direction='column'
                                                         spacing={2}
-                                                    >  <Grid item>
-                                                            <Typography variant="subtitle2" >
+                                                    >
+                                                        <Grid item>
+                                                            <Typography variant='subtitle2'>
                                                                 {row.name}
                                                             </Typography>
-                                                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                                                            <Typography
+                                                                variant='body2'
+                                                                color='textSecondary'
+                                                                gutterBottom
+                                                            >
                                                                 {row.type}
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item>
-                                                            {allEnvRevision && (allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).length) !== 0 ? (
-                                                                allEnvRevision && allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).map(o3 =>
-                                                                    <div>
-                                                                        <Chip
-                                                                            label={o3.key}
-                                                                            style={{ backgroundColor: '#15B8CF' }}
-                                                                        />
-                                                                    </div>
-                                                                )) : (
-                                                                    <div></div>
+                                                            {allEnvRevision
+                                                                && (
+                                                                    allEnvRevision.filter(
+                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                            (o2) => o2.name === row.name,
+                                                                        ),
+                                                                    ).length
+                                                                ) !== 0 ? (
+                                                                    allEnvRevision && allEnvRevision.filter(
+                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                            (o2) => o2.name === row.name,
+                                                                        ),
+                                                                    ).map((o3) => (
+                                                                        <div>
+                                                                            <Chip
+                                                                                label={o3.key}
+                                                                                style={{ backgroundColor: '#15B8CF' }}
+                                                                            />
+                                                                        </div>
+                                                                    ))) : (
+                                                                // eslint-disable-next-line react/jsx-indent
+                                                                    <div />
                                                                 )}
-                                                        </Grid>  <Grid item>
-                                                        </Grid></Grid>
+                                                        </Grid>
+                                                        <Grid item />
+                                                    </Grid>
                                                 </CardContent>
                                             </Box>
-                                            <Box height="30%">
+                                            <Box height='30%'>
                                                 <CardActions className={classes.cardActionHeight}>
 
                                                     <Checkbox
-                                                        id={row.name.split(" ").join("")}
+                                                        id={row.name.split(' ').join('')}
                                                         value={row.name}
                                                         checked={SelectedEnvironment.includes(row.name)}
                                                         onChange={handleChange}
-                                                        color="primary"
-                                                        inputProps={{ "aria-label": "secondary checkbox" }}
+                                                        color='primary'
+                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
                                                     />
                                                 </CardActions>
                                             </Box>
-
                                         </Card>
-
                                     </Grid>
-
-                                )}
-                                {mgLabels && mgLabels.map((row) =>
+                                ))}
+                                {mgLabels && mgLabels.map((row) => (
                                     <Grid item xs={4}>
-                                        <Card className={clsx(SelectedEnvironment && SelectedEnvironment.includes(row.name) ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)} variant="outlined">
-                                            <Box height="70%">
+                                        <Card
+                                            className={clsx(SelectedEnvironment
+                                                && SelectedEnvironment.includes(row.name)
+                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
+                                            variant='outlined'
+                                        >
+                                            <Box height='70%'>
                                                 <CardContent className={classes.cardContentHeight}>
                                                     <Grid
                                                         container
                                                         direction='column'
                                                         spacing={2}
-                                                    >  <Grid item>
-                                                            <Typography variant="subtitle2" >
+                                                    >
+                                                        <Grid item>
+                                                            <Typography variant='subtitle2'>
                                                                 {row.name}
                                                             </Typography>
-                                                            <Typography variant="body2" color="textSecondary" gutterBottom>
+                                                            <Typography
+                                                                variant='body2'
+                                                                color='textSecondary'
+                                                                gutterBottom
+                                                            >
                                                                 {row.type}
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item>
-                                                        {allEnvRevision && (allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).length) !== 0 ? (
-                                                            allEnvRevision && allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).map(o3 =>
-                                                                    <div>
-                                                                        <Chip
-                                                                            label={o3.key}
-                                                                            style={{ backgroundColor: '#15B8CF' }}
-                                                                        />
-                                                                    </div>
-                                                                )) : (
-                                                                    <div></div>
+                                                            {allEnvRevision && (allEnvRevision.filter(
+                                                                (o1) => o1.deploymentInfo.filter(
+                                                                    (o2) => o2.name === row.name,
+                                                                ),
+                                                            ).length) !== 0 ? (
+                                                                    allEnvRevision && allEnvRevision.filter(
+                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                            (o2) => o2.name === row.name,
+                                                                        ),
+                                                                    ).map((o3) => (
+                                                                        <div>
+                                                                            <Chip
+                                                                                label={o3.key}
+                                                                                style={{ backgroundColor: '#15B8CF' }}
+                                                                            />
+                                                                        </div>
+                                                                    ))) : (
+                                                                    // eslint-disable-next-line react/jsx-indent
+                                                                    <div />
                                                                 )}
-                                                        </Grid>  <Grid item>
-                                                        </Grid></Grid>
+                                                        </Grid>
+                                                        {' '}
+                                                        <Grid item />
+                                                    </Grid>
                                                 </CardContent>
                                             </Box>
-                                            <Box height="30%">
+                                            <Box height='30%'>
                                                 <CardActions className={classes.cardActionHeight}>
 
                                                     <Checkbox
-                                                        id={row.name.split(" ").join("")}
+                                                        id={row.name.split(' ').join('')}
                                                         value={row.name}
                                                         checked={SelectedEnvironment.includes(row.name)}
                                                         onChange={handleChange}
-                                                        color="primary"
-                                                        inputProps={{ "aria-label": "secondary checkbox" }}
+                                                        color='primary'
+                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
                                                     />
                                                 </CardActions>
                                             </Box>
                                         </Card>
                                     </Grid>
-
-                                )}
-                            </Grid></Box>
+                                ))}
+                            </Grid>
+                        </Box>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleClose} >
+                        <Button onClick={handleClose}>
                             Cancel
-        </Button>
-                        <Button onClick={handleClickAddRevision} type='submit'
+                        </Button>
+                        <Button
+                            onClick={handleClickAddRevision}
+                            type='submit'
                             variant='contained'
-                            color='primary'>
+                            color='primary'
+                        >
                             Create
-        </Button>
-                        <Button type='submit'
+                        </Button>
+                        <Button
+                            type='submit'
                             variant='contained'
                             onClick={() => createDeployRevision(SelectedEnvironment, SelectedEnvironment.length)}
                             color='primary'
-                            disabled={SelectedEnvironment.length === 0}>
+                            disabled={SelectedEnvironment.length === 0}
+                        >
                             Deploy
-        </Button>
+                        </Button>
                     </DialogActions>
                 </Dialog>
             </Grid>
 
-            <Box mx="auto" mt={5}>
-                <Typography variant='h6' gutterBottom >
+            <Box mx='auto' mt={5}>
+                <Typography variant='h6' gutterBottom>
                     <FormattedMessage
                         id='Apis.Details.Environments.Environments.APIGateways'
                         defaultMessage='API Gateways'
@@ -914,7 +1008,7 @@ export default function Environments() {
                 </Typography>
 
                 <TableContainer component={Paper}>
-                    <Table >
+                    <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell align='left'>Name</TableCell>
@@ -926,15 +1020,14 @@ export default function Environments() {
                                         {/* <TableCell align='left'>WSS Endpoint</TableCell> */}
                                     </>
                                 ) : (
-                                        <>
-                                            <TableCell align='left'>Endpoints</TableCell>
-                                            {/* <TableCell align='left'>HTTPS Endpoint</TableCell> */}
-                                        </>
-                                    )}
-                                {api && api.isDefaultVersion !== true ?
-                                    <TableCell align='left'>Deployed Revision</TableCell>
-                                    : <TableCell align='left'>Action</TableCell>
-                                }
+                                    <>
+                                        <TableCell align='left'>Endpoints</TableCell>
+                                        {/* <TableCell align='left'>HTTPS Endpoint</TableCell> */}
+                                    </>
+                                )}
+                                {api && api.isDefaultVersion !== true
+                                    ? <TableCell align='left'>Deployed Revision</TableCell>
+                                    : <TableCell align='left'>Action</TableCell>}
                                 <TableCell align='left'>Display in devportal</TableCell>
                             </TableRow>
                         </TableHead>
@@ -950,63 +1043,94 @@ export default function Environments() {
 
                                     {api.isWebSocket() ? (
                                         <>
-                                            <TableCell align='left' className={classes.primaryEndpoint}>{row.endpoints.ws} <div className={classes.secondaryEndpoint}>{row.endpoints.wss}</div></TableCell>
+                                            <TableCell
+                                                align='left'
+                                                className={classes.primaryEndpoint}
+                                            >
+                                                {row.endpoints.ws}
+                                                <div className={classes.secondaryEndpoint}>
+                                                    {row.endpoints.wss}
+                                                </div>
+                                            </TableCell>
                                             {/* <TableCell align='left'>{row.endpoints.wss}</TableCell> */}
                                         </>
                                     ) : (
-                                            <>
-                                                <TableCell align='left' className={classes.primaryEndpoint}>{row.endpoints.http}<div className={classes.secondaryEndpoint}>{row.endpoints.https}</div></TableCell>
-                                                {/* <TableCell align='left'>{row.endpoints.https}</TableCell> */}
-                                            </>
-                                        )}
+                                        <>
+                                            <TableCell align='left' className={classes.primaryEndpoint}>
+                                                {row.endpoints.http}
+                                                <div className={classes.secondaryEndpoint}>
+                                                    {row.endpoints.https}
+                                                </div>
+                                            </TableCell>
+                                            {/* <TableCell align='left'>{row.endpoints.https}</TableCell> */}
+                                        </>
+                                    )}
 
 
                                     <TableCell align='left'>
-                                        {allEnvRevision && (allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).length) !== 0 ? (
-                                            allEnvRevision && allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).map(o3 =>
-                                                <div>
-                                                    <Chip
-                                                        label={o3.key}
-                                                        style={{ backgroundColor: '#15B8CF' }}
-                                                    />
-                                                    <Button
-
-                                                        className={classes.button1}
-                                                        variant="outlined"
-                                                        disabled={api.isRevision}
-                                                        onClick={() => undeployRevision(o3.id, row.name)}
-                                                        size="small"
-                                                    >
-                                                        Undepoly
-                                        </Button></div>
-                                            )) : (
+                                        {allEnvRevision && (allEnvRevision.filter(
+                                            (o1) => o1.deploymentInfo.filter(
+                                                (o2) => o2.name === row.name,
+                                            ),
+                                        ).length) !== 0 ? (
+                                                allEnvRevision && allEnvRevision.filter(
+                                                    (o1) => o1.deploymentInfo.filter((o2) => o2.name === row.name),
+                                                ).map((o3) => (
+                                                    <div>
+                                                        <Chip
+                                                            label={o3.key}
+                                                            style={{ backgroundColor: '#15B8CF' }}
+                                                        />
+                                                        <Button
+                                                            className={classes.button1}
+                                                            variant='outlined'
+                                                            disabled={api.isRevision}
+                                                            onClick={() => undeployRevision(o3.id, row.name)}
+                                                            size='small'
+                                                        >
+                                                            Undepoly
+                                                        </Button>
+                                                    </div>
+                                                ))) : (
+                                                // eslint-disable-next-line react/jsx-indent
                                                 <div>
                                                     <FormControl
                                                         className={classes.formControl}
                                                         variant='outlined'
                                                         margin='dense'
-                                                        size='small'>
-                                                        <InputLabel disabled={allRevisions} id="demo-simple-select-label">Select Revision</InputLabel>
+                                                        size='small'
+                                                    >
+                                                        <InputLabel
+                                                            disabled={allRevisions}
+                                                            id='demo-simple-select-label'
+                                                        >
+                                                                Select Revision
+                                                        </InputLabel>
                                                         <Select
-                                                            labelId="demo-simple-select-helper-label"
-                                                            id="demo-simple-select-helper"
+                                                            labelId='demo-simple-select-helper-label'
+                                                            id='demo-simple-select-helper'
                                                             disabled={api.isRevision}
                                                             onChange={handleSelect}
                                                         >
-                                                            {allRevisions && allRevisions.map((number) =>
-                                                                <MenuItem value={number.id}>{number.key}</MenuItem>
+                                                            {allRevisions && allRevisions.map(
+                                                                (number) => (
+                                                                    <MenuItem value={number.id}>
+                                                                        {number.key}
+                                                                    </MenuItem>
+                                                                ),
                                                             )}
-
-                                                        </Select></FormControl>
+                                                        </Select>
+                                                    </FormControl>
                                                     <Button
                                                         className={classes.button2}
                                                         disabled={api.isRevision || !selectedRevision}
-                                                        variant="outlined"
+                                                        variant='outlined'
                                                         onClick={() => deployRevision(selectedRevision, row.name)}
 
                                                     >
                                                         Depoly
-                                        </Button></div>
+                                                    </Button>
+                                                </div>
                                             )}
                                     </TableCell>
 
@@ -1015,7 +1139,7 @@ export default function Environments() {
                                             checked={row.showInApiConsole}
                                             onChange={handleChange}
                                             disabled={api.isRevision}
-                                            name="checkedA"
+                                            name='checkedA'
                                         />
 
                                     </TableCell>
@@ -1031,6 +1155,7 @@ export default function Environments() {
                             selectedMgLabel={selectedMgLabel}
                             setSelectedMgLabel={setSelectedMgLabel}
                             api={api}
+                            updateAPI={updateAPI}
                         />
                     )}
                 {

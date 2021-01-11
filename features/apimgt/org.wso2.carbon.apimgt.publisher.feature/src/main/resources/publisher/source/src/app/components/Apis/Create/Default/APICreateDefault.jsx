@@ -222,7 +222,7 @@ function APICreateDefault(props) {
                 setIsPublishing(false);
                 setIsRevisioning(true);
                 const body = {
-                    'description': 'state',
+                    description: 'state',
                 };
                 const restApi = new API();
                 restApi.addRevision(api.id, body)
@@ -237,11 +237,9 @@ function APICreateDefault(props) {
                         }
                         console.error(error);
                     });
-                    setIsRevisioning(false);
-                
+                setIsRevisioning(false);
             })
             .finally(() => {
-                
                 history.push(`/apis/${api.id}/overview`);
             }));
     }
@@ -366,11 +364,12 @@ function APICreateDefault(props) {
                                     id='itest-id-apicreatedefault-createnpublish'
                                     variant='contained'
                                     color='primary'
-                                    disabled={isRevisioning || !isPublishable || isAPICreateDisabled || !apiInputs.isFormValid}
+                                    disabled={isRevisioning || !isPublishable
+                                        || isAPICreateDisabled || !apiInputs.isFormValid}
                                     onClick={createAndPublish}
                                 >
                                     {(!isPublishing) && 'Create & Deploy'}
-                                    {isPublishing || isRevisioning && <CircularProgress size={24} />}
+                                    {(isPublishing || isRevisioning) && <CircularProgress size={24} />}
                                     {isCreating && isPublishing && 'Creating API . . .'}
                                     {!isCreating && isPublishing && !isRevisioning && 'Publishing API . . .'}
                                     {!isCreating && isPublishing && isRevisioning && 'Create Revision . . .'}

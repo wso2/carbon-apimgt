@@ -23,15 +23,16 @@ import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Box from '@material-ui/core/Box';
+import Alert from 'AppComponents/Shared/Alert';
+// import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableContainer from "@material-ui/core/TableContainer";
+import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Switch from '@material-ui/core/Switch';
-import Checkbox from '@material-ui/core/Checkbox';
+// import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
@@ -40,7 +41,7 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Chip from '@material-ui/core/Chip';
-import { isRestricted } from 'AppData/AuthManager';
+// import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -75,12 +76,12 @@ const useStyles = makeStyles((theme) => ({
     },
     button1: {
         color: '#1B3A57',
-        marginLeft: 7
+        marginLeft: 7,
     },
     button2: {
         color: '#1B3A57',
         marginLeft: 7,
-        marginTop: 10
+        marginTop: 10,
     },
 }));
 
@@ -92,7 +93,12 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function MicroGateway(props) {
     const classes = useStyles();
-    const { selectedMgLabel, setSelectedMgLabel, api } = props;
+    const {
+        // selectedMgLabel,
+        // setSelectedMgLabel,
+        api,
+        updateAPI,
+    } = props;
     const restApi = new API();
     const [mgLabels, setMgLabels] = useState(null);
     const [allRevisions, setRevisions] = useState(null);
@@ -120,12 +126,11 @@ export default function MicroGateway(props) {
       * Handles undeploy a revision
       * @memberof Revisions
       */
-     function undeployRevision(revisionId, envName) {
+    function undeployRevision(revisionId, envName) {
         const body = [{
-            'name': envName,
-            'displayOnDevportal': 'false'
+            name: envName,
+            displayOnDevportal: false,
         }];
-        const restApi = new API();
         restApi.undeployRevision(api.id, revisionId, body)
             .then(() => {
                 Alert.info('Undeploy revision Successfully');
@@ -148,10 +153,9 @@ export default function MicroGateway(props) {
       */
     function deployRevision(revisionId, envName) {
         const body = [{
-            'name': envName,
-            'displayOnDevportal': 'true'
+            name: envName,
+            displayOnDevportal: true,
         }];
-        const restApi = new API();
         restApi.deployRevision(api.id, revisionId, body)
             .then(() => {
                 Alert.info('Deploy revision Successfully');
@@ -183,7 +187,6 @@ export default function MicroGateway(props) {
                 />
             </Typography>
             {mgLabels.length > 0 ? (
-
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
@@ -210,51 +213,68 @@ export default function MicroGateway(props) {
 
                                     </TableCell>
                                     <TableCell align='left'>
-                                        {allEnvRevision && (allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).length) !== 0 ? (
-                                            allEnvRevision && allEnvRevision.filter(o1 => o1.deploymentInfo.filter(o2 => o2.name === row.name)).map(o3 =>
-                                                <div>
-                                                    <Chip
-                                                        label={o3.key}
-                                                        style={{ backgroundColor: '#15B8CF' }}
-                                                    />
-                                                    <Button
+                                        {allEnvRevision && (allEnvRevision.filter(
+                                            (o1) => o1.deploymentInfo.filter((o2) => o2.name === row.name),
+                                        ).length) !== 0 ? (
+                                                allEnvRevision && allEnvRevision.filter(
+                                                    (o1) => o1.deploymentInfo.filter((o2) => o2.name === row.name),
+                                                ).map((o3) => (
+                                                    <div>
+                                                        <Chip
+                                                            label={o3.key}
+                                                            style={{ backgroundColor: '#15B8CF' }}
+                                                        />
+                                                        <Button
 
-                                                        className={classes.button1}
-                                                        variant="outlined"
-                                                        disabled={api.isRevision}
-                                                        onClick={() => undeployRevision(o3.id, row.name)}
-                                                        size="small"
-                                                    >
-                                                        Undepoly
-                                        </Button></div>
-                                            )) : (
+                                                            className={classes.button1}
+                                                            variant='outlined'
+                                                            disabled={api.isRevision}
+                                                            onClick={() => undeployRevision(o3.id, row.name)}
+                                                            size='small'
+                                                        >
+                                                            Undepoly
+                                                        </Button>
+                                                    </div>
+                                                ))) : (
+                                                // eslint-disable-next-line react/jsx-indent
                                                 <div>
                                                     <FormControl
                                                         className={classes.formControl}
                                                         variant='outlined'
                                                         margin='dense'
-                                                        size='small'>
-                                                        <InputLabel disabled={allRevisions} id="demo-simple-select-label">Select Revision</InputLabel>
+                                                        size='small'
+                                                    >
+                                                        <InputLabel
+                                                            disabled={allRevisions}
+                                                            id='demo-simple-select-label'
+                                                        >
+                                                            Select Revision
+                                                        </InputLabel>
                                                         <Select
-                                                            labelId="demo-simple-select-helper-label"
-                                                            id="demo-simple-select-helper"
+                                                            labelId='demo-simple-select-helper-label'
+                                                            id='demo-simple-select-helper'
                                                             disabled={api.isRevision}
                                                             onChange={handleSelect}
                                                         >
-                                                            {allRevisions && allRevisions.map((number) =>
-                                                                <MenuItem value={number.id}>{number.key}</MenuItem>
+                                                            {allRevisions && allRevisions.map(
+                                                                (number) => (
+                                                                    <MenuItem value={number.id}>
+                                                                        {number.key}
+                                                                    </MenuItem>
+                                                                ),
                                                             )}
-
-                                                        </Select></FormControl>
+                                                        </Select>
+                                                    </FormControl>
                                                     <Button
                                                         className={classes.button2}
                                                         disabled={api.isRevision || !selectedRevision}
-                                                        variant="outlined"
+                                                        variant='outlined'
                                                         onClick={() => deployRevision(selectedRevision, row.name)}
 
                                                     >
                                                         Depoly
-                                        </Button></div>
+                                                    </Button>
+                                                </div>
                                             )}
                                     </TableCell>
 
@@ -262,7 +282,7 @@ export default function MicroGateway(props) {
                                         <Switch
                                             checked={row.showInApiConsole}
                                             disabled={api.isRevision}
-                                            name="checkedA"
+                                            name='checkedA'
                                         />
 
                                     </TableCell>
@@ -293,11 +313,10 @@ export default function MicroGateway(props) {
         </>
     );
 }
-MicroGateway.defaultProps = {
-    api: {},
-};
+
 MicroGateway.propTypes = {
-    selectedMgLabel: PropTypes.arrayOf(PropTypes.string).isRequired,
-    setSelectedMgLabel: PropTypes.func.isRequired,
-    api: PropTypes.shape({}),
+    // selectedMgLabel: PropTypes.arrayOf(PropTypes.string).isRequired,
+    // setSelectedMgLabel: PropTypes.func.isRequired,
+    api: PropTypes.shape({}).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
