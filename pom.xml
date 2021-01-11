@@ -1794,7 +1794,7 @@
 
         <carbon.commons.version>4.7.35</carbon.commons.version>
         <carbon.registry.version>4.7.35</carbon.registry.version>
-        <carbon.mediation.version>4.7.61</carbon.mediation.version>
+        <carbon.mediation.version>4.7.67</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.18.187</carbon.identity.version>
@@ -1852,7 +1852,7 @@
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v41</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v54</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
@@ -1876,7 +1876,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v183</synapse.version>
+	    <synapse.version>2.1.7-wso2v192</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
