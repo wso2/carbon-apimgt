@@ -3617,4 +3617,41 @@ public class SQLConstants {
         public static final String DELETE_TENANT_THEME = "DELETE FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
         public static final String GET_TENANT_THEME = "SELECT * FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
     }
+    
+    /**
+     * Static class to hold database queries related to SERVICE_CATALOG tables
+     */
+    public static class ServiceCatalogConstants {
+
+        public static final String ADD_SERVICE = "INSERT INTO SERVICE_CATALOG_ENTRY " +
+                "(UUID, MD5, ENTRY_NAME, DISPLAY_NAME, ENTRY_VERSION, TENANT_ID, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
+                "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        public static final String UPDATE_SERVICE = "UPDATE SERVICE_CATALOG_ENTRY SET " +
+                "MD5 = ?," +
+                "ENTRY_NAME = ?," +
+                "DISPLAY_NAME = ?," +
+                "ENTRY_VERSION = ?," +
+                "SERVICE_URL = ?," +
+                "TENANT_ID = ?" +
+                "DEFINITION_TYPE = ?," +
+                "DEFINITION_URL = ?," +
+                "DESCRIPTION = ?," +
+                "SECURITY_TYPE = ?," +
+                "MUTUAL_SSL_ENABLED = ?," +
+                "CREATED_TIME = ?," +
+                "LAST_UPDATED_TIME = ?," +
+                "CREATED_BY = ?," +
+                "UPDATED_BY = ?" +
+                "WHERE UUID = ?";
+        public static final String DELETE_SERVICE = "DELETE FROM SERVICE_CATALOG_ENTRY WHERE UUID = ?";
+        public static final String GET_SERVICE_BY_ID = "SELECT * FROM SERVICE_CATALOG_ENTRY WHERE UUID = ?";
+        public static final String GET_SERVICE_BY_NAME_AND_VERSION = "SELECT * FROM SERVICE_CATALOG_ENTRY " +
+                "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ?";
+        public static final String GET_SERVICE = "SELECT * FROM SERVICE_CATALOG_ENTRY " +
+                "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ? AND DEFINITION_TYPE = ? AND DISPLAY_NAME = ?";
+
+        public static final String ADD_ENDPOINT_DEFINITION_ENTRY = "INSERT INTO ENDPOINT_DEFINITION_ENTRY (UUID, ENDPOINT_DEFINITION) VALUES (?,?)";
+        public static final String UPDATE_ENDPOINT_DEFINITION_ENTRY = "UPDATE ENDPOINT_DEFINITION_ENTRY SET ENDPOINT_DEFINITION = ? WHERE UUID = ?";
+    }
 }
