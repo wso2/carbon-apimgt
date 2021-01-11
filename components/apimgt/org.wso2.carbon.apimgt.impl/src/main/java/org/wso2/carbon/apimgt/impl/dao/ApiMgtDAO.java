@@ -4404,6 +4404,30 @@ public class ApiMgtDAO {
         return appId;
     }
 
+    public String getApplicationUUID(String appName, String username) throws APIManagementException {
+        if (username == null) {
+            return null;
+        }
+        Subscriber subscriber = getSubscriber(username);
+        String applicationUUID = null;
+
+        String sql = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ? AND SUBSCRIBER_ID  = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, appName);
+            prepStmt.setInt(2, subscriber.getId());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    applicationUUID = rs.getString("UUID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        }
+        return applicationUUID;
+    }
+
     /**
      * Find the name of the application by Id
      *
@@ -5181,6 +5205,34 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
 
         }
+    }
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return Map<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
+    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+
+        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+            preparedStatement.setInt(1, appId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys for application " + appId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return consumerKeysOfApplication;
     }
 
     public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {

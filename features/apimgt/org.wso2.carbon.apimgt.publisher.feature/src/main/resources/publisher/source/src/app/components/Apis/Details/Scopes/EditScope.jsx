@@ -36,6 +36,7 @@ import Icon from '@material-ui/core/Icon';
 import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Error from '@material-ui/core/SvgIcon/SvgIcon';
+import Api from 'AppData/api';
 
 const styles = (theme) => ({
     root: {
@@ -187,7 +188,7 @@ class EditScope extends React.Component {
             description: originalScope.description,
             bindings: validRoles,
         };
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         const scopes = api.scopes.map((scopeObj) => {
             if (scopeObj.scope.name === apiScope.scope.name) {
                 return apiScope;

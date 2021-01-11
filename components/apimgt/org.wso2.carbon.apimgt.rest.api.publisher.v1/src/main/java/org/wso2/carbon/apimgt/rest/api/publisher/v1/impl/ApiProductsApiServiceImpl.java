@@ -87,7 +87,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSA
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
 
-    @Override public Response apiProductsApiProductIdDelete(String apiProductId, String ifMatch,
+    @Override public Response deleteAPIProduct(String apiProductId, String ifMatch,
             MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -117,7 +117,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,
+    public Response getAPIProductDocumentContent(String apiProductId,
             String documentId, String accept, String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
@@ -173,7 +173,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId, String documentId,
+    public Response addAPIProductDocumentContent(String apiProductId, String documentId,
                               String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent,
                                                                           MessageContext messageContext) {
         try {
@@ -241,7 +241,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdDelete(String apiProductId, String documentId,
+    public Response deleteAPIProductDocument(String apiProductId, String documentId,
             String ifMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
@@ -275,7 +275,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId, String documentId,
+    public Response getAPIProductDocument(String apiProductId, String documentId,
             String accept, String ifNoneMatch, MessageContext messageContext) {
         Documentation documentation;
         try {
@@ -306,7 +306,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId, String documentId,
+    public Response updateAPIProductDocument(String apiProductId, String documentId,
             DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -361,7 +361,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsGet(String apiProductId, Integer limit, Integer offset,
+    public Response getAPIProductDocuments(String apiProductId, Integer limit, Integer offset,
             String accept, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -394,7 +394,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdDocumentsPost(String apiProductId, DocumentDTO body,
+    public Response addAPIProductDocument(String apiProductId, DocumentDTO body,
             MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -449,7 +449,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdGet(String apiProductId, String accept, String ifNoneMatch,
+    @Override public Response getAPIProduct(String apiProductId, String accept, String ifNoneMatch,
             MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -473,13 +473,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdIsOutdatedGet(String apiProductId, String accept, String ifNoneMatch,
+    public Response getIsAPIProductOutdated(String apiProductId, String accept, String ifNoneMatch,
                                                          MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
     @Override
-    public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch,
+    public Response updateAPIProduct(String apiProductId, APIProductDTO body, String ifMatch,
             MessageContext messageContext) {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -499,7 +499,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch,
+    @Override public Response getAPIProductSwagger(String apiProductId, String accept, String ifNoneMatch,
             MessageContext messageContext) {
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -523,7 +523,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept,
+    public Response getAPIProductThumbnail(String apiProductId, String accept,
             String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -557,7 +557,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream,
+    public Response updateAPIProductThumbnail(String apiProductId, InputStream fileInputStream,
             Attachment fileDetail, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -611,7 +611,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @return Zipped file containing exported API Product
      */
     @Override
-    public Response apiProductsExportGet(String name, String version, String providerName, String format,
+    public Response exportAPIProduct(String name, String version, String providerName, String format,
                                          Boolean preserveStatus, MessageContext messageContext)
             throws APIManagementException {
 
@@ -638,7 +638,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response apiProductsGet(Integer limit, Integer offset, String query, String accept,
+    public Response getAllAPIProducts(Integer limit, Integer offset, String query, String accept,
             String ifNoneMatch, MessageContext messageContext) {
 
         List<APIProduct> allMatchedProducts = new ArrayList<>();
@@ -696,7 +696,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @param overwriteAPIs         Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
      * @return API Product import response
      */
-    @Override public Response apiProductsImportPost(InputStream fileInputStream, Attachment fileDetail,
+    @Override public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs,
             MessageContext messageContext) throws APIManagementException {
         // If importAPIs flag is not set, the default value is false
@@ -738,7 +738,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
     }
 
-    @Override public Response apiProductsPost(APIProductDTO body, MessageContext messageContext) {
+    @Override public Response createAPIProduct(APIProductDTO body, MessageContext messageContext) {
         String provider = null;
         try {
             APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body, provider,
