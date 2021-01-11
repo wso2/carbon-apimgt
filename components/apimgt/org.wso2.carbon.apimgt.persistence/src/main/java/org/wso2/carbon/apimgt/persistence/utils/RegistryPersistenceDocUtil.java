@@ -36,8 +36,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 
-public class RegistryPersistanceDocUtil {
-    private static final Log log = LogFactory.getLog(RegistryPersistanceDocUtil.class);
+public class RegistryPersistenceDocUtil {
+    private static final Log log = LogFactory.getLog(RegistryPersistenceDocUtil.class);
     public static Documentation getDocumentation(GenericArtifact artifact) throws DocumentationPersistenceException {
 
         Documentation documentation;

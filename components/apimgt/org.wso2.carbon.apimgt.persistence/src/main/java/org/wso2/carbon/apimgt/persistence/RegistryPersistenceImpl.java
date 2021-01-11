@@ -89,7 +89,7 @@ import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistanceDocUtil;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceDocUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -234,7 +234,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
             
             //Set permissions to doc path
-            String docLocation = RegistryPersistanceDocUtil.getDocumentPath(api.getId().getProviderName(),
+            String docLocation = RegistryPersistenceDocUtil.getDocumentPath(api.getId().getProviderName(),
                     api.getId().getApiName(), api.getId().getVersion());
             RegistryPersistenceUtil.clearResourcePermissions(docLocation, api.getId(),
                     ((UserRegistry) registry).getTenantId());
@@ -1318,7 +1318,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             Resource docResource = registry.get(resourcePath);
                             String docArtifactId = docResource.getUUID();
                             GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
-                            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+                            Documentation doc = RegistryPersistenceDocUtil.getDocumentation(docArtifact);
                             //API associatedAPI = null;
                             //APIProduct associatedAPIProduct = null;
                             int indexOfDocumentation = resourcePath.indexOf(APIConstants.DOCUMENTATION_KEY);
@@ -1469,7 +1469,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                             Resource docResource = registry.get(resourcePath);
                             String docArtifactId = docResource.getUUID();
                             GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
-                            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+                            Documentation doc = RegistryPersistenceDocUtil.getDocumentation(docArtifact);
                             int indexOfDocumentation = resourcePath.indexOf(APIConstants.DOCUMENTATION_KEY);
                             String apiPath = resourcePath.substring(0, indexOfDocumentation) + APIConstants.API_KEY;
                             Resource apiResource = registry.get(apiPath);
@@ -1925,7 +1925,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifactManager docArtifactManager = new GenericArtifactManager(registry,
                     APIConstants.DOCUMENTATION_KEY);
             GenericArtifact docArtifact = docArtifactManager.newGovernanceArtifact(new QName(documentation.getName()));
-            docArtifactManager.addGenericArtifact(RegistryPersistanceDocUtil.createDocArtifactContent(docArtifact,
+            docArtifactManager.addGenericArtifact(RegistryPersistenceDocUtil.createDocArtifactContent(docArtifact,
                     apiName, apiVersion, apiProviderName, documentation));           
             
             String apiPath = RegistryPersistenceUtil.getAPIPath(apiName, apiVersion, apiProviderName);
@@ -1984,7 +1984,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil.getDocumentArtifactManager(registry);
+            GenericArtifactManager artifactManager = RegistryPersistenceDocUtil.getDocumentArtifactManager(registry);
             GenericArtifact artifact = artifactManager.getGenericArtifact(documentation.getId());
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = new String[0];
@@ -2003,7 +2003,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
             }
 
-            GenericArtifact updateApiArtifact = RegistryPersistanceDocUtil.createDocArtifactContent(artifact,
+            GenericArtifact updateApiArtifact = RegistryPersistenceDocUtil.createDocArtifactContent(artifact,
                     apiProviderName, apiName, apiVersion, documentation);
             artifactManager.updateGenericArtifact(updateApiArtifact);
             RegistryPersistenceUtil.clearResourcePermissions(updateApiArtifact.getPath(),
@@ -2045,7 +2045,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Registry registryType = holder.getRegistry();
             tenantFlowStarted  = holder.isTenantFlowStarted();
 
-            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
+            GenericArtifactManager artifactManager = RegistryPersistenceDocUtil
                     .getDocumentArtifactManager(registryType);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             
@@ -2053,7 +2053,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 return documentation;
             }
             if (null != artifact) {
-                documentation = RegistryPersistanceDocUtil.getDocumentation(artifact);
+                documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
                 documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
                 Date lastModified = registryType.get(artifact.getPath()).getLastModified();
                 if (lastModified != null) {
@@ -2082,7 +2082,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Registry registryType = holder.getRegistry();
             tenantFlowStarted  = holder.isTenantFlowStarted();
 
-            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
+            GenericArtifactManager artifactManager = RegistryPersistenceDocUtil
                     .getDocumentArtifactManager(registryType);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             
@@ -2090,7 +2090,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 return null;
             }
             if (artifact != null) {
-                Documentation documentation = RegistryPersistanceDocUtil.getDocumentation(artifact);
+                Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
                 if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     String resource = documentation.getFilePath();
                     String[] resourceSplitPath =
@@ -2169,14 +2169,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             
-            GenericArtifactManager docArtifactManager = RegistryPersistanceDocUtil
+            GenericArtifactManager docArtifactManager = RegistryPersistenceDocUtil
                     .getDocumentArtifactManager(registry);
             GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docId);
-            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+            Documentation doc = RegistryPersistenceDocUtil.getDocumentation(docArtifact);
 
             if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
                 ResourceFile resource = content.getResourceFile();
-                String filePath = RegistryPersistanceDocUtil.getDocumentFilePath(apiProviderName, apiName, apiVersion,
+                String filePath = RegistryPersistenceDocUtil.getDocumentFilePath(apiProviderName, apiName, apiVersion,
                         resource.getName());
                 String visibility = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
                 String visibleRolesList = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
@@ -2194,7 +2194,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 docArtifactManager.updateGenericArtifact(docArtifact);
                 RegistryPersistenceUtil.setFilePermission(filePath);
             } else {
-                String contentPath = RegistryPersistanceDocUtil.getDocumentContentPath(apiProviderName, apiName,
+                String contentPath = RegistryPersistenceDocUtil.getDocumentContentPath(apiProviderName, apiName,
                         apiVersion, doc.getName());
                 Resource docContent;
 
@@ -2260,7 +2260,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            String apiOrAPIProductDocPath = RegistryPersistanceDocUtil.getDocumentPath(apiProviderName, apiName,
+            String apiOrAPIProductDocPath = RegistryPersistenceDocUtil.getDocumentPath(apiProviderName, apiName,
                     apiVersion);
             String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
             String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
@@ -2273,10 +2273,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     for (String docPath : docsPaths) {
                         if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
                             Resource docResource = registryType.get(docPath);
-                            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil
+                            GenericArtifactManager artifactManager = RegistryPersistenceDocUtil
                                     .getDocumentArtifactManager(registryType);
                             GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
-                            Documentation doc = RegistryPersistanceDocUtil.getDocumentation(docArtifact);
+                            Documentation doc = RegistryPersistenceDocUtil.getDocumentation(docArtifact);
                             if (searchQuery != null) {
                                 if (searchQuery.toLowerCase().startsWith("name:")) {
                                     String requestedDocName = searchQuery.split(":")[1];
@@ -2315,7 +2315,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryHolder holder = getRegistry(org.getName());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-            GenericArtifactManager artifactManager = RegistryPersistanceDocUtil.getDocumentArtifactManager(registry);
+            GenericArtifactManager artifactManager = RegistryPersistenceDocUtil.getDocumentArtifactManager(registry);
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when removing documentation of " + apiId
                         + " Document ID " + docId;
