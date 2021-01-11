@@ -26,6 +26,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -778,9 +779,15 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
         Date startDate;
         Date endDate;
+        String revisionKey = null;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+            if (apiProductIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Failed to get API. API artifact corresponding to artifactId "
+                        + apiProductId + " does not exist", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND,
+                        apiProductId));
+            }
             // pre-processing
             // setting default limit and offset values if they are not set
             limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -790,8 +797,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     Date.from(OffsetDateTime.parse(startTime).toInstant()) : null;
             endDate = StringUtils.isNotBlank(endTime) ?
                     Date.from(OffsetDateTime.parse(endTime).toInstant()) : null;
-            String revisionKey = (StringUtils.isNotBlank(revisionId)) ?
-                    apiProvider.getRevisionKeyFromRevisionUUID(revisionId) : null;
+            if (StringUtils.isNotBlank(revisionId)) {
+                revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
+                if (revisionKey == null) {
+                    throw new APIManagementException("Invalid Revision Id: " + revisionId,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_REVISION_ID));
+                }
+            }
             List<HistoryEvent> historyEvents = apiProvider
                     .getAPIOrAPIProductHistoryWithPagination(apiProductIdentifier, revisionKey, startDate, endDate,
                             offset, limit);
@@ -813,9 +825,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 historyEventListDTO.setCount(0);
                 historyEventListDTO.setPagination(new PaginationDTO());
                 return Response.ok().entity(historyEventListDTO).build();
-            } else {
-                throw e;
             }
+            if (isAuthorizationFailure(e)) {
+                throw new APIManagementException("Authorization failure while retrieving history for API Product: "
+                        + apiProductId, ExceptionCodes.from(ExceptionCodes.HISTORY_AUTHORIZATION_FAILURE));
+            }
+            throw e;
         }
     }
 
@@ -823,14 +838,27 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
-        String payload = apiProvider.getAPIOrAPIProductHistoryEventPayload(apiProductIdentifier, eventId);
-        if (StringUtils.isBlank(payload)) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT
-                    + RestApiConstants.RESOURCE_HISTORY_PAYLOAD, StringUtils.EMPTY, log);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+            if (apiProductIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Failed to get API. API artifact corresponding to artifactId "
+                        + apiProductId + " does not exist", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_NOT_FOUND,
+                        apiProductId));
+            }
+            String payload = apiProvider.getAPIOrAPIProductHistoryEventPayload(apiProductIdentifier, eventId);
+            if (StringUtils.isBlank(payload)) {
+                throw new APIManagementException("API Payload Not Found for: " + eventId,
+                        ExceptionCodes.from(ExceptionCodes.HISTORY_EVENT_PAYLOAD_NOT_FOUND, eventId));
+            }
+            return Response.ok().entity(payload).build();
+        } catch (APIManagementException e) {
+            if (isAuthorizationFailure(e)) {
+                throw new APIManagementException("Authorization failure while retrieving history for API Product: "
+                        + apiProductId, ExceptionCodes.from(ExceptionCodes.HISTORY_AUTHORIZATION_FAILURE));
+            }
+            throw e;
         }
-        return Response.ok().entity(payload).build();
     }
 
 }

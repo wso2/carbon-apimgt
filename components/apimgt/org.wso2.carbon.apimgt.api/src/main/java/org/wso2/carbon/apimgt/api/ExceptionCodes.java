@@ -90,6 +90,7 @@ ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+    API_PRODUCT_NOT_FOUND(900350, "API Product Not Found", 404, "Requested API Product with id %s not found"),
 
 
     // Generic codes
@@ -411,7 +412,13 @@ ExceptionCodes implements ErrorHandler {
 
     // API History related codes
     INVALID_TIMESTAMP_FORMAT(901000, "Invalid timestamp format for startTime/endTime", 400,
-            "Timestamp format should be in ISO8601 format.");
+            "Timestamp format should be in ISO8601 format."),
+    INVALID_REVISION_ID(901001, "Invalid Revision Id", 400,
+            "Invalid revision Id to get API history"),
+    HISTORY_EVENT_PAYLOAD_NOT_FOUND(901002, "Payload Not Found", 404,
+            "Payload Not Found for Event Id %s"),
+    HISTORY_AUTHORIZATION_FAILURE(901003, "Forbidden", 403,
+            "User not authorized to view history");
 
     private final long errorCode;
     private final String errorMessage;
