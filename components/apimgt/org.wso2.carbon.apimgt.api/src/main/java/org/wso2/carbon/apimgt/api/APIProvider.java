@@ -930,13 +930,13 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to change registry lifecycle states for an API artifact
      *
-     * @param organizationId UUID of the organization
+     * @param orgId UUID of the organization
      * @param  uuid uuid of the API
      * @param  action  Action which need to execute from registry lifecycle
      * @param  checklist checklist items
      * @return APIStateChangeResponse API workflow state and WorkflowResponse
      * */
-    APIStateChangeResponse changeLifeCycleStatus(String organizationId, String uuid, String action, Map<String, Boolean> checklist)
+    APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action, Map<String, Boolean> checklist)
              throws APIManagementException, FaultGatewaysException;
     
     /**
@@ -978,7 +978,7 @@ public interface APIProvider extends APIManager {
      * @param apiId id of the api
      * @return Map<String,Object> a map with lifecycle data
      */
-     Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException;
+     Map<String, Object> getAPILifeCycleData(String apiId, String orgId) throws APIManagementException;
 
      /**
       * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
@@ -1633,16 +1633,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deleteAPI(API api) throws APIManagementException;
-
-    /**
-     * Checks whether the given document already exists for the given api/product
-     *
-     * @param uuid API/Product id
-     * @param docName    Name of the document
-     * @return true if document already exists for the given api/product
-     * @throws APIManagementException if failed to check existence of the documentation
-     */
-    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
     
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file

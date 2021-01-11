@@ -671,6 +671,7 @@ paths:
         This operation can be used to retrieve conversion policy resource definitions of an API.
       parameters:
       - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/organizationId'
       - name: resourcePath
         in: query
         description: Resource path of the resource policy definition

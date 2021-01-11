@@ -108,7 +108,7 @@ public interface APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException;
 
     /**
      * Get minimal details of API by API identifier
@@ -117,7 +117,7 @@ public interface APIManager {
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
-    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
+    API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException;
 
     /**
      * Returns details of an API
@@ -216,12 +216,12 @@ public interface APIManager {
     /**
      * Checks whether the given document already exists for the given api/product
      *
-     * @param identifier API/Product Identifier
+     * @param uuid API/Product id
      * @param docName    Name of the document
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException;
+    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API/API Product

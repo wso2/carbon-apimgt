@@ -921,18 +921,18 @@ public class PublisherCommonUtils {
      * update swagger definition of the given api
      *
      * @param apiId    API Id
-     * @param organizationId   Organization WHich the API belongs to
+     * @param orgId  Organization WHich the API belongs to
      * @param response response of a swagger definition validation call
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, String organizationId,APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, String orgId, APIDefinitionValidationResponse response)
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, orgId);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         apiDefinition = OASParserUtil.preProcess(apiDefinition);
@@ -975,18 +975,13 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-        if (organizationId != null) {
-            unModifiedAPI.setOrganizationId(organizationId);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, orgId);
+        if (orgId != null) {
+            unModifiedAPI.setOrganizationId(orgId);
         }
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger;
-        if (organizationId != null) {
-            apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organizationId);
-        } else {
-            apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain);
-        }
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, orgId);
          // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
@@ -1128,7 +1123,7 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
 
-        if (apiProvider.isDocumentationExist(apiId, documentName)) {
+        if (apiProvider.isDocumentationExist(apiId, documentName, orgId)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }

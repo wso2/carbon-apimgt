@@ -4984,12 +4984,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public boolean isDocumentationExist(String uuid, String docName) throws APIManagementException {
+    public boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException {
         boolean exist = false;
         UserContext ctx = null;
         try {
+            Organization org = Organization.getInstance(orgId);
             DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(
-                    getOrganizationForRegistry(uuid), uuid, 0, 0, "name:" + docName, ctx);
+                    org, uuid, 0, 0, "name:" + docName, ctx);
             if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
                 String returnDocName = result.getDocumentationList().get(0).getName();
                 if (returnDocName != null && returnDocName.equals(docName)) {
@@ -6976,7 +6977,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     @Override
-    public APIStateChangeResponse changeLifeCycleStatus(String organizationId, String uuid, String action, Map<String, Boolean> checklist)
+    public APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action, Map<String, Boolean> checklist)
             throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
@@ -6985,7 +6986,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
             //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
-            API api = getAPIbyUUID(uuid, this.tenantDomain);
+            API api = getAPIbyUUID(uuid, orgId);
             String targetStatus;
             if (api != null) {
 
@@ -7516,10 +7517,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return lcData;
     }
 
-    public Map<String, Object> getAPILifeCycleData(String uuid) throws APIManagementException {
+    public Map<String, Object> getAPILifeCycleData(String uuid, String orgId) throws APIManagementException {
 
         Map<String, Object> lcData = new HashMap<String, Object>();
-        API api = getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        API api = getAPIbyUUID(uuid, orgId);
 
         List<String> actionsList;
         try {
@@ -10544,7 +10545,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-
         Organization org = Organization.getInstance(orgId);
         String[] roles = APIUtil.getFilteredUserRoles(userNameWithoutChange);
         Map<String, Object> properties = APIUtil.getUserProperties(userNameWithoutChange);
@@ -10586,7 +10586,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String orgID) throws APIManagementException {
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(getOrganizationForRegistry(uuid), uuid);
             if (publisherAPI != null) {
@@ -10612,6 +10612,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String msg = "Failed to get API with uuid " + uuid;
             throw new APIManagementException(msg, e);
         }
+    }
+
+    @Override
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+        return null;
     }
 
     @Override
@@ -10678,7 +10683,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end) throws APIManagementException {
         ArrayList<Object> compoundResult = new ArrayList<Object>();
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<Documentation, APIProduct> productDocMap = new HashMap<Documentation, APIProduct>();
@@ -10688,12 +10693,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int totalLength = 0;
 
         String userame = userNameWithoutChange;
-        Organization org = new Organization(tenantDomain);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
-        String[] roles = APIUtil.getFilteredUserRoles(userame);;
+        String[] roles = APIUtil.getFilteredUserRoles(userame);
+        Organization org = Organization.getInstance(orgId);
         UserContext ctx = new UserContext(userame, org, properties, roles);
-
-        
         try {
             PublisherContentSearchResult results = apiPersistenceInstance.searchContentForPublisher(org, searchQuery,
                     start, end, ctx);

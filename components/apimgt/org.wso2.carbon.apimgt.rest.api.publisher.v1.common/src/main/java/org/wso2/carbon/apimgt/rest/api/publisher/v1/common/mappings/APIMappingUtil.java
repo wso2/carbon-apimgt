@@ -2578,17 +2578,17 @@ public class APIMappingUtil {
      * This method is used to retrieve APIIdentifier from the apiId or UUID
      *
      * @param apiId
-     * @param requestedTenantDomain
+     * @param orgId
      */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String orgId)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, orgId).getId();
         } else {
-            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId),orgId).getId();
         }
         return apiIdentifier;
     }
@@ -2632,18 +2632,18 @@ public class APIMappingUtil {
     /**
      * Returns the API given the uuid or the id in {provider}-{api}-{version} format
      *
-     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
-     * @param requestedTenantDomain tenant domain of the API
+     * @param apiId        uuid or the id in {provider}-{api}-{version} format
+     * @param orgId        tenant domain of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIFromApiIdOrUUID(String apiId, String organizationId, String requestedTenantDomain)
+    public static API getAPIFromApiIdOrUUID(String apiId, String orgId)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId, orgId);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
             //Checks whether the logged in user's tenant and the API's tenant is equal

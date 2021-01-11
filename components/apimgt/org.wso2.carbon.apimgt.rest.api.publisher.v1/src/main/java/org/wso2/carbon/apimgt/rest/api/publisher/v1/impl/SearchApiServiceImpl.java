@@ -68,10 +68,11 @@ public class SearchApiServiceImpl implements SearchApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = null;
+            String orgId = getOrgId(organizationId);
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiProvider.searchPaginatedContent(query, tenantDomain, offset, limit);
+                result = apiProvider.searchPaginatedContent(query, orgId, offset, limit);
             } else {
-                result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+                result = apiProvider.searchPaginatedAPIs(query, orgId, offset, limit);
             }
             ArrayList<Object> apis;
             /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
@@ -130,5 +131,20 @@ public class SearchApiServiceImpl implements SearchApiService {
         }
 
         return Response.ok().entity(resultListDTO).build();
+    }
+
+    /**
+     * Getting the Identifier of an Organization
+     * @param organizationId UUID of the Organization which the API belongs to
+     * @return tenantDomain or OrganizationUUID
+     */
+    private String getOrgId(String organizationId) {
+        String orgId;
+        if (organizationId != null) {
+            orgId = organizationId;
+        } else {
+            orgId = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        }
+        return orgId;
     }
 }

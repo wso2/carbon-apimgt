@@ -87,7 +87,7 @@ public interface ApisApiService {
       public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO apIMonetizationInfoDTO, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdPut(String apiId, APIDTO APIDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePathsGet(String apiId, String organizationId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String organizationId, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId, ResourcePolicyInfoDTO resourcePolicyInfoDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdRevenueGet(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;

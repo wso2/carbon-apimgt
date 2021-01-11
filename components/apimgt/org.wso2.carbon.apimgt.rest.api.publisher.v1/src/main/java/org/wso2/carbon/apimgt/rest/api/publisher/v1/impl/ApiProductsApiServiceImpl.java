@@ -407,7 +407,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
-            if (apiProvider.isDocumentationExist(productIdentifier, documentName)) {
+            if (apiProvider.isDocumentationExist(null, documentName, tenantDomain)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
             }
