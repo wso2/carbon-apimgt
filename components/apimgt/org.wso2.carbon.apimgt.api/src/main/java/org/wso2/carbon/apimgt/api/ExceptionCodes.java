@@ -90,6 +90,13 @@ ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+    API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
+    EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
+            "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
+    EXISTING_API_REVISION_FOUND(900349, "Can not create API Revision ", 400, "API revision already exists with id: %s "),
+    API_REVISION_UUID_NOT_FOUND(900350, "Can not create API Revision ", 400, "Failed to retrieve revision uuid from revision registry artifact"),
+    MAXIMUM_REVISIONS_REACHED(900351, "Can not create API Revision ", 400, "Maximum number of revisions per API has reached." +
+            "Need to remove any revision to create a new Revision for API with API UUID: %s"),
 
 
     // Generic codes

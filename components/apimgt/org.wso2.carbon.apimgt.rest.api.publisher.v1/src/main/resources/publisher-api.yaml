@@ -1415,6 +1415,14 @@ paths:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId'
       responses:
+        200:
+          description: |
+            OK.
+            List of remaining API revisions are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionList'
         204:
           description: |
             No Content.
@@ -1572,6 +1580,14 @@ paths:
         200:
           description: |
             OK.
+        201:
+          description: |
+            Restored.
+            Successful response with the newly restored API object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -7266,7 +7282,7 @@ components:
     APIRevision:
       title: API Info object with basic API details
       properties:
-        key:
+        displayName:
           type: string
           example: REVISION 1
         id:
