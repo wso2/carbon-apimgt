@@ -70,7 +70,7 @@ class Monetization extends Component {
 
     getMonetizationData() {
         const { api } = this.props;
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct(api.name, api.context, api.policies);
             apiProduct.getSettings().then((settings) => {
                 if (settings.monetizationAttributes != null) {
@@ -110,7 +110,7 @@ class Monetization extends Component {
      */
     handleSubmit() {
         const { api, intl } = this.props;
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === API.CONSTS.APIProduct) {
             const properties = this.state.property;
             const enabled = this.state.monStatus;
             const body = {

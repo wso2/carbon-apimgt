@@ -122,7 +122,7 @@ public class CertificateManagerImpl implements CertificateManager {
     public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
 
         try {
-            if (certificateMgtDAO.addCertificate(alias, endpoint, tenantId)) {
+            if (certificateMgtDAO.addCertificate(certificate, alias, endpoint, tenantId)) {
                 ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
                 if (responseCode.getResponseCode() ==
                         ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode()) {
@@ -179,11 +179,12 @@ public class CertificateManagerImpl implements CertificateManager {
     public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
 
         try {
+            CertificateMetadataDTO certificate = certificateMgtDAO.getCertificate(alias, endpoint, tenantId);
             boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
             if (removeFromDB) {
                 ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
                 if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
-                    certificateMgtDAO.addCertificate(alias, endpoint, tenantId);
+                    certificateMgtDAO.addCertificate(certificate.getCertificate(), alias, endpoint, tenantId);
                     log.error("Error removing the Certificate from Trust Store. Rolling back...");
                 } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
                     log.warn("The Certificate for Alias '" + alias + "' has been previously removed from " +

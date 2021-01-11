@@ -86,7 +86,7 @@ export default function ApplicationLevel(props) {
     const classes = useStyles();
     let mandatoryValue = null;
     let hasResourceWithSecurity;
-    if (apiFromContext.apiType === 'APIProduct') {
+    if (apiFromContext.apiType === API.CONSTS.APIProduct) {
         const apiList = apiFromContext.apis;
         for (const apiInProduct in apiList) {
             if (Object.prototype.hasOwnProperty.call(apiList, apiInProduct)) {

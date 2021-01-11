@@ -4402,6 +4402,30 @@ public class ApiMgtDAO {
         return appId;
     }
 
+    public String getApplicationUUID(String appName, String username) throws APIManagementException {
+        if (username == null) {
+            return null;
+        }
+        Subscriber subscriber = getSubscriber(username);
+        String applicationUUID = null;
+
+        String sql = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ? AND SUBSCRIBER_ID  = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, appName);
+            prepStmt.setInt(2, subscriber.getId());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    applicationUUID = rs.getString("UUID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        }
+        return applicationUUID;
+    }
+
     /**
      * Find the name of the application by Id
      *
@@ -5180,6 +5204,34 @@ public class ApiMgtDAO {
 
         }
     }
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return Map<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
+    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+
+        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+            preparedStatement.setInt(1, appId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys for application " + appId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return consumerKeysOfApplication;
+    }
 
     public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
 
@@ -5713,6 +5765,7 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
+            prepStmt.setString(10, api.getUUID());
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -7877,6 +7930,172 @@ public class ApiMgtDAO {
                     + identifier.getApiName() + '-' + identifier.getVersion(), e);
         }
         return context;
+    }
+
+    /**
+     * Get API Identifier by the the API's UUID.
+     *
+     * @param uuid uuid of the API
+     * @return API Identifier
+     * @throws APIManagementException if an error occurs
+     */
+    public APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException {
+
+        APIIdentifier identifier = null;
+        String sql = SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, uuid);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    String provider = resultSet.getString(1);
+                    String name = resultSet.getString(2);
+                    String version = resultSet.getString(3);
+                    identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API Identifier details for UUID : " + uuid, e);
+        }
+        return identifier;
+    }
+
+    /**
+     * Get API Product Identifier by the product's UUID.
+     *
+     * @param uuid uuid of the API
+     * @return API Identifier
+     * @throws APIManagementException if an error occurs
+     */
+    public APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException {
+
+        APIProductIdentifier identifier = null;
+        String sql = SQLConstants.GET_API_IDENTIFIER_BY_UUID_SQL;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, uuid);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    String provider = resultSet.getString(1);
+                    String name = resultSet.getString(2);
+                    String version = resultSet.getString(3);
+                    identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API Product Identifier details for UUID : " + uuid, e);
+        }
+        return identifier;
+    }
+
+    /**
+     * Get API UUID by the API Identifier.
+     *
+     * @param identifier API Identifier
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    public String getUUIDFromIdentifier(APIIdentifier identifier) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
+                    + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Get API UUID by passed parameters.
+     *
+     * @param provider Provider of the API
+     * @param apiName Name of the API
+     * @param version Version of the API
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    public String getUUIDFromIdentifier(String provider, String apiName, String version) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
+            prepStmt.setString(2, apiName);
+            prepStmt.setString(3, version);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the UUID for API : ", e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Get API Product UUID by the API Product Identifier.
+     *
+     * @param identifier API Product Identifier
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    public String getUUIDFromIdentifier(APIProductIdentifier identifier) throws APIManagementException {
+
+        String uuid = null;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getName());
+            prepStmt.setString(3, identifier.getVersion());
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the UUID for the API Product : " + identifier.getName() + '-'
+                    + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Get API TYPE by the uuid.
+     *
+     * @param uuid UUID of API
+     * @return String API Type
+     * @throws APIManagementException if an error occurs
+     */
+    public String getAPITypeFromUUID(String uuid) throws APIManagementException {
+
+        String apiType = null;
+        String sql = SQLConstants.GET_API_TYPE_BY_UUID;
+        try(Connection connection = APIMgtDBUtil.getConnection()) {
+            PreparedStatement prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, uuid);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    apiType = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve the API TYPE for UUID " + uuid, e);
+        }
+        return apiType;
     }
 
     public List<String> getAllAvailableContexts() {
@@ -13799,8 +14018,8 @@ public class ApiMgtDAO {
                     while (rs.next()) {
                         ResourcePath resourcePath = new ResourcePath();
                         resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
-                        resourcePath.setResourcePath(rs.getString("HTTP_METHOD"));
-                        resourcePath.setHttpVerb(rs.getString("URL_PATTERN"));
+                        resourcePath.setResourcePath(rs.getString("URL_PATTERN"));
+                        resourcePath.setHttpVerb(rs.getString("HTTP_METHOD"));
                         resourcePathList.add(resourcePath);
                     }
                 }
@@ -13836,7 +14055,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setString(6, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtAddAPIProduct.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmtAddAPIProduct.setString(8, APIConstants.API_PRODUCT);
-
+            prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();

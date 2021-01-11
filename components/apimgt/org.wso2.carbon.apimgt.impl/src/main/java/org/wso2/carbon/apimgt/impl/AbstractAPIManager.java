@@ -1293,48 +1293,45 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
-        String resourcePath = StringUtils.EMPTY;
         String docArtifactKeyType = StringUtils.EMPTY;
-        if (id instanceof APIIdentifier) {
-            resourcePath = APIUtil.getAPIPath((APIIdentifier) id);
-        } else if (id instanceof APIProductIdentifier) {
-            resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) id);
-        }
         docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
 
+        String apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(id);
+        String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+        String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
         try {
-            Association[] docAssociations = registry.getAssociations(resourcePath,
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
-            if (docAssociations == null) {
-                return documentationList;
-            }
-            for (Association association : docAssociations) {
-                String docPath = association.getDestinationPath();
-
-                Resource docResource = registry.get(docPath);
-                GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
-                        docArtifactKeyType);
-                GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
-                Documentation doc = APIUtil.getDocumentation(docArtifact);
-                Date contentLastModifiedDate;
-                Date docLastModifiedDate = docResource.getLastModified();
-                if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType()) || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
-                    String contentPath = StringUtils.EMPTY;
-                    if (id instanceof APIIdentifier) {
-                        contentPath = APIUtil.getAPIDocContentPath((APIIdentifier) id, doc.getName());
-                    } else if (id instanceof APIProductIdentifier) {
-                        contentPath = APIUtil.getProductDocContentPath((APIProductIdentifier) id, doc.getName());
+            if (registry.resourceExists(apiOrAPIProductDocPath)) {
+                Resource resource = registry.get(apiOrAPIProductDocPath);
+                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
+                    for (String docPath : docsPaths) {
+                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
+                            Resource docResource = registry.get(docPath);
+                            GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
+                                    docArtifactKeyType);
+                            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
+                            Documentation doc = APIUtil.getDocumentation(docArtifact);
+                            Date contentLastModifiedDate;
+                            Date docLastModifiedDate = docResource.getLastModified();
+                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())
+                                    || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
+                                String contentPath = StringUtils.EMPTY;
+                                if (id instanceof APIIdentifier) {
+                                    contentPath = APIUtil.getAPIDocContentPath((APIIdentifier) id, doc.getName());
+                                } else if (id instanceof APIProductIdentifier) {
+                                    contentPath = APIUtil.getProductDocContentPath((APIProductIdentifier) id, doc.getName());
+                                }
+                                contentLastModifiedDate = registry.get(contentPath).getLastModified();
+                                doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
+                                        contentLastModifiedDate : docLastModifiedDate));
+                            } else {
+                                doc.setLastUpdated(docLastModifiedDate);
+                            }
+                            documentationList.add(doc);
+                        }
                     }
-
-                    contentLastModifiedDate = registry.get(contentPath).getLastModified();
-                    doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
-                            contentLastModifiedDate : docLastModifiedDate));
-                } else {
-                    doc.setLastUpdated(docLastModifiedDate);
                 }
-                documentationList.add(doc);
             }
-
         } catch (RegistryException e) {
             String msg = "Failed to get documentations for api/product " + id.getName();
             throw new APIManagementException(msg, e);
@@ -1344,7 +1341,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
-        String apiResourcePath = APIUtil.getAPIPath(apiId);
         try {
             String tenantDomain = getTenantDomain(apiId);
             Registry registryType;
@@ -1357,50 +1353,48 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            Association[] docAssociations = registryType.getAssociations(apiResourcePath,
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
-            for (Association association : docAssociations) {
-                String docPath = association.getDestinationPath();
-                Resource docResource = null;
-                try {
-                    docResource = registryType.get(docPath);
-                } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-                    //do nothing. Permission not allowed to access the doc.
-                } catch (RegistryException e) {
-                    String msg = "Failed to get documentations for api " + apiId.getApiName();
-                    throw new APIManagementException(msg, e);
-                }
-                if (docResource != null) {
-                    GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registryType,
-                            APIConstants.DOCUMENTATION_KEY);
-                    GenericArtifact docArtifact = artifactManager.getGenericArtifact(
-                            docResource.getUUID());
-                    Documentation doc = APIUtil.getDocumentation(docArtifact, apiId.getProviderName());
-                    Date contentLastModifiedDate;
-                    Date docLastModifiedDate = docResource.getLastModified();
-                    if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
-                        String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
-                        try {
-                            contentLastModifiedDate = registryType.get(contentPath).getLastModified();
-                            doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
-                                    contentLastModifiedDate : docLastModifiedDate));
-                        } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-                            //do nothing. Permission not allowed to access the doc.
-                        }
+            String apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(apiId);
+            String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+            String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
 
-                    } else if (Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
-                        String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
-                        try {
-                            contentLastModifiedDate = registryType.get(contentPath).getLastModified();
-                            doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
+            if (registry.resourceExists(apiOrAPIProductDocPath)) {
+                Resource resource = registry.get(apiOrAPIProductDocPath);
+                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
+                    for (String docPath : docsPaths) {
+                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
+                            Resource docResource = registry.get(docPath);
+                            GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
+                                    APIConstants.DOCUMENTATION_KEY);
+                            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
+                            Documentation doc = APIUtil.getDocumentation(docArtifact, apiId.getProviderName());
+                            Date contentLastModifiedDate;
+                            Date docLastModifiedDate = docResource.getLastModified();
+                            if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
+                                String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                                try {
+                                    contentLastModifiedDate = registryType.get(contentPath).getLastModified();
+                                    doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
+                                            contentLastModifiedDate : docLastModifiedDate));
+                                } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
+                                    //do nothing. Permission not allowed to access the doc.
+                                }
+
+                            } else if (Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
+                                String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                                try {
+                                    contentLastModifiedDate = registryType.get(contentPath).getLastModified();
+                                    doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
                                     contentLastModifiedDate : docLastModifiedDate));
-                        } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-                            //do nothing. Permission not allowed to access the doc.
+                                } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
+                                    //do nothing. Permission not allowed to access the doc.
+                                }
+                            } else {
+                                doc.setLastUpdated(docLastModifiedDate);
+                            }
+                        documentationList.add(doc);
                         }
-                    } else {
-                        doc.setLastUpdated(docLastModifiedDate);
                     }
-                    documentationList.add(doc);
                 }
             }
         } catch (RegistryException e) {
@@ -1726,7 +1720,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException {
-        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         String tenantDomain = getTenantDomain(identifier);
@@ -1749,10 +1746,14 @@ public abstract class AbstractAPIManager implements APIManager {
                     registry = this.registry;
                 }
             }
+            String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
             String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
 
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
+            } else if (registry.resourceExists(oldThumbPath)){
+                Resource res = registry.get(oldThumbPath);
                 return new ResourceFile(res.getContentStream(), res.getMediaType());
             }
         } catch (RegistryException e) {
@@ -2923,21 +2924,24 @@ public abstract class AbstractAPIManager implements APIManager {
 
             for (ResourceData data : resourceData) {
                 String resourcePath = data.getResourcePath();
-                int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
-                resourcePath = resourcePath.substring(index);
-                Resource resource = registry.get(resourcePath);
-                if (APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(resource.getMediaType())) {
-                    Resource docResource = registry.get(resourcePath);
-                    String docArtifactId = docResource.getUUID();
-                    GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
-                    Documentation doc = APIUtil.getDocumentation(docArtifact);
-                    Association[] docAssociations = registry
-                            .getAssociations(resourcePath, APIConstants.DOCUMENTATION_ASSOCIATION);
-                    API associatedAPI = null;
-                    APIProduct associatedAPIProduct = null;
-                    if (docAssociations.length > 0) { // a content can have one api association at most
-                        String apiPath = docAssociations[0].getSourcePath();
-
+                if (resourcePath.contains(APIConstants.APIMGT_REGISTRY_LOCATION)) {
+                    int index = resourcePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
+                    resourcePath = resourcePath.substring(index);
+                    Resource resource = registry.get(resourcePath);
+                    if (APIConstants.DOCUMENT_RXT_MEDIA_TYPE.equals(resource.getMediaType()) ||
+                            APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE.equals(resource.getMediaType())) {
+                        if (resourcePath.contains(APIConstants.INLINE_DOCUMENT_CONTENT_DIR)) {
+                            int indexOfContents = resourcePath.indexOf(APIConstants.INLINE_DOCUMENT_CONTENT_DIR);
+                            resourcePath = resourcePath.substring(0, indexOfContents) + data.getName();
+                        }
+                        Resource docResource = registry.get(resourcePath);
+                        String docArtifactId = docResource.getUUID();
+                        GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                        Documentation doc = APIUtil.getDocumentation(docArtifact);
+                        API associatedAPI = null;
+                        APIProduct associatedAPIProduct = null;
+                        int indexOfDocumentation = resourcePath.indexOf(APIConstants.DOCUMENTATION_KEY);
+                        String apiPath = resourcePath.substring(0, indexOfDocumentation) + APIConstants.API_KEY;
                         Resource apiResource = registry.get(apiPath);
                         String apiArtifactId = apiResource.getUUID();
                         if (apiArtifactId != null) {
@@ -2949,7 +2953,7 @@ public abstract class AbstractAPIManager implements APIManager {
                                 associatedAPI = APIUtil.getAPI(apiArtifact, registry);
                             }
                         } else {
-                            throw new GovernanceException("artifact id is null for " + apiPath);
+                            throw new GovernanceException("artifact id is null of " + apiPath);
                         }
 
                         if (associatedAPI != null && doc != null) {
@@ -2958,23 +2962,23 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (associatedAPIProduct != null && doc != null) {
                             productDocMap.put(doc, associatedAPIProduct);
                         }
-                    }
-                } else {
-                    String apiArtifactId = resource.getUUID();
-                    API api;
-                    APIProduct apiProduct;
-                    if (apiArtifactId != null) {
-                        GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                        if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
-                                equals(APIConstants.API_PRODUCT)) {
-                            apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
-                            apiProductSet.add(apiProduct);
-                        } else {
-                            api = APIUtil.getAPI(apiArtifact, registry);
-                            apiSet.add(api);
-                        }
                     } else {
-                        throw new GovernanceException("artifact id is null for " + resourcePath);
+                        String apiArtifactId = resource.getUUID();
+                        API api;
+                        APIProduct apiProduct;
+                        if (apiArtifactId != null) {
+                            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
+                            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                    equals(APIConstants.API_PRODUCT)) {
+                                apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                                apiProductSet.add(apiProduct);
+                            } else {
+                                api = APIUtil.getAPI(apiArtifact, registry);
+                                apiSet.add(api);
+                            }
+                        } else {
+                            throw new GovernanceException("artifact id is null for " + resourcePath);
+                        }
                     }
                 }
             }
@@ -3114,13 +3118,6 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (StringUtils.isNotEmpty(apiKey.getAppMetaData())) {
                             OAuthApplicationInfo storedOAuthApplicationInfo = new Gson().fromJson(apiKey.getAppMetaData()
                                     , OAuthApplicationInfo.class);
-                            if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES)
-                                    instanceof String) {
-                                oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                        ((String) storedOAuthApplicationInfo
-                                                .getParameter(APIConstants.JSON_GRANT_TYPES))
-                                                .replace(",", " "));
-                            }
                             if (oAuthApplicationInfo == null) {
                                 oAuthApplicationInfo = storedOAuthApplicationInfo;
                             } else {
@@ -3130,8 +3127,16 @@ public abstract class AbstractAPIManager implements APIManager {
                                 }
                                 if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
                                         storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
-                                    oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
-                                            storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                    if (storedOAuthApplicationInfo
+                                            .getParameter(APIConstants.JSON_GRANT_TYPES) instanceof String) {
+                                        oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                                ((String) storedOAuthApplicationInfo
+                                                        .getParameter(APIConstants.JSON_GRANT_TYPES))
+                                                        .replace(",", " "));
+                                    } else {
+                                        oAuthApplicationInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                                                storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                                    }
                                 }
                                 if (StringUtils.isEmpty(oAuthApplicationInfo.getClientSecret()) &&
                                         StringUtils.isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {

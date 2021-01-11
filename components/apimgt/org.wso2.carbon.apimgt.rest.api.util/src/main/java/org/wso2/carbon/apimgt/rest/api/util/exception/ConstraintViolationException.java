@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.validation.ConstraintViolation;

@@ -24,6 +24,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -82,7 +83,7 @@ public class CertificateManagerImplTest {
     static CertificateMgtDAO certificateMgtDAO;
 
     @BeforeClass
-    public static void init() throws NoSuchFieldException, IllegalAccessException {
+    public static void init() {
 
         PowerMockito.mockStatic(CertificateMgtDAO.class);
         certificateMgtDAO = Mockito.mock(CertificateMgtDAO.class);
@@ -100,7 +101,8 @@ public class CertificateManagerImplTest {
     @Test
     public void testAddToPublisher() throws CertificateAliasExistsException, CertificateManagementException {
 
-        Mockito.when(certificateMgtDAO.addCertificate(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt()))
+        Mockito.when(certificateMgtDAO.addCertificate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyInt()))
                 .thenReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.SUCCESS);
@@ -121,10 +123,10 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testAddToPublisherWithExpiredCertificate() {
-
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
+    public void testAddToPublisherWithExpiredCertificate()
+            throws CertificateAliasExistsException, CertificateManagementException {
+        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
+        Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
@@ -133,10 +135,10 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testAddToPublisherWithExistingAlias() {
-
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
+    public void testAddToPublisherWithExistingAlias()
+            throws CertificateAliasExistsException, CertificateManagementException {
+        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
+        Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
@@ -157,7 +159,7 @@ public class CertificateManagerImplTest {
     public void testAddToPublisherWithExistingAliasInDB()
             throws CertificateManagementException, CertificateAliasExistsException {
 
-        Mockito.when(certificateMgtDAO.addCertificate(ALIAS, END_POINT, TENANT_ID))
+        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID))
                 .thenThrow(CertificateAliasExistsException.class);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
@@ -191,7 +193,7 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.CERTIFICATE_NOT_FOUND);
         try {
             Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS, END_POINT, TENANT_ID)).thenReturn(true);
-            Mockito.when(certificateMgtDAO.addCertificate(ALIAS, END_POINT, TENANT_ID)).thenReturn(true);
+            Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS, END_POINT, TENANT_ID)).thenReturn(true);
         } catch (CertificateManagementException | CertificateAliasExistsException e) {
             e.printStackTrace();
         }
@@ -207,9 +209,17 @@ public class CertificateManagerImplTest {
         try {
             Mockito.when(certificateMgtDAO.deleteCertificate("testRemoveFromPublisherCertificateManagementException",
                     "testRemoveFromPublisherCertificateManagementException", TENANT_ID)).thenReturn(true);
-            Mockito.when(certificateMgtDAO.addCertificate("testRemoveFromPublisherCertificateManagementException",
+            Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,
+                    "testRemoveFromPublisherCertificateManagementException",
                     "testRemoveFromPublisherCertificateManagementException", TENANT_ID))
                     .thenThrow(CertificateManagementException.class);
+            CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+            certificateMetadataDTO.setEndpoint("testRemoveFromPublisherCertificateManagementException");
+            certificateMetadataDTO.setCertificate(BASE64_ENCODED_CERT);
+            certificateMetadataDTO.setAlias("testRemoveFromPublisherCertificateManagementException");
+            Mockito.when(certificateMgtDAO.getCertificate("testRemoveFromPublisherCertificateManagementException",
+                    "testRemoveFromPublisherCertificateManagementException", TENANT_ID))
+                    .thenReturn(certificateMetadataDTO);
         } catch (CertificateManagementException | CertificateAliasExistsException e) {
             e.printStackTrace();
         }
@@ -228,8 +238,16 @@ public class CertificateManagerImplTest {
             Mockito.when(certificateMgtDAO
                     .deleteCertificate("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
                             "testRemoveFromPublisherWithInternalServerErrorWhenDeleting", TENANT_ID)).thenReturn(true);
-            Mockito.when(certificateMgtDAO.addCertificate("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
+            Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,
+                    "testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
                     "testRemoveFromPublisherWithInternalServerErrorWhenDeleting", TENANT_ID)).thenReturn(true);
+            CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+            certificateMetadataDTO.setEndpoint("testRemoveFromPublisherWithInternalServerErrorWhenDeleting");
+            certificateMetadataDTO.setCertificate(BASE64_ENCODED_CERT);
+            certificateMetadataDTO.setAlias("testRemoveFromPublisherWithInternalServerErrorWhenDeleting");
+            Mockito.when(certificateMgtDAO.getCertificate("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
+                    "testRemoveFromPublisherWithInternalServerErrorWhenDeleting", TENANT_ID))
+                    .thenReturn(certificateMetadataDTO);
         } catch (CertificateManagementException | CertificateAliasExistsException e) {
             e.printStackTrace();
         }

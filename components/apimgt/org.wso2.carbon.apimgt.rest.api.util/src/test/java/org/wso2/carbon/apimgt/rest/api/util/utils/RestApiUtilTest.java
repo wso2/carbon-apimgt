@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
@@ -27,7 +28,7 @@ public class RestApiUtilTest {
         Mockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
         Mockito.when(carbonContext.getUsername()).thenReturn(defaultUsername);
 
-        String loggedInUsername = RestApiUtil.getLoggedInUsername();
+        String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
 
         Assert.assertEquals(defaultUsername, loggedInUsername);
     }

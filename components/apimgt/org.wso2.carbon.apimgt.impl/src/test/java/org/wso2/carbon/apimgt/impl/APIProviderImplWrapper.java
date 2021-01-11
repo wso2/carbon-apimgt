@@ -66,9 +66,9 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void createAPI(API api) throws APIManagementException {
+    protected String createAPI(API api) throws APIManagementException {
         this.api = api;
-        super.createAPI(api);
+        return super.createAPI(api);
     }
 
     @Override

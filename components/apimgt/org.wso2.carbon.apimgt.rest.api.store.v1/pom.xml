@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.87-SNAPSHOT</version>
+        <version>6.8.139-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -117,6 +117,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
         </dependency>
@@ -172,31 +177,10 @@
                         </fileset>
                     </filesets>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>clean-old-generated-docs</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                        <configuration>
-                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                            <filesets>
-                                <fileset>
-                                    <directory>../../../docs/apidocs/store/v1</directory>
-                                    <includes>
-                                        <include>**/*</include>
-                                    </includes>
-                                    <followSymlinks>false</followSymlinks>
-                                </fileset>
-                            </filesets>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -209,92 +193,17 @@
                                 <apiPackage>org.wso2.carbon.apimgt.rest.api.store.v1</apiPackage>
                                 <modelPackage>org.wso2.carbon.apimgt.rest.api.store.v1.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
-                                <dateLibrary>custom</dateLibrary>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
                             </configOptions>
+                            <generateAliasAsModel>true</generateAliasAsModel>
                             <output>.</output>
                             <templateDirectory>
                                 ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
                             </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-apidocs</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
-                            <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>
-                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                            </templateDirectory>
-                            <output>${project.build.directory}/apidocs</output>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-generated-docs</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/store/v1</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/apidocs/docs</directory>
-                                    <excludes>
-                                        <exclude>**/*.mustache</exclude>
-                                    </excludes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-common-doc-resources</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/store/v1</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                                    </directory>
-                                    <excludes>
-                                        <exclude>**/*.mustache</exclude>
-                                    </excludes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-specific-doc-resources</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/store/v1</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/src/main/resources/docs/static</directory>
-                                    <includes>
-                                        <include>*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
                         </configuration>
                     </execution>
                 </executions>

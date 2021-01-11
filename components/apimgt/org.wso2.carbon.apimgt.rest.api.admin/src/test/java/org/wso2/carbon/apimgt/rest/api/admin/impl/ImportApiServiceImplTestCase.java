@@ -41,11 +41,11 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
@@ -54,10 +54,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import javax.ws.rs.core.Response;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RestApiUtil.class, ServiceReferenceHolder.class, APIUtil.class})
+@PrepareForTest({RestApiUtil.class, ServiceReferenceHolder.class, APIUtil.class, RestApiCommonUtil.class})
 public class ImportApiServiceImplTestCase {
     private final String USER = "admin";
     private ImportApiService importApiService;
@@ -68,6 +69,8 @@ public class ImportApiServiceImplTestCase {
 
     @Before
     public void init() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.mockStatic(RestApiCommonUtil.class);
         importApiService = new ImportApiServiceImpl();
         apiConsumer = Mockito.mock(APIConsumer.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -97,9 +100,8 @@ public class ImportApiServiceImplTestCase {
         FileInputStream fis;
         fis = new FileInputStream(file);
         Attachment fileInfo = Mockito.mock(Attachment.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         APIIdentifier apiId = new APIIdentifier("admin_sampleAPI_1.0.0");
         Map matchedAPIs = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<>(new APINameComparator());
@@ -135,9 +137,8 @@ public class ImportApiServiceImplTestCase {
         FileInputStream fis;
         fis = new FileInputStream(file);
         Attachment fileInfo = Mockito.mock(Attachment.class);
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
         APIIdentifier apiId = new APIIdentifier("admin_sampleAPI_1.0.0");
         Map matchedAPIs = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<>(new APINameComparator());
@@ -165,9 +166,8 @@ public class ImportApiServiceImplTestCase {
      */
     @Test
     public void testImportApplicationsPostError() throws Exception {
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("sampleApp.zip").getFile());
         FileInputStream fis;
@@ -189,9 +189,8 @@ public class ImportApiServiceImplTestCase {
      */
     @Test
     public void testImportApplicationsPostCrossTenantError() throws Exception {
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        PowerMockito.when(RestApiCommonUtil.getConsumer(USER)).thenReturn(apiConsumer);
+        PowerMockito.when(RestApiCommonUtil.getLoggedInUsername()).thenReturn(USER);
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("sampleApp.zip").getFile());
         FileInputStream fis;

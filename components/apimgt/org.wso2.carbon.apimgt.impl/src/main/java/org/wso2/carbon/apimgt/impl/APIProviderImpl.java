@@ -827,7 +827,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
 
-        createAPI(api);
+        String apiUUID = createAPI(api);
+        api.setUUID(apiUUID);
 
         if (log.isDebugEnabled()) {
             log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
@@ -2389,16 +2390,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> claimMap = new HashMap<>();
         try {
             tenantId = getTenantId(tenantDomain);
-        SortedMap<String, String> subscriberClaims =
-                APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
-        APIManagerConfiguration configuration = getAPIManagerConfiguration();
-        String configuredClaims = configuration
-                .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
-        if (subscriberClaims != null) {
-            for (String claimURI : configuredClaims.split(",")) {
-                claimMap.put(claimURI, subscriberClaims.get(claimURI));
+            SortedMap<String, String> subscriberClaims =
+                    APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
+            APIManagerConfiguration configuration = getAPIManagerConfiguration();
+            String configuredClaims = configuration
+                    .getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
+            if (subscriberClaims != null) {
+                for (String claimURI : configuredClaims.split(",")) {
+                    claimMap.put(claimURI, subscriberClaims.get(claimURI));
+                }
             }
-        }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while retrieving tenant id for tenant domain "
                     + tenantDomain, e);
@@ -2874,6 +2875,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if (APIUtil.isCORSEnabled()) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                     , corsProperties);
+        }
+        if (APIConstants.PROTOTYPED.equals(api.getStatus())) {
+            String extensionHandlerPosition = getExtensionHandlerPosition();
+            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+                vtb.addHandlerPriority(
+                        "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                        Collections.<String, String>emptyMap(), 0);
+            } else {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                        Collections.<String, String>emptyMap());
+            }
         }
         if(!APIConstants.PROTOTYPED.equals(api.getStatus())) {
 
@@ -3534,11 +3546,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.delete(docFilePath);
                 }
             }
-
-            Association[] associations = registry.getAssociations(docPath, APIConstants.DOCUMENTATION_KEY);
-            for (Association association : associations) {
-                registry.delete(association.getDestinationPath());
-            }
         } catch (RegistryException e) {
             handleException("Failed to delete documentation", e);
         }
@@ -3575,23 +3582,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             docPath = artifact.getPath();
-            String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-
-            if (docFilePath != null) {
-                File tempFile = new File(docFilePath);
-                String fileName = tempFile.getName();
-                docFilePath = APIUtil.getDocumentationFilePath(id, fileName);
-                if (registry.resourceExists(docFilePath)) {
-                    registry.delete(docFilePath);
+            if (docPath != null) {
+                if (registry.resourceExists(docPath)) {
+                    registry.delete(docPath);
                 }
             }
 
-            Association[] associations = registry.getAssociations(docPath,
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
-
-            for (Association association : associations) {
-                registry.delete(association.getDestinationPath());
-            }
         } catch (RegistryException e) {
             handleException("Failed to delete documentation", e);
         }
@@ -3660,7 +3656,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
             registry.put(contentPath, docContent);
-            registry.addAssociation(documentationPath, contentPath, APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
             String apiPath = APIUtil.getAPIPath(identifier);
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String docVisibility = doc.getVisibility().name();
@@ -3807,7 +3802,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath,
                         registry);
-                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
 
         } catch (RegistryException e) {
@@ -3849,7 +3843,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws APIManagementException if failed to create API
      */
-    protected void createAPI(API api) throws APIManagementException {
+    protected String createAPI(API api) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         if (artifactManager == null) {
@@ -3868,6 +3862,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
         boolean transactionCommitted = false;
+        String apiUUID = null;
         try {
             registry.beginTransaction();
             GenericArtifact genericArtifact =
@@ -3929,6 +3924,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " created";
                 log.debug(logMessage);
             }
+            apiUUID = artifact.getId();
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
@@ -3948,6 +3944,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
             }
         }
+        return apiUUID;
     }
 
     /**
@@ -3982,9 +3979,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, apiId, documentation));
             String apiPath = APIUtil.getAPIPath(apiId);
-
-            //Adding association from api to documentation . (API -----> doc)
-            registry.addAssociation(apiPath, artifact.getPath(), APIConstants.DOCUMENTATION_ASSOCIATION);
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String visibility = api.getVisibility();
@@ -4006,7 +4000,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 int startIndex = docFilePath.indexOf(APIConstants.GOVERNANCE) + (APIConstants.GOVERNANCE).length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles, filePath, registry);
-                registry.addAssociation(artifact.getPath(), filePath, APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
             documentation.setId(artifact.getId());
         } catch (RegistryException e) {
@@ -4342,7 +4335,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " from Key Manager : " + keyManagerDtoEntry.getKey() + ".");
                     }
                 } catch (APIManagementException e) {
-                    log.error("Error while Detach and Delete Scope from Key Manager " + keyManagerDtoEntry.getKey());
+                    log.error("Error while Detach and Delete Scope from Key Manager " + keyManagerDtoEntry.getKey(), e);
                 }
             }
         }
@@ -7780,7 +7773,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
         // Create registry artifact
-        createAPIProduct(product);
+        String apiProductUUID = createAPIProduct(product);
+        product.setUuid(apiProductUUID);
 
         // Add to database
         apiMgtDAO.addAPIProduct(product, tenantDomain);
@@ -8115,7 +8109,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiProduct API Product
      * @throws APIManagementException if failed to create APIProduct
      */
-    protected void createAPIProduct(APIProduct apiProduct) throws APIManagementException {
+    protected String createAPIProduct(APIProduct apiProduct) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         if (artifactManager == null) {
@@ -8129,6 +8123,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetAPISecurity(apiProduct);
 
         boolean transactionCommitted = false;
+        String apiProductUUID = null;
         try {
             registry.beginTransaction();
             GenericArtifact genericArtifact =
@@ -8178,6 +8173,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.debug(logMessage);
             }
             changeLifeCycleStatusToPublish(apiProduct.getId());
+            apiProductUUID = artifact.getId();
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
@@ -8197,6 +8193,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
             }
         }
+        return apiProductUUID;
     }
 
     private void changeLifeCycleStatusToPublish(APIProductIdentifier apiIdentifier) throws APIManagementException {

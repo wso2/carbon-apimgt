@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyPermissionDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +44,7 @@ import java.util.Map;
  */
 public class SubscriptionThrottlePolicyMappingUtil {
 
+    private static final String SUBSCRIPTION_THROTTLE_POLICY_TYPE = "SubscriptionThrottlePolicy";
     /**
      * Converts an array of Subscription Policy objects into a List DTO
      *
@@ -104,6 +105,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
             policyDTO.setDefaultLimit(
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
         }
+        policyDTO.setType(SUBSCRIPTION_THROTTLE_POLICY_TYPE);
         return policyDTO;
     }
 

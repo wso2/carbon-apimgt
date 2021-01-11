@@ -232,6 +232,8 @@ public final class APIConstants {
     public static final String EXTERNAL_API_STORES_LOCATION =
             APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
 
+    public static final String EXTERNAL_API_DEVPORTAL_URL_REGEX = "^./devportal$";
+
     public static final String GA_CONFIGURATION_LOCATION = APIMGT_REGISTRY_LOCATION + "/statistics/ga-config.xml";
 
     public static final String GA_CONF_KEY = "ga-config-key";
@@ -355,6 +357,7 @@ public final class APIConstants {
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
     public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
+    public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -507,6 +510,11 @@ public final class APIConstants {
     public static final String VERB_INFO_DTO = "VERB_INFO";
     public static final String RESOURCE_AUTHENTICATION_SCHEME = "ResourceAuthenticationScheme";
     public static final String GOVERNANCE = "governance";
+
+    public static final String DEFAULT_CARBON_DIALECT = "http://wso2.org/claims";
+    public static final String FULL_NAME = DEFAULT_CARBON_DIALECT + "/fullname";
+    public static final String FIRST_NAME = DEFAULT_CARBON_DIALECT + "/givenname";
+    public static final String LAST_NAME = DEFAULT_CARBON_DIALECT + "/lastname";
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
@@ -797,6 +805,7 @@ public final class APIConstants {
     public static final String AUTH_MANAGER_USERNAME = AUTH_MANAGER + "Username";
     public static final String AUTH_MANAGER_PASSWORD = AUTH_MANAGER + "Password";
     public static final String ENABLE_MTLS_FOR_APIS = "EnableMTLSForAPIs";
+    public static final String IS_KM_REVERSE_PROXY_ENABLED = "ISKMReverseProxyEnabled";
 
     public static final String IDENTITY_PROVIDER = "IdentityProvider.";
     public static final String IDENTITY_PROVIDER_AUTHORIZE_ENDPOINT = IDENTITY_PROVIDER + "AuthorizeEndpoint";
@@ -1926,7 +1935,7 @@ public final class APIConstants {
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
-    public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+    public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;:%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
@@ -2225,6 +2234,7 @@ public final class APIConstants {
 
         public static final String MUTUAL_SSL_CONFIG_ROOT = "MutualSSL";
         public static final String CLIENT_CERTIFICATE_HEADER = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateHeader";
+        public static final String CLIENT_CERTIFICATE_ENCODE = MUTUAL_SSL_CONFIG_ROOT + ".ClientCertificateEncode";
         public static final String ENABLE_CLIENT_CERTIFICATE_VALIDATION = MUTUAL_SSL_CONFIG_ROOT +
                 ".EnableClientCertificateValidation";
     }
@@ -2388,6 +2398,7 @@ public final class APIConstants {
         SUBSCRIPTIONS_DELETE,
         DEPLOY_API_IN_GATEWAY,
         REMOVE_API_FROM_GATEWAY,
+        REMOVE_APPLICATION_KEYMAPPING,
         SCOPE_CREATE,
         SCOPE_UPDATE,
         SCOPE_DELETE
