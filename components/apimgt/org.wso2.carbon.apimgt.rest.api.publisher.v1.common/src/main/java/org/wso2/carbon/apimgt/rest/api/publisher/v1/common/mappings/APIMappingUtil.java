@@ -836,7 +836,9 @@ public class APIMappingUtil {
         }
         dto.setContext(context);
         dto.setCreatedTime(model.getCreatedTime());
-        dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
+        if (model.getLastUpdated() != null) {
+            dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
+        }
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());

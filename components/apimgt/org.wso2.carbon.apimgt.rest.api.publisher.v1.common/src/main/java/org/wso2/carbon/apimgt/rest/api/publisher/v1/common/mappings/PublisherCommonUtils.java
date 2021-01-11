@@ -966,6 +966,7 @@ public class PublisherCommonUtils {
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
