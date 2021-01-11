@@ -31,6 +31,7 @@ import java.util.List;
  */
 public class GlobalThrottlePolicyMappingUtil {
 
+    private static final String CUSTOM_RULE_THROTTLING_POLICY_TYPE = "CustomRule";
     /**
      * Converts an array of Global policy model objects into REST API DTO objects
      *
@@ -66,6 +67,7 @@ public class GlobalThrottlePolicyMappingUtil {
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(globalPolicy, policyDTO);
         policyDTO.setKeyTemplate(globalPolicy.getKeyTemplate());
         policyDTO.setSiddhiQuery(globalPolicy.getSiddhiQuery());
+        policyDTO.setType(CUSTOM_RULE_THROTTLING_POLICY_TYPE);
         return policyDTO;
     }
 

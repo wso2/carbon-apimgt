@@ -133,7 +133,6 @@
                                 <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1</apiPackage>
                                 <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
-                                <dateLibrary>custom</dateLibrary>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
