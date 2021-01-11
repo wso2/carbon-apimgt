@@ -116,6 +116,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -833,10 +835,8 @@ public class APIMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         dto.setContext(context);
-        Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
-        Timestamp createdTimestamp = new Timestamp(createdTime.getTime());
-        dto.setCreatedTime(createdTimestamp);
-        dto.setLastUpdatedTime(model.getLastUpdated());
+        dto.setCreatedTime(model.getCreatedTime());
+        dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
@@ -1129,12 +1129,12 @@ public class APIMappingUtil {
         if (null != model.getLastUpdated()) {
             Date lastUpdateDate = model.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
-            dto.setLastUpdatedTime(timeStamp);
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != model.getCreatedTime()) {
             Date created = new Date(Long.parseLong(model.getCreatedTime()));
             Timestamp timeStamp = new Timestamp(created.getTime());
-            dto.setCreatedTime(timeStamp);
+            dto.setCreatedTime(String.valueOf(timeStamp));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 
@@ -2133,10 +2133,14 @@ public class APIMappingUtil {
         productDto.setCategories(categoryNameList);
 
         if (null != product.getLastUpdated()) {
-            productDto.setLastUpdatedTime(product.getLastUpdated());
+            Date lastUpdateDate = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != product.getCreatedTime()) {
-            productDto.setCreatedTime(product.getCreatedTime());
+            Date createdTime = product.getCreatedTime();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            productDto.setCreatedTime(String.valueOf(timeStamp));
         }
 
         return productDto;

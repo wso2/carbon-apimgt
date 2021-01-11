@@ -835,14 +835,14 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/graphql-policies/complexity")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = GraphQLQueryComplexityInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "GraphQL Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested complexity details returned. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Requested complexity details returned. ", response = GraphQLQueryComplexityInfoDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getGraphQLPolicyComplexityOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getGraphQLPolicyComplexityOfAPI(apiId, securityContext);
@@ -903,7 +903,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @POST
     @Path("/import")
     @Consumes({ "multipart/form-data" })
-    
+    @Produces({ "application/json" })
     @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
@@ -911,10 +911,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Created. API Imported Successfully. ", response = Void.class),
-        @ApiResponse(code = 403, message = "", response = Void.class),
-        @ApiResponse(code = 404, message = "", response = Void.class),
-        @ApiResponse(code = 409, message = "", response = Void.class),
-        @ApiResponse(code = 500, message = "", response = Void.class) })
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response importAPI( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
         return delegate.importAPI(fileInputStream, fileDetail, preserveProvider, overwrite, securityContext);
     }

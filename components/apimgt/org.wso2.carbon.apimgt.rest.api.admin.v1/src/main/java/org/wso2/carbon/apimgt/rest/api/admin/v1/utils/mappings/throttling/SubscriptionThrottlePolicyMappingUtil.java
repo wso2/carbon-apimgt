@@ -44,6 +44,7 @@ import java.util.Map;
  */
 public class SubscriptionThrottlePolicyMappingUtil {
 
+    private static final String SUBSCRIPTION_THROTTLE_POLICY_TYPE = "SubscriptionThrottlePolicy";
     /**
      * Converts an array of Subscription Policy objects into a List DTO
      *
@@ -104,6 +105,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
             policyDTO.setDefaultLimit(
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
         }
+        policyDTO.setType(SUBSCRIPTION_THROTTLE_POLICY_TYPE);
         return policyDTO;
     }
 
