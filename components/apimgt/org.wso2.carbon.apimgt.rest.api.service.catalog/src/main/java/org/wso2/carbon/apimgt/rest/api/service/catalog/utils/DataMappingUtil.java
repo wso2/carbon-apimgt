@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 
-public class MetadataMappingUtil {
+public class DataMappingUtil {
 
     /**
      * Converts a single metadata file content into a model object

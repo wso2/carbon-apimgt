@@ -17,8 +17,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -29,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -141,7 +138,7 @@ public class FileBasedServicesImportExportManager {
         if (log.isDebugEnabled()) {
             log.debug("Archive generated successfully " + archiveName);
         }
-        return ETagValueGenerator.getETag(fileList);
+        return Md5HashGenerator.generateHash(fileList);
     }
 
     /**
@@ -267,5 +264,17 @@ public class FileBasedServicesImportExportManager {
             }
             return archiveName;
         }
+    }
+
+    /**
+     * Create directory with unique uuid as name
+     *
+     * @param path Path to the directory
+     */
+    public static String directoryCreator(String path) throws APIManagementException {
+        String tempDirPath = System.getProperty(path) + File.separator + UUID.randomUUID().toString();
+        File file = new File(tempDirPath);
+        file.mkdir();
+        return tempDirPath;
     }
 }
