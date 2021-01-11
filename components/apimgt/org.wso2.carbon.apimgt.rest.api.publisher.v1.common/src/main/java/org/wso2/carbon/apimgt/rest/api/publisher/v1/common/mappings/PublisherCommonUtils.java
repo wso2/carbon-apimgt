@@ -100,8 +100,9 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
-            throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
+                                String orgId) throws ParseException, CryptoException, APIManagementException,
+            FaultGatewaysException {
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
         if (tokenScopes == null) {
@@ -326,7 +327,7 @@ public class PublisherCommonUtils {
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
         if (originalAPI.getOrganizationId() != null) {
             apiToUpdate.setOrganizationId(originalAPI.getOrganizationId());
-        }
+        } else {}
 
         if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(apiToUpdate.getVisibility())) {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
@@ -351,7 +352,7 @@ public class PublisherCommonUtils {
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, orgId);
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
@@ -973,7 +974,7 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, orgId);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, orgId);
         if (orgId != null) {

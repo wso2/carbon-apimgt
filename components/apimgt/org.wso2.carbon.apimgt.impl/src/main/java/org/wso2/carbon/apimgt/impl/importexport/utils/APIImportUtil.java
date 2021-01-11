@@ -310,7 +310,8 @@ public final class APIImportUtil {
                 // (Adding missing attributes to swagger)
                 SwaggerData swaggerData = new SwaggerData(importedApi);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, swaggerContent);
-                apiProvider.saveSwaggerDefinition(importedApi, newDefinition);
+                String orgId = APIUtil.getTenantDomainFromTenantId(tenantId);
+                apiProvider.saveSwaggerDefinition(importedApi, newDefinition, orgId);
             }
             // This is required to make url templates and scopes get effected
             apiProvider.updateAPI(importedApi);
@@ -536,7 +537,8 @@ public final class APIImportUtil {
             throws APIImportExportException {
 
         try {
-            apiProvider.saveSwagger20Definition(apiId, swaggerContent);
+            String orgId = apiProvider.getOrganizationIDbyAPIUUID(apiId.getUUID());
+            apiProvider.saveSwagger20Definition(apiId, swaggerContent, orgId );
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();

@@ -213,7 +213,7 @@ public class RestAPIStoreUtils {
         //this is just to check whether the user has access to the api or the api exists. 
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            apiConsumer.getLightweightAPI(apiId);
+            apiConsumer.getLightweightAPI(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =

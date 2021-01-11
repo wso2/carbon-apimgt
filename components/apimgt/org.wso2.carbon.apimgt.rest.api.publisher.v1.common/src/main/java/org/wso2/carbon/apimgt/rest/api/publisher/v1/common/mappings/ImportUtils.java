@@ -200,7 +200,8 @@ public class ImportUtils {
                     setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
                 }
                 importedApi = PublisherCommonUtils
-                        .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
+                        .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes,
+                                orgId);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()

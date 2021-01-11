@@ -427,9 +427,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        super.saveSwagger20Definition(apiId, jsonText);
+        super.saveSwagger20Definition(apiId, jsonText, orgId);
     }
 
     @Override

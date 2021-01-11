@@ -804,7 +804,7 @@ public interface APIProvider extends APIManager {
      * @param jsonText json text to be saved in the registry
      * @throws APIManagementException
      */
-    void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
+    void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException;
 
     /**
      * This method updates Swagger 2.0 resources in the registry
@@ -822,7 +822,7 @@ public interface APIProvider extends APIManager {
      * @param jsonText    openAPI definition
      * @throws APIManagementException
      */
-    void saveSwaggerDefinition(API api, String jsonText) throws APIManagementException;
+    void saveSwaggerDefinition(API api, String jsonText, String orgId) throws APIManagementException;
 
     /**
      * This method updates the swagger definition in registry
@@ -831,7 +831,7 @@ public interface APIProvider extends APIManager {
      * @param jsonText    openAPI definition
      * @throws APIManagementException
      */
-    void saveSwaggerDefinition(String apiId, String jsonText) throws APIManagementException;
+    void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException;
     
     /**
      * This method updates the swagger definition in registry
@@ -1641,7 +1641,7 @@ public interface APIProvider extends APIManager {
      * @param url wsdl url
      * @throws APIManagementException
      */
-    void addWSDLResource(String apiId, ResourceFile resource, String url) throws APIManagementException;
+    void addWSDLResource(String apiId, ResourceFile resource, String url, String OrgId) throws APIManagementException;
     
     /**
      * Add or update thumbnail image of an api
@@ -1649,7 +1649,7 @@ public interface APIProvider extends APIManager {
      * @param resource image resource
      * @throws APIManagementException
      */
-    void setThumbnailToAPI(String apiId, ResourceFile resource) throws APIManagementException;
+    void setThumbnailToAPI(String apiId, ResourceFile resource, String orgId) throws APIManagementException;
     
     /**
      * List all the mediation policies for the api
@@ -1657,7 +1657,7 @@ public interface APIProvider extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    List<Mediation> getAllApiSpecificMediationPolicies(String apiId) throws APIManagementException;
+    List<Mediation> getAllApiSpecificMediationPolicies(String apiId, String orgId) throws APIManagementException;
 
     /**
      * The mediation policies for the api
@@ -1666,7 +1666,7 @@ public interface APIProvider extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId) throws APIManagementException;
+    Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId, String orgId) throws APIManagementException;
 
     /**
      * upload mediation policy to api
@@ -1675,7 +1675,7 @@ public interface APIProvider extends APIManager {
      * @return added policy
      * @throws APIManagementException
      */
-    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy) throws APIManagementException;
+    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy, String orgId) throws APIManagementException;
     
     /**
      * update mediation policy content
@@ -1684,7 +1684,7 @@ public interface APIProvider extends APIManager {
      * @return added policy
      * @throws APIManagementException
      */
-    Mediation updateApiSpecificMediationPolicyContent(String apiId, Mediation mediationPolicy)
+    Mediation updateApiSpecificMediationPolicyContent(String apiId, Mediation mediationPolicy, String orgId)
             throws APIManagementException;
 
     /**
@@ -1693,7 +1693,7 @@ public interface APIProvider extends APIManager {
      * @param mediationPolicyId mediation Policy Id
      * @throws APIManagementException
      */
-    void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId) throws APIManagementException;
+    void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId, String orgId) throws APIManagementException;
     
     /**
      * Add or update graphql definition
@@ -1701,6 +1701,6 @@ public interface APIProvider extends APIManager {
      * @param definition
      * @throws APIManagementException
      */
-    void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException;
+    void saveGraphqlSchemaDefinition(String apiId, String definition, String orgId) throws APIManagementException;
     
 }
