@@ -753,12 +753,13 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @DELETE
     @Path("/{apiId}/revisions/{revisionId}")
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a revision of an API", notes = "Delete a revision of an API ", response = Void.class, authorizations = {
-            @Authorization(value = "OAuth2Security", scopes = {
-                    @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
-            })
+    @ApiOperation(value = "Delete a revision of an API", notes = "Delete a revision of an API ", response = APIRevisionListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of remaining API revisions are returned. ", response = APIRevisionListDTO.class),
         @ApiResponse(code = 204, message = "No Content. Successfully deleted the revision ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response deleteAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("revisionId") String revisionId) throws APIManagementException{
@@ -1098,6 +1099,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 201, message = "Restored. Successful response with the newly restored API object as the entity in the body. ", response = APIDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response restoreAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("revisionId") String revisionId) throws APIManagementException{
         return delegate.restoreAPIRevision(apiId, revisionId, securityContext);

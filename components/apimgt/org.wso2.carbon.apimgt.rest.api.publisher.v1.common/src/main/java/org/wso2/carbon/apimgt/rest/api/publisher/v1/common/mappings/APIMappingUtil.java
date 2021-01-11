@@ -2774,7 +2774,7 @@ public class APIMappingUtil {
         APIRevisionDTO apiRevisionDTO = new APIRevisionDTO();
         apiRevisionDTO.setId(model.getRevisionUUID());
         String key = "REVISION " + model.getId();
-        apiRevisionDTO.setKey(key);
+        apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         Date parsedDate;
@@ -2812,7 +2812,9 @@ public class APIMappingUtil {
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) throws APIManagementException {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
-        apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
+        if(model.getRevisionUUID() != null) {
+            apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
+        }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
         Date parsedDate;

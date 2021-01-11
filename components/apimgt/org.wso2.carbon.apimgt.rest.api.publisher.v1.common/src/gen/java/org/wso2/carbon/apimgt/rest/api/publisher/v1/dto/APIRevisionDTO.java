@@ -24,7 +24,7 @@ import javax.validation.Valid;
 
 public class APIRevisionDTO   {
   
-    private String key = null;
+    private String displayName = null;
     private String id = null;
     private String description = null;
     private java.util.Date createdTime = null;
@@ -33,19 +33,19 @@ public class APIRevisionDTO   {
 
   /**
    **/
-  public APIRevisionDTO key(String key) {
-    this.key = key;
+  public APIRevisionDTO displayName(String displayName) {
+    this.displayName = displayName;
     return this;
   }
 
   
   @ApiModelProperty(example = "REVISION 1", value = "")
-  @JsonProperty("key")
-  public String getKey() {
-    return key;
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
   }
-  public void setKey(String key) {
-    this.key = key;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -145,7 +145,7 @@ public class APIRevisionDTO   {
       return false;
     }
     APIRevisionDTO apIRevision = (APIRevisionDTO) o;
-    return Objects.equals(key, apIRevision.key) &&
+    return Objects.equals(displayName, apIRevision.displayName) &&
         Objects.equals(id, apIRevision.id) &&
         Objects.equals(description, apIRevision.description) &&
         Objects.equals(createdTime, apIRevision.createdTime) &&
@@ -155,14 +155,14 @@ public class APIRevisionDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(key, id, description, createdTime, apiInfo, deploymentInfo);
+    return Objects.hash(displayName, id, description, createdTime, apiInfo, deploymentInfo);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIRevisionDTO {\n");
-    sb.append("    key: ").append(toIndentedString(key)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
