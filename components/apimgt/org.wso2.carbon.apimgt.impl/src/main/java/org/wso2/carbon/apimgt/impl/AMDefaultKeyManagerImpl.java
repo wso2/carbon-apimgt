@@ -272,6 +272,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
+        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
@@ -284,8 +285,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
             // Construct the application name subsequent to replacing email domain separator
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
-                    getTenantAwareUsername(userId)), applicationName, keyType);
+            oauthClientName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), oauthClientName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application update.");
         }
@@ -295,10 +296,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("CallBackURL : " + oAuthApplicationInfo.getCallBackURL());
         }
         if (log.isDebugEnabled() && applicationName != null) {
-            log.debug("Client Name : " + applicationName);
+            log.debug("Trying to update OAuth application : " + oauthClientName + " for application: " + applicationName
+                    + " and key type: " + keyType);
         }
 
-        ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, true);
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, true);
         ClientInfo createdClient;
         try {
             createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
