@@ -213,7 +213,7 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: 1,
         height: '25%%',
     },
-    dialgContent: {
+    dialogContent: {
         overflow: 'auto',
         height: '90%',
     },
@@ -259,6 +259,7 @@ export default function Environments() {
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState(null);
+    const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState(null);
     const [SelectedEnvironment, setSelectedEnvironment] = React.useState([]);
     const [open, setOpen] = React.useState(false);
@@ -306,6 +307,9 @@ export default function Environments() {
                 SelectedEnvironment.filter((env) => env !== event.target.value),
             );
         }
+        if (event.target.name === 'description') {
+            setDescription(event.target.value);
+        }
     };
 
     /**
@@ -314,7 +318,7 @@ export default function Environments() {
       */
     function handleClickAddRevision() {
         const body = {
-            description: 'state',
+            description,
         };
         restApi.createRevision(api.id, body)
             .then(() => {
@@ -435,7 +439,7 @@ export default function Environments() {
       */
     function createDeployRevision(envList, length1) {
         const body = {
-            description: 'state',
+            description,
         };
         restApi.createRevision(api.id, body)
             .then((response) => {
@@ -796,7 +800,7 @@ export default function Environments() {
                     classes={{ paper: classes.dialogPaper }}
                 >
                     <DialogTitle id='form-dialog-title' variant='h2'>Deploy</DialogTitle>
-                    <DialogContent className={classes.dialgContent}>
+                    <DialogContent className={classes.dialogContent}>
                         <Typography variant='h6' gutterBottom>
                             {/* Revision {(allRevisions && allRevisions.length !== 0) ?
                                 (parseInt(allRevisions[allRevisions.length-1].key.slice(-1)) +1) : 0} */}
@@ -806,9 +810,10 @@ export default function Environments() {
                                 margin='dense'
                                 autoFocus
                                 id='name'
+                                name='description'
                                 label='Description'
-                                type='email'
                                 variant='outlined'
+                                value={description}
                                 helperText={(
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.Revision.Description'
@@ -819,6 +824,7 @@ export default function Environments() {
                                 multiline
                                 rows={3}
                                 rowsMax={4}
+                                onChange={handleChange}
                             />
                         </Box>
                         <Box mt={2}>
