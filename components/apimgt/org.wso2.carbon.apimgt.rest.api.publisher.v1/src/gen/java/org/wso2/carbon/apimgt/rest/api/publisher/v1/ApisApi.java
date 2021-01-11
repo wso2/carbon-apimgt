@@ -1048,6 +1048,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API History list is returned. ", response = HistoryEventListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAPIHistory(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the starting timestamp to show history from. ")  @QueryParam("startTime") String startTime,  @ApiParam(value = "Specify the ending timestamp to show history upto. ")  @QueryParam("endTime") String endTime) throws APIManagementException{
         return delegate.getAPIHistory(apiId, limit, offset, revisionId, startTime, endTime, securityContext);
@@ -1065,7 +1067,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API History Event Payload is returned. ", response = String.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class) })
     public Response getAPIHistoryEventPayload(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
         return delegate.getAPIHistoryEventPayload(apiId, eventId, securityContext);
     }

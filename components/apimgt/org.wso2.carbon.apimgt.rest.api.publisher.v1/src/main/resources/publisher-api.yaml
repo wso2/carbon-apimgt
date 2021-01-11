@@ -6520,6 +6520,10 @@ paths:
                 $ref: '#/components/schemas/HistoryEventList'
         404:
           $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        400:
+          $ref: '#/components/responses/BadRequest'
         500:
           $ref: '#/components/responses/InternalServerError'
       x-code-samples:
@@ -6564,10 +6568,12 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+        403:
+          $ref: '#/components/responses/Forbidden'
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f/history/1/payload"'
+          "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f/history/bd853492-244c-4d8f-878a-4k2m4mm3n22f5/payload"'
 
   ######################################################
   #  The "API Product History" individual resource APIs
@@ -6634,6 +6640,10 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        400:
+          $ref: '#/components/responses/BadRequest'
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6676,10 +6686,12 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+        403:
+          $ref: '#/components/responses/Forbidden'
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/history/1/payload"'
+          "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/history/bd853492-244c-4d8f-878a-4k2m4mm3n22f5/payload"'
 
 components:
   schemas:

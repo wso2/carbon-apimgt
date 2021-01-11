@@ -60,6 +60,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -3792,14 +3793,26 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext)
             throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-        String payload = apiProvider.getAPIOrAPIProductHistoryEventPayload(apiIdentifier, eventId);
-        if (StringUtils.isBlank(payload)) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API
-                    + RestApiConstants.RESOURCE_HISTORY_PAYLOAD, StringUtils.EMPTY, log);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Failed to get API. API artifact corresponding to artifactId "
+                        + apiId + " does not exist", ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+            }
+            String payload = apiProvider.getAPIOrAPIProductHistoryEventPayload(apiIdentifier, eventId);
+            if (StringUtils.isBlank(payload)) {
+                throw new APIManagementException("API Payload Not Found for: " + eventId,
+                        ExceptionCodes.from(ExceptionCodes.HISTORY_EVENT_PAYLOAD_NOT_FOUND, eventId));
+            }
+            return Response.ok().entity(payload).build();
+        } catch (APIManagementException e) {
+            if (isAuthorizationFailure(e)) {
+                throw new APIManagementException("Authorization failure while retrieving history for API: " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.HISTORY_AUTHORIZATION_FAILURE));
+            }
+            throw e;
         }
-        return Response.ok().entity(payload).build();
     }
 
     @Override
@@ -3809,9 +3822,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         HistoryEventListDTO historyEventListDTO = new HistoryEventListDTO();
         Date startDate;
         Date endDate;
+        String revisionKey = null;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Failed to get API. API artifact corresponding to artifactId "
+                        + apiId + " does not exist", ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+            }
             // pre-processing
             // setting default limit and offset values if they are not set
             limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -3821,8 +3839,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     Date.from(OffsetDateTime.parse(startTime).toInstant()) : null;
             endDate = StringUtils.isNotBlank(endTime) ?
                     Date.from(OffsetDateTime.parse(endTime).toInstant()) : null;
-            String revisionKey = (StringUtils.isNotBlank(revisionId)) ?
-                    apiProvider.getRevisionKeyFromRevisionUUID(revisionId) : null;
+            if (StringUtils.isNotBlank(revisionId)) {
+                revisionKey = apiProvider.getRevisionKeyFromRevisionUUID(revisionId);
+                if (revisionKey == null) {
+                    throw new APIManagementException("Invalid Revision Id: " + revisionId,
+                            ExceptionCodes.from(ExceptionCodes.INVALID_REVISION_ID));
+                }
+            }
             List<HistoryEvent> historyEvents = apiProvider
                     .getAPIOrAPIProductHistoryWithPagination(apiIdentifier, revisionKey, startDate, endDate, offset,
                             limit);
@@ -3843,9 +3866,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 historyEventListDTO.setCount(0);
                 historyEventListDTO.setPagination(new PaginationDTO());
                 return Response.ok().entity(historyEventListDTO).build();
-            } else {
-                throw e;
             }
+            if (isAuthorizationFailure(e)) {
+                throw new APIManagementException("Authorization failure while retrieving history for API: " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.HISTORY_AUTHORIZATION_FAILURE));
+            }
+            throw e;
         }
     }
 }
