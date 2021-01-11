@@ -1258,7 +1258,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    public boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException {
+    public boolean isDocumentationExist(Identifier identifier, String docName, String orgId) throws APIManagementException {
         String docPath = "";
 
             docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
@@ -1266,6 +1266,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
                     + RegistryConstants.PATH_SEPARATOR + docName;
         try {
+            // TODO DOC exits ?
             return registry.resourceExists(docPath);
         } catch (RegistryException e) {
             String msg = "Failed to check existence of the document :" + docPath;
@@ -1273,15 +1274,10 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
     
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain, String organizationId) throws APIManagementException {
+    public List<Documentation> getAllDocumentation(String uuid, String orgId) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org;
-        if (organizationId != null) {
-            org = new Organization(organizationId);
-        } else {
-            org = new Organization(tenantDomain);
-        }
+        Organization org = Organization.getInstance(orgId);
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
@@ -1464,20 +1460,14 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param apiId                 artifact id of the api
      * @param docId                 artifact id of the document
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain, String organizationId)
+    public Documentation getDocumentation(String apiId, String docId, String organizationId)
             throws APIManagementException {
-        Documentation documentation = null;
+        Documentation documentation;
         try {
-            Organization org;
-            if (organizationId != null) {
-                org = new Organization(organizationId);
-            } else {
-                org = new Organization(tenantDomain);
-            }
+            Organization org = Organization.getInstance(organizationId);
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
                     .getDocumentation(org, apiId, docId);
             if (doc != null) {
@@ -1497,11 +1487,12 @@ public abstract class AbstractAPIManager implements APIManager {
     }
     
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String orgId)
             throws APIManagementException {
         try {
+            Organization org = Organization.getInstance(orgId);
             DocumentContent content = apiPersistenceInstance
-                    .getDocumentationContent(new Organization(requestedTenantDomain), apiId, docId);
+                    .getDocumentationContent(org, apiId, docId);
             DocumentationContent docContent = null;
             if (content != null) {
                 docContent = DocumentMapper.INSTANCE.toDocumentationContent(content);

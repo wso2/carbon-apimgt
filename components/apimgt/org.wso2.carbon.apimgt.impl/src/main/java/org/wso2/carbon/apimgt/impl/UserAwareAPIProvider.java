@@ -264,9 +264,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void removeDocumentation(Identifier id, String docId) throws APIManagementException {
+    public void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException {
         checkAccessControlPermission(id);
-        super.removeDocumentation(id, docId);
+        super.removeDocumentation(id, docId, orgId);
     }
 
     @Override
@@ -275,14 +275,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
         if (!checkCreateOrPublishPermission()) {
             throw new APIManagementException("User '" + username + "' has neither '" +
                     APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
                     "' permission to update API documentation");
         }
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation);
+        return super.updateDocumentation(apiId, documentation,orgId);
     }
 
     @Override

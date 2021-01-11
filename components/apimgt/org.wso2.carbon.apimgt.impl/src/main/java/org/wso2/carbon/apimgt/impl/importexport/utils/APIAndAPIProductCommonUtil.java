@@ -506,7 +506,8 @@ public class APIAndAPIProductCommonUtil {
      * @param pathToArchive     Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper    Imported API or API Product
      */
-    public static void addAPIOrAPIProductDocuments(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    public static void addAPIOrAPIProductDocuments(String pathToArchive, ApiTypeWrapper apiTypeWrapper,
+                                                   APIProvider apiProvider, String tenantDomain) {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_DOCUMENT_FILE_LOCATION;
@@ -519,7 +520,7 @@ public class APIAndAPIProductCommonUtil {
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId());
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
                 }
             }
             //load document file if exists

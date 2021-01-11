@@ -2175,10 +2175,10 @@ paths:
       description: |
         This operation can be used to retrieve a particular document's metadata associated with an API.
       parameters:
-      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |
@@ -2337,10 +2337,10 @@ paths:
         3. **URL type**:
             The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
       parameters:
-      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/If-None-Match'
+      - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |

@@ -318,7 +318,8 @@ public final class APIImportUtil {
             //Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             APIAndAPIProductCommonUtil.addAPIOrAPIProductImage(pathToArchive, apiTypeWrapperWithUpdatedApi, apiProvider);
-            APIAndAPIProductCommonUtil.addAPIOrAPIProductDocuments(pathToArchive, apiTypeWrapperWithUpdatedApi, apiProvider);
+            APIAndAPIProductCommonUtil.addAPIOrAPIProductDocuments(pathToArchive, apiTypeWrapperWithUpdatedApi,
+                    apiProvider, currentTenantDomain);
             addAPISequences(pathToArchive, importedApi, registry);
             addAPISpecificSequences(pathToArchive, importedApi, registry);
             addAPIWsdl(pathToArchive, importedApi, apiProvider, registry);

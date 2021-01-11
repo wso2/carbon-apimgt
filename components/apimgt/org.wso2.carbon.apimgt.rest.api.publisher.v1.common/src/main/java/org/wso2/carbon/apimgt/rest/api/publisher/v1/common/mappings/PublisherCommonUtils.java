@@ -1099,14 +1099,14 @@ public class PublisherCommonUtils {
 
     /**
      * Add document DTO.
-     * @param organizationId UUID of the organization
+     * @param orgId Identifier of the organization
      * @param documentDto Document DTO
      * @param apiId       API UUID
      * @return Added documentation
      * @throws APIManagementException If an error occurs when retrieving API Identifier,
      *                                when checking whether the documentation exists and when adding the documentation
      */
-    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String organizationId)
+    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String orgId)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
@@ -1132,7 +1132,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        documentation = apiProvider.addDocumentation(apiId, documentation, organizationId);
+        documentation = apiProvider.addDocumentation(apiId, documentation, orgId);
 
         return documentation;
     }

@@ -246,11 +246,11 @@ public interface APIManager {
      * Returns a list of documentation attached to a particular API
      *
      * @param uuid id of the api
-     * @param requestedTenantDomain tenant domain
+     * @param orgId  Identifier of an organization
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException;
+    List<Documentation> getAllDocumentation(String uuid, String orgId) throws APIManagementException;
     /**
      * Returns the specified document attached to the given API
      *
@@ -267,11 +267,11 @@ public interface APIManager {
      *
      * @param apiId   apiId
      * @param docId   DocumentID
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @param orgId   Identifier of the organization
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-    Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+    Documentation getDocumentation(String apiId, String docId, String orgId)
             throws APIManagementException;
      
     /**
@@ -279,11 +279,10 @@ public interface APIManager {
      *
      * @param apiId uuid of the API
      * @param docId DocumentID
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
      * @return DocumentationContent
      * @throws APIManagementException if failed to get Documentation
      */
-    DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+    DocumentationContent getDocumentationContent(String apiId, String docId, String orgId)
             throws APIManagementException;
 
     /**

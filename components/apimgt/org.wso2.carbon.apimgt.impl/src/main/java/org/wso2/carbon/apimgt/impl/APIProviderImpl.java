@@ -4102,7 +4102,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
-                                   String organizationId) throws DuplicateAPIException, APIManagementException {
+                                   String orgId) throws DuplicateAPIException, APIManagementException {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
@@ -4133,15 +4133,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String newAPIId = newAPI.getUuid();
         
         // copy docs
-        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain, organizationId);
+        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain);
 
         if (existingDocs != null) {
             for (Documentation documentation : existingDocs) {
-                Documentation newDoc = addDocumentation(newAPIId, documentation, organizationId);
+                Documentation newDoc = addDocumentation(newAPIId, documentation, orgId);
                 DocumentationContent content = getDocumentationContent(existingApiId, documentation.getId(),
                         tenantDomain); // TODO see whether we can optimize this
                 if (content != null) {
-                    addDocumentationContent(newAPIId, newDoc.getId(), content);
+                    addDocumentationContent(newAPIId, newDoc.getId(), orgId, content);
                 }
             }
         }
@@ -4561,7 +4561,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(Identifier id, String docId)
+    public void removeDocumentation(Identifier id, String docId, String orgId)
             throws APIManagementException {
         String uuid;
         if (id.getUUID() == null) {
@@ -4569,13 +4569,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion());
         }
-        removeDocumentation(uuid, docId);
+        removeDocumentation(uuid, docId,orgId);
     }
 
     @Override
-    public void removeDocumentation(String apiId, String docId) throws APIManagementException {
+    public void removeDocumentation(String apiId, String docId, String orgId) throws APIManagementException {
         try {
-            apiPersistenceInstance.deleteDocumentation(getOrganizationForRegistry(apiId), apiId, docId);
+            Organization org = Organization.getInstance(orgId);
+            apiPersistenceInstance.deleteDocumentation(org, apiId, docId);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
@@ -4743,14 +4744,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    public Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
 
         if (documentation != null) {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
+                Organization org = Organization.getInstance(orgId);
                 org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
-                        .updateDocumentation(getOrganizationForRegistry(apiId), apiId, mappedDoc);
+                        .updateDocumentation(org, apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
@@ -4963,13 +4965,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Documentation addDocumentation(String uuid, Documentation documentation, String organizationId) throws APIManagementException {
+    public Documentation addDocumentation(String uuid, Documentation documentation, String orgId) throws APIManagementException {
         if (documentation != null) {
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
-                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
-                        getOrganizationForRegistry(uuid), uuid, mappedDoc);
+                Organization org = Organization.getInstance(orgId);
+                org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance
+                        .addDocumentation(org, uuid, mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
                 }
@@ -10612,16 +10615,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException {
-        return null;
-    }
-
-    @Override
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain) throws APIManagementException {
-        return null;
-    }
-
-    @Override
     public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {
         List<APIResource> usedProductResources = new ArrayList<>();
         Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiId);
@@ -10637,13 +10630,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
     
     @Override
-    public void addDocumentationContent(String uuid, String docId, DocumentationContent content)
+    public void addDocumentationContent(String uuid, String docId, String orgId, DocumentationContent content)
             throws APIManagementException {
         DocumentContent mappedContent = null;
         try {
+            Organization org = Organization.getInstance(orgId);
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
-            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(
-                    getOrganizationForRegistry(uuid), uuid, docId, mappedContent);
+            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(org, uuid, docId, mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
         }

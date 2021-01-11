@@ -246,8 +246,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response apisApiIdDocumentsDocumentIdContentGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId, documentId, organizationId, ifNoneMatch, securityContext);
+    public Response apisApiIdDocumentsDocumentIdContentGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId, documentId, ifNoneMatch, organizationId, securityContext);
     }
 
     @POST
@@ -301,8 +301,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response apisApiIdDocumentsDocumentIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.apisApiIdDocumentsDocumentIdGet(apiId, documentId, organizationId, ifNoneMatch, securityContext);
+    public Response apisApiIdDocumentsDocumentIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.apisApiIdDocumentsDocumentIdGet(apiId, documentId, ifNoneMatch, organizationId, securityContext);
     }
 
     @PUT

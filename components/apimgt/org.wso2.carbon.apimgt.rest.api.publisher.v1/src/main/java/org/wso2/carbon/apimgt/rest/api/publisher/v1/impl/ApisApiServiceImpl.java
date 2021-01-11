@@ -1216,13 +1216,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Content of the document/ either inline/file or source url as a redirection
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String organizationId,
-                                                           String ifNoneMatch, MessageContext messageContext) {
+    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String ifNoneMatch,
+                                                           String organizationId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
 
-            DocumentationContent docContent = apiProvider.getDocumentationContent(apiId, documentId, tenantDomain);
+            DocumentationContent docContent = apiProvider.getDocumentationContent(apiId, documentId, orgId);
             if (docContent == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
@@ -1282,15 +1283,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                             String ifMatch, InputStream inputStream, Attachment fileDetail,
                                                             String inlineContent, MessageContext messageContext) {
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
             //API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
             if (inputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
             }
 
             //retrieves the document and send 404 if not found
-            Documentation documentation = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
+            Documentation documentation = apiProvider.getDocumentation(apiId, documentId, orgId);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
@@ -1301,7 +1303,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
-                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
+                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail, orgId);
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) &&
                         !documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
@@ -1312,13 +1314,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
                 content.setTextContent(inlineContent);
                 // apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
-                apiProvider.addDocumentationContent(apiId, documentId, content);
+                apiProvider.addDocumentationContent(apiId, documentId, orgId, content);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
 
             //retrieving the updated doc and the URI
-            Documentation updatedDoc = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
+            Documentation updatedDoc = apiProvider.getDocumentation(apiId, documentId, orgId);
             DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
                     .replace(RestApiConstants.APIID_PARAM, apiId)
@@ -1359,15 +1361,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
 
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            documentation = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
+            documentation = apiProvider.getDocumentation(apiId, documentId, orgId);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(apiId, documentId);
+            apiProvider.removeDocumentation(apiId, documentId, orgId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -1385,14 +1388,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String organizationId, String documentId, String ifNoneMatch,
-                                                    MessageContext messageContext) {
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
+                                                    String organizationId , MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
 
-            documentation = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
+            documentation = apiProvider.getDocumentation(apiId, documentId, orgId);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
@@ -1429,11 +1433,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                     MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             String sourceUrl = body.getSourceUrl();
-            Documentation oldDocument = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
+            Documentation oldDocument = apiProvider.getDocumentation(apiId, documentId, orgId);
 
             //validation checks for existence of the document
             if (body.getType() == null) {
@@ -1460,7 +1464,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             newDocumentation.setFilePath(oldDocument.getFilePath());
             newDocumentation.setId(documentId);
-            newDocumentation = apiProvider.updateDocumentation(apiId, newDocumentation);
+            newDocumentation = apiProvider.updateDocumentation(apiId, newDocumentation, orgId);
 
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
@@ -1498,11 +1502,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             //List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
-            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiId, tenantDomain);
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
+            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiId, orgId);
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
                     offset, limit);
             DocumentationMappingUtil
@@ -1534,7 +1539,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String organizationId, String ifMatch,
                                            MessageContext messageContext) {
         try {
-            Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId, organizationId);
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
+            Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId, orgId);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
                     .replace(RestApiConstants.APIID_PARAM, apiId)
@@ -2690,9 +2697,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("API Id and/ or document name should not be empty", log);
         }
         try {
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            checkAPIExistsInOrganization(apiId,organizationId);
+            String orgId = getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            return apiProvider.isDocumentationExist(apiId, name) ? Response.status(Response.Status.OK).build() :
+            return apiProvider.isDocumentationExist(apiId, name, orgId) ? Response.status(Response.Status.OK).build() :
                     Response.status(Response.Status.NOT_FOUND).build();
 
         } catch(APIManagementException e){

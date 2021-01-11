@@ -129,11 +129,12 @@ public class ImportUtils {
      * @param preserveProvider    Decision to keep or replace the provider
      * @param overwrite           Whether to update the API or not
      * @param tokenScopes         Scopes of the token
+     * @param orgId        Scopes of the token
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-            Boolean overwrite, String[] tokenScopes, String organizationID) throws APIManagementException {
+            Boolean overwrite, String[] tokenScopes, String orgId) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -159,6 +160,7 @@ public class ImportUtils {
             String apiType = importedApiDTO.getType().toString();
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiDTO.getProvider());
+
 
             // Validate swagger content except for WebSocket APIs
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
@@ -209,7 +211,7 @@ public class ImportUtils {
                 importedApiDTO.setLifeCycleStatus(currentStatus);
                 importedApi = PublisherCommonUtils
                         .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider(), organizationID);
+                                importedApiDTO.getProvider(), orgId);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -233,7 +235,7 @@ public class ImportUtils {
             // Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, currentTenantDomain);
             addAPISequences(extractedFolderPath, importedApi, registry);
             addAPISpecificSequences(extractedFolderPath, registry, importedApi.getId());
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider, registry);
@@ -809,8 +811,10 @@ public class ImportUtils {
      *
      * @param pathToArchive  Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper Imported API or API Product
+     * @param tenantDomain Tenant Domain of the API
      */
-    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider,
+                                         String tenantDomain) {
 
         String jsonContent = null;
         Identifier identifier = apiTypeWrapper.getId();
@@ -824,7 +828,7 @@ public class ImportUtils {
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId());
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
                 }
             }
 
@@ -861,8 +865,9 @@ public class ImportUtils {
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
                                     .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
-                                            null) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID(), null);
+                                            tenantDomain) :
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID(),
+                                    tenantDomain);
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
@@ -901,9 +906,11 @@ public class ImportUtils {
                             documentation.setFilePath(
                                     apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
                             if (!apiTypeWrapper.isAPIProduct()) {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation,
+                                        tenantDomain);
                             } else {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation,
+                                        tenantDomain);
                             }
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
@@ -1484,7 +1491,7 @@ public class ImportUtils {
             // Since Image, documents and client certificates are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApiProduct = new ApiTypeWrapper(importedApiProduct);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider, currentTenantDomain);
 
             if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
                 if (log.isDebugEnabled()) {

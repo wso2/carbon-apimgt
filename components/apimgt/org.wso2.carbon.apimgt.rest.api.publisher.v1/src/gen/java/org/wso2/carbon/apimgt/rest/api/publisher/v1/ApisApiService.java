@@ -61,10 +61,10 @@ public interface ApisApiService {
       public Response apisApiIdClientCertificatesGet(String apiId, String organizationId, Integer limit, Integer offset, String alias, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdClientCertificatesPost(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDelete(String apiId, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String ifNoneMatch, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO documentDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsGet(String apiId, String organizationId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsPost(String apiId, DocumentDTO documentDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;

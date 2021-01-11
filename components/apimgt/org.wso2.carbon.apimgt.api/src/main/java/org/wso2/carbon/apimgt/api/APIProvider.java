@@ -453,7 +453,7 @@ public interface APIProvider extends APIManager {
      * @param documentId ID of the documentation
      * @throws APIManagementException if failed to remove documentation
      */
-    void removeDocumentation(String apiId, String documentId) throws APIManagementException;
+    void removeDocumentation(String apiId, String documentId, String orgId) throws APIManagementException;
     /**
      * Removes a given documentation
      *
@@ -461,7 +461,7 @@ public interface APIProvider extends APIManager {
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(Identifier id, String docId)throws APIManagementException;
+    void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException;
     /**
      * Adds Documentation to an API/Product
      *
@@ -476,11 +476,11 @@ public interface APIProvider extends APIManager {
      *
      * @param uuid                API/Product Identifier
      * @param documentation       Documentation
-     * @param organizationId      UUID of the Organization
+     * @param orgId               Identifier of an organization
      * @return                    created documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    Documentation addDocumentation(String uuid, Documentation documentation, String organizationId) throws APIManagementException;
+    Documentation addDocumentation(String uuid, Documentation documentation, String orgId) throws APIManagementException;
 
 
     /**
@@ -491,7 +491,7 @@ public interface APIProvider extends APIManager {
      * @param docId doc uuid
      * @throws APIManagementException if failed to add documentation
      */
-    void addDocumentationContent(String uuid, String docId, DocumentationContent content)
+    void addDocumentationContent(String uuid, String docId, String orgId, DocumentationContent content)
             throws APIManagementException;
 
     /**
@@ -530,10 +530,11 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         id of the document
      * @param documentation Documentation
+     * @param orgId Documentation
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException;
+    Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
@@ -1641,7 +1642,7 @@ public interface APIProvider extends APIManager {
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(String uuid, String docName) throws APIManagementException;
+    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
     
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file

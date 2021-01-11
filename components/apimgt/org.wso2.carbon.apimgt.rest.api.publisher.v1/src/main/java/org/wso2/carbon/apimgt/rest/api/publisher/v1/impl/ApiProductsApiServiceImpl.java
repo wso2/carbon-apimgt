@@ -248,7 +248,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil
                         .handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(apiProductId, documentId);
+            apiProvider.removeDocumentation(apiProductId, documentId, tenantDomain);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource
