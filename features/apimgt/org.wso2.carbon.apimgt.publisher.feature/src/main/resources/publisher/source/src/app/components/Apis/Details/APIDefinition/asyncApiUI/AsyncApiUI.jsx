@@ -1,6 +1,6 @@
 import React from 'react';
-import AsyncApiComponent from '@kyma-project/asyncapi-react';
-import '@kyma-project/asyncapi-react/lib/styles/fiori.css';
+import AsyncApiComponent from '@asyncapi/react-component';
+import '@asyncapi/react-component/lib/styles/fiori.css';
 // import './styles.css';
 
 const AsyncApiUI = (props) => {

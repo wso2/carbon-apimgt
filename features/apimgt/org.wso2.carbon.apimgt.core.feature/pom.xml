@@ -71,6 +71,10 @@
             <artifactId>apicurio-data-models</artifactId>
             <version>1.1.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -224,6 +228,7 @@
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
                                 <bundleDef>io.apicurio:apicurio-data-models</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
