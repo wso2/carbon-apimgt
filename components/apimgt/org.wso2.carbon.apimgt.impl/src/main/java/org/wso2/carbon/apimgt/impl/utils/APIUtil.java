@@ -5034,6 +5034,10 @@ public final class APIUtil {
         return false;
     }
 
+    public static String getApplicationUUID(String appName, String userId) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getApplicationUUID(appName, userId);
+    }
+
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getApplicationId(appName, userId);

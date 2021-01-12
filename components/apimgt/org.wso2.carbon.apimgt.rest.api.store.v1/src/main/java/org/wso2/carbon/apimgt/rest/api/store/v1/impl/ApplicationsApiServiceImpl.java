@@ -21,12 +21,15 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,6 +37,8 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -45,13 +50,19 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
@@ -61,15 +72,26 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedApplication;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +100,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import javax.validation.Valid;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -143,6 +168,112 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     /**
+     * Import an Application which has been exported to a zip file
+     *
+     * @param appOwner            target owner of the application
+     * @param preserveOwner       if true, preserve the original owner of the application
+     * @param skipSubscriptions   if true, skip subscriptions of the application
+     * @param fileInputStream     content stream of the zip file which contains exported Application
+     * @param fileDetail          meta information of the zip file
+     * @param skipApplicationKeys Skip application keys while importing
+     * @param update              update if existing application found or import
+     * @return imported Application
+     */
+    @Override public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail,
+            Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys,
+            Boolean update, MessageContext messageContext) throws APIManagementException {
+        String ownerId;
+        Application application;
+
+        try {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            String extractedFolderPath = CommonUtil.getArchivePathOfExtractedDirectory(fileInputStream,
+                    ImportExportConstants.UPLOAD_APPLICATION_FILE_NAME);
+            String jsonContent = ImportUtils.getApplicationDefinitionAsJson(extractedFolderPath);
+
+            // Retrieving the field "data" in api.yaml/json and convert it to a JSON object for further processing
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            ExportedApplication exportedApplication = new Gson().fromJson(configElement, ExportedApplication.class);
+
+            // Retrieve the application DTO object from the aggregated exported application
+            ApplicationDTO applicationDTO = exportedApplication.getApplicationInfo();
+
+            if (!StringUtils.isBlank(appOwner)) {
+                ownerId = appOwner;
+            } else if (preserveOwner != null && preserveOwner) {
+                ownerId = applicationDTO.getOwner();
+            } else {
+                ownerId = username;
+            }
+            if (!MultitenantUtils.getTenantDomain(ownerId).equals(MultitenantUtils.getTenantDomain(username))) {
+                throw new APIManagementException("Cross Tenant Imports are not allowed",
+                        ExceptionCodes.TENANT_MISMATCH);
+            }
+
+            String applicationGroupId = String.join(",", applicationDTO.getGroups());
+
+            if (applicationDTO.getGroups() != null && applicationDTO.getGroups().size() > 0) {
+                ImportUtils.validateOwner(username, applicationGroupId, apiConsumer);
+            }
+
+            if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId) && update != null
+                    && update) {
+                int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
+                Application oldApplication = apiConsumer.getApplicationById(appId);
+                application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
+                        oldApplication.getUUID());
+            } else {
+                application = preProcessAndAddApplication(ownerId, applicationDTO);
+            }
+
+            // Get keys to import
+            List<ApplicationKeyDTO> applicationKeys = applicationDTO.getKeys();
+            for (ApplicationKeyDTO applicationKey : applicationKeys) {
+                application.addKey(ImportUtils.getAPIKeyFromApplicationKeyDTO(applicationKey));
+            }
+            // Update the application to add keys
+            apiConsumer.updateApplication(application);
+
+            List<APIIdentifier> skippedAPIs = new ArrayList<>();
+            if (skipSubscriptions == null || !skipSubscriptions) {
+                skippedAPIs = ImportUtils
+                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application.getId(),
+                                update, apiConsumer);
+            }
+            Application importedApplication = apiConsumer.getApplicationById(application.getId());
+            importedApplication.setOwner(ownerId);
+            ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil
+                    .fromApplicationToInfoDTO(importedApplication);
+            URI location = new URI(
+                    RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + importedApplicationDTO.getApplicationId());
+
+            // check whether keys need to be skipped while import
+            if (skipApplicationKeys == null || !skipApplicationKeys) {
+                // Add application keys if present and keys does not exists in the current application
+                if (application.getKeys().size() > 0 && importedApplication.getKeys().size() == 0) {
+                    for (APIKey apiKey : application.getKeys()) {
+                        ImportUtils.addApplicationKey(ownerId, importedApplication, apiKey, apiConsumer);
+                    }
+                }
+            }
+
+            if (skippedAPIs.isEmpty()) {
+                return Response.created(location).entity(importedApplicationDTO).build();
+            } else {
+                APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
+                return Response.created(location).status(207).entity(skippedAPIListDTO).build();
+            }
+        } catch (URISyntaxException | UserStoreException | APIImportExportException e) {
+            throw new APIManagementException("Error while importing Application", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new APIManagementException("Error while Decoding apiId", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading the application definition", e);
+        }
+    }
+
+    /**
      * Creates a new application
      *
      * @param body        request body containing application details
@@ -152,38 +283,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-
-            //validate the tier specified for the application
-            String tierName = body.getThrottlingPolicy();
-            if (tierName == null) {
-                RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
-            }
-
-            Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
-            if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
-                RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
-            }
-
-            Object applicationAttributesFromUser = body.getAttributes();
-            Map<String, String> applicationAttributes =
-                    new ObjectMapper().convertValue(applicationAttributesFromUser, Map.class);
-            if (applicationAttributes != null) {
-                body.setAttributes(applicationAttributes);
-            }
-
-            //we do not honor tokenType sent in the body and
-            //all the applications created will of 'JWT' token type
-            body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
-
-            //subscriber field of the body is not honored. It is taken from the context
-            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-
-            int applicationId = apiConsumer.addApplication(application, username);
-
-            //retrieves the created application and send as the response
-            Application createdApplication = apiConsumer.getApplicationById(applicationId);
+            Application createdApplication = preProcessAndAddApplication(username, body);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header
@@ -205,6 +305,49 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         }
         return null;
+    }
+
+    /**
+     * Preprocess and add the application
+     *
+     * @param username       Username
+     * @param applicationDto Application DTO
+     * @return Created application
+     */
+    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto)
+            throws APIManagementException {
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+
+        //validate the tier specified for the application
+        String tierName = applicationDto.getThrottlingPolicy();
+        if (tierName == null) {
+            RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
+        }
+
+        Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+        if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
+            RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
+        }
+
+        Object applicationAttributesFromUser = applicationDto.getAttributes();
+        Map<String, String> applicationAttributes = new ObjectMapper()
+                .convertValue(applicationAttributesFromUser, Map.class);
+        if (applicationAttributes != null) {
+            applicationDto.setAttributes(applicationAttributes);
+        }
+
+        //we do not honor tokenType sent in the body and
+        //all the applications created will of 'JWT' token type
+        applicationDto.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+
+        //subscriber field of the body is not honored. It is taken from the context
+        Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+
+        int applicationId = apiConsumer.addApplication(application, username);
+
+        //retrieves the created application and send as the response
+        return apiConsumer.getApplicationById(applicationId);
     }
 
     /**
@@ -284,32 +427,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
-            Object applicationAttributesFromUser = body.getAttributes();
-            Map<String, String> applicationAttributes = new ObjectMapper()
-                    .convertValue(applicationAttributesFromUser, Map.class);
-
-            if (applicationAttributes != null) {
-                body.setAttributes(applicationAttributes);
-            }
-
-            //we do not honor tokenType sent in the body and all the applications are considered of 'JWT' token type
-            //unless the current application is already of 'OAUTH' type
-            if (!ApplicationDTO.TokenTypeEnum.OAUTH.toString().equals(oldApplication.getTokenType())) {
-                body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
-            }
-            
-            //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
-            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-
-            //we do not honor the application id which is sent via the request body
-            application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
-
-            apiConsumer.updateApplication(application);
-
-            //retrieves the updated application and send as the response
-            Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
-            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil
-                    .fromApplicationtoDTO(updatedApplication);
+            Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
+                    applicationId);
+            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
                 
         } catch (APIManagementException e) {
@@ -322,6 +442,85 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         }
         return null;
+    }
+
+    /**
+     * Preprocess and update the application
+     *
+     * @param username       Username
+     * @param applicationDto Application DTO
+     * @param oldApplication Old application
+     * @param applicationId  Application UUID
+     * @return Updated application
+     */
+    private Application preProcessAndUpdateApplication(String username, ApplicationDTO applicationDto,
+            Application oldApplication, String applicationId) throws APIManagementException {
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        Object applicationAttributesFromUser = applicationDto.getAttributes();
+        Map<String, String> applicationAttributes = new ObjectMapper()
+                .convertValue(applicationAttributesFromUser, Map.class);
+
+        if (applicationAttributes != null) {
+            applicationDto.setAttributes(applicationAttributes);
+        }
+
+        //we do not honor tokenType sent in the body and all the applications are considered of 'JWT' token type
+        //unless the current application is already of 'OAUTH' type
+        if (!ApplicationDTO.TokenTypeEnum.OAUTH.toString().equals(oldApplication.getTokenType())) {
+            applicationDto.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
+        }
+
+        //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
+        Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+
+        //we do not honor the application id which is sent via the request body
+        application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
+
+        apiConsumer.updateApplication(application);
+
+        //retrieves the updated application and send as the response
+        return apiConsumer.getApplicationByUUID(applicationId);
+    }
+
+    /**
+     * Export an existing Application
+     *
+     * @param appName  Search query
+     * @param appOwner Owner of the Application
+     * @param withKeys Export keys with application
+     * @return Zip file containing exported Application
+     */
+    @Override
+    public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format,
+            MessageContext messageContext) throws APIManagementException {
+        APIConsumer apiConsumer;
+        Application application = null;
+
+        if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
+            RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
+        }
+
+        // Default export format is YAML
+        ExportFormat exportFormat = StringUtils.isNotEmpty(format) ?
+                ExportFormat.valueOf(format.toUpperCase()) :
+                ExportFormat.YAML;
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+
+        apiConsumer = RestApiCommonUtil.getConsumer(username);
+        if (appOwner != null && apiConsumer.getSubscriber(appOwner) != null) {
+            application = ExportUtils.getApplicationDetails(appName, appOwner, apiConsumer);
+        }
+        if (application == null) {
+            throw new APIManagementException("No application found with name " + appName + " owned by " + appOwner, ExceptionCodes.APPLICATION_NOT_FOUND);
+        } else if (!MultitenantUtils.getTenantDomain(application.getSubscriber().getName())
+                .equals(MultitenantUtils.getTenantDomain(username))) {
+            throw new APIManagementException("Cross Tenant Exports are not allowed", ExceptionCodes.TENANT_MISMATCH);
+        }
+
+        File file = ExportUtils.exportApplication(application, apiConsumer, exportFormat, withKeys);
+        return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getName() + "\"").build();
     }
 
     @Override

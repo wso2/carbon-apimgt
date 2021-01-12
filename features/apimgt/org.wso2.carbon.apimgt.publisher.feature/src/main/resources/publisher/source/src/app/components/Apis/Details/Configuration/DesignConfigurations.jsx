@@ -34,7 +34,7 @@ import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/
 import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api.js';
 import DefaultVersion from './components/DefaultVersion';
-import Description from './components/Description';
+import MarkdownEditor from './components/MarkdownEditor';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
@@ -260,7 +260,7 @@ export default function DesignConfigurations() {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} md={10}>
-                                                <Description api={apiConfig} configDispatcher={configDispatcher} />
+                                                <MarkdownEditor api={apiConfig} configDispatcher={configDispatcher} />
                                             </Grid>
                                         </Grid>
                                     </Box>
@@ -284,7 +284,7 @@ export default function DesignConfigurations() {
                                         <Social api={apiConfig} configDispatcher={configDispatcher} />
                                     </Box>
                                     <Box py={1}>
-                                        {api.apiType !== 'APIProduct' && (
+                                        {api.apiType !== API.CONSTS.APIProduct && (
                                             <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
                                         )}
                                     </Box>
