@@ -294,37 +294,35 @@ public class RegistryPersistenceImpl implements APIPersistence {
             tenantFlowStarted  = holder.isTenantFlowStarted();
             
             registry.beginTransaction();
-
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+            String apiArtifactId = registry.get(RegistryPersistenceUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
             if (artifactManager == null) {
                 String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
-            // get existing api
-            GenericArtifact existingAPIArtifact = artifactManager.getGenericArtifact(publisherAPI.getId());
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
 
             boolean isSecured = Boolean.parseBoolean(
-                    existingAPIArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
             boolean isDigestSecured = Boolean.parseBoolean(
-                    existingAPIArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST));
-            String userName = existingAPIArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME);
-            String password = existingAPIArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST));
+            String userName = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME);
+            String password = artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD);
    
             if (!isSecured && !isDigestSecured && userName != null) {
                 api.setEndpointUTUsername(userName);
                 api.setEndpointUTPassword(password);
             }
 
-            String oldStatus = existingAPIArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            Resource apiResource = registry.get(existingAPIArtifact.getPath());
+            String oldStatus = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+            Resource apiResource = registry.get(artifact.getPath());
             String oldAccessControlRoles = api.getAccessControlRoles();
             if (apiResource != null) {
-                oldAccessControlRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+                oldAccessControlRoles = registry.get(artifact.getPath()).getProperty(APIConstants.PUBLISHER_ROLES);
             }
-            // update tags
-            String artifactPath = RegistryPersistenceUtil.getAPIPath(api.getId());
+            GenericArtifact updateApiArtifact = RegistryPersistenceUtil.createAPIArtifactContent(artifact, api);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, updateApiArtifact.getId());
             org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
             if (oldTags != null) {
                 for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
@@ -337,33 +335,51 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.applyTag(artifactPath, tag);
                 }
             }
-            
-            GenericArtifact updateApiArtifact = RegistryPersistenceUtil.createAPIArtifactContent(existingAPIArtifact,
-                    api);
+            if (api.isDefaultVersion()) {
+                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
+            } else {
+                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
+            }
+
+
             artifactManager.updateGenericArtifact(updateApiArtifact);
 
+            //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
+            //to gain performance
+            //String apiStatus = api.getStatus().toUpperCase();
+            //saveAPIStatus(artifactPath, apiStatus);
+            String[] visibleRoles = new String[0];
             String publisherAccessControlRoles = api.getAccessControlRoles();
+
             updateRegistryResources(registry, artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
 
             //propagate api status change and access control roles change to document artifact
             String newStatus = updateApiArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            if (!StringUtils.equals(oldStatus, newStatus)
-                    || !StringUtils.equals(oldAccessControlRoles, publisherAccessControlRoles)) {
-                RegistryPersistenceUtil.notifyAPIStateChangeToAssociatedDocuments(existingAPIArtifact, registry);
+            if (!StringUtils.equals(oldStatus, newStatus) || !StringUtils.equals(oldAccessControlRoles, publisherAccessControlRoles)) {
+                RegistryPersistenceUtil.notifyAPIStateChangeToAssociatedDocuments(artifact, registry);
             }
 
-
+            // TODO Improve: add a visibility change check and only update if needed
             RegistryPersistenceUtil.clearResourcePermissions(artifactPath, api.getId(),
                     ((UserRegistry) registry).getTenantId());
             String visibleRolesList = api.getVisibleRoles();
 
-            String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
             RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                     visibleRoles, artifactPath, registry);
+            
+            //attaching api categories to the API
+            List<APICategory> attachedApiCategories = api.getApiCategories();
+            artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
+            if (attachedApiCategories != null) {
+                for (APICategory category : attachedApiCategories) {
+                    artifact.addAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME, category.getName());
+                }
+            }
+            
             if (api.getSwaggerDefinition() != null) {
                 String resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(api.getId().getName(),
                         api.getId().getVersion(), api.getId().getProviderName());
