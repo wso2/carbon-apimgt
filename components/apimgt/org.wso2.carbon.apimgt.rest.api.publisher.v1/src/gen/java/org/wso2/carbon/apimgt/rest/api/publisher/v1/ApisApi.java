@@ -1092,13 +1092,12 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/restore-revision")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Restore a revision", notes = "Restore a revision to the working copy of the API ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Restore a revision", notes = "Restore a revision to the working copy of the API ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
         @ApiResponse(code = 201, message = "Restored. Successful response with the newly restored API object as the entity in the body. ", response = APIDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response restoreAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("revisionId") String revisionId) throws APIManagementException{

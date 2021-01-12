@@ -4099,6 +4099,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.restoreAPIRevision(apiId, revisionId);
         APIDTO apiToReturn = getAPIByID(apiId);
-        return Response.ok().entity(apiToReturn).build();
+        Response.Status status = Response.Status.CREATED;
+        return Response.status(status).entity(apiToReturn).build();
     }
 }
