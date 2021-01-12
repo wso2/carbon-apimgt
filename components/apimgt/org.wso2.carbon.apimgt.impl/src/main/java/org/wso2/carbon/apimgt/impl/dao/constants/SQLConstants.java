@@ -3193,25 +3193,13 @@ public class SQLConstants {
 				+ " IS_DEPLOYED, UUID, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?, ?,?,?,?,? ,?,?,?)";
 
 
-        public static final String UPDATE_API_POLICY_BY_UUID_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET "
-                + "DISPLAY_NAME = ?,"
-                + "DESCRIPTION = ?,"
-                + "DEFAULT_QUOTA_TYPE = ?,"
-                + "DEFAULT_QUOTA = ?,"
-                + "DEFAULT_QUOTA_UNIT = ?,"
-                + "DEFAULT_UNIT_TIME = ?,"
-                + "DEFAULT_TIME_UNIT = ? "
-                + "WHERE UUID = ?";
+        public static final String UPDATE_API_POLICY_BY_UUID_SQL = "UPDATE AM_API_THROTTLE_POLICY SET DISPLAY_NAME = ?, "
+                + "DESCRIPTION = ?, DEFAULT_QUOTA_TYPE = ?, DEFAULT_QUOTA = ?, DEFAULT_QUOTA_UNIT = ?, "
+                + "DEFAULT_UNIT_TIME = ?, DEFAULT_TIME_UNIT = ? WHERE UUID = ?";
 
-		public static final String UPDATE_API_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY " + "SET "
-                + "DISPLAY_NAME = ?,"
-                + "DESCRIPTION = ?,"
-                + "DEFAULT_QUOTA_TYPE = ?,"
-                + "DEFAULT_QUOTA = ?,"
-                + "DEFAULT_QUOTA_UNIT = ?,"
-                + "DEFAULT_UNIT_TIME = ?,"
-                + "DEFAULT_TIME_UNIT = ? "
-                + "WHERE NAME = ? AND TENANT_ID = ?";
+		public static final String UPDATE_API_POLICY_SQL = "UPDATE AM_API_THROTTLE_POLICY SET DISPLAY_NAME = ?,"
+                + "DESCRIPTION = ?, DEFAULT_QUOTA_TYPE = ?, DEFAULT_QUOTA = ?, DEFAULT_QUOTA_UNIT = ?,"
+                + "DEFAULT_UNIT_TIME = ?, DEFAULT_TIME_UNIT = ? WHERE NAME = ? AND TENANT_ID = ?";
 
 		public static final String GET_API_POLICY_NAMES = " SELECT " + "   NAME " + "FROM "
 				+ "   AM_API_THROTTLE_POLICY " + " WHERE" + "   TENANT_ID =?";
@@ -3235,21 +3223,12 @@ public class SQLConstants {
 
 		public static final String DELETE_API_POLICY_SQL = "DELETE FROM AM_API_THROTTLE_POLICY WHERE TENANT_ID = ? AND NAME = ?";
 
-
-
 		public static final String INSERT_CONDITION_GROUP_SQL = "INSERT INTO AM_CONDITION_GROUP(POLICY_ID, QUOTA_TYPE,QUOTA,QUOTA_UNIT,UNIT_TIME,TIME_UNIT,DESCRIPTION) \n"
 															+ " VALUES (?,?,?,?,?,?,?)";
         public static final String DELETE_CONDITION_GROUP_SQL = "DELETE FROM AM_CONDITION_GROUP WHERE POLICY_ID = ?";
 
-        public static final String UPDATE_CONDITION_GROUP_SQL =  "UPDATE AM_CONDITION_GROUP " + "SET "
-                + "QUOTA_TYPE = ?,"
-                + "QUOTA = ?,"
-                + "QUOTA_UNIT = ?,"
-                + "UNIT_TIME = ?,"
-                + "TIME_UNIT = ?,"
-                + "DESCRIPTION = ? "
-                + "WHERE POLICY_ID = ?";
-
+        public static final String UPDATE_CONDITION_GROUP_SQL =  "UPDATE AM_CONDITION_GROUP SET QUOTA_TYPE = ?, "
+                + "QUOTA = ?, QUOTA_UNIT = ?, UNIT_TIME = ?, TIME_UNIT = ?, DESCRIPTION = ? WHERE POLICY_ID = ?";
 
         public static final String GET_PIPELINES_SQL = "SELECT " + "CONDITION_GROUP_ID, " + "QUOTA_TYPE, " + "QUOTA, "
 				+ " QUOTA_UNIT, " + "UNIT_TIME, " + "TIME_UNIT, "+ "DESCRIPTION " + "FROM " + "AM_CONDITION_GROUP " + "WHERE " + "POLICY_ID =?";
