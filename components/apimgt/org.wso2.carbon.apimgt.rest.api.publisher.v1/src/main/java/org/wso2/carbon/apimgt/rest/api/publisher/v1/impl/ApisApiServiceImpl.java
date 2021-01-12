@@ -61,6 +61,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -448,9 +449,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId
-                                                                                 );
-
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             originalAPI = PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
             APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
@@ -479,6 +483,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
+            APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
@@ -870,6 +880,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
+            APIIdentifier apiIdentifierFromTable = APIUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
@@ -948,6 +964,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                       MessageContext messageContext) {
 
         try {
+            APIIdentifier apiIdentifierFromTable = APIUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             ContentDisposition contentDisposition;
             String fileName;
             String base64EncodedCert = null;
@@ -1066,6 +1088,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                 MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifierFromTable = APIUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
             String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(apiId)) {
@@ -1145,8 +1173,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-
             //check if the API has subscriptions
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId());
@@ -1273,6 +1306,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 InputStream inputStream, Attachment fileDetail, String inlineContent,
                                                             MessageContext messageContext) {
         try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
@@ -1352,6 +1391,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             documentation = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
@@ -1422,6 +1467,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             String sourceUrl = body.getSourceUrl();
             Documentation oldDocument = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
 
@@ -1523,6 +1573,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
@@ -1741,6 +1797,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             apiProvider.deleteWorkflowTask(apiIdentifier);
             return Response.ok().build();
@@ -1793,6 +1855,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
         try {
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
@@ -1896,6 +1964,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
                                                           String inlineContent, MessageContext messageContext) {
         try {
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2029,6 +2103,12 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String fileName = "";
         try {
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (fileInputStream != null && inlineContent != null) {
@@ -2172,6 +2252,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             API api = apiProvider.getAPI(apiIdentifier);
             if (!APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus())) {
                 String errorMessage = "API " + apiIdentifier.getApiName() +
@@ -2246,6 +2331,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         API api = null;
         List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
         try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -2386,6 +2477,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             boolean isSoapToRESTApi = SOAPOperationBindingUtils
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
                             apiIdentifier.getProviderName());
@@ -2508,6 +2604,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String updatedSwagger;
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
                     apiIdentifier.getVersion(), apiIdentifier.getProviderName());
             //Handle URL and file based definition imports
@@ -2608,6 +2709,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
         try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
@@ -2689,6 +2796,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             return apiProvider.isDocumentationExist(apiId, name) ? Response.status(Response.Status.OK).build() :
                     Response.status(Response.Status.NOT_FOUND).build();
 
@@ -2745,6 +2858,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             List<ResourcePath> apiResourcePaths = apiProvider.getResourcePathsOfAPI(apiIdentifier);
 
             ResourcePathListDTO dto = APIMappingUtil.fromResourcePathListToDTO(apiResourcePaths, limit, offset);
@@ -3219,6 +3337,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         validateWSDLAndReset(fileInputStream, fileDetail, url);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
         API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         if (api == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
@@ -3244,6 +3368,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId);
             String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
             if (!ArrayUtils.contains(nextAllowedStates, action)) {
@@ -3297,6 +3426,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
         try {
+            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifierFromTable == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion);
 
@@ -3491,6 +3626,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifierFromTable == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
