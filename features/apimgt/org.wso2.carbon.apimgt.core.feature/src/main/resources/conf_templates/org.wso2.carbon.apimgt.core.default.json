@@ -66,6 +66,7 @@
   "apim.oauth_config.revoke_endpoint_context":"/revoke",
   "apim.devportal.login_username_case_insensitive": true,
   "apim.devportal.url": "https://localhost:${mgt.transport.https.port}/devportal",
+  "apim.devportal.display_url": false,
   "apim.devportal.enable_application_sharing": false,
   "apim.devportal.display_multiple_versions": false,
   "apim.devportal.display_deprecated_apis": false,
@@ -77,6 +78,7 @@
   "apim.devportal.application_sharing_claim": "http://wso2.org/claims/organization",
   "apim.devportal.enable_anonymous_mode": true,
   "apim.publisher.enable_api_doc_visibility": false,
+  "apim.publisher.display_url": false,
   "apim.cors.enable": "true",
   "apim.cors.allow_origins": "*",
   "apim.cors.allow_methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
@@ -162,5 +164,6 @@
   "apim.cache_invalidation.username":"${admin.username}",
   "apim.cache_invalidation.password":"${admin.password}",
   "apim.cache_invalidation.topic_name":"globalCacheInvalidation",
+  "apim.auth_manager.check_permissions_remotely": false,
   "apim.auth_manager.iskm_reverseproxy_enabled": false
 }
