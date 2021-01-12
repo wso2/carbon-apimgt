@@ -10735,6 +10735,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setUuid(publisherAPIInfo.getId());
                     mappedAPI.setState(publisherAPIInfo.getState());
                     mappedAPI.setContext(publisherAPIInfo.getContext());
+                    mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
                     productList.add(mappedAPI);
                 }
                 productSet.addAll(productList);
