@@ -42,6 +42,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -247,7 +248,12 @@ export default function Environments() {
     const classes = useStyles();
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
-    const revisionCount = 5;
+    let revisionCount;
+    if (Configurations.app.revisionCount) {
+        revisionCount = Configurations.app.revisionCount;
+    } else {
+        revisionCount = 5;
+    }
     // const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
     // const [isUpdating, setUpdating] = useState(false);
