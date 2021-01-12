@@ -1019,7 +1019,6 @@ export default function Environments() {
                             <TableRow>
                                 <TableCell align='left'>Name</TableCell>
                                 <TableCell align='left'>Type</TableCell>
-                                <TableCell align='left'>Server URL</TableCell>
                                 {api.isWebSocket() ? (
                                     <>
                                         <TableCell align='left'>Endpoints</TableCell>
@@ -1045,8 +1044,6 @@ export default function Environments() {
 
                                     </TableCell>
                                     <TableCell align='left'>{row.type}</TableCell>
-                                    <TableCell align='left'>{row.serverUrl}</TableCell>
-
                                     {api.isWebSocket() ? (
                                         <>
                                             <TableCell
