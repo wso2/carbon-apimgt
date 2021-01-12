@@ -110,16 +110,19 @@ public class APIMappingUtil {
         }
 
         //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = null;
-
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+        String apiDefinition = null;
+        if (isAsyncAPI(model)) {
+            // for asyncAPI retrieve asyncapi.yml specification
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getId());
+        } else {
+            // retrieve open API definition
             if (model.getSwaggerDefinition() != null) {
-                apiSwaggerDefinition = model.getSwaggerDefinition();
+                apiDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
-        dto.setApiDefinition(apiSwaggerDefinition);
+        dto.setApiDefinition(apiDefinition);
 
         if (APIConstants.APITransportType.GRAPHQL.toString().equals(model.getType())) {
             List<APIOperationsDTO> operationList = new ArrayList<>();
@@ -278,16 +281,19 @@ public class APIMappingUtil {
         } */
 
         //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = null;
-
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+        String apiDefinition = null;
+        if (isAsyncAPI(model)) {
+            // for asyncAPI retrieve asyncapi.yml specification
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getId());
+        } else {
+            // retrieve open API definition
             if (model.getDefinition() != null) {
-                apiSwaggerDefinition = model.getDefinition();
+                apiDefinition = model.getDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
-        dto.setApiDefinition(apiSwaggerDefinition);
+        dto.setApiDefinition(apiDefinition);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1070,6 +1076,26 @@ public class APIMappingUtil {
             subscriptionAllowed = true;
         }
         return subscriptionAllowed;
+    }
+
+    private static boolean isAsyncAPI(API api) {
+        String apiType = api.getType();
+        if (APIConstants.APITransportType.WS.toString().equals(apiType) ||
+                APIConstants.APITransportType.SSE.toString().equals(apiType) ||
+                APIConstants.APITransportType.WEBSUB.toString().equals(apiType)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isAsyncAPI(APIProduct api) {
+        String apiType = api.getType();
+        if (APIConstants.APITransportType.WS.toString().equals(apiType) ||
+                APIConstants.APITransportType.SSE.toString().equals(apiType) ||
+                APIConstants.APITransportType.WEBSUB.toString().equals(apiType)) {
+            return true;
+        }
+        return false;
     }
 
 }

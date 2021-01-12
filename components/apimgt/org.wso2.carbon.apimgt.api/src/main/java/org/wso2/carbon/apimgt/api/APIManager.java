@@ -205,6 +205,16 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns the async-api v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return async specification string
+     * @throws APIManagementException
+     */
+    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
+
     /**
      * Checks whether the given document already exists for the given api/product
      *
