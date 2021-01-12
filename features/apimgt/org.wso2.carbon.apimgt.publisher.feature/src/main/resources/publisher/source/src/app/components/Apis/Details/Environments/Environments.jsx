@@ -485,18 +485,26 @@ export default function Environments() {
     }
 
 
-    const item1 = (
-        <Grid
-            container
-            direction='container'
-        >
-            <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
-                <Grid className={clsx(classes.shapeInnerComplete, classes.shapeCircle)} />
+    let item1;
+    const returnItem1 = (revDescription) => {
+        item1 = (
+            <Grid
+                container
+                direction='container'
+            >
+                <Grid item className={classes.shapeRec} />
+                <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
+                    <Tooltip
+                        title={revDescription}
+                        placement='top'
+                    >
+                        <Grid className={clsx(classes.shapeInnerComplete, classes.shapeCircle)} />
+                    </Tooltip>
+                </Grid>
+                <Grid item className={classes.shapeRecBack} />
             </Grid>
-            <Grid item className={classes.shapeRecBack} />
-        </Grid>
-    );
+        );
+    };
     const item2 = (
         <Grid
             container
@@ -544,18 +552,26 @@ export default function Environments() {
 
         </Grid>
     );
-    const item6 = (
-        <Grid
-            container
-            direction='container'
-        >
-            <Grid item className={classes.shapeRec} />
-            <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
-                <Grid className={clsx(classes.shapeDottedStart1, classes.shapeCircle)} />
+    let item6;
+    const returnItem6 = (revDescription) => {
+        item6 = (
+            <Grid
+                container
+                direction='container'
+            >
+                <Grid item className={classes.shapeRec} />
+                <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
+                    <Tooltip
+                        title={revDescription}
+                        placement='bottom'
+                    >
+                        <Grid className={clsx(classes.shapeDottedStart1, classes.shapeCircle)} />
+                    </Tooltip>
+                </Grid>
+                <Grid item className={classes.shapeRecBack} />
             </Grid>
-            <Grid item className={classes.shapeRecBack} />
-        </Grid>
-    );
+        );
+    };
 
 
     const items = [];
@@ -569,6 +585,7 @@ export default function Environments() {
                     items.push(
                         <Grid item>
                             <Grid className={classes.textShape4} />
+                            {returnItem1(allRevisions[revision].description)}
                             {item1}
                             <Grid className={classes.textShape2}>
                                 {allRevisions[revision].key}
@@ -634,6 +651,7 @@ export default function Environments() {
                                     />
                                 </Button>
                             </Grid>
+                            {returnItem6(allRevisions[revision].description)}
                             {item6}
                         </Grid>,
                     );
@@ -813,12 +831,11 @@ export default function Environments() {
                         </Typography>
                         <Box mb={3}>
                             <TextField
-                                margin='dense'
                                 autoFocus
-                                id='name'
                                 name='description'
-                                label='Description'
+                                margin='dense'
                                 variant='outlined'
+                                label='Description'
                                 value={description}
                                 helperText={(
                                     <FormattedMessage
