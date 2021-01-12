@@ -1954,7 +1954,7 @@ public class APIMappingUtil {
         return operationsDTOs;
     }
 
-    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
+    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList, String orgId) {
         APIProductListDTO listDto = new APIProductListDTO();
         List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
         for (APIProduct apiProduct : productList) {
@@ -2055,7 +2055,8 @@ public class APIMappingUtil {
             }
         }
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(), null);
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(),
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 

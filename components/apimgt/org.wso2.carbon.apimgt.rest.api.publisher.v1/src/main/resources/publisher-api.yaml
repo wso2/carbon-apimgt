@@ -4622,6 +4622,7 @@ paths:
 
         Each retrieved API Product is represented with a minimal amount of attributes. If you want to get complete details of an API Product, you need to use **Get details of an API Product** operation.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - name: query

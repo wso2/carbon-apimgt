@@ -3296,7 +3296,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String swagger;
         if (api.getSwaggerDefinition() == null) { // If definition is not in the API object
             if (api.getUuid() != null) {
-                swagger = getOpenAPIDefinition(api.getUuid(), tenantDomain); 
+                swagger = getOpenAPIDefinition(api.getUuid(), api.getOrganizationId());
             } else {
                 swagger = getOpenAPIDefinition(api.getId(), api.getOrganizationId()); // TODO this needs to be changed to uuid based one
             }
@@ -3328,8 +3328,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilder builder = null;
         APIProductIdentifier apiProductId = apiProduct.getId();
 
-        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId(), null));
-
         String provider = apiProductId.getProviderName();
         if (provider.contains("AT")) {
             provider = provider.replace("-AT-", "@");
@@ -3337,6 +3335,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
+        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId(), tenantDomain));
+
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         gatewayManager.setProductResourceSequences(this, apiProduct);
@@ -4104,8 +4104,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
                                    String orgId) throws DuplicateAPIException, APIManagementException {
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
+        API existingAPI = getAPIbyUUID(existingApiId, orgId);
 
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
@@ -4134,7 +4133,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String newAPIId = newAPI.getUuid();
         
         // copy docs
-        List<Documentation> existingDocs = getAllDocumentation(existingApiId, tenantDomain);
+        List<Documentation> existingDocs = getAllDocumentation(existingApiId, orgId);
 
         if (existingDocs != null) {
             for (Documentation documentation : existingDocs) {
@@ -4148,7 +4147,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         
         // copy icon
-        ResourceFile icon = getIcon(existingApiId, tenantDomain);
+        ResourceFile icon = getIcon(existingApiId, orgId);
         if (icon != null) {
             setThumbnailToAPI(newAPIId, icon, orgId);
         }
@@ -4163,14 +4162,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         
         // copy wsdl 
         if (existingAPI.getWsdlUrl() != null) {
-            ResourceFile wsdl = getWSDL(existingApiId, tenantDomain);
+            ResourceFile wsdl = getWSDL(existingApiId, orgId);
             if (wsdl != null) {
                 addWSDLResource(newAPIId, wsdl, null, orgId);
             }
         }
         
         // copy graphql definition
-        String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, tenantDomain);
+        String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, orgId);
         if(graphQLSchema != null) {
             saveGraphqlSchemaDefinition(newAPIId, graphQLSchema, orgId);
         }
@@ -10517,7 +10516,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
-            populateAPIInformation(uuid, tenantDomain, getOrganizationForRegistry(uuid), api);
+            populateAPIInformation(uuid, tenantDomain, org, api);
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);

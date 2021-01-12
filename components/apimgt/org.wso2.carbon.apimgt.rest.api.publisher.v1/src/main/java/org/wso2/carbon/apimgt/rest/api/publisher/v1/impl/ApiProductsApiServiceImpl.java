@@ -629,8 +629,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
+
     @Override
-    public Response apiProductsGet(Integer limit, Integer offset, String query, String accept,
+    public Response apiProductsGet(String organizationId, Integer limit, Integer offset, String query, String accept,
             String ifNoneMatch, MessageContext messageContext) {
 
         List<APIProduct> allMatchedProducts = new ArrayList<>();
@@ -657,8 +658,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
             allMatchedProducts.addAll(apiProducts);
+            String orgId = getOrgId(organizationId);
 
-            apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(allMatchedProducts);
+            apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(allMatchedProducts, orgId);
 
             //Add pagination section in the response
             Object totalLength = result.get("length");
@@ -761,5 +763,15 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
+    }
+
+    private String getOrgId(String organizationId) {
+        String orgId;
+        if (organizationId != null) {
+            orgId = organizationId;
+        } else {
+            orgId = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        }
+        return orgId;
     }
 }

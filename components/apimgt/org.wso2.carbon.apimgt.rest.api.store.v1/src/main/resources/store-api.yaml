@@ -128,6 +128,7 @@ paths:
         * By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
         * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/requestedTenant'
@@ -187,6 +188,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
@@ -240,6 +242,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/labelName'
       - $ref: '#/components/parameters/environmentName'
@@ -310,6 +313,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-None-Match'
       - $ref: '#/components/parameters/requestedTenant'
@@ -355,6 +359,7 @@ paths:
       description: |
         This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Developer Portal, for a requested development language.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - name: language
         in: path
@@ -398,6 +403,7 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       operationId: getWSDLOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/labelName'
       - $ref: '#/components/parameters/environmentName'
@@ -455,6 +461,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's documents, you need to provide Authorization header.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
@@ -507,6 +514,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's document, you need to provide Authorization header.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/requestedTenant'
@@ -565,6 +573,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's document content, you need to provide Authorization header.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/documentId'
       - $ref: '#/components/parameters/requestedTenant'
@@ -627,6 +636,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
@@ -679,6 +689,7 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrieve ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
@@ -712,6 +723,7 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrieve the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
@@ -765,6 +777,7 @@ paths:
 
         `X-WSO2-Tenant` header can be used to add or update the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       requestBody:
@@ -813,6 +826,7 @@ paths:
 
         `X-WSO2-Tenant` header can be used to delete the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-Match'
@@ -841,6 +855,7 @@ paths:
         Get a list of Comments that are already added to APIs
       operationId: getAllCommentsOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/limit'
@@ -873,6 +888,7 @@ paths:
       summary: Add an API Comment
       operationId: addCommentToAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       requestBody:
         description: |
@@ -928,6 +944,7 @@ paths:
         Get the individual comment given by a username for a certain API.
       operationId: getCommentOfAPI
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/commentId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
@@ -982,6 +999,7 @@ paths:
         Remove a Comment
       operationId: deleteComment
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/commentId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/If-Match'
@@ -1016,6 +1034,7 @@ paths:
 
         `X-WSO2-Tenant` header can be used to retrive API subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/If-None-Match'
@@ -2026,6 +2045,7 @@ paths:
         **IMPORTANT:**
         * It is mandatory to provide either **apiId** or **applicationId**.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId-Q'
       - $ref: '#/components/parameters/applicationId-Q'
       - $ref: '#/components/parameters/groupId'
@@ -2073,6 +2093,7 @@ paths:
       description: |
         This operation can be used to add a new subscription providing the id of the API and the application.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
@@ -3148,6 +3169,7 @@ paths:
       description: |
         This operation can be used to retrieve complexity related details belonging to an API by providing the API id.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -3174,6 +3196,7 @@ paths:
       description: |
         This operation can be used to retrieve all types and fields of the GraphQL Schema by providing the API id.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/apiId'
       responses:
         200:
@@ -5270,6 +5293,13 @@ components:
       schema:
         type: boolean
         default : false
+    organizationId:
+      name: organizationId
+      in: query
+      description: |
+        The Organization which the API belongs to.
+      schema:
+        type: string
     apiId:
       name: apiId
       in: path

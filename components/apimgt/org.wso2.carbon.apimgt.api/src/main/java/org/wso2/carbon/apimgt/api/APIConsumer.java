@@ -912,11 +912,11 @@ public interface APIConsumer extends APIManager {
      * @param api API  
      * @param environmentName environment name
      * @param environmentType environment type
-     * @param tenantDomain tenant domain
+     * @param orgId tenant domain
      * @return WSDL of the API
      * @throws APIManagementException when error occurred while getting the WSDL
      */
-    ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
+    ResourceFile getWSDL(API api, String environmentName, String environmentType, String orgId)
             throws APIManagementException;
     /**
      * Returns application attributes defined in configuration

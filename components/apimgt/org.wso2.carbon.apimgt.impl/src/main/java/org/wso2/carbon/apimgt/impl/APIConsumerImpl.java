@@ -5114,10 +5114,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
+    public ResourceFile getWSDL(API api, String environmentName, String environmentType, String orgId)
             throws APIManagementException {
         WSDLValidationResponse validationResponse;
-        ResourceFile resourceFile = getWSDL(api.getUuid(), tenantDomain);
+        ResourceFile resourceFile = getWSDL(api.getUuid(), orgId);
         if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
             validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
         } else {
@@ -5424,8 +5424,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
+    public String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, orgId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 
@@ -5500,7 +5500,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiTenantDomain;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId,null);
+        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
@@ -5977,20 +5977,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId)
             throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
-            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
-                    uuid);
+            Organization org = new Organization(orgId);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equals(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
-                    api = addTiersToAPI(api, requestedTenantDomain);
+                    populateAPIInformation(uuid, orgId, org, api);
+                    api = addTiersToAPI(api, orgId);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -6003,11 +6002,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    private API addTiersToAPI(API api, String requestedTenantDomain) throws APIManagementException {
+    private API addTiersToAPI(API api, String orgId) throws APIManagementException {
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(requestedTenantDomain);
+                    .getTenantId(orgId);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error when getting tiers");
         }

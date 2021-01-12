@@ -94,11 +94,11 @@ public interface APIManager {
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param orgId tenantDomain for the registry
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
-    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId)
             throws APIManagementException;
 
     /**
@@ -188,11 +188,11 @@ public interface APIManager {
     /**
      * Get graphql schema definition
      * @param apiId
-     * @param tenantDomain
+     * @param orgId
      * @return
      * @throws APIManagementException
      */
-    String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException;
+    String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException;
 
     /**
      * Returns the swagger v2.0 definition as a string
@@ -208,11 +208,11 @@ public interface APIManager {
      * Returns the OpenAPI definition as a string
      *
      * @param apiId id of the api
-     * @param tenantDomain tenant
+     * @param orgId
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
+    String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
     /**
      * Checks whether the given document already exists for the given api/product
      *

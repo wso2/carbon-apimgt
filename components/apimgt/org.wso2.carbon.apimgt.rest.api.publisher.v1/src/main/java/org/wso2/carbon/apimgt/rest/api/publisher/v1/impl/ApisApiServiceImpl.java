@@ -652,7 +652,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API api = apiProvider.getAPIbyUUID(apiId, orgId);
             APIIdentifier apiIdentifier = api.getId();
-            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier,organizationId);
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, orgId);
             // Get configuration file, retrieve API token and collection id
             JSONObject securityAuditPropertyObject = apiProvider.getSecurityAuditAttributesFromConfig(username);
             String apiToken = (String) securityAuditPropertyObject.get("apiToken");
@@ -1632,7 +1632,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
         APIIdentifier apiIdentifier = originalAPI.getId();
-        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, organizationId);
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, orgId);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
@@ -3208,11 +3208,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getWSDLOfAPI(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
         try {
+            checkAPIExistsInOrganization(apiId, organizationId);
+            String orgId = getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            ResourceFile resource = apiProvider.getWSDL(apiId, tenantDomain);
+            ResourceFile resource = apiProvider.getWSDL(apiId, orgId);
             return RestApiUtil.getResponseFromResourceFile(resource.getName(), resource);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -3297,7 +3298,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //todo: check if API's tiers are properly set before Publishing
             //APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(apiIdentifier, action.toString());
-            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(organizationId, apiId, action.toString(), lcMap);
+            APIStateChangeResponse stateChangeResponse = apiProvider.changeLifeCycleStatus(orgId, apiId,
+                    action.toString(), lcMap);
 
             //returns the current lifecycle state
             LifecycleStateDTO stateDTO = getLifecycleState(apiIdentifier, apiId, orgId); // todo try to prevent this call

@@ -23,13 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
-import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.api.WorkflowStatus;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -38,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
@@ -49,6 +44,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -81,11 +77,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId,
+    public Response subscriptionsGet(String organizationId, String apiId, String applicationId, String groupId,
                                      String xWSO2Tenant, Integer offset, Integer limit, String ifNoneMatch,
                                      MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions;
         List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
@@ -99,6 +94,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
+            String orgId = getOrgId(organizationId, xWSO2Tenant);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
@@ -106,7 +102,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow.
 
                 // This will fail with an authorization failed exception if user does not have permission to access the API
-                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, orgId);
 
                 if (apiTypeWrapper.isAPIProduct()) {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
@@ -122,7 +118,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset, orgId);
 
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -142,7 +138,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscribedAPIList.addAll(subscriptions);
 
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
-                        offset);
+                        offset, orgId);
                 return Response.ok().entity(subscriptionListDTO).build();
 
             } else {
@@ -159,6 +155,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username, e,
                         log);
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -170,7 +169,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body, String xWSO2Tenant, MessageContext messageContext) {
+    public Response subscriptionsPost(SubscriptionDTO body, String organizationId, String xWSO2Tenant,
+                                      MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
@@ -329,7 +329,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                             currentThrottlingPolicy, requestedThrottlingPolicy);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
-            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
+                    tenantDomain);
             WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
             if (workflowResponse instanceof HttpWorkflowResponse) {
                 String payload = workflowResponse.getJSONPayload();
@@ -413,7 +414,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 SubscribedAPI addedSubscribedAPI = apiConsumer
                         .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
                 SubscriptionDTO addedSubscriptionDTO =
-                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
+                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI, tenantDomain);
                 subscriptions.add(addedSubscriptionDTO);
 
             } catch (APIMgtAuthorizationFailedException e) {
@@ -456,8 +457,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-
-            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI, tenantDomain);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
@@ -529,5 +530,44 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
         }
         return subscribedAPI;
+    }
+
+    /**
+     * Validate whether the provided API exists in the specific organization
+     * @param apiId API UUID
+     * @param organizationId UUID of the Organization which the API belongs to
+     *
+     */
+    private void checkAPIExistsInOrganization(String apiId, String organizationId) throws APIManagementException {
+        if (organizationId != null) {
+            String retrivedorgId = RestApiCommonUtil.getLoggedInUserProvider().getOrganizationIDbyAPIUUID(apiId);
+            if (retrivedorgId == null || !retrivedorgId.equals(organizationId)) {
+                String errorMessage =
+                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
+                RestApiUtil.handleInternalServerError(errorMessage, log);
+            }
+        }
+    }
+
+    /**
+     * Getting the Identifier of an Organization
+     * @param organizationId UUID of the Organization which the API belongs to
+     * @param tenantDomain   TenantDomain which the API belongs to
+     * @return tenantDomain or OrganizationUUID
+     */
+    private String getOrgId(String organizationId, String tenantDomain) throws UserStoreException {
+        if (organizationId != null) {
+            return organizationId;
+        } else {
+            if (tenantDomain != null) {
+                if (!APIUtil.isTenantAvailable(tenantDomain)) {
+                    RestApiUtil.handleBadRequest("Provided tenant domain '" + tenantDomain + "' is invalid",
+                            ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
+                }
+                return tenantDomain;
+            } else {
+                return RestApiCommonUtil.getLoggedInUserTenantDomain();
+            }
+        }
     }
 }

@@ -1096,10 +1096,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException {
+    public ResourceFile getWSDL(String apiId, String orgId) throws APIManagementException {
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
-                    .getWSDL(new Organization(tenantDomain), apiId);
+            Organization org = Organization.getInstance(orgId);
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getWSDL(org, apiId);
             if (resource != null) {
                 return new ResourceFile(resource.getContent(), resource.getContentType());
             } else {
@@ -1177,10 +1177,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException {
+    public String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException {
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+            Organization org = Organization.getInstance(orgId);
+            definition = apiPersistenceInstance.getGraphQLSchema(org, apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
                     e);
@@ -1197,7 +1198,6 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
-        String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
         String id;
         if (apiId.getUUID() != null) {
@@ -1215,10 +1215,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
     
     @Override
-    public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+    public String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException {
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
+            Organization org = Organization.getInstance(orgId);
+            definition = apiPersistenceInstance.getOASDefinition(org, apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1258,7 +1259,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    public boolean isDocumentationExist(Identifier identifier, String docName, String orgId) throws APIManagementException {
+    public boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException {
         String docPath = "";
 
             docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()

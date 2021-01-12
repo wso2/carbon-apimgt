@@ -196,7 +196,7 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end) throws APIManagementException {
                     return null;
                 }
 
@@ -206,7 +206,12 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
+                public API getAPIbyUUID(String uuid, String orgId) throws APIManagementException {
+                    return null;
+                }
+
+                @Override
+                public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
                     return null;
                 }
 
@@ -215,6 +220,16 @@ public class AbstractAPIManagerTestCase {
                         throws APIManagementException {
                     // TODO Auto-generated method stub
                     return null;
+                }
+
+                @Override
+                public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+                    return null;
+                }
+
+                @Override
+                public boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException {
+                    return false;
                 }
             };
             Assert.fail("User store exception not thrown for error scenario");
@@ -765,7 +780,7 @@ public class AbstractAPIManagerTestCase {
         
         Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN), swaggerContent);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier,null), swaggerContent);
+        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier, abstractAPIManager.tenantDomain), swaggerContent);
     }
 
     @Test
