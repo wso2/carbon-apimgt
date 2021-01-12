@@ -78,6 +78,7 @@ import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 import TestConsole from './TestConsole/TestConsole';
+import HistoryTree from './History/HistoryTree';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -664,6 +665,14 @@ class Details extends Component {
                                 Icon={<StoreIcon />}
                             />
                         )}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.history',
+                                defaultMessage: 'history',
+                            })}
+                            to={pathPrefix + 'history'}
+                            Icon={<DocumentsIcon />}
+                        />
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
@@ -783,6 +792,7 @@ class Details extends Component {
                                     component={() => <TestConsole apiObj={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
+                                <Route path={Details.subPaths.HISTORY} component={HistoryTree} />
                             </Switch>
                         </div>
                     </div>
@@ -834,6 +844,7 @@ Details.subPaths = {
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
     TRYOUT: '/apis/:api_uuid/test-console',
     QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
+    HISTORY: '/apis/:api_uuid/history',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

@@ -209,9 +209,9 @@ class API extends Resource {
         const apiZip = this.client.then((client) => {
             return client.apis['Import Export'].exportAPI({
                 apiId: apiId
-            },  this._requestMetaData({ 
-                    'accept': 'application/zip'
-                })
+            }, this._requestMetaData({
+                'accept': 'application/zip'
+            })
             );
         });
         return apiZip;
@@ -480,10 +480,10 @@ class API extends Resource {
      * 
      * @param id {String} The api id.
      */
-    generateMockScripts(id=this.id) {
-        const promise_get = this.client.then(client => { 
+    generateMockScripts(id = this.id) {
+        const promise_get = this.client.then(client => {
             return client.apis['APIs'].generateMockScripts(
-                { 
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -498,10 +498,10 @@ class API extends Resource {
      * 
      * @param {String} id 
      */
-    getGeneratedMockScriptsOfAPI(id=this.id) {
-        const promise_get = this.client.then(client => { 
-            return client.apis['APIs'].getGeneratedMockScriptsOfAPI( 
-                { 
+    getGeneratedMockScriptsOfAPI(id = this.id) {
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].getGeneratedMockScriptsOfAPI(
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -544,7 +544,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
-                { limit, offset},
+                { limit, offset },
                 this._requestMetaData(),
             );
         });
@@ -1713,7 +1713,7 @@ class API extends Resource {
     /**
      * Get the complexity related details of an API
      */
-    
+
     getGraphqlPoliciesComplexity(id) {
         const promisePolicies = this.client.then(client => {
             return client.apis['GraphQL Policies'].getGraphQLPolicyComplexityOfAPI(
@@ -1725,7 +1725,7 @@ class API extends Resource {
         });
         return promisePolicies.then(response => response.body);
     }
-    
+
     /**
      * Update complexity related details of an API
      */
@@ -1759,7 +1759,7 @@ class API extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
-    
+
 
     /**
      *
@@ -1813,12 +1813,12 @@ class API extends Resource {
         });
     }
 
-     /**
-     * Get details of a given API
-     * @param id {string} UUID of the api.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
+    /**
+    * Get details of a given API
+    * @param id {string} UUID of the api.
+    * @param callback {function} A callback function to invoke after receiving successful response.
+    * @returns {promise} With given callback attached to the success chain else API invoke promise.
+    */
     static getAPIById(id, callback = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
@@ -1975,7 +1975,7 @@ class API extends Resource {
         } else {
             return promisedAPI;
         }
-       
+
     }
 
     /**
@@ -2638,6 +2638,198 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
+    }
+    /**
+   *
+   * Return sample mocked model data for list history
+   * @export
+   * @returns {*} Mocked history list
+   */
+    static listHistory(offset = 0) {
+        const response1 = {
+            count: 1,
+            list: [
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Deploy Revision 1 to Gateway',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/deploy-revision',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Create Revision 1',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/revisions',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/swagger',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f32',
+                    operationId: 'Create API',
+                    description: 'POST /apis?openAPIVersion=v3',
+                    user: 'user1',
+                    timestamp: {},
+                },
+            ],
+            pagination: {
+                offset: 0,
+                limit: 1,
+                total: 10,
+                next: 'string',
+                previous: 'string',
+            },
+        };
+
+        const response2_page1 = {
+            count: 10,
+            list: [
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/swagger',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Deploy Revision 2 to Gateway',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/deploy-revision',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Create Revision 2',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/revisions',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                // Revision 2 creation
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Deploy Revision 1 to Gateway',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/deploy-revision',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Create Revision 1',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/revisions',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                // Revision 1 created
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/swagger',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update Thumbnail',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/thumbnail',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f32',
+                    operationId: 'Import OpenAPI',
+                    description: 'POST /apis/import-openapi',
+                    user: 'user1',
+                    timestamp: {},
+                },
+            ],
+            pagination: {
+                offset,
+                limit: 10,
+                total: 16,
+                next: 'string',
+                previous: 'string',
+            },
+        };
+
+
+
+        const response2_page2 = {
+            count: 6,
+            list: [
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Deploy Revision 1 to Gateway',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/deploy-revision',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Create Revision 1',
+                    description: 'POST /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/revisions',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                // Revision 1 created
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/swagger',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update API',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f31',
+                    operationId: 'Update Thumbnail',
+                    description: 'PUT /apis/2a478f6e-dbd6-4036-9da8-33cf714886e5/thumbnail',
+                    user: 'user1',
+                    timestamp: {},
+                },
+                {
+                    id: '3333ce7e1-8233-46a5-9295-525dca347f32',
+                    operationId: 'Import OpenAPI',
+                    description: 'POST /apis/import-openapi',
+                    user: 'user1',
+                    timestamp: {},
+                },
+            ],
+            pagination: {
+                offset,
+                limit: 10,
+                total: 16,
+                next: 'string',
+                previous: 'string',
+            },
+        };
+        return Promise.resolve({ body: offset === 0 ? response2_page1: response2_page2 });
     }
 }
 
