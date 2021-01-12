@@ -15731,7 +15731,7 @@ public class ApiMgtDAO {
                     apiRevision.setCreatedBy(rs.getString(6));
                     if (!StringUtils.isEmpty(rs.getString(7))) {
                         apiRevisionDeployment.setDeployment(rs.getString(7));
-                        apiRevisionDeployment.setRevisionUUID(rs.getString(8));
+                        //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
                         apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(9));
                         apiRevisionDeployment.setDeployedTime(rs.getString(10));
                         apiRevisionDeploymentList.add(apiRevisionDeployment);
@@ -15864,6 +15864,35 @@ public class ApiMgtDAO {
         return apiRevisionDeploymentList;
     }
 
+    /**
+     * Get APIRevisionDeployment details by providing ApiUUID
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentsByApiUUID(String apiUUID) throws APIManagementException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    apiRevisionDeployment.setDeployment(rs.getString(1));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString(2));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(3));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(4));
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details for api uuid: " +
+                    apiUUID, e);
+        }
+        return apiRevisionDeploymentList;
+    }
     /**
      * Remove an API revision Deployment mapping record to the database
      *
