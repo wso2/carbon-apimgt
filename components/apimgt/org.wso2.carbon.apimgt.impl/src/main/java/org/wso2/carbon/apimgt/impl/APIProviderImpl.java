@@ -48,6 +48,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ErrorItem;
@@ -3993,6 +3994,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
+        }
+        if (newVersion.equals(existingAPI.getId().getVersion())) {
+            throw new APIMgtResourceAlreadyExistsException(
+                    "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName());
         }
         APIIdentifier existingAPIId = existingAPI.getId();
         String existingAPIStatus = existingAPI.getStatus();
