@@ -977,6 +977,8 @@ public final class APIConstants {
     public static final String NO_PERMISSION_ERROR = "noPermissions";
     public static final String JSON_PARSE_ERROR = "parseErrors";
 
+    public static final String ACCOUNT_LOCKED_CLAIM = "http://wso2.org/claims/identity/accountLocked";
+
     //TODO: move this to a common place (& Enum) to be accessible by all components
     public static class KeyValidationStatus {
 
