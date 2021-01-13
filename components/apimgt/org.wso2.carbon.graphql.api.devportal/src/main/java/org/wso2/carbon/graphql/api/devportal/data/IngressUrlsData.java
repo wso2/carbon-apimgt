@@ -1,6 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.DeployEnvironment;
@@ -14,6 +15,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,7 +27,7 @@ import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.e
 
 public class IngressUrlsData {
 
-    public List<IngressUrlDTO>  getIngressUrlData(String Id) throws APIManagementException, GovernanceException {
+    public List<IngressUrlDTO>  getIngressUrlData(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
 //        RegistryData registryData = new RegistryData();
 //        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
 
@@ -84,7 +87,7 @@ public class IngressUrlsData {
         return apiDeployedIngressURLs;
     }
 
-    public List<DeploymentClusterInfoDTO> getDeploymentClusterData(String Id) throws APIManagementException, GovernanceException {
+    public List<DeploymentClusterInfoDTO> getDeploymentClusterData(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
         List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
         List<IngressUrlDTO> ingressUrlDTOList = getIngressUrlData(Id);
 
@@ -94,7 +97,7 @@ public class IngressUrlsData {
         return deploymentClusterInfoDTOList;
     }
 
-    public List<DeployEnvironment> getDeplymentEnvironmentName(String Id) throws APIManagementException, GovernanceException {
+    public List<DeployEnvironment> getDeplymentEnvironmentName(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
         List<IngressUrlDTO> ingressUrlDTOList = getIngressUrlData(Id);
         List<DeployEnvironment> deployEnvironmentList = new ArrayList<>();
         for(int i = 0; i< ingressUrlDTOList.size();i++){

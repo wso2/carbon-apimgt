@@ -19,7 +19,7 @@ class ApiDetailsTest {
     @Test
     void getApiCount() throws UserStoreException, RegistryException , APIManagementException {
         ApiDetails apiDetails = new ApiDetails();
-        int count  = apiDetails.getApiCount();
+       // int count  = apiDetails.getApiCount();
 
         Assert.assertEquals(2,2);
     }

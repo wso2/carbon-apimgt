@@ -1,5 +1,6 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
@@ -8,12 +9,14 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class SubscribeAvailableData {
 
 
-    public boolean getSubscriptionAvailable(String Id) throws GovernanceException {
+    public boolean getSubscriptionAvailable(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
         ArtifactData artifactData = new ArtifactData();
         GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
         String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_PROVIDER)));
@@ -25,7 +28,7 @@ public class SubscribeAvailableData {
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
                                                    String subscriptionAllowedTenants) {
 
-        String userTenant = RestApiUtil.getLoggedInUserTenantDomain();
+        String userTenant = RestApiUtil.getLoggedInUserGroupId();
         boolean subscriptionAllowed = false;
         if (!userTenant.equals(apiTenant)) {
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {

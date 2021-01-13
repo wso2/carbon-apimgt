@@ -8,9 +8,17 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.PersistenceManager;
+import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
+import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -29,10 +37,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
 import static org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantAwareUsername;
@@ -42,10 +47,12 @@ public class ArtifactData {
     protected Registry registry;
     protected String username;
     protected String tenantDomain;
+    //private final String userNameWithoutChange;
+    APIPersistence apiPersistenceInstance;
 
 
 
-    public GenericArtifact getDevportalApis(String apiId) throws GovernanceException {
+    public GenericArtifact getDevportalApis(String apiId) throws APIPersistenceException, RegistryException, UserStoreException {
         boolean tenantFlowStarted = false;
         //String providername = null;
         GenericArtifact apiArtifact = null;
@@ -76,7 +83,7 @@ public class ArtifactData {
 
             apiArtifact = artifactManager.getGenericArtifact(apiId);
             //providername = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        }catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e){
+        }catch (RegistryException e){
 
         }finally {
             if (tenantFlowStarted) {
@@ -119,7 +126,7 @@ public class ArtifactData {
         return registry;
     }
 
-    public GenericArtifact[] getAllApis() throws APIManagementException, RegistryException, UserStoreException {
+    public GenericArtifact[] getAllApis() throws APIPersistenceException,APIManagementException, RegistryException, UserStoreException {
         //ArtifactData artifactData = new ArtifactData();
 
         boolean tenantFlowStarted = false;
@@ -138,7 +145,7 @@ public class ArtifactData {
             artifacts = artifactManager.getAllGenericArtifacts();
 
 
-        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException | APIManagementException e) {
+        } catch (RegistryException e) {
 
         } finally {
             if (tenantFlowStarted) {
@@ -187,6 +194,41 @@ public class ArtifactData {
 
         return IdentifireParams;
 
+    }
+
+
+    public int getDevportalAPIS() throws APIManagementException, UserStoreException, RegistryException, APIPersistenceException {
+
+        Organization org = new Organization("carbon.super");
+
+        //final String userNameWithoutChange = "wso2.anonymous.user";
+        //String userame = (userNameWithoutChange != null)? userNameWithoutChange: username;
+
+        //String[] roles = APIUtil.getListOfRoles("wso2.anonymous.user");
+//
+        String[] roles = new String[1];
+        roles[0] = "system/wso2.anonymous.role";
+        Map<String, Object> properties = null;
+//        //UserContext userCtx = new UserContext("",org,properties, roles);
+        UserContext userCtx = new UserContext("wso2.anonymous.user", org, properties,  roles);
+//
+//        String requestedTenantDomain = org.getName();
+//        //RegistryPersistenceImpl.RegistryHolder holder = getRegistry(requestedTenantDomain);
+
+        String searchQuery = "";
+        String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, userCtx);
+
+
+        //String searchQuery = "store_view_roles=(null OR system\\/wso2.anonymous.role)&name=*&enableStore=(true OR null)&lcState=(PUBLISHED OR PROTOTYPED)";
+
+        Registry userRegistry = getRegistry();
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+        DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
+                0, 25, userCtx);
+
+        List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
+
+        return searchAPIs.getTotalAPIsCount();
     }
 
 }

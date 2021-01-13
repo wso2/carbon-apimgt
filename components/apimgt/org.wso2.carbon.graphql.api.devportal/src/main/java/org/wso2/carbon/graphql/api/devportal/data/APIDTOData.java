@@ -1,10 +1,12 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -75,23 +77,26 @@ public class APIDTOData {
 //        return new APIDTO(uuid,apiName,context,version,provider,type,createdTime,lastUpdate);
 //
 //    }
-    public int getApiCount(){
+    public int getApiCount() throws RegistryException, UserStoreException, APIManagementException, APIPersistenceException {
         int count = 0;
         //int apiId = 0;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_API_ID)) {
-            //statement.setString(1, Id);
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection.prepareStatement(GET_API_ID)) {
+//            //statement.setString(1, Id);
+//
+//            ResultSet resultSet = statement.executeQuery();
+//
+//            while (resultSet.next()) {
+//                //apiId = resultSet.getInt("API_ID");
+//                count = count+1;
+//            }
+//        } catch (SQLException e) {
+//
+//        }
+//        return count;
 
-            ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                //apiId = resultSet.getInt("API_ID");
-                count = count+1;
-            }
-        } catch (SQLException e) {
-
-        }
-        return count;
+        ArtifactData artifactData = new ArtifactData();
+        return artifactData.getDevportalAPIS();
     }
 
     public String getApiName(String Id){

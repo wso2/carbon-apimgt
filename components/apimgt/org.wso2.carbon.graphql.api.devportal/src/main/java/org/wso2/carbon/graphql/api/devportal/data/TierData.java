@@ -6,12 +6,14 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.RegistryData;
 import org.wso2.carbon.graphql.api.devportal.modules.TierDTO;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.graphql.api.devportal.modules.TierNameDTO;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -23,7 +25,7 @@ import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.replaceEm
 
 public class TierData {
 
-    public List<TierDTO> getTierData(String Id, String name) throws APIManagementException, GovernanceException, UserStoreException {
+    public List<TierDTO> getTierData(String Id, String name) throws APIManagementException, RegistryException, UserStoreException, APIPersistenceException {
 
 
         ArtifactData artifactData = new ArtifactData();
@@ -75,7 +77,7 @@ public class TierData {
 
     }
 
-    public List<TierNameDTO> getTierName(String Id) throws GovernanceException {
+    public List<TierNameDTO> getTierName(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
         ArtifactData artifactData = new ArtifactData();
 
         List<TierNameDTO> tierNameDTOS = new ArrayList<>();

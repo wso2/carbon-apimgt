@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -44,7 +45,7 @@ public class ApiDetails {
 
 
 
-    public List<Api> getAllApis() throws UserStoreException, RegistryException, OASPersistenceException, APIManagementException {
+    public List<Api> getAllApis() throws UserStoreException, RegistryException, OASPersistenceException, APIManagementException, APIPersistenceException {
         SubscribeAvailableData subscribeAvailableData = new SubscribeAvailableData();
         MonetizationLabelData monetizationLabelData = new MonetizationLabelData();
         ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
@@ -155,7 +156,7 @@ public class ApiDetails {
         return hasthumbnail;
     }
 
-    public String getEnvironmentList(String Id) throws GovernanceException {
+    public String getEnvironmentList(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
 
         ArtifactData artifactData = new ArtifactData();
         Set<String> environmentset = getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
@@ -216,7 +217,7 @@ public class ApiDetails {
     }
 
 
-    public int getApiCount() throws UserStoreException, RegistryException, APIManagementException {
+    public int getApiCount() throws UserStoreException, RegistryException, APIManagementException, APIPersistenceException {
 
        ArtifactData artifactData = new ArtifactData();
        return artifactData.getAllApis().length;
@@ -237,7 +238,7 @@ public class ApiDetails {
 
 
 
-    public Api getApi(String Id) throws APIManagementException, RegistryException, OASPersistenceException, UserStoreException {
+    public Api getApi(String Id) throws APIManagementException, RegistryException, OASPersistenceException, UserStoreException, APIPersistenceException {
         SubscribeAvailableData subscribeAvailableData = new SubscribeAvailableData();
         MonetizationLabelData monetizationLabelData = new MonetizationLabelData();
         ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
@@ -245,23 +246,25 @@ public class ApiDetails {
         ArtifactData artifactData = new ArtifactData();
 
 
-        String id = artifactData.getDevportalApis(Id).getId();
-        String name = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
+        GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
 
-        String description = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
+        String id = apiArtifact.getId();
+        String name = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
 
-        String provider = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        String description = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
 
-        String transport = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
+        String provider = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+
+        String transport = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
 
 
-        String thumbnailUrl = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
+        String thumbnailUrl = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
         boolean hasthumbnail = HasThumbnail(thumbnailUrl);
 
 
         String environments = getEnvironmentList(Id);
 
-        String wsdUrl = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_WSDL);
+        String wsdUrl = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_WSDL);
         String status  = getLcStateFromArtifact(artifactData.getDevportalApis(Id));
 
 
@@ -269,7 +272,7 @@ public class ApiDetails {
 
 
         //for monetizationLabel
-        String  tiers = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TIER);
+        String  tiers = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
         String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                 .getTenantId(tenantDomainName);
@@ -281,8 +284,8 @@ public class ApiDetails {
                 APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION));
 
 
-        String authorizationHeader = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER);
-        String apiSecurity = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
+        String authorizationHeader = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER);
+        String apiSecurity = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
 
         //
 
@@ -293,7 +296,7 @@ public class ApiDetails {
         String categories = getCatogories(getAPICategoriesFromAPIGovernanceArtifact(artifactData.getDevportalApis(Id)));
 
 
-        String keyManagers = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+        String keyManagers = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
         List<String> keyManagersList = null;
         if (StringUtils.isNotEmpty(keyManagers)) {
             keyManagersList =  new Gson().fromJson(keyManagers, List.class);

@@ -2,6 +2,7 @@ package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -13,6 +14,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.*;
 
@@ -24,7 +27,7 @@ public class APIUrlsData {
 //            new APIURLsDTO("2","http/x2","https/x2","x2","x22")
 //    );
 
-    public APIURLsDTO apiURLsDTO(String Id) throws APIManagementException, GovernanceException {
+    public APIURLsDTO apiURLsDTO(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
         //return apiurLsDTOS.stream().filter(x->x.getApiID().equals(Id)).findFirst().orElse(null);
 //        RegistryData registryData = new RegistryData();
 //        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
