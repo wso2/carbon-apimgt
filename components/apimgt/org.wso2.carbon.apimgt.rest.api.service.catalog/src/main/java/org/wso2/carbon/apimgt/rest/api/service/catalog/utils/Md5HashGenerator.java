@@ -23,33 +23,63 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class generates ETag hash value for the given files of the zip
  * using MD5 as the hashing algorithm.
  */
-public class ETagValueGenerator {
-    private static final Log log = LogFactory.getLog(ETagValueGenerator.class);
+public class Md5HashGenerator {
+    private static final Log log = LogFactory.getLog(Md5HashGenerator.class);
+    private static HashMap<String, String> endpoints = new HashMap<String, String>();
+
+    public String getHashForEndPoint(String endPointName)
+    {
+        return endpoints.get(endPointName);
+    }
 
     /**
-     * This generates the ETag value using the given algorithm
+     * This generates the md5 hash value using the given algorithm
      *
-     * @param files the List of File objects included in zip
+     * @param path files available directory location
      * @return String
      */
-    public static String getETag(List<File> files) {
-        String eTagValue = null;
-        try {
-            eTagValue = getHash(files);
-        } catch (NoSuchAlgorithmException | IOException e) {
-            log.error("Failed to generate E-Tag due to " + e.getMessage(), e);
+    public static HashMap<String, String> generateHash(String path) {
+
+        File dir = new File(path);
+        return loopDirectories(Objects.requireNonNull(dir.listFiles()));
+    }
+
+    /**
+     * This traversal through the directories and calculate md5
+     *
+     * @param files list of files available directory location
+     * @return HashMap<String, String>
+     */
+    private static HashMap<String, String> loopDirectories(File[] files) {
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                List<File> fList = Arrays.asList(Objects.requireNonNull(file.listFiles()));
+                try {
+                    endpoints.put(file.getName(), calculateHash(fList));
+                } catch (NoSuchAlgorithmException | IOException e) {
+                    log.error("Failed to generate E-Tag due to " + e.getMessage(), e);
+                }
+            }
         }
-        return eTagValue;
+        return endpoints;
     }
 
 
@@ -60,7 +90,7 @@ public class ETagValueGenerator {
      * @return String
      * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
      */
-    private static String getHash(List<File> files) throws NoSuchAlgorithmException, IOException {
+    private static String calculateHash(List<File> files) throws NoSuchAlgorithmException, IOException {
 
         MessageDigest md5Digest = MessageDigest.getInstance("MD5");
         return getFileChecksum(md5Digest, files.get(0)) + getFileChecksum(md5Digest, files.get(1));
