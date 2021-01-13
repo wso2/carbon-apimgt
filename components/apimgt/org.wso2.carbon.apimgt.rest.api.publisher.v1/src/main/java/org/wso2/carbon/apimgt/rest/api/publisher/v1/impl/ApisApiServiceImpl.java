@@ -42,6 +42,7 @@ import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -1116,7 +1117,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+                                new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
                         String inputLine;
                         StringBuilder responseString = new StringBuilder();
 
@@ -1131,7 +1132,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         Integer numErrors = Integer.valueOf(
                                 (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
                                         .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
-                        String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
+                        String decodedReport = new String(Base64Utils.decode(report), StandardCharsets.UTF_8);
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
@@ -1170,7 +1171,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Set the property to be attached in the body of the request
         // Attach API Definition to property called specfile to be sent in the request
         JSONObject jsonBody = new JSONObject();
-        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes("UTF-8")));
+        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         // Logic for HTTP Request
         String putUrl = baseUrl + "/" + auditUuid;
         URL updateApiUrl = new URL(putUrl);
@@ -1230,7 +1231,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
         httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
         outputStream = httpConn.getOutputStream();
-        writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
+        writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
         // Name property
         writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
                 .append("Content-Disposition: form-data; name=\"name\"")
@@ -1261,7 +1262,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug("HTTP status " + status);
             }
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+                    new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
             String inputLine;
             StringBuilder responseString = new StringBuilder();
 
@@ -4548,8 +4549,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.debug("Proxy configured, hence routing through configured proxy");
             String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
             String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
-            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-                    new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
+            HostConfiguration hostConfiguration = client.getHostConfiguration();
+            hostConfiguration.setProxy(proxyHost, Integer.parseInt(proxyPort));
+            client.setHostConfiguration(hostConfiguration);
         }
         try {
             int statusCode = client.executeMethod(method);
