@@ -5930,7 +5930,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, null, roles);
+        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
                     start, end, userCtx);
