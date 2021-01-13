@@ -6000,7 +6000,7 @@ paths:
         200:
           description: |
             OK.
-            The store alert configuration.
+            The Devportal alert configuration.
           headers:
             Content-Type:
               description: |
@@ -6731,7 +6731,7 @@ components:
           - apim:api_publish
         visibleRoles:
           type: array
-          description: The user roles that are able to access the API in Store
+          description: The user roles that are able to access the API in Devportal
           example: []
           items:
             type: string
@@ -7059,7 +7059,7 @@ components:
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the store
+            State of the API product. Only published api products are visible on the Devportal
           enum:
           - CREATED
           - PUBLISHED
@@ -7111,7 +7111,7 @@ components:
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the store
+            State of the API product. Only published api products are visible on the Devportal
           enum:
           - CREATED
           - PUBLISHED
@@ -8932,9 +8932,9 @@ components:
       title: SettingsDTO
       type: object
       properties:
-        storeUrl:
+        devportalUrl:
           type: string
-          description: Store URL
+          description: The Developer Portal URL
           example: https://localhost:9443/devportal
         environment:
           type: array

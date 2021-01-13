@@ -83,7 +83,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
         })
     }, tags={ "Alert Configuration" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The store alert configuration. ", response = AlertConfigListDTO.class),
+        @ApiResponse(code = 200, message = "OK. The Devportal alert configuration. ", response = AlertConfigListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAllAlertConfigs(@ApiParam(value = "The alert type.",required=true) @PathParam("alertType") String alertType) throws APIManagementException{
         return delegate.getAllAlertConfigs(alertType, securityContext);

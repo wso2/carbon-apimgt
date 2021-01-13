@@ -25,7 +25,7 @@ import AuthManager from './AuthManager';
 import Utils from './Utils';
 
 /**
- * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
+ * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Devportal, ect ..)
  * it's highly unlikely to change the REST API Swagger definition (swagger.json) file on the fly,
  * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
  */

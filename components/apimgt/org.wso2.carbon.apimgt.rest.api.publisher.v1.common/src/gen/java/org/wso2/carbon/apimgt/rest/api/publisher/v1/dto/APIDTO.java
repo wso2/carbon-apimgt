@@ -718,7 +718,7 @@ return null;
   }
 
   /**
-   * The user roles that are able to access the API in Store
+   * The user roles that are able to access the API in Devportal
    **/
   public APIDTO visibleRoles(List<String> visibleRoles) {
     this.visibleRoles = visibleRoles;
@@ -726,7 +726,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[]", value = "The user roles that are able to access the API in Store")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to access the API in Devportal")
   @JsonProperty("visibleRoles")
   public List<String> getVisibleRoles() {
     return visibleRoles;

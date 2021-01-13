@@ -21,7 +21,7 @@ import Settings from 'Settings';
 import AuthManager from "./AuthManager";
 
 /**
- * Utility class for Store application
+ * Utility class for Devportal application
  */
 class Utils {
 
@@ -275,7 +275,7 @@ Utils.CONST = {
     LOGIN_SIGN_UP_PATH: '/login/signup',
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
-    SWAGGER_YAML: '/api/am/store/v1/swagger.yaml',
+    SWAGGER_YAML: '/api/am/devportal/v1/swagger.yaml',
     PROTOCOL: 'https://',
 };
 
