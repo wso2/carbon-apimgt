@@ -20,7 +20,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -61,6 +61,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Checkbox from '@material-ui/core/Checkbox';
 import InputLabel from '@material-ui/core/InputLabel';
 import API from 'AppData/api';
+import { ConfirmDialog } from 'AppComponents/Shared/index';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -246,6 +247,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
+    const intl = useIntl();
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
     let revisionCount;
@@ -269,7 +271,10 @@ export default function Environments() {
     const [mgLabels, setMgLabels] = useState(null);
     const [SelectedEnvironment, setSelectedEnvironment] = React.useState([]);
     const [open, setOpen] = React.useState(false);
-
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [revisionToDelete, setRevisionToDelete] = useState([]);
+    const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
+    const [revisionToRestore, setRevisionToRestore] = useState([]);
 
     useEffect(() => {
         restApi.getDeployments()
@@ -292,6 +297,15 @@ export default function Environments() {
         // });
     }, []);
 
+    const toggleOpenConfirmDelete = (revisionName, revisionId) => {
+        setRevisionToDelete([revisionName, revisionId]);
+        setConfirmDeleteOpen(!confirmDeleteOpen);
+    };
+
+    const toggleOpenConfirmRestore = (revisionName, revisionId) => {
+        setRevisionToRestore([revisionName, revisionId]);
+        setConfirmRestoreOpen(!confirmRestoreOpen);
+    };
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -352,21 +366,34 @@ export default function Environments() {
     function deleteRevision(revisionId) {
         restApi.deleteRevision(api.id, revisionId)
             .then(() => {
-                Alert.info('Revision Create Successfully');
+                Alert.info(intl.formatMessage({
+                    defaultMessage: 'Revision Deleted Successfully',
+                    id: 'Apis.Details.Environments.Environments.revision.delete.success',
+                }));
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 } else {
-                    Alert.error('Something went wrong while deleting the revision');
+                    Alert.error(intl.formatMessage({
+                        defaultMessage: 'Something went wrong while deleting the revision',
+                        id: 'Apis.Details.Environments.Environments.revision.delete.error',
+                    }));
                 }
-                console.error(error);
             }).finally(() => {
                 restApi.getRevisions(api.id).then((result) => {
                     setRevisions(result.body.list);
                 });
             });
     }
+
+    const runActionDelete = (confirm, revisionId) => {
+        if (confirm) {
+            deleteRevision(revisionId);
+        }
+        setConfirmDeleteOpen(!confirmDeleteOpen);
+        setRevisionToDelete([]);
+    };
 
     /**
       * Handles restore revision
@@ -388,6 +415,14 @@ export default function Environments() {
                 updateAPI();
             });
     }
+
+    const runActionRestore = (confirm, revisionId) => {
+        if (confirm) {
+            restoreRevision(revisionId);
+        }
+        setConfirmRestoreOpen(!confirmRestoreOpen);
+        setRevisionToRestore([]);
+    };
 
     /**
       * Handles undeploy a revision
@@ -484,6 +519,71 @@ export default function Environments() {
         setOpen(false);
     }
 
+    const confirmDeleteDialog = (
+        <ConfirmDialog
+            key='key-dialog'
+            labelCancel={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.delete.cancel'
+                    defaultMessage='Cancel'
+                />
+            )}
+            title={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.delete.confirm.title'
+                    defaultMessage='Confirm Delete'
+                />
+            )}
+            message={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.delete.confirm.message'
+                    defaultMessage='Are you sure you want to delete {revision} ?'
+                    values={{ revision: revisionToDelete[0] }}
+                />
+            )}
+            labelOk={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.delete.confirm.ok'
+                    defaultMessage='Yes'
+                />
+            )}
+            callback={(e) => runActionDelete(e, revisionToDelete[1])}
+            open={confirmDeleteOpen}
+        />
+    );
+
+    const confirmRestoreDialog = (
+        <ConfirmDialog
+            key='key-dialog-restore'
+            labelCancel={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.restore.cancel'
+                    defaultMessage='Cancel'
+                />
+            )}
+            title={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.restore.confirm.title'
+                    defaultMessage='Confirm Restore'
+                />
+            )}
+            message={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.restore.confirm.message'
+                    defaultMessage='Are you sure you want to restore {revision} ?'
+                    values={{ revision: revisionToRestore[0] }}
+                />
+            )}
+            labelOk={(
+                <FormattedMessage
+                    id='Apis.Details.Environments.Environments.revision.restore.confirm.ok'
+                    defaultMessage='Yes'
+                />
+            )}
+            callback={(e) => runActionRestore(e, revisionToRestore[1])}
+            open={confirmRestoreOpen}
+        />
+    );
 
     let item1;
     const returnItem1 = (revDescription) => {
@@ -593,25 +693,29 @@ export default function Environments() {
                             <Grid>
                                 <Button
                                     className={classes.textShape3}
-                                    onClick={() => restoreRevision(allRevisions[revision].id)}
+                                    onClick={() => toggleOpenConfirmRestore(
+                                        allRevisions[revision].key, allRevisions[revision].id,
+                                    )}
                                     size='small'
                                     type='submit'
                                     startIcon={<RestoreIcon />}
                                 >
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.Deployments.restore'
+                                        id='Apis.Details.Environments.Environments.revision.restore'
                                         defaultMessage='Restore'
                                     />
                                 </Button>
                                 <Button
                                     className={classes.textShape7}
-                                    onClick={() => deleteRevision(allRevisions[revision].id)}
+                                    onClick={() => toggleOpenConfirmDelete(
+                                        allRevisions[revision].key, allRevisions[revision].id,
+                                    )}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
                                 >
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.Deployments.delete'
+                                        id='Apis.Details.Environments.Environments.revision.delete'
                                         defaultMessage='Delete'
                                     />
                                 </Button>
@@ -628,25 +732,29 @@ export default function Environments() {
                             <Grid>
                                 <Button
                                     className={classes.textShape3}
-                                    onClick={() => restoreRevision(allRevisions[revision].id)}
+                                    onClick={() => toggleOpenConfirmRestore(
+                                        allRevisions[revision].key, allRevisions[revision].id,
+                                    )}
                                     size='small'
                                     type='submit'
                                     startIcon={<RestoreIcon />}
                                 >
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.Deployments.restore.up'
+                                        id='Apis.Details.Environments.Environments.revision.restore'
                                         defaultMessage='Restore'
                                     />
                                 </Button>
                                 <Button
                                     className={classes.textShape7}
-                                    onClick={() => deleteRevision(allRevisions[revision].id)}
+                                    onClick={() => toggleOpenConfirmDelete(
+                                        allRevisions[revision].key, allRevisions[revision].id,
+                                    )}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
                                 >
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.Deployments.delete.up'
+                                        id='Apis.Details.Environments.Environments.revision.delete'
                                         defaultMessage='Delete'
                                     />
                                 </Button>
@@ -814,6 +922,8 @@ export default function Environments() {
                     xs={12}
                 >
                     {items}
+                    {confirmDeleteDialog}
+                    {confirmRestoreDialog}
                 </Grid>
             </Box>
             <Grid container>
