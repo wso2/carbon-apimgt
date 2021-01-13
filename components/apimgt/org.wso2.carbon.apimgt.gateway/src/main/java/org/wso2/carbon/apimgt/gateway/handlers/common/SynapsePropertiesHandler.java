@@ -105,18 +105,8 @@ public class SynapsePropertiesHandler extends AbstractHandler {
                             .getProperty("keyManager.port");
                     String hostHeader = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_HEADER);
 
-                    // This check to change the location header is done to make sure that only location headers of the
-                    // appropriate endpoints which have been proxied are changed. Without this check condition to change
-                    // the location header, any endpoint which is having KM host as part of the URL will be redirected
-                    // which could lead to wrong endpoints.
-                    if (locationURI.contains(APIMgtGatewayConstants.AUTHENTICATION_ENDPOINT_CONTEXT) || locationURI
-                            .contains(APIMgtGatewayConstants.OAUTH2_CONTEXT + APIMgtGatewayConstants.AUTHORIZE_CONTEXT)
-                            || locationURI.contains(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT) || locationURI
-                            .contains(APIMgtGatewayConstants.LOGIN_CONTEXT) || locationURI
-                            .contains(APIMgtGatewayConstants.OIDC_CONTEXT)) {
-                        // Replacing KM host with Gateway host
-                        locationURI = locationURI.replaceFirst(kmHost, hostHeader);
-                    }
+                    // Replacing KM host with Gateway host
+                    locationURI = locationURI.replaceFirst(kmHost, hostHeader);
 
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                             .setProperty("PRE_LOCATION_HEADER", locationURI);
