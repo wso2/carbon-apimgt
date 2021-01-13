@@ -218,8 +218,8 @@ return null;
     private APIMonetizationInfoDTO monetization = null;
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    private java.util.Date createdTime = null;
-    private java.util.Date lastUpdatedTime = null;
+    private String createdTime = null;
+    private String lastUpdatedTime = null;
     private List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<String> categories = new ArrayList<String>();
@@ -774,7 +774,7 @@ return null;
 
   /**
    **/
-  public APIProductDTO createdTime(java.util.Date createdTime) {
+  public APIProductDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -782,16 +782,16 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public java.util.Date getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(java.util.Date createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIProductDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public APIProductDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -799,10 +799,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
-  public java.util.Date getLastUpdatedTime() {
+  public String getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public void setLastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

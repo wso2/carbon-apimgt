@@ -131,9 +131,9 @@ return null;
         }
     }
     private VisibilityEnum visibility = null;
-    private java.util.Date createdTime = null;
+    private String createdTime = null;
     private String createdBy = null;
-    private java.util.Date lastUpdatedTime = null;
+    private String lastUpdatedTime = null;
     private String lastUpdatedBy = null;
 
   /**
@@ -312,7 +312,7 @@ return null;
 
   /**
    **/
-  public DocumentDTO createdTime(java.util.Date createdTime) {
+  public DocumentDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -320,10 +320,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public java.util.Date getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(java.util.Date createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 
@@ -346,7 +346,7 @@ return null;
 
   /**
    **/
-  public DocumentDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public DocumentDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -354,10 +354,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
-  public java.util.Date getLastUpdatedTime() {
+  public String getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public void setLastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

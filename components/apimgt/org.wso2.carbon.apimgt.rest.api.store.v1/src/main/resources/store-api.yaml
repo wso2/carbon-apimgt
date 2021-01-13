@@ -3308,7 +3308,17 @@ paths:
           description: |
             OK.
             Requested complexity details returned.
-          content: {}
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              schema:
+                type: string
+                default: application/json
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphQLQueryComplexityInfo'
         404:
           description: |
             Not Found.
@@ -4187,7 +4197,6 @@ components:
           example: This is a comment
         createdTime:
           type: string
-          format: date-time
           readOnly: true
         createdBy:
           type: string

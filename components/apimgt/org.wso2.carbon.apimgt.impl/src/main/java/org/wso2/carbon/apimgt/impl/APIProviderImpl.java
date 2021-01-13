@@ -1752,10 +1752,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        boolean isValid = true;//isAPIUpdateValid(api);//////////////////////// handled from rest api
-        if (!isValid) {
-            throw new APIManagementException(" User doesn't have permission for update");
-        }
+        
         validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = existingAPI;
@@ -1787,7 +1784,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
             
-            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);///////////////has registry access /////////////////
+            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);
 
             updateEndpointSecurity(oldApi, api);
 
@@ -1832,45 +1829,41 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             } else {
                 gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
-
             }
-                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-                boolean isAPIPublished = false;
-                // gatewayType check is required when API Management is deployed on other servers to avoid synapse
-                if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                    isAPIPublished = isAPIPublished(api);
-                    if (gatewayExists) {
-                        if (isAPIPublished) {
-                            replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
-                        } else if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED
-                                .equals(api.getStatus())) {
-                            if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                                api.setEnvironments(
-                                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
-                            }
-                            if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                                api.setEnvironments(
-                                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
-                            }
-                            Map<String, String> failedToPublishEnvironments = publishToGateway(api);
-                            if (!failedToPublishEnvironments.isEmpty()) {
-                                Set<String> publishedEnvironments =
-                                        new HashSet<String>(api.getEnvironments());
-                                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-                                api.setEnvironments(publishedEnvironments);
-                                failedGateways.clear();
-                                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                                failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
-                            }
+            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+            boolean isAPIPublished = false;
+            // gatewayType check is required when API Management is deployed on other servers to avoid synapse
+            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                isAPIPublished = isAPIPublished(api);
+                if (gatewayExists) {
+                    if (isAPIPublished) {
+                        replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
+                    } else if (!APIConstants.CREATED.equals(api.getStatus())
+                            && !APIConstants.RETIRED.equals(api.getStatus())) {
+                        if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
+                            api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
                         }
-                    } else {
-                        log.debug("Gateway is not existed for the current API Provider");
+                        if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
+                            api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                        }
+                        Map<String, String> failedToPublishEnvironments = publishToGateway(api);
+                        if (!failedToPublishEnvironments.isEmpty()) {
+                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
+                            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                            api.setEnvironments(publishedEnvironments);
+                            failedGateways.clear();
+                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                            failedGateways.put("UNPUBLISHED", Collections.<String, String> emptyMap());
+                        }
                     }
+                } else {
+                    log.debug("Gateway is not existed for the current API Provider");
                 }
+            }
 
-            //If gateway(s) exist, remove resource paths saved on the cache.
+            // If gateway(s) exist, remove resource paths saved on the cache.
             if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
                 Set<URITemplate> resourceVerbs = api.getUriTemplates();
                 if (resourceVerbs != null) {
@@ -1904,12 +1897,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
-
-            //need to be moved to persistent layer
-
-            updateWSDL(oldApi);///////////////has registry access /////////////////
-
-            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
 
             // update apiContext cache
             if (APIUtil.isAPIManagementEnabled()) {
@@ -2046,70 +2033,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
     
-    private void updateWSDL(API api) throws APIManagementException {
-        
-        //Update WSDL in the registry
-        if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {////////////////////////
-            updateWsdlFromUrl(api);
-        }
-
-        if (api.getWsdlResource() != null) {//////////////////////////////////////
-            updateWsdlFromResourceFile(api);
-        }
-        
-        boolean transactionCommitted = false;
-        try {
-            registry.beginTransaction();
-            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when updating API artifact ID " + api.getId();
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-
-            if (api.getEndpointConfig() != null && !api.getEndpointConfig().isEmpty()) {
-                // If WSDL URL get change only we update registry WSDL resource. If its registry resource patch we
-                // will skip registry update. Only if this API created with WSDL end point type we need to update
-                // wsdls for each update.
-                // check for wsdl endpoint
-                org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
-                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
-                String wsdlURL;
-                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString())
-                        && response1.has("production_endpoints")) {
-                    wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
-
-                    if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
-                        String path = APIUtil.createWSDL(registry, api);
-                        if (path != null) {
-                            registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                        }
-                    }
-                }
-            }
-            registry.commitTransaction();
-            transactionCommitted = true;
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                // Throwing an error from this level will mask the original exception
-                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
-            }
-            handleException("Error while performing registry transaction operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException ex) {
-                handleException("Error occurred while rolling back the transaction.", ex);
-            }
-        }
-    }
 
     private void replublish(API api, Map<String, Map<String, String>> failedGateways, API oldApi,
             String previousDefaultVersion, String publishedDefaultVersion) throws APIManagementException {
@@ -4013,28 +3936,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value) throws APIManagementException {
         try {
-
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage =
-                        "Artifact manager is null when updating default API " + apiIdentifier.getApiName();
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            String defaultAPIPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    apiIdentifier.getProviderName() +
-                    RegistryConstants.PATH_SEPARATOR + apiIdentifier.getApiName() +
-                    RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion() +
-                    APIConstants.API_RESOURCE_NAME;
-
-            Resource defaultAPISourceArtifact = registry.get(defaultAPIPath);
-            GenericArtifact defaultAPIArtifact = artifactManager.getGenericArtifact(
-                    defaultAPISourceArtifact.getUUID());
-            defaultAPIArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(value));
-            artifactManager.updateGenericArtifact(defaultAPIArtifact);
-
-        } catch (RegistryException e) {
+            String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
+            Organization org = new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            
+            PublisherAPI api = apiPersistenceInstance.getPublisherAPI(org , apiId);
+            api.setDefaultVersion(value);
+            apiPersistenceInstance.updateAPI(org, api);
+        } catch (APIPersistenceException e) {
             String msg = "Failed to update default API version : " + apiIdentifier.getVersion() + " of : "
                     + apiIdentifier.getApiName();
             handleException(msg, e);
@@ -10827,6 +10735,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     mappedAPI.setUuid(publisherAPIInfo.getId());
                     mappedAPI.setState(publisherAPIInfo.getState());
                     mappedAPI.setContext(publisherAPIInfo.getContext());
+                    mappedAPI.setApiSecurity(publisherAPIInfo.getApiSecurity());
                     productList.add(mappedAPI);
                 }
                 productSet.addAll(productList);

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -53,6 +54,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -399,6 +401,51 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
                         visibleRoles, resourcePath);
             }
+            
+            // doc visibility change
+            String apiOrAPIProductDocPath = RegistryPersistenceDocUtil.getDocumentPath(api.getId().getProviderName(),
+                    api.getId().getApiName(), api.getId().getVersion());
+            String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+            String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
+
+            if (registry.resourceExists(apiOrAPIProductDocPath)) {
+                Resource resource = registry.get(apiOrAPIProductDocPath);
+                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
+                    for (String docPath : docsPaths) {
+                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
+                            Resource docResource = registry.get(docPath);
+                            GenericArtifactManager docArtifactManager = RegistryPersistenceDocUtil
+                                    .getDocumentArtifactManager(registry);
+                            GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docResource.getUUID());
+                            Documentation doc = RegistryPersistenceDocUtil.getDocumentation(docArtifact);
+
+                            if ((APIConstants.DOC_API_BASED_VISIBILITY).equalsIgnoreCase(doc.getVisibility().name())) {
+                                String documentationPath = RegistryPersistenceDocUtil.getAPIDocPath(api.getId())
+                                        + doc.getName();
+                                RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(),
+                                        api.getVisibility(), visibleRoles, documentationPath, registry);
+                                if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())
+                                        || Documentation.DocumentSourceType.MARKDOWN.equals(doc.getSourceType())) {
+
+                                    String contentPath = RegistryPersistenceDocUtil.getAPIDocPath(api.getId())
+                                            + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                                            + RegistryConstants.PATH_SEPARATOR + doc.getName();
+                                    RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(),
+                                            api.getVisibility(), visibleRoles, contentPath, registry);
+                                } else if (Documentation.DocumentSourceType.FILE.equals(doc.getSourceType())
+                                        && doc.getFilePath() != null) {
+                                    String filePath = RegistryPersistenceDocUtil.getDocumentationFilePath(api.getId(),
+                                            doc.getFilePath().split("files" + RegistryConstants.PATH_SEPARATOR)[1]);
+                                    RegistryPersistenceUtil.setResourcePermissions(api.getId().getProviderName(),
+                                            api.getVisibility(), visibleRoles, filePath, registry);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             registry.commitTransaction();
             transactionCommitted = true;
             return APIMapper.INSTANCE.toPublisherApi(api);
@@ -838,6 +885,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                 apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                Set<String> availableTiers = new HashSet<String>();
+                if (tiers != null) {
+                    String[] tiersArray = tiers.split("\\|\\|");
+                    for (String tierName : tiersArray) {
+                        availableTiers.add(tierName);
+                    }
+                }
+                apiInfo.setAvailableTierNames(availableTiers);
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -3204,6 +3260,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 info.setState(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
                 info.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                 info.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                info.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
 
                 publisherAPIProductInfoList.add(info);
 

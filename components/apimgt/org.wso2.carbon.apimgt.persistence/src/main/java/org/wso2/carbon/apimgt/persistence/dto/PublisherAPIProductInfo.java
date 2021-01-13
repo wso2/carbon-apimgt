@@ -31,6 +31,7 @@ public class PublisherAPIProductInfo {
     private String context;
     private String state;
     private String type;
+    private String apiSecurity;
     public String getId() {
         return id;
     }
@@ -72,6 +73,12 @@ public class PublisherAPIProductInfo {
     }
     public void setState(String state) {
         this.state = state;
+    }
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
     }
     
 }
