@@ -930,6 +930,16 @@ export default function Environments() {
                                         </Card>
                                     </Grid>
                                 ))}
+                            </Grid>
+                        </Box>
+                        <Box mt={2}>
+                            <Typography variant='h6' gutterBottom>
+                                Gateway Labels
+                            </Typography>
+                            <Grid
+                                container
+                                spacing={3}
+                            >
                                 {mgLabels && mgLabels.map((row) => (
                                     <Grid item xs={4}>
                                         <Card
