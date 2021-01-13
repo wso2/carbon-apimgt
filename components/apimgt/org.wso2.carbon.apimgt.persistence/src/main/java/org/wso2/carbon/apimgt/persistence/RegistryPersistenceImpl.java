@@ -52,9 +52,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -485,8 +483,20 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
             if (apiArtifact != null) {
+
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
-                api.setSwaggerDefinition(this.getOASDefinition(org, apiId));
+                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+                        + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+                        + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+
+                if (registry.resourceExists(definitionPath)) {
+                    Resource apiDocResource = registry.get(definitionPath);
+                    String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                    api.setSwaggerDefinition(apiDocContent);
+                }
+
                 PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ; 
                 if (log.isDebugEnabled()) {
                     log.debug("API for id " + apiId + " : " + pubApi.toString());
@@ -501,9 +511,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException(msg, e);
         } catch (APIManagementException e) {
             String msg = "Failed to get API";
-            throw new APIPersistenceException(msg, e);
-        } catch (OASPersistenceException e) {
-            String msg = "Failed to retrieve OpenAPI definition for the API";
             throw new APIPersistenceException(msg, e);
         } finally {
             if (tenantFlowStarted) {
@@ -527,42 +534,33 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
             if (apiArtifact != null) {
-                String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
 
-                if (APIConstants.API_PRODUCT.equals(type)) {
+                API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
+                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+                        + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+                        + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
 
-                    
-                    //TODO previously there was a seperate method to get products. validate whether we could use api one instead
-                    API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
-                    String apiTenantDomain = MultitenantUtils.getTenantDomain(
-                            RegistryPersistenceUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
-                        return APIMapper.INSTANCE.toDevPortalApi(api);
-                    }
-
-                    if (tenantDomain == null || !tenantDomain.equals(apiTenantDomain)) {
-                        throw new APIPersistenceException(
-                                "User " + username + " does not have permission to view API : " + api.getId()
-                                        .getApiName());
-                    }
-                    return APIMapper.INSTANCE.toDevPortalApi(api);
-                } else {
-                    API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
-                    String apiTenantDomain = MultitenantUtils.getTenantDomain(
-                            RegistryPersistenceUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                    if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
-                        //return new ApiTypeWrapper(api);
-                        return APIMapper.INSTANCE.toDevPortalApi(api);
-                    }
-
-                    if (tenantDomain == null || !tenantDomain.equals(apiTenantDomain)) {
-                        throw new APIPersistenceException(
-                                "User " + username + " does not have permission to view API : " + api.getId()
-                                        .getApiName());
-                    }
-
+                if (registry.resourceExists(definitionPath)) {
+                    Resource apiDocResource = registry.get(definitionPath);
+                    String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                    api.setSwaggerDefinition(apiDocContent);
+                }
+                String apiTenantDomain = MultitenantUtils
+                        .getTenantDomain(RegistryPersistenceUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) {
+                    // return new ApiTypeWrapper(api);
                     return APIMapper.INSTANCE.toDevPortalApi(api);
                 }
+
+                if (tenantDomain == null || !tenantDomain.equals(apiTenantDomain)) {
+                    throw new APIPersistenceException(
+                            "User " + username + " does not have permission to view API : " + api.getId().getApiName());
+                }
+
+                return APIMapper.INSTANCE.toDevPortalApi(api);
+            
             } else {
                 return null;
             }
@@ -1846,27 +1844,28 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Registry registryType = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted;
 
-            Identifier id = null;
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
                     APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
             if (apiArtifact != null) {
+                String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+                String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+                String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+                
+                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
+                        + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
 
-                String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-                if ("APIProduct".equals(type)) {
-                    id = new APIProductIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                } else {
-                    id = new APIIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
-                            apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                if (registryType.resourceExists(definitionPath)) {
+                    Resource apiDocResource = registryType.get(definitionPath);
+                    definition = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                    return definition;
                 }
-                definition = RegistryPersistenceUtil.getAPIDefinition(id, registryType);
             }
 
-        } catch (RegistryException | APIManagementException | APIPersistenceException e) {
+        } catch (RegistryException | APIPersistenceException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             throw new OASPersistenceException(msg, e);
         } finally {
@@ -2972,7 +2971,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
     
     protected RegistryHolder getRegistry(String requestedTenantDomain) throws APIPersistenceException {
-        // String username = getTenantAwareUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
+        // String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         String tenantAwareUserName = getTenantAwareUsername(username);
         String userTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -3183,7 +3182,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiProductId);
             if (apiArtifact != null) {
                 APIProduct apiProduct = RegistryPersistenceUtil.getAPIProduct(apiArtifact, registry);
-                apiProduct.setDefinition(this.getOASDefinition(org, apiProductId));
+                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil.replaceEmailDomain(apiProduct.getId().getProviderName())
+                        + RegistryConstants.PATH_SEPARATOR + apiProduct.getId().getName()
+                        + RegistryConstants.PATH_SEPARATOR + apiProduct.getId().getVersion()
+                        + RegistryConstants.PATH_SEPARATOR + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+
+                if (registry.resourceExists(definitionPath)) {
+                    Resource apiDocResource = registry.get(definitionPath);
+                    String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                    apiProduct.setDefinition(apiDocContent);
+                }
                 PublisherAPIProduct pubApi = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct) ; 
                 pubApi.setApiProductName(apiProduct.getId().getName());
                 pubApi.setProviderName(apiProduct.getId().getProviderName());
@@ -3203,9 +3212,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException(msg, e);
         } catch (APIManagementException e) {
             String msg = "Failed to get API";
-            throw new APIPersistenceException(msg, e);
-        } catch (OASPersistenceException e) {
-            String msg = "Failed to retrieve OpenAPI definition for the API";
             throw new APIPersistenceException(msg, e);
         } finally {
             if (tenantFlowStarted) {
