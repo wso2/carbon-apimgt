@@ -59,7 +59,7 @@ public class APIDTOData {
 //            ResultSet resultSet = statement.executeQuery();
 //
 //            while (resultSet.next()) {
-//                uuid = resultSet.getString("API_UUID");
+//               uuid = resultSet.getString("API_UUID");
 //                 apiName = resultSet.getString("API_NAME");
 //                 context = resultSet.getString("CONTEXT");
 //                 version = resultSet.getString("API_VERSION");

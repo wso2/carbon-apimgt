@@ -11,10 +11,7 @@ import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.RegistryPersistenceImpl;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
@@ -226,9 +223,10 @@ public class ArtifactData {
         DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
                 0, 25, userCtx);
 
-        List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
+        List<DevPortalAPI> list = searchAPIs.getDevPortalAPIList();
 
-        return searchAPIs.getTotalAPIsCount();
+
+        return list.size();
     }
 
 }

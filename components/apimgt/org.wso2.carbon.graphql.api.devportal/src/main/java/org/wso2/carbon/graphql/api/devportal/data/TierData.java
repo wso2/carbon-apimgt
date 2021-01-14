@@ -53,6 +53,7 @@ public class TierData {
 
         List<TierDTO> tierList = new ArrayList<TierDTO>();
         String tierPlan=null;
+        String description = null;
         String monetizationAttributes = null;
 
         for (int i=0;i< nameList.size();i++){
@@ -60,6 +61,8 @@ public class TierData {
 
             if(name.equals(nameList.get(i).getName())){
                 tierPlan = nameList.get(i).getTierPlan();
+
+                description = nameList.get(i).getDescription();
 
                 Map<String,String> monetizationAttributesList = nameList.get(i).getMonetizationAttributes();
 

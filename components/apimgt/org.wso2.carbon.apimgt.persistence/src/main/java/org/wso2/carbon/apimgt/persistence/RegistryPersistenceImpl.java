@@ -16,17 +16,11 @@
 package org.wso2.carbon.apimgt.persistence;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
+import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.getLcStateFromArtifact;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -46,12 +40,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -1022,10 +1011,59 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
             }
             List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<DevPortalAPIInfo>();
+
+            List<DevPortalAPI> devPortalAPIList = new ArrayList<>();
             int tempLength = 0;
             for (GovernanceArtifact artifact : governanceArtifacts) {
 
                 DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
+
+                DevPortalAPI devPortalAPI = new DevPortalAPI();
+
+                devPortalAPI.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+                devPortalAPI.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+                devPortalAPI.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+
+                devPortalAPI.setId(artifact.getId());
+
+                devPortalAPI.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
+
+                devPortalAPI.setStatus(getLcStateFromArtifact(artifact));
+                devPortalAPI.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+                devPortalAPI.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
+
+                devPortalAPI.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+
+                devPortalAPI.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
+
+                devPortalAPI.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+                devPortalAPI.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
+
+                devPortalAPI.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+
+                devPortalAPI.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
+                devPortalAPI.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+                devPortalAPI.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+
+                String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+                Set<String> availableTiers = new HashSet<>();
+                if(tiers != null) {
+                    String[] tiersArray = tiers.split("\\|\\|");
+                    for(String tierName : tiersArray) {
+                        availableTiers.add(tierName);
+                    }
+                }
+                devPortalAPI.setAvailableTierNames(availableTiers);
+
+                devPortalAPI.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
+
+              //  devPortalAPI.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
+               devPortalAPI.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
+               devPortalAPI.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+
+               devPortalAPIList.add(devPortalAPI);
+
+
                 //devPortalAPIInfoList apiInfo = new devPortalAPIInfoList();
                 apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                 apiInfo.setId(artifact.getId());
@@ -1046,6 +1084,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
             }
 
+            searchResults.setDevPortalAPIList(devPortalAPIList);
             searchResults.setDevPortalAPIInfoList(devPortalAPIInfoList);
             searchResults.setReturnedAPIsCount(devPortalAPIInfoList.size());
             searchResults.setTotalAPIsCount(totalLength);
@@ -1212,7 +1251,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) { // Not found 
                         
-                        String status = RegistryPersistenceUtil.getLcStateFromArtifact(artifact);
+                        String status = getLcStateFromArtifact(artifact);
                         DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
                         if (isAllowDisplayAPIsWithMultipleStatus()) {
                             if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)
@@ -1417,7 +1456,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) { // Not found 
                         
-                        String status = RegistryPersistenceUtil.getLcStateFromArtifact(artifact);
+                        String status = getLcStateFromArtifact(artifact);
                         PublisherAPIInfo apiInfo = new PublisherAPIInfo();
                         apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                         apiInfo.setId(artifact.getId());

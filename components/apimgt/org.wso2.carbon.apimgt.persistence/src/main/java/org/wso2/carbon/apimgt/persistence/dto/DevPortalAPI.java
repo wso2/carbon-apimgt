@@ -58,6 +58,17 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String swaggerDefinition;
     private String contextTemplate;
 
+
+    //new for apiSecurity
+    private String apiSecurity;
+    public void setApiSecurity(String apiSecurity){
+        this.apiSecurity = apiSecurity;
+    }
+    public String getApiSecurity(){
+        return apiSecurity;
+    }
+    //
+
     public String getContextTemplate() {
         return contextTemplate;
     }
