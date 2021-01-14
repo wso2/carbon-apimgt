@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -939,12 +940,9 @@ public class APIMappingUtil {
         String inMedPolicyName = model.getInSequence();
         if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
-            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(inMedPolicyName, type, dto);
-            String mediationPolicyUUID =
-                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
-            String mediationPolicyRegistryPath =
-                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
-            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, inMedPolicyName);
+            Mediation mediation = model.getInSequenceMediation();
+            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
+            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
 
             MediationPolicyDTO inMedPolicy = new MediationPolicyDTO();
             inMedPolicy.setName(inMedPolicyName);
@@ -957,12 +955,9 @@ public class APIMappingUtil {
         String outMedPolicyName = model.getOutSequence();
         if (outMedPolicyName != null && !outMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
-            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(outMedPolicyName, type, dto);
-            String mediationPolicyUUID =
-                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
-            String mediationPolicyRegistryPath =
-                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
-            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, outMedPolicyName);
+            Mediation mediation = model.getOutSequenceMediation();
+            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
+            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
 
             MediationPolicyDTO outMedPolicy = new MediationPolicyDTO();
             outMedPolicy.setName(outMedPolicyName);
@@ -975,13 +970,9 @@ public class APIMappingUtil {
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
-
-            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(faultSequenceName, type, dto);
-            String mediationPolicyUUID =
-                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
-            String mediationPolicyRegistryPath =
-                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
-            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, faultSequenceName);
+            Mediation mediation = model.getFaultSequenceMediation();
+            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
+            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
 
             MediationPolicyDTO faultMedPolicy = new MediationPolicyDTO();
             faultMedPolicy.setName(faultSequenceName);

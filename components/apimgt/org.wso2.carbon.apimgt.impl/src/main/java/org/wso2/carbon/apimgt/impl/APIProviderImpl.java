@@ -10354,7 +10354,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, requestedTenantDomain, org, api);
-
+            loadMediationPoliciesToAPI(api, requestedTenantDomain);
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
