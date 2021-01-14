@@ -120,6 +120,7 @@ public interface APIMapper {
     //@Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
     //@Mapping(source = "environments", target = "environmentList")
     @Mapping(source = "status", target = "state")
+    @Mapping(source = "swaggerDefinition", target = "definition")
     APIProduct toApiProduct(DevPortalAPI api);
 
     default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {

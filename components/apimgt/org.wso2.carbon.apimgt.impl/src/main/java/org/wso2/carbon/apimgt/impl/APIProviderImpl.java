@@ -6521,55 +6521,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
-
-        try {
-            String uuid;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            if (apiId.getUUID() != null) {
-                uuid = apiId.getUUID();
-            } else {
-                uuid = apiMgtDAO.getUUIDFromIdentifier(apiId);
-            }
-            saveSwaggerDefinition(uuid, jsonText);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        String uuid;
+        if (apiId.getUUID() != null) {
+            uuid = apiId.getUUID();
+        } else {
+            uuid = apiMgtDAO.getUUIDFromIdentifier(apiId);
         }
+        saveSwaggerDefinition(uuid, jsonText);
     }
 
     @Override
     public void saveSwaggerDefinition(API api, String jsonText) throws APIManagementException {
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            String apiId;
-            if (api.getUuid() != null) {
-                apiId = api.getUuid();
-            } else if (api.getId().getUUID() != null) {
-                apiId = api.getId().getUUID();
-            } else {
-                apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
-            }
-            saveSwaggerDefinition(apiId, jsonText);
 
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        String apiId;
+        if (api.getUuid() != null) {
+            apiId = api.getUuid();
+        } else if (api.getId().getUUID() != null) {
+            apiId = api.getId().getUUID();
+        } else {
+            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
         }
+        saveSwaggerDefinition(apiId, jsonText);
     }
 
     @Override
     public void saveSwaggerDefinition(String apiId, String jsonText) throws APIManagementException {
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            //OASParserUtil.saveAPIDefinition(api, jsonText, registry);
             apiPersistenceInstance.saveOASDefinition(new Organization(tenantDomain), apiId, jsonText);
 
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while persisting OAS definition ", e);
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        } 
     }
     
     @Override
