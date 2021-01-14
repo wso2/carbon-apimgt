@@ -680,12 +680,15 @@ public class RegistryPersistenceUtil {
             //set uuid
             api.setUuid(artifact.getId());
             // set rating
-            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            api = setResourceProperties(api, registry, artifactPath);
+            //String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
+            Resource apiResource = registry.get(artifactPath);
+            api = setResourceProperties(api, apiResource, artifactPath);
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
-            //set last access time
-            api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
@@ -707,7 +710,7 @@ public class RegistryPersistenceUtil {
                     .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
                 api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
             } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
-                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+                api.setEndpointUTPassword(apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY));
             }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
@@ -776,8 +779,8 @@ public class RegistryPersistenceUtil {
                 tags.add(tag1.getTagName());
             }
             api.setTags(tags);
-            api.setLastUpdated(registry.get(artifactPath).getLastModified());
-            api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
+            api.setLastUpdated(apiResource.getLastModified());
+            api.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
 
             api.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
@@ -858,9 +861,8 @@ public class RegistryPersistenceUtil {
      * @return Updated API.
      * @throws RegistryException Registry Exception.
      */
-    private static API setResourceProperties(API api, Registry registry, String artifactPath) throws RegistryException {
+    private static API setResourceProperties(API api, Resource apiResource, String artifactPath) throws RegistryException {
 
-        Resource apiResource = registry.get(artifactPath);
         Properties properties = apiResource.getProperties();
         if (properties != null) {
             Enumeration<?> propertyNames = properties.propertyNames();
