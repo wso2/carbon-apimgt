@@ -119,6 +119,7 @@ public class APIGatewayManager {
 
         Map<String, String> failedGatewaysMap = new HashMap<String, String>(0);
         Set<String> publishedGateways = new HashSet<>();
+        Set<URITemplate> operationList = null;
 
         if (debugEnabled) {
             log.debug("API to be published: " + api.getId());
@@ -131,6 +132,9 @@ public class APIGatewayManager {
         }
 
         if (api.getEnvironments() != null) {
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                operationList = api.getUriTemplates();
+            }
             for (String environmentName : api.getEnvironments()) {
                 Environment environment = environments.get(environmentName);
                 //If the environment is removed from the configuration, continue without publishing
@@ -143,6 +147,9 @@ public class APIGatewayManager {
                 }
                 failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, false,
                         publishedGateways, failedGatewaysMap);
+                if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                    api.setUriTemplates(operationList);
+                }
             }
         }
 
