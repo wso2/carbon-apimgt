@@ -3042,7 +3042,17 @@ paths:
           description: |
             OK.
             Requested complexity details returned.
-          content: {}
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              schema:
+                type: string
+                default: application/json
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphQLQueryComplexityInfo'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -3436,13 +3446,13 @@ paths:
             Created.
             API Imported Successfully.
         403:
-          $ref: '#/responses/Forbidden'
+          $ref: '#/components/responses/Forbidden'
         404:
-          $ref: '#/responses/NotFound'
+          $ref: '#/components/responses/NotFound'
         409:
-          $ref: '#/responses/Conflict'
+          $ref: '#/components/responses/Conflict'
         500:
-          $ref: '#/responses/InternalServerError'
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_import_export
@@ -6825,10 +6835,8 @@ components:
           example: APPROVED
         createdTime:
           type: string
-          format: date-time
         lastUpdatedTime:
           type: string
-          format: date-time
           x-otherScopes:
           - apim:api_publish
         endpointConfig:
@@ -7249,10 +7257,8 @@ components:
           $ref: '#/components/schemas/APICorsConfiguration'
         createdTime:
           type: string
-          format: date-time
         lastUpdatedTime:
           type: string
-          format: date-time
         apis:
           type: array
           description: |
@@ -7507,14 +7513,12 @@ components:
           - API_LEVEL
         createdTime:
           type: string
-          format: date-time
           readOnly: true
         createdBy:
           type: string
           example: admin
         lastUpdatedTime:
           type: string
-          format: date-time
           readOnly: true
         lastUpdatedBy:
           type: string

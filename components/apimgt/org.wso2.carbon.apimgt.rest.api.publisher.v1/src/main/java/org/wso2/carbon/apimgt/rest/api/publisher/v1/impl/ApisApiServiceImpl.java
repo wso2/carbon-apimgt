@@ -2047,7 +2047,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     Mediation mediationPolicy = new Mediation();
                     mediationPolicy.setConfig(content);
-                    mediationPolicy.setName(localName);
+                    mediationPolicy.setName(fileName);
                     mediationPolicy.setType(type);
                     //Adding api specific mediation policy
                     returnedPolicy  = apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy);
@@ -2857,7 +2857,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
-            //API addedAPI = apiProvider.getAPI(apiToAdd.getId());
+            // this would provide the updated templates
+            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
             // This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());

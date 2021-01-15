@@ -46,7 +46,6 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private String transports;    
     private CORSConfiguration corsConfiguration;    
     private String authorizationHeader;  
-    private String apiSecurity;
     private String contextTemplate;
     private boolean enableSchemaValidation;
     private boolean isMonetizationEnabled;
@@ -156,12 +155,6 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     }
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
-    }
-    public String getApiSecurity() {
-        return apiSecurity;
-    }
-    public void setApiSecurity(String apiSecurity) {
-        this.apiSecurity = apiSecurity;
     }
     public String getContextTemplate() {
         return contextTemplate;
