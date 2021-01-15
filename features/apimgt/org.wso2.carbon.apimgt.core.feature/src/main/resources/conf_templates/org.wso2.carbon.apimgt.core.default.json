@@ -104,6 +104,7 @@
   "apim.throttling.jms.destination_type": "topic",
   "apim.throttling.jms.username": "$ref{apim.throttling.username}",
   "apim.throttling.jms.password": "$ref{apim.throttling.password}",
+  "apim.throttling.jms.ssl": false,
   "apim.throttling.enable_unlimited_tier": "true",
   "apim.throttling.enable_header_based_throttling": "false",
   "apim.throttling.enable_jwt_claim_based_throttling": "false",
