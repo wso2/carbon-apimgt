@@ -468,6 +468,9 @@ public abstract class AbstractAPIManager implements APIManager {
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
             api.setSwaggerDefinition(getOpenAPIDefinition(identifier));
+            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+            }
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
                 return api;
