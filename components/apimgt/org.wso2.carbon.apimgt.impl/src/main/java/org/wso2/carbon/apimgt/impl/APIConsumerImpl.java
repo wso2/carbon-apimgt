@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -3860,9 +3861,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void removeApplication(Application application, String username) throws APIManagementException {
         String uuid = application.getUUID();
+        HashMap<String, String> consumerKeysOfApplication = null;
         if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
             application = apiMgtDAO.getApplicationByUUID(uuid);
         }
+        consumerKeysOfApplication = apiMgtDAO.getConsumerKeysForApplication(application.getId());
+
         boolean isTenantFlowStarted = false;
         int applicationId = application.getId();
 
@@ -4042,6 +4046,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     application.getTokenType(),
                     application.getTier(), application.getGroupId(), Collections.EMPTY_MAP, username);
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
+
+        if (consumerKeysOfApplication != null && consumerKeysOfApplication.size() > 0) {
+            for (Map.Entry<String, String> entry : consumerKeysOfApplication.entrySet()) {
+                String consumerKey = entry.getKey();
+                String keymanager = entry.getValue();
+                ApplicationRegistrationEvent removeEntryTrigger = new ApplicationRegistrationEvent(
+                        UUID.randomUUID().toString(), System.currentTimeMillis(),
+                        APIConstants.EventType.REMOVE_APPLICATION_KEYMAPPING.name(), tenantId, tenantDomain,
+                        application.getId(), consumerKey, application.getKeyType(), keymanager);
+                APIUtil.sendNotification(removeEntryTrigger, APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
+            }
         }
     }
 
@@ -5438,10 +5454,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
         Properties properties = new Properties();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        properties.put(APIConstants.NotificationEvent.EVENT_ID,UUID.randomUUID().toString());
+        String eventID = UUID.randomUUID().toString();
+        properties.put(APIConstants.NotificationEvent.EVENT_ID,eventID);
         properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        ApiMgtDAO.getInstance().addRevokedJWTSignature(eventID,
+                apiKey, APIConstants.API_KEY_AUTH_TYPE,
+                expiryTime, tenantId);
         revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
     }
 

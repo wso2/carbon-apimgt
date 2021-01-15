@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.tokenmgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.tokenmgt.handlers.SessionDataPublisherImpl;
@@ -64,20 +65,32 @@ public class APITokenMgtServiceComponent {
             serviceRegistration =
                     ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(), listener, null);
             log.debug("Key Manager User Operation Listener is enabled.");
-            // registering logout token revoke listener
-            try {
-                SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();
-                ctxt.getBundleContext()
-                        .registerService(AuthenticationDataPublisher.class.getName(), dataPublisher, null);
-                log.debug("SessionDataPublisherImpl bundle is activated");
-            } catch (Throwable e) {
-                log.error("SessionDataPublisherImpl bundle activation Failed", e);
-            }
+
             // loading white listed scopes
             List<String> whitelist = null;
             APIManagerConfigurationService configurationService =
                     org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService();
+            boolean accessTokenBindingEnable;
+
+            String firstProperty = configurationService.getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.AccessTokenBinding.ACCESS_TOKEN_BINDING_ENABLED);
+            if (firstProperty != null) {
+                accessTokenBindingEnable = Boolean.parseBoolean(firstProperty);
+            } else {
+                accessTokenBindingEnable = false;
+            }
+            if (!accessTokenBindingEnable) {
+                // registering logout token revoke listener
+                try {
+                    SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();
+                    ctxt.getBundleContext()
+                            .registerService(AuthenticationDataPublisher.class.getName(), dataPublisher, null);
+                    log.debug("SessionDataPublisherImpl bundle is activated");
+                } catch (Throwable e) {
+                    log.error("SessionDataPublisherImpl bundle activation Failed", e);
+                }
+            }
             if (configurationService != null) {
                 // Read scope whitelist from Configuration.
                 whitelist =

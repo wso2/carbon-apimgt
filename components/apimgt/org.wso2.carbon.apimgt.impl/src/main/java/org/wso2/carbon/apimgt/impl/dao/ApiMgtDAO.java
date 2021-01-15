@@ -5181,6 +5181,35 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return HashMap<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
+    public HashMap<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+
+        HashMap<String, String> consumerKeysOfApplication = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+            preparedStatement.setInt(1, appId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys for application " + appId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return consumerKeysOfApplication;
+    }
+
     public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
 
         Connection connection = null;
@@ -7811,6 +7840,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
 
         String sql = SQLConstants.GET_API_CONTEXT_SQL;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sql);
@@ -13812,8 +13842,10 @@ public class ApiMgtDAO {
                     while (rs.next()) {
                         ResourcePath resourcePath = new ResourcePath();
                         resourcePath.setId(rs.getInt("URL_MAPPING_ID"));
-                        resourcePath.setResourcePath(rs.getString("HTTP_METHOD"));
-                        resourcePath.setHttpVerb(rs.getString("URL_PATTERN"));
+                        //Set the URL pattern as the resource path
+                        resourcePath.setResourcePath(rs.getString("URL_PATTERN"));
+                        //Set the HTTP method as the HTTPVerb
+                        resourcePath.setHttpVerb(rs.getString("HTTP_METHOD"));
                         resourcePathList.add(resourcePath);
                     }
                 }
