@@ -326,6 +326,7 @@ paths:
           schema:
             type: boolean
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -337,7 +338,11 @@ paths:
                   description: |
                     Zip archive consisting of exported Application Configuration.
                   format: binary
-        required: true
+                verifier:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Verifier'
+              
       responses:
         "200":
           description: |
@@ -352,6 +357,53 @@ paths:
         "400":
           description: |
             Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  #----------------------------------------------------------
+  # Check the existence of a services and retrieve the MD5 hashes representing the currrent state of the resources.
+  #----------------------------------------------------------
+  /services/status:
+    get:
+      summary: Check services existence
+      description: |
+        Check multiple services existence by service keys.
+        Upon successful response, this will also return the current states of the services as MD5 hash values.
+      security:
+        - OAuth2Security:
+            - service_catalog:entry_view
+      operationId: checkServicesExistence
+      tags:
+        - Services
+      parameters:
+        - name: key
+          in: query
+          description: |
+            Comma seperated keys of the services to check
+          required: true
+          schema:
+            type: string
+        - name: shrink
+          in: query
+          description: |
+            If this set to true, a minimal set of fields will be provided for each service including the md5
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: |
+            Successful response with the available services' current states as the MD5 hashes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesList'
+        "404":
+          description: |
+            Not Found.
+            Requested Service does not exist.
           content:
             application/json:
               schema:
@@ -508,6 +560,56 @@ components:
   # The definitions of resources used by some of the APIs
   #-------------------------------------------------------
   schemas:
+  
+    ServicesList:
+      title: Services List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            MD5 hashes of services returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          
+    ServiceListExpanded:
+      title: Services List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            MD5 hashes of services returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          
+    #-----------------------------------------------------
+    # The Service Catalog Entry resource
+    #-----------------------------------------------------
+    Verifier:
+      type: object
+      title: Json array of md5 hash values of Service Catalog Entry objects
+      required:
+        - key
+        - md5
+      properties:
+        key:
+          type: string
+          pattern: '^[^\*]+$'
+          example: petStore-1.0.0
+        md5:
+          type: string
+          example: e27ef979af14c72783b8112dc41c3434c09763ddb230e1a829d5f9134d1abd07
 
     #-----------------------------------------------------
     # The Paginated Service Catalog Entry Array resource
@@ -599,7 +701,29 @@ components:
           type: string
           readOnly: true
           example: '2020-02-20T13:57:16.229'
-        
+    
+    ServiceInfo:
+      type: object
+      title: The Service Catalog Entry object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+          readOnly: true
+        name:
+          type: string
+          pattern: '^[^\*]+$'
+          example: PizzashackEndpoint
+        key:
+          type: string
+          example: PizzashackEndpoint-1.0.0
+        version:
+          type: string
+          example: v1
+        md5:
+          type: string
+          example: 36583a6a249b410e7fc4f892029709cac09763ddb230e1a829d5f9134d1abd07
+          
     #-----------------------------------------------------
     # The Service Catalog Entry Schema resource
     #-----------------------------------------------------
