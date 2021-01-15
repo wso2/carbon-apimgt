@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -117,9 +118,15 @@ public class ThrottlingPolicyMappingUtil {
         dto.setDescription(throttlingPolicy.getDescription());
         dto.setRequestCount(throttlingPolicy.getRequestCount());
         dto.setUnitTime(throttlingPolicy.getUnitTime());
+        dto.setTimeUnit(throttlingPolicy.getTimeUnit());
+        dto.setRateLimitCount(throttlingPolicy.getRateLimitCount());
+        dto.setRateLimitTimeUnit(throttlingPolicy.getRateLimitTimeUnit());
         dto.setStopOnQuotaReach(throttlingPolicy.isStopOnQuotaReached());
         dto.setPolicyLevel(ThrottlingPolicyDTO.PolicyLevelEnum.valueOf(tierLevel.toUpperCase()));
         dto = setTierPermissions(dto, throttlingPolicy);
+        if (throttlingPolicy.getQuotaPolicyType() != null) {
+            dto.setQuotaPolicyType(mapQuotaPolicyTypeFromModeltoDTO(throttlingPolicy.getQuotaPolicyType()));
+        }
         if (throttlingPolicy.getTierPlan() != null) {
             dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.valueOf(throttlingPolicy.getTierPlan()));
         }
@@ -146,6 +153,25 @@ public class ThrottlingPolicyMappingUtil {
         }
         dto.setMonetizationAttributes(monetizationInfoDTO);
         return dto;
+    }
+
+    /**
+     * map quot policy type from data model to DTO
+     *
+     * @param quotaPolicyType quota policy type
+     * @return ThrottlingPolicyDTO.QuotaPolicyTypeEnum
+     */
+    private static ThrottlingPolicyDTO.QuotaPolicyTypeEnum mapQuotaPolicyTypeFromModeltoDTO(String quotaPolicyType) {
+
+        switch (quotaPolicyType) {
+            case PolicyConstants.REQUEST_COUNT_TYPE:
+                return ThrottlingPolicyDTO.QuotaPolicyTypeEnum.fromValue(PolicyConstants.
+                        REQUEST_COUNT_TYPE.toUpperCase());
+            case PolicyConstants.BANDWIDTH_TYPE:
+                return ThrottlingPolicyDTO.QuotaPolicyTypeEnum.fromValue(PolicyConstants.BANDWIDTH_TYPE.toUpperCase());
+            default:
+                return null;
+        }
     }
 
     /**
