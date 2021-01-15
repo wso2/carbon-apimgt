@@ -1472,7 +1472,6 @@ public class APIGatewayManager {
     private void addSequence(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO, String sequenceType,
             String sequenceExtension,String sequenceName) throws APIManagementException, XMLStreamException {
         try {
-            log.info("+++++++++ temp log +++ " + sequenceType + " mediation not set +++++++++++++++");
             PrivilegedCarbonContext.startTenantFlow();
             if (tenantDomain != null && !"".equals(tenantDomain)) {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -1525,7 +1524,6 @@ public class APIGatewayManager {
             //If a fault sequence has be defined.
             if (APIUtil.isSequenceDefined(faultSequenceName)) {
                 if (mediation == null) {
-                    log.info("+++++++++ temp log +++ fault mediation not set +++++++++++++++");
                     PrivilegedCarbonContext.startTenantFlow();
                     isTenantFlowStarted = true;
                     if (!StringUtils.isEmpty(tenantDomain)) {
