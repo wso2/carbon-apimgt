@@ -97,6 +97,10 @@ public class API implements Serializable {
     private String inSequence;
     private String outSequence;
     private String faultSequence;
+    
+    private Mediation inSequenceMediation;
+    private Mediation outSequenceMediation;
+    private Mediation faultSequenceMediation;
 
     private String oldInSequence;
     private String oldOutSequence;
@@ -1111,6 +1115,31 @@ public class API implements Serializable {
 
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
+    }
+
+    
+    public Mediation getInSequenceMediation() {
+        return inSequenceMediation;
+    }
+
+    public void setInSequenceMediation(Mediation inSequenceMediation) {
+        this.inSequenceMediation = inSequenceMediation;
+    }
+
+    public Mediation getOutSequenceMediation() {
+        return outSequenceMediation;
+    }
+
+    public void setOutSequenceMediation(Mediation outSequenceMediation) {
+        this.outSequenceMediation = outSequenceMediation;
+    }
+
+    public Mediation getFaultSequenceMediation() {
+        return faultSequenceMediation;
+    }
+
+    public void setFaultSequenceMediation(Mediation faultSequenceMediation) {
+        this.faultSequenceMediation = faultSequenceMediation;
     }
 
     @Override

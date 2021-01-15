@@ -1837,6 +1837,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                 isAPIPublished = isAPIPublished(api);
                 if (gatewayExists) {
+                    loadMediationPoliciesToAPI(api, tenantDomain);
                     if (isAPIPublished) {
                         replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
                     } else if (!APIConstants.CREATED.equals(api.getStatus())
@@ -2585,6 +2586,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
                 if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType) && updateGatewayConfig) {
+                    loadMediationPoliciesToAPI(api, tenantDomain);
                     if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status) ||
                         APIConstants.BLOCKED.equals(status) || APIConstants.PROTOTYPED.equals(status)) {
                         Map<String, String> failedToPublishEnvironments = publishToGateway(api);
@@ -2672,6 +2674,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
                     if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                        loadMediationPoliciesToAPI(api, tenantDomain);
                         if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
                             || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
                             failedGateways = publishToGateway(api);
@@ -2728,6 +2731,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
+                    loadMediationPoliciesToAPI(api, tenantDomain);
                     if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                         if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
                             || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
@@ -2749,6 +2753,124 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return failedGateways;
+    }
+
+    private void loadMediationPoliciesToAPI(API api, String tenantDomain) throws APIManagementException {
+        if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
+                || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+            Organization org = new Organization(tenantDomain);
+            String apiUUID = api.getUuid();
+            // get all policies
+            try {
+                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+                List<Mediation> globalPolicies = null;
+                if (APIUtil.isSequenceDefined(api.getInSequence())) {
+                    boolean found = false;
+                    for (MediationInfo mediationInfo : localPolicies) {
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
+                                && api.getInSequence().equals(mediationInfo.getName())) {
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            Mediation mediation = new Mediation();
+                            mediation.setConfig(mediationPolicy.getConfig());
+                            mediation.setName(mediationPolicy.getName());
+                            mediation.setUuid(mediationPolicy.getId());
+                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+                            mediation.setGlobal(false);
+                            api.setInSequenceMediation(mediation);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) { // global policy 
+                        if (globalPolicies == null) {
+                            globalPolicies = getAllGlobalMediationPolicies();
+                        }
+                        for (Mediation m : globalPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
+                                    && api.getInSequence().equals(m.getName())) {
+                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                mediation.setGlobal(true);
+                                api.setInSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (APIUtil.isSequenceDefined(api.getOutSequence())) {
+                    boolean found = false;
+                    for (MediationInfo mediationInfo : localPolicies) {
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
+                                && api.getOutSequence().equals(mediationInfo.getName())) {
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            Mediation mediation = new Mediation();
+                            mediation.setConfig(mediationPolicy.getConfig());
+                            mediation.setName(mediationPolicy.getName());
+                            mediation.setUuid(mediationPolicy.getId());
+                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+                            mediation.setGlobal(false);
+                            api.setOutSequenceMediation(mediation);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) { // global policy 
+                        if (globalPolicies == null) {
+                            globalPolicies = getAllGlobalMediationPolicies();
+                        }
+                        for (Mediation m : globalPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(m.getType())
+                                    && api.getOutSequence().equals(m.getName())) {
+                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                mediation.setGlobal(true);
+                                api.setOutSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                    boolean found = false;
+                    for (MediationInfo mediationInfo : localPolicies) {
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
+                                && api.getFaultSequence().equals(mediationInfo.getName())) {
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            Mediation mediation = new Mediation();
+                            mediation.setConfig(mediationPolicy.getConfig());
+                            mediation.setName(mediationPolicy.getName());
+                            mediation.setUuid(mediationPolicy.getId());
+                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+                            mediation.setGlobal(false);
+                            api.setFaultSequenceMediation(mediation);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) { // global policy 
+                        if (globalPolicies == null) {
+                            globalPolicies = getAllGlobalMediationPolicies();
+                        }
+                        for (Mediation m : globalPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(m.getType())
+                                    && api.getFaultSequence().equals(m.getName())) {
+                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                mediation.setGlobal(true);
+                                api.setFaultSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (MediationPolicyPersistenceException e) {
+                throw new APIManagementException("Error while loading medation policies", e);
+            }
+        }
+
     }
 
     @Override
@@ -10232,7 +10354,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, requestedTenantDomain, org, api);
-
+            loadMediationPoliciesToAPI(api, requestedTenantDomain);
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
