@@ -30,7 +30,8 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
-                            org.wso2.carbon.apimgt.persistence.*; version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.persistence.*; version="${carbon.apimgt.version}",
+                            org.apache.http.*
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -55,6 +56,16 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.3.6</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.httpcomponents</groupId>-->
+            <!--<artifactId>httpcore</artifactId>-->
+            <!--<version>4.3.6</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>

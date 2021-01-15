@@ -22,7 +22,7 @@ public class MongoDBPersistenceComponent {
     @Activate
     protected void activate(ComponentContext context) {
         serviceRegistration = context.getBundleContext().registerService(APIPersistence.class.getName(),
-                new MongoDBPersistenceImpl(""), null);
+                new MongoDBPersistenceImpl(), null);
     }
 
     @Deactivate

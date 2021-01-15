@@ -48,8 +48,6 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
-//import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBDevPortalAPI;
-//import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
@@ -67,9 +65,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceExcepti
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-//import org.wso2.carbon.apimgt.mongodb.persistence.mappers.DocumentationMapper;
-//import org.wso2.carbon.apimgt.mongodb.persistence.mappers.MongoAPIMapper;
-import org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,8 +72,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Aggregates.match;
@@ -95,22 +94,42 @@ import static com.mongodb.client.model.Projections.exclude;
 
 public class MongoDBPersistenceImpl implements APIPersistence {
 
-    private static APIPersistence instance = null;
     private static final Log log = LogFactory.getLog(MongoDBPersistenceImpl.class);
-
-    public MongoDBPersistenceImpl(String userName) {
-
-    }
+    private static Map<String, Boolean> indexCheckCache = new HashMap<>();
 
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
+
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
         publisherAPI.setCreatedTime(String.valueOf(new Date().getTime()));
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
         InsertOneResult insertOneResult = collection.insertOne(mongoDBPublisherAPI);
-        MongoDBPublisherAPI createdDoc = collection.find(eq("_id",
-                insertOneResult.getInsertedId())).first();
+        MongoDBPublisherAPI createdDoc = collection.find(eq("_id", insertOneResult.getInsertedId())).first();
+
+        //Create atlas search index in async manner
+        Runnable runnable = () -> {
+            isIndexCreated(org.getName());
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
         return MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
+    }
+
+    private Boolean isIndexCreated(String organizationName) {
+        //Check if index is created flag exists in cache
+        if (indexCheckCache.get(organizationName) != null) {
+            return true;
+        }
+        //Call mongodb atlas rest api to check if index exists
+        boolean isCreated = MongoDBAtlasAPIConnector.getInstance().getIndexes(organizationName).isEmpty();
+        if (!isCreated) {
+            return true;
+        }
+
+        // Should we retry if we failed?
+        // Create atlas search index
+        Boolean searchIndexes = MongoDBAtlasAPIConnector.getInstance().createSearchIndexes(organizationName);
+        return true;
     }
 
     @Override
