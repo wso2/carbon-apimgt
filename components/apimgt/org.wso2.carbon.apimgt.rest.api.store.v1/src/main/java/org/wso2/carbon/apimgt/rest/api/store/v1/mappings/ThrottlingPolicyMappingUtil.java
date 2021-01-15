@@ -156,7 +156,7 @@ public class ThrottlingPolicyMappingUtil {
     }
 
     /**
-     * map quot policy type from data model to DTO
+     * Map quota policy type from data model to DTO
      *
      * @param quotaPolicyType quota policy type
      * @return ThrottlingPolicyDTO.QuotaPolicyTypeEnum
