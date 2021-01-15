@@ -8432,10 +8432,13 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
+                tier.setQuotaPolicyType(policy.getDefaultQuotaPolicy().getType());
 
                 //If the policy is a subscription policy
                 if (policy instanceof SubscriptionPolicy) {
                     SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
+                    tier.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
+                    tier.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
                     setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
                     if (StringUtils.equals(subscriptionPolicy.getBillingPlan(), APIConstants.COMMERCIAL_TIER_PLAN)) {
                         tier.setMonetizationAttributes(subscriptionPolicy.getMonetizationPlanProperties());

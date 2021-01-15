@@ -4016,6 +4016,29 @@ components:
           type: integer
           format: int64
           example: 60000
+        timeUnit:
+          type: string
+          example: min
+          readOnly: true
+        rateLimitCount:
+          type: integer
+          default: 0
+          description: Burst control request count
+          example: 10
+          readOnly: true
+        rateLimitTimeUnit:
+          type: string
+          description: Burst control time unit
+          example: min
+          readOnly: true
+        quotaPolicyType:
+          type: string
+          description: Default quota limit type
+          enum:
+            - REQUESTCOUNT
+            - BANDWIDTHVOLUME
+          example: REQUESTCOUNT
+          readOnly: true
         tierPlan:
           type: string
           description: |
