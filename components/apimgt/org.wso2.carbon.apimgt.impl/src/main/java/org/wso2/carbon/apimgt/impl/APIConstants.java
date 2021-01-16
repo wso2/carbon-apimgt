@@ -2476,4 +2476,8 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+
+    // Constants related to Service Catalog
+    public static final String METADATA_FILE_NAME = "metadata";
+    public static final String KEY_SEPARATOR = "-";
 }
