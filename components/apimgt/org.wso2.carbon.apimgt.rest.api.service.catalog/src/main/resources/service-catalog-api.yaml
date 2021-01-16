@@ -350,7 +350,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Service'
+                $ref: '#/components/schemas/ServicesStatusList'
           headers:
             ETag:
               $ref: '#/components/headers/ETag'
@@ -577,6 +577,22 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
           
+    ServicesStatusList:
+      title: Services List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            MD5 hashes of services returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceCRUDStatus'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+          
     ServiceListExpanded:
       title: Services List
       type: object
@@ -701,6 +717,80 @@ components:
           type: string
           readOnly: true
           example: '2020-02-20T13:57:16.229'
+          
+    #-----------------------------------------------------
+    # Status of CRUD operations of Service Catalog Entry resource 
+    #-----------------------------------------------------
+    ServiceCRUDStatus:
+      type: object
+      title: The Service Catalog Entry object
+      required:
+        - entryName
+        - version
+        - serviceType
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+          readOnly: true
+        name:
+          type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        displayName:
+          type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        description:
+          type: string
+          example: A Catalog Entry that exposes a REST endpoint
+        version:
+          type: string
+          example: v1
+        serviceUrl:
+          type: string
+          example: http://localhost/pizzashack
+        definitionType:
+          type: string
+          description: The type of the provided API definition
+          example: OAS3
+          enum:
+            - OAS2
+            - OAS3
+            - WSDL1
+            - WSDL2
+            - GRAPHQL_SDL
+            - ASYNC_API
+        securityType:
+          type: string
+          description: The security type of the endpoint
+          example: BASIC
+          enum:
+            - BASIC
+            - DIGEST
+            - OAUTH2
+            - NONE
+        mutualSSLEnabled:
+          type: boolean
+          description: Whether Mutual SSL is enabled for the endpoint
+          default: false
+        usage:
+          type: integer
+          description: Number of usages of the service in APIs
+          readOnly: true
+          example: 1
+        createdTime:
+          type: string
+          readOnly: true
+          example: '2020-02-20T13:57:16.229'
+        lastUpdatedTime:
+          type: string
+          readOnly: true
+          example: '2020-02-20T13:57:16.229'
+        catalogUpdated:
+          type: boolean
+          description: Whether the service participated to CRUD operations
+          default: false
     
     ServiceInfo:
       type: object
