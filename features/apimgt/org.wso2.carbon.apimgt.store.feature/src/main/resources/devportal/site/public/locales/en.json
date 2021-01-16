@@ -247,7 +247,6 @@
   "Applications.Details.Invoice.view.btn": "View Invoice",
   "Applications.Details.Overview.application.owner": "Application Owner",
   "Applications.Details.Overview.description": "Description",
-  "Applications.Details.Overview.token.type": "Token Type",
   "Applications.Details.Overview.workflow.status": "Workflow Status",
   "Applications.Details.SubscriptionTableData.cancel": "Cancel",
   "Applications.Details.SubscriptionTableData.delete": "Delete",
