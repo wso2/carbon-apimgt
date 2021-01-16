@@ -23,14 +23,16 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ServiceCatalogDAO {
@@ -65,6 +67,9 @@ public class ServiceCatalogDAO {
      */
     public String addServiceCatalog(ServiceCatalogInfo serviceCatalogInfo, int tenantID) throws APIManagementException {
 
+
+        // Check createApplicationRegistrationEntry in ApiMgtDAO
+
         String uuid = UUID.randomUUID().toString();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -72,21 +77,22 @@ public class ServiceCatalogDAO {
             connection.setAutoCommit(false);
 
             ps.setString(1, uuid);
-            ps.setString(2, serviceCatalogInfo.getMd5());
-            ps.setString(3, serviceCatalogInfo.getName());
-            ps.setString(4, serviceCatalogInfo.getDisplayName());
-            ps.setString(5, serviceCatalogInfo.getVersion());
-            ps.setInt(6, tenantID);
-            ps.setString(7, serviceCatalogInfo.getServiceUrl());
-            ps.setString(8, serviceCatalogInfo.getDefType());
-            ps.setString(9, serviceCatalogInfo.getDefUrl());
-            ps.setString(10, serviceCatalogInfo.getDescription());
-            ps.setString(11, serviceCatalogInfo.getSecurityType());
-            ps.setBoolean(12, serviceCatalogInfo.getIsMutualSSLEnabled());
-            ps.setTimestamp(13, serviceCatalogInfo.getCreatedTime());
-            ps.setTimestamp(14, serviceCatalogInfo.getLastUpdatedTime());
-            ps.setString(15, serviceCatalogInfo.getCreatedBy());
-            ps.setString(16, serviceCatalogInfo.getUpdatedBy());
+            ps.setString(2, serviceCatalogInfo.getKey());
+            ps.setString(3, serviceCatalogInfo.getMd5());
+            ps.setString(4, serviceCatalogInfo.getName());
+            ps.setString(5, serviceCatalogInfo.getDisplayName());
+            ps.setString(6, serviceCatalogInfo.getVersion());
+            ps.setInt(7, tenantID);
+            ps.setString(8, serviceCatalogInfo.getServiceUrl());
+            ps.setString(9, serviceCatalogInfo.getDefType());
+            ps.setString(10, serviceCatalogInfo.getDefUrl());
+            ps.setString(11, serviceCatalogInfo.getDescription());
+            ps.setString(12, serviceCatalogInfo.getSecurityType());
+            ps.setBoolean(13, serviceCatalogInfo.isMutualSSLEnabled());
+            ps.setTimestamp(14, serviceCatalogInfo.getCreatedTime());
+            ps.setTimestamp(15, serviceCatalogInfo.getLastUpdatedTime());
+            ps.setString(16, serviceCatalogInfo.getCreatedBy());
+            ps.setString(17, serviceCatalogInfo.getUpdatedBy());
 
             ps.executeUpdate();
             connection.commit();
@@ -113,6 +119,7 @@ public class ServiceCatalogDAO {
 
             ps.setString(1, endPointInfo.getUuid());
             ps.setBlob(2, endPointInfo.getEndPointDef());
+            ps.setBlob(3, endPointInfo.getMetadata());
 
             ps.executeUpdate();
             connection.commit();
@@ -121,5 +128,53 @@ public class ServiceCatalogDAO {
                     + endPointInfo.getUuid(), e);
         }
         return endPointInfo.getUuid();
+    }
+
+    public ServiceCatalogInfo getMd5Hash(ServiceCatalogInfo serviceInfo, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_MD5_BY_NAME_AND_VERSION;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, serviceInfo.getName());
+            ps.setString(2, serviceInfo.getVersion());
+            ps.setInt(3, tenantId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                serviceInfo.setMd5(rs.getString("MD5"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User MD5 hash : SQL " + sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return serviceInfo;
+    }
+
+    public String getMd5HashByKey(String key, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String md5 = null;
+
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_MD5_BY_SERVICE_KEY;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, key);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                md5 = rs.getString("MD5");
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User MD5 hash : SQL " + sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return md5;
     }
 }
