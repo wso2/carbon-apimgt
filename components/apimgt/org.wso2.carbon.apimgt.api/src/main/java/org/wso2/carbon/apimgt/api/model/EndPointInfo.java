@@ -5,6 +5,7 @@ import java.io.InputStream;
 public class EndPointInfo {
     private String uuid;
     private InputStream endPointDef;
+    private InputStream metadata;
 
     public String getUuid() {
         return uuid;
@@ -20,5 +21,13 @@ public class EndPointInfo {
 
     public void setEndPointDef(InputStream endPointDef) {
         this.endPointDef = endPointDef;
+    }
+
+    public InputStream getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(InputStream metadata) {
+        this.metadata = metadata;
     }
 }

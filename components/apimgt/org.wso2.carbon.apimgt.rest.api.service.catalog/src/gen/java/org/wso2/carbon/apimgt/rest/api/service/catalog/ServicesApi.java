@@ -4,6 +4,9 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceListDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServicesListDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServicesStatusListDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.impl.ServicesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -52,6 +55,22 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
     public Response checkServiceExistence( @NotNull @ApiParam(value = "Name of the service to export ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the service to export ",required=true)  @QueryParam("version") String version) throws APIManagementException{
         return delegate.checkServiceExistence(name, version, securityContext);
+    }
+
+    @GET
+    @Path("/status")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Check services existence", notes = "Check multiple services existence by service keys. Upon successful response, this will also return the current states of the services as MD5 hash values. ", response = ServicesListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
+        })
+    }, tags={ "Services",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Successful response with the available services' current states as the MD5 hashes. ", response = ServicesListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
+    public Response checkServicesExistence( @NotNull @ApiParam(value = "Comma seperated keys of the services to check ",required=true)  @QueryParam("key") String key,  @ApiParam(value = "If this set to true, a minimal set of fields will be provided for each service including the md5 ")  @QueryParam("shrink") Boolean shrink) throws APIManagementException{
+        return delegate.checkServicesExistence(key, shrink, securityContext);
     }
 
     @POST
@@ -142,16 +161,16 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @Path("/import")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import a service", notes = "Import  a service by providing an archived service ", response = ServiceDTO.class, authorizations = {
+    @ApiOperation(value = "Import a service", notes = "Import  a service by providing an archived service ", response = ServicesStatusListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "service_catalog:entry_create", description = "")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with the imported service metadata. ", response = ServiceDTO.class),
+        @ApiResponse(code = 200, message = "Successful response with the imported service metadata. ", response = ServicesStatusListDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class) })
-    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
-        return delegate.importService(serviceId, fileInputStream, fileDetail, ifMatch, overwrite, securityContext);
+    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite, @Multipart(value = "verifier", required = false)  List<VerifierDTO> verifier) throws APIManagementException{
+        return delegate.importService(serviceId, fileInputStream, fileDetail, ifMatch, overwrite, verifier, securityContext);
     }
 
     @GET

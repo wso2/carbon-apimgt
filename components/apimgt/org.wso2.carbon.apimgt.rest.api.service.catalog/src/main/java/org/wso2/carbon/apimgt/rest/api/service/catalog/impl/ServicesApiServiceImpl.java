@@ -12,15 +12,18 @@ import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.Md5HashGenerator;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceCatalogUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
@@ -32,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -52,14 +56,19 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 List<File> fileList = new ArrayList<File>();
                 fileList.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME));
                 fileList.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + OAS_FILE_NAME));
-                String eTag = Md5HashGenerator.generateHash(fileList);
+//                String eTag = Md5HashGenerator.generateHash(fileList);
 
-                return Response.ok().header("ETag", eTag).build();
+//                return Response.ok().header("ETag", eTag).build();
             } else {
                 RestApiUtil.handleBadRequest("Invalid service name or version defined", log);
             }
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @Override
+    public Response checkServicesExistence(String key, Boolean shrink, MessageContext messageContext) throws APIManagementException {
+        return null;
     }
 
     public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
@@ -143,22 +152,21 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         return Response.status(status).entity(errorObject).build();
     }
 
-    private ServiceCatalogApi serviceCatalogApi = new ServiceCatalogImpl();
-
     @Override
     public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String ifMatch,
-                                  Boolean overwrite, MessageContext messageContext) throws APIManagementException {
-        if (StringUtils.isBlank(ifMatch)) {
-            ifMatch = null;
-        }
+                                  Boolean overwrite, List<VerifierDTO> verifier, MessageContext messageContext)
+            throws APIManagementException {
+
         APIConsumer consumer;
-        String username = RestApiCommonUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
         String tempDirPath = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
-        String currentETag = null;
+        Map<String, String> md5Hashes;
+        List<String> verifiedKeys;
 
         // unzip the uploaded zip
         try {
-            consumer = RestApiCommonUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(userName);
             FileBasedServicesImportExportManager importExportManager =
                     new FileBasedServicesImportExportManager(consumer, tempDirPath);
             importExportManager.importService(fileInputStream);
@@ -166,61 +174,61 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
         }
 
-        // Retrieve hash from db
-//        if (Files.exists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
-//            List<File> existingFiles = new ArrayList<File>();
-//            existingFiles.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME));
-//            existingFiles.add(new File(RESOURCE_FOLDER_LOCATION + File.separator + OAS_FILE_NAME));
-//            currentETag = Md5HashGenerator.generateHash(existingFiles);
-//        }
+        md5Hashes = Md5HashGenerator.generateHash(tempDirPath);
+
+        verifiedKeys = ServiceCatalogUtils.VerifierListValidate(verifier, tenantId);
+
+        // Retrieve endpoint name + version from each metadata and verifier list
+
+        // Search each in db with tenant id
+
+        // Entries not present in db -> directly to persistence layer
+
+        // number of endpoint resources available in zip equals to number of verifier values(for the initial registration of services,
+        // can we allow blank?)
+
+        // For others go through verifier list and compare each hash with the available values retrieved from db(based on name)
+
+        // if hashes are equal, then loop through the list and proceed with CRUD
+        // new hashes for new content > from map or getHashForEndPoint()
+
+        ///////////////////////////////////////////////////////////////////////////////////
+//        if (StringUtils.equals(ifMatch, eTag)) {
+//            return Response.status(Response.Status.CONFLICT).build();
+//        } else if (overwrite != null) {
+//            if (overwrite) {
+//                if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
+//                    File rsc = new File(RESOURCE_FOLDER_LOCATION);
+//                    rsc.mkdir();
+//                }
+//                for (File source : fileList) {
+//                    try {
+//                        FileUtils.copyFile(source, new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName()));
+//                        if (source.getName().equals("metadata.yaml")){
+//                            File inputFile = new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName());
+//                            ServiceCatalogInfo serviceCatalogInfo = DataMappingUtil.fromServiceDTOToServiceCatalogInfo(inputFile, eTag);
+//                            String uuid = serviceCatalogApi.addServiceCatalog(serviceCatalogInfo,1);
+//                            EndPointInfo endPointInfo = DataMappingUtil.generateEndPointInfo(inputFile, uuid);
+//                            String id = serviceCatalogApi.addEndPointDefinition(endPointInfo);
+//                        }
+//                    } catch (IOException e) {
+//                        RestApiUtil.handleInternalServerError("Error while updating Service", e, log);
+//                    }
+//                }
 //
-//        if (!StringUtils.equals(currentETag, ifMatch)) {
-//            return Response.status(Response.Status.PRECONDITION_FAILED).build();
+//                try {
+//                    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+//                    ServiceDTO serviceDTO = mapper.readValue(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME), ServiceDTO.class);
+//                    return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
+//                } catch (IOException e) {
+//                    RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
+//                }
+//            } else {
+//                return Response.status(Response.Status.CONFLICT).build();
+//            }
 //        }
-
-
-        List<File> fileList = new ArrayList<File>();
-        fileList.add(new File(tempDirPath + File.separator + METADATA_FILE_NAME));
-        fileList.add(new File(tempDirPath + File.separator + OAS_FILE_NAME));
-        String eTag = Md5HashGenerator.generateHash(fileList);
-
-        if (StringUtils.equals(ifMatch, eTag)) {
-            return Response.status(Response.Status.CONFLICT).build();
-        } else if (overwrite != null) {
-            if (overwrite) {
-                if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
-                    File rsc = new File(RESOURCE_FOLDER_LOCATION);
-                    rsc.mkdir();
-                }
-                for (File source : fileList) {
-                    try {
-                        FileUtils.copyFile(source, new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName()));
-                        if (source.getName().equals("metadata.yaml")){
-                            File inputFile = new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName());
-                            ServiceCatalogInfo serviceCatalogInfo = DataMappingUtil.fromServiceDTOToServiceCatalogInfo(inputFile, eTag);
-                            String uuid = serviceCatalogApi.addServiceCatalog(serviceCatalogInfo,1);
-                            EndPointInfo endPointInfo = DataMappingUtil.generateEndPointInfo(inputFile, uuid);
-                            String id = serviceCatalogApi.addEndPointDefinition(endPointInfo);
-                        }
-                    } catch (IOException e) {
-                        RestApiUtil.handleInternalServerError("Error while updating Service", e, log);
-                    }
-                }
-
-                try {
-                    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-                    ServiceDTO serviceDTO = mapper.readValue(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME), ServiceDTO.class);
-                    return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
-                } catch (IOException e) {
-                    RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
-                }
-            } else {
-                return Response.status(Response.Status.CONFLICT).build();
-            }
-        }
         return null;
     }
-
 
     public Response searchServices(String name, String version, String definitionType, String displayName, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
         log.info("searchServices");

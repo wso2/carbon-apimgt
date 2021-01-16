@@ -138,7 +138,9 @@ public class FileBasedServicesImportExportManager {
         if (log.isDebugEnabled()) {
             log.debug("Archive generated successfully " + archiveName);
         }
-        return Md5HashGenerator.generateHash(fileList);
+//        *********** add correct code to generate hash***********
+        return null;
+//        return Md5HashGenerator.generateHash(fileList);
     }
 
     /**

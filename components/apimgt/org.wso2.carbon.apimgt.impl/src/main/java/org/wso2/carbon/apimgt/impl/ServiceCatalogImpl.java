@@ -38,4 +38,14 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     public String addEndPointDefinition(EndPointInfo endPointInfo) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().addEndPointDefinition(endPointInfo);
     }
+
+    @Override
+    public ServiceCatalogInfo getMD5Hash(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getMd5Hash(serviceCatalogInfo, tenantId);
+    }
+
+    @Override
+    public String getMD5HashByKey(String key, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getMd5HashByKey(key, tenantId);
+    }
 }

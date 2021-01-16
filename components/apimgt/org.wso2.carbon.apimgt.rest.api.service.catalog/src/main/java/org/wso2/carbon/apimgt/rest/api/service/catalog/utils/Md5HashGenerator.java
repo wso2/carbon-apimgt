@@ -17,8 +17,10 @@ package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
  * under the License.
  */
 
+import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,8 +38,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.fromServiceDTOToServiceCatalogInfo;
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.keyGenerator;
+
 /**
- * This class generates ETag hash value for the given files of the zip
+ * This class generates MD5 hash value for the given files of the zip
  * using MD5 as the hashing algorithm.
  */
 public class Md5HashGenerator {
@@ -71,11 +76,24 @@ public class Md5HashGenerator {
 
         for (File file : files) {
             if (file.isDirectory()) {
-                List<File> fList = Arrays.asList(Objects.requireNonNull(file.listFiles()));
-                try {
-                    endpoints.put(file.getName(), calculateHash(fList));
-                } catch (NoSuchAlgorithmException | IOException e) {
-                    log.error("Failed to generate E-Tag due to " + e.getMessage(), e);
+                File[] fArray = file.listFiles();
+                if (fArray != null) {
+                    Arrays.sort(fArray, NameFileComparator.NAME_COMPARATOR);
+                    String key = null;
+                    for (File aFile : fArray) {
+                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
+                            try {
+                                key = keyGenerator(fromServiceDTOToServiceCatalogInfo(aFile));
+                            } catch (IOException e) {
+                                log.error("Failed to fetch metadata information from zip due to generate key" + e.getMessage(), e);
+                            }
+                        }
+                    }
+                    try {
+                        endpoints.put(key, calculateHash(fArray));
+                    } catch (NoSuchAlgorithmException | IOException e) {
+                        log.error("Failed to generate MD5 Hash due to " + e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -90,10 +108,10 @@ public class Md5HashGenerator {
      * @return String
      * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
      */
-    private static String calculateHash(List<File> files) throws NoSuchAlgorithmException, IOException {
+    private static String calculateHash(File[] files) throws NoSuchAlgorithmException, IOException {
 
         MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-        return getFileChecksum(md5Digest, files.get(0)) + getFileChecksum(md5Digest, files.get(1));
+        return getFileChecksum(md5Digest, files[0]) + getFileChecksum(md5Digest, files[1]);
     }
 
     /**

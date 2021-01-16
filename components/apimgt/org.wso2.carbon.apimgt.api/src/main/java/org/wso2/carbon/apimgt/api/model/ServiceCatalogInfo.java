@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 public class ServiceCatalogInfo {
 
     private String uuid;
+    private String key;
     private String md5;
     private String name;
     private String version;
@@ -26,6 +27,22 @@ public class ServiceCatalogInfo {
 
     public void setLastUpdatedTime(Timestamp lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public boolean isMutualSSLEnabled() {
+        return isMutualSSLEnabled;
+    }
+
+    public void setMutualSSLEnabled(boolean mutualSSLEnabled) {
+        isMutualSSLEnabled = mutualSSLEnabled;
     }
 
     public String getUuid() {
@@ -106,14 +123,6 @@ public class ServiceCatalogInfo {
 
     public void setSecurityType(String securityType) {
         this.securityType = securityType;
-    }
-
-    public boolean getIsMutualSSLEnabled() {
-        return isMutualSSLEnabled;
-    }
-
-    public void setIsMutualSSLEnabled(boolean isMutualSSLEnabled) {
-        this.isMutualSSLEnabled = isMutualSSLEnabled;
     }
 
     public String getCreatedBy() {

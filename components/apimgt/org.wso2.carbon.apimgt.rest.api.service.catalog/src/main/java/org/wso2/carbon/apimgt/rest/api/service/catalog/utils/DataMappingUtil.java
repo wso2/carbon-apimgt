@@ -55,7 +55,7 @@ public class DataMappingUtil {
         serviceCatalogInfo.setDefType(serviceDTO.getDefinitionType().value());
         serviceCatalogInfo.setDescription(serviceDTO.getDescription());
         serviceCatalogInfo.setSecurityType(serviceDTO.getSecurityType().value());
-        serviceCatalogInfo.setIsMutualSSLEnabled(serviceDTO.isMutualSSLEnabled());
+        serviceCatalogInfo.setMutualSSLEnabled(serviceDTO.isMutualSSLEnabled());
         serviceCatalogInfo.setCreatedTime(Timestamp.valueOf(serviceDTO.getCreatedTime()));
         return serviceCatalogInfo;
     }
@@ -97,6 +97,7 @@ public class DataMappingUtil {
                             serviceInfo = fromServiceDTOToServiceCatalogInfo(aFile);
                             serviceCatalogEntry.setServiceCatalogInfo(serviceInfo);
                             key = keyGenerator(serviceInfo);
+                            serviceInfo.setKey(key);
                             endPointInfo.setMetadata(new FileInputStream(aFile));
                         } else {
                             endPointInfo.setEndPointDef(new FileInputStream(aFile));

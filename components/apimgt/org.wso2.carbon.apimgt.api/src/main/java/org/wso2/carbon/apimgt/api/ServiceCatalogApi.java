@@ -54,4 +54,22 @@ public interface ServiceCatalogApi {
      */
     String addEndPointDefinition(EndPointInfo endPointInfo) throws APIManagementException;
 
+    /**
+     * Get MD5 hash value of a service endpoint
+     *
+     * @param serviceCatalogInfo EndPoint related information
+     * @return ServiceCatalogInfo Endpoint information with md5 hash value
+     * @throws APIManagementException if failed to add ServiceCatalogInfo
+     */
+    ServiceCatalogInfo getMD5Hash(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException;
+
+    /**
+     * Get MD5 hash value of a service endpoint
+     *
+     * @param key Service key unique to each tenant
+     * @return ServiceCatalogInfo Endpoint information with md5 hash value
+     * @throws APIManagementException if failed to add ServiceCatalogInfo
+     */
+    String getMD5HashByKey(String key, int tenantId) throws APIManagementException;
+
 }
