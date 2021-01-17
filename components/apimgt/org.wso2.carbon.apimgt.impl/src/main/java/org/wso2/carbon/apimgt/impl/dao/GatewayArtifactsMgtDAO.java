@@ -55,8 +55,8 @@ public class GatewayArtifactsMgtDAO {
      * @param tenantDomain - Tenant domain of the API
      * @throws APIManagementException if an error occurs
      */
-    public boolean addGatewayPublishedAPIDetails(String apiId, String name, String version, String tenantDomain)
-            throws APIManagementException {
+    public boolean addGatewayPublishedAPIDetails(String apiId, String name, String version, String tenantDomain,
+                                                 String type) throws APIManagementException {
 
         boolean result = false;
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
@@ -66,6 +66,7 @@ public class GatewayArtifactsMgtDAO {
                 statement.setString(2, name);
                 statement.setString(3, version);
                 statement.setString(4, tenantDomain);
+                statement.setString(5, type);
                 result = statement.executeUpdate() == 1;
                 connection.commit();
             } catch (SQLException e) {
@@ -452,7 +453,8 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDAndLabel(String apiId, String label)
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDAndLabel(String apiId, String label,
+                                                                               String tenantDomain)
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
@@ -461,6 +463,7 @@ public class GatewayArtifactsMgtDAO {
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, label);
+            preparedStatement.setString(3, tenantDomain);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
@@ -485,7 +488,7 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String label)
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String label, String tenantDomain)
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
@@ -493,6 +496,7 @@ public class GatewayArtifactsMgtDAO {
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, label);
+            preparedStatement.setString(2, tenantDomain);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
@@ -517,13 +521,14 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifacts()
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifacts(String tenantDomain)
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS;
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, tenantDomain);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();

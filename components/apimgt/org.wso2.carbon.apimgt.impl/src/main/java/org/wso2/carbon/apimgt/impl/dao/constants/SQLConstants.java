@@ -3073,6 +3073,8 @@ public class SQLConstants {
     /** Label related constants **/
 
     public static final String GET_LABEL_BY_TENANT = "select * from AM_LABELS where AM_LABELS.TENANT_DOMAIN= ? ";
+    public static final String GET_LABEL_DETAIL_BY_LABEL_AND_TENANT = "select * from AM_LABELS where TENANT_DOMAIN = " +
+            "? AND NAME = ?";
 
     public static final String GET_URL_BY_LABEL_ID = "Select * from  AM_LABEL_URLS where LABEL_ID= ? ";
 
@@ -3159,7 +3161,7 @@ public class SQLConstants {
             "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
     public static final String ADD_GW_PUBLISHED_API_DETAILS = "INSERT INTO AM_GW_PUBLISHED_API_DETAILS (API_ID, " +
-            "API_NAME, API_VERSION, TENANT_DOMAIN) VALUES (?,?,?,?)";
+            "API_NAME, API_VERSION, TENANT_DOMAIN, API_TYPE) VALUES (?,?,?,?,?)";
 
     public static final String ADD_GW_API_ARTIFACT =
             "INSERT INTO AM_GW_API_ARTIFACTS (ARTIFACT,TIME_STAMP, API_ID,REVISION_ID) VALUES (?,?,?,?)";
@@ -3211,7 +3213,8 @@ public class SQLConstants {
                     "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
-                    "AM_GW_API_DEPLOYMENTS.API_ID= ? AND AM_GW_API_DEPLOYMENTS.LABEL= ? " +
+                    "AM_GW_API_DEPLOYMENTS.API_ID= ? AND AM_GW_API_DEPLOYMENTS.LABEL= ? AND " +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?" +
                     "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
                     "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
                     " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
@@ -3225,10 +3228,10 @@ public class SQLConstants {
                     "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
-                    "AM_GW_API_DEPLOYMENTS.LABEL= ? " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL= ? AND AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?" +
                     "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
                     "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
-                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID;";
+                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
     public static final String RETRIEVE_ARTIFACTS =
             "SELECT AM_GW_API_DEPLOYMENTS.API_ID AS API_ID,AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN AS TENANT_DOMAIN,AM_GW_PUBLISHED_API_DETAILS.API_PROVIDER AS " +
@@ -3240,7 +3243,8 @@ public class SQLConstants {
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
                     "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
-                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID;";
+                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID AND " +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

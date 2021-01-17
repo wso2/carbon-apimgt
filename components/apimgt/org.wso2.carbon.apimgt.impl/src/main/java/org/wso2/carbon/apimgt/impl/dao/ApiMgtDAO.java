@@ -94,7 +94,6 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -132,7 +131,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -13666,6 +13664,38 @@ public class ApiMgtDAO {
             handleException("Failed to get Labels of " + tenantDomain, e);
         }
         return labelList;
+    }
+
+    /**
+     * Returns the Label detail for name and the TenantId.
+     *
+     * @param tenantDomain The tenant domain.
+     * @return List of labels.
+     */
+    public Label getLabelDetailByLabelAndTenantDomain(String labelName, String tenantDomain)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.GET_LABEL_DETAIL_BY_LABEL_AND_TENANT)) {
+            statement.setString(1, tenantDomain);
+            statement.setString(2, labelName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    String labelId = rs.getString("LABEL_ID");
+                    String description = rs.getString("DESCRIPTION");
+                    Label label = new Label();
+                    label.setLabelId(labelId);
+                    label.setName(labelName);
+                    label.setDescription(description);
+                    label.setAccessUrls(getAccessUrlList(connection, labelId));
+                    return label;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Label of " + tenantDomain, e);
+        }
+        return null;
     }
 
     /**

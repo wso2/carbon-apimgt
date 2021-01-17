@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -37,6 +38,8 @@ import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -45,12 +48,20 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import javax.xml.stream.XMLStreamException;
 
 public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     private static Log log = LogFactory.getLog(APIGatewayAdmin.class);
+
+    public APIGatewayAdmin() {
+
+    }
 
     /**
      * Add the API to the gateway
@@ -906,6 +917,59 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
         unDeployAPI(certificateManager, sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
+        return true;
+    }
+
+    public boolean cleanDeployment(String tenantDomain) throws AxisFault {
+
+        RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(tenantDomain);
+        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(tenantDomain);
+        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
+        EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+        GatewayCleanupSkipList gatewayCleanupSkipList =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getGatewayCleanupSkipList();
+        if (gatewayCleanupSkipList != null) {
+
+            boolean tenantFlowStarted = false;
+            try {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    tenantFlowStarted = true;
+
+                }
+                Set<String> apis = new HashSet<>(gatewayCleanupSkipList.getApis());
+                List<String> deployedApis = new ArrayList(Arrays.asList(restapiAdminServiceProxy.getapis()));
+                deployedApis.removeAll(apis);
+                for (String api : deployedApis) {
+                    restapiAdminServiceProxy.deleteApi(api);
+                }
+                Set<String> endpoints = gatewayCleanupSkipList.getEndpoints();
+                List<String> deployedEndpoints = new ArrayList(Arrays.asList(endpointAdminServiceProxy.getEndpoints()));
+                deployedEndpoints.removeAll(endpoints);
+                for (String endpoint : deployedEndpoints) {
+                    endpointAdminServiceProxy.deleteEndpoint(endpoint);
+                }
+                Set<String> sequences = gatewayCleanupSkipList.getSequences();
+                Set<String> deployedSequences = sequenceAdminServiceProxy.getSequences();
+                deployedSequences.removeAll(sequences);
+                for (String sequence : deployedSequences) {
+                    sequenceAdminServiceProxy.deleteSequence(sequence);
+                }
+                Set<String> localEntries = gatewayCleanupSkipList.getLocalEntries();
+                List<String> deployedLocalEntries =
+                        new ArrayList(Arrays.asList(localEntryServiceProxy.getLocalEntries()));
+                deployedLocalEntries.removeAll(localEntries);
+                for (String localEntry : deployedLocalEntries) {
+                    localEntryServiceProxy.deleteEntry(localEntry);
+                }
+
+            } finally {
+                if (tenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        }
         return true;
     }
 }

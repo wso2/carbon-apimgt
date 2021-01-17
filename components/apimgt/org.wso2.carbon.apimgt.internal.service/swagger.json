@@ -531,6 +531,12 @@
         "summary" : "Get all the runtime artifacts for a given API UUID and gateway label",
         "description" : "This will provide access to runtime artifacts in database.\n",
         "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
           "name" : "apiId",
           "in" : "query",
           "description" : "**Search condition**.\n  Api ID\n",
@@ -552,6 +558,37 @@
         "responses" : {
           "200" : {
             "description" : "List of runtime Artifacts"
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/endpoint-certificates" : {
+      "get" : {
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get all the endpoint certificates for given alias.",
+        "description" : "This will provide access to\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "alias",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Alias\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "List of endpoint certificates"
           },
           "default" : {
             "description" : "Unexpected error",
