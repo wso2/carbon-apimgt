@@ -53,12 +53,11 @@ public class DBSaver implements ArtifactSaver {
 
     @Override
     public void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain,
-                             File artifact, String[] gatewayLabels) throws ArtifactSynchronizerException {
+                             File artifact, String[] gatewayLabels,String type) throws ArtifactSynchronizerException {
 
         try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
             if (!gatewayArtifactsMgtDAO.isAPIDetailsExists(apiId)) {
-                gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiId, name,
-                        version, tenantDomain);
+                gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiId, name, version, tenantDomain, type);
             }
 
             if (gatewayArtifactsMgtDAO.isAPIArtifactExists(apiId, revision)) {

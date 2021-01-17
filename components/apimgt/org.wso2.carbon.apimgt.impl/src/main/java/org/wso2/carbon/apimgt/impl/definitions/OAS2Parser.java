@@ -380,6 +380,14 @@ public class OAS2Parser extends APIDefinition {
                         template.setMediationScript(mediationScript);
                         template.setMediationScripts(template.getHTTPVerb(), mediationScript);
                     }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                        template.setAmznResourceName((String)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                    }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                        template.setAmznResourceTimeout(((Long)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                    }
                 }
                 urlTemplates.add(template);
             }

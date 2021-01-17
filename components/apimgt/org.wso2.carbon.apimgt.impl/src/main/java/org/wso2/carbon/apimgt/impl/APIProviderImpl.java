@@ -139,6 +139,7 @@ import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
@@ -3504,7 +3505,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private Map<String, String> removeFromGateway(API api) {
+    private Map<String, String> removeFromGateway(API api) throws APIManagementException {
         String tenantDomain = null;
         Map<String, String> failedEnvironment;
         if (api.getId().getProviderName().contains("AT")) {
@@ -8268,15 +8269,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .getTenantId(tenantDomain);
             responseCode = certificateManager
                     .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
-
-            if (responseCode == ResponseCode.SUCCESS) {
-                //Get the gateway manager and add the certificate to gateways.
-                GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
-                gatewayCertificateManager.addToGateways(certificate, alias);
-            } else {
-                log.error("Adding certificate to the Publisher node is failed. No certificate changes will be " +
-                        "affected.");
-            }
+            CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(),APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
+                    tenantDomain,alias,endpoint);
+            APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
@@ -8312,15 +8308,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             responseCode = certificateManager.deleteCertificateFromParentNode(alias, endpoint, tenantId);
-
-            if (responseCode == ResponseCode.SUCCESS) {
-                //Get the gateway manager and remove the certificate from gateways.
-                GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
-                gatewayCertificateManager.removeFromGateways(alias);
-            } else {
-                log.error("Removing the certificate from Publisher node is failed. No certificate changes will "
-                        + "be affected.");
-            }
+            CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_REMOVE.toString(),
+                    tenantDomain, alias, endpoint);
+            APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
         }
@@ -8567,14 +8558,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return gatewayManager.publishToGateway(api, builder, tenantDomain);
     }
 
-    protected Map<String, String> removeFromGateway(API api, String tenantDomain) {
+    protected Map<String, String> removeFromGateway(API api, String tenantDomain) throws APIManagementException {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        gatewayManager.unDeployFromGateway(api,tenantDomain);
         return gatewayManager.removeFromGateway(api, tenantDomain);
     }
 
     protected Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs);
         return gatewayManager.removeFromGateway(apiProduct, tenantDomain, associatedAPIs);
     }
 

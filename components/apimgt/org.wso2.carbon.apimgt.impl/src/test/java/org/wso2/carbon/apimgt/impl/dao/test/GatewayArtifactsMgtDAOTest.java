@@ -105,7 +105,7 @@ public class GatewayArtifactsMgtDAOTest {
     @Test
     public void testAddValidateGatewayPublishedAPIDetails() throws APIManagementException {
         boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID, apiName, version,
-                String.valueOf(MultitenantConstants.SUPER_TENANT_ID));
+                String.valueOf(MultitenantConstants.SUPER_TENANT_ID),APIConstants.API_PRODUCT);
         Assert.assertTrue(result);
     }
 

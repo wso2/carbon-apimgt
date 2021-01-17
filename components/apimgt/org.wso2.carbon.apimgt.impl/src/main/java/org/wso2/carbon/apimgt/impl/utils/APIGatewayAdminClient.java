@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.utils;
 
+import javafx.scene.chart.Axis;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
@@ -27,6 +28,7 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -35,7 +37,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 
 import java.rmi.RemoteException;
 
@@ -309,5 +310,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
 
         return gatewayAPIDTOStub;
+    }
+
+    public boolean cleanDeployment(String tenantDomain) throws AxisFault {
+
+        try {
+            return apiGatewayAdminStub.cleanDeployment(tenantDomain);
+        } catch (RemoteException e) {
+            throw new AxisFault("Error while running cleanup",e);
+        }
     }
 }

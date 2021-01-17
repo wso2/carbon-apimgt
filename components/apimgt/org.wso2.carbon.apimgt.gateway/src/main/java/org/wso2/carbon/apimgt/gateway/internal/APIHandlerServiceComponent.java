@@ -35,20 +35,11 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGate
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
-import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
-import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
-import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
-import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -102,7 +93,7 @@ public class APIHandlerServiceComponent {
             GatewayStartupListener gatewayStartupListener = new GatewayStartupListener();
             bundleContext.registerService(ServerStartupObserver.class.getName(), gatewayStartupListener, null);
             bundleContext.registerService(ServerShutdownHandler.class, gatewayStartupListener, null);
-
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class, gatewayStartupListener, null);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();

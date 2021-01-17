@@ -25,11 +25,12 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.internal.service.RuntimeArtifactsApiService;
+import org.wso2.carbon.apimgt.internal.service.dto.SynapseArtifactListDTO;
+import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -38,23 +39,27 @@ import javax.ws.rs.core.Response;
  */
 public class RuntimeArtifactsApiServiceImpl implements RuntimeArtifactsApiService {
 
-    public Response runtimeArtifactsGet(String apiId, String gatewayLabel, String type, MessageContext messageContext)
+    public Response runtimeArtifactsGet(String xWSO2Tenant, String apiId, String gatewayLabel, String type,
+                                        MessageContext messageContext)
             throws APIManagementException {
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         RuntimeArtifactDto runtimeArtifactDto =
-                RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayLabel, type);
+                RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayLabel, type, xWSO2Tenant);
         if (runtimeArtifactDto != null) {
             if (runtimeArtifactDto.isFile()) {
                 File artifact = (File) runtimeArtifactDto.getArtifact();
-                try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
-                    return Response.ok(fileInputStream).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
-                            "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
-                            APIConstants.APPLICATION_ZIP).build();
-                } catch (IOException e) {
-                    throw new APIManagementException("Error while sending api achieve", e);
-                }
+                return Response.ok(artifact).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=apis.zip").header(RestApiConstants.HEADER_CONTENT_TYPE,
+                        APIConstants.APPLICATION_ZIP).build();
             } else {
-                return Response.ok().entity(runtimeArtifactDto.getArtifact()).build();
+                SynapseArtifactListDTO synapseArtifactListDTO = new SynapseArtifactListDTO();
+                if (runtimeArtifactDto.getArtifact() instanceof List) {
+                    synapseArtifactListDTO.setList((List<String>) runtimeArtifactDto.getArtifact());
+                    synapseArtifactListDTO.setCount(((List<String>) runtimeArtifactDto.getArtifact()).size());
+                }
+                return Response.ok().entity(synapseArtifactListDTO)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
             }
         }
         return Response.noContent().build();
