@@ -56,7 +56,7 @@ public interface ArtifactSaver {
      * @throws ArtifactSynchronizerException
      */
     void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain, File artifact,
-                      String[] gatewayLabels) throws ArtifactSynchronizerException;
+                      String[] gatewayLabels,String type) throws ArtifactSynchronizerException;
 
 
     /**

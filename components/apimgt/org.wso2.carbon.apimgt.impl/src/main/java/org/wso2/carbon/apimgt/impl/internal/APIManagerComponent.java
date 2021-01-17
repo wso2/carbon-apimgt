@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
@@ -202,7 +203,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
-
+            bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -315,12 +316,10 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            if (configuration.getGatewayArtifactSynchronizerProperties().isSaveArtifactsEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
                     bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
                 }
-            }
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -905,8 +904,7 @@ public class APIManagerComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.isSaveArtifactsEnabled()
-                && gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
+        if (gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
             ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
 
             try {
