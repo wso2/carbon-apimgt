@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ServiceCatalogApi;
 import org.wso2.carbon.apimgt.api.model.EndPointInfo;
+import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
@@ -15,8 +16,8 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
     @Override
-    public String addServiceCatalog(ServiceCatalogInfo serviceCatalog, int tenantId) throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().addServiceCatalog(serviceCatalog, tenantId);
+    public String addServiceCatalog(ServiceCatalogEntry serviceCatalog, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().addServiceCatalog(serviceCatalog.getServiceCatalogInfo(), tenantId);
     }
 
     @Override

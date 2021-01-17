@@ -332,6 +332,7 @@ paths:
             schema:
               required:
                 - file
+                - verifier
               properties:
                 file:
                   type: string

@@ -82,7 +82,6 @@ public class FileBasedServicesImportExportManager {
                                                String importedDirectoryName,
                                                String appArchiveLocation, String extractLocation)
             throws IOException, APIManagementException {
-        String archiveExtractLocation;
         // create import directory structure
         Files.createDirectories(Paths.get(extractLocation));
         // create archive

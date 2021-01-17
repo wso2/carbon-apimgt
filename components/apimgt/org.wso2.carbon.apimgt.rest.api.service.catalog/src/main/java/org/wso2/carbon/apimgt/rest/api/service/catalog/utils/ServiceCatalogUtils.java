@@ -8,32 +8,55 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ServiceCatalogUtils {
     private static final Log log = LogFactory.getLog(ServiceCatalogUtils.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
-    public static List<String> VerifierListValidate(List<VerifierDTO> verifier, int tenantId) throws APIManagementException {
-        List<String> verifiedServices = new ArrayList<>();
+    public static HashMap<String, Object> filterNewServices(List<VerifierDTO> verifier, int tenantId) throws APIManagementException {
+        HashMap<String, Object> filteredNewServices = new HashMap<String, Object>();
+        List<String> newServices = new ArrayList<>();
+        List<String> ignoredNewServices = new ArrayList<>();
 
-        for(VerifierDTO verifierDTO : verifier){
+        for (VerifierDTO verifierDTO : verifier) {
             String key = verifierDTO.getKey();
-            if(!StringUtils.isBlank(verifierDTO.getMd5()) && verifierDTO.getMd5().equals(serviceCatalog.getMD5HashByKey(key, tenantId))){
-                verifiedServices.add(key);
+            if (StringUtils.isBlank(verifierDTO.getMd5()) && serviceCatalog.getMD5HashByKey(key, tenantId) == null) {
+                newServices.add(key);
+            } else if (StringUtils.isBlank(verifierDTO.getMd5()) && serviceCatalog.getMD5HashByKey(key, tenantId) != null) {
+                ignoredNewServices.add(key);
             }
         }
-        return verifiedServices;
+        filteredNewServices.put("accepted", newServices);
+        filteredNewServices.put("ignored", ignoredNewServices);
+        return filteredNewServices;
     }
 
+    public static HashMap<String, Object> verifierListValidate(List<VerifierDTO> verifier,
+                                                               HashMap<String, String> newResourcesHash, int tenantId)
+            throws APIManagementException {
+        HashMap<String, Object> filteredServices = new HashMap<String, Object>();
+        List<String> verifiedServices = new ArrayList<>();
+        List<String> ignoredServices = new ArrayList<>();
+        List<String> statusNotChanged = new ArrayList<>();
 
-//    List<String> verifiedServices = new ArrayList<>();
-//
-//        for(String key : md5Hashes.keySet()){
-//        if(md5Hashes.get(key).equals(serviceCatalog.getMD5HashByKey(key, tenantId))){
-//            verifiedServices.add(key);
-//        };
-//    }
-//        return verifiedServices;
-//}
+        for (VerifierDTO verifierDTO : verifier) {
+            String key = verifierDTO.getKey();
+            if (!StringUtils.isBlank(verifierDTO.getMd5()) && serviceCatalog.getMD5HashByKey(key, tenantId) != null &&
+                    verifierDTO.getMd5().equals(serviceCatalog.getMD5HashByKey(key, tenantId))) {
+                if(!StringUtils.equals(verifierDTO.getMd5(), newResourcesHash.get(key))) {
+                    verifiedServices.add(key);
+                } else {
+                    statusNotChanged.add(key);
+                }
+            } else {
+                ignoredServices.add(key);
+            }
+        }
+        filteredServices.put("verified", verifiedServices);
+        filteredServices.put("ignored", ignoredServices);
+        filteredServices.put("notChanged", statusNotChanged);
+        return filteredServices;
+    }
 }

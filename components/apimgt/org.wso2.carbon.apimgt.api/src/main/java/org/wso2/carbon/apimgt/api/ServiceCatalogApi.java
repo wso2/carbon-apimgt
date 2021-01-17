@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.EndPointInfo;
+import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface ServiceCatalogApi {
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String addServiceCatalog(ServiceCatalogInfo serviceCatalog, int tenantId) throws APIManagementException;
+    String addServiceCatalog(ServiceCatalogEntry serviceCatalog, int tenantId) throws APIManagementException;
 
     /**
      * Returns details of an Service Catalog

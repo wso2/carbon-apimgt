@@ -1,16 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.wso2.carbon.apimgt.api.*;
-import org.wso2.carbon.apimgt.api.model.EndPointInfo;
-import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -20,28 +18,28 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.Md5HashGenerator;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.Md5HashGenerator;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceCatalogUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 
 public class ServicesApiServiceImpl implements ServicesApiService {
 
     private static final Log log = LogFactory.getLog(ServicesApiServiceImpl.class);
+    private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
     public final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "data" + File.separator + "petstore";
     public final String ZIP_EXPORT_DIR = "repository" + File.separator + "data";
     private final String ENDPOINT_NAME = "petstore-endpoint";
@@ -153,16 +151,17 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     @Override
-    public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String ifMatch,
-                                  Boolean overwrite, List<VerifierDTO> verifier, MessageContext messageContext)
+    public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail,
+                                  List<VerifierDTO> verifier, String ifMatch, Boolean overwrite, MessageContext messageContext)
             throws APIManagementException {
-
         APIConsumer consumer;
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String tempDirPath = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
-        Map<String, String> md5Hashes;
-        List<String> verifiedKeys;
+        HashMap<String, String> newResourcesHash;
+        HashMap<String, ServiceCatalogEntry> catalogEntries;
+        HashMap<String, Object> validatedServices;
+        HashMap<String, Object> newServices;
 
         // unzip the uploaded zip
         try {
@@ -174,23 +173,32 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
         }
 
-        md5Hashes = Md5HashGenerator.generateHash(tempDirPath);
+        if (verifier.size() != DataMappingUtil.dirCount(tempDirPath)) {
+            RestApiUtil.handleBadRequest("Number of elements in verifier must equals to number of directories in the zip archive.", log);
+        }
 
-        verifiedKeys = ServiceCatalogUtils.VerifierListValidate(verifier, tenantId);
+        newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
+        catalogEntries = DataMappingUtil.fromDirToServiceCatalogEntryMap(tempDirPath);
+        validatedServices = ServiceCatalogUtils.verifierListValidate(verifier, newResourcesHash, tenantId);
+        newServices = ServiceCatalogUtils.filterNewServices(verifier, tenantId);
 
-        // Retrieve endpoint name + version from each metadata and verifier list
 
-        // Search each in db with tenant id
 
-        // Entries not present in db -> directly to persistence layer
+//        check overwrite value*********************************
 
-        // number of endpoint resources available in zip equals to number of verifier values(for the initial registration of services,
+        // ***Retrieve endpoint name + version from each metadata and verifier list
+
+        // ***Search each in db with tenant id
+
+        // ***Entries not present in db -> directly to persistence layer
+
+        // ***number of endpoint resources available in zip equals to number of verifier values(for the initial registration of services,
         // can we allow blank?)
 
-        // For others go through verifier list and compare each hash with the available values retrieved from db(based on name)
+        // ***For others go through verifier list and compare each hash with the available values retrieved from db(based on name)
 
-        // if hashes are equal, then loop through the list and proceed with CRUD
-        // new hashes for new content > from map or getHashForEndPoint()
+        // ***if hashes are equal, then loop through the list and proceed with CRUD
+        // ***new hashes for new content > from map or getHashForEndPoint()
 
         ///////////////////////////////////////////////////////////////////////////////////
 //        if (StringUtils.equals(ifMatch, eTag)) {
@@ -229,6 +237,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 //        }
         return null;
     }
+
+//    @Override
+//    public Response importService(String serviceId, String ifMatch, Boolean overwrite, List<VerifierDTO> verifier, MessageContext messageContext) throws APIManagementException {
+//        String userName = RestApiCommonUtil.getLoggedInUsername();
+//        int tenantId = APIUtil.getTenantId(userName);
+//        List<String> verifiedKeys;
+//        verifiedKeys = ServiceCatalogUtils.VerifierListValidate(verifier, tenantId);
+//        return null;
+//    }
 
     public Response searchServices(String name, String version, String definitionType, String displayName, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
         log.info("searchServices");

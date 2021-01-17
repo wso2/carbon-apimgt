@@ -77,6 +77,18 @@ public class DataMappingUtil {
         return endPointInfo;
     }
 
+    public static int dirCount(String path) {
+        File[] files = new File(path).listFiles();
+        int count = 0;
+        assert files != null;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     public static HashMap<String, ServiceCatalogEntry> fromDirToServiceCatalogEntryMap(String path) {
 
         // We can use list: then we can go through it and if we need name or something we can just use getters

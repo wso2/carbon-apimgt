@@ -169,8 +169,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successful response with the imported service metadata. ", response = ServicesStatusListDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class) })
-    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite, @Multipart(value = "verifier", required = false)  List<VerifierDTO> verifier) throws APIManagementException{
-        return delegate.importService(serviceId, fileInputStream, fileDetail, ifMatch, overwrite, verifier, securityContext);
+    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @Multipart(value = "verifier")  List<VerifierDTO> verifier,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
+        return delegate.importService(serviceId, fileInputStream, fileDetail, verifier, ifMatch, overwrite, securityContext);
     }
 
     @GET
