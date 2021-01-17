@@ -34,6 +34,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.ScopesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GlobalPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.RuntimeArtifactsApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.EndpointCertificatesApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

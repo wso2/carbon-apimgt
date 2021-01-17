@@ -8,14 +8,14 @@ import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeArtifactGeneratorUtil {
 
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
-    public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String gatewayLabel, String type)
+    public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String gatewayLabel, String type,
+                                                             String tenantDomain)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
@@ -24,13 +24,14 @@ public class RuntimeArtifactGeneratorUtil {
             List<APIRuntimeArtifactDto> gatewayArtifacts;
             if (StringUtils.isNotEmpty(gatewayLabel)) {
                 if (StringUtils.isNotEmpty(apiId)) {
-                    gatewayArtifacts =
-                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabel);
+                    gatewayArtifacts = gatewayArtifactsMgtDAO
+                            .retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabel, tenantDomain);
                 } else {
-                    gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabel);
+                    gatewayArtifacts =
+                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabel, tenantDomain);
                 }
             } else {
-                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts();
+                gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
             }
             if (gatewayArtifacts != null){
                 if (gatewayArtifacts.isEmpty()){

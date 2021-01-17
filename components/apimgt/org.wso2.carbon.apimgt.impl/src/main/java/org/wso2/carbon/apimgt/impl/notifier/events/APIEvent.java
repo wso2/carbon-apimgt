@@ -33,7 +33,16 @@ public class APIEvent extends Event {
     private String apiType;
     private String apiStatus;
 
-    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,String apiName, int apiId,
+    public APIEvent(String apiName, String apiVersion, String apiProvider,
+                    String apiType, String apiStatus) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.apiProvider = apiProvider;
+        this.apiType = apiType;
+        this.apiStatus = apiStatus;
+    }
+
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName, int apiId,
                     String apiVersion, String apiType, String apiContext, String apiProvider, String apiStatus) {
         this.eventId = eventId;
         this.timeStamp = timestamp;

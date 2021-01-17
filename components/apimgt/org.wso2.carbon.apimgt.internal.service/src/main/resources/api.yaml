@@ -405,6 +405,7 @@ paths:
       description: |
         This will provide access to runtime artifacts in database.
       parameters:
+        - $ref: '#/parameters/requestedTenant'
         - name: apiId
           in: query
           description: |
@@ -428,6 +429,28 @@ paths:
       responses:
         200:
           description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /endpoint-certificates:
+    get:
+      summary: Get all the endpoint certificates for given alias.
+      description: |
+        This will provide access to
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: alias
+          in: query
+          description: |
+            **Search condition**.
+              Alias
+          type: string
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: List of endpoint certificates
         default:
           description: Unexpected error
           schema:

@@ -123,12 +123,12 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -156,7 +156,6 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -294,10 +293,10 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.UUID;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -595,16 +594,7 @@ public final class APIUtil {
                 }
             }
         } while (retry);
-
-        if (httpResponse.getStatusLine().getStatusCode() == 200) {
-            return httpResponse;
-        } else {
-            httpResponse.close();
-            String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
-                    APIConstants.DigestAuthConstants.CHARSET);
-            throw new APIManagementException(errorMessage + "Event-Hub status code is : "
-                    + httpResponse.getStatusLine().getStatusCode());
-        }
+        return httpResponse;
     }
 
     /**
@@ -10605,7 +10595,7 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
-    
+
     public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
         Map<String, Object> properties = new HashMap<String, Object>();
         if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
@@ -11829,7 +11819,7 @@ public final class APIUtil {
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
-    
+
     public static String getconvertedId(Identifier apiId) {
         String id = null;
         if (apiId instanceof APIIdentifier) {
@@ -11860,5 +11850,22 @@ public final class APIUtil {
             userRoles = filteredUserRoles.toArray(new String[0]);
         }
         return userRoles;
+    }
+
+    public static Environment getEnvironment(String name, String tenantDomain) throws APIManagementException {
+
+        Environment environment = getEnvironments().get(name);
+        if (environment != null) {
+            return environment;
+        }
+        Label label =
+                ApiMgtDAO.getInstance().getLabelDetailByLabelAndTenantDomain(name, tenantDomain);
+        if (label != null) {
+            environment = new Environment();
+            environment.setName(label.getName());
+            environment.setType(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+            return environment;
+        }
+        return null;
     }
 }
