@@ -1030,6 +1030,7 @@ public final class APIConstants {
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
+    public static final String LC_CACHE_NAME = "lcCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
@@ -2476,4 +2477,8 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+    
+    
+    public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
+    public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
 }

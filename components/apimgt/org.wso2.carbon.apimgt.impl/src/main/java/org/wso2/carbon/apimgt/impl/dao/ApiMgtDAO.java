@@ -14297,6 +14297,7 @@ public class ApiMgtDAO {
                         APIProductResource resource = new APIProductResource();
                         APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
                                 rs.getString("API_VERSION"));
+                        apiId.setUuid(rs.getString("API_UUID"));
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
                         resource.setApiName(rs.getString("API_NAME"));
@@ -15477,5 +15478,54 @@ public class ApiMgtDAO {
             handleException("Failed to delete tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
+    }
+    
+    /**
+     * Return the existing versions for the given api name for the provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set version
+     * @throws APIManagementException
+     */
+    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_VERSION"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
+    }
+    /**
+     * Return ids of the versions for the given name for the given provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set ids
+     * @throws APIManagementException
+     */
+    public Set<String> getUUIDsOfAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_UUID"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
     }
 }

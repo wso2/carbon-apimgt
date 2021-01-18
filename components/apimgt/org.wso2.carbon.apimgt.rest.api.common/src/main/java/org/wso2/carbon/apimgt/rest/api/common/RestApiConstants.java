@@ -31,6 +31,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
@@ -122,6 +123,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_RATINGS = "/ratings";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
+    public static final String RESOURCE_PATH_API_MEDIATION = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/mediation-policies";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM + "/documents";
     public static final String RESOURCE_PATH_THUMBNAIL_API_PRODUCT = RESOURCE_PATH_API_PRODUCTS + "/"

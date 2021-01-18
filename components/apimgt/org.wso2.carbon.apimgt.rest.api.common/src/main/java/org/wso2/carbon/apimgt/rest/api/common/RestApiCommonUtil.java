@@ -364,7 +364,15 @@ public class RestApiCommonUtil {
      * */
     public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
-        String apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+        String apiSwagger = null;
+        String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        if (api.getUuid() != null) {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), providerTenantDomain);
+        } else {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+        }
+         
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
         return parser.getOASDefinitionForPublisher(api, apiSwagger);
     }
