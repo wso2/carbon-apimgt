@@ -1419,7 +1419,7 @@ public final class APIConstants {
     public static final String CUSTOM_HTTP_STATUS_CODE = "CUSTOM_HTTP_SC";
     public static final String CUSTOM_ERROR_CODE = "ERROR_CODE";
     public static final String CUSTOM_ERROR_MESSAGE = "ERROR_MESSAGE";
-    //Swagger v2.0 constants
+    //Swagger constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
@@ -1428,6 +1428,9 @@ public final class APIConstants {
     public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";
     public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
     public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
+    public static final String SWAGGER_X_RECORD_HISTORY = "x-record-history";
+    public static final String SWAGGER_X_RECORD_HISTORY_PAYLOAD = "x-record-history-payload";
+    public static final String SWAGGER_OPERATION_ID = "operationId";
     public static final String WSO2_APP_SECURITY_TYPES = "security-types";
     public static final String OPTIONAL = "optional";
     public static final String MANDATORY = "mandatory";
