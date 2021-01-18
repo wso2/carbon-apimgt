@@ -92,6 +92,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient authClient;
     private ScopeClient scopeClient;
     private UserClient userClient;
+    private String reservedAppOwnerUsername = "apim_reserved_user";
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -182,7 +183,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } else {
             clientInfo.setTokenType(info.getTokenType());
         }
-        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+        clientInfo.setApplication_owner(reservedAppOwnerUsername);
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
@@ -566,6 +567,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String username = (String) configuration.getParameter(APIConstants.KEY_MANAGER_USERNAME);
         String password = (String) configuration.getParameter(APIConstants.KEY_MANAGER_PASSWORD);
         String keyManagerServiceUrl = (String) configuration.getParameter(APIConstants.AUTHSERVER_URL);
+
+        String reservedUserConfig = (String) configuration.getParameter(APIConstants.KEY_MANAGER_RESERVED_USER);
+
+        if(StringUtils.isNotBlank(reservedUserConfig)) {
+            reservedAppOwnerUsername = reservedUserConfig;
+            if(log.isDebugEnabled()) {
+                log.debug("Reserved App Owner Username set to: " + reservedAppOwnerUsername);
+            }
+        } else {
+            log.warn("Using default reserved username for app ownership: " + reservedUserConfig);
+        }
 
         String dcrEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.CLIENT_REGISTRATION_ENDPOINT) != null) {

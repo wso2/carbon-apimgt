@@ -25,10 +25,17 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.message.clustering.TenantLoadMessage;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+
+import java.util.HashMap;
 
 /**
  * Observer class for keeping track of tenant loading/unloading operations
@@ -38,11 +45,36 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
     private static final Log log = LogFactory.getLog(TenantLoadMessageSender.class);
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
+        createReservedUser();
         if (!isEnabled()) {
             log.debug("Tenant Load Notifications are disabled");
             return;
         }
         notifyTenantLoad();
+    }
+
+    public void createReservedUser() {
+        APIManagerConfiguration config = getAPIManagerConfiguration();
+        String username = "apim_reserved_user";
+        if (config != null) {
+            username = config.getFirstProperty(APIConstants.KEY_MANAGER_RESERVED_USER);
+        }
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            int tenantId = getTenantId();
+            if (realmService != null && tenantId != MultitenantConstants.INVALID_TENANT_ID) {
+                UserStoreManager userStoreManager =
+                        (UserStoreManager) realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+                boolean isReservedUserCreated = userStoreManager.isExistingUser(username);
+                if (!isReservedUserCreated) {
+                    userStoreManager.addUser(username, "apimuserpass", new String[]{"Internal/everyone"},
+                            new HashMap<>(), "apim_reserved_user", false);
+                }
+            }
+        } catch (UserStoreException e) {
+            log.error("Error occurred while getting the realm configuration, User store properties might not be " +
+                    "returned", e);
+        }
     }
 
     @Override
@@ -138,5 +170,14 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
      */
     public boolean isEnabled() {
         return Boolean.parseBoolean((System.getProperty(APIConstants.ENABLE_TENANT_LOAD_NOTIFICATION)));
+    }
+
+
+    /**
+     * Returns API manager configurations.
+     * @return APIManagerConfiguration object
+     */
+    private APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 }
