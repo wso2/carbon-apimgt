@@ -7241,7 +7241,7 @@ public class ApiMgtDAO {
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
-
+        String deleteAPIHistoryQuery = SQLConstants.HistorySqlConstants.REMOVE_FROM_API_HISTORY_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7276,6 +7276,12 @@ public class ApiMgtDAO {
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
             prepStmt = connection.prepareStatement(deleteLCEventQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.execute();
+            prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            //Delete all history event details associated with the API
+            prepStmt = connection.prepareStatement(deleteAPIHistoryQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
@@ -15643,12 +15649,16 @@ public class ApiMgtDAO {
                      connection.prepareStatement(SQLConstants.HistorySqlConstants.ADD_HISTORY_EVENT)) {
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, historyEvent.getId());
+                statement.setString(1, uuid);
                 statement.setTimestamp(2, new Timestamp(historyEvent.getCreatedTime().getTime()));
                 statement.setString(3, historyEvent.getOperationId());
                 statement.setString(4, historyEvent.getDescription());
                 statement.setString(5, historyEvent.getRevisionKey());
-                statement.setBlob(6, (InputStream) historyEvent.getPayload());
+                ByteArrayInputStream payloadStream = null;
+                if (historyEvent.getPayload() != null) {
+                    payloadStream = new ByteArrayInputStream(historyEvent.getPayload());
+                }
+                statement.setBlob(6, payloadStream);
                 statement.setString(7, historyEvent.getApiId());
                 statement.setString(8, historyEvent.getUser());
                 statement.executeUpdate();
