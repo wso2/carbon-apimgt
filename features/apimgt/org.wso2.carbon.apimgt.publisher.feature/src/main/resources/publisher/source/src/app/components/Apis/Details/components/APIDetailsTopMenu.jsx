@@ -234,7 +234,7 @@ const APIDetailsTopMenu = (props) => {
                             <MenuItem value={item.id}>
                                 <Link to={'/apis/' + item.id + '/overview'}>
                                     <Typography variant='body'>
-                                        {item.key}
+                                        {item.displayName}
                                     </Typography>
                                 </Link>
                             </MenuItem>

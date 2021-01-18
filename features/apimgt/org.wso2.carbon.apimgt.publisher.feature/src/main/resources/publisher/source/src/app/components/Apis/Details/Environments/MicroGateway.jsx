@@ -211,7 +211,7 @@ export default function MicroGateway(props) {
                                                 ).map((o3) => (
                                                     <div>
                                                         <Chip
-                                                            label={o3.key}
+                                                            label={o3.displayName}
                                                             style={{ backgroundColor: '#15B8CF' }}
                                                         />
                                                         <Button
@@ -249,7 +249,7 @@ export default function MicroGateway(props) {
                                                             {allRevisions && allRevisions.map(
                                                                 (number) => (
                                                                     <MenuItem value={number.id}>
-                                                                        {number.key}
+                                                                        {number.displayName}
                                                                     </MenuItem>
                                                                 ),
                                                             )}

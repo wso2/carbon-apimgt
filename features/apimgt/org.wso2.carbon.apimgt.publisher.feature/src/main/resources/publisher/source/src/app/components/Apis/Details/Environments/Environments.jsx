@@ -688,13 +688,13 @@ export default function Environments() {
                             {returnItem1(allRevisions[revision].description)}
                             {item1}
                             <Grid className={classes.textShape2}>
-                                {allRevisions[revision].key}
+                                {allRevisions[revision].displayName}
                             </Grid>
                             <Grid>
                                 <Button
                                     className={classes.textShape3}
                                     onClick={() => toggleOpenConfirmRestore(
-                                        allRevisions[revision].key, allRevisions[revision].id,
+                                        allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
                                     type='submit'
@@ -708,7 +708,7 @@ export default function Environments() {
                                 <Button
                                     className={classes.textShape7}
                                     onClick={() => toggleOpenConfirmDelete(
-                                        allRevisions[revision].key, allRevisions[revision].id,
+                                        allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
                                     color='#38536c'
@@ -727,13 +727,13 @@ export default function Environments() {
                         <Grid item>
                             <Grid className={classes.textShape5} />
                             <Grid className={classes.textShape2}>
-                                {allRevisions[revision].key}
+                                {allRevisions[revision].displayName}
                             </Grid>
                             <Grid>
                                 <Button
                                     className={classes.textShape3}
                                     onClick={() => toggleOpenConfirmRestore(
-                                        allRevisions[revision].key, allRevisions[revision].id,
+                                        allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
                                     type='submit'
@@ -747,7 +747,7 @@ export default function Environments() {
                                 <Button
                                     className={classes.textShape7}
                                     onClick={() => toggleOpenConfirmDelete(
-                                        allRevisions[revision].key, allRevisions[revision].id,
+                                        allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
                                     color='#38536c'
@@ -937,7 +937,7 @@ export default function Environments() {
                     <DialogContent className={classes.dialogContent}>
                         <Typography variant='h6' gutterBottom>
                             {/* Revision {(allRevisions && allRevisions.length !== 0) ?
-                                (parseInt(allRevisions[allRevisions.length-1].key.slice(-1)) +1) : 0} */}
+                                (parseInt(allRevisions[allRevisions.length-1].displayName.slice(-1)) +1) : 0} */}
                         </Typography>
                         <Box mb={3}>
                             <TextField
@@ -1011,7 +1011,7 @@ export default function Environments() {
                                                                     ).map((o3) => (
                                                                         <div>
                                                                             <Chip
-                                                                                label={o3.key}
+                                                                                label={o3.displayName}
                                                                                 style={{ backgroundColor: '#15B8CF' }}
                                                                             />
                                                                         </div>
@@ -1090,7 +1090,7 @@ export default function Environments() {
                                                                     ).map((o3) => (
                                                                         <div>
                                                                             <Chip
-                                                                                label={o3.key}
+                                                                                label={o3.displayName}
                                                                                 style={{ backgroundColor: '#15B8CF' }}
                                                                             />
                                                                         </div>
@@ -1224,7 +1224,7 @@ export default function Environments() {
                                                 ).map((o3) => (
                                                     <div>
                                                         <Chip
-                                                            label={o3.key}
+                                                            label={o3.displayName}
                                                             style={{ backgroundColor: '#15B8CF' }}
                                                         />
                                                         <Button
@@ -1261,7 +1261,7 @@ export default function Environments() {
                                                             {allRevisions && allRevisions.map(
                                                                 (number) => (
                                                                     <MenuItem value={number.id}>
-                                                                        {number.key}
+                                                                        {number.displayName}
                                                                     </MenuItem>
                                                                 ),
                                                             )}
