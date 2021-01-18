@@ -69,8 +69,6 @@ public interface ApisApiService {
       public Response deploymentsGetStatus(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String startTime, String endTime, MessageContext messageContext) throws APIManagementException;
-      public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext) throws APIManagementException;
       public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateContentByAlias(String apiId, String alias, MessageContext messageContext) throws APIManagementException;
@@ -79,6 +77,8 @@ public interface ApisApiService {
       public Response getAPIDocumentContentByDocumentId(String apiId, String documentId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIDocuments(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIGraphQLSchema(String apiId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIHistory(String apiId, Integer limit, Integer offset, String revisionId, String startTime, String endTime, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIHistoryEventPayload(String apiId, String eventId, MessageContext messageContext) throws APIManagementException;
       public Response getAPILifecycleHistory(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPILifecycleState(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

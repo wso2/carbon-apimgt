@@ -222,6 +222,43 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiProductId}/history")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List API Product History", notes = "List all history events of an API Product. ", response = HistoryEventListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API Product History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Product History list is returned. ", response = HistoryEventListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
+    public Response getAPIProductHistory(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API Product history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the starting timestamp to show history from. ")  @QueryParam("startTime") String startTime,  @ApiParam(value = "Specify the ending timestamp to show history upto. ")  @QueryParam("endTime") String endTime) throws APIManagementException{
+        return delegate.getAPIProductHistory(apiProductId, limit, offset, revisionId, startTime, endTime, securityContext);
+    }
+
+    @GET
+    @Path("/{apiProductId}/history/{eventId}/payload")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get payload of an API Product History Event.", notes = "Get the payload of a particular history event of an API Product. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Product History Event Payload is returned. ", response = String.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class) })
+    public Response getAPIProductHistoryEventPayload(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
+        return delegate.getAPIProductHistoryEventPayload(apiProductId, eventId, securityContext);
+    }
+
+    @GET
     @Path("/{apiProductId}/swagger")
     
     @Produces({ "application/json" })
@@ -356,7 +393,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Products",  })
+    }, tags={ "API Products" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Image updated ", response = FileInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
@@ -364,42 +401,5 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response updateAPIProductThumbnail(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.updateAPIProductThumbnail(apiProductId, fileInputStream, fileDetail, ifMatch, securityContext);
-    }
-
-    @GET
-    @Path("/{apiProductId}/history")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "List API Product History", notes = "List all history events of an API Product. ", response = HistoryEventListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "API Product History",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. API Product History list is returned. ", response = HistoryEventListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response getAPIProductHistory(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API Product history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the starting timestamp to show history from. ")  @QueryParam("startTime") String startTime,  @ApiParam(value = "Specify the ending timestamp to show history upto. ")  @QueryParam("endTime") String endTime) throws APIManagementException{
-        return delegate.getAPIProductHistory(apiProductId, limit, offset, revisionId, startTime, endTime, securityContext);
-    }
-
-    @GET
-    @Path("/{apiProductId}/history/{eventId}/payload")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get payload of an API Product History Event.", notes = "Get the payload of a particular history event of an API Product. ", response = String.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "API History" })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. API Product History Event Payload is returned. ", response = String.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class) })
-    public Response getAPIProductHistoryEventPayload(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
-        return delegate.getAPIProductHistoryEventPayload(apiProductId, eventId, securityContext);
     }
 }

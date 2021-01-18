@@ -38,6 +38,8 @@ public interface ApiProductsApiService {
       public Response getAPIProductDocument(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductDocumentContent(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductDocuments(String apiProductId, Integer limit, Integer offset, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId, String startTime, String endTime, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductSwagger(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIProductThumbnail(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAllAPIProducts(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -46,6 +48,4 @@ public interface ApiProductsApiService {
       public Response updateAPIProduct(String apiProductId, APIProductDTO apIProductDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIProductDocument(String apiProductId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIProductThumbnail(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response getAPIProductHistory(String apiProductId, Integer limit, Integer offset, String revisionId, String startTime, String endTime, MessageContext messageContext) throws APIManagementException;
-      public Response getAPIProductHistoryEventPayload(String apiProductId, String eventId, MessageContext messageContext) throws APIManagementException;
 }

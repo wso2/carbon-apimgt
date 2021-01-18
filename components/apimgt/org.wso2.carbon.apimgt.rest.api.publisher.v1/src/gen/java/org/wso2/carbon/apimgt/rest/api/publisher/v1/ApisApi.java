@@ -513,6 +513,43 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/history")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "List API History", notes = "List all history events of an API. ", response = HistoryEventListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API History list is returned. ", response = HistoryEventListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getAPIHistory(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the starting timestamp to show history from. ")  @QueryParam("startTime") String startTime,  @ApiParam(value = "Specify the ending timestamp to show history upto. ")  @QueryParam("endTime") String endTime) throws APIManagementException{
+        return delegate.getAPIHistory(apiId, limit, offset, revisionId, startTime, endTime, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/history/{eventId}/payload")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get payload of an API History Event.", notes = "Get the payload of a particular history event of an API. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API History",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API History Event Payload is returned. ", response = String.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class) })
+    public Response getAPIHistoryEventPayload(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
+        return delegate.getAPIHistoryEventPayload(apiId, eventId, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/lifecycle-history")
     
     @Produces({ "application/json" })
@@ -763,43 +800,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response getAllAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API contains \"wso2\". \"provider:\"wso2\"\" will match an API if the provider of the API is exactly \"wso2\". \"status:PUBLISHED\" will match an API if the API is in PUBLISHED state. \"label:external\" will match an API if it contains a Microgateway label called \"external\".  Also you can use combined modifiers Eg. name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.  Supported attribute modifiers are [**version, context, name, status, description, subcontext, doc, provider, label**]  If no advanced attribute modifier has been specified,  the API names containing the search term will be returned as a result.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Defines whether the returned response should contain full details of API ")  @QueryParam("expand") Boolean expand,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
         return delegate.getAllAPIs(limit, offset, xWSO2Tenant, query, ifNoneMatch, expand, accept, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/history")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "List API History", notes = "List all history events of an API. ", response = HistoryEventListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "API History",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. API History list is returned. ", response = HistoryEventListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getAPIHistory(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Specify the revision to return API history up to. ")  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "Specify the starting timestamp to show history from. ")  @QueryParam("startTime") String startTime,  @ApiParam(value = "Specify the ending timestamp to show history upto. ")  @QueryParam("endTime") String endTime) throws APIManagementException{
-        return delegate.getAPIHistory(apiId, limit, offset, revisionId, startTime, endTime, securityContext);
-    }
-
-    @GET
-    @Path("/{apiId}/history/{eventId}/payload")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get payload of an API History Event.", notes = "Get the payload of a particular history event of an API. ", response = String.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "API History",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. API History Event Payload is returned. ", response = String.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class) })
-    public Response getAPIHistoryEventPayload(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "The UUID of the event ",required=true) @PathParam("eventId") String eventId) throws APIManagementException{
-        return delegate.getAPIHistoryEventPayload(apiId, eventId, securityContext);
     }
 
     @GET
