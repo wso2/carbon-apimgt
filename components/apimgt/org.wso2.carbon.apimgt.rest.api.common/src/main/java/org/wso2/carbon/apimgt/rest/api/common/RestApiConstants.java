@@ -17,6 +17,9 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public final class RestApiConstants {
@@ -303,4 +306,11 @@ public final class RestApiConstants {
 
     public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
 
+    //API History related constants
+    public static final String LOGGED_IN_USERNAME = "loggedInUser";
+    public static final String PARAM_API_ID = "apiId";
+    public static final String HISTORY_EVENT = "historyEvent";
+    public static final List<String> DTO_CLASSES_TO_RECORD_HISTORY = new ArrayList<>(
+            Arrays.asList("APIDTO", "DocumentDTO", "GraphQLQueryComplexityInfoDTO", "APIProductDTO",
+                    "APIMonetizationInfoDTO", "ResourcePolicyInfoDTO"));
 }
