@@ -138,24 +138,30 @@ public class CertificateManagerImpl implements CertificateManager {
     public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
 
         try {
-            CertificateMetadataDTO certificate = certificateMgtDAO.getCertificate(alias, endpoint, tenantId);
-            boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
-            if (removeFromDB) {
-                ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
-                if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
-                    certificateMgtDAO.addCertificate(certificate.getCertificate(), alias, endpoint, tenantId);
-                    log.error("Error removing the Certificate from Trust Store. Rolling back...");
-                } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
-                    log.warn("The Certificate for Alias '" + alias + "' has been previously removed from " +
-                            "Trust Store. Hence DB entry is removed.");
+            List<CertificateMetadataDTO> certificateMetadataDTOList =
+                    certificateMgtDAO.getCertificates(alias, null, tenantId);
+            if (certificateMetadataDTOList != null && certificateMetadataDTOList.size() == 1) {
+                CertificateMetadataDTO certificate = certificateMetadataDTOList.get(0);
+                boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
+                if (removeFromDB) {
+                    ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
+                    if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
+                        certificateMgtDAO.addCertificate(certificate.getCertificate(), alias, endpoint, tenantId);
+                        log.error("Error removing the Certificate from Trust Store. Rolling back...");
+                    } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
+                        log.warn("The Certificate for Alias '" + alias + "' has been previously removed from " +
+                                "Trust Store. Hence DB entry is removed.");
+                    } else {
+                        log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '"
+                                + alias + "'");
+                    }
+                    return responseCode;
                 } else {
-                    log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '"
-                            + alias + "'");
+                    log.error(
+                            "Failed to remove certificate from the data base. No certificate changes will be affected" +
+                                    ".");
+                    return ResponseCode.INTERNAL_SERVER_ERROR;
                 }
-                return responseCode;
-            } else {
-                log.error("Failed to remove certificate from the data base. No certificate changes will be affected.");
-                return ResponseCode.INTERNAL_SERVER_ERROR;
             }
         } catch (CertificateManagementException e) {
             log.error("Error persisting/ deleting certificate metadata. ", e);
@@ -163,6 +169,7 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateAliasExistsException e) {
             return ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
         }
+        return ResponseCode.CERTIFICATE_NOT_FOUND;
     }
 
     @Override

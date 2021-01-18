@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.internal.CertificateDataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -247,7 +246,7 @@ public class InMemoryAPIDeployer {
 
         try {
             if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-                APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
+                APIGatewayAdminClient apiGatewayAdmin = new APIGatewayAdminClient();
 
                 API api = new API(new APIIdentifier(gatewayEvent.getProvider(), gatewayEvent.getName(),
                         gatewayEvent.getVersion()));
@@ -287,12 +286,7 @@ public class InMemoryAPIDeployer {
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
                         GatewayUtils
                                 .addStringToList(gatewayEvent.getApiId(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
-                MessageContext messageContext =
-                        ServiceReferenceHolder.getInstance().getConfigurationContextService()
-                                .getServerConfigContext().createMessageContext();
-                MessageContext.setCurrentMessageContext(messageContext);
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
-                MessageContext.destroyCurrentMessageContext();
             }
         } catch (AxisFault axisFault) {
             throw new ArtifactSynchronizerException("Error while unDeploying api ", axisFault);
@@ -304,14 +298,8 @@ public class InMemoryAPIDeployer {
 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             try {
-                APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
-                MessageContext messageContext =
-                        ServiceReferenceHolder.getInstance().getConfigurationContextService()
-                                .getServerConfigContext().createMessageContext();
-                messageContext.setAxisService(new AxisService());
-                MessageContext.setCurrentMessageContext(messageContext);
+                APIGatewayAdminClient apiGatewayAdmin = new APIGatewayAdminClient();
                 apiGatewayAdmin.cleanDeployment(tenantDomain);
-                MessageContext.destroyCurrentMessageContext();
             } catch (AxisFault axisFault) {
                 throw new ArtifactSynchronizerException("Error while running cleanup", axisFault);
             }
