@@ -58,7 +58,7 @@ import java.util.List;
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
-    private EventHubConfigurationDto getEventHubConfigurationDto;
+    private final EventHubConfigurationDto getEventHubConfigurationDto;
 
     public static final int retrievalTimeoutInSeconds = 15;
     public static final int retrievalRetries = 15;
@@ -257,7 +257,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
                 + consumerKey;
-        ApplicationKeyMapping application = new ApplicationKeyMapping();
+        ApplicationKeyMapping application = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);

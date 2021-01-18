@@ -306,7 +306,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                 }
             }
             // check whether still api and keys are not found
-            if(api == null || key == null || StringUtils.isEmpty(key.getConsumerKey())) {
+            if(api == null || key == null) {
                 // invalid request. nothing to do. return without any further processing
                 if (log.isDebugEnabled()) {
                     if (api == null) {
