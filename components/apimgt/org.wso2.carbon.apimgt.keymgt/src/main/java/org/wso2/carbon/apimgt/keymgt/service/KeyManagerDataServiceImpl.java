@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
@@ -416,5 +417,21 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
             log.debug("Converted : " + policy.toString());
         }
         return policy;
+    }
+
+    @Override
+    public void updateDeployedAPIRevision(DeployAPIInGatewayEvent event) {
+        if (log.isDebugEnabled()) {
+            log.debug("Add or Update API in datastore in tenant " + event.getTenantDomain());
+        }
+        SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
+                .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
+        store.addOrUpdateAPIRevisionWithUrlTemplates(event);
     }
 }

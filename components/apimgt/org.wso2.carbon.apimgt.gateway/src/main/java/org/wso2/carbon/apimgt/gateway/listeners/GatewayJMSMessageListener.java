@@ -114,7 +114,11 @@ public class GatewayJMSMessageListener implements MessageListener {
         byte[] eventDecoded = Base64.decodeBase64(encodedEvent);
         String eventJson = new String(eventDecoded);
 
-        if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
+        if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
+                || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
+            ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
+        } else if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
                 && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model;
 
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
@@ -101,6 +102,8 @@ public interface SubscriptionDataStore {
     void addOrUpdateAPI(API api);
     
     void addOrUpdateAPIWithUrlTemplates(API api);
+
+    void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event);
 
     void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
     
