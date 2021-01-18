@@ -9,14 +9,13 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.*;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
@@ -160,8 +159,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String tempDirPath = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
         HashMap<String, String> newResourcesHash;
         HashMap<String, ServiceCatalogEntry> catalogEntries;
-        HashMap<String, Object> validatedServices;
-        HashMap<String, Object> newServices;
+        HashMap<String, List<String>> existingServices;
+        HashMap<String, List<String>> newServices;
+        List<ServiceCRUDStatusDTO> serviceStatusList;
+        PaginationDTO paginationDTO = null;
 
         // unzip the uploaded zip
         try {
@@ -176,76 +177,44 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         if (verifier.size() != DataMappingUtil.dirCount(tempDirPath)) {
             RestApiUtil.handleBadRequest("Number of elements in verifier must equals to number of directories in the zip archive.", log);
         }
+        if (overwrite) {
+            newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
+            catalogEntries = DataMappingUtil.fromDirToServiceCatalogEntryMap(tempDirPath);
+            existingServices = ServiceCatalogUtils.verifierListValidate(verifier, newResourcesHash, tenantId);
+            newServices = ServiceCatalogUtils.filterNewServices(verifier, tenantId);
 
-        newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
-        catalogEntries = DataMappingUtil.fromDirToServiceCatalogEntryMap(tempDirPath);
-        validatedServices = ServiceCatalogUtils.verifierListValidate(verifier, newResourcesHash, tenantId);
-        newServices = ServiceCatalogUtils.filterNewServices(verifier, tenantId);
+            // Adding new services
+            for (String newService : newServices.get(APIConstants.MAP_KEY_ACCEPTED)) {
+                if (catalogEntries.containsKey(newService)) {
+                    String uuid = serviceCatalog.addServiceCatalog(catalogEntries.get(newService), tenantId);
+                    if (uuid != null) {
+                        catalogEntries.get(newService).getServiceCatalogInfo().setUuid(uuid);
+                    } else {
+                        newServices.get(APIConstants.MAP_KEY_IGNORED).add(newService);
+                        newServices.get(APIConstants.MAP_KEY_ACCEPTED).remove(newService);
+                    }
+                }
+            }
 
+            // Adding updated services
+            for (String updatedService : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
+                if (catalogEntries.containsKey(updatedService)) {
+                    String uuid = serviceCatalog.addServiceCatalog(catalogEntries.get(updatedService), tenantId);
+                    if (uuid != null) {
+                        catalogEntries.get(updatedService).getServiceCatalogInfo().setUuid(uuid);
+                    } else {
+                        existingServices.get(APIConstants.MAP_KEY_IGNORED).add(updatedService);
+                        existingServices.get(APIConstants.MAP_KEY_VERIFIED).remove(updatedService);
+                    }
+                }
+            }
 
-
-//        check overwrite value*********************************
-
-        // ***Retrieve endpoint name + version from each metadata and verifier list
-
-        // ***Search each in db with tenant id
-
-        // ***Entries not present in db -> directly to persistence layer
-
-        // ***number of endpoint resources available in zip equals to number of verifier values(for the initial registration of services,
-        // can we allow blank?)
-
-        // ***For others go through verifier list and compare each hash with the available values retrieved from db(based on name)
-
-        // ***if hashes are equal, then loop through the list and proceed with CRUD
-        // ***new hashes for new content > from map or getHashForEndPoint()
-
-        ///////////////////////////////////////////////////////////////////////////////////
-//        if (StringUtils.equals(ifMatch, eTag)) {
-//            return Response.status(Response.Status.CONFLICT).build();
-//        } else if (overwrite != null) {
-//            if (overwrite) {
-//                if (Files.notExists(Paths.get(RESOURCE_FOLDER_LOCATION))) {
-//                    File rsc = new File(RESOURCE_FOLDER_LOCATION);
-//                    rsc.mkdir();
-//                }
-//                for (File source : fileList) {
-//                    try {
-//                        FileUtils.copyFile(source, new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName()));
-//                        if (source.getName().equals("metadata.yaml")){
-//                            File inputFile = new File(RESOURCE_FOLDER_LOCATION + File.separator + source.getName());
-//                            ServiceCatalogInfo serviceCatalogInfo = DataMappingUtil.fromServiceDTOToServiceCatalogInfo(inputFile, eTag);
-//                            String uuid = serviceCatalogApi.addServiceCatalog(serviceCatalogInfo,1);
-//                            EndPointInfo endPointInfo = DataMappingUtil.generateEndPointInfo(inputFile, uuid);
-//                            String id = serviceCatalogApi.addEndPointDefinition(endPointInfo);
-//                        }
-//                    } catch (IOException e) {
-//                        RestApiUtil.handleInternalServerError("Error while updating Service", e, log);
-//                    }
-//                }
-//
-//                try {
-//                    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-//                    ServiceDTO serviceDTO = mapper.readValue(new File(RESOURCE_FOLDER_LOCATION + File.separator + METADATA_FILE_NAME), ServiceDTO.class);
-//                    return Response.ok().header("ETag", eTag).entity(serviceDTO).build();
-//                } catch (IOException e) {
-//                    RestApiUtil.handleInternalServerError("Error while updating Service dto from metadata.yaml", e, log);
-//                }
-//            } else {
-//                return Response.status(Response.Status.CONFLICT).build();
-//            }
-//        }
-        return null;
+            serviceStatusList = DataMappingUtil.responsePayloadListBuilder(catalogEntries, existingServices, newServices);
+            return Response.ok().entity(DataMappingUtil.responsePayloadBuilder(serviceStatusList, paginationDTO)).build();// set paginationDTO
+        } else {
+            return Response.status(Response.Status.CONFLICT).build();
+        }
     }
-
-//    @Override
-//    public Response importService(String serviceId, String ifMatch, Boolean overwrite, List<VerifierDTO> verifier, MessageContext messageContext) throws APIManagementException {
-//        String userName = RestApiCommonUtil.getLoggedInUsername();
-//        int tenantId = APIUtil.getTenantId(userName);
-//        List<String> verifiedKeys;
-//        verifiedKeys = ServiceCatalogUtils.VerifierListValidate(verifier, tenantId);
-//        return null;
-//    }
 
     public Response searchServices(String name, String version, String definitionType, String displayName, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
         log.info("searchServices");

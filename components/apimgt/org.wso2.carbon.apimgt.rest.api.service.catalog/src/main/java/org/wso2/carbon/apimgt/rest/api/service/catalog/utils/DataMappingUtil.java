@@ -8,14 +8,20 @@ import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceCRUDStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServicesStatusListDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class DataMappingUtil {
@@ -125,8 +131,103 @@ public class DataMappingUtil {
         return endpointDetails;
     }
 
-    public static String keyGenerator(ServiceCatalogInfo serviceCatalogInfo){
-        String key =  serviceCatalogInfo.getName() + APIConstants.KEY_SEPARATOR + serviceCatalogInfo.getVersion();
+    public static String keyGenerator(ServiceCatalogInfo serviceCatalogInfo) {
+        String key = serviceCatalogInfo.getName() + APIConstants.KEY_SEPARATOR + serviceCatalogInfo.getVersion();
         return key.toLowerCase();
+    }
+
+    /**
+     * Converts a single metadata file content into a model object
+     *
+     * @param serviceCatalogInfo ServiceCatalogInfo model object
+     * @return Converted ServiceCRUDStatusDTO DTO object
+     * @throws IOException
+     */
+    public static ServiceCRUDStatusDTO fromServiceCatalogInfoToServiceCRUDStatusDTO(ServiceCatalogInfo serviceCatalogInfo, boolean status) throws IOException {
+        ServiceCRUDStatusDTO serviceCRUDStatusDTO = new ServiceCRUDStatusDTO();
+
+        serviceCRUDStatusDTO.setId(serviceCatalogInfo.getUuid());
+        serviceCRUDStatusDTO.setName(serviceCatalogInfo.getName());
+        serviceCRUDStatusDTO.setDisplayName(serviceCatalogInfo.getDisplayName());
+        serviceCRUDStatusDTO.setDescription(serviceCatalogInfo.getDescription());
+        serviceCRUDStatusDTO.setVersion(serviceCatalogInfo.getVersion());
+        serviceCRUDStatusDTO.setServiceUrl(serviceCatalogInfo.getServiceUrl());
+        serviceCRUDStatusDTO.setDefinitionType(ServiceCRUDStatusDTO.DefinitionTypeEnum.fromValue(serviceCatalogInfo.getDefType()));
+        serviceCRUDStatusDTO.setSecurityType(ServiceCRUDStatusDTO.SecurityTypeEnum.fromValue(serviceCatalogInfo.getSecurityType()));
+        serviceCRUDStatusDTO.setMutualSSLEnabled(serviceCatalogInfo.isMutualSSLEnabled());
+        serviceCRUDStatusDTO.setCreatedTime(serviceCatalogInfo.getCreatedTime().toString());
+        serviceCRUDStatusDTO.setLastUpdatedTime(serviceCatalogInfo.getLastUpdatedTime().toString());
+        serviceCRUDStatusDTO.setCatalogUpdated(status);
+
+        return serviceCRUDStatusDTO;
+    }
+
+    /**
+     * Converts a single metadata file content into a model object
+     *
+     * @param servicesList metadata list of services provided in zip
+     * @param paginationDTO Pagination data
+     * @return build the ServicesStatusListDTO DTO object
+     */
+    public static ServicesStatusListDTO responsePayloadBuilder(List<ServiceCRUDStatusDTO> servicesList, PaginationDTO paginationDTO) {
+        ServicesStatusListDTO servicesStatusListDTO = new ServicesStatusListDTO();
+
+        servicesStatusListDTO.setCount(servicesList.size());
+        servicesStatusListDTO.setList(servicesList);
+        servicesStatusListDTO.setPagination(paginationDTO);
+
+        return servicesStatusListDTO;
+    }
+
+    public static List<ServiceCRUDStatusDTO> responsePayloadListBuilder(HashMap<String, ServiceCatalogEntry> catalogEntries,
+                                                                        HashMap<String, List<String>> existingServices,
+                                                                        HashMap<String, List<String>> newServices){
+        List<ServiceCRUDStatusDTO> serviceStatusList = new ArrayList<>();
+        for (String element : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
+            if (catalogEntries.containsKey(element)) {
+                try {
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
+                }
+            }
+        }
+        for (String element : existingServices.get(APIConstants.MAP_KEY_NOT_CHANGED)) {
+            if (catalogEntries.containsKey(element)) {
+                try {
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
+                }
+            }
+        }
+        for (String element : existingServices.get(APIConstants.MAP_KEY_IGNORED)) {
+            if (catalogEntries.containsKey(element)) {
+                try {
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
+                }
+            }
+        }
+        for (String element : newServices.get(APIConstants.MAP_KEY_ACCEPTED)) {
+            if (catalogEntries.containsKey(element)) {
+                try {
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
+                }
+            }
+        }
+        for (String element : newServices.get(APIConstants.MAP_KEY_IGNORED)) {
+            if (catalogEntries.containsKey(element)) {
+                try {
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                } catch (IOException e) {
+                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
+                }
+            }
+        }
+        return serviceStatusList;
     }
 }

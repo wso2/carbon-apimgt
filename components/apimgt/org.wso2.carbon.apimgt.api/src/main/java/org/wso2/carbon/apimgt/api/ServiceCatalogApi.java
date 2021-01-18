@@ -53,7 +53,7 @@ public interface ServiceCatalogApi {
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String addEndPointDefinition(EndPointInfo endPointInfo) throws APIManagementException;
+    String addEndPointDefinition(EndPointInfo endPointInfo, String uuid) throws APIManagementException;
 
     /**
      * Get MD5 hash value of a service endpoint
@@ -72,5 +72,15 @@ public interface ServiceCatalogApi {
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
     String getMD5HashByKey(String key, int tenantId) throws APIManagementException;
+
+    /**
+     * Get metadata and endpoint definition resources of a service endpoint
+     *
+     * @param key Service key unique to each tenant
+     * @param tenantId Tenant Identifier
+     * @return EndPointInfo Endpoint resources
+     * @throws APIManagementException if failed to add ServiceCatalogInfo
+     */
+    EndPointInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
 
 }

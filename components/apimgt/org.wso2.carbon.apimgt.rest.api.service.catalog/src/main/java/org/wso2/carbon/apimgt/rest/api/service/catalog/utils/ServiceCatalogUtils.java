@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
 
@@ -15,8 +16,8 @@ public class ServiceCatalogUtils {
     private static final Log log = LogFactory.getLog(ServiceCatalogUtils.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
-    public static HashMap<String, Object> filterNewServices(List<VerifierDTO> verifier, int tenantId) throws APIManagementException {
-        HashMap<String, Object> filteredNewServices = new HashMap<String, Object>();
+    public static HashMap<String, List<String>> filterNewServices(List<VerifierDTO> verifier, int tenantId) throws APIManagementException {
+        HashMap<String, List<String>> filteredNewServices = new HashMap<>();
         List<String> newServices = new ArrayList<>();
         List<String> ignoredNewServices = new ArrayList<>();
 
@@ -28,15 +29,15 @@ public class ServiceCatalogUtils {
                 ignoredNewServices.add(key);
             }
         }
-        filteredNewServices.put("accepted", newServices);
-        filteredNewServices.put("ignored", ignoredNewServices);
+        filteredNewServices.put(APIConstants.MAP_KEY_ACCEPTED, newServices);
+        filteredNewServices.put(APIConstants.MAP_KEY_IGNORED, ignoredNewServices);
         return filteredNewServices;
     }
 
-    public static HashMap<String, Object> verifierListValidate(List<VerifierDTO> verifier,
+    public static HashMap<String, List<String>> verifierListValidate(List<VerifierDTO> verifier,
                                                                HashMap<String, String> newResourcesHash, int tenantId)
             throws APIManagementException {
-        HashMap<String, Object> filteredServices = new HashMap<String, Object>();
+        HashMap<String, List<String>> filteredServices = new HashMap<>();
         List<String> verifiedServices = new ArrayList<>();
         List<String> ignoredServices = new ArrayList<>();
         List<String> statusNotChanged = new ArrayList<>();
@@ -54,9 +55,9 @@ public class ServiceCatalogUtils {
                 ignoredServices.add(key);
             }
         }
-        filteredServices.put("verified", verifiedServices);
-        filteredServices.put("ignored", ignoredServices);
-        filteredServices.put("notChanged", statusNotChanged);
+        filteredServices.put(APIConstants.MAP_KEY_VERIFIED, verifiedServices);
+        filteredServices.put(APIConstants.MAP_KEY_IGNORED, ignoredServices);
+        filteredServices.put(APIConstants.MAP_KEY_NOT_CHANGED, statusNotChanged);
         return filteredServices;
     }
 }

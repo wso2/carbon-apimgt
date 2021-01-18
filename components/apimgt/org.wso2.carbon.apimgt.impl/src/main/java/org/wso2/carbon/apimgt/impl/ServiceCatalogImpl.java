@@ -14,10 +14,15 @@ import java.util.List;
 public class ServiceCatalogImpl implements ServiceCatalogApi {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+    private static final ServiceCatalogImpl serviceCatalogImpl = new ServiceCatalogImpl();
 
     @Override
     public String addServiceCatalog(ServiceCatalogEntry serviceCatalog, int tenantId) throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().addServiceCatalog(serviceCatalog.getServiceCatalogInfo(), tenantId);
+        if (serviceCatalogImpl.getMD5HashByKey(serviceCatalog.getServiceCatalogInfo().getKey(), tenantId) != null){
+            return null; //Exceptions??
+        }
+        String uuid =  ServiceCatalogDAO.getInstance().addServiceCatalog(serviceCatalog.getServiceCatalogInfo(), tenantId);
+        return serviceCatalogImpl.addEndPointDefinition(serviceCatalog.getEndPointInfo(), uuid);
     }
 
     @Override
@@ -36,8 +41,9 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     }
 
     @Override
-    public String addEndPointDefinition(EndPointInfo endPointInfo) throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().addEndPointDefinition(endPointInfo);
+    public String addEndPointDefinition(EndPointInfo endPointInfo, String uuid) throws APIManagementException {
+
+        return ServiceCatalogDAO.getInstance().addEndPointDefinition(endPointInfo, uuid);
     }
 
     @Override
@@ -48,5 +54,10 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     @Override
     public String getMD5HashByKey(String key, int tenantId) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().getMd5HashByKey(key, tenantId);
+    }
+
+    @Override
+    public EndPointInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getCatalogResourcesByKey(key, tenantId);
     }
 }

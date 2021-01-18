@@ -2480,4 +2480,8 @@ public final class APIConstants {
     // Constants related to Service Catalog
     public static final String METADATA_FILE_NAME = "metadata";
     public static final String KEY_SEPARATOR = "-";
+    public static final String MAP_KEY_ACCEPTED = "accepted";
+    public static final String MAP_KEY_IGNORED = "ignored";
+    public static final String MAP_KEY_VERIFIED = "verified";
+    public static final String MAP_KEY_NOT_CHANGED = "notChanged";
 }

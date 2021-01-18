@@ -4,22 +4,22 @@ import java.sql.Timestamp;
 
 public class ServiceCatalogInfo {
 
-    private String uuid;
-    private String key;
-    private String md5;
-    private String name;
-    private String version;
-    private String displayName;
-    private String serviceUrl;
-    private String defType;
-    private String defUrl;
-    private String description;
-    private String securityType;
-    private boolean isMutualSSLEnabled;
-    private String createdBy;
-    private String updatedBy;
-    private Timestamp createdTime;
-    private Timestamp lastUpdatedTime;
+    private String uuid = null;
+    private String key = null;
+    private String md5 = null;
+    private String name = null;
+    private String version = null;
+    private String displayName = null;
+    private String serviceUrl = null;
+    private String defType = null;
+    private String defUrl = null;
+    private String description = null;
+    private String securityType = null;
+    private boolean isMutualSSLEnabled = false;
+    private String createdBy = null;
+    private String updatedBy = null;
+    private Timestamp createdTime = null;
+    private Timestamp lastUpdatedTime = null;
 
     public Timestamp getLastUpdatedTime() {
         return lastUpdatedTime;

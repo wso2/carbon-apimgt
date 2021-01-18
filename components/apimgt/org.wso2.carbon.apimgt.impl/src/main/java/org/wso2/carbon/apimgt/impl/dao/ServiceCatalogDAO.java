@@ -110,14 +110,14 @@ public class ServiceCatalogDAO {
      * @return uuid
      * throws APIManagementException if failed to create service catalog
      */
-    public String addEndPointDefinition(EndPointInfo endPointInfo) throws APIManagementException {
+    public String addEndPointDefinition(EndPointInfo endPointInfo, String uuid) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_ENDPOINT_DEFINITION_ENTRY)) {
             connection.setAutoCommit(false);
 
-            ps.setString(1, endPointInfo.getUuid());
+            ps.setString(1, uuid);
             ps.setBlob(2, endPointInfo.getEndPointDef());
             ps.setBlob(3, endPointInfo.getMetadata());
 
@@ -176,5 +176,32 @@ public class ServiceCatalogDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return md5;
+    }
+
+    public EndPointInfo getCatalogResourcesByKey(String key, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_DEFINITION_ENTRY_BY_KEY;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, key);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                EndPointInfo endPointInfo = new EndPointInfo();
+                endPointInfo.setUuid(rs.getString("UUID"));
+                endPointInfo.setMetadata(rs.getBlob("METADATA").getBinaryStream());
+                endPointInfo.setEndPointDef(rs.getBlob("ENDPOINT_DEFINITION").getBinaryStream());
+                return endPointInfo;
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting catalog entry resources : SQL " + sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
     }
 }
