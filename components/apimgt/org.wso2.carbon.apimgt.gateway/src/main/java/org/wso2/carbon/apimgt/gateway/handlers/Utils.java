@@ -39,11 +39,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.api.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -67,7 +68,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.cache.Caching;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
@@ -502,12 +502,40 @@ public class Utils {
 
     public static API getSelectedAPI(MessageContext messageContext) {
 
-        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         Object apiObject = messageContext.getProperty(RESTConstants.PROCESSED_API);
         if (apiObject != null) {
             return (API) apiObject;
         } else {
+            String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
             return messageContext.getConfiguration().getAPI(apiName);
         }
+    }
+
+    public static void setSubRequestPath(API api, MessageContext synCtx) {
+
+        synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, getSubRequestPath(api, synCtx));
+    }
+
+    public static String getSubRequestPath(API api, MessageContext synCtx) {
+
+        Object requestSubPath = synCtx.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
+        if (requestSubPath != null) {
+            return (String) requestSubPath;
+        }
+        String subPath = null;
+        String path = ApiUtils.getFullRequestPath(synCtx);
+        if (api != null) {
+            if (VersionStrategyFactory.TYPE_URL.equals(api.getVersionStrategy().getVersionType())) {
+                subPath = path.substring(
+                        api.getContext().length() + api.getVersionStrategy().getVersion().length() + 1);
+            } else {
+                subPath = path.substring(api.getContext().length());
+            }
+        }
+        if (subPath != null && subPath.isEmpty()) {
+            subPath = "/";
+        }
+        synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+        return subPath;
     }
 }
