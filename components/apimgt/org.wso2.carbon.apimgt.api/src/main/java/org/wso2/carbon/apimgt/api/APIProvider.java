@@ -340,7 +340,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      * @return updated API
      */
-    API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
+    API updateAPI(API api, API existingAPI, String orgId) throws APIManagementException, FaultGatewaysException;
 
 
     /**

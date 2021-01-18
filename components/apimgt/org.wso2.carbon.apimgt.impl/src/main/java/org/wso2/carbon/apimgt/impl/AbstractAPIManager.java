@@ -1202,6 +1202,9 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         String definition = null;
         String id;
+        if (orgId == null) {
+            orgId = tenantDomain;
+        }
         if (apiId.getUUID() != null) {
             id = apiId.getUUID();
         } else {
@@ -1218,8 +1221,11 @@ public abstract class AbstractAPIManager implements APIManager {
     
     @Override
     public String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException {
-        String definition = null;
+        String definition;
         try {
+            if (orgId == null) {
+                orgId = tenantDomain;
+            }
             Organization org = Organization.getInstance(orgId);
             definition = apiPersistenceInstance.getOASDefinition(org, apiId);
         } catch (OASPersistenceException e) {

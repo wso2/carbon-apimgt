@@ -1766,7 +1766,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
+    public API updateAPI(API api, API existingAPI, String orgId) throws APIManagementException, FaultGatewaysException {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
 
@@ -1823,6 +1823,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
             List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
+            api.setOrganizationId(orgId);
             updateAPI(api, tenantId, userNameWithoutChange);
             updateProductResourceMappings(api, productResources);
 
@@ -1853,7 +1854,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                 isAPIPublished = isAPIPublished(api);
                 if (gatewayExists) {
-                    loadMediationPoliciesToAPI(api, tenantDomain);
+                    loadMediationPoliciesToAPI(api, orgId);
                     if (isAPIPublished) {
                         replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
                     } else if (!APIConstants.CREATED.equals(api.getStatus())
@@ -2614,7 +2615,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
                 if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType) && updateGatewayConfig) {
-                    loadMediationPoliciesToAPI(api, tenantDomain);
+                    loadMediationPoliciesToAPI(api, api.getOrganizationId());
                     if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status) ||
                         APIConstants.BLOCKED.equals(status) || APIConstants.PROTOTYPED.equals(status)) {
                         Map<String, String> failedToPublishEnvironments = publishToGateway(api);
@@ -2702,7 +2703,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
                     if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                        loadMediationPoliciesToAPI(api, tenantDomain);
+                        loadMediationPoliciesToAPI(api, api.getOrganizationId());
                         if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
                             || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
                             failedGateways = publishToGateway(api);
@@ -2729,8 +2730,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus, API api)
-            throws APIManagementException {
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus, API api,
+                                                                   String orgId) throws APIManagementException {
         Map<String, String> failedGateways = new HashMap<String, String>();
         String provider = identifier.getProviderName();
         String providerTenantMode = identifier.getProviderName();
@@ -2759,7 +2760,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-                    loadMediationPoliciesToAPI(api, tenantDomain);
+                    loadMediationPoliciesToAPI(api,orgId);
                     if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                         if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
                             || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
@@ -2783,7 +2784,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
-    private void loadMediationPoliciesToAPI(API api, String tenantDomain) throws APIManagementException {
+    private void loadMediationPoliciesToAPI(API api, String orgId) throws APIManagementException {
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             Organization org = new Organization(tenantDomain);
@@ -4205,6 +4206,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<Mediation> mediationPolicies = getAllApiSpecificMediationPolicies(existingApiId, orgId);
         if (mediationPolicies != null) {
             for (Mediation mediation : mediationPolicies) {
+                Mediation policy = getApiSpecificMediationPolicyByPolicyId(existingApiId, mediation.getUuid(), orgId);
                 addApiSpecificMediationPolicy(newAPIId, mediation, orgId);
             }
         }
@@ -6719,8 +6721,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException {
         try {
-            apiPersistenceInstance.saveOASDefinition(new Organization(tenantDomain), apiId, jsonText);
+            if (orgId != null) {
+                orgId = tenantDomain;
+            }
             Organization org = Organization.getInstance(orgId);
+            apiPersistenceInstance.saveOASDefinition(org, apiId, jsonText);
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             //OASParserUtil.saveAPIDefinition(api, jsonText, registry);
@@ -7260,7 +7265,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // push the state change to gateway
             Map<String, String> failedGateways = propergateAPIStatusChangeToGateways(api.getId(),
-                    newStatus, api);
+                    newStatus, api, orgId);
             
             if (APIConstants.PUBLISHED.equals(newStatus) || !oldStatus.equals(newStatus)) { //TODO has registry access
                 //if the API is websocket and if default version is selected, update the other versions
@@ -10413,7 +10418,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, tenantDomain, org, api);
-            loadMediationPoliciesToAPI(api, tenantDomain);
+            loadMediationPoliciesToAPI(api, orgId);
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);

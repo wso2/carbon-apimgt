@@ -84,7 +84,7 @@ public class APIMappingUtil {
             // Adding the api
             apiProvider.addAPI(apiToAdd);
             if (!isWSApi) {
-                apiProvider.saveSwagger20Definition(apiId, body.getApiDefinition());
+                apiProvider.saveSwagger20Definition(apiId, body.getApiDefinition(), apiToAdd.getOrganizationId());
             }
             log.info("Successfully created API " + apiId);
             // Publishing the API

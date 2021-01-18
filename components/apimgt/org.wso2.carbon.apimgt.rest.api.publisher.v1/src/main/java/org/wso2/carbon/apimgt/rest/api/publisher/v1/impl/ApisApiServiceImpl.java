@@ -456,6 +456,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
+            originalAPI.setOrganizationId(orgId);
             originalAPI = PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
             APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
             return Response.ok().entity(modifiedAPI.getOperations()).build();
@@ -902,6 +903,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
+                    api.setOrganizationId(orgId);
                     apiProvider.updateAPI(api);
                 }
                 if (log.isDebugEnabled()) {
@@ -997,6 +999,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
+                    api.setOrganizationId(orgId);
                     apiProvider.updateAPI(api);
                 }
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
@@ -1114,6 +1117,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
+                    api.setOrganizationId(orgId);
                     apiProvider.updateAPI(api);
                 }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
@@ -1819,8 +1823,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, orgId);
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
-                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId); // TODO do a deep copy
-                    apiProvider.updateAPI(oldAPI, api);
+                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId);
+                    api.setOrganizationId(orgId);// TODO do a deep copy
+                    apiProvider.updateAPI(oldAPI, api, orgId);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);

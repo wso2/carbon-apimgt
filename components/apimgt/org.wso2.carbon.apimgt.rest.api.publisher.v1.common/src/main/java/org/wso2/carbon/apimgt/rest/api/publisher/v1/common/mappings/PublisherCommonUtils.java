@@ -327,7 +327,7 @@ public class PublisherCommonUtils {
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
         if (originalAPI.getOrganizationId() != null) {
             apiToUpdate.setOrganizationId(originalAPI.getOrganizationId());
-        } else {}
+        }
 
         if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(apiToUpdate.getVisibility())) {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
@@ -348,7 +348,7 @@ public class PublisherCommonUtils {
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, apiToUpdate.getOrganizationId());
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, orgId);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -368,10 +368,9 @@ public class PublisherCommonUtils {
             }
         }
 
-        apiProvider.updateAPI(apiToUpdate, originalAPI);
+        apiProvider.updateAPI(apiToUpdate, originalAPI, orgId);
         
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
-                originalAPI.getOrganizationId());// TODO use returend api
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), orgId);// TODO use returend api
     }
 
     /**
@@ -981,7 +980,7 @@ public class PublisherCommonUtils {
             unModifiedAPI.setOrganizationId(orgId);
         }
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        apiProvider.updateAPI(existingAPI, unModifiedAPI, orgId);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, orgId);
          // TODO see why we need to get it instead of passing same
