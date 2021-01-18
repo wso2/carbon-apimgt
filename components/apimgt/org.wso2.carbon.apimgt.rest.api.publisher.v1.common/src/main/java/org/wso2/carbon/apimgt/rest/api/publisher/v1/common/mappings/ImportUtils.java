@@ -410,7 +410,7 @@ public class ImportUtils {
             throws APIImportExportException {
         // Temporary directory is used to create the required folders
         File importFolder = CommonUtil.createTempDirectory(null);
-        String uploadFileName = ImportExportConstants.UPLOAD_FILE_NAME;
+        String uploadFileName = ImportExportConstants.UPLOAD_API_FILE_NAME;
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
         String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);

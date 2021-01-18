@@ -31,6 +31,8 @@ import java.util.List;
  */
 public class ApplicationThrottlePolicyMappingUtil {
 
+    private static final String APPLICATION_THROTTLING_POLICY_TYPE = "ApplicationThrottlePolicy";
+
     /**
      * Converts an array of Application Policy objects into a List DTO
      *
@@ -67,6 +69,7 @@ public class ApplicationThrottlePolicyMappingUtil {
         if (appPolicy.getDefaultQuotaPolicy() != null) {
             policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(appPolicy.getDefaultQuotaPolicy()));
         }
+        policyDTO.setType(APPLICATION_THROTTLING_POLICY_TYPE);
         return policyDTO;
     }
 

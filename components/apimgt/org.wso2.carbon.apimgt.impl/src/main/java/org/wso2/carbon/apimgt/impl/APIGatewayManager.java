@@ -39,12 +39,14 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -62,6 +64,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -69,6 +72,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
 public class APIGatewayManager {
@@ -1247,8 +1252,13 @@ public class APIGatewayManager {
             throws APIManagementException {
 
         for (APIProductResource resource : apiProduct.getProductResources()) {
-            APIIdentifier apiIdentifier = resource.getApiIdentifier();
-            API api = apiProvider.getAPI(apiIdentifier);
+            String uuid = resource.getApiId();
+            if (StringUtils.isEmpty(uuid)) {
+                APIIdentifier apiIdentifier = resource.getApiIdentifier();
+                uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
+            }
+
+            API api = apiProvider.getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
 
             String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
             if (APIUtil.isSequenceDefined(api.getInSequence())) {
@@ -1415,40 +1425,37 @@ public class APIGatewayManager {
 
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())) {
             try {
-                PrivilegedCarbonContext.startTenantFlow();
-                if (tenantDomain != null && !"".equals(tenantDomain)) {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                } else {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
-                            (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                }
-                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
-                    addSequence(api, tenantId, gatewayAPIDTO, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
-                            APIConstants.API_CUSTOM_SEQ_IN_EXT, api.getInSequence());
+                    if (api.getInSequenceMediation() != null) {
+                        addSequenceFromConfig(api, gatewayAPIDTO, api.getInSequenceMediation().getConfig(),
+                                APIConstants.API_CUSTOM_SEQ_IN_EXT, api.getInSequence());
+                    } else {
+                        addSequence(api, tenantDomain, gatewayAPIDTO, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
+                                APIConstants.API_CUSTOM_SEQ_IN_EXT, api.getInSequence());
+                    }
                 }
-
                 if (APIUtil.isSequenceDefined(api.getOutSequence())) {
-                    addSequence(api, tenantId, gatewayAPIDTO, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
-                            APIConstants.API_CUSTOM_SEQ_OUT_EXT, api.getOutSequence());
+                    if (api.getOutSequenceMediation() != null) {
+                        addSequenceFromConfig(api, gatewayAPIDTO, api.getOutSequenceMediation().getConfig(),
+                                APIConstants.API_CUSTOM_SEQ_OUT_EXT, api.getOutSequence());
+                    } else {
+                        addSequence(api, tenantDomain, gatewayAPIDTO, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
+                                APIConstants.API_CUSTOM_SEQ_OUT_EXT, api.getOutSequence());
+                    }
                 }
-
             } catch (Exception e) {
                 String msg = "Error in deploying the sequence to gateway";
                 log.error(msg, e);
                 throw new APIManagementException(msg);
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
             }
         }
 
     }
 
-    private void addSequence(API api, int tenantId, GatewayAPIDTO gatewayAPIDTO, String sequenceType,
-            String sequenceExtension,String sequenceName) throws APIManagementException, XMLStreamException {
+    private void addSequenceFromConfig(API api, GatewayAPIDTO gatewayAPIDTO, String sequence, String sequenceExtension,
+            String sequenceName) throws Exception {
 
-        OMElement inSequence = APIUtil.getCustomSequence(sequenceName, tenantId, sequenceType, api.getId());
+        OMElement inSequence = APIUtil.buildOMElement(new ByteArrayInputStream(sequence.getBytes()));
 
         if (inSequence != null) {
             String inSeqExt = APIUtil.getSequenceExtensionName(api) + sequenceExtension;
@@ -1461,6 +1468,33 @@ public class APIGatewayManager {
             gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sequenceDto, gatewayAPIDTO.getSequenceToBeAdd()));
         }
 
+    }
+    private void addSequence(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO, String sequenceType,
+            String sequenceExtension,String sequenceName) throws APIManagementException, XMLStreamException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            if (tenantDomain != null && !"".equals(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                        .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            OMElement inSequence = APIUtil.getCustomSequence(sequenceName, tenantId, sequenceType, api.getId());
+            if (inSequence != null) {
+                String inSeqExt = APIUtil.getSequenceExtensionName(api) + sequenceExtension;
+                if (inSequence.getAttribute(new QName("name")) != null) {
+                    inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
+                }
+                GatewayContentDTO sequenceDto = new GatewayContentDTO();
+                sequenceDto.setName(inSeqExt);
+                sequenceDto.setContent(APIUtil.convertOMtoString(inSequence));
+                gatewayAPIDTO
+                        .setSequenceToBeAdd(addGatewayContentToList(sequenceDto, gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     /**
@@ -1484,30 +1518,45 @@ public class APIGatewayManager {
 
         String faultSequenceName = api.getFaultSequence();
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+        Mediation mediation = api.getFaultSequenceMediation();
         boolean isTenantFlowStarted = false;
         try {
-            PrivilegedCarbonContext.startTenantFlow();
-            isTenantFlowStarted = true;
-            if (!StringUtils.isEmpty(tenantDomain)) {
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            } else {
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
-                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            }
-
             //If a fault sequence has be defined.
             if (APIUtil.isSequenceDefined(faultSequenceName)) {
-                int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                if (mediation == null) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    isTenantFlowStarted = true;
+                    if (!StringUtils.isEmpty(tenantDomain)) {
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    } else {
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                                (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    }
+
+                }
                 gatewayAPIDTO
                         .setSequencesToBeRemove(addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
 
                 //Get the fault sequence xml
-                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId,
-                        APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT, api.getId());
+                OMElement faultSequence = null;
+                if (mediation != null) {
+                    faultSequence = APIUtil.buildOMElement(new ByteArrayInputStream(mediation.getConfig().getBytes()));
+                } else {
+                    int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId,
+                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT, api.getId());
+                }
 
                 if (faultSequence != null) {
-                    if (APIUtil.isPerAPISequence(faultSequenceName, tenantId, api.getId(),
-                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
+                    boolean isPerAPISeq = false;
+                    if (mediation != null) {
+                        isPerAPISeq = !mediation.isGlobal();
+                    } else {
+                        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                        isPerAPISeq = APIUtil.isPerAPISequence(faultSequenceName, tenantId, api.getId(),
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+                    }
+                    if (isPerAPISeq) {
                         if (faultSequence.getAttribute(new QName("name")) != null) {
                             faultSequence.getAttribute(new QName("name")).setAttributeValue(faultSeqExt);
                         }
@@ -1521,12 +1570,13 @@ public class APIGatewayManager {
                     faultSequenceContent.setContent(APIUtil.convertOMtoString(faultSequence));
                     gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(faultSequenceContent,
                             gatewayAPIDTO.getSequenceToBeAdd()));
+
                 }
             } else {
                 gatewayAPIDTO
                         .setSequencesToBeRemove(addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
             }
-        } catch (XMLStreamException e) {
+        } catch (Exception e) {
             throw new APIManagementException("Error while updating the fault sequence at the Gateway", e);
         } finally {
             if (isTenantFlowStarted) {

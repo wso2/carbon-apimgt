@@ -23,7 +23,7 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-
+import API from 'AppData/api';
 import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     DEFAULT_API_SECURITY_OAUTH2,
@@ -59,7 +59,7 @@ export default function APISecurity(props) {
         api,
     } = props;
     const apiContext = useContext(ApiContext);
-    const isAPIProduct = apiContext.api.apiType === 'APIProduct';
+    const isAPIProduct = apiContext.api.apiType === API.CONSTS.APIProduct;
     let isEndpointAvailable;
     let isPrototyped;
     if (isAPIProduct) {
@@ -83,7 +83,7 @@ export default function APISecurity(props) {
     // Check the validation conditions and return an error message
     const Validate = () => {
         let resourcesWithSecurity;
-        if (apiFromContext.apiType === 'APIProduct') {
+        if (apiFromContext.apiType === API.CONSTS.APIProduct) {
             const apiList = apiFromContext.apis;
             for (const apiInProduct in apiList) {
                 if (Object.prototype.hasOwnProperty.call(apiList, apiInProduct)) {

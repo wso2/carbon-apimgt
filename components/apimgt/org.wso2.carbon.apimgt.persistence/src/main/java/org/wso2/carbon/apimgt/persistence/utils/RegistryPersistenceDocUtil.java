@@ -15,15 +15,13 @@
  */ 
 package org.wso2.carbon.apimgt.persistence.utils;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentationType;
-import org.wso2.carbon.apimgt.persistence.dto.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo.DocumentSourceType;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -36,8 +34,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 
-public class RegistryPersistanceDocUtil {
-    private static final Log log = LogFactory.getLog(RegistryPersistanceDocUtil.class);
+public class RegistryPersistenceDocUtil {
+    private static final Log log = LogFactory.getLog(RegistryPersistenceDocUtil.class);
     public static Documentation getDocumentation(GenericArtifact artifact) throws DocumentationPersistenceException {
 
         Documentation documentation;
@@ -214,44 +212,23 @@ public class RegistryPersistanceDocUtil {
         }
         return artifact;
     }
-    
-    public DocumentSearchContent getPublisherDocSearchResult(GenericArtifact docArtifact, GenericArtifact apiArtifact)
-            throws DocumentationPersistenceException {
-        DocumentSearchContent doc = new DocumentSearchContent();
-        try {
-            doc.setApiName(apiArtifact.getAttribute(""));
-            doc.setApiProvider("admin");
-            doc.setApiVersion("2");
-            doc.setAssociatedType("API");
-            doc.setApiUUID(apiArtifact.getId());
-            
-            
-            doc.setDocType(DocumentationType.HOWTO);
-            doc.setId(docArtifact.getId());
-            doc.setSourceType(DocumentSourceType.INLINE);
-            doc.setVisibility(DocumentVisibility.API_LEVEL);
-            doc.setName(docArtifact.getAttribute(APIConstants.DOC_NAME));
-            
-            
-            
-        } catch (GovernanceException e) {
-            throw new DocumentationPersistenceException("Error while retrieving artifact attributes", e);
-        }
 
-        return doc;
+    public static String getAPIDocPath(APIIdentifier id) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion() + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
-    
-    public DocumentSearchContent getDevPortalDocSearchResult(Documentation document) {
-        DocumentSearchContent doc = new DocumentSearchContent();
-        doc.setApiName(document.getName());
-        doc.setApiProvider("admin");
-        doc.setApiVersion("2");
-        doc.setAssociatedType("API");
-        doc.setDocType(DocumentationType.HOWTO);
-        doc.setId("yyyyyyyyyyy");
-        doc.setSourceType(DocumentSourceType.INLINE);
-        doc.setVisibility(DocumentVisibility.API_LEVEL);
-        doc.setName("Mydoc");
-        return doc;
+
+    public static String getAPIDocContentPath(APIIdentifier id, String name) {
+        return getAPIDocPath(id) + RegistryConstants.PATH_SEPARATOR + name;
+    }
+
+    public static String getDocumentationFilePath(Identifier id, String fileName) {
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.replaceEmailDomain(id.getProviderName()) + RegistryConstants.PATH_SEPARATOR
+                + id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion() + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + APIConstants.DOCUMENT_FILE_DIR
+                + RegistryConstants.PATH_SEPARATOR + fileName;
     }
 }

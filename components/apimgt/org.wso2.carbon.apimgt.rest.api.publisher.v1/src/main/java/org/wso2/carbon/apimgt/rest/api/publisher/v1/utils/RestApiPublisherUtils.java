@@ -157,7 +157,7 @@ public class RestApiPublisherUtils {
      * @throws APIManagementException if unable to add the file
      */
     public static void attachFileToProductDocument(String productId, Documentation documentation, InputStream inputStream,
-            Attachment fileDetails) throws APIManagementException {
+                                                   Attachment fileDetails, String orgId) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -182,15 +182,21 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
-            APIProductIdentifier productIdentifier = APIMappingUtil
-                    .getAPIProductIdentifierFromUUID(productId, tenantDomain);
+            //APIProductIdentifier productIdentifier = APIMappingUtil
+            //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
-            apiProvider.updateDocumentation(productIdentifier, documentation);
+            DocumentationContent content = new DocumentationContent();
+            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
+            resourceFile.setName(filename);
+            content.setResourceFile(resourceFile);
+            content.setSourceType(ContentSourceType.FILE);
+            //apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
+            //apiProvider.updateDocumentation(productIdentifier, documentation);
+            apiProvider.addDocumentationContent(productId, documentId, orgId, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
@@ -227,7 +233,7 @@ public class RestApiPublisherUtils {
      * */
     public static String getSOAPOperation() {
         return "{\"/*\":{\"post\":{\"parameters\":[{\"schema\":{\"type\":\"string\"},\"description\":\"SOAP request.\","
-            + "\"name\":\"SOAP Request\",\"required\":true,\"in\":\"body\"},"
+                + "\"name\":\"SOAP Request\",\"required\":true,\"in\":\"body\"},"
                 + "{\"description\":\"SOAPAction header for soap 1.1\",\"name\":\"SOAPAction\",\"type\":\"string\","
                 + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}," +
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";

@@ -96,12 +96,14 @@ public class ScopesDAO {
     private void addScopeBindingsToBatch(PreparedStatement addScopeBindingStatement, Scope scope, int tenantId)
             throws SQLException {
 
-        for (String role : scope.getRoles().split(",")) {
-            addScopeBindingStatement.setString(1, scope.getKey());
-            addScopeBindingStatement.setInt(2, tenantId);
-            addScopeBindingStatement.setString(3, role);
-            addScopeBindingStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
-            addScopeBindingStatement.addBatch();
+        if (StringUtils.isNotEmpty(scope.getRoles()) && scope.getRoles().trim().length() > 0) {
+            for (String role : scope.getRoles().split(",")) {
+                addScopeBindingStatement.setString(1, scope.getKey());
+                addScopeBindingStatement.setInt(2, tenantId);
+                addScopeBindingStatement.setString(3, role);
+                addScopeBindingStatement.setString(4, APIConstants.DEFAULT_BINDING_TYPE);
+                addScopeBindingStatement.addBatch();
+            }
         }
     }
 

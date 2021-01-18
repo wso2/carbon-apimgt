@@ -43,7 +43,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
     private List<String> securityScheme = new ArrayList<>();
-    private Set<String> availableTierNames;
     private Set<String> environments;
     private Set<String> gatewayLabels;
     private Set<String> apiCategories;
@@ -57,6 +56,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private Boolean advertisedOnly;
     private String swaggerDefinition;
     private String contextTemplate;
+    private String apiSecurity;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -202,14 +202,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.securityScheme = securityScheme;
     }
 
-    public Set<String> getAvailableTierNames() {
-        return availableTierNames;
-    }
-
-    public void setAvailableTierNames(Set<String> availableTierNames) {
-        this.availableTierNames = availableTierNames;
-    }
-
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -316,12 +308,20 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", availableTierNames=" + availableTierNames + ", environments=" + environments + ", gatewayLabels="
+                + ", availableTierNames=" + getAvailableTierNames() + ", environments=" + environments + ", gatewayLabels="
                 + gatewayLabels + ", apiCategories=" + apiCategories + ", isMonetizationEnabled="
                 + isMonetizationEnabled + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
                 + deploymentEnvironments + ", tags=" + tags + ", additionalProperties=" + additionalProperties
                 + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly=" + advertisedOnly
                 + ", swaggerDefinition=" + swaggerDefinition + ", toString()=" + super.toString() + "]";
+    }
+
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
     }
     
 

@@ -219,9 +219,9 @@ return null;
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
-    private java.util.Date createdTime = null;
+    private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private java.util.Date lastUpdatedTime = null;
+    private String lastUpdatedTime = null;
     private Object endpointConfig = null;
 
     @XmlType(name="EndpointImplementationTypeEnum")
@@ -1005,7 +1005,7 @@ return null;
 
   /**
    **/
-  public APIDTO createdTime(java.util.Date createdTime) {
+  public APIDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -1013,16 +1013,16 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public java.util.Date getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(java.util.Date createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -1030,10 +1030,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
-  public java.util.Date getLastUpdatedTime() {
+  public String getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public void setLastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 

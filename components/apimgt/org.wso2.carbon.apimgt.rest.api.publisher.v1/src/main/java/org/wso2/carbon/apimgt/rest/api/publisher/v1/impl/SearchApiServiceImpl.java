@@ -147,4 +147,9 @@ public class SearchApiServiceImpl implements SearchApiService {
         }
         return orgId;
     }
+
+    @Override
+    public Response search(String organizationId, Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+        return null;
+    }
 }
