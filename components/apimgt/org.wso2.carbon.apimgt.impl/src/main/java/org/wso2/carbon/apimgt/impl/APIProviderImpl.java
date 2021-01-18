@@ -5068,9 +5068,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         apiMgtDAO.updateSubscription(subscribedAPI);
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
-        int apiId = apiMgtDAO.getAPIID(subscribedAPI.getApiId(), null);
+        Identifier identifier =
+                subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
+        int apiId = apiMgtDAO.getAPIID(identifier, null);
         String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, tenantDomain,
                 subscribedAPI.getSubscriptionId(), apiId,
