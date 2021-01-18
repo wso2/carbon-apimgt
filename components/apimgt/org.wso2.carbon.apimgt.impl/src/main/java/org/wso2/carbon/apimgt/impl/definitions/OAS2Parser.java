@@ -381,6 +381,9 @@ public class OAS2Parser extends APIDefinition {
                         template.setMediationScripts(template.getHTTPVerb(), mediationScript);
                     }
                 }
+                if (operation.getOperationId() != null) {
+                    template.setOperationId(operation.getOperationId());
+                }
                 urlTemplates.add(template);
             }
         }

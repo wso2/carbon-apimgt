@@ -142,6 +142,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
+                    message.getExchange().put(RestApiConstants.LOGGED_IN_USERNAME, username);
                     return true;
                 } catch (UserStoreException e) {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
@@ -198,6 +199,11 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             }
             if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
                     && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
+                message.getExchange().put(APIConstants.SWAGGER_OPERATION_ID, ((URITemplate) template).getOperationId());
+                message.getExchange().put(APIConstants.SWAGGER_X_RECORD_HISTORY,
+                        ((URITemplate) template).isRecordHistory());
+                message.getExchange().put(APIConstants.SWAGGER_X_RECORD_HISTORY_PAYLOAD,
+                        ((URITemplate) template).isRecordHistoryPayload());
                 for (String scope : scopes) {
                     Scope scp = ((URITemplate) template).getScope();
                     if (scp != null) {
