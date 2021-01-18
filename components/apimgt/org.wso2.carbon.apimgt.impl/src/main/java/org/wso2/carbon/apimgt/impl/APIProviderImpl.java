@@ -233,6 +233,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMu
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
+    private static Map<String,List<Integer>> revisionIDList = new HashMap<>();
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
@@ -8896,7 +8897,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED,
                     apiRevision.getApiUUID()));
         }
-        int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
+        //int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
+        List<Integer> idList = revisionIDList.get(apiRevision.getApiUUID());
+        if (idList == null) {
+            idList = new ArrayList<>();
+        }
+        int maxId = 0;
+        for (int id : idList) {
+            if (maxId < id) {
+                maxId = id;
+            }
+        }
+
+        int revisionId;
+        int revisionIdStored = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID());
+        if (maxId < revisionIdStored) {
+            revisionId = revisionIdStored + 1;
+        } else {
+            revisionId = maxId +1 ;
+        }
         apiRevision.setId(revisionId);
         APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
         if (apiId == null) {
@@ -8911,6 +8930,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIRevision(apiRevision);
+        idList.add(revisionId);
+        revisionIDList.put(apiRevision.getApiUUID(),idList);
         return revisionUUID;
     }
 

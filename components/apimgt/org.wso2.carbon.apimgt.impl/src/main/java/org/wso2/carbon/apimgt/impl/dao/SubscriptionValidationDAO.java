@@ -422,57 +422,110 @@ public class SubscriptionValidationDAO {
      * @param apiId : unique identifier of an API
      * @return {@link API}
      * */
-    public API getApi(String version, String context) {
+    public API getApi(String version, String context, String revisionUUID) {
 
         API api = null;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
-                        + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
-            ps.setString(1, version);
-            ps.setString(2, context);
-            ps.setString(3, version);
-            ps.setString(4, context);
+        if (StringUtils.isEmpty(revisionUUID)) {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
+                         + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
+                ps.setString(1, version);
+                ps.setString(2, context);
+                ps.setString(3, version);
+                ps.setString(4, context);
 
-            try (ResultSet resultSet = ps.executeQuery()) {
-                Map<Integer, API> temp = new ConcurrentHashMap<>();
-                while (resultSet.next()) {
-                    int apiId = resultSet.getInt("API_ID");
-                    api = temp.get(apiId);
-                    if (api == null) {
-                        api = new API();
-                        api.setApiId(apiId);
-                        api.setProvider(resultSet.getString("API_PROVIDER"));
-                        api.setName(resultSet.getString("API_NAME"));
-                        api.setPolicy(resultSet.getString("API_TIER"));
-                        String apiVersionFromDB = resultSet.getString("API_VERSION");
-                        api.setVersion(apiVersionFromDB);
-                        api.setContext(resultSet.getString("CONTEXT"));
-                        String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (apiVersionFromDB != null) {
-                            api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    Map<Integer, API> temp = new ConcurrentHashMap<>();
+                    while (resultSet.next()) {
+                        int apiId = resultSet.getInt("API_ID");
+                        api = temp.get(apiId);
+                        if (api == null) {
+                            api = new API();
+                            api.setApiId(apiId);
+                            api.setProvider(resultSet.getString("API_PROVIDER"));
+                            api.setName(resultSet.getString("API_NAME"));
+                            api.setPolicy(resultSet.getString("API_TIER"));
+                            String apiVersionFromDB = resultSet.getString("API_VERSION");
+                            api.setVersion(apiVersionFromDB);
+                            api.setContext(resultSet.getString("CONTEXT"));
+                            String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
+                            if (apiVersionFromDB != null) {
+                                api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                            }
+                            temp.put(apiId, api);
                         }
-                        temp.put(apiId, api);
-                    }
-                    String urlPattern = resultSet.getString("URL_PATTERN");
-                    String httpMethod = resultSet.getString("HTTP_METHOD");
-                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
-                    if (urlMapping == null) {
-                        urlMapping = new URLMapping();
-                        urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                        urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                        urlMapping.setHttpMethod(httpMethod);
-                        urlMapping.setUrlPattern(urlPattern);
-                        api.addResource(urlMapping);
-                    }
-                    String scopeName = resultSet.getString("SCOPE_NAME");
-                    if (StringUtils.isNotEmpty(scopeName)) {
-                        urlMapping.addScope(scopeName);
+                        String urlPattern = resultSet.getString("URL_PATTERN");
+                        String httpMethod = resultSet.getString("HTTP_METHOD");
+                        URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                        if (urlMapping == null) {
+                            urlMapping = new URLMapping();
+                            urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
+                            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                            urlMapping.setHttpMethod(httpMethod);
+                            urlMapping.setUrlPattern(urlPattern);
+                            api.addResource(urlMapping);
+                        }
+                        String scopeName = resultSet.getString("SCOPE_NAME");
+                        if (StringUtils.isNotEmpty(scopeName)) {
+                            urlMapping.addScope(scopeName);
+                        }
                     }
                 }
-            }
 
-        } catch (SQLException e) {
-            log.error("Error in loading API for api : " + context + " : " + version, e);
+            } catch (SQLException e) {
+                log.error("Error in loading API for api : " + context + " : " + version, e);
+            }
+        } else {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_REVISION_SQL + " UNION "
+                         + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
+                ps.setString(1, version);
+                ps.setString(2, context);
+                ps.setString(3, revisionUUID);
+                ps.setString(4, version);
+                ps.setString(5, context);
+
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    Map<Integer, API> temp = new ConcurrentHashMap<>();
+                    while (resultSet.next()) {
+                        int apiId = resultSet.getInt("API_ID");
+                        api = temp.get(apiId);
+                        if (api == null) {
+                            api = new API();
+                            api.setApiId(apiId);
+                            api.setProvider(resultSet.getString("API_PROVIDER"));
+                            api.setName(resultSet.getString("API_NAME"));
+                            api.setPolicy(resultSet.getString("API_TIER"));
+                            String apiVersionFromDB = resultSet.getString("API_VERSION");
+                            api.setVersion(apiVersionFromDB);
+                            api.setContext(resultSet.getString("CONTEXT"));
+                            String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
+                            if (apiVersionFromDB != null) {
+                                api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                            }
+                            temp.put(apiId, api);
+                        }
+                        String urlPattern = resultSet.getString("URL_PATTERN");
+                        String httpMethod = resultSet.getString("HTTP_METHOD");
+                        URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                        if (urlMapping == null) {
+                            urlMapping = new URLMapping();
+                            urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
+                            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
+                            urlMapping.setHttpMethod(httpMethod);
+                            urlMapping.setUrlPattern(urlPattern);
+                            api.addResource(urlMapping);
+                        }
+                        String scopeName = resultSet.getString("SCOPE_NAME");
+                        if (StringUtils.isNotEmpty(scopeName)) {
+                            urlMapping.addScope(scopeName);
+                        }
+                    }
+                }
+
+            } catch (SQLException e) {
+                log.error("Error in loading API for api : " + context + " : " + version, e);
+            }
         }
 
         return api;

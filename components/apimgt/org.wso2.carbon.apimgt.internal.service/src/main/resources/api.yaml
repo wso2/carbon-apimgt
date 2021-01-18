@@ -188,6 +188,12 @@ paths:
             **Search condition**.
              versio  of the api
           type: string
+        - name: revisionUUID
+          in: query
+          description: |
+            **Search condition**.
+             revision uuid of the api
+          type: string
         - $ref: "#/parameters/Accept"
       tags:
         - Subscription Validation

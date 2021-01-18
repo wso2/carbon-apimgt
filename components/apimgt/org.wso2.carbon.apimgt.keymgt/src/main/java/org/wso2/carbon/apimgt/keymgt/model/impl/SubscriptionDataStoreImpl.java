@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
@@ -515,5 +516,15 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public Map<String, Scope> getScopesByTenant(String tenantDomain) {
         return scopesMap;
+    }
+
+    @Override
+    public void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event) {
+        try {
+            API newAPI = new SubscriptionDataLoaderImpl().getApi(event.getContext(), event.getVersion(), event.getApiId());
+            apiMap.put(event.getContext() + ":" + event.getVersion(), newAPI);
+        } catch (DataLoadingException e) {
+            log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
+        }
     }
 }
