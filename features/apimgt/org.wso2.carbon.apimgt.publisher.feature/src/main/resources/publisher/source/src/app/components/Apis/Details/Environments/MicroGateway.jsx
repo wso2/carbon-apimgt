@@ -51,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
     },
     mainTitle: {
         paddingTop: theme.spacing(3),
+        marginBottom: theme.spacing(2),
     },
     gatewayPaper: {
         marginTop: theme.spacing(2),

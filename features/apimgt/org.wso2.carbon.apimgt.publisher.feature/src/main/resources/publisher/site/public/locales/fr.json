@@ -515,6 +515,8 @@
   "Apis.Details.Environments.Environments.GatewayLabels": "",
   "Apis.Details.Environments.Environments.Kubernetes": "",
   "Apis.Details.Environments.Environments.Revision.Description": "",
+  "Apis.Details.Environments.Environments.api.gateways.heading": "",
+  "Apis.Details.Environments.Environments.gateway.labels.heading": "",
   "Apis.Details.Environments.Environments.revision.delete": "",
   "Apis.Details.Environments.Environments.revision.delete.cancel": "",
   "Apis.Details.Environments.Environments.revision.delete.confirm.message": "",

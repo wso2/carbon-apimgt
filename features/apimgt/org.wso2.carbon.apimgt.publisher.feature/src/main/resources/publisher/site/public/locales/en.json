@@ -515,6 +515,8 @@
   "Apis.Details.Environments.Environments.GatewayLabels": "Gateway Labels",
   "Apis.Details.Environments.Environments.Kubernetes": "Kubernetes",
   "Apis.Details.Environments.Environments.Revision.Description": "Brief description of the revision",
+  "Apis.Details.Environments.Environments.api.gateways.heading": "API Gateways",
+  "Apis.Details.Environments.Environments.gateway.labels.heading": "Gateway Labels",
   "Apis.Details.Environments.Environments.revision.delete": "Delete",
   "Apis.Details.Environments.Environments.revision.delete.cancel": "Cancel",
   "Apis.Details.Environments.Environments.revision.delete.confirm.message": "Are you sure you want to delete {revision} ?",

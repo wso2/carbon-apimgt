@@ -238,6 +238,9 @@ const useStyles = makeStyles((theme) => ({
         width: '800px',
         height: '600px',
     },
+    sectionTitle: {
+        marginBottom: theme.spacing(2),
+    },
 }));
 
 /**
@@ -268,7 +271,7 @@ export default function Environments() {
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState(null);
     const [description, setDescription] = useState('');
-    const [mgLabels, setMgLabels] = useState(null);
+    const [mgLabels, setMgLabels] = useState([]);
     const [SelectedEnvironment, setSelectedEnvironment] = React.useState([]);
     const [open, setOpen] = React.useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
@@ -935,10 +938,10 @@ export default function Environments() {
                 >
                     <DialogTitle id='form-dialog-title' variant='h2'>Deploy</DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Typography variant='h6' gutterBottom>
-                            {/* Revision {(allRevisions && allRevisions.length !== 0) ?
+                        {/* <Typography variant='h6' gutterBottom> */}
+                        {/* Revision {(allRevisions && allRevisions.length !== 0) ?
                                 (parseInt(allRevisions[allRevisions.length-1].displayName.slice(-1)) +1) : 0} */}
-                        </Typography>
+                        {/* </Typography> */}
                         <Box mb={3}>
                             <TextField
                                 autoFocus
@@ -961,19 +964,22 @@ export default function Environments() {
                             />
                         </Box>
                         <Box mt={2}>
-                            <Typography variant='h6' gutterBottom>
-                                API Gateways
+                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.api.gateways.heading'
+                                    defaultMessage='API Gateways'
+                                />
                             </Typography>
                             <Grid
                                 container
-                                spacing={3}
+                                // spacing={3}
                             >
                                 {settings.environment.map((row) => (
                                     <Grid item xs={4}>
                                         <Card
-                                            className={clsx(SelectedEnvironment
-                                                && SelectedEnvironment.includes(row.name)
-                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
+                                            // className={clsx(SelectedEnvironment
+                                            //     && SelectedEnvironment.includes(row.name)
+                                            //     ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
                                             variant='outlined'
                                         >
                                             <Box height='70%'>
@@ -1042,15 +1048,18 @@ export default function Environments() {
                                 ))}
                             </Grid>
                         </Box>
-                        <Box mt={2}>
-                            <Typography variant='h6' gutterBottom>
-                                Gateway Labels
-                            </Typography>
-                            <Grid
-                                container
-                                spacing={3}
-                            >
-                                {mgLabels && mgLabels.map((row) => (
+                        {mgLabels.length > 0 && mgLabels.map((row) => (
+                            <Box mt={2}>
+                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.gateway.labels.heading'
+                                        defaultMessage='Gateway Labels'
+                                    />
+                                </Typography>
+                                <Grid
+                                    container
+                                    spacing={3}
+                                >
                                     <Grid item xs={4}>
                                         <Card
                                             className={clsx(SelectedEnvironment
@@ -1119,9 +1128,9 @@ export default function Environments() {
                                             </Box>
                                         </Card>
                                     </Grid>
-                                ))}
-                            </Grid>
-                        </Box>
+                                </Grid>
+                            </Box>
+                        ))}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose}>
@@ -1149,7 +1158,7 @@ export default function Environments() {
             </Grid>
 
             <Box mx='auto' mt={5}>
-                <Typography variant='h6' gutterBottom>
+                <Typography variant='h6' className={classes.sectionTitle}>
                     <FormattedMessage
                         id='Apis.Details.Environments.Environments.APIGateways'
                         defaultMessage='API Gateways'
