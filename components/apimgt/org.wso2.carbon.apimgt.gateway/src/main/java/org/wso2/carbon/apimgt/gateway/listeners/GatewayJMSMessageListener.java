@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
-import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
-import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.concurrent.Executors;
@@ -257,14 +256,17 @@ public class GatewayJMSMessageListener implements MessageListener {
                     log.error(e);
                 }
             } else if (EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
-                ResponseCode status = CertificateMgtUtils.getInstance()
-                        .removeCertificateFromSenderTrustStore(certificateEvent.getAlias());
-                if (status.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
-                    log.info(
-                            "Endpoint Certificate Removed from Alias " + certificateEvent.getAlias() + " Successfully");
-                } else {
-                    log.error("Endpoint Certificate not Removed from Alias " + certificateEvent.getAlias() +
-                            "Successfully code :" + status.getResponseCode());
+                boolean tenantFlowStarted = false;
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(certificateEvent.getTenantDomain(), true);
+                    tenantFlowStarted = true;
+                    CertificateManagerImpl.getInstance().deleteCertificateFromGateway(certificateEvent.getAlias());
+                } finally {
+                    if (tenantFlowStarted) {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
                 }
             }
         }

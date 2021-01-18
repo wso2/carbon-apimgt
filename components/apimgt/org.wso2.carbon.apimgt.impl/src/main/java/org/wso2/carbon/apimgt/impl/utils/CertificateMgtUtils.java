@@ -72,6 +72,7 @@ public class CertificateMgtUtils {
     private static char[] TRUST_STORE_PASSWORD = System.getProperty("javax.net.ssl.trustStorePassword").toCharArray();
     private static String TRUST_STORE = System.getProperty("javax.net.ssl.trustStore");
     private static String CERTIFICATE_TYPE = "X.509";
+    private static final String KEY_STORE_TYPE = "JKS";
     private static CertificateMgtUtils instance;
     private static final String COMMON_CERT_NAME = "client-truststore-temp.jks";
     private static final String LISTER_PROFILE_JKS_NAME = "client-truststore-listener.jks";
@@ -171,9 +172,9 @@ public class CertificateMgtUtils {
                 //Read the client-truststore.jks into a KeyStore.
                 File trustStoreFile = new File(trustStoreDTO.getLocation());
                 try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
-                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
                     trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
-                    CertificateFactory cf = CertificateFactory.getInstance(trustStoreDTO.getType());
+                    CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
                     while (serverCert.available() > 0) {
                         Certificate certificate = cf.generateCertificate(serverCert);
                         //Check whether the Alias exists in the trust store.
@@ -314,7 +315,7 @@ public class CertificateMgtUtils {
         boolean isExists; //Check for the existence of the certificate in trust store.
         try {
             File trustStoreFile = new File(trustStoreDTO.getLocation());
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore trustStore = KeyStore.getInstance(trustStoreDTO.getType());
             try (InputStream localTrustStoreStream = new FileInputStream(trustStoreFile)) {
                 trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
             }
@@ -717,7 +718,7 @@ public class CertificateMgtUtils {
 
         Path userDirPath = Paths.get(System.getProperty("user.dir"));
         Path fullPath = Paths.get(jksLocation);
-        Path relativePath = fullPath.relativize(userDirPath);
+        Path relativePath = userDirPath.relativize(fullPath);
         return relativePath.toString();
     }
 
@@ -761,7 +762,7 @@ public class CertificateMgtUtils {
 
     private static TrustStoreDTO getParentTrustStore() {
 
-        return new TrustStoreDTO(TRUST_STORE, CERTIFICATE_TYPE, TRUST_STORE_PASSWORD);
+        return new TrustStoreDTO(TRUST_STORE, KEY_STORE_TYPE, TRUST_STORE_PASSWORD);
     }
 
     private static void updateSenderProfileTrustStoreLocation(String jksLocation)
