@@ -4168,7 +4168,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<Mediation> mediationPolicies = getAllApiSpecificMediationPolicies(existingApiId);
         if (mediationPolicies != null) {
             for (Mediation mediation : mediationPolicies) {
-                addApiSpecificMediationPolicy(newAPIId, mediation);
+                Mediation policy = getApiSpecificMediationPolicyByPolicyId(existingApiId, mediation.getUuid());
+                addApiSpecificMediationPolicy(newAPIId, policy);
             }
         }
         
