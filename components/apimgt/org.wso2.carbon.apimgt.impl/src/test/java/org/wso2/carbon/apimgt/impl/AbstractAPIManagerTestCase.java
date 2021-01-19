@@ -1133,8 +1133,8 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
-        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
+        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, null));
+        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, null));
 
     }
 
@@ -1549,17 +1549,17 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsDuplicateContextTemplate() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isDuplicateContextTemplate(Mockito.anyString())).thenReturn(true, false, true, false);
+        Mockito.when(apiMgtDAO.isDuplicateContextTemplate(Mockito.anyString(), null)).thenReturn(true, false, true, false);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context"));
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context"));
+        Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context", null));
+        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context", null));
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context"));
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context"));
+        Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context", null));
+        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context", null));
         abstractAPIManager.tenantDomain = null;
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate(null));
-        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context"));
+        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate(null, null));
+        Assert.assertFalse(abstractAPIManager.isDuplicateContextTemplate("context", null));
     }
 
     @Test

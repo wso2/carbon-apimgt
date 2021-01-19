@@ -181,27 +181,38 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
+    public boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException {
+        return false;
+    }
+
+    @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return null;
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String organizationId, String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end) throws APIManagementException {
         return null;
     }
-
+    
     @Override
     public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
         return null;
     }
 
+
     @Override
-    public API getAPIbyUUID(String organizationId, String uuid, String requestedTenantDomain) throws APIManagementException {
+    public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
         return null;
     }
 
     public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
         return null;
     }
 }

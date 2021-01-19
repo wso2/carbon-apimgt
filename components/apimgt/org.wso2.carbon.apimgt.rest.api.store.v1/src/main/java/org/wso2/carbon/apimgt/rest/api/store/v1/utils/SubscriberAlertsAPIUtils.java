@@ -77,7 +77,7 @@ public class SubscriberAlertsAPIUtils {
 
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(userName);
-            if (!apiConsumer.isApiNameExist(parameters[0])) {
+            if (!apiConsumer.isApiNameExist(parameters[0], null)) {
                 RestApiUtil.handleBadRequest("Invalid API Name", log);
             }
             Application application = apiConsumer.getApplicationsByName(userName, parameters[2], null);

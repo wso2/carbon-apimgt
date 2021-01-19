@@ -2677,14 +2677,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("The query should not be empty", log);
         }
         try {
+            String orgId = getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             if (query.contains(":")) {
                 String[] queryTokens = query.split(":");
                 switch (queryTokens[0]) {
                     case "name":
-                        isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1]) ||
-                                apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                        isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1], orgId) ||
+                                apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1], orgId);
                         break;
                     case "context":
                     default: // API version validation.
@@ -2694,7 +2695,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             } else { // consider the query as api name
                 isSearchArtifactExists =
-                        apiProvider.isApiNameExist(query) || apiProvider.isApiNameWithDifferentCaseExist(query);
+                        apiProvider.isApiNameExist(query, orgId) || apiProvider.isApiNameWithDifferentCaseExist(query, orgId);
             }
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);

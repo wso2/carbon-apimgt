@@ -162,7 +162,7 @@ public interface APIManager {
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the api name availability
      */
-    boolean isApiNameExist(String apiName) throws APIManagementException;
+    boolean isApiNameExist(String apiName, String orgId) throws APIManagementException;
 
     /**
      * Checks whether a different letter case of the given API name is already registered in the system
@@ -171,7 +171,7 @@ public interface APIManager {
      * @return true if a different letter case of the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the different letter case api name availability
      */
-    boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException;
+    boolean isApiNameWithDifferentCaseExist(String apiName, String orgId) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name
@@ -528,7 +528,7 @@ public interface APIManager {
      * @return boolean - true if the template exists, false otherwise.
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
-    boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
+    boolean isDuplicateContextTemplate(String contextTemplate, String organizationId) throws APIManagementException;
 
     /**
      * get a set of API names that matches given context template

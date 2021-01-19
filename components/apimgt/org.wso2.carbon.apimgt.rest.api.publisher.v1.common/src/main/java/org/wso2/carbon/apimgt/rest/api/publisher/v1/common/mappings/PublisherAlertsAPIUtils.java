@@ -49,7 +49,7 @@ public class PublisherAlertsAPIUtils {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (!apiProvider.isApiNameExist(parameters[0])) {
+            if (!apiProvider.isApiNameExist(parameters[0], null)) {
                 throw new APIManagementException("Invalid API Name", ExceptionCodes.INVALID_API_NAME);
             }
         } catch (APIManagementException e) {

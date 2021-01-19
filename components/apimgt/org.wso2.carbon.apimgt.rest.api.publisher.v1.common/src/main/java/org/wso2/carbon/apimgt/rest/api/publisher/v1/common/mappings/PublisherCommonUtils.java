@@ -803,7 +803,8 @@ public class PublisherCommonUtils {
         } else if (body.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
         }
-        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+
+        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organizationId)) {
             throw new APIManagementException(
                     "Error occurred while adding API. API with name " + body.getName() + " already exists.",
                     ExceptionCodes.API_ALREADY_EXISTS);
@@ -834,24 +835,45 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(context)) {
-                        throw new APIManagementException(
-                                "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
+                    if (apiProvider.isDuplicateContextTemplate(context, organizationId)) {
+                        if (organizationId != null ) {
+                            throw new APIManagementException(
+                                    "Error occurred while " + "adding the API. A duplicate API already exists for "
+                                            + context + " in the organization : " + organizationId , ExceptionCodes.API_ALREADY_EXISTS);
+                        } else {
+                            throw new APIManagementException(
+                                    "Error occurred while " + "adding the API. A duplicate API already exists for "
+                                            + context, ExceptionCodes.API_ALREADY_EXISTS);
+                        }
                     } else {
-                        throw new APIManagementException(
-                                "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context,
-                                ExceptionCodes.API_ALREADY_EXISTS);
+                        if (organizationId != null) {
+                            throw new APIManagementException(
+                                    "Error occurred while adding API. API with name " + body.getName()
+                                            + " already exists with different context" + context + " in the " +
+                                            "organization : " + organizationId, ExceptionCodes.API_ALREADY_EXISTS);
+                        } else {
+                            throw new APIManagementException(
+                                    "Error occurred while adding API. API with name " + body.getName()
+                                            + " already exists with different context" + context,
+                                    ExceptionCodes.API_ALREADY_EXISTS);
+                        }
                     }
                 }
             }
         } else {
             //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplate(context)) {
-                throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                                + context, ExceptionCodes.API_ALREADY_EXISTS);
+            if (apiProvider.isDuplicateContextTemplate(context, organizationId)) {
+                if (organizationId != null) {
+                    throw new APIManagementException(
+                            "Error occurred while adding API. API with name " + body.getName()
+                                    + " already exists with different context" + context + " in the " +
+                                    "organization : " + organizationId, ExceptionCodes.API_ALREADY_EXISTS);
+                } else {
+                    throw new APIManagementException(
+                            "Error occurred while adding API. API with name " + body.getName()
+                                    + " already exists with different context" + context,
+                            ExceptionCodes.API_ALREADY_EXISTS);
+                }
             }
         }
 

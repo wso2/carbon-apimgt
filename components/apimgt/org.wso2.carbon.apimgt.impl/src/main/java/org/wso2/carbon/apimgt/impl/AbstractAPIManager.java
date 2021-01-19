@@ -1223,9 +1223,6 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException {
         String definition;
         try {
-            if (orgId == null) {
-                orgId = tenantDomain;
-            }
             Organization org = Organization.getInstance(orgId);
             definition = apiPersistenceInstance.getOASDefinition(org, apiId);
         } catch (OASPersistenceException e) {
@@ -1656,20 +1653,24 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId);
     }
 
-    public boolean isApiNameExist(String apiName) throws APIManagementException {
-        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            tenantName = tenantDomain;
+    public boolean isApiNameExist(String apiName, String orgId) throws APIManagementException {
+        if (orgId == null) {
+            orgId = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                orgId = tenantDomain;
+            }
         }
-        return apiMgtDAO.isApiNameExist(apiName, tenantName);
+        return apiMgtDAO.isApiNameExist(apiName, orgId);
     }
 
-    public boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException {
-        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            tenantName = tenantDomain;
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String orgId) throws APIManagementException {
+        if (orgId == null) {
+            orgId = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                orgId = tenantDomain;
+            }
         }
-        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
+        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, orgId);
     }
 
     public void addSubscriber(String username, String groupingId)
@@ -2068,7 +2069,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
 
-    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
+    public boolean isDuplicateContextTemplate(String contextTemplate, String organizationId) throws APIManagementException {
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             if (contextTemplate != null && contextTemplate.startsWith("/t/")) {
@@ -2077,7 +2078,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             contextTemplate = "/t/" + tenantDomain + contextTemplate;
         }
-        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
+        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate, organizationId);
     }
 
     @Override

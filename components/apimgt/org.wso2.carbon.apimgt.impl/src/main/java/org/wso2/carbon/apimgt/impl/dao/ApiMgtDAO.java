@@ -9939,16 +9939,16 @@ public class ApiMgtDAO {
      * @return true if a different letter case name is already available
      * @throws APIManagementException If failed to check different letter case api name availability
      */
-    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String orgId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet resultSet = null;
         String contextParam = "/t/";
 
         String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(orgId)) {
             query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
-            contextParam += tenantDomain + '/';
+            contextParam += orgId + '/';
         }
 
         try {
@@ -10063,17 +10063,25 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
+    public boolean isDuplicateContextTemplate(String contextTemplate, String organizationId) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+        String sqlQuery = null;
 
-        String sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL;
+        if (organizationId != null) {
+            sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION_ID;
+        } else {
+            sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL;
+        }
+
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, contextTemplate.toLowerCase());
-
+            if (organizationId != null) {
+                ps.setString(2, organizationId);
+            }
             resultSet = ps.executeQuery();
             if (resultSet.next()) {
                 int count = resultSet.getInt("CTX_COUNT");

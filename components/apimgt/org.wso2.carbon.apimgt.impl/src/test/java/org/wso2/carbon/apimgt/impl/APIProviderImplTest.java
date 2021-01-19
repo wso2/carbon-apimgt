@@ -183,6 +183,7 @@ public class APIProviderImplTest {
     private CertificateManagerImpl certificateManager;
     private APIManagerConfiguration config;
     private APIPersistence apiPersistenceInstance;
+    private String superTenantDomain;
 
     @Before
     public void init() throws Exception {
@@ -253,6 +254,7 @@ public class APIProviderImplTest {
             return (String) args[0];
         });
         TestUtils.initConfigurationContextService(true);
+        superTenantDomain = "carbon.super";
     }
 
     @Test
@@ -1110,7 +1112,7 @@ public class APIProviderImplTest {
         Association[] associations = new Association[]{association};
         Mockito.when(apiProvider.registry.getAssociations("docPath", APIConstants.DOCUMENTATION_KEY)).
                 thenReturn(associations);
-        apiProvider.removeDocumentation(apiId, "testId");
+        apiProvider.removeDocumentation(apiId, "testId", superTenantDomain);
         Mockito.verify(apiProvider.registry);
     }
 
@@ -1609,7 +1611,7 @@ public class APIProviderImplTest {
 
         //No state changes
         Map<String, String> failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId,
-                APIConstants.CREATED, api);
+                APIConstants.CREATED, api, superTenantDomain);
         Assert.assertEquals(0, failedGatewaysReturned.size());
         Assert.assertEquals(APIConstants.CREATED, api.getStatus());
 
@@ -1645,7 +1647,8 @@ public class APIProviderImplTest {
         PowerMockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tm);
         PowerMockito.when(tm.getTenantId(Matchers.anyString())).thenReturn(-1234);
-        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api);
+        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api,
+                superTenantDomain);
 
         Assert.assertEquals(0, failedGatewaysReturned.size());
         Assert.assertEquals(APIConstants.PUBLISHED, api.getStatus());
@@ -1658,7 +1661,8 @@ public class APIProviderImplTest {
 
         Mockito.when(gatewayManager.publishToGateway(any(API.class), any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedGWEnv);
-        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api);
+        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api,
+                superTenantDomain);
         Assert.assertEquals(1, failedGatewaysReturned.size());
         Assert.assertEquals(APIConstants.PUBLISHED, api.getStatus());
 
@@ -1666,7 +1670,8 @@ public class APIProviderImplTest {
         api.setStatus(APIConstants.CREATED);
         failedGateways.remove("PUBLISHED");
 
-        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.RETIRED, api);
+        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.RETIRED, api,
+                superTenantDomain);
         Assert.assertEquals(0, failedGatewaysReturned.size());
         Assert.assertEquals(APIConstants.RETIRED, api.getStatus());
 
@@ -1676,7 +1681,7 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.removeFromGateway(any(API.class),
                 Matchers.anyString())).thenReturn(failedGWEnv);
 
-        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.RETIRED, api);
+        failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.RETIRED, api, superTenantDomain);
         Assert.assertEquals(1, failedGatewaysReturned.size());
         Assert.assertEquals(APIConstants.RETIRED, api.getStatus());
     }
@@ -1755,7 +1760,7 @@ public class APIProviderImplTest {
         PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
 
-        apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api);
+        apiProvider.propergateAPIStatusChangeToGateways(apiId, APIConstants.PUBLISHED, api, superTenantDomain);
         //Mockito.verify(notificationExecutor).sendAsyncNotifications(notificationDTO); Not valid. notification logic moved outside
     }
 
@@ -2124,7 +2129,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.getPublisherAPI(any(Organization.class), any(String.class)))
         .thenReturn(publisherAPI);
         //apiProvider.createNewAPIVersion(api, newVersion);
-        apiProvider.createNewAPIVersion(apiSourceUUID, newVersion, true);
+        apiProvider.createNewAPIVersion(apiSourceUUID, newVersion, true, superTenantDomain);
         Assert.assertEquals(newVersion, apiProvider.getAPI(newApi.getId()).getId().getVersion());
     }
 
@@ -2370,7 +2375,7 @@ public class APIProviderImplTest {
         Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
         PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_PUBLISH)).thenReturn(true);
         PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_CREATE)).thenReturn(true);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, superTenantDomain);
     }
 
     @Test
@@ -2516,14 +2521,14 @@ public class APIProviderImplTest {
         
         Mockito.when(gatewayManager.isAPIPublished(api, "carbon.super")).thenReturn(false);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, superTenantDomain);
         Assert.assertEquals(0, api.getEnvironments().size());
 
         tiers.remove("Gold", tier);
         tier = new Tier("Unlimited");
         tiers.put("Unlimited", tier);
         try {
-            apiProvider.updateAPI(api, oldApi);
+            apiProvider.updateAPI(api, oldApi, superTenantDomain);
         } catch (APIManagementException ex) {
             Assert.assertTrue(ex.getMessage().contains("Invalid x-throttling tier Gold found in api definition for " +
                     "resource POST /add"));
@@ -2693,13 +2698,13 @@ public class APIProviderImplTest {
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         PowerMockito.when(apiPersistenceInstance.getPublisherAPI(any(Organization.class), any(String.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, superTenantDomain);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
 
         //Previous updateAPI() call enabled API security. Therefore need to set it as false for the second test
         api.setEndpointSecured(false);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, superTenantDomain);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
 
@@ -2708,7 +2713,7 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.isValidWSDLURL(WSDL_URL, true)).thenReturn(true);
         PowerMockito.when(APIUtil.createWSDL(apiProvider.registry, api)).thenReturn("wsdl_path");
 
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, superTenantDomain);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
         Assert.assertEquals("Additional properties that are set are not retrieved new_test", "new_test",
@@ -2963,7 +2968,7 @@ public class APIProviderImplTest {
                 .getAPIManagerConfiguration();
         GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, superTenantDomain);
     }
 
     @Test
@@ -4429,7 +4434,7 @@ public class APIProviderImplTest {
         ResourceFile resourceFile = new ResourceFile(inputStream, contentType);
         content.setResourceFile(resourceFile);
 
-        apiProvider.addDocumentationContent(apiUUID, docUUID, content);
+        apiProvider.addDocumentationContent(apiUUID, docUUID, superTenantDomain, content);
     }
 
     /**
