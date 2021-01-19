@@ -56,7 +56,7 @@ public class RegistryPersistenceImplWrapper extends RegistryPersistenceImpl {
         if (registry != null) {
             RegistryHolder holder = new RegistryHolder();
             holder.setRegistry(registry);
-            holder.setRegistryUser(username);
+            //holder.setRegistryUser(username);
             holder.setTenantId(CarbonContext.getThreadLocalCarbonContext().getTenantId());
             return holder;
         } else {

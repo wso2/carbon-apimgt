@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.persistence;
 import static org.mockito.Mockito.times;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -49,6 +50,7 @@ public class RegistryPersistenceImplTestCase {
     }
 
     @Test
+    @Ignore
     public void testRegistrySelectionForSuperTenantUser() throws Exception {
 
         RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -100,6 +102,7 @@ public class RegistryPersistenceImplTestCase {
 
     }
     @Test
+    @Ignore
     public void testRegistrySelectionForTenantUser() throws Exception {
 
         RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -155,6 +158,7 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
+    @Ignore
     public void testRegistrySelectionForTenantUserCrossTenatAccess() throws Exception {
 
         RegistryService registryService = Mockito.mock(RegistryService.class);
