@@ -204,4 +204,74 @@ public class ServiceCatalogDAO {
         }
         return null;
     }
+
+    public ServiceCatalogInfo getServiceByKey(String key, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_BY_SERVICE_KEY;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, key);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
+
+                serviceCatalogInfo.setUuid(rs.getString("UUID"));
+                serviceCatalogInfo.setKey(rs.getString("SERVICE_KEY"));
+                serviceCatalogInfo.setMd5(rs.getString("MD5"));
+                serviceCatalogInfo.setName(rs.getString("ENTRY_NAME"));
+                serviceCatalogInfo.setDisplayName(rs.getString("DISPLAY_NAME"));
+                serviceCatalogInfo.setVersion(rs.getString("ENTRY_VERSION"));
+                serviceCatalogInfo.setServiceUrl(rs.getString("SERVICE_URL"));
+                serviceCatalogInfo.setDescription(rs.getString("DESCRIPTION"));
+                serviceCatalogInfo.setDefType(rs.getString("DEFINITION_TYPE"));
+                serviceCatalogInfo.setDefUrl(rs.getString("DEFINITION_URL"));
+                serviceCatalogInfo.setSecurityType(rs.getString("SECURITY_TYPE"));
+                serviceCatalogInfo.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
+                serviceCatalogInfo.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                serviceCatalogInfo.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
+                serviceCatalogInfo.setCreatedBy(rs.getString("CREATED_BY"));
+                serviceCatalogInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+                return serviceCatalogInfo;
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User MD5 hash : SQL " + sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
+    }
+
+    public EndPointInfo getCatalogResourcesByNameAndVersion(String key, String version, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_DEFINITION_ENTRY_BY_NAME_AND_VERSION;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, key);
+            ps.setString(2, version);
+            ps.setInt(3, tenantId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                EndPointInfo endPointInfo = new EndPointInfo();
+                endPointInfo.setUuid(rs.getString("UUID"));
+                endPointInfo.setMetadata(rs.getBlob("METADATA").getBinaryStream());
+                endPointInfo.setEndPointDef(rs.getBlob("ENDPOINT_DEFINITION").getBinaryStream());
+                return endPointInfo;
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting catalog entry resources : SQL " + sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
+    }
 }

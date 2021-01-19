@@ -2,22 +2,18 @@ package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceCRUDStatusDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServicesStatusListDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -229,5 +225,64 @@ public class DataMappingUtil {
             }
         }
         return serviceStatusList;
+    }
+
+    /**
+     * Converts a single metadata file content into a model object
+     *
+     * @param serviceCatalogInfo ServiceCatalogInfo model object
+     * @return Converted ServiceCRUDStatusDTO DTO object
+     */
+    public static ServiceInfoDTO fromServiceCatalogInfoToServiceInfoDTO(ServiceCatalogInfo serviceCatalogInfo) {
+        ServiceInfoDTO serviceInfoDTO = new ServiceInfoDTO();
+
+        serviceInfoDTO.setId(serviceCatalogInfo.getUuid());
+        serviceInfoDTO.setName(serviceCatalogInfo.getName());
+        serviceInfoDTO.setKey(serviceCatalogInfo.getKey());
+        serviceInfoDTO.setVersion(serviceCatalogInfo.getVersion());
+        serviceInfoDTO.setMd5(serviceCatalogInfo.getMd5());
+
+        return serviceInfoDTO;
+    }
+
+    /**
+     * Converts a single metadata file content into a model object
+     *
+     * @param servicesList metadata list of services provided in zip
+     * @param paginationDTO Pagination data
+     * @return build the ServicesStatusListDTO DTO object
+     */
+    public static ServicesListDTO StatusResponsePayloadBuilder(List<ServiceInfoDTO> servicesList, PaginationDTO paginationDTO) {
+        ServicesListDTO servicesListDTO = new ServicesListDTO();
+
+        servicesListDTO.setCount(servicesList.size());
+        servicesListDTO.setList(servicesList);
+        servicesListDTO.setPagination(paginationDTO);
+
+        return servicesListDTO;
+    }
+
+    /**
+     * Converts EndPointInfo object's input stream entries to files
+     *
+     * @param endPointInfo metadata list of services provided in zip
+     *
+     * @return location to the files
+     */
+    public static String fromEndPointInfoToFiles(EndPointInfo endPointInfo) {
+        String pathToCreateFiles = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
+        fromInputStreamToFile(endPointInfo.getMetadata(), pathToCreateFiles + File.separator + APIConstants.METADATA_FILE);
+        fromInputStreamToFile(endPointInfo.getEndPointDef(), pathToCreateFiles + File.separator + APIConstants.DEFINITION_FILE);
+
+        return pathToCreateFiles;
+    }
+
+    private static void fromInputStreamToFile(InputStream inputStream, String outputFile) {
+        File file = new File(outputFile);
+        try(OutputStream outputStream = new FileOutputStream(file)){
+            IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Error while preparing resource files before zip", e, log);
+        }
     }
 }

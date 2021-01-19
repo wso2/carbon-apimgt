@@ -8,7 +8,9 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -65,7 +67,23 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     @Override
     public Response checkServicesExistence(String key, Boolean shrink, MessageContext messageContext) throws APIManagementException {
-        return null;
+        if (StringUtils.isBlank(key)) {
+            RestApiUtil.handleBadRequest("Service key can not be an empty String", log);
+        }
+
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        List<ServiceInfoDTO> servicesList = new ArrayList<>();
+        PaginationDTO paginationDTO = null;
+
+        String keys[] = key.trim().split("\\s*,\\s*");
+        for (String serviceKey : keys) {
+            ServiceCatalogInfo serviceCatalogInfo = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+            if (serviceCatalogInfo != null) {
+                servicesList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(serviceCatalogInfo));
+            }
+        }
+        return Response.ok().entity(DataMappingUtil.StatusResponsePayloadBuilder(servicesList, paginationDTO)).build();// set paginationDTO
     }
 
     public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
@@ -95,33 +113,38 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     public Response exportService(String name, String version, MessageContext messageContext) {
         APIConsumer consumer;
         File exportedServiceArchiveFile = null;
-        String pathToExportDir =
-                System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + ENDPOINT_NAME + DASH + UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
-        File file = new File(pathToExportDir);
-        file.mkdir();
-        String username = RestApiCommonUtil.getLoggedInUsername();
+        String pathToExportDir = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR); //creates a directory in default temporary-file directory
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        String archiveName = name + APIConstants.KEY_SEPARATOR + version;
+        EndPointInfo endPointInfo;
         String exportedFileName = null;
-        ExportArchive exportArchive = null;
+        ExportArchive exportArchive;
 
         if (StringUtils.isBlank(name) || StringUtils.isBlank(version)) {
             RestApiUtil.handleBadRequest("Service name or owner should not be empty or null.", log);
         }
 
         try {
-            consumer = RestApiCommonUtil.getConsumer(username);
-            FileBasedServicesImportExportManager importExportManager =
-                    new FileBasedServicesImportExportManager(consumer, pathToExportDir);
-            exportArchive = importExportManager.createArchiveFromExportedServices(RESOURCE_FOLDER_LOCATION,
-                    pathToExportDir, ENDPOINT_NAME);
-            exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
-            exportedFileName = exportedServiceArchiveFile.getName();
+            endPointInfo = serviceCatalog.getEndPointResourcesByNameAndVersion(name, version, tenantId);
+            if (endPointInfo != null) {
+                consumer = RestApiCommonUtil.getConsumer(userName);
+                FileBasedServicesImportExportManager importExportManager =
+                        new FileBasedServicesImportExportManager(consumer, pathToExportDir);
+                exportArchive = importExportManager.createArchiveFromExportedServices(DataMappingUtil.fromEndPointInfoToFiles(endPointInfo),
+                        pathToExportDir, archiveName);
+                exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
+                exportedFileName = exportedServiceArchiveFile.getName();
+            } else {
+                return Response.ok("Empty result set").build();
+            }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while exporting Services: " + ENDPOINT_NAME, e, log);
+            RestApiUtil.handleInternalServerError("Error while exporting Services: " + archiveName, e, log);
         }
 
         Response.ResponseBuilder responseBuilder =
                 Response.status(Response.Status.OK).entity(exportedServiceArchiveFile).type(MediaType.APPLICATION_OCTET_STREAM);
-        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"").header("ETag", exportArchive.getETag());
+        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"");
         return responseBuilder.build();
     }
 

@@ -83,4 +83,24 @@ public interface ServiceCatalogApi {
      */
     EndPointInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
 
+    /**
+     * Get information of a service endpoint by key
+     *
+     * @param key Service key unique to each tenant
+     * @param tenantId Tenant Identifier
+     * @return ServiceCatalogInfo object including endpoint information
+     * @throws APIManagementException if failed to add ServiceCatalogInfo
+     */
+    ServiceCatalogInfo getServiceByKey(String key, int tenantId) throws APIManagementException;
+
+    /**
+     * Get metadata and endpoint definition resources of a service endpoint
+     *
+     * @param name Service name
+     * @param version Version of service
+     * @param tenantId Tenant Identifier
+     * @return EndPointInfo Endpoint resources
+     * @throws APIManagementException if failed to add ServiceCatalogInfo
+     */
+    EndPointInfo getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException;
 }

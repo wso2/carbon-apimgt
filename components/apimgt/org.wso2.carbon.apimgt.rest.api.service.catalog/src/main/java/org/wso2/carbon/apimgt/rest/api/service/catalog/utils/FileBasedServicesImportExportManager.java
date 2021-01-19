@@ -29,7 +29,10 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -73,9 +76,9 @@ public class FileBasedServicesImportExportManager {
      * uploadedServiceArchiveInputStream
      *
      * @param uploadedServiceArchiveInputStream Incoming {@link InputStream}
-     * @param importedDirectoryName         directory to extract the archive
-     * @param appArchiveLocation            full path of the archive location
-     * @param extractLocation               full path to the location to which the archive will be written
+     * @param importedDirectoryName             directory to extract the archive
+     * @param appArchiveLocation                full path of the archive location
+     * @param extractLocation                   full path to the location to which the archive will be written
      * @throws IOException if an error occurs while extracting the archive
      */
     private void extractUploadedArchiveService(InputStream uploadedServiceArchiveInputStream,
@@ -104,7 +107,7 @@ public class FileBasedServicesImportExportManager {
         String archivedFilePath;
         ExportArchive exportArchive = new ExportArchive();
         try {
-            exportArchive.setETag(archiveDirectory(sourceDirectory, archiveLocation, archiveName));
+            archiveDirectory(sourceDirectory, archiveLocation, archiveName);
         } catch (IOException e) {
             // cleanup the archive root directory
             try {
@@ -128,18 +131,12 @@ public class FileBasedServicesImportExportManager {
      * @param archiveName     name of the archive to create
      * @throws IOException if an error occurs while creating the archive
      */
-    private String archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
+    private void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
             throws IOException {
         File directoryToZip = new File(sourceDirectory);
         List<File> fileList = new ArrayList<>();
         getAllFiles(directoryToZip, fileList);
         writeArchiveFile(directoryToZip, fileList, archiveLocation, archiveName);
-        if (log.isDebugEnabled()) {
-            log.debug("Archive generated successfully " + archiveName);
-        }
-//        *********** add correct code to generate hash***********
-        return null;
-//        return Md5HashGenerator.generateHash(fileList);
     }
 
     /**
@@ -244,7 +241,7 @@ public class FileBasedServicesImportExportManager {
                 String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
                 String canonicalizedDestinationFolderPath = new File(destination).getCanonicalPath();
                 if (!canonicalizedDestinationFilePath.startsWith(canonicalizedDestinationFolderPath)) {
-                    String errorMessage ="Attempt to upload invalid zip archive with file at " + currentEntry +
+                    String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry +
                             ". File path is outside target directory.";
                     log.error(errorMessage);
                     throw new APIManagementException(errorMessage);
@@ -272,7 +269,7 @@ public class FileBasedServicesImportExportManager {
      *
      * @param path Path to the directory
      */
-    public static String directoryCreator(String path) throws APIManagementException {
+    public static String directoryCreator(String path) {
         String tempDirPath = System.getProperty(path) + File.separator + UUID.randomUUID().toString();
         File file = new File(tempDirPath);
         file.mkdir();

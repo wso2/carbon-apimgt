@@ -60,4 +60,14 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     public EndPointInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().getCatalogResourcesByKey(key, tenantId);
     }
+
+    @Override
+    public ServiceCatalogInfo getServiceByKey(String key, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getServiceByKey(key, tenantId);
+    }
+
+    @Override
+    public EndPointInfo getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getCatalogResourcesByNameAndVersion(name, version, tenantId);
+    }
 }
