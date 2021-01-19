@@ -45,6 +45,7 @@ import java.util.List;
  * This class used to deploy Certificates into Gateway.
  */
 public class EndpointCertificateDeployer {
+
     private static final Log log = LogFactory.getLog(EndpointCertificateDeployer.class);
     private String tenantDomain;
     private final EventHubConfigurationDto eventHubConfigurationDto =
