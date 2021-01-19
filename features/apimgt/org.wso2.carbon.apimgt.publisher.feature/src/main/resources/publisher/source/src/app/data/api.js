@@ -209,9 +209,9 @@ class API extends Resource {
         const apiZip = this.client.then((client) => {
             return client.apis['Import Export'].exportAPI({
                 apiId: apiId
-            },  this._requestMetaData({ 
-                    'accept': 'application/zip'
-                })
+            }, this._requestMetaData({
+                'accept': 'application/zip'
+            })
             );
         });
         return apiZip;
@@ -480,10 +480,10 @@ class API extends Resource {
      * 
      * @param id {String} The api id.
      */
-    generateMockScripts(id=this.id) {
-        const promise_get = this.client.then(client => { 
+    generateMockScripts(id = this.id) {
+        const promise_get = this.client.then(client => {
             return client.apis['APIs'].generateMockScripts(
-                { 
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -498,10 +498,10 @@ class API extends Resource {
      * 
      * @param {String} id 
      */
-    getGeneratedMockScriptsOfAPI(id=this.id) {
-        const promise_get = this.client.then(client => { 
-            return client.apis['APIs'].getGeneratedMockScriptsOfAPI( 
-                { 
+    getGeneratedMockScriptsOfAPI(id = this.id) {
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].getGeneratedMockScriptsOfAPI(
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -544,7 +544,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
-                { limit, offset},
+                { limit, offset },
                 this._requestMetaData(),
             );
         });
@@ -1713,7 +1713,7 @@ class API extends Resource {
     /**
      * Get the complexity related details of an API
      */
-    
+
     getGraphqlPoliciesComplexity(id) {
         const promisePolicies = this.client.then(client => {
             return client.apis['GraphQL Policies'].getGraphQLPolicyComplexityOfAPI(
@@ -1725,7 +1725,7 @@ class API extends Resource {
         });
         return promisePolicies.then(response => response.body);
     }
-    
+
     /**
      * Update complexity related details of an API
      */
@@ -1759,7 +1759,7 @@ class API extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
-    
+
 
     /**
      *
@@ -1813,12 +1813,12 @@ class API extends Resource {
         });
     }
 
-     /**
-     * Get details of a given API
-     * @param id {string} UUID of the api.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
+    /**
+    * Get details of a given API
+    * @param id {string} UUID of the api.
+    * @param callback {function} A callback function to invoke after receiving successful response.
+    * @returns {promise} With given callback attached to the success chain else API invoke promise.
+    */
     static getAPIById(id, callback = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
@@ -1975,7 +1975,7 @@ class API extends Resource {
         } else {
             return promisedAPI;
         }
-       
+
     }
 
     /**
@@ -2635,6 +2635,28 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis["Key Managers (Collection)"].getAllKeyManagers(
+                this._requestMetaData(),
+            );
+        });
+    }
+    /**
+   *
+   * Return sample mocked model data for list history
+   * @export
+   * @returns {*} Mocked history list
+   */
+    static getAllHistory(offset = 0, limit = 10, apiId, startTime, endTime) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+
+        return apiClient.then(client => {
+            return client.apis["API History"].getAPIHistory(
+                {
+                    apiId,
+                    offset,
+                    limit,
+                    startTime,
+                    endTime,
+                },
                 this._requestMetaData(),
             );
         });
