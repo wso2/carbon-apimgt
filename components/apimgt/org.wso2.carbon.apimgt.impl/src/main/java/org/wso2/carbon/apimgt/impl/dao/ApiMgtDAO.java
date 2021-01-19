@@ -7378,65 +7378,125 @@ public class ApiMgtDAO {
             throws APIManagementException {
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
+        //Check If the API is a Revision
+        if (checkAPIUUIDIsARevisionUUID(identifier.getUUID()).getApiUUID() != null) {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
+                ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                ps.setString(2, identifier.getName());
+                ps.setString(3, identifier.getVersion());
+                ps.setString(4, identifier.getUUID());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                        String scopeName = rs.getString("SCOPE_NAME");
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-            PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getName());
-            ps.setString(3, identifier.getVersion());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
-                    String scopeName = rs.getString("SCOPE_NAME");
+                        if (scopeToURITemplateId.containsKey(uriTemplateId) && !StringUtils.isEmpty(scopeName)
+                                && !scopeToURITemplateId.get(uriTemplateId).contains(scopeName)
+                                && uriTemplates.containsKey(uriTemplateId)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            scopeToURITemplateId.get(uriTemplateId).add(scopeName);
+                            uriTemplates.get(uriTemplateId).setScopes(scope);
+                            continue;
+                        }
+                        String urlPattern = rs.getString("URL_PATTERN");
+                        String verb = rs.getString("HTTP_METHOD");
 
-                    if (scopeToURITemplateId.containsKey(uriTemplateId) && !StringUtils.isEmpty(scopeName)
-                            && !scopeToURITemplateId.get(uriTemplateId).contains(scopeName)
-                            && uriTemplates.containsKey(uriTemplateId)) {
-                        Scope scope = new Scope();
-                        scope.setKey(scopeName);
-                        scopeToURITemplateId.get(uriTemplateId).add(scopeName);
-                        uriTemplates.get(uriTemplateId).setScopes(scope);
-                        continue;
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setUriTemplate(urlPattern);
+                        uriTemplate.setHTTPVerb(verb);
+                        uriTemplate.setHttpVerbs(verb);
+                        String authType = rs.getString("AUTH_SCHEME");
+                        String throttlingTier = rs.getString("THROTTLING_TIER");
+                        if (StringUtils.isNotEmpty(scopeName)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            uriTemplate.setScope(scope);
+                            uriTemplate.setScopes(scope);
+                            Set<String> templateScopes = new HashSet<>();
+                            templateScopes.add(scopeName);
+                            scopeToURITemplateId.put(uriTemplateId, templateScopes);
+                        }
+                        uriTemplate.setAuthType(authType);
+                        uriTemplate.setAuthTypes(authType);
+                        uriTemplate.setThrottlingTier(throttlingTier);
+                        uriTemplate.setThrottlingTiers(throttlingTier);
+
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                            uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
+                        }
+
+                        uriTemplates.put(uriTemplateId, uriTemplate);
                     }
-                    String urlPattern = rs.getString("URL_PATTERN");
-                    String verb = rs.getString("HTTP_METHOD");
-
-                    URITemplate uriTemplate = new URITemplate();
-                    uriTemplate.setUriTemplate(urlPattern);
-                    uriTemplate.setHTTPVerb(verb);
-                    uriTemplate.setHttpVerbs(verb);
-                    String authType = rs.getString("AUTH_SCHEME");
-                    String throttlingTier = rs.getString("THROTTLING_TIER");
-                    if (StringUtils.isNotEmpty(scopeName)) {
-                        Scope scope = new Scope();
-                        scope.setKey(scopeName);
-                        uriTemplate.setScope(scope);
-                        uriTemplate.setScopes(scope);
-                        Set<String> templateScopes = new HashSet<>();
-                        templateScopes.add(scopeName);
-                        scopeToURITemplateId.put(uriTemplateId, templateScopes);
-                    }
-                    uriTemplate.setAuthType(authType);
-                    uriTemplate.setAuthTypes(authType);
-                    uriTemplate.setThrottlingTier(throttlingTier);
-                    uriTemplate.setThrottlingTiers(throttlingTier);
-
-                    InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                    if (mediationScriptBlob != null) {
-                        String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                        uriTemplate.setMediationScript(script);
-                        uriTemplate.setMediationScripts(verb, script);
-                    }
-
-                    uriTemplates.put(uriTemplateId, uriTemplate);
                 }
+
+                setAssociatedAPIProducts(identifier, uriTemplates);
+            } catch (SQLException e) {
+                handleException("Failed to get URI Templates of API" + identifier, e);
             }
+        } else {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
+                ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                ps.setString(2, identifier.getName());
+                ps.setString(3, identifier.getVersion());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                        String scopeName = rs.getString("SCOPE_NAME");
 
-            setAssociatedAPIProducts(identifier, uriTemplates);
-        } catch (SQLException e) {
-            handleException("Failed to get URI Templates of API" + identifier, e);
+                        if (scopeToURITemplateId.containsKey(uriTemplateId) && !StringUtils.isEmpty(scopeName)
+                                && !scopeToURITemplateId.get(uriTemplateId).contains(scopeName)
+                                && uriTemplates.containsKey(uriTemplateId)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            scopeToURITemplateId.get(uriTemplateId).add(scopeName);
+                            uriTemplates.get(uriTemplateId).setScopes(scope);
+                            continue;
+                        }
+                        String urlPattern = rs.getString("URL_PATTERN");
+                        String verb = rs.getString("HTTP_METHOD");
+
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setUriTemplate(urlPattern);
+                        uriTemplate.setHTTPVerb(verb);
+                        uriTemplate.setHttpVerbs(verb);
+                        String authType = rs.getString("AUTH_SCHEME");
+                        String throttlingTier = rs.getString("THROTTLING_TIER");
+                        if (StringUtils.isNotEmpty(scopeName)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            uriTemplate.setScope(scope);
+                            uriTemplate.setScopes(scope);
+                            Set<String> templateScopes = new HashSet<>();
+                            templateScopes.add(scopeName);
+                            scopeToURITemplateId.put(uriTemplateId, templateScopes);
+                        }
+                        uriTemplate.setAuthType(authType);
+                        uriTemplate.setAuthTypes(authType);
+                        uriTemplate.setThrottlingTier(throttlingTier);
+                        uriTemplate.setThrottlingTiers(throttlingTier);
+
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                            uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
+                        }
+
+                        uriTemplates.put(uriTemplateId, uriTemplate);
+                    }
+                }
+
+                setAssociatedAPIProducts(identifier, uriTemplates);
+            } catch (SQLException e) {
+                handleException("Failed to get URI Templates of API" + identifier, e);
+            }
         }
-
         return new LinkedHashSet<>(uriTemplates.values());
     }
 

@@ -1704,7 +1704,7 @@ public class APIGatewayManager {
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
-                api.getUUID(), publishedGateways);
+                api.getUUID(), publishedGateways, api.getContext(), api.getId().getVersion());
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "
@@ -1858,7 +1858,7 @@ public class APIGatewayManager {
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                api.getUUID(), removedGateways);
+                api.getUUID(), removedGateways, api.getContext(), api.getId().getVersion());
         APIUtil.sendNotification(deployAPIInGatewayEvent,
                 APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
 

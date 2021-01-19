@@ -322,7 +322,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            APIIdentifier apiIdentifier;
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
+            } else {
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            }
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
@@ -369,6 +374,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            if (apiIdentifier == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 apiProvider.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
@@ -407,7 +417,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            APIIdentifier apiIdentifier;
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
+            } else {
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            }
             String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
             GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
             dto.setSchemaDefinition(schemaContent);
@@ -525,7 +540,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            APIIdentifier apiIdentifier;
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
+            } else {
+                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            }
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);

@@ -2160,6 +2160,26 @@ public class SQLConstants {
                     "AUM.REVISION_UUID IS NULL " +
             " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
+    public static final String GET_URL_TEMPLATES_OF_API_REVISION_SQL =
+            " SELECT " +
+                    "  AUM.URL_MAPPING_ID," +
+                    "   AUM.URL_PATTERN," +
+                    "   AUM.HTTP_METHOD," +
+                    "   AUM.AUTH_SCHEME," +
+                    "   AUM.THROTTLING_TIER," +
+                    "   AUM.MEDIATION_SCRIPT," +
+                    "   ARSM.SCOPE_NAME " +
+                    " FROM " +
+                    "   AM_API_URL_MAPPING AUM " +
+                    " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                    " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
+                    " WHERE " +
+                    "  API.API_PROVIDER = ? AND " +
+                    "  API.API_NAME = ? AND " +
+                    "  API.API_VERSION = ?  AND " +
+                    "AUM.REVISION_UUID = ? " +
+                    " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
     public static final String GET_API_PRODUCT_URI_TEMPLATE_ASSOCIATION_SQL =
             " SELECT " +
             "  API.API_PROVIDER," +
