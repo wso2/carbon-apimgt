@@ -117,18 +117,21 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     private Boolean isIndexCreated(String organizationName) {
         //Check if index is created flag exists in cache
-        if (indexCheckCache.get(organizationName) != null) {
+        Boolean indexCacheCheck = indexCheckCache.get(organizationName);
+        if (indexCacheCheck != null && indexCacheCheck) {
             return true;
         }
         //Call mongodb atlas rest api to check if index exists
-        boolean isCreated = MongoDBAtlasAPIConnector.getInstance().getIndexes(organizationName).isEmpty();
-        if (!isCreated) {
+        boolean isIndexEmpty = MongoDBAtlasAPIConnector.getInstance().getIndexes(organizationName).isEmpty();
+        if (!isIndexEmpty) {
+            indexCheckCache.put(organizationName, true);
             return true;
         }
 
         // Should we retry if we failed?
         // Create atlas search index
         Boolean searchIndexes = MongoDBAtlasAPIConnector.getInstance().createSearchIndexes(organizationName);
+        indexCheckCache.put(organizationName, searchIndexes);
         return true;
     }
 
@@ -194,8 +197,12 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         searchQuery = "";
+        int skip = start;
+        int limit = offset;
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(ctx.getOrganization().getName());
-        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        long totalCount = collection.countDocuments();
+        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery, skip, limit))
+                .cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
 
@@ -206,7 +213,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         }
         publisherAPISearchResult.setPublisherAPIInfoList(publisherAPIInfoList);
         publisherAPISearchResult.setReturnedAPIsCount(publisherAPIInfoList.size());
-        publisherAPISearchResult.setTotalAPIsCount(5);
+        publisherAPISearchResult.setTotalAPIsCount((int) totalCount);
         return publisherAPISearchResult;
     }
 
@@ -221,7 +228,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return "*" + searchQuery + "*";
     }
 
-    private List<Document> getSearchAggregate(String query) {
+    private List<Document> getSearchAggregate(String query, int skip, int limit) {
         String searchQuery = getSearchQuery(query);
         List<String> paths = new ArrayList<>();
         paths.add("apiName");
@@ -237,24 +244,34 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         Document search = new Document();
         Document wildCard = new Document();
         Document wildCardBody = new Document();
+        Document skipDoc = new Document();
+        Document limitDoc = new Document();
         wildCardBody.put("path", "apiName");
         wildCardBody.put("query", "*");
         wildCardBody.put("allowAnalyzedField", true);
         wildCard.put("wildcard", wildCardBody);
         search.put("$search", wildCard);
+        skipDoc.put("$skip", skip);
+        limitDoc.put("$limit", limit);
 
         List<Document> list = new ArrayList<>();
         list.add(search);
+        list.add(skipDoc);
+        list.add(limitDoc);
         return list;
     }
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
+        int skip = start;
+        int limit = offset;
         //published prototyped only
         searchQuery = "";
         MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(ctx.getOrganization().getName());
-        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery)).cursor();
+        long totalCount = collection.countDocuments();
+        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery, skip, limit))
+                .cursor();
         DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
         List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
         while (aggregate.hasNext()) {
@@ -264,7 +281,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         }
         devPortalAPISearchResult.setDevPortalAPIInfoList(devPortalAPIInfoList);
         devPortalAPISearchResult.setReturnedAPIsCount(devPortalAPIInfoList.size());
-        devPortalAPISearchResult.setTotalAPIsCount(5);
+        devPortalAPISearchResult.setTotalAPIsCount((int) totalCount);
         return devPortalAPISearchResult;
     }
 
