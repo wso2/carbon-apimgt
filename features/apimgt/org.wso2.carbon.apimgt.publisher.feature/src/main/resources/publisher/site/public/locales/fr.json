@@ -282,6 +282,7 @@
   "Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.empty": "",
   "Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.invalid": "",
   "Apis.Details.Documents.CreateEditForm.source.url.url": "",
+  "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": "",
   "Apis.Details.Documents.Delete.document.delete": "",
   "Apis.Details.Documents.Delete.document.delete.error": "",
   "Apis.Details.Documents.Delete.document.delete.successfully": "",
