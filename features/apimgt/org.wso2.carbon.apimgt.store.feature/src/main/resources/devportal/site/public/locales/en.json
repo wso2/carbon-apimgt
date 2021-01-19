@@ -1,4 +1,5 @@
 {
+  "\"Applications.Details.Subscriptions.api.webhooks\"": "Web Hooks",
   "Apis.Details.APIConsole.APIConsole.download.postman": "Postman collection",
   "Apis.Details.APIConsole.APIConsole.download.swagger": "OpenAPI",
   "Apis.Details.ApiCOnsole.generate.test.key": "GET TEST KEY ",
@@ -260,6 +261,7 @@
   "Applications.Details.Subscriptions.Status": "Subscription Status",
   "Applications.Details.Subscriptions.action": "Action",
   "Applications.Details.Subscriptions.api.name": "API",
+  "Applications.Details.Subscriptions.api.webhooks.subscribe": "Subscribe to topic",
   "Applications.Details.Subscriptions.error.occurred.during.subscription": "Error occurred during subscription",
   "Applications.Details.Subscriptions.error.occurred.during.subscription.not.201": "Error occurred during subscription",
   "Applications.Details.Subscriptions.filter.msg": "Filtered APIs for ",

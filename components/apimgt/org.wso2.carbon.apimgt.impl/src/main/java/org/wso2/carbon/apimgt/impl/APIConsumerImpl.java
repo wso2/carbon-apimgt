@@ -73,6 +73,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -99,7 +101,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
@@ -121,9 +122,6 @@ import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -5852,6 +5850,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.error("Error while retrieving Anonymous config from registry", e);
         }
         return true;
+    }
+
+    @Override
+    public Set<Topic> getTopics(String apiId) throws APIManagementException {
+        return apiMgtDAO.getAPITopics(apiId);
+    }
+
+    @Override
+    public Set<Subscription> getTopicSubscriptions(String applicationUUID, String apiUUID) throws APIManagementException {
+
+        if (StringUtils.isNotEmpty(apiUUID)) {
+            return apiMgtDAO.getTopicSubscriptionsByApiUUID(applicationUUID, apiUUID);
+        } else {
+            return apiMgtDAO.getTopicSubscriptions(applicationUUID);
+        }
     }
 
     /**
