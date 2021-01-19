@@ -455,6 +455,28 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /ga-config:
+    get:
+      summary: Get Google analytics config related to tenant.
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: google analytics configuration
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
   /synapse-artifacts:
     get:
