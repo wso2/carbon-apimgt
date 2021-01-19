@@ -67,6 +67,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -1298,6 +1300,126 @@ public class ApiMgtDAO {
         return subscriber;
     }
 
+    public Set<Topic> getAPITopics(String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicsQuery = SQLConstants.GET_ALL_TOPICS_BY_API_ID;
+        Set<Topic> topicSet = new HashSet();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicsQuery);
+            ps.setString(1, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Topic topic = new Topic();
+                topic.setName(resultSet.getString("URL_MAPPING"));
+                topic.setApiId(resultSet.getString("API_ID"));
+                topicSet.add(topic);
+            }
+            return topicSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topics available in api " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    public Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsQuery);
+            ps.setString(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiKey(resultSet.getString("API_KEY"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                subscription.setLastDelivery(resultSet.getDate("DELIVERED_AT"));
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATUS"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("UUID"));
+                subscriptionSet.add(subscription);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
+    }
+
+    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsByApiIdQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY;
+        Set<Subscription> subscriptionSet = new HashSet();
+        Map <String, String> apiMetaData = getAPIMetaDataFromApiUUID(apiId);
+        // since the gateway side does not have access to the apiId, it creates a unique apiKey
+        // by combining API provider, name and version. This will be the unique idenitifier of the api of the subscription
+        String apiKey = apiMetaData.get("API_PROVIDER") + "_" + apiMetaData.get("API_NAME") + "_" + apiMetaData.get("API_VERSION");
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsByApiIdQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, apiKey);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiKey(resultSet.getString("API_KEY"));
+                subscription.setApiUuid(apiId);
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                subscription.setLastDelivery(resultSet.getDate("DELIVERED_AT"));
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATUS"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("UUID"));
+                subscriptionSet.add(subscription);
+            }
+            return subscriptionSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
+    }
+
+    private Map getAPIMetaDataFromApiUUID(String apiUUID) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getApiMetaDataQuery = SQLConstants.GET_API_DATA_FROM_UUID;
+        Map<String, String> metaData = new HashMap<>();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getApiMetaDataQuery);
+            ps.setString(1, apiUUID);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                metaData.put("API_PROVIDER", resultSet.getString("API_PROVIDER"));
+                metaData.put("API_NAME", resultSet.getString("API_NAME"));
+                metaData.put("API_VERSION", "API_VERSION");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API meta data from  " + apiUUID, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return metaData;
+    }
+
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
@@ -1800,6 +1922,8 @@ public class ApiMgtDAO {
 
         return subscribedAPIs;
     }
+
+
 
     private String appendSubscriptionQueryWhereClause(final String groupingId, String sqlQuery) {
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {

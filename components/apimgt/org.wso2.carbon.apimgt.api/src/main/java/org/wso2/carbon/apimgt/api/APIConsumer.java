@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
 import java.util.List;
 import java.util.Map;
@@ -983,6 +985,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if an error occurs while reading configs
      */
     boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
+
+    /**
+     *
+     * @param apiId API UUID
+     * @return Set of Topics defined in a specified Async API
+     * @throws APIManagementException
+     */
+    Set<Topic> getTopics(String apiId) throws APIManagementException;
+
+    Set<Subscription> getTopicSubscriptions(String applicationId, String apiId) throws APIManagementException;
 
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
