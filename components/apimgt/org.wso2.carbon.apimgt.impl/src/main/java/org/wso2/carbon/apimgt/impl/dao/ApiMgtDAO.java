@@ -7173,6 +7173,11 @@ public class ApiMgtDAO {
             prepStmt.setString(7, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(8, api.getId().getApiName());
             prepStmt.setString(9, api.getId().getVersion());
+            if (api.getOrganizationId() != null) {
+                prepStmt.setString(10, api.getOrganizationId());
+            } else {
+                prepStmt.setNull(10, Types.VARCHAR);
+            }
             prepStmt.execute();
             //}
 

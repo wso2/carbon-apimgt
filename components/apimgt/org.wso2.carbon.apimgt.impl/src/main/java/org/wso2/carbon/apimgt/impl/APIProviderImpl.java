@@ -1529,7 +1529,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
                     // happen
                     // Remove the previous default API entry from the Registry
-                    updateDefaultAPIInRegistry(defaultAPIId, false);
+                    updateDefaultAPIInRegistry(defaultAPIId, false, api.getOrganizationId());
                     if (!api.isDefaultVersion()) {// default api tick is removed
                         // todo: if it is ok, these two variables can be put to the top of the function to remove
                         // duplication
@@ -1766,197 +1766,203 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public API updateAPI(API api, API existingAPI, String orgId) throws APIManagementException, FaultGatewaysException {
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+    public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
 
-        validateKeyManagers(api);
-        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
-        API oldApi = existingAPI;
-        Gson gson = new Gson();
-        Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
-                HashMap.class);
-        if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
-            Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            String userName = this.username;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
+
+            validateKeyManagers(api);
+            Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
+            API oldApi = existingAPI;
+            Gson gson = new Gson();
+            Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                     HashMap.class);
-            if (newMonetizationProperties != null) {
-                for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
-                    String newValue = newMonetizationProperties.get(entry.getKey());
-                    if (StringUtils.isAllBlank(newValue)) {
-                        newMonetizationProperties.put(entry.getKey(), entry.getValue());
+            if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
+                Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
+                        HashMap.class);
+                if (newMonetizationProperties != null) {
+                    for (Map.Entry<String, String> entry : oldMonetizationProperties.entrySet()) {
+                        String newValue = newMonetizationProperties.get(entry.getKey());
+                        if (StringUtils.isAllBlank(newValue)) {
+                            newMonetizationProperties.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    JSONParser parser = new JSONParser();
+                    try {
+                        JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
+                        api.setMonetizationProperties(jsonObj);
+                    } catch (ParseException e) {
+                        throw new APIManagementException("Error when parsing monetization properties ", e);
                     }
                 }
-                JSONParser parser = new JSONParser();
+            }
+
+            if (oldApi.getStatus().equals(api.getStatus())) {
+
+                String previousDefaultVersion = getDefaultVersion(api.getId());
+                String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
+                updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);
+                updateEndpointSecurity(oldApi, api);
+                if (!oldApi.getContext().equals(api.getContext())) {
+                    api.setApiHeaderChanged(true);
+                }
+                int tenantId;
                 try {
-                    JSONObject jsonObj = (JSONObject) parser.parse(gson.toJson(newMonetizationProperties));
-                    api.setMonetizationProperties(jsonObj);
-                } catch (ParseException e) {
-                    throw new APIManagementException("Error when parsing monetization properties ", e);
+                    tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+                } catch (UserStoreException e) {
+                    throw new APIManagementException(
+                            "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
                 }
-            }
-        }
+                validateResourceThrottlingTiers(api, tenantDomain);
 
-        if (oldApi.getStatus().equals(api.getStatus())) {
-            
-            String previousDefaultVersion = getDefaultVersion(api.getId());
-            String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
-            
-            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);
+                //get product resource mappings on API before updating the API. Update uri templates on api will remove all
+                //product mappings as well.
+                List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
+                updateAPI(api, tenantId, userNameWithoutChange);
+                updateProductResourceMappings(api, productResources);
 
-            updateEndpointSecurity(oldApi, api);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated the API: " + api.getId() + " in the database");
+                }
 
-            if (!oldApi.getContext().equals(api.getContext())) {
-                api.setApiHeaderChanged(true);
-            }
+                JSONObject apiLogObject = new JSONObject();
+                apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+                apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
 
-            int tenantId;
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                        APIConstants.AuditLogConstants.UPDATED, this.username);
 
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            } catch (UserStoreException e) {
-                throw new APIManagementException(
-                        "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
-            }
-            validateResourceThrottlingTiers(api, tenantDomain);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                boolean gatewayExists;
+                if (config.getGatewayArtifactSynchronizerProperties().isPublishDirectlyToGatewayEnabled()) {
+                    gatewayExists = config.getApiGatewayEnvironments().size() > 0;
+                } else {
+                    gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
+                }
+                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                boolean isAPIPublished = false;
 
-            //get product resource mappings on API before updating the API. Update uri templates on api will remove all
-            //product mappings as well.
-            List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-            api.setOrganizationId(orgId);
-            updateAPI(api, tenantId, userNameWithoutChange);
-            updateProductResourceMappings(api, productResources);
+                // gatewayType check is required when API Management is deployed on other servers to avoid synapse
+                if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                    isAPIPublished = isAPIPublished(api);
+                    if (gatewayExists) {
+                        loadMediationPoliciesToAPI(api, existingAPI.getOrganizationId());
+                        if (isAPIPublished) {
+                            replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
+                        } else if (!APIConstants.CREATED.equals(api.getStatus())
+                                && !APIConstants.RETIRED.equals(api.getStatus())) {
+                            if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
+                                api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                        .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                            }
+                            if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
+                                api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                        .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                            }
+                            Map<String, String> failedToPublishEnvironments = publishToGateway(api);
+                            if (!failedToPublishEnvironments.isEmpty()) {
+                                Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
+                                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                                api.setEnvironments(publishedEnvironments);
+                                failedGateways.clear();
+                                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                                failedGateways.put("UNPUBLISHED", Collections.<String, String> emptyMap());
+                            }
+                        }
+                    } else {
+                        log.debug("Gateway is not existed for the current API Provider");
+                    }
+                }
 
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully updated the API: " + api.getId() + " in the database");
-            }
+                // If gateway(s) exist, remove resource paths saved on the cache.
+                if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
+                    Set<URITemplate> resourceVerbs = api.getUriTemplates();
+                    if (resourceVerbs != null) {
+                        invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Calling invalidation cache");
+                        }
+                    }
+                }
 
-            JSONObject apiLogObject = new JSONObject();
-            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
-            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
-            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
-            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+                //Validate Transports
+                validateAndSetTransports(api);
+                validateAndSetAPISecurity(api);
+                //This is a fix for broken APIs after migrating from 1.10 to 2.0.0.
+                //This sets the endpoint security of the APIs based on the old artifact.
+                APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+                if (gatewayManager.isAPIPublished(api, tenantDomain)) {
+                    if (!api.isEndpointSecured() && !api.isEndpointAuthDigest() && api.getEndpointUTUsername() != null) {
+                        String epAuthType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
+                        if (APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH.equalsIgnoreCase(epAuthType)) {
+                            api.setEndpointSecured(true);
+                            api.setEndpointAuthDigest(true);
+                        } else if (APIConstants.APIEndpointSecurityConstants.BASIC_AUTH.equalsIgnoreCase(epAuthType)) {
+                            api.setEndpointSecured(true);
+                        }
+                    }
+                }
+                try {
+                    Organization org = null;
+                    if (existingAPI.getOrganizationId() != null) {
+                        org = new Organization(existingAPI.getOrganizationId());
+                    } else {
+                        org = new Organization(tenantDomain);
+                    }
+                    api.setCreatedTime(oldApi.getCreatedTime());
+                    apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
+                } catch (APIPersistenceException e) {
+                    throw new APIManagementException("Error while updating API details", e);
+                }
 
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                    APIConstants.AuditLogConstants.UPDATED, this.username);
+                // update apiContext cache
+                if (APIUtil.isAPIManagementEnabled()) {
+                    Cache contextCache = APIUtil.getAPIContextCache();
+                    contextCache.remove(oldApi.getContext());
+                    contextCache.put(api.getContext(), Boolean.TRUE);
+                }
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            boolean gatewayExists;
-            if (config.getGatewayArtifactSynchronizerProperties().isPublishDirectlyToGatewayEnabled()) {
-                gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             } else {
-                gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
+                // We don't allow API status updates via this method.
+                // Use changeAPIStatus for that kind of updates.
+                throw new APIManagementException("Invalid API update operation involving API status changes");
             }
-            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            boolean isAPIPublished = false;
-            // gatewayType check is required when API Management is deployed on other servers to avoid synapse
-            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                isAPIPublished = isAPIPublished(api);
-                if (gatewayExists) {
-                    loadMediationPoliciesToAPI(api, orgId);
-                    if (isAPIPublished) {
-                        replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
-                    } else if (!APIConstants.CREATED.equals(api.getStatus())
-                            && !APIConstants.RETIRED.equals(api.getStatus())) {
-                        if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                            api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
-                        }
-                        if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                            api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
-                        }
-                        Map<String, String> failedToPublishEnvironments = publishToGateway(api);
-                        if (!failedToPublishEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-                            api.setEnvironments(publishedEnvironments);
-                            failedGateways.clear();
-                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                            failedGateways.put("UNPUBLISHED", Collections.<String, String> emptyMap());
-                        }
-                    }
-                } else {
-                    log.debug("Gateway is not existed for the current API Provider");
-                }
+            if (!failedGateways.isEmpty() &&
+                    (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
+                throw new FaultGatewaysException(failedGateways);
             }
 
-            // If gateway(s) exist, remove resource paths saved on the cache.
-            if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
-                Set<URITemplate> resourceVerbs = api.getUriTemplates();
-                if (resourceVerbs != null) {
-                    invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Calling invalidation cache");
-                    }
-                }
-            }
+            //notify key manager with API update
+            registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-            //Validate Transports
-            validateAndSetTransports(api);
-            validateAndSetAPISecurity(api);
-            //This is a fix for broken APIs after migrating from 1.10 to 2.0.0.
-            //This sets the endpoint security of the APIs based on the old artifact.
-            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-            if (gatewayManager.isAPIPublished(api, tenantDomain)) {
-                if (!api.isEndpointSecured() && !api.isEndpointAuthDigest() && api.getEndpointUTUsername() != null) {
-                    String epAuthType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
-                    if (APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH.equalsIgnoreCase(epAuthType)) {
-                        api.setEndpointSecured(true);
-                        api.setEndpointAuthDigest(true);
-                    } else if (APIConstants.APIEndpointSecurityConstants.BASIC_AUTH.equalsIgnoreCase(epAuthType)) {
-                        api.setEndpointSecured(true);
-                    }
-                }
-            }
-            try {
-                Organization org = null;
-                if (existingAPI.getOrganizationId() != null) {
-                    org = new Organization(existingAPI.getOrganizationId());
-                } else {
-                    org = new Organization(tenantDomain);
-                }
-                api.setCreatedTime(oldApi.getCreatedTime());
-                apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
-            } catch (APIPersistenceException e) {
-                throw new APIManagementException("Error while updating API details", e);
-            }
+            int apiId = apiMgtDAO.getAPIID(api.getId(), null);
 
-            //need to be moved to persistent layer
-//
-//            updateWSDL(oldApi);///////////////has registry access /////////////////
-//
-//            updateDocumentPermissions(api, oldApi);///////////////has registry access /////////////////
-
-            // update apiContext cache
-            if (APIUtil.isAPIManagementEnabled()) {
-                Cache contextCache = APIUtil.getAPIContextCache();
-                contextCache.remove(oldApi.getContext());
-                contextCache.put(api.getContext(), Boolean.TRUE);
+            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                    APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
+                    api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                    api.getStatus());
+            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+            return api;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
-
-        } else {
-            // We don't allow API status updates via this method.
-            // Use changeAPIStatus for that kind of updates.
-            throw new APIManagementException("Invalid API update operation involving API status changes");
-        }
-        if (!failedGateways.isEmpty() &&
-                (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
-            throw new FaultGatewaysException(failedGateways);
         }
 
-        //notify key manager with API update
-        registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getId(), null);
-
-        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
-                api.getStatus());
-        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-        return api;
     }
     
     private void updateOtherAPIversionsForNewDefautlAPIChange(API api, String previousDefaultVersion)
@@ -1969,7 +1975,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
                 // happen
                 // Remove the previous default API entry from the Registry
-                updateDefaultAPIInRegistry(defaultAPIId, false);
+                updateDefaultAPIInRegistry(defaultAPIId, false, api.getOrganizationId());
                 if (!api.isDefaultVersion()) {// default api tick is removed
                     // todo: if it is ok, these two variables can be put to the top of the function to remove
                     // duplication
@@ -2785,9 +2791,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void loadMediationPoliciesToAPI(API api, String orgId) throws APIManagementException {
+        if (orgId == null) {
+            orgId = tenantDomain;
+        }
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
-            Organization org = new Organization(tenantDomain);
+            Organization org = new Organization(orgId);
             String apiUUID = api.getUuid();
             // get all policies
             try {
@@ -2795,54 +2804,58 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<Mediation> globalPolicies = null;
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
-                                && api.getInSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-                            mediation.setGlobal(false);
-                            api.setInSequenceMediation(mediation);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) { // global policy
-                        if (globalPolicies == null) {
-                            globalPolicies = getAllGlobalMediationPolicies();
-                        }
-                        for (Mediation m : globalPolicies) {
-                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
-                                    && api.getInSequence().equals(m.getName())) {
-                                Mediation mediation = getGlobalMediationPolicy(m.getUuid());
-                                mediation.setGlobal(true);
+                    if (localPolicies != null) {
+                        for (MediationInfo mediationInfo : localPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
+                                    && api.getInSequence().equals(mediationInfo.getName())) {
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                                Mediation mediation = new Mediation();
+                                mediation.setConfig(mediationPolicy.getConfig());
+                                mediation.setName(mediationPolicy.getName());
+                                mediation.setUuid(mediationPolicy.getId());
+                                mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+                                mediation.setGlobal(false);
                                 api.setInSequenceMediation(mediation);
                                 found = true;
                                 break;
+                            }
+                        }
+                        if (!found) { // global policy
+                            if (globalPolicies == null) {
+                                globalPolicies = getAllGlobalMediationPolicies();
+                            }
+                            for (Mediation m : globalPolicies) {
+                                if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(m.getType())
+                                        && api.getInSequence().equals(m.getName())) {
+                                    Mediation mediation = getGlobalMediationPolicy(m.getUuid());
+                                    mediation.setGlobal(true);
+                                    api.setInSequenceMediation(mediation);
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
                 if (APIUtil.isSequenceDefined(api.getOutSequence())) {
                     boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
-                                && api.getOutSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-                            mediation.setGlobal(false);
-                            api.setOutSequenceMediation(mediation);
-                            found = true;
-                            break;
+                    if (localPolicies != null) {
+                        for (MediationInfo mediationInfo : localPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
+                                    && api.getOutSequence().equals(mediationInfo.getName())) {
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                                Mediation mediation = new Mediation();
+                                mediation.setConfig(mediationPolicy.getConfig());
+                                mediation.setName(mediationPolicy.getName());
+                                mediation.setUuid(mediationPolicy.getId());
+                                mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+                                mediation.setGlobal(false);
+                                api.setOutSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
                         }
                     }
                     if (!found) { // global policy
@@ -2863,22 +2876,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
-                                && api.getFaultSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-                            mediation.setGlobal(false);
-                            api.setFaultSequenceMediation(mediation);
-                            found = true;
-                            break;
+                    if (localPolicies != null ) {
+                        for (MediationInfo mediationInfo : localPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
+                                    && api.getFaultSequence().equals(mediationInfo.getName())) {
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                                Mediation mediation = new Mediation();
+                                mediation.setConfig(mediationPolicy.getConfig());
+                                mediation.setName(mediationPolicy.getName());
+                                mediation.setUuid(mediationPolicy.getId());
+                                mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+                                mediation.setGlobal(false);
+                                api.setFaultSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
                         }
                     }
+
                     if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
@@ -4096,10 +4112,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return vtb;
     }
 
-    public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value) throws APIManagementException {
+    public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value, String orgId) throws APIManagementException {
         try {
             String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
-            Organization org = new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            Organization org = new Organization(orgId);
 
             PublisherAPI api = apiPersistenceInstance.getPublisherAPI(org , apiId);
             api.setDefaultVersion(value);
@@ -4312,7 +4328,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (defaultVersion != null) {
                     APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
                             defaultVersion);
-                    updateDefaultAPIInRegistry(defaultAPIId, false);
+                    updateDefaultAPIInRegistry(defaultAPIId, false, api.getOrganizationId());
                 }
             } else {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
@@ -6721,7 +6737,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException {
         try {
-            if (orgId != null) {
+            if (orgId == null) {
                 orgId = tenantDomain;
             }
             Organization org = Organization.getInstance(orgId);
@@ -10606,8 +10622,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     resource.getContent(), resource.getContentType());
             try {
-                apiPersistenceInstance.saveWSDL(org, apiId,
-                        wsdlResourceFile);
+                apiPersistenceInstance.saveWSDL(org, apiId, wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
             }

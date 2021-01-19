@@ -822,7 +822,9 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+        RestApiCommonUtil.getLoggedInUserProvider();
         String uuid = "uuid";
         String path = "path";
         APIDTO dto = new APIDTO();

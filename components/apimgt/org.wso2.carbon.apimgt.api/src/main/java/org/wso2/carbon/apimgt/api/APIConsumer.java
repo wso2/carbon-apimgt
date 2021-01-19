@@ -707,6 +707,7 @@ public interface APIConsumer extends APIManager {
      * Returns details of an API information in low profile
      *
      * @param identifier APIIdentifier
+     * @param orgId  Identifier of an organization
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */

@@ -340,7 +340,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      * @return updated API
      */
-    API updateAPI(API api, API existingAPI, String orgId) throws APIManagementException, FaultGatewaysException;
+    API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
 
 
     /**
@@ -451,6 +451,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId   api uuid
      * @param documentId ID of the documentation
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException if failed to remove documentation
      */
     void removeDocumentation(String apiId, String documentId, String orgId) throws APIManagementException;
@@ -459,6 +460,7 @@ public interface APIProvider extends APIManager {
      *
      * @param id   Identifier
      * @param docId UUID of the doc
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException if failed to remove documentation
      */
     void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException;
@@ -477,7 +479,7 @@ public interface APIProvider extends APIManager {
      * @param uuid                API/Product Identifier
      * @param documentation       Documentation
      * @param orgId               Identifier of an organization
-     * @return                    created documentation Documentation
+     * @return Documentation      created documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
     Documentation addDocumentation(String uuid, Documentation documentation, String orgId) throws APIManagementException;
@@ -486,9 +488,10 @@ public interface APIProvider extends APIManager {
     /**
      * Adds Document content to an API/Product
      *
-     * @param uuid         API/Product Identifier
+     * @param uuid    API/Product Identifier
      * @param content Documentation content
-     * @param docId doc uuid
+     * @param docId   doc uuid
+     * @param orgId   Identifier of an organization
      * @throws APIManagementException if failed to add documentation
      */
     void addDocumentationContent(String uuid, String docId, String orgId, DocumentationContent content)
@@ -530,7 +533,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId         id of the document
      * @param documentation Documentation
-     * @param orgId Documentation
+     * @param orgId  Identifier of an organization
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
@@ -802,6 +805,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId    id of the APIIdentifier
      * @param jsonText json text to be saved in the registry
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException
      */
     void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException;
@@ -820,6 +824,7 @@ public interface APIProvider extends APIManager {
      *
      * @param api   API
      * @param jsonText    openAPI definition
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException
      */
     void saveSwaggerDefinition(API api, String jsonText, String orgId) throws APIManagementException;
@@ -829,6 +834,7 @@ public interface APIProvider extends APIManager {
      *
      * @param apiId   uuid of the api
      * @param jsonText    openAPI definition
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException
      */
     void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException;
@@ -976,6 +982,7 @@ public interface APIProvider extends APIManager {
      * This method returns the lifecycle data for an API including current state,next states.
      *
      * @param apiId id of the api
+     * @param orgId  Identifier of an organization
      * @return Map<String,Object> a map with lifecycle data
      */
      Map<String, Object> getAPILifeCycleData(String apiId, String orgId) throws APIManagementException;
@@ -1638,15 +1645,17 @@ public interface APIProvider extends APIManager {
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
      * @param apiId id of the api
      * @param resource Resource
+     * @param orgId  Identifier of an organization
      * @param url wsdl url
      * @throws APIManagementException
      */
-    void addWSDLResource(String apiId, ResourceFile resource, String url, String OrgId) throws APIManagementException;
+    void addWSDLResource(String apiId, ResourceFile resource, String url, String orgId) throws APIManagementException;
     
     /**
      * Add or update thumbnail image of an api
      * @param apiId apiid
      * @param resource image resource
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException
      */
     void setThumbnailToAPI(String apiId, ResourceFile resource, String orgId) throws APIManagementException;
@@ -1654,6 +1663,7 @@ public interface APIProvider extends APIManager {
     /**
      * List all the mediation policies for the api
      * @param apiId api id
+     * @param orgId  Identifier of an organization
      * @return
      * @throws APIManagementException
      */
@@ -1663,6 +1673,7 @@ public interface APIProvider extends APIManager {
      * The mediation policies for the api
      * @param apiId api id
      * @param policyId policy id
+     * @param orgId  Identifier of an organization
      * @return
      * @throws APIManagementException
      */
@@ -1671,7 +1682,8 @@ public interface APIProvider extends APIManager {
     /**
      * upload mediation policy to api
      * @param apiId apiid
-     * @param mediationPolicy poilicy
+     * @param mediationPolicy policy
+     * @param orgId  Identifier of an organization
      * @return added policy
      * @throws APIManagementException
      */
@@ -1681,6 +1693,7 @@ public interface APIProvider extends APIManager {
      * update mediation policy content
      * @param apiId apiid
      * @param mediationPolicy poilicy
+     * @param orgId  Identifier of an organization
      * @return added policy
      * @throws APIManagementException
      */
@@ -1691,6 +1704,7 @@ public interface APIProvider extends APIManager {
      * delete mediation policy
      * @param apiId apiId
      * @param mediationPolicyId mediation Policy Id
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException
      */
     void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId, String orgId) throws APIManagementException;
@@ -1699,6 +1713,7 @@ public interface APIProvider extends APIManager {
      * Add or update graphql definition
      * @param apiId
      * @param definition
+     * @param orgId  Identifier of an organization
      * @throws APIManagementException
      */
     void saveGraphqlSchemaDefinition(String apiId, String definition, String orgId) throws APIManagementException;

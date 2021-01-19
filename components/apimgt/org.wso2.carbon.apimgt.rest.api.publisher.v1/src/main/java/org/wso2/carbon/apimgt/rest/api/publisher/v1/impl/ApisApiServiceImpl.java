@@ -311,7 +311,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getGraphQLPolicyComplexityOfAPI(String apiId, String organizationId,
-                                                          MessageContext messageContext) throws APIManagementException {
+                                                          MessageContext messageContext) {
         try {
             checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = getOrgId(organizationId);
@@ -353,7 +353,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response updateGraphQLPolicyComplexityOfAPI(String apiId, String organizationId,
-                                                          GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) {
+                    GraphQLQueryComplexityInfoDTO body, MessageContext messageContext) {
         try {
             if (StringUtils.isBlank(apiId)) {
                 String errorMessage = "API ID cannot be empty or null.";
@@ -403,7 +403,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with GraphQL Schema
      */
     @Override
-    public Response getAPIGraphQLSchema(String apiId, String organizationId, String accept, String ifNoneMatch, MessageContext messageContext) {
+    public Response getAPIGraphQLSchema(String apiId, String organizationId, String accept, String ifNoneMatch,
+                                        MessageContext messageContext) {
         try {
             checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = getOrgId(organizationId);
@@ -466,9 +467,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
-                                log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving schema of API: "
+                                        + apiId, e, log);
             } else {
                 String errorMessage = "Error while uploading schema of the API: " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -478,16 +478,17 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response updateAPI(String apiId, APIDTO body, String organizationId, String ifMatch, MessageContext messageContext) {
-        String[] tokenScopes =
-                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+    public Response updateAPI(String apiId, APIDTO body, String organizationId, String ifMatch,
+                              MessageContext messageContext) {
+        String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
-            originalAPI.setOrganizationId(organizationId);
+            originalAPI.setOrganizationId(orgId);
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, orgId);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
@@ -496,7 +497,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : "
+                        + apiId, e, log);
             } else {
                 String errorMessage = "Error while updating the API : " + apiId + " - " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -640,7 +642,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response object of Security Audit
      */
     @Override
-    public Response getAuditReportOfAPI(String apiId, String organizationId, String accept, MessageContext messageContext) {
+    public Response getAuditReportOfAPI(String apiId, String organizationId, String accept,
+                                        MessageContext messageContext) {
         boolean isDebugEnabled = log.isDebugEnabled();
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -1011,14 +1014,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return Response.ok(updatedCertUri).entity(clientCertMetadataDTO).build();
             } else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
                 RestApiUtil.handleInternalServerError(
-                        "Error while updating the client certificate for the alias " + alias + " due to an internal "
-                                + "server error", log);
+                        "Error while updating the client certificate for the alias " + alias + " due to an internal"
+                                + " server error", log);
             } else if (ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode() == responseCode) {
                 RestApiUtil.handleResourceNotFoundError("", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest(
-                        "Error while updating the client certificate for the alias " + alias + " Certificate Expired.",
-                        log);
+                        "Error while updating the client certificate for the alias " + alias + " Certificate " +
+                                "Expired.", log);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
@@ -1039,14 +1042,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIClientCertificates(String apiId, String organizationId, Integer limit, Integer offset, String alias,
-                                                   MessageContext messageContext) {
+    public Response getAPIClientCertificates(String apiId, String organizationId, Integer limit, Integer offset,
+                                             String alias, MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         List<ClientCertificateDTO> certificates = new ArrayList<>();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
-        String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId", apiId);
+        String query = CertificateRestApiUtils.buildQueryString("alias", alias, "apiId",
+                apiId);
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1082,7 +1086,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, String organizationId, MessageContext messageContext) {
+    public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
+                    Attachment certificateDetail, String alias, String tier, String organizationId,
+                    MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
@@ -1134,12 +1140,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "The alias '" + alias + "' already exists in the trust store.", log);
             } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
                 RestApiUtil.handleBadRequest(
-                        "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.", log);
+                        "Error while adding the certificate to the API " + apiId + ". " + "Certificate Expired.",
+                        log);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError(
-                    "APIManagement exception while adding the certificate to the API " + apiId + " due to an internal "
-                            + "server error", e, log);
+                    "APIManagement exception while adding the certificate to the API " + apiId + " due to an " +
+                            "internal server error", e, log);
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError(
                     "IOException while generating the encoded certificate for the API " + apiId, e, log);
@@ -1175,7 +1182,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
             List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(api.getId());
             if (apiUsages != null && apiUsages.size() > 0) {
-                RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist", log);
+                RestApiUtil.handleConflict("Cannot remove the API " + apiId + " as active subscriptions exist",
+                        log);
             }
 
             List<APIResource> usedProductResources = apiProvider.getUsedProductResources(api.getId());
@@ -1192,7 +1200,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId,
+                        e, log);
             } else {
                 String errorMessage = "Error while deleting API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1270,7 +1279,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
+                        "Authorization failure while retrieving document : " + documentId + " of API " +
+                                apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1294,9 +1304,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document as DTO
      */
     @Override
-    public Response addAPIDocumentContent(String apiId, String documentId, String organizationId,
-                                                            String ifMatch, InputStream inputStream, Attachment fileDetail,
-                                                            String inlineContent, MessageContext messageContext) {
+    public Response addAPIDocumentContent(String apiId, String documentId, String organizationId, String ifMatch,
+                  InputStream inputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             checkAPIExistsInOrganization(apiId,organizationId);
@@ -1351,7 +1360,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "Authorization failure while adding content to the document: " + documentId + " of API "
                                 + apiId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
+                RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e,
+                        log);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving document content location : " + documentId;
@@ -1424,7 +1434,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
+                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId,
+                        e, log);
             } else {
                 String errorMessage = "Error while retrieving document : " + documentId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1488,7 +1499,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating document : " + documentId + " of API " + apiId, e, log);
+                        "Authorization failure while updating document : " + documentId + " of API " + apiId,
+                        e, log);
             } else {
                 String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1569,8 +1581,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
-                                log);
+                        .handleAuthorizationFailure("Authorization failure while adding documents of API : "
+                                        + apiId, e, log);
             } else {
                 String errorMessage = "Error while adding the document for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1590,8 +1602,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return External Store list of published API
      */
     @Override
-    public Response getAllPublishedExternalStoresByAPI(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException {
+    public Response getAllPublishedExternalStoresByAPI(String apiId, String organizationId, String ifNoneMatch,
+                                                       MessageContext messageContext) throws APIManagementException {
 
         APIIdentifier apiIdentifier = null;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1624,7 +1636,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getGeneratedMockScriptsOfAPI(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getGeneratedMockScriptsOfAPI(String apiId, String organizationId, String ifNoneMatch,
+                                                 MessageContext messageContext) throws APIManagementException {
 
         checkAPIExistsInOrganization(apiId,organizationId);
         String orgId = getOrgId(organizationId);
@@ -1633,7 +1646,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, orgId);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
-        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.
+                get(APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
 
@@ -1670,7 +1684,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Lifecycle history information
      */
     @Override
-    public Response  getAPILifecycleHistory(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) {
+    public Response  getAPILifecycleHistory(String apiId, String organizationId, String ifNoneMatch,
+                                            MessageContext messageContext) {
         try {
             checkAPIExistsInOrganization(apiId,organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1683,7 +1698,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId,
+                        e, log);
             } else {
                 String errorMessage = "Error while deleting API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1752,7 +1768,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId,
+                        e, log);
             } else {
                 String errorMessage = "Error while deleting API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1762,7 +1779,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteAPILifecycleStatePendingTasks(String apiId, String organizationId, MessageContext messageContext) {
+    public Response deleteAPILifecycleStatePendingTasks(String apiId, String organizationId,
+                                                        MessageContext messageContext) {
         try {
             checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = getOrgId(organizationId);
@@ -1778,8 +1796,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAllAPIMediationPolicies(String apiId, String organizationId, Integer limit, Integer offset, String query,
-                                                  String ifNoneMatch, MessageContext messageContext) {
+    public Response getAllAPIMediationPolicies(String apiId, String organizationId, Integer limit, Integer offset,
+                                               String query, String ifNoneMatch, MessageContext messageContext) {
 
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -1825,7 +1843,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (isAPIModified(api, mediation)) {
                     API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId);
                     api.setOrganizationId(orgId);// TODO do a deep copy
-                    apiProvider.updateAPI(oldAPI, api, orgId);
+                    apiProvider.updateAPI(oldAPI, api);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
@@ -1911,9 +1929,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response updateAPIMediationPolicyContentByPolicyId(String apiId, String mediationPolicyId,
-                                                                          String type, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
-                                                                          String inlineContent, MessageContext messageContext) {
+    public Response updateAPIMediationPolicyContentByPolicyId(String apiId, String mediationPolicyId, String type,
+                  String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                  String inlineContent, MessageContext messageContext) {
         try {
             checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = getOrgId(organizationId);
@@ -1964,8 +1982,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating the mediation policy with uuid " + mediationPolicyId
-                                + " of API " + apiId, e, log);
+                        "Authorization failure while updating the mediation policy with uuid " +
+                                mediationPolicyId + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error occurred while updating the mediation policy with uuid " +
                         mediationPolicyId + " of API " + apiId;
@@ -2021,8 +2039,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving document : " + mediationPolicyId + " of API " + apiId,
-                        e, log);
+                        "Authorization failure while retrieving document : " + mediationPolicyId + " of API "
+                                + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document " + mediationPolicyId + " of the API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -2256,7 +2274,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String organizationId,
-                                               String ifMatch, MessageContext messageContext) throws APIManagementException {
+                    String ifMatch, MessageContext messageContext) throws APIManagementException {
 
         checkAPIExistsInOrganization(apiId,organizationId);
         String orgId = getOrgId(organizationId);
@@ -2400,7 +2418,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
-                                                                 ResourcePolicyInfoDTO body,  String organizationId, String ifMatch, MessageContext messageContext) {
+                 ResourcePolicyInfoDTO body,  String organizationId, String ifMatch, MessageContext messageContext) {
         try {
             checkAPIExistsInOrganization(apiId, organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -2413,8 +2431,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
                 if (isValidSchema) {
-                    SequenceUtils
-                            .updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId, body.getContent());
+                    SequenceUtils.updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId,
+                                    body.getContent());
                     String updatedPolicyContent = SequenceUtils
                             .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
@@ -2493,7 +2511,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(apiId, orgId);
             if (orgId!= null) {
-                api.setOrganizationId(organizationId);
+                api.setOrganizationId(orgId);
             }
             String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
@@ -2504,8 +2522,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : " + apiId,
-                                e, log);
+                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : "
+                                        + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -2525,8 +2543,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated swagger document of the API
      */
     @Override
-    public Response updateAPISwagger(String apiId, String organizationId, String ifMatch, String apiDefinition, String url,
-                                        InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+    public Response updateAPISwagger(String apiId, String organizationId, String ifMatch, String apiDefinition,
+                     String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
             checkAPIExistsInOrganization(apiId, organizationId);
@@ -2654,8 +2672,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while adding thumbnail for API : " + apiId,
-                                e, log);
+                        .handleAuthorizationFailure("Authorization failure while adding thumbnail for API : "
+                                        + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -2694,8 +2712,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
 
             } else { // consider the query as api name
-                isSearchArtifactExists =
-                        apiProvider.isApiNameExist(query, orgId) || apiProvider.isApiNameWithDifferentCaseExist(query, orgId);
+                isSearchArtifactExists = apiProvider.isApiNameExist(query, orgId) ||
+                        apiProvider.isApiNameWithDifferentCaseExist(query, orgId);
             }
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);
@@ -2705,7 +2723,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response validateDocument(String apiId, String name, String organizationId, String ifMatch, MessageContext messageContext) {
+    public Response validateDocument(String apiId, String name, String organizationId, String ifMatch,
+                                     MessageContext messageContext) {
         if (StringUtils.isEmpty(name) || StringUtils.isEmpty(apiId)) {
             RestApiUtil.handleBadRequest("API Id and/ or document name should not be empty", log);
         }
@@ -2763,8 +2782,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIResourcePaths(String apiId, String organizationId, Integer limit, Integer offset, String ifNoneMatch,
-                                              MessageContext messageContext) {
+    public Response getAPIResourcePaths(String apiId, String organizationId, Integer limit, Integer offset,
+                                        String ifNoneMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2825,8 +2844,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Import using OpenAPI definition response
      */
     @Override
-    public Response importOpenAPIDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url,
-                                            String additionalProperties, MessageContext messageContext) {
+    public Response importOpenAPIDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail,
+                                            String url, String additionalProperties, MessageContext messageContext) {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
@@ -2896,9 +2915,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
+            String orgId = getOrgId(organizationId);
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
+            apiToAdd.setOrganizationId(orgId);
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
@@ -2950,7 +2971,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return the validation response DTO (for REST API) and the intermediate model as a Map
      * @throws APIManagementException if error occurred during validation of the WSDL
      */
-    private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
+    private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws
+            APIManagementException {
         handleInvalidParams(fileInputStream, fileDetail, url);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
@@ -3002,8 +3024,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred during the operation
      */
     @Override
-    public Response importWSDLDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url,
-                                         String additionalProperties, String implementationType, MessageContext messageContext)
+    public Response importWSDLDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail,
+                     String url, String additionalProperties, String implementationType, MessageContext messageContext)
             throws APIManagementException {
         try {
             String orgId = getOrgId(organizationId);
@@ -3239,8 +3261,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
      */
     @Override
-    public Response updateWSDLOfAPI(String apiId, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
-                                    String url, MessageContext messageContext) throws APIManagementException {
+    public Response updateWSDLOfAPI(String apiId, String organizationId, String ifMatch, InputStream fileInputStream,
+                    Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -3352,7 +3374,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " +
+                        apiId, e, log);
             } else {
                 String errorMessage = "Error while copying API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -3412,7 +3435,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response importGraphQLSchema(String organizationId, String ifMatch, String type, InputStream fileInputStream,
-                                                Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
+                                    Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
         String schema = "";
 
@@ -3439,6 +3462,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername(), organizationId);
 
+            apiToAdd.setOrganizationId(orgId);
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -3461,7 +3485,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
-                    additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
+                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-"
@@ -3488,7 +3512,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response importAPI(InputStream fileInputStream, Attachment fileDetail, String organizationId,
-                                             Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+            Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;
 
@@ -3510,7 +3534,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Validation response
      */
     @Override
-    public Response validateGraphQLSchema(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+    public Response validateGraphQLSchema(InputStream fileInputStream, Attachment fileDetail,
+                                          MessageContext messageContext) {
 
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         String filename = fileDetail.getContentDisposition().getFilename();
@@ -3536,7 +3561,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockScripts(String apiId,  String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response generateMockScripts(String apiId,  String organizationId, String ifNoneMatch,
+                                        MessageContext messageContext) throws APIManagementException {
         checkAPIExistsInOrganization(apiId,organizationId);
         String orgId = getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -3549,8 +3575,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPISubscriptionPolicies(String apiId, String organizationId, String ifNoneMatch, String xWSO2Tenant,
-                                                     MessageContext messageContext) throws APIManagementException {
+    public Response getAPISubscriptionPolicies(String apiId, String organizationId, String ifNoneMatch, String
+            xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         checkAPIExistsInOrganization(apiId,organizationId);
         String orgId = getOrgId(organizationId);
         APIDTO apiInfo = getAPIByID(apiId, orgId);
@@ -3788,7 +3814,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param mediationResourcePath mediation config content
      */
-    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath, String name) throws APIManagementException {
+    public void checkMediationPolicy(APIProvider apiProvider, String mediationResourcePath, String name)
+            throws APIManagementException {
         if (apiProvider.checkIfResourceExists(mediationResourcePath)) {
             throw new APIManagementException(ExceptionCodes.MEDIATION_POLICY_API_ALREADY_EXISTS);
         }
@@ -3831,7 +3858,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiEndpointValidationResponseDTO.setStatusCode(statusCode);
             apiEndpointValidationResponseDTO.setStatusMessage(HttpStatus.getStatusText(statusCode));
         } catch (UnknownHostException e) {
-            log.error("UnknownHostException occurred while sending the HEAD request to the given endpoint url:", e);
+            log.error("Unknown HostException occurred while sending the HEAD request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError("Unknown Host");
         } catch (IOException e) {
             log.error("Error occurred while sending the HEAD request to the given endpoint url:", e);

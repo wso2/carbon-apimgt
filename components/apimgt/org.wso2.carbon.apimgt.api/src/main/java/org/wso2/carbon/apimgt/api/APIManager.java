@@ -93,8 +93,8 @@ public interface APIManager {
     /**
      * Get API or APIProduct by registry artifact id
      *
-     * @param uuid                  Registry artifact id
-     * @param orgId tenantDomain for the registry
+     * @param uuid   Registry artifact id
+     * @param orgId  Identifier of an organization
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
@@ -105,6 +105,7 @@ public interface APIManager {
      * Get minimal details of API by registry artifact id
      *
      * @param uuid Registry artifact id
+     * @param orgId  Identifier of an organization
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
@@ -114,6 +115,7 @@ public interface APIManager {
      * Get minimal details of API by API identifier
      *
      * @param identifier APIIdentifier object
+     * @param orgId  Identifier of an organization
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
@@ -159,6 +161,7 @@ public interface APIManager {
      * Checks whether the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
+     * @param orgId  Identifier of an organization
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the api name availability
      */
@@ -168,6 +171,7 @@ public interface APIManager {
      * Checks whether a different letter case of the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
+     * @param orgId  Identifier of an organization
      * @return true if a different letter case of the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the different letter case api name availability
      */
@@ -187,8 +191,8 @@ public interface APIManager {
 
     /**
      * Get graphql schema definition
-     * @param apiId
-     * @param orgId
+     * @param apiId  ID of the APIIdentifier
+     * @param orgId  Identifier of an organization
      * @return
      * @throws APIManagementException
      */
@@ -208,7 +212,7 @@ public interface APIManager {
      * Returns the OpenAPI definition as a string
      *
      * @param apiId id of the api
-     * @param orgId
+     * @param orgId  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
      */
@@ -218,6 +222,7 @@ public interface APIManager {
      *
      * @param uuid API/Product id
      * @param docName    Name of the document
+     * @param orgId  Identifier of an organization
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
@@ -279,6 +284,7 @@ public interface APIManager {
      *
      * @param apiId uuid of the API
      * @param docId DocumentID
+     * @param orgId  Identifier of an organization
      * @return DocumentationContent
      * @throws APIManagementException if failed to get Documentation
      */
@@ -569,7 +575,7 @@ public interface APIManager {
      * search in multiple fields.
      *
      * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
-     * @param orgId identifier of an organization
+     * @param orgId           Identifier of an organization
      * @param start           starting number
      * @param end             ending number
      * @param limitAttributes whether or not to limit attributes in the search result

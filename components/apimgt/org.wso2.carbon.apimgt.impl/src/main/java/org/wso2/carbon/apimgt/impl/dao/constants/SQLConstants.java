@@ -2072,7 +2072,8 @@ public class SQLConstants {
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
-            "   AND" + " API_VERSION = ? ";
+            "   AND API_VERSION = ? " +
+            "   AND ORGANIZATION_UUID = ? ";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +

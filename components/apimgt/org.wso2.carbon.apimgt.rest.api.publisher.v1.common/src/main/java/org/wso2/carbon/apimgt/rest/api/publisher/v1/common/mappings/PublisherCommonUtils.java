@@ -367,8 +367,8 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-
-        apiProvider.updateAPI(apiToUpdate, originalAPI, orgId);
+        originalAPI.setOrganizationId(orgId);
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
         
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), orgId);// TODO use returend api
     }
@@ -1002,7 +1002,7 @@ public class PublisherCommonUtils {
             unModifiedAPI.setOrganizationId(orgId);
         }
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI, orgId);
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, orgId);
          // TODO see why we need to get it instead of passing same
