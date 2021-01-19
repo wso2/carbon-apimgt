@@ -15,7 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import Node from 'AppComponents/Apis/Details/History/Node';
@@ -29,6 +30,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import DateTime from 'AppComponents/Apis/Details/History/DateTime';
+import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'column',
         justifyContent: 'left',
         alignItems: 'center',
-        padding: 50,
+        paddingTop: 50,
     },
     moreLink: {
         background: 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(231,231,231,1) 50%, rgba(255,255,255,1) 100%)',
@@ -65,6 +68,13 @@ const useStyles = makeStyles((theme) => ({
         background: '#fefefe',
         border: 'solid 1px #efefef',
         borderRadius: 5,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+    },
+    formControl: {
+        minWidth: 200,
+        marginRight: 10,
     },
 }));
 
@@ -74,19 +84,26 @@ const useStyles = makeStyles((theme) => ({
  */
 const HistoryTree = () => {
     const classes = useStyles();
+    const { api } = useContext(APIContext);
     const [history, setHistory] = useState([]);
     const [pageCount, setPageCount] = useState(1);
+    const today = new Date();
+    const lastYear = new Date();
+    lastYear.setFullYear(lastYear.getFullYear() - 1);
+    const [startTime, setStartTime] = useState(moment(lastYear).format('YYYY-MM-DD') + 'T00:00');
+    const [endTime, setEndTime] = useState(moment(today).format('YYYY-MM-DD') + 'T00:00');
     const [page, setPage] = useState(0);
-    const [age, setAge] = React.useState('');
+    const [revision, setRevision] = React.useState('all');
 
-    const handleChange = (event) => {
-        setAge(event.target.value);
+    const handleChangeRevision = (event) => {
+        setRevision(event.target.value);
     };
     const limit = 10;
 
     const loadPage = (currentPage) => {
-        Api.listHistory(currentPage).then((response) => {
-            const { body: { list, pagination: { offset, total, limit } } } = response;
+        Api.getAllHistory(currentPage, limit, api.id, moment(startTime).toISOString(),
+            moment(endTime).toISOString()).then((response) => {
+            const { body: { list, pagination: { total } } } = response;
             if (total > limit) {
                 // Need pagination logic.
                 setPageCount(Math.ceil(total / limit));
@@ -104,7 +121,7 @@ const HistoryTree = () => {
     };
     useEffect(() => {
         loadPage(page * limit);
-    }, []);
+    }, [startTime, endTime]);
     const loadMore = () => {
         loadPage(page * limit);
     };
@@ -119,22 +136,36 @@ const HistoryTree = () => {
             </Typography>
             <div className={classes.filterBar}>
                 <FormControl
-                    className={classes.formControl}
-                    variant='outlined'
+                    classes={{ root: classes.formControl }}
                     margin='normal'
                 >
-                    <InputLabel id='demo-simple-select-label'>Age</InputLabel>
+                    <InputLabel id='demo-simple-select-label'>Revision</InputLabel>
                     <Select
                         labelId='demo-simple-select-label'
                         id='demo-simple-select'
-                        value={age}
-                        onChange={handleChange}
+                        value={revision}
+                        onChange={handleChangeRevision}
+                        margin='normal'
                     >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        <MenuItem value='all'>All</MenuItem>
+                        <MenuItem value='revision1'>Revision 1</MenuItem>
+                        <MenuItem value='revision2'>Revision 2</MenuItem>
                     </Select>
                 </FormControl>
+                <DateTime
+                    label={
+                        <FormattedMessage id='Apis.Details.History.HistoryTree.startTime' defaultMessage='Start Time' />
+                    }
+                    time={startTime}
+                    setTime={setStartTime}
+                />
+                <DateTime
+                    time={endTime}
+                    setTime={setEndTime}
+                    label={
+                        <FormattedMessage id='Apis.Details.History.HistoryTree.endTime' defaultMessage='End Time' />
+                    }
+                />
             </div>
 
             {history ? (
@@ -147,18 +178,24 @@ const HistoryTree = () => {
                             return (
                                 <>
                                     <Node
-                                        title={entry.operationId}
-                                        description={entry.description}
+                                        entry={entry}
                                         isLeft={isLeft}
                                         isRevisionNode={isRevision}
                                     />
                                 </>
                             );
                         })}
-                        {(pageCount === page) && (<NodeStartEnd isLeft={isLeft} isTop={false} />)}
+                        {(pageCount === page) && (
+                            <>
+                                <NodeStartEnd isLeft={isLeft} isTop={false} />
+                            </>
+                        )}
                         {(pageCount > 1 && pageCount !== page) && (
                             <Link href='#' onClick={loadMore} className={classes.moreLink}>
-                                <FormattedMessage id='Apis.Details.History.HistoryTree.show.more' defaultMessage='Show More' />
+                                <FormattedMessage
+                                    id='Apis.Details.History.HistoryTree.show.more'
+                                    defaultMessage='Show More'
+                                />
                             </Link>
                         )}
                     </div>
@@ -166,7 +203,12 @@ const HistoryTree = () => {
             ) : (
                 <Progress
                     per={5}
-                    message={<FormattedMessage id='Apis.Details.History.HistoryTree.loading' defaultMessage='Loading history data...' />}
+                    message={(
+                        <FormattedMessage
+                            id='Apis.Details.History.HistoryTree.loading'
+                            defaultMessage='Loading history data...'
+                        />
+                    )}
                 />
             )}
         </>

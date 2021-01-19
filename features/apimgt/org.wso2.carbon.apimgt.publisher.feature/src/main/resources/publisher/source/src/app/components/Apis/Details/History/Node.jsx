@@ -1,6 +1,9 @@
+/* eslint-disable max-len */
 import * as React from 'react';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
+import moment from 'moment';
+import { useIntl } from 'react-intl';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -54,25 +57,37 @@ const useStyles = makeStyles((theme) => ({
  */
 function Node(props) {
     const classes = useStyles();
+    const intl = useIntl();
     const {
-        title, description, isLeft, isRevisionNode,
+        entry: { operationId, description, createdTime }, isLeft, isRevisionNode,
     } = props;
     let label = '';
     if (description.indexOf('PUT') !== -1) {
         label = 'PUT';
     } else if (description.indexOf('POST') !== -1) {
         label = 'POST';
+    } else if (description.indexOf('DELETE') !== -1) {
+        label = 'DELETE';
     }
 
     const theme = useTheme();
 
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[label.toString().toLowerCase()] : null;
-    let chipTextColor = '#000000';
     if (!chipColor) {
         console.log('Check the theme settings. The resourceChipColors is not populated properlly');
         chipColor = '#cccccc';
-    } else {
-        chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[label.toString().toLowerCase()]);
+    }
+    let title = operationId;
+    if (operationId === 'createAPI') {
+        title = intl.formatMessage({
+            id: 'Apis.Details.History.Node.message.createAPI',
+            defaultMessage: 'Create API',
+        });
+    } else if (operationId === 'updateAPI') {
+        title = intl.formatMessage({
+            id: 'Apis.Details.History.Node.message.updateAPI',
+            defaultMessage: 'Update API',
+        });
     }
     return (
         <div className={classes.nodeWrapper}>
@@ -354,6 +369,9 @@ function Node(props) {
             <div className={isLeft ? classes.nodeTextLeft : classes.nodeTextRight}>
                 <Typography variant='body1'>{title}</Typography>
                 <Typography variant='caption'>{description}</Typography>
+            </div>
+            <div className={isLeft ? classes.nodeTextRight : classes.nodeTextLeft}>
+                <Typography variant='caption'>{moment(createdTime).format('MMMM Do YYYY, h:mm:ss a')}</Typography>
             </div>
         </div>
 
