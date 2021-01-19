@@ -282,6 +282,7 @@
   "Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.empty": "URL Field cannot be empty",
   "Apis.Details.Documents.CreateEditForm.source.url.helper.text.error.invalid": "Enter a valid URL to the source",
   "Apis.Details.Documents.CreateEditForm.source.url.url": "URL",
+  "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": "Error when validating the document source file name",
   "Apis.Details.Documents.Delete.document.delete": "Delete",
   "Apis.Details.Documents.Delete.document.delete.error": "Error while deleting documents!",
   "Apis.Details.Documents.Delete.document.delete.successfully": "deleted successfully.",
