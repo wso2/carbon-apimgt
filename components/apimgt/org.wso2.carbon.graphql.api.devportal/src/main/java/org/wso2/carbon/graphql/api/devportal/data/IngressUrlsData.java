@@ -29,15 +29,12 @@ import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.e
 public class IngressUrlsData {
 
     public List<IngressUrlDTO>  getIngressUrlData(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
-//        RegistryData registryData = new RegistryData();
-//        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
 
         ArtifactData artifactData = new ArtifactData();
         List<IngressUrlDTO> apiDeployedIngressURLs = new ArrayList<>();
 
         DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
-        //String deployments = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
         Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> deploymentEnvironments = devPortalAPI.getDeploymentEnvironments();//extractDeploymentsForAPI(deployments);
 
         if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {

@@ -29,15 +29,10 @@ public class LabelData {
 
     public List<LabelDTO> getLabeldata(String Id, String name) throws RegistryException, APIManagementException, APIPersistenceException, UserStoreException {
 
-        ArtifactData artifactData = new ArtifactData();
-//        GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
-//       // String providerName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-//        APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+
        List<Label> labels = ApiMgtDAO.getInstance().getAllLabels(MultitenantUtils.getTenantDomain("wso2.anonymous.user"));//getLabelsFromAPIGovernanceArtifact(apiArtifact,apiIdentifier.getProviderName());
 
-        //DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
-       // Set<String> labelset = devPortalAPI.getGatewayLabels();
         List<LabelDTO> labelData = new ArrayList<LabelDTO>();
 
         for (int i = 0; i<labels.size();i++) {

@@ -17,7 +17,7 @@ public class ApiService {
     APIUrlsData dummyAPIUrlsDTO = new APIUrlsData();
     DefaultAPIURLsData defaultAPIURLsData = new DefaultAPIURLsData();
     PaginationData paginationData = new PaginationData();
-    ApiData apiData = new ApiData();
+
     TierData tierData = new TierData();
     AdvertiseData advertiseData = new AdvertiseData();
     ScopesData scopesData = new ScopesData();
@@ -30,41 +30,7 @@ public class ApiService {
     APIDTOData apidtoData = new APIDTOData();
 
 
-//    public DataFetcher getApiDetails(){
-//        return env->{
-//            Api api = env.getSource();
-//            return apidtoData.getApiData(api.getId());
-//
-//        };
-//    }
-//    public DataFetcher getApiName(){
-//        return env->{
-//            Api api = env.getSource();
-//            return apidtoData.getApiName(api.getId());
-//
-//        };
-//    }
-//    public DataFetcher getApiContext(){
-//        return env->{
-//            Api api = env.getSource();
-//            return apidtoData.getApiContext(api.getId());
-//
-//        };
-//    }
-//    public DataFetcher getApiVersion(){
-//        return env->{
-//            Api api = env.getSource();
-//            return apidtoData.getApiVersion(api.getId());
-//
-//        };
-//    }
-//    public DataFetcher getApiProvider(){
-//        return env->{
-//            Api api = env.getSource();
-//            return apidtoData.getApiProvider(api.getId());
-//
-//        };
-//    }
+
     public DataFetcher getApiType(){
         return env->{
             Api api = env.getSource();
@@ -147,14 +113,6 @@ public class ApiService {
             return tierData.getTierData(tierNameDTO.getApiId(),tierNameDTO.getName());
         };
     }
-
-//    public DataFetcher getTierName(){
-//        return env->{
-//
-//            TierDTO tierDTO = env.getSource();
-//            return tierData.getTierName(tierDTO.setApiId("b9cb1f47-f450-4ff6-bba9-3b51ba28433c"));
-//        };
-//    }
 
 
 

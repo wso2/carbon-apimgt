@@ -100,27 +100,6 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getApisCount",apiService.getApiCount());
     }
-
-//    private TypeRuntimeWiring.Builder queryApiDetails(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("apiDetails",apiService.getApiDetails());
-//    }
-//    private TypeRuntimeWiring.Builder ApiNameDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("name",apiService.getApiName());
-//    }
-//    private TypeRuntimeWiring.Builder ApiContextDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("context",apiService.getApiContext());
-//    }
-//    private TypeRuntimeWiring.Builder ApiVersionDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("version",apiService.getApiVersion());
-//    }
-//    private TypeRuntimeWiring.Builder ApiProviderDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("provider",apiService.getApiProvider());
-//    }
     private TypeRuntimeWiring.Builder ApiTypeDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("type",apiService.getApiType());
@@ -171,18 +150,12 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("IngressUrl")
                 .dataFetcher("clusterDetails",apiService.getDeploymentClusterInformation());
     }
-//    private TypeRuntimeWiring.Builder queryTags(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("tagList",apiService.getTagsInformatio());
-//    }
+
     private TypeRuntimeWiring.Builder OperationInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("operationInformation",apiService.getOperationInformation());
     }
-//    private TypeRuntimeWiring.Builder queryUrl(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("url",apiService.getEndPoint());
-//    }
+
     private TypeRuntimeWiring.Builder BusinessInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("businessInformation",apiService.getBusinessInformation());

@@ -30,31 +30,13 @@ public class TierData {
     public List<TierDTO> getTierData(String Id, String name) throws APIManagementException, RegistryException, UserStoreException, APIPersistenceException {
 
 
-        ArtifactData artifactData = new ArtifactData();
-
-        //List<String> tierParams = artifactData.getApiIdentifireParams(Id);
-
-        //String  apiname = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
-
         APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
         String  provider = apiIdentifier.getProviderName();
-        //.String  version = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        //String  tiers = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TIER);
-
-        //APIIdentifier apiIdentifier = new APIIdentifier(provider, apiname, version);
-        //int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
-
         String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
         Map<String, Tier> definedTiers = getTiers(tenantId);
-
-
-        //Set<Tier> tierData = getAvailableTiers(definedTiers, tiers, apiname);
-
-
-       // List<org.wso2.carbon.apimgt.api.model.Tier> nameList = new ArrayList<org.wso2.carbon.apimgt.api.model.Tier>(tierData);
 
 
         List<TierDTO> tierList = new ArrayList<TierDTO>();
@@ -77,49 +59,46 @@ public class TierData {
         TierPermission tierPermission = null;
 
         Tier definedTier = definedTiers.get(name);
-       // for (int i=0;i< nameList.size();i++){
-            //String name = getTierName(i);
 
-            //if(name.equals(nameList.get(i).getName())){
+        if(definedTier!=null) {
 
 
+            displayName = definedTier.getDisplayName();//nameList.get(i).getDisplayName();
 
-                displayName = definedTier.getDisplayName();//nameList.get(i).getDisplayName();
+            description = definedTier.getDescription(); //nameList.get(i).getDescription();
 
-                description =definedTier.getDescription(); //nameList.get(i).getDescription();
+            policyContent = String.valueOf(definedTier.getPolicyContent());//String.valueOf(nameList.get(i).getPolicyContent());
 
-                policyContent = String.valueOf(definedTier.getPolicyContent());//String.valueOf(nameList.get(i).getPolicyContent());
+            Map<String, Object> tierAttributesMap = definedTier.getTierAttributes();
 
-                Map<String, Object> tierAttributesMap = definedTier.getTierAttributes();
+            tierAttributes = "";
+            long requestsPerMinL = definedTier.getRequestsPerMin();//nameList.get(i).getRequestsPerMin();
+            requestsPerMin = (int) requestsPerMinL;
 
-                tierAttributes = "";
-                long requestsPerMinL = definedTier.getRequestsPerMin();//nameList.get(i).getRequestsPerMin();
-                requestsPerMin = (int) requestsPerMinL;
+            long requestCountL = definedTier.getRequestCount();//nameList.get(i).getRequestCount();
+            requestCount = (int) requestCountL;
 
-                long requestCountL = definedTier.getRequestCount();//nameList.get(i).getRequestCount();
-                requestCount = (int) requestCountL;
+            long unitTimeL = definedTier.getUnitTime();//nameList.get(i).getUnitTime();
+            unitTime = (int) unitTimeL;
 
-                long unitTimeL = definedTier.getUnitTime();//nameList.get(i).getUnitTime();
-                unitTime = (int) unitTimeL;
+            timeUnit = definedTier.getTimeUnit();//nameList.get(i).getTimeUnit();
 
-                timeUnit = definedTier.getTimeUnit();//nameList.get(i).getTimeUnit();
+            tierPlan = definedTier.getTierPlan();//nameList.get(i).getTierPlan();
 
-                tierPlan = definedTier.getTierPlan();//nameList.get(i).getTierPlan();
+            stopOnQuotaReached = definedTier.isStopOnQuotaReached();//nameList.get(i).isStopOnQuotaReached();
 
-                stopOnQuotaReached = definedTier.isStopOnQuotaReached();//nameList.get(i).isStopOnQuotaReached();
+            tierPermission = definedTier.getTierPermission();
+            Map<String, String> monetizationAttributesList = definedTier.getMonetizationAttributes();//nameList.get(i).getMonetizationAttributes();
 
-                tierPermission = definedTier.getTierPermission();
-                Map<String,String> monetizationAttributesList = definedTier.getMonetizationAttributes();//nameList.get(i).getMonetizationAttributes();
+            if (monetizationAttributesList != null) {
+                monetizationAttributes = monetizationAttributesList.toString();
+            }
 
-                if(monetizationAttributesList!=null){
-                    monetizationAttributes = monetizationAttributesList.toString();
-                }
-          //  }
+        }
 
 
 
 
-        //}
         tierList.add(new TierDTO(displayName,description,policyContent,tierAttributes,requestsPerMin,requestCount,unitTime,timeUnit,tierPlan,stopOnQuotaReached,monetizationAttributes));
         return tierList;
 
@@ -131,16 +110,12 @@ public class TierData {
         List<TierNameDTO> tierNameDTOS = new ArrayList<>();
 
 
-//       String  tiers = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TIER);
-//        String[] tierNames = tiers.split("\\|\\|");
-//
        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
-//
+
         Set<String> tierNames = devPortalAPI.getAvailableTierNames();
         for (String tierName : tierNames) {
             tierNameDTOS.add(new TierNameDTO(Id,tierName));
         }
-        //tierNameDTOS.add(new TierNameDTO(Id,devPortalAPI.getAvailableTierNames().toString()));
         return tierNameDTOS;
 
 

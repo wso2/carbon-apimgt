@@ -38,27 +38,12 @@ public class ThrottlingPoliciesData {
     }
     public String getThrottlingPoliciesData(String Id) throws APIPersistenceException {
 
-
-//        Set<Tier> throttlingPolicies =  getAvailableTiers(definedTiers, tiers, apiname);
-//        List<String> throttlingPolicyNames = new ArrayList<>();
         String throttlingPolicy = "";
-//        for (Tier tier : throttlingPolicies) {
-//            throttlingPolicyNames.add(tier.getName());
-//        }
-//
-//        if (throttlingPolicyNames!=null){
-//            throttlingPolicy = String.join(",",throttlingPolicyNames);
-//        }
         ArtifactData artifactData = new ArtifactData();
 
 
-
-
-//       String  tiers = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TIER);
-//        String[] tierNames = tiers.split("\\|\\|");
-//
         DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
-//
+
         Set<String> tierNames = devPortalAPI.getAvailableTierNames();
         for (String tierName : tierNames) {
             throttlingPolicy += tierName;

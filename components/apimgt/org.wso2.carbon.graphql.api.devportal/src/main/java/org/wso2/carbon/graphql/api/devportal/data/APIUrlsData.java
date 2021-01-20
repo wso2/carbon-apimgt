@@ -23,20 +23,13 @@ import java.util.*;
 public class APIUrlsData {
 
 
-//    List<APIURLsDTO> apiurLsDTOS = Arrays.asList(
-//            new APIURLsDTO("1","http/x1","https/x1","x1","x11"),
-//            new APIURLsDTO("2","http/x2","https/x2","x2","x22")
-//    );
+
 
     public APIURLsDTO apiURLsDTO(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
-        //return apiurLsDTOS.stream().filter(x->x.getApiID().equals(Id)).findFirst().orElse(null);
-//        RegistryData registryData = new RegistryData();
-//        ApiTypeWrapper apiTypeWrapper  = registryData.getApiData(Id);
 
         ArtifactData artifactData = new ArtifactData();
 
         DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
-        //GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
         String tenantDomain="";
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
