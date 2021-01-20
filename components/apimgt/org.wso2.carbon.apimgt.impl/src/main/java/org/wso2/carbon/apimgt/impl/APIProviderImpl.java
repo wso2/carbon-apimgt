@@ -6765,9 +6765,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
-
         apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
-
         saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
         apiProduct.setDefinition(apiProductSwagger);
     }
@@ -6779,13 +6777,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
-
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
-
         saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
         apiProduct.setDefinition(updatedProductSwagger);
-
         updateLocalEntry(apiProduct);
     }
 
@@ -10267,17 +10262,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIResource> removedReusedResources = new ArrayList<>();
 
         for (URITemplate existingUriTemplate : existingUriTemplates) {
-
             // If existing URITemplate is used by any API Products
             if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
-
                 for (URITemplate updatedUriTemplate : updatedUriTemplates) {
                     String updatedVerb = updatedUriTemplate.getHTTPVerb();
                     String updatedPath = updatedUriTemplate.getUriTemplate();
-
                     //Check if existing reused resource is among updated resources
                     if (existingVerb.equalsIgnoreCase(updatedVerb) &&
                             existingPath.equalsIgnoreCase(updatedPath)) {
@@ -10285,7 +10277,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         break;
                     }
                 }
-
                 // Existing reused resource is not among updated resources
                 if (isReusedResourceRemoved) {
                     APIResource removedResource = new APIResource(existingVerb, existingPath);
