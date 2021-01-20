@@ -10,8 +10,9 @@
 
 If you want to build carbon-apimgt from the source code:
 
-1. Install Java 7 or 8 (http://www.oracle.com/technetwork/java/javase/downloads)
+1. Install Java 8 or 11 (http://www.oracle.com/technetwork/java/javase/downloads)
 1. Install Apache Maven 3.x.x (https://maven.apache.org/download.cgi#)
+1. Install Node.js 8.12.0 or later
 1. Get a clone or download the source from this repository (https://github.com/wso2/carbon-apimgt.git).
 1. Check out branch master as follows:\
 ``git checkout master``
