@@ -237,11 +237,15 @@ class TestConsole extends React.Component {
             .then((settingsNew) => {
                 if (settingsNew.environment) {
                     urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
-                    httpVal = urls.map((val) => { return val.http; });
                     httpsVal = urls.map((value) => { return value.https; });
+                    httpVal = urls.map((value) => { return value.http; });
                     basePath = apiData.context + '/' + apiData.version;
-                    newServer.push({ url: httpsVal + apiData.context + '/' + apiData.version });
-                    newServer.push({ url: httpVal + apiData.context + '/' + apiData.version });
+                    for (let i = 0; i < httpsVal.length; i++) {
+                        newServer.push({ url: httpsVal[i] + apiData.context + '/' + apiData.version });
+                    }
+                    for (let i = 0; i < httpVal.length; i++) {
+                        newServer.push({ url: httpVal[i] + apiData.context + '/' + apiData.version });
+                    }
                 }
                 this.setState({
                     settings: newServer,
