@@ -61,7 +61,7 @@ function Invoice(props) {
     const handlePopup = () => {
         setShowPopup(true);
         setInvoice(null);
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === API.CONSTS.APIProduct) {
             const apiProduct = new APIProduct(api.name, api.context, api.policies);
             const promiseInvoice = apiProduct.getMonetizationInvoice(subscriptionId);
             promiseInvoice.then((response) => {

@@ -201,11 +201,22 @@ public class APIProduct {
     public JSONObject getMonetizationProperties() {
         return monetizationProperties;
     }
+    @Deprecated
     public boolean getMonetizationStatus() {
         return isMonetizationEnabled;
     }
+    @Deprecated
     public void setMonetizationStatus(boolean monetizationStatus) {
         this.isMonetizationEnabled = monetizationStatus;
+    }
+    public boolean isMonetizationEnabled() {
+        return isMonetizationEnabled;
+    }
+    public void setMonetizationEnabled(boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
+    }
+    public boolean isEnableSchemaValidation() {
+        return enableSchemaValidation;
     }
     public void setMonetizationProperties(JSONObject monetizationProperties) {
         this.monetizationProperties = monetizationProperties;
@@ -376,6 +387,7 @@ public class APIProduct {
      *
      * @return Status of the validator property.
      */
+    @Deprecated
     public boolean isEnabledSchemaValidation() {
         return enableSchemaValidation;
     }
@@ -514,6 +526,10 @@ public class APIProduct {
         return Collections.unmodifiableSet(tags);
     }
 
+    public void setTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+    @Deprecated
     public void addTags(Set<String> tags) {
         this.tags.addAll(tags);
     }

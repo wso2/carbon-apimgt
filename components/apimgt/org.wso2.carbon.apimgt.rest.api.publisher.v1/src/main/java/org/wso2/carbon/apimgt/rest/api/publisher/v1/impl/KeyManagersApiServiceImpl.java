@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response;
 public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     @Override
-    public Response keyManagersGet(MessageContext messageContext) throws APIManagementException {
+    public Response getAllKeyManagers(MessageContext messageContext) throws APIManagementException {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIAdmin apiAdmin = new APIAdminImpl();

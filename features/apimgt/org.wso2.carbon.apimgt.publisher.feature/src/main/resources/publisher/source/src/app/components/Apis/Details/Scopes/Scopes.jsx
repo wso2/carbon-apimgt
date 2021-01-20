@@ -105,7 +105,7 @@ class Scopes extends React.Component {
         const {
             intl, classes, api,
         } = this.props;
-        const urlPrefix = (api.apiType === 'APIProduct') ? 'api-products' : 'apis';
+        const urlPrefix = (api.apiType === Api.CONSTS.APIProduct) ? 'api-products' : 'apis';
         const { scopes } = api;
         const url = `/${urlPrefix}/${api.id}/scopes/create`;
         const editUrl = `/${urlPrefix}/${api.id}/scopes/edit`;

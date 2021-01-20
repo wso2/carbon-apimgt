@@ -55,6 +55,7 @@ public class APIIdentifier implements Serializable, Identifier {
         this.tier = tier;
     }
 
+    @Default
     public APIIdentifier(String providerName, String apiName, String version) {
         this.providerName = providerName;
         this.apiName = apiName;
@@ -133,5 +134,9 @@ public class APIIdentifier implements Serializable, Identifier {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

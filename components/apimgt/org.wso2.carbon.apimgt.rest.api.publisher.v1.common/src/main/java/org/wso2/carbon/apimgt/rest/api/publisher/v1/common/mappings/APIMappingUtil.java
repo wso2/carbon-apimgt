@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -123,6 +124,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -822,12 +825,22 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        return fromAPItoDTO(model, false);
+        return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        return fromAPItoDTO(model, false, apiProvider);
+    }
+
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
+            throws APIManagementException {
+        APIProvider apiProvider;
+        if(apiProviderParam != null) {
+            apiProvider = apiProviderParam;
+        } else {
+            apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        }
         String uuid = "uuid";
         String path = "path";
         APIDTO dto = new APIDTO();
@@ -841,10 +854,10 @@ public class APIMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         dto.setContext(context);
-        Date createdTime = new Date(Long.parseLong(model.getCreatedTime()));
-        Timestamp createdTimestamp = new Timestamp(createdTime.getTime());
-        dto.setCreatedTime(createdTimestamp);
-        dto.setLastUpdatedTime(model.getLastUpdated());
+        dto.setCreatedTime(model.getCreatedTime());
+        if (model.getLastUpdated() != null) {
+            dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
+        }
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
@@ -948,12 +961,9 @@ public class APIMappingUtil {
         String inMedPolicyName = model.getInSequence();
         if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
-            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(inMedPolicyName, type, dto);
-            String mediationPolicyUUID =
-                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
-            String mediationPolicyRegistryPath =
-                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
-            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, inMedPolicyName);
+            Mediation mediation = model.getInSequenceMediation();
+            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
+            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
 
             MediationPolicyDTO inMedPolicy = new MediationPolicyDTO();
             inMedPolicy.setName(inMedPolicyName);
@@ -966,12 +976,9 @@ public class APIMappingUtil {
         String outMedPolicyName = model.getOutSequence();
         if (outMedPolicyName != null && !outMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
-            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(outMedPolicyName, type, dto);
-            String mediationPolicyUUID =
-                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
-            String mediationPolicyRegistryPath =
-                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
-            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, outMedPolicyName);
+            Mediation mediation = model.getOutSequenceMediation();
+            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
+            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
 
             MediationPolicyDTO outMedPolicy = new MediationPolicyDTO();
             outMedPolicy.setName(outMedPolicyName);
@@ -984,13 +991,9 @@ public class APIMappingUtil {
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
-
-            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(faultSequenceName, type, dto);
-            String mediationPolicyUUID =
-                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
-            String mediationPolicyRegistryPath =
-                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
-            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, faultSequenceName);
+            Mediation mediation = model.getFaultSequenceMediation();
+            String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
+            boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
 
             MediationPolicyDTO faultMedPolicy = new MediationPolicyDTO();
             faultMedPolicy.setName(faultSequenceName);
@@ -1014,13 +1017,20 @@ public class APIMappingUtil {
         }
 
         //Get Swagger definition which has URL templates, scopes and resource details
+        model.getId().setUuid(model.getUuid());
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
             List<APIOperationsDTO> apiOperationsDTO;
-            String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+            String apiSwaggerDefinition;
+            if (model.getSwaggerDefinition() != null) {
+                apiSwaggerDefinition = model.getSwaggerDefinition();
+            } else {
+                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+            }
+            
             apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
-            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
+            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1133,12 +1143,12 @@ public class APIMappingUtil {
         if (null != model.getLastUpdated()) {
             Date lastUpdateDate = model.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
-            dto.setLastUpdatedTime(timeStamp);
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != model.getCreatedTime()) {
             Date created = new Date(Long.parseLong(model.getCreatedTime()));
             Timestamp timeStamp = new Timestamp(created.getTime());
-            dto.setCreatedTime(timeStamp);
+            dto.setCreatedTime(String.valueOf(timeStamp));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 
@@ -2137,10 +2147,14 @@ public class APIMappingUtil {
         productDto.setCategories(categoryNameList);
 
         if (null != product.getLastUpdated()) {
-            productDto.setLastUpdatedTime(product.getLastUpdated());
+            Date lastUpdateDate = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
         if (null != product.getCreatedTime()) {
-            productDto.setCreatedTime(product.getCreatedTime());
+            Date createdTime = product.getCreatedTime();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            productDto.setCreatedTime(String.valueOf(timeStamp));
         }
 
         return productDto;
@@ -2567,6 +2581,27 @@ public class APIMappingUtil {
 
         List<APIScopeDTO> apiScopeDTOS = new ArrayList<>();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
+        scopeDTOS.forEach(scopeDTO -> {
+            APIScopeDTO apiScopeDTO = new APIScopeDTO();
+            apiScopeDTO.setScope(scopeDTO);
+            apiScopeDTO.setShared(allSharedScopeKeys.contains(scopeDTO.getName()) ? Boolean.TRUE : Boolean.FALSE);
+            apiScopeDTOS.add(apiScopeDTO);
+        });
+        return apiScopeDTOS;
+    }
+
+    /**
+     * Convert ScopeDTO List to APIScopesDTO List adding the attribute 'isShared'.
+     *
+     * @param scopeDTOS ScopeDTO List
+     * @return APIScopeDTO List
+     * @throws APIManagementException if an error occurs while converting ScopeDTOs to APIScopeDTOs
+     */
+    private static List<APIScopeDTO> getAPIScopesFromScopeDTOs(List<ScopeDTO> scopeDTOS, APIProvider apiProvider) throws APIManagementException {
+
+        List<APIScopeDTO> apiScopeDTOS = new ArrayList<>();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
         scopeDTOS.forEach(scopeDTO -> {

@@ -4408,6 +4408,30 @@ public class ApiMgtDAO {
         return appId;
     }
 
+    public String getApplicationUUID(String appName, String username) throws APIManagementException {
+        if (username == null) {
+            return null;
+        }
+        Subscriber subscriber = getSubscriber(username);
+        String applicationUUID = null;
+
+        String sql = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ? AND SUBSCRIBER_ID  = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, appName);
+            prepStmt.setInt(2, subscriber.getId());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    applicationUUID = rs.getString("UUID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        }
+        return applicationUUID;
+    }
+
     /**
      * Find the name of the application by Id
      *
@@ -5185,6 +5209,34 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(deleteApp, null, null);
 
         }
+    }
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return Map<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
+    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+
+        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+            preparedStatement.setInt(1, appId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys for application " + appId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return consumerKeysOfApplication;
     }
 
     public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
@@ -10808,10 +10860,10 @@ public class ApiMgtDAO {
                           .ThrottleSQLConstants.DELETE_CONDITION_GROUP_SQL);
                   PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
                 if (selectQuery.equals(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL)) {
-                    selectStatement .setString(1, policy.getPolicyName());
-                    selectStatement .setInt(2, policy.getTenantId());
+                    selectStatement.setString(1, policy.getPolicyName());
+                    selectStatement.setInt(2, policy.getTenantId());
                 } else {
-                    selectStatement .setString(1, policy.getUUID());
+                    selectStatement.setString(1, policy.getUUID());
                 }
                 try (ResultSet resultSet = selectStatement.executeQuery()) {
                     if (resultSet.next()) {
@@ -14312,6 +14364,7 @@ public class ApiMgtDAO {
                         APIProductResource resource = new APIProductResource();
                         APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
                                 rs.getString("API_VERSION"));
+                        apiId.setUuid(rs.getString("API_UUID"));
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
                         resource.setApiName(rs.getString("API_NAME"));
@@ -15492,6 +15545,55 @@ public class ApiMgtDAO {
             handleException("Failed to delete tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
+    }
+    
+    /**
+     * Return the existing versions for the given api name for the provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set version
+     * @throws APIManagementException
+     */
+    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_VERSION"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
+    }
+    /**
+     * Return ids of the versions for the given name for the given provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set ids
+     * @throws APIManagementException
+     */
+    public Set<String> getUUIDsOfAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_UUID"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
     }
 
     /**

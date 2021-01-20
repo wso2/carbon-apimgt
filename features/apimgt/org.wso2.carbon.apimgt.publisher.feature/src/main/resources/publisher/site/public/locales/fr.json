@@ -213,6 +213,8 @@
   "Apis.Details.Configuration.components.KeyManager.configuration": "",
   "Apis.Details.Configuration.components.KeyManager.more.than.one.error": "",
   "Apis.Details.Configuration.components.KeyManager.more.than.one.info": "",
+  "Apis.Details.Configuration.components.MarkdownEditor.add.description.button": "",
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.button": "",
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": "",
   "Apis.Details.Configuration.components.MaxBackendTps.tooltip": "",
   "Apis.Details.Configuration.components.ResponseCaching.tooltip": "",
