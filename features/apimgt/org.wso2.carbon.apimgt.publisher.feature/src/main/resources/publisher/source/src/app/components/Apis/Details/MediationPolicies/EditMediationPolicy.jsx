@@ -315,7 +315,11 @@ function EditMediationPolicy(props) {
     function handleChangeProvideBy(event) {
         const inputValue = event.target.value;
         setProvideBy(inputValue);
-        setActivePolicy({});
+        if (inputValue === NONE) {
+            setActivePolicy({ name: NONE, type: NONE });
+        } else {
+            setActivePolicy({});
+        }
     }
     return (
         <Dialog

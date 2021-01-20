@@ -72,14 +72,14 @@ class APIProduct extends Resource {
 
     getSettings() {
         const promisedSettings = this.client.then(client => {
-            return client.apis['Settings'].get_settings();
+            return client.apis['Settings'].getSettings();
         });
         return promisedSettings.then(response => response.body);
     }
 
     getMonetization(id, callback = null) {
         const promiseMonetization = this.client.then(client => {
-            return client.apis['API Monetization'].get_apis__apiId__monetization(
+            return client.apis['API Monetization'].getAPIMonetization(
                 {
                     apiId: id,
                 },
@@ -91,7 +91,7 @@ class APIProduct extends Resource {
 
     configureMonetizationToApiProduct(id, body) {
         const promised_status = this.client.then(client => {
-            return client.apis['API Monetization'].post_apis__apiId__monetize({
+            return client.apis['API Monetization'].addAPIMonetization({
                 apiId: id,
                 body,
             });
@@ -101,7 +101,7 @@ class APIProduct extends Resource {
 
     getSubscriptionPolicies(id, callback = null) {
         const promisePolicies = this.client.then(client => {
-            return client.apis['APIs'].get_apis__apiId__subscription_policies(
+            return client.apis['APIs'].getAPISubscriptionPolicies(
                 {
                     apiId: id,
                 },
@@ -113,7 +113,7 @@ class APIProduct extends Resource {
 
     getMonetizationInvoice(id, callback = null) {
         const promiseInvoice = this.client.then(client => {
-            return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
+            return client.apis['API Monetization'].getSubscriptionUsage(
                 {
                     subscriptionId: id
                 },
@@ -146,7 +146,7 @@ class APIProduct extends Resource {
             const requestBody = {
                 requestBody: data
             }
-            return client.apis['API Products'].post_api_products(payload, requestBody, this._requestMetaData());
+            return client.apis['API Products'].createAPIProduct(payload, requestBody, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
             return new API(response.body);
@@ -166,7 +166,7 @@ class APIProduct extends Resource {
             'Content-Type': 'application/json',
         };
         promise_create = this.client.then(client => {
-            return client.apis['API Products'].post_api_products(payload, this._requestMetaData());
+            return client.apis['API Products'].createAPIProduct(payload, this._requestMetaData());
         });
 
         return promise_create;
@@ -206,7 +206,7 @@ class APIProduct extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedAPIProduct = apiClient
             .then(client => {
-                return client.apis['API Products'].get_api_products__apiProductId_(
+                return client.apis['API Products'].getAPIProduct(
                     {
                         apiProductId: id,
                     },
@@ -238,7 +238,7 @@ class APIProduct extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedProducts = apiClient
             .then(client => {
-                return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
+                return client.apis['API Products'].getAllAPIProducts(params, Resource._requestMetaData());
             })
             .catch(error => {
                 console.error(error);
@@ -262,7 +262,7 @@ class APIProduct extends Resource {
             const requestBody = {
                 requestBody: updatedAPI,
             }
-            return client.apis['API Products'].put_api_products__apiProductId_(payload, requestBody);
+            return client.apis['API Products'].updateAPIProduct(payload, requestBody);
         });
         return promisedUpdate.then(response => {
             return new APIProduct(response.body);
@@ -277,7 +277,7 @@ class APIProduct extends Resource {
     getAPIProductThumbnail(id) {
         const promisedAPIThumbnail = this.client
             .then(client => {
-                return client.apis['API Products'].get_api_products__apiProductId__thumbnail(
+                return client.apis['API Products'].getAPIProductThumbnail(
                     {
                         apiProductId: id,
                     },
@@ -304,7 +304,7 @@ class APIProduct extends Resource {
                     apiProductId: id,
                     'Content-Type': imageFile.type,
                 };
-                return client.apis['API Products'].put_api_products__apiProductId__thumbnail(
+                return client.apis['API Products'].updateAPIProductThumbnail(
                     payload,
                     {
                         requestBody: {
@@ -333,7 +333,7 @@ class APIProduct extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient
             .then(client => {
-                return client.apis['API Products'].delete_api_products__apiProductId_(
+                return client.apis['API Products'].deleteAPIProduct(
                     {
                         apiProductId: id,
                     },
@@ -357,7 +357,7 @@ class APIProduct extends Resource {
                     apiProductId: id,
                     'Content-Type': 'application/json',
                 };
-                return client.apis['API Product Documents'].post_api_products__apiProductId__documents(
+                return client.apis['API Product Documents'].addAPIProductDocument(
                     payload,
                     {
                         requestBody: body,
@@ -379,7 +379,7 @@ class APIProduct extends Resource {
     getDocuments(id) {
         const promisedDocuments = this.client
             .then(client => {
-                return client.apis['API Product Documents'].get_api_products__apiProductId__documents(
+                return client.apis['API Product Documents'].getAPIProductDocuments(
                     {
                         apiProductId: id,
                     },
@@ -406,7 +406,7 @@ class APIProduct extends Resource {
                 'Content-Type': 'application/json',
             };
             return client.apis['API Product Documents']
-                .put_api_products__apiProductId__documents__documentId_(
+                .updateAPIProductDocument(
                     payload,
                     {
                         requestBody: body,
@@ -428,7 +428,7 @@ class APIProduct extends Resource {
     getDocument(productId, docId) {
         const promisedDocument = this.client
             .then(client => {
-                return client.apis['API Product Documents'].get_api_products__apiProductId__documents__documentId_(
+                return client.apis['API Product Documents'].getAPIProductDocument(
                     {
                         apiProductId: productId,
                         documentId: docId,
@@ -460,7 +460,7 @@ class APIProduct extends Resource {
                 };
                 return client.apis[
                     'API Product Documents'
-                ].post_api_products__apiProductId__documents__documentId__content(
+                ].addAPIProductDocumentContent(
                     payload,
                     {
                         requestBody: {
@@ -492,7 +492,7 @@ class APIProduct extends Resource {
                 };
                 return client.apis[
                     'API Product Documents'
-                ].get_api_products__apiProductId__documents__documentId__content(payload);
+                ].getAPIProductDocumentContent(payload);
             })
             .catch(error => {
                 console.error(error);
@@ -508,7 +508,7 @@ class APIProduct extends Resource {
     deleteDocument(productId, docId) {
         const promiseDeleteDocument = this.client
             .then(client => {
-                return client.apis['API Product Documents'].delete_api_products__apiProductId__documents__documentId_(
+                return client.apis['API Product Documents'].deleteAPIProductDocument(
                     {
                         apiProductId: productId,
                         documentId: docId,
@@ -535,7 +535,7 @@ class APIProduct extends Resource {
                 documentId: docId,
                 'Content-Type': 'application/json',
             };
-            return client.apis['API Product Documents'].post_api_products__apiProductId__documents__documentId__content(
+            return client.apis['API Product Documents'].addAPIProductDocumentContent(
                 payload,
                 {
                     requestBody: {
@@ -585,7 +585,7 @@ class APIProduct extends Resource {
     getSwagger(id = this.id) {
         const promiseGet = this.client
             .then(client => {
-                return client.apis['API Products'].get_api_products__apiProductId__swagger(
+                return client.apis['API Products'].getAPIProductSwagger(
                     {
                         apiProductId: id,
                     },

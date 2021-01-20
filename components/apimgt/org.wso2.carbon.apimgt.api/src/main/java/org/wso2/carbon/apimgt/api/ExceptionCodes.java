@@ -97,6 +97,7 @@ ExceptionCodes implements ErrorHandler {
     API_REVISION_UUID_NOT_FOUND(900350, "Can not create API Revision ", 400, "Failed to retrieve revision uuid from revision registry artifact"),
     MAXIMUM_REVISIONS_REACHED(900351, "Can not create API Revision ", 400, "Maximum number of revisions per API has reached." +
             "Need to remove any revision to create a new Revision for API with API UUID: %s"),
+    ERROR_CREATING_API_REVISION(900349, "Can not create API Revision ", 400, "Failed to create API revision registry artifacts: %s "),
 
 
     // Generic codes

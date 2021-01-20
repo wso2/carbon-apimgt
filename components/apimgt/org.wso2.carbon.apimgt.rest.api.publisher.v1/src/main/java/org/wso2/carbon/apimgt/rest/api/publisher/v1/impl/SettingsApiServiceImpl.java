@@ -45,13 +45,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     private static final Log log = LogFactory.getLog(SettingsApiServiceImpl.class);
 
     @Override
-    public Response settingsGatewayEnvironmentsGet(String apiId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
-
-    @Override
-    public Response settingsGet(MessageContext messageContext){
+    public Response getSettings(MessageContext messageContext){
 
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
