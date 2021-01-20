@@ -46,45 +46,11 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
     private static final Log log = LogFactory.getLog(TenantLoadMessageSender.class);
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
-        createReservedUser();
         if (!isEnabled()) {
             log.debug("Tenant Load Notifications are disabled");
             return;
         }
         notifyTenantLoad();
-    }
-
-    /**
-     * Creates a reserved user to be used in cross tenant subscription scenarios, so that the tenant admin is
-     * not exposed in JWT tokens generated. This logic will be run to add this user to the tenants if it
-     * is not existing. This value can be changed from a config as well.
-     */
-    public void createReservedUser() {
-        APIManagerConfiguration config = getAPIManagerConfiguration();
-        String username = APIConstants.DEFAULT_RESERVED_USERNAME;
-        if (config != null) {
-            String usernameConfig = config.getFirstProperty(APIConstants.KEY_MANAGER_RESERVED_USER);
-            if (StringUtils.isNotBlank(usernameConfig)) {
-                username = usernameConfig;
-            }
-        }
-        try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = getTenantId();
-            if (realmService != null && tenantId != MultitenantConstants.INVALID_TENANT_ID) {
-                UserStoreManager userStoreManager =
-                        (UserStoreManager) realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-                boolean isReservedUserCreated = userStoreManager.isExistingUser(username);
-                if (!isReservedUserCreated) {
-                    userStoreManager.addUser(username, APIConstants.DEFAULT_RESERVED_USER_PASSWORD,
-                            new String[]{APIConstants.EVERYONE_ROLE},
-                            new HashMap<>(), username, false);
-                }
-            }
-        } catch (UserStoreException e) {
-            log.error("Error occurred while getting the realm configuration, User store properties might not be " +
-                    "returned", e);
-        }
     }
 
     @Override

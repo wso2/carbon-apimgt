@@ -137,7 +137,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             buildDTOFromClientInfo(createdClient, oAuthApplicationInfo);
 
             oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
-            oAuthApplicationInfo.setIsSaasApplication(false);
+            oAuthApplicationInfo.setIsSaasApplication(true);
 
             return oAuthApplicationInfo;
 
@@ -519,7 +519,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey);
         }
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
-        oAuthApplicationInfo.setIsSaasApplication(false);
+        oAuthApplicationInfo.setIsSaasApplication(true);
 
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
