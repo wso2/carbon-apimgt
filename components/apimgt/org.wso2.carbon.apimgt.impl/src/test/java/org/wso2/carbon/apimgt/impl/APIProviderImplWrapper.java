@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -49,6 +50,18 @@ public class APIProviderImplWrapper extends APIProviderImpl {
                                   Map<String, Map<String,String>> failedGateways) throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
+        this.scopesDAO = scopesDAO;
+        if (documentationList != null) {
+            this.documentationList = documentationList;
+        }
+        this.failedGateways = failedGateways;
+    }
+
+    public APIProviderImplWrapper(APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO,
+            List<Documentation> documentationList, Map<String, Map<String,String>> failedGateways) throws APIManagementException {
+        super(null);
+        this.apiPersistenceInstance = apiPersistenceInstance;
+        this.apiMgtDAO = apimgtDAO;
         this.scopesDAO = scopesDAO;
         if (documentationList != null) {
             this.documentationList = documentationList;
@@ -116,6 +129,11 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     @Override
     public boolean hasValidLength(String field, int maxLength) {
         return true;
+    }
+    
+    @Override
+    public void updateWsdlFromUrl(API api) throws APIManagementException {
+        // do nothing
     }
 
     protected String getTenantConfigContent() throws RegistryException, UserStoreException {

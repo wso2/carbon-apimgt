@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.8.140-SNAPSHOT</version>
+        <version>6.8.146-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -72,6 +72,11 @@
             <artifactId>org.wso2.carbon.apimgt.jms.listener.feature</artifactId>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.persistence.feature</artifactId>
+            <type>zip</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -114,6 +119,9 @@
                                 </includedFeatureDef>
                                 <includedFeatureDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tokenmgt.feature:${carbon.apimgt.version}
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.persistence.feature:${carbon.apimgt.version}
                                 </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
