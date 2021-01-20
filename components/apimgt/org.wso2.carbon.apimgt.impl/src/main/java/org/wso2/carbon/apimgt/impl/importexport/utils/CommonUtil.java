@@ -24,6 +24,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.apache.commons.io.FileUtils;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
@@ -33,6 +38,8 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -372,5 +379,113 @@ public class CommonUtil {
             String errorMessage = "Error while moving file from" + source + "to" + dest;
             throw new APIManagementException(errorMessage, e);
         }
+    }
+
+
+    /**
+     * This method will be used to copy files from source to destination
+     *
+     * @param source String of the source file path
+     * @param dest   String of the destination file path
+     * @throws APIImportExportException If an error occurs when copying files
+     */
+    public static void copyFile(String source, String dest) throws APIImportExportException {
+        try {
+            FileUtils.copyFile(new File(source), new File(dest));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from " + source + " to " + dest;
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    /**
+     * This method will be used to copy a whole directory to a new location preserving the file dates.
+     *
+     * @param sourceDir String of the source Directory path
+     * @param destDir   String of the destination Directory path
+     * @throws APIImportExportException If an error occurs when copying directory
+     */
+    public static void copyDirectory(String sourceDir, String destDir) throws APIImportExportException {
+
+        try {
+            FileUtils.copyDirectory(new File(sourceDir), new File(destDir));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from " + sourceDir + " to " + destDir;
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+
+    /**
+     * Add the type and the version to the artifact file when exporting.
+     *
+     * @param type        Type of the artifact to be exported
+     * @param version     API Manager version
+     * @param jsonElement JSON element to be added as data
+     * @return The artifact object with the type and version added to it
+     */
+    public static JsonObject addTypeAndVersionToFile(String type, String version, JsonElement jsonElement) {
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(APIConstants.TYPE, type);
+        jsonObject.addProperty(APIConstants.API_DATA_VERSION, version);
+        jsonObject.add(APIConstants.DATA, jsonElement);
+        return jsonObject;
+    }
+
+    /**
+     * Write the file content of an API or API related artifact based on the format.
+     *
+     * @param filePath     Path to the location where the file content should be written
+     * @param exportFormat Format to be exported
+     * @param fileContent  Content to be written
+     */
+    public static void writeToYamlOrJson(String filePath, ExportFormat exportFormat, String fileContent)
+            throws APIImportExportException, IOException {
+
+        switch (exportFormat) {
+        case YAML:
+            String fileInYaml = jsonToYaml(fileContent);
+            writeFile(filePath + ImportExportConstants.YAML_EXTENSION, fileInYaml);
+            break;
+        case JSON:
+            writeFile(filePath + ImportExportConstants.JSON_EXTENSION, fileContent);
+        }
+    }
+
+    /**
+     * Write the DTO an artifact based on the format.
+     *
+     * @param filePath     Path to the location where the file content should be written
+     * @param exportFormat Format to be exported
+     * @param type         Type of the file to be written
+     * @param dtoObject    DTO object
+     */
+    public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, Object dtoObject)
+            throws APIImportExportException, IOException {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject jsonObject = addTypeAndVersionToFile(type, ImportExportConstants.APIM_VERSION,
+                gson.toJsonTree(dtoObject));
+        String jsonContent = gson.toJson(jsonObject);
+        writeToYamlOrJson(filePath, exportFormat, jsonContent);
+    }
+
+    /**
+     * Extract the imported archive to a temporary folder and return the folder path of it
+     *
+     * @param uploadedInputStream Input stream from the REST request
+     * @return Path to the extracted directory
+     * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
+     *                                  extracting the content
+     */
+    public static String getArchivePathOfExtractedDirectory(InputStream uploadedInputStream, String uploadFileName)
+            throws APIImportExportException {
+        // Temporary directory is used to create the required folders
+        File importFolder = CommonUtil.createTempDirectory(null);
+        String absolutePath = importFolder.getAbsolutePath() + File.separator;
+        CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+        String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
+        return absolutePath + extractedFolderName;
     }
 }

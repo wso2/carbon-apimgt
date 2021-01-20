@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -178,6 +179,15 @@ public interface APIManager {
     String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
+     * Get graphql schema definition
+     * @param apiId
+     * @param tenantDomain
+     * @return
+     * @throws APIManagementException
+     */
+    String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException;
+
+    /**
      * Returns the swagger v2.0 definition as a string
      *
      * @param apiId id of the APIIdentifier
@@ -186,6 +196,15 @@ public interface APIManager {
      */
     String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
 
+    /**
+     * Returns the OpenAPI definition as a string
+     *
+     * @param apiId id of the api
+     * @param tenantDomain tenant
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
     /**
      * Checks whether the given document already exists for the given api/product
      *
@@ -216,6 +235,15 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Returns a list of documentation attached to a particular API
+     *
+     * @param uuid id of the api
+     * @param requestedTenantDomain tenant domain
+     * @return List<Documentation>
+     * @throws APIManagementException if failed to get Documentations
+     */
+    List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException;
+    /**
      * Returns the specified document attached to the given API
      *
      * @param apiId   APIIdentifier
@@ -229,12 +257,26 @@ public interface APIManager {
     /**
      * Get a documentation by artifact Id
      *
+     * @param apiId   apiId
      * @param docId   DocumentID
      * @param requestedTenantDomain tenant domain of the registry where the artifact is located
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-     Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+    Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException;
+     
+    /**
+     * Get a documentation Content by apiid and doc id
+     *
+     * @param apiId uuid of the API
+     * @param docId DocumentID
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return DocumentationContent
+     * @throws APIManagementException if failed to get Documentation
+     */
+    DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
@@ -339,6 +381,16 @@ public interface APIManager {
      * @throws APIManagementException if an error occurs while retrieving the image
      */
     ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Retrieves the icon image associated with a particular API as a stream.
+     *
+     * @param apiId ID representing the API
+     * @param tenantDomain tenant
+     * @return an Icon containing image content and content type information
+     * @throws APIManagementException if an error occurs while retrieving the image
+     */
+    ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException;
 
     /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended
@@ -714,6 +766,16 @@ public interface APIManager {
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
     ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException;
+    
+    /**
+     * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
+     * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
+     *
+     * @param apiId api identifier of the API
+     * @param tenantDomain tenant
+     * @return wsdl content matching name if exist else throws an APIManagementException
+     */
+    ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException;
 
     /**
      * Returns the graphql schema content in registry specified by the schema name
@@ -812,4 +874,27 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
+    
+    /**
+     * @param searchQuery search query. ex : provider:admin
+     * @param tenantDomain tenant domain
+     * @param start starting number
+     * @param end ending number
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException;
+    
+    /**
+     * Search in content of apis, api products and documents and provide the results
+     * @param searchQuery search query 
+     * @param tenantDomain
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException;
 }

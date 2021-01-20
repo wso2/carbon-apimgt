@@ -97,6 +97,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYP
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+    static final String OPENAPI_DEFAULT_AUTHORIZATION_URL = "https://test.com";
     private List<String> otherSchemes;
     private List<String> getOtherSchemes() {
         return otherSchemes;
@@ -541,7 +542,7 @@ public class OAS3Parser extends APIDefinition {
 
         info.setVersion(swaggerData.getVersion());
         openAPI.setInfo(info);
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL);
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             modifyGraphQLSwagger(openAPI);
@@ -621,7 +622,7 @@ public class OAS3Parser extends APIDefinition {
                 addOrUpdatePathToSwagger(openAPI, resource);
             }
         }
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL);
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         
         if (StringUtils.isEmpty(openAPI.getInfo().getTitle())) {
@@ -841,7 +842,7 @@ public class OAS3Parser extends APIDefinition {
         if (oAuthFlow.getScopes() == null) {
             oAuthFlow.setScopes(new Scopes());
         }
-        oAuthFlow.setAuthorizationUrl("");
+        oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
 
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
@@ -1518,7 +1519,7 @@ public class OAS3Parser extends APIDefinition {
                 oAuthFlow = new OAuthFlow();
                 securityScheme.getFlows().setImplicit(oAuthFlow);
             }
-            oAuthFlow.setAuthorizationUrl("");
+            oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
             Scopes oas3Scopes = oAuthFlow.getScopes() != null ? oAuthFlow.getScopes() : new Scopes();
 
             if (scopes != null && !scopes.isEmpty()) {
@@ -1567,7 +1568,7 @@ public class OAS3Parser extends APIDefinition {
                 //Populating the default security scheme with default values
                 OAuthFlows newDefaultFlows = new OAuthFlows();
                 OAuthFlow newDefaultFlow = new OAuthFlow();
-                newDefaultFlow.setAuthorizationUrl("https://test.com");
+                newDefaultFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
                 Scopes newDefaultScopes = new Scopes();
                 newDefaultFlow.setScopes(newDefaultScopes);
                 newDefaultFlows.setImplicit(newDefaultFlow);

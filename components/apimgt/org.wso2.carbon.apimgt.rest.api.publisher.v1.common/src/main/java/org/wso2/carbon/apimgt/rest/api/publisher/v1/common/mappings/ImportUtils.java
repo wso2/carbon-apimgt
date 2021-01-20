@@ -329,6 +329,73 @@ public class ImportUtils {
     }
 
     /**
+     * Process the extracted temporary directory in order to detect the flow and alter the directory structure
+     * according to the flow
+     *
+     * @param tempDirectory String of the temporary directory path value
+     * @return Path to the extracted directory
+     * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
+     *                                  extracting the content
+     */
+    public static String preprocessImportedArtifact(String tempDirectory) throws APIImportExportException {
+
+        String tempDirectoryAbsolutePath = tempDirectory + File.separator;
+        boolean isParamsFileAvailable = CommonUtil
+                .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME);
+        boolean isDeploymentDirectoryAvailable = CommonUtil
+                .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME);
+
+        //When api controller is provided with api_params.file
+        if (isParamsFileAvailable) {
+            if (!CommonUtil
+                    .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
+                throw new APIImportExportException("The source artifact is not provided properly");
+            } else {
+                String newExtractedFolderName = CommonUtil.extractArchive(
+                        new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
+                        tempDirectoryAbsolutePath);
+
+                //Copy api_params.yaml file to working directory
+                String srcParamsFilePath = tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME;
+                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
+
+                return tempDirectoryAbsolutePath + newExtractedFolderName;
+            }
+        }
+        //When api controller is provided with the "Deployment" directory
+        if (isDeploymentDirectoryAvailable) {
+            if (!CommonUtil
+                    .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
+                throw new APIImportExportException("The source artifact is not provided properly");
+            } else {
+                String newExtractedFolderName = CommonUtil.extractArchive(
+                        new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
+                        tempDirectoryAbsolutePath);
+
+                //Copy api_params.yaml file to working directory
+                String srcParamsFilePath =
+                        tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME + File.separator
+                                + ImportExportConstants.API_PARAMS_FILE_NAME;
+                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
+
+                //move deployment directory into working directory
+                String srcDeploymentDirectoryPath =
+                        tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME;
+                String destDeploymentDirectoryPath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
+                        + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME;
+                CommonUtil.copyDirectory(srcDeploymentDirectoryPath, destDeploymentDirectoryPath);
+
+                return tempDirectoryAbsolutePath + newExtractedFolderName;
+            }
+        }
+        return tempDirectory;
+    }
+
+    /**
      * Extract the imported archive to a temporary folder and return the folder path of it
      *
      * @param uploadedInputStream Input stream from the REST request
@@ -340,11 +407,11 @@ public class ImportUtils {
             throws APIImportExportException {
         // Temporary directory is used to create the required folders
         File importFolder = CommonUtil.createTempDirectory(null);
-        String uploadFileName = ImportExportConstants.UPLOAD_FILE_NAME;
+        String uploadFileName = ImportExportConstants.UPLOAD_API_FILE_NAME;
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
         String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
-        return absolutePath + extractedFolderName;
+        return preprocessImportedArtifact(absolutePath + extractedFolderName);
     }
 
     /**
@@ -833,9 +900,9 @@ public class ImportUtils {
                             documentation.setFilePath(
                                     apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
                             if (!apiTypeWrapper.isAPIProduct()) {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getId(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation);
                             } else {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getId(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation);
                             }
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
