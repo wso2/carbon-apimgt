@@ -34,10 +34,11 @@ import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/
 import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api.js';
 import DefaultVersion from './components/DefaultVersion';
-import Description from './components/Description';
+import MarkdownEditor from './components/MarkdownEditor';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
+import Social from './components/Social';
 import APICategories from './components/APICategories';
 
 const useStyles = makeStyles((theme) => ({
@@ -138,6 +139,7 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
+        additionalProperties: { ...api.additionalProperties },
     };
 }
 /**
@@ -181,6 +183,10 @@ export default function DesignConfigurations() {
                 return { ...copyAPIConfig(state), [action]: value };
             case 'visibleRoles':
                 return { ...copyAPIConfig(state), [action]: value };
+            case 'github_repo':
+            case 'slack_url':
+                nextState.additionalProperties[action] = value;
+                return nextState;
             default:
                 return state;
         }
@@ -254,7 +260,7 @@ export default function DesignConfigurations() {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} md={10}>
-                                                <Description api={apiConfig} configDispatcher={configDispatcher} />
+                                                <MarkdownEditor api={apiConfig} configDispatcher={configDispatcher} />
                                             </Grid>
                                         </Grid>
                                     </Box>
@@ -275,7 +281,10 @@ export default function DesignConfigurations() {
                                         />
                                     </Box>
                                     <Box py={1}>
-                                        {api.apiType !== 'APIProduct' && (
+                                        <Social api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Box>
+                                    <Box py={1}>
+                                        {api.apiType !== API.CONSTS.APIProduct && (
                                             <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
                                         )}
                                     </Box>

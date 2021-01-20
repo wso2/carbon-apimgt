@@ -23,7 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.rest.api.util.*;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 /**
  * Util methods for Entitlement client use to validate requests

@@ -172,8 +172,6 @@ function AddEdit(props) {
                     })}`;
                 }
                 break;
-            case 'description':
-                break;
             case 'requestCount':
             case 'dataAmount':
             case 'unitTime':
@@ -253,9 +251,15 @@ function AddEdit(props) {
         promiseAPICall.then((msg) => {
             Alert.success(`${policyName} ${msg}`);
             history.push('/throttling/advanced/');
-        }).catch((e) => {
-            Alert.error(e);
-        }).finaly(() => {
+        }).catch((error) => {
+            const { response, message } = error;
+            if (response && response.body) {
+                Alert.error(response.body.description);
+            } else if (message) {
+                Alert.error(message);
+            }
+            return null;
+        }).finally(() => {
             setSaving(false);
         });
         return true;

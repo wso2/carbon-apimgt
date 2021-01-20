@@ -314,9 +314,10 @@ public interface APIProvider extends APIManager {
      * Adds a new API to the Store
      *
      * @param api API
+     * @return added api
      * @throws APIManagementException if failed to add API
      */
-    void addAPI(API api) throws APIManagementException;
+    API addAPI(API api) throws APIManagementException;
 
     public boolean isAPIUpdateValid(API api) throws APIManagementException;
 
@@ -330,6 +331,20 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      */
     void updateAPI(API api) throws APIManagementException, FaultGatewaysException;
+    
+    /**
+     * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
+     * should throw an exceptions when such attempts are made. All life cycle state changes
+     * should be carried out using the changeAPIStatus method of this interface.
+     *
+     * @param api API
+     * @param existingAPI existing api
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to update API
+     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
+     * @return updated API
+     */
+    API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException;
+
 
     /**
      * Updates manage of an existing API. This method must not be used to change API status. Implementations
@@ -409,6 +424,20 @@ public interface APIProvider extends APIManager {
      *                                the new version of the API
      */
     void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException;
+    
+    /**
+     * Create a new version of the <code>api</code>, with version <code>newVersion</code>
+     *
+     * @param apiid        The id of the API to be copied
+     * @param newVersion The version of the new API
+     * @param defaultVersion whether this version is default or not 
+     * @return api created api
+     * @throws DuplicateAPIException  If the API trying to be created already exists
+     * @throws APIManagementException If an error occurs while trying to create
+     *                                the new version of the API
+     */
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion)
+            throws DuplicateAPIException, APIManagementException;
 
     /**
      * Removes a given documentation
@@ -420,6 +449,15 @@ public interface APIProvider extends APIManager {
      */
     void removeDocumentation(APIIdentifier apiId, String docType, String docName) throws APIManagementException;
 
+    /**
+     * Removes a given documentation
+     *
+     * @param apiId   api uuid
+     * @param docType the type of the documentation
+     * @param docName name of the document
+     * @throws APIManagementException if failed to remove documentation
+     */
+    void removeDocumentation(String apiId, String documentId) throws APIManagementException;
     /**
      * Removes a given documentation
      *
@@ -436,6 +474,28 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add documentation
      */
     void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
+    
+    /**
+     * Adds Documentation to an API/Product
+     *
+     * @param id         API/Product Identifier
+     * @param documentation Documentation
+     * @return created documentation Documentation
+     * @throws APIManagementException if failed to add documentation
+     */
+    Documentation addDocumentation(String uuid, Documentation documentation) throws APIManagementException;
+
+
+    /**
+     * Adds Document content to an API/Product
+     *
+     * @param uuid         API/Product Identifier
+     * @param content Documentation content
+     * @param docId doc uuid
+     * @throws APIManagementException if failed to add documentation
+     */
+    void addDocumentationContent(String uuid, String docId, DocumentationContent content)
+            throws APIManagementException;
 
     /**
      * Add a file to a document of source type FILE
@@ -471,11 +531,12 @@ public interface APIProvider extends APIManager {
     /**
      * Updates a given documentation
      *
-     * @param apiId         APIIdentifier
+     * @param apiId         id of the document
      * @param documentation Documentation
+     * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    void updateDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException;
+    Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException;
 
     /**
      * Copies current Documentation into another version of the same API.
@@ -768,6 +829,15 @@ public interface APIProvider extends APIManager {
     /**
      * This method updates the swagger definition in registry
      *
+     * @param apiId   uuid of the api
+     * @param jsonText    openAPI definition
+     * @throws APIManagementException
+     */
+    void saveSwaggerDefinition(String apiId, String jsonText) throws APIManagementException;
+    
+    /**
+     * This method updates the swagger definition in registry
+     *
      * @param apiProduct   APIProduct
      * @param jsonText    openAPI definition
      * @throws APIManagementException
@@ -860,6 +930,17 @@ public interface APIProvider extends APIManager {
              throws APIManagementException, FaultGatewaysException;
 
     /**
+     * This method is to change registry lifecycle states for an API artifact
+     *
+     * @param  uuid uuid of the API
+     * @param  action  Action which need to execute from registry lifecycle
+     * @param  checklist checklist items
+     * @return APIStateChangeResponse API workflow state and WorkflowResponse
+     * */
+    APIStateChangeResponse changeLifeCycleStatus(String uuid, String action, Map<String, Boolean> checklist)
+             throws APIManagementException, FaultGatewaysException;
+    
+    /**
     * This method is to set checklist item values for a particular life-cycle state of an API
     *
     * @param  apiIdentifier apiIdentifier
@@ -891,6 +972,14 @@ public interface APIProvider extends APIManager {
      * @return Map<String,Object> a map with lifecycle data
      */
      Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
+     
+     /**
+     * This method returns the lifecycle data for an API including current state,next states.
+     *
+     * @param apiId id of the api
+     * @return Map<String,Object> a map with lifecycle data
+     */
+     Map<String, Object> getAPILifeCycleData(String apiId) throws APIManagementException;
 
      /**
       * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
@@ -1530,4 +1619,115 @@ public interface APIProvider extends APIManager {
      * @return a list of Deploymentstatus objects in different cloud environments
      */
     List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
+    
+    /**
+     * Retrieve list of resources of the provided api that are used in other API products
+     * @param apiId api id
+     * @return APIResource list of resources
+     * @throws APIManagementException
+     */
+    List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException ;
+
+    /**
+     * Delete API
+     * @param api API to delete
+     * @throws APIManagementException
+     */
+    void deleteAPI(API api) throws APIManagementException;
+
+    /**
+     * Checks whether the given document already exists for the given api/product
+     *
+     * @param uuid API/Product id
+     * @param docName    Name of the document
+     * @return true if document already exists for the given api/product
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    boolean isDocumentationExist(String uuid, String docName) throws APIManagementException;
+    
+    /**
+     * Add WSDL to the api. wsdl can be provided either as a url or a resource file
+     * @param apiId id of the api
+     * @param resource Resource
+     * @param url wsdl url
+     * @throws APIManagementException
+     */
+    void addWSDLResource(String apiId, ResourceFile resource, String url) throws APIManagementException;
+    
+    /**
+     * Add or update thumbnail image of an api
+     * @param apiId apiid
+     * @param resource image resource
+     * @throws APIManagementException
+     */
+    void setThumbnailToAPI(String apiId, ResourceFile resource) throws APIManagementException;
+    
+    /**
+     * List all the mediation policies for the api
+     * @param apiId api id
+     * @return
+     * @throws APIManagementException
+     */
+    List<Mediation> getAllApiSpecificMediationPolicies(String apiId) throws APIManagementException;
+
+    /**
+     * The mediation policies for the api
+     * @param apiId api id
+     * @param policyId policy id
+     * @return
+     * @throws APIManagementException
+     */
+    Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId) throws APIManagementException;
+
+    /**
+     * upload mediation policy to api
+     * @param apiId apiid
+     * @param mediationPolicy poilicy
+     * @return added policy
+     * @throws APIManagementException
+     */
+    Mediation addApiSpecificMediationPolicy(String apiId, Mediation mediationPolicy) throws APIManagementException;
+    
+    /**
+     * update mediation policy content
+     * @param apiId apiid
+     * @param mediationPolicy poilicy
+     * @return added policy
+     * @throws APIManagementException
+     */
+    Mediation updateApiSpecificMediationPolicyContent(String apiId, Mediation mediationPolicy)
+            throws APIManagementException;
+
+    /**
+     * delete mediation policy
+     * @param apiId apiId
+     * @param mediationPolicyId mediation Policy Id
+     * @throws APIManagementException
+     */
+    void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId) throws APIManagementException;
+    
+    /**
+     * Add or update graphql definition
+     * @param apiId
+     * @param definition
+     * @throws APIManagementException
+     */
+    void saveGraphqlSchemaDefinition(String apiId, String definition) throws APIManagementException;
+
+    /**
+     * Get API product by uuid
+     * @param uuid id of the api product
+     * @param requestedTenantDomain domain
+     * @return APIProduct product
+     * @throws APIManagementException
+     */
+    APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    
+    /**
+     * Delete API Product
+     * @param apiProduct
+     */
+    void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException;
+    
+    
 }

@@ -135,6 +135,7 @@ import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -1771,7 +1772,7 @@ public final class APIUtil {
      */
     public static String getIconPath(Identifier identifier) {
 
-        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
@@ -5028,6 +5029,10 @@ public final class APIUtil {
         return false;
     }
 
+    public static String getApplicationUUID(String appName, String userId) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getApplicationUUID(appName, userId);
+    }
+
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
@@ -6355,17 +6360,34 @@ public final class APIUtil {
 
             for (SolrDocument document : documentList) {
                 String filePath = (String) document.getFieldValue("path_s");
+                String fileName = (String) document.getFieldValue("resourceName_s");
                 int index = filePath.indexOf(APIConstants.APIMGT_REGISTRY_LOCATION);
                 filePath = filePath.substring(index);
-                Association[] associations = registry.getAllAssociations(filePath);
                 API api = null;
                 Documentation doc = null;
-                for (Association association : associations) {
-                    boolean isAuthorized;
-                    String documentationPath = association.getSourcePath();
-                    String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                boolean isAuthorized;
+                int indexOfContents = filePath.indexOf(APIConstants.INLINE_DOCUMENT_CONTENT_DIR);
+                String documentationPath = filePath.substring(0, indexOfContents) + fileName;
+                String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                        APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                                RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
+                if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
+                    isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
+                } else {
+                    isAuthorized = manager.isUserAuthorized(username, path, ActionConstants.GET);
+                }
+                if (isAuthorized) {
+                    Resource docResource = registry.get(documentationPath);
+                    String docArtifactId = docResource.getUUID();
+                    if (docArtifactId != null) {
+                        GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
+                        doc = APIUtil.getDocumentation(docArtifact);
+                    }
+                    int indexOfDocumentation = filePath.indexOf(APIConstants.DOCUMENTATION_KEY);
+                    String apiPath = documentationPath.substring(0, indexOfDocumentation) + APIConstants.API_KEY;
+                    path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + documentationPath);
+                                    RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + apiPath);
                     if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
                         isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
                     } else {
@@ -6373,49 +6395,26 @@ public final class APIUtil {
                     }
 
                     if (isAuthorized) {
-                        Resource docResource = registry.get(documentationPath);
-                        String docArtifactId = docResource.getUUID();
-                        if (docArtifactId != null) {
-                            GenericArtifact docArtifact = docArtifactManager.getGenericArtifact(docArtifactId);
-                            doc = APIUtil.getDocumentation(docArtifact);
-                        }
-
-                        Association[] docAssociations = registry.getAssociations(documentationPath, APIConstants.DOCUMENTATION_ASSOCIATION);
-                        /* There will be only one document association, for a document path which is by its owner API*/
-                        if (docAssociations.length > 0) {
-
-                            String apiPath = docAssociations[0].getSourcePath();
-                            path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + apiPath);
-                            if (CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME.equalsIgnoreCase(username)) {
-                                isAuthorized = manager.isRoleAuthorized(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
-                            } else {
-                                isAuthorized = manager.isUserAuthorized(username, path, ActionConstants.GET);
-                            }
-
-                            if (isAuthorized) {
-                                Resource resource = registry.get(apiPath);
-                                String apiArtifactId = resource.getUUID();
-                                if (apiArtifactId != null) {
-                                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                                    api = APIUtil.getAPI(apiArtifact, registry);
-                                } else {
-                                    throw new GovernanceException("artifact id is null of " + apiPath);
-                                }
-                            }
+                        Resource resource = registry.get(apiPath);
+                        String apiArtifactId = resource.getUUID();
+                        if (apiArtifactId != null) {
+                            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                            api = APIUtil.getAPI(apiArtifact, registry);
+                        } else {
+                            throw new GovernanceException("artifact id is null of " + apiPath);
                         }
                     }
 
-                    if (doc != null && api != null) {
-                        if (APIConstants.STORE_CLIENT.equals(searchClient)) {
-                            if (APIConstants.PUBLISHED.equals(api.getStatus()) ||
-                                    APIConstants.PROTOTYPED.equals(api.getStatus())) {
-                                apiDocMap.put(doc, api);
-                            }
-                        } else {
+                }
+
+                if (doc != null && api != null) {
+                    if (APIConstants.STORE_CLIENT.equals(searchClient)) {
+                        if (APIConstants.PUBLISHED.equals(api.getStatus()) ||
+                                APIConstants.PROTOTYPED.equals(api.getStatus())) {
                             apiDocMap.put(doc, api);
                         }
+                    } else {
+                        apiDocMap.put(doc, api);
                     }
                 }
             }
@@ -10606,6 +10605,16 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
+    
+    public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
+            properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
+        }
+        properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
+
+        return properties;
+    }
 
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
@@ -11026,7 +11035,6 @@ public final class APIUtil {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
     }
 
     /**
@@ -11305,6 +11313,12 @@ public final class APIUtil {
         }
         if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_HYBRID)) {
             return map.get(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION)) {
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION);
+        }
+        if (map.containsKey(APIConstants.GATEWAY_ENV_TYPE_SANDBOX)) {
+            return map.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX);
         }
         return map.get(type);
     }
@@ -11610,6 +11624,25 @@ public final class APIUtil {
         } catch (UserStoreException e) {
             APIUtil.handleException("Couldn't read tenant configuration from User Store", e);
         }
+
+        //append original role to the role mapping list
+        Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
+        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
+            List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
+            boolean isOriginalRoleAlreadyInRoles = false;
+            for (String role: currentRoles) {
+                if (role.equals(entry.getKey())) {
+                    isOriginalRoleAlreadyInRoles = true;
+                    break;
+                }
+            }
+
+            if (!isOriginalRoleAlreadyInRoles) {
+                String newRoles = entry.getKey() + "," + entry.getValue();
+                newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
+            }
+        }
+
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
@@ -11752,6 +11785,7 @@ public final class APIUtil {
         return false;
     }
 
+
     /**
      * Get UUID by the API Identifier.
      *
@@ -11794,5 +11828,37 @@ public final class APIUtil {
      */
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+    }
+    
+    public static String getconvertedId(Identifier apiId) {
+        String id = null;
+        if (apiId instanceof APIIdentifier) {
+            id = APIType.API + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
+        } else if (apiId instanceof APIProductIdentifier) {
+            id = APIType.API_PRODUCT + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
+        }
+        return id;
+    }
+
+    public static String[] getFilteredUserRoles(String username) throws APIManagementException {
+        String[] userRoles = APIUtil.getListOfRoles(username);
+        String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
+        if (StringUtils.isNotEmpty(skipRolesByRegex)) {
+            List<String> filteredUserRoles = new ArrayList<>(Arrays.asList(userRoles));
+            String[] regexList = skipRolesByRegex.split(",");
+            for (int i = 0; i < regexList.length; i++) {
+                Pattern p = Pattern.compile(regexList[i]);
+                Iterator<String> itr = filteredUserRoles.iterator();
+                while (itr.hasNext()) {
+                    String role = itr.next();
+                    Matcher m = p.matcher(role);
+                    if (m.matches()) {
+                        itr.remove();
+                    }
+                }
+            }
+            userRoles = filteredUserRoles.toArray(new String[0]);
+        }
+        return userRoles;
     }
 }

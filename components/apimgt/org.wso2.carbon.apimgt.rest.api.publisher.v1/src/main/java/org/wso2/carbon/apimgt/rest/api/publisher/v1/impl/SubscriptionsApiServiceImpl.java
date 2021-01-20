@@ -34,15 +34,15 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApi;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
@@ -62,11 +62,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifMatch If-Match header value
      * @return 200 response and the updated subscription if subscription block is successful
      */
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
+    public Response blockSubscription(String subscriptionId, String blockState, String ifMatch,
                                                        MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
 
@@ -151,22 +151,22 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted subscriptions
      */
-    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query,
+    public Response getSubscriptions(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query,
             MessageContext messageContext) {
         // pre-processing
         // setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             SubscriptionListDTO subscriptionListDTO;
             List<SubscribedAPI> apiUsages;
 
             if (apiId != null) {
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
@@ -209,14 +209,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return monetization usage data for a subscription
      */
     @Override
-    public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) {
+    public Response getSubscriptionUsage(String subscriptionId, MessageContext messageContext) {
 
         if (StringUtils.isBlank(subscriptionId)) {
             String errorMessage = "Subscription ID cannot be empty or null when getting monetization usage.";
             RestApiUtil.handleBadRequest(errorMessage, log);
         }
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             Map<String, String> billingEngineUsageData = monetizationImplementation.
                     getCurrentUsageForSubscription(subscriptionId, apiProvider);
@@ -244,11 +244,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifMatch If-Match header value
      * @return 200 response and the updated subscription if subscription block is successful
      */
-    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
+    public Response unBlockSubscription(String subscriptionId, String ifMatch,
             MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
             // validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
@@ -308,14 +308,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsSubscriptionIdSubscriberInfoGet(String subscriptionId, MessageContext messageContext)
+    public Response getSubscriberInfoBySubscriptionId(String subscriptionId, MessageContext messageContext)
             throws APIManagementException {
         if (StringUtils.isBlank(subscriptionId)) {
             String errorMessage = "Subscription ID cannot be empty or null when getting subscriber info.";
             RestApiUtil.handleBadRequest(errorMessage, log);
         }
-        String username = RestApiUtil.getLoggedInUsername();
-        APIProvider apiProvider = RestApiUtil.getProvider(username);
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         String subscriberName = apiProvider.getSubscriber(subscriptionId);
         Map subscriberClaims = apiProvider.getSubscriberClaims(subscriberName);
         SubscriberInfoDTO subscriberInfoDTO = SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims,

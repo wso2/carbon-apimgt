@@ -24,20 +24,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.netbeans.lib.cvsclient.commandLine.command.log;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -56,126 +56,6 @@ public class RestApiPublisherUtils {
     private static final Log log = LogFactory.getLog(RestApiPublisherUtils.class);
 
     /**
-     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints
-     *
-     * @param api api model
-     * @return validity of the web socket api
-     */
-    public static boolean isValidWSAPI(APIDTO api) {
-
-        boolean isValid = false;
-
-        if (api.getEndpointConfig() != null) {
-            LinkedHashMap endpointConfig = (LinkedHashMap) api.getEndpointConfig();
-            String prodEndpointUrl = String
-                    .valueOf(((LinkedHashMap) endpointConfig.get("production_endpoints")).get("url"));
-            String sandboxEndpointUrl = String
-                    .valueOf(((LinkedHashMap) endpointConfig.get("sandbox_endpoints")).get("url"));
-            isValid = prodEndpointUrl.startsWith("ws://") || prodEndpointUrl.startsWith("wss://");
-
-            if (isValid) {
-                isValid = sandboxEndpointUrl.startsWith("ws://") || sandboxEndpointUrl.startsWith("wss://");
-            }
-        }
-
-        return isValid;
-    }
-
-    /**
-     * To validate the roles against user roles and tenant roles.
-     *
-     * @param inputRoles Input roles.
-     * @return relevant error string or empty string.
-     * @throws APIManagementException API Management Exception.
-     */
-    public static String validateUserRoles(List<String> inputRoles) throws APIManagementException {
-
-        String userName = RestApiUtil.getLoggedInUsername();
-        String[] tenantRoleList = APIUtil.getRoleNames(userName);
-        boolean isMatched = false;
-        String[] userRoleList = null;
-
-        if (APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN)) {
-            isMatched = true;
-        } else {
-            userRoleList = APIUtil.getListOfRoles(userName);
-        }
-        if (inputRoles != null && !inputRoles.isEmpty()) {
-            if (tenantRoleList != null || userRoleList != null) {
-                for (String inputRole : inputRoles) {
-                    if (!isMatched && userRoleList != null && APIUtil.compareRoleList(userRoleList, inputRole)) {
-                        isMatched = true;
-                    }
-                    if (tenantRoleList != null && !APIUtil.compareRoleList(tenantRoleList, inputRole)) {
-                        return "Invalid user roles found in accessControlRole list";
-                    }
-                }
-                return isMatched ? "" : "This user does not have at least one role specified in API access control.";
-            } else {
-                return "Invalid user roles found";
-            }
-        }
-        return "";
-    }
-
-    /**
-     * To validate the additional properties.
-     * Validation will be done for the keys of additional properties. Property keys should not contain spaces in it
-     * and property keys should not conflict with reserved key words.
-     *
-     * @param additionalProperties Map<String, String>  properties to validate
-     * @return error message if there is an validation error with additional properties.
-     */
-    public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
-
-        if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                String propertyKey = entry.getKey().trim();
-                String propertyValue = entry.getValue();
-                if (propertyKey.contains(" ")) {
-                    return "Property names should not contain space character. Property '" + propertyKey + "' "
-                            + "contains space in it.";
-                }
-                if (Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(propertyKey.toLowerCase())) {
-                    return "Property '" + propertyKey + "' conflicts with the reserved keywords. Reserved keywords "
-                            + "are [" + Arrays.toString(APIConstants.API_SEARCH_PREFIXES) + "]";
-                }
-                // Maximum allowable characters of registry property name and value is 100 and 1000. Hence we are
-                // restricting them to be within 80 and 900.
-                if (propertyKey.length() > 80) {
-                    return "Property name can have maximum of 80 characters. Property '" + propertyKey + "' + contains "
-                            + propertyKey.length() + "characters";
-                }
-                if (propertyValue.length() > 900) {
-                    return "Property value can have maximum of 900 characters. Property '" + propertyKey + "' + "
-                            + "contains a value with " + propertyValue.length() + "characters";
-                }
-            }
-        }
-        return "";
-    }
-    
-    /**
-     * To validate the roles against and tenant roles.
-     *
-     * @param inputRoles Input roles.
-     * @return relevant error string or empty string.
-     * @throws APIManagementException API Management Exception.
-     */
-    public static String validateRoles(List<String> inputRoles) throws APIManagementException {
-        String userName = RestApiUtil.getLoggedInUsername();
-        boolean isMatched = false;
-        if (inputRoles != null && !inputRoles.isEmpty()) {
-            String roleString = String.join(",", inputRoles);
-            isMatched = APIUtil.isRoleNameExist(userName, roleString);
-            if (!isMatched) {
-                return "Invalid user roles found in visibleRoles list";
-            }
-        }
-        return "";
-    }
-
-    /**
      * Attaches a file to the specified document
      *
      * @param apiId identifier of the API, the document belongs to
@@ -187,8 +67,8 @@ public class RestApiPublisherUtils {
     public static void attachFileToDocument(String apiId, Documentation documentation, InputStream inputStream,
                                             Attachment fileDetails) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String documentId = documentation.getId();
         String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
         String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
@@ -210,15 +90,21 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
-            APIIdentifier apiIdentifier = APIMappingUtil
-                    .getAPIIdentifierFromUUID(apiId, tenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil
+            //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            apiProvider.addFileToDocumentation(apiIdentifier, documentation, filename, docInputStream, mediaType);
-            apiProvider.updateDocumentation(apiIdentifier, documentation);
+            DocumentationContent content = new DocumentationContent();
+            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
+            resourceFile.setName(filename);
+            content.setResourceFile(resourceFile);
+            content.setSourceType(ContentSourceType.FILE);
+            //apiProvider.addFileToDocumentation(apiIdentifier, documentation, filename, docInputStream, mediaType);
+            //apiProvider.updateDocumentation(apiIdentifier, documentation);
+            apiProvider.addDocumentationContent(apiId, documentId, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
@@ -273,8 +159,8 @@ public class RestApiPublisherUtils {
     public static void attachFileToProductDocument(String productId, Documentation documentation, InputStream inputStream,
             Attachment fileDetails) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String documentId = documentation.getId();
         String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
         String tmpFolder = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator
@@ -296,15 +182,21 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
-            APIProductIdentifier productIdentifier = APIMappingUtil
-                    .getAPIProductIdentifierFromUUID(productId, tenantDomain);
+            //APIProductIdentifier productIdentifier = APIMappingUtil
+            //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
-            apiProvider.updateDocumentation(productIdentifier, documentation);
+            DocumentationContent content = new DocumentationContent();
+            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
+            resourceFile.setName(filename);
+            content.setResourceFile(resourceFile);
+            content.setSourceType(ContentSourceType.FILE);
+            //apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
+            //apiProvider.updateDocumentation(productIdentifier, documentation);
+            apiProvider.addDocumentationContent(productId, documentId, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
@@ -346,4 +238,5 @@ public class RestApiPublisherUtils {
                 + "\"required\":false,\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"OK\"}}," +
                 "\"security\":[{\"default\":[]}],\"consumes\":[\"text/xml\",\"application/soap+xml\"]}}}";
     }
+
 }

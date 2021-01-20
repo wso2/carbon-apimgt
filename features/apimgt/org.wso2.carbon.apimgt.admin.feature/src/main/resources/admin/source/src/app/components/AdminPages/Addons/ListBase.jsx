@@ -98,7 +98,7 @@ function ListBase(props) {
                 setData(LocalData);
             })
                 .catch((e) => {
-                    Alert.error(e);
+                    Alert.error(e.message);
                 });
         }
     };

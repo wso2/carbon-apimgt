@@ -25,6 +25,6 @@ public interface PoliciesApiService {
       public Response policiesMediationGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
       public Response policiesMediationMediationPolicyIdGet(String mediationPolicyId, String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, MediationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response policiesMediationPost(MediationDTO body, String contentType, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, String contentType, MediationDTO mediationDTO, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationPost(String contentType, MediationDTO mediationDTO, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
 }

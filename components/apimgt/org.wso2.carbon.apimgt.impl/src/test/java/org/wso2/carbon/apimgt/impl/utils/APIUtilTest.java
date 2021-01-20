@@ -2400,5 +2400,27 @@ public class APIUtilTest {
         Assert.assertEquals(expectedError, exception.getMessage());
     }
 
+    @Test
+    public void testGetTokenEndpointsByType () throws Exception {
+        Environment environment = new Environment();
+        environment.setType("production");
+        environment.setName("Production");
+        environment.setDefault(true);
+        environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+        environmentMap.put("Production", environment);
 
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+        String tokenEndpointType = APIUtil.getTokenEndpointsByType("production");
+        Assert.assertEquals("https://localhost:8243", tokenEndpointType);
+    }
 }

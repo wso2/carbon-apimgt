@@ -90,7 +90,11 @@ import javax.xml.transform.stream.StreamResult;
 public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
-    protected ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+    protected ApiMgtDAO apiMgtDAO;
+
+    public APIAdminImpl() {
+        apiMgtDAO = ApiMgtDAO.getInstance();
+    }
 
     /**
      * Returns all labels associated with given tenant domain.

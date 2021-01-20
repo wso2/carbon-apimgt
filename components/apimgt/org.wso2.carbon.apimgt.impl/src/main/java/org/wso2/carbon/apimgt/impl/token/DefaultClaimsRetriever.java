@@ -57,7 +57,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
      */
     public void init() {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getFirstProperty(APIConstants.CONSUMER_DIALECT_URI);
+                getAPIManagerConfiguration().getJwtConfigurationDto().getConsumerDialectUri();
         if (dialectURI == null) {
             dialectURI = DEFAULT_DIALECT_URI;
         }

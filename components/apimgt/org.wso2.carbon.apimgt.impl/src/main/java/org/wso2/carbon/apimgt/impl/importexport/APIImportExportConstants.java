@@ -62,6 +62,8 @@ public final class APIImportExportConstants {
             + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "schema.graphql";
 
     public static final int REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM = 1;
+    public static final String REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC = 
+            "Requires re-subscription when publishing the API";
 
     //Image resource
     public static final String IMAGE_RESOURCE = "Image";
@@ -136,4 +138,5 @@ public final class APIImportExportConstants {
         // To identify thumbnail icons
         fileExtensionMapping.put("application/json", "json");
     }
+
 }

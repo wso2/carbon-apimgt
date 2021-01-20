@@ -158,10 +158,17 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         } else {
             resourceArray = new ArrayList<>(Arrays.asList(resourceList));
         }
+
+        String actualVersion = validationContext.getVersion();
+        //Check if the api version has been prefixed with _default_
+        if (actualVersion != null && actualVersion.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+            //Remove the prefix from the version.
+            actualVersion = actualVersion.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+        }
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         API api = tenantSubscriptionStore.getApiByContextAndVersion(validationContext.getContext(),
-                validationContext.getVersion());
+                actualVersion);
         boolean scopesValidated = false;
         if (api != null) {
 

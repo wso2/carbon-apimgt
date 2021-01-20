@@ -35,10 +35,12 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
+import ServiceCatalog from 'AppComponents/ServiceCatalog/ServiceCatalog';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import Scopes from 'AppComponents/Scopes/Scopes';
 import merge from 'lodash/merge';
+import Utils from 'AppData/Utils';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
@@ -190,6 +192,7 @@ export default class Protected extends Component {
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
         const { settings } = this.state;
         const { theme } = this.state;
+        const enableServiceCatalog = Utils.CONST.ENABLE_SERVICE_CATALOG;
         if (!user) {
             return (
                 <IntlProvider locale={language} messages={messages}>
@@ -219,6 +222,8 @@ export default class Protected extends Component {
                                         <Route path='/api-products' component={DeferredAPIs} />
                                         <Route path='/scopes' component={Scopes} />
                                         <Route path='/settings' component={SettingsBase} />
+                                        { enableServiceCatalog
+                                            && <Route path='/service-catalog' component={ServiceCatalog} />}
                                         <Route component={ResourceNotFound} />
                                     </Switch>
                                 </AppContextProvider>

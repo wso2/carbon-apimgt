@@ -24,14 +24,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.apache.commons.io.FileUtils;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -40,7 +48,11 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -83,8 +95,9 @@ public class CommonUtil {
         if (identifier != null) {
             createdDirectories = File.separator + identifier.toString() + File.separator;
         } else {
-            createdDirectories = File.separator + RandomStringUtils
-                    .randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH) + File.separator;
+            createdDirectories =
+                    File.separator + RandomStringUtils.randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH)
+                            + File.separator;
         }
         File tempDirectory = new File(currentDirectory + createdDirectories);
         createDirectory(tempDirectory.getPath());
@@ -138,7 +151,7 @@ public class CommonUtil {
     private static void writeArchiveFile(File directoryToZip, List<File> fileList) throws APIImportExportException {
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(directoryToZip.getPath() + ".zip");
-             ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
+                ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             for (File file : fileList) {
                 if (!file.isDirectory()) {
                     addToArchive(directoryToZip, file, zipOutputStream);
@@ -233,15 +246,12 @@ public class CommonUtil {
      */
     public static String jsonToYaml(String json) throws IOException {
 
-        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory()
-                .enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
+        ObjectMapper yamlReader = new ObjectMapper(
+                new YAMLFactory().enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER));
         JsonNode jsonNodeTree = yamlReader.readTree(json);
-        YAMLMapper yamlMapper = new YAMLMapper()
-                .disable(YAMLGenerator.Feature.SPLIT_LINES)
-                .enable(YAMLGenerator.Feature.INDENT_ARRAYS)
-                .disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+        YAMLMapper yamlMapper = new YAMLMapper().disable(YAMLGenerator.Feature.SPLIT_LINES)
+                .enable(YAMLGenerator.Feature.INDENT_ARRAYS).disable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
+                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER).enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS);
         return yamlMapper.writeValueAsString(jsonNodeTree);
     }
@@ -294,8 +304,8 @@ public class CommonUtil {
 
                 //This index variable is used to get the extracted folder name; that is root directory
                 if (index == 0) {
-                    archiveName = currentEntry.substring(0, currentEntry.indexOf(
-                            APIImportExportConstants.ZIP_FILE_SEPARATOR));
+                    archiveName = currentEntry
+                            .substring(0, currentEntry.indexOf(APIImportExportConstants.ZIP_FILE_SEPARATOR));
                     --index;
                 }
 
@@ -303,8 +313,8 @@ public class CommonUtil {
                 File destinationParent = destinationFile.getParentFile();
                 String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
                 if (!canonicalizedDestinationFilePath.startsWith(new File(destination).getCanonicalPath())) {
-                    String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry +
-                            ". File path is outside target directory";
+                    String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry
+                            + ". File path is outside target directory";
                     throw new APIImportExportException(errorMessage);
                 }
 
@@ -316,8 +326,8 @@ public class CommonUtil {
                 if (!entry.isDirectory()) {
                     // write the current file to the destination
                     try (InputStream zipInputStream = zip.getInputStream(entry);
-                         BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
-                         FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+                            BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
+                            FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
                         IOUtils.copy(inputStream, outputStream);
                     }
                 }
@@ -327,5 +337,155 @@ public class CommonUtil {
             String errorMessage = "Failed to extract the archive (zip) file. ";
             throw new APIImportExportException(errorMessage, e);
         }
+    }
+
+    /**
+     * This method will be used to generate Endpoint certificates and meta information related to endpoint certs
+     *
+     * @param filePath String of new file path
+     * @param content  String of content to write into the file
+     * @throws APIManagementException If an error occurs when generating new certs and yaml file
+     */
+    public static void generateFiles(String filePath, String content) throws APIManagementException {
+
+        File file = new File(filePath);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            byte[] bytesArray = content.getBytes();
+
+            fos.write(bytesArray);
+            fos.flush();
+
+        } catch (IOException e) {
+            String errorMessage = "Error while generating meta information of client certificates from path.";
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+    /**
+     * This method will be used to copy files from source to destination
+     *
+     * @param source String of the source file path
+     * @param dest   String of the destination file path
+     * @throws APIManagementException If an error occurs when copying files
+     */
+    public static void moveFile(String source, String dest) throws APIManagementException {
+        try {
+            Files.move(Paths.get(source), Paths.get(dest));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from" + source + "to" + dest;
+            throw new APIManagementException(errorMessage, e);
+        }
+    }
+
+
+    /**
+     * This method will be used to copy files from source to destination
+     *
+     * @param source String of the source file path
+     * @param dest   String of the destination file path
+     * @throws APIImportExportException If an error occurs when copying files
+     */
+    public static void copyFile(String source, String dest) throws APIImportExportException {
+        try {
+            FileUtils.copyFile(new File(source), new File(dest));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from " + source + " to " + dest;
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+    /**
+     * This method will be used to copy a whole directory to a new location preserving the file dates.
+     *
+     * @param sourceDir String of the source Directory path
+     * @param destDir   String of the destination Directory path
+     * @throws APIImportExportException If an error occurs when copying directory
+     */
+    public static void copyDirectory(String sourceDir, String destDir) throws APIImportExportException {
+
+        try {
+            FileUtils.copyDirectory(new File(sourceDir), new File(destDir));
+        } catch (IOException e) {
+            String errorMessage = "Error while moving file from " + sourceDir + " to " + destDir;
+            throw new APIImportExportException(errorMessage, e);
+        }
+    }
+
+
+    /**
+     * Add the type and the version to the artifact file when exporting.
+     *
+     * @param type        Type of the artifact to be exported
+     * @param version     API Manager version
+     * @param jsonElement JSON element to be added as data
+     * @return The artifact object with the type and version added to it
+     */
+    public static JsonObject addTypeAndVersionToFile(String type, String version, JsonElement jsonElement) {
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(APIConstants.TYPE, type);
+        jsonObject.addProperty(APIConstants.API_DATA_VERSION, version);
+        jsonObject.add(APIConstants.DATA, jsonElement);
+        return jsonObject;
+    }
+
+    /**
+     * Write the file content of an API or API related artifact based on the format.
+     *
+     * @param filePath     Path to the location where the file content should be written
+     * @param exportFormat Format to be exported
+     * @param fileContent  Content to be written
+     */
+    public static void writeToYamlOrJson(String filePath, ExportFormat exportFormat, String fileContent)
+            throws APIImportExportException, IOException {
+
+        switch (exportFormat) {
+        case YAML:
+            String fileInYaml = jsonToYaml(fileContent);
+            writeFile(filePath + ImportExportConstants.YAML_EXTENSION, fileInYaml);
+            break;
+        case JSON:
+            writeFile(filePath + ImportExportConstants.JSON_EXTENSION, fileContent);
+        }
+    }
+
+    /**
+     * Write the DTO an artifact based on the format.
+     *
+     * @param filePath     Path to the location where the file content should be written
+     * @param exportFormat Format to be exported
+     * @param type         Type of the file to be written
+     * @param dtoObject    DTO object
+     */
+    public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, Object dtoObject)
+            throws APIImportExportException, IOException {
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject jsonObject = addTypeAndVersionToFile(type, ImportExportConstants.APIM_VERSION,
+                gson.toJsonTree(dtoObject));
+        String jsonContent = gson.toJson(jsonObject);
+        writeToYamlOrJson(filePath, exportFormat, jsonContent);
+    }
+
+    /**
+     * Extract the imported archive to a temporary folder and return the folder path of it
+     *
+     * @param uploadedInputStream Input stream from the REST request
+     * @return Path to the extracted directory
+     * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
+     *                                  extracting the content
+     */
+    public static String getArchivePathOfExtractedDirectory(InputStream uploadedInputStream, String uploadFileName)
+            throws APIImportExportException {
+        // Temporary directory is used to create the required folders
+        File importFolder = CommonUtil.createTempDirectory(null);
+        String absolutePath = importFolder.getAbsolutePath() + File.separator;
+        CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+        String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
+        return absolutePath + extractedFolderName;
     }
 }

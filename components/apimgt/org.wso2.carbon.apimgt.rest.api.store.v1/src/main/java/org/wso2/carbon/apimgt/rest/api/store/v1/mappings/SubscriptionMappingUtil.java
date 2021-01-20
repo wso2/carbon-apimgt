@@ -26,13 +26,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public class SubscriptionMappingUtil {
      */
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription)
             throws APIManagementException {
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
@@ -75,6 +76,35 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
         subscriptionDTO.setRequestedThrottlingPolicy(subscription.getRequestedTier().getName());
 
+
+        ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
+        subscriptionDTO.setApplicationInfo(applicationInfoDTO);
+
+        return subscriptionDTO;
+    }
+
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, ApiTypeWrapper apiTypeWrapper)
+            throws APIManagementException {
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
+        subscriptionDTO.setSubscriptionId(subscription.getUUID());
+        if (apiTypeWrapper !=null && !apiTypeWrapper.isAPIProduct()) {
+            API api = apiTypeWrapper.getApi();
+            subscriptionDTO.setApiId(api.getUUID());
+            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
+            subscriptionDTO.setApiInfo(apiInfo);
+        } else {
+            APIProduct apiProduct = apiTypeWrapper.getApiProduct();
+            subscriptionDTO.setApiId(apiProduct.getUuid());
+            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
+            subscriptionDTO.setApiInfo(apiInfo);
+        }
+        Application application = subscription.getApplication();
+        application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
+        subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
+        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
+        subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
+        subscriptionDTO.setRequestedThrottlingPolicy(subscription.getRequestedTier().getName());
 
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);
