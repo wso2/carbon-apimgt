@@ -174,8 +174,9 @@ class CreateEditForm extends React.Component {
 
     onDrop = (acceptedFile) => {
         const { intl } = this.props;
-        var specialChars = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/;
+        var specialChars = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,<>\/?~]/;
         if (specialChars.test(acceptedFile[0].name)) {
+            this.setState({ file: null });
             Alert.error(intl.formatMessage({
                 id: 'Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid',
                 defaultMessage: 'Error when validating the document source file name',
