@@ -3,6 +3,7 @@ package org.wso2.carbon.graphql.api.devportal.data;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -29,21 +30,11 @@ public class ScopesData {
 
     public List<ScopesDTO> getScopesData(String Id) throws APIManagementException{
 
-        ArtifactData artifactData = new ArtifactData();
-
-        List<String> identifierParams = artifactData.getApiIdentifireParams(Id);
-
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(apiIdentifier1.getProviderName()));
 
 
-        String apiVersion = identifierParams.get(2);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        String providerName = identifierParams.get(1);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        String apiName = identifierParams.get(0);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
-
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
-
-
-        Map<String, Scope> scopeToKeyMapping = getAPIScopes(apiIdentifier, tenantDomainName);
+        Map<String, Scope> scopeToKeyMapping = getAPIScopes(apiIdentifier1, tenantDomainName);
         Set<Scope> scopes = new LinkedHashSet<>(scopeToKeyMapping.values());
 
 

@@ -91,6 +91,8 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response;
 
+
+
 public class RestApiUtil {
 
     public static final Log log = LogFactory.getLog(RestApiUtil.class);
@@ -101,6 +103,7 @@ public class RestApiUtil {
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
+
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setDescription("Validation Error");
         errorDTO.setMessage("Bad Request");

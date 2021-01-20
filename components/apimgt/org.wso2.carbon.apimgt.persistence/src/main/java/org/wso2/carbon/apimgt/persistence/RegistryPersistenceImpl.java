@@ -1057,7 +1057,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 devPortalAPI.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
 
-              //  devPortalAPI.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
+                devPortalAPI.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
+                        (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+                Set<String> labels = new HashSet<>(Arrays.asList(artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS)));
+                devPortalAPI.setGatewayLabels(labels);
+
+                //devPortalAPI.setApiCategories();
+              // devPortalAPI.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
                devPortalAPI.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
                devPortalAPI.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
 

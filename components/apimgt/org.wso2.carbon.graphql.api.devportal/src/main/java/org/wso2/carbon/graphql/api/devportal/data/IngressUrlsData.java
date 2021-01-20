@@ -1,6 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
@@ -34,13 +35,15 @@ public class IngressUrlsData {
         ArtifactData artifactData = new ArtifactData();
         List<IngressUrlDTO> apiDeployedIngressURLs = new ArrayList<>();
 
-        String deployments = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-        Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
+        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+
+        //String deployments = artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
+        Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> deploymentEnvironments = devPortalAPI.getDeploymentEnvironments();//extractDeploymentsForAPI(deployments);
 
         if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-            Set<DeploymentEnvironments> selectedDeploymentEnvironments = deploymentEnvironments;
+            Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> selectedDeploymentEnvironments = deploymentEnvironments;
             if (selectedDeploymentEnvironments != null && !selectedDeploymentEnvironments.isEmpty()) {
-                for (org.wso2.carbon.apimgt.api.model.DeploymentEnvironments deploymentEnvironment : selectedDeploymentEnvironments) {
+                for (org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments deploymentEnvironment : selectedDeploymentEnvironments) {
                     IngressUrlDTO ingressUrlDTO = new IngressUrlDTO();
                     JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
                     for (Object clusterConfig : clusterConfigs) {

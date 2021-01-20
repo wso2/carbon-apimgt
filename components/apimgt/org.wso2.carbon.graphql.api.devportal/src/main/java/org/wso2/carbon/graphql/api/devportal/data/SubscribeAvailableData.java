@@ -1,5 +1,6 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -18,17 +19,20 @@ public class SubscribeAvailableData {
 
     public boolean getSubscriptionAvailable(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
         ArtifactData artifactData = new ArtifactData();
-        GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
-        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_PROVIDER)));
-        String subscriptionAvailability = apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY);
-        String subscriptionAllowedTenants = apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS);
+        //GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
+
+        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+        String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(devPortalAPI.getProviderName()));
+        String subscriptionAvailability = devPortalAPI.getSubscriptionAvailability();//apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY);
+        String subscriptionAllowedTenants =devPortalAPI.getSubscriptionAvailableOrgs(); //apiArtifact.getAttribute(org.wso2.carbon.apimgt.persistence.APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS);
         boolean IsSubscriptionAvailability = isSubscriptionAvailable(apiTenant,subscriptionAvailability,subscriptionAllowedTenants);
         return IsSubscriptionAvailability;
     }
     private static boolean isSubscriptionAvailable(String apiTenant, String subscriptionAvailability,
                                                    String subscriptionAllowedTenants) {
 
-        String userTenant = RestApiUtil.getLoggedInUserGroupId();
+        String userTenant = RestApiUtil.getRequestedTenantDomain("");
+        //String userTenant = RestApiUtil.getLoggedInUserTenantDomain();
         boolean subscriptionAllowed = false;
         if (!userTenant.equals(apiTenant)) {
             if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {

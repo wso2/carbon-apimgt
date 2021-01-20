@@ -650,6 +650,7 @@ public final class APIUtil {
             }
 
             api = new API(apiIdentifier);
+
             //set uuid
             api.setUUID(artifact.getId());
             // set rating
@@ -8402,6 +8403,7 @@ public final class APIUtil {
      * @throws APIManagementException if failed to fetch micro gateway labels
      */
     public static List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         return apiMgtDAO.getAllLabels(tenantDomain);

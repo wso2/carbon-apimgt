@@ -91,66 +91,66 @@ public class ArtifactData {
 
 
     }
-
-
+//
+//
     protected TenantManager getTenantManager() {
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
     }
     protected RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
-
-    public Registry getRegistry() throws UserStoreException, RegistryException {
-        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-        Organization org = new Organization(TenantDomain);
-        //boolean tenantFlowStarted = false;
-        Registry registry;
-        String requestedTenantDomain = org.getName();
-        if (requestedTenantDomain  != null) {
-            int id = getTenantManager().getTenantId(requestedTenantDomain);
-            RegistryPersistenceUtil.startTenantFlow(requestedTenantDomain);
-            //tenantFlowStarted = true;
-            if (APIConstants.WSO2_ANONYMOUS_USER.equals("wso2.anonymous.user")) {
-                registry = getRegistryService().getGovernanceUserRegistry("wso2.anonymous.user", id);
-            } else if (this.tenantDomain != null && !this.tenantDomain.equals(requestedTenantDomain)) {
-                registry = getRegistryService().getGovernanceSystemRegistry(id);
-            } else {
-                registry = this.registry;
-            }
-        } else {
-            registry = this.registry;
-        }
-        return registry;
-    }
-
-    public GenericArtifact[] getAllApis() throws APIPersistenceException,APIManagementException, RegistryException, UserStoreException {
-        //ArtifactData artifactData = new ArtifactData();
-
-        boolean tenantFlowStarted = false;
-        GenericArtifact apiArtifact = null;
-        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-        Organization org = new Organization(TenantDomain);
-        String[] allGenericArtifact=null;
-        GenericArtifact[] artifacts = null;
-
-        try {
-            Registry registry = getRegistry();
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            allGenericArtifact = artifactManager.getAllGenericArtifactIds();
-            artifacts = artifactManager.getAllGenericArtifacts();
-
-
-        } catch (RegistryException e) {
-
-        } finally {
-            if (tenantFlowStarted) {
-                RegistryPersistenceUtil.endTenantFlow();
-            }
-        }
-        return artifacts;
-    }
+//
+//    public Registry getRegistry() throws UserStoreException, RegistryException {
+//        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
+//        Organization org = new Organization(TenantDomain);
+//        //boolean tenantFlowStarted = false;
+//        Registry registry;
+//        String requestedTenantDomain = org.getName();
+//        if (requestedTenantDomain  != null) {
+//            int id = getTenantManager().getTenantId(requestedTenantDomain);
+//            RegistryPersistenceUtil.startTenantFlow(requestedTenantDomain);
+//            //tenantFlowStarted = true;
+//            if (APIConstants.WSO2_ANONYMOUS_USER.equals("wso2.anonymous.user")) {
+//                registry = getRegistryService().getGovernanceUserRegistry("wso2.anonymous.user", id);
+//            } else if (this.tenantDomain != null && !this.tenantDomain.equals(requestedTenantDomain)) {
+//                registry = getRegistryService().getGovernanceSystemRegistry(id);
+//            } else {
+//                registry = this.registry;
+//            }
+//        } else {
+//            registry = this.registry;
+//        }
+//        return registry;
+//    }
+//
+//    public GenericArtifact[] getAllApis() throws APIPersistenceException,APIManagementException, RegistryException, UserStoreException {
+//        //ArtifactData artifactData = new ArtifactData();
+//
+//        boolean tenantFlowStarted = false;
+//        GenericArtifact apiArtifact = null;
+//        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
+//        Organization org = new Organization(TenantDomain);
+//        String[] allGenericArtifact=null;
+//        GenericArtifact[] artifacts = null;
+//
+//        try {
+//            Registry registry = getRegistry();
+//            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+//                    APIConstants.API_KEY);
+//
+//            allGenericArtifact = artifactManager.getAllGenericArtifactIds();
+//            artifacts = artifactManager.getAllGenericArtifacts();
+//
+//
+//        } catch (RegistryException e) {
+//
+//        } finally {
+//            if (tenantFlowStarted) {
+//                RegistryPersistenceUtil.endTenantFlow();
+//            }
+//        }
+//        return artifacts;
+//    }
 //    public static final String GET_API_VERSIONS = "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
 //    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
 //        Set<String> versions = new HashSet<String>();
@@ -171,30 +171,30 @@ public class ArtifactData {
 //    }
     public static final String GET_API_IDENTIFIRE_PARAMS = "SELECT API.API_NAME,API.API_PROVIDER,API.API_VERSION,API.API_TYPE FROM AM_API API WHERE API.API_UUID = ? ";
 
-    public List<String> getApiIdentifireParams(String Id){
-        List<String> IdentifireParams = new ArrayList<>();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_API_IDENTIFIRE_PARAMS)) {
-            statement.setString(1, Id);
+//    public List<String> getApiIdentifireParams(String Id){
+//        List<String> IdentifireParams = new ArrayList<>();
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection.prepareStatement(GET_API_IDENTIFIRE_PARAMS)) {
+//            statement.setString(1, Id);
+//
+//            ResultSet resultSet = statement.executeQuery();
+//            while (resultSet.next()) {
+//                IdentifireParams.add(resultSet.getString("API_NAME"));
+//                IdentifireParams.add(resultSet.getString("API_PROVIDER"));
+//                IdentifireParams.add(resultSet.getString("API_VERSION"));
+//                IdentifireParams.add(resultSet.getString("API_TYPE"));
+//
+//            }
+//        } catch (SQLException e) {
+//
+//        }
+//
+//        return IdentifireParams;
+//
+//    }
 
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                IdentifireParams.add(resultSet.getString("API_NAME"));
-                IdentifireParams.add(resultSet.getString("API_PROVIDER"));
-                IdentifireParams.add(resultSet.getString("API_VERSION"));
-                IdentifireParams.add(resultSet.getString("API_TYPE"));
 
-            }
-        } catch (SQLException e) {
-
-        }
-
-        return IdentifireParams;
-
-    }
-
-
-    public int getDevportalAPIS() throws APIManagementException, UserStoreException, RegistryException, APIPersistenceException {
+    public List<DevPortalAPI> getDevportalAPIS() throws APIManagementException, UserStoreException, RegistryException, APIPersistenceException {
 
         Organization org = new Organization("carbon.super");
 
@@ -218,7 +218,7 @@ public class ArtifactData {
 
         //String searchQuery = "store_view_roles=(null OR system\\/wso2.anonymous.role)&name=*&enableStore=(true OR null)&lcState=(PUBLISHED OR PROTOTYPED)";
 
-        Registry userRegistry = getRegistry();
+        //Registry userRegistry = getRegistry();
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
         DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
                 0, 25, userCtx);
@@ -226,7 +226,17 @@ public class ArtifactData {
         List<DevPortalAPI> list = searchAPIs.getDevPortalAPIList();
 
 
-        return list.size();
+        return list;
     }
+
+    public DevPortalAPI getApiFromUUID(String Id) throws APIPersistenceException {
+        Organization org = new Organization("carbon.super");
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+
+        DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org , Id);
+
+        return devPortalApi;
+    }
+
 
 }

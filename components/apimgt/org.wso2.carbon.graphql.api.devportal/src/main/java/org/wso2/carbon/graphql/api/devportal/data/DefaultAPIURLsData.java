@@ -1,6 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
@@ -25,33 +26,36 @@ public class DefaultAPIURLsData {
 
         ArtifactData artifactData = new ArtifactData();
 
+
+        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
 
-        Set<String> environmentsPublishedByAPI = ApiDetails.getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));;
+        Set<String> environmentsPublishedByAPI = devPortalAPI.getEnvironments();//ApiDetails.getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));;
         environmentsPublishedByAPI.remove("none");
 
         String http = null;
         String https = null;
         String ws = null;
         String wss = null;
-        Set<String> apiTransports = new HashSet<>(Arrays.asList(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS).split(",")));
+        Set<String> apiTransports = new HashSet<>(Arrays.asList(devPortalAPI.getTransports().split(",")));
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if(environment !=null){
                 String[] gwEndpoints = null; //environment.getApiGatewayEndpoint().split(",");
-                if ("WS".equalsIgnoreCase(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
+                if ("WS".equalsIgnoreCase(devPortalAPI.getType())) {
                     gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
                 } else {
                     gwEndpoints = environment.getApiGatewayEndpoint().split(",");
                 }
                 for (String gwEndpoint : gwEndpoints) {
                     StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
-                    endpointBuilder.append(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
-                    if(Boolean.parseBoolean(artifactData.getDevportalApis(Id).getAttribute(
-                            APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION))){
-                        int index = endpointBuilder.indexOf(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                    endpointBuilder.append(devPortalAPI.getContext());
+                    if(devPortalAPI.getIsDefaultVersion()){
+                        //artifactData.getDevportalApis(Id).getAttribute(
+                        //                            APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)
+                        int index = endpointBuilder.indexOf(devPortalAPI.getVersion());
                         endpointBuilder.replace(index, endpointBuilder.length(), "");
                         if (gwEndpoint.contains("http:") && apiTransports.contains("http")){
                             http = endpointBuilder.toString();

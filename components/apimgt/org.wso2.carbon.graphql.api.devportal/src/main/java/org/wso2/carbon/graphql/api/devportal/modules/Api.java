@@ -3,13 +3,13 @@ package org.wso2.carbon.graphql.api.devportal.modules;
 
 public class Api {
    private String id;
-//    private String name;
+    private String name;
     private String description;
-    //private String context;
-    //private String version;
-   // private String provider;
+    private String context;
+    private String version;
+    private String provider;
     //private String apiDefinition;
-    //private String type;
+    private String type;
     private String transport;
     private boolean hasthumbnail;
     //private String additionalProperties;
@@ -31,15 +31,15 @@ public class Api {
     //private String createdTime;
     //private String lastUpdate;
 
-    public Api(String id,String description,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
+    public Api(String id,String name,String description,String context,String version,String provider,String type,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
         this.id = id;
-
+        this.name = name;
         this.description = description;
-//        this.context = context;
-//        this.version = version;
-//        this.provider = provider;
+        this.context = context;
+        this.version = version;
+        this.provider = provider;
         //this.apiDefinition = apiDefinition;
-       // this.type = type;
+        this.type = type;
         this.transport=transport;
         this.hasthumbnail = hasthumbnail;
         //this.additionalProperties = additionalProperties;

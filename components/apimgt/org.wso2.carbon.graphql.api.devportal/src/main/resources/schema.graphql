@@ -38,6 +38,10 @@ type Api{
 }
 type Label{
     name:String
+    labelDetails:[LabelDetails]
+}
+
+type LabelDetails{
     description:String
     accessUrls:String
 }
@@ -60,8 +64,18 @@ type Tier{
     tierDetails:[TierDetails]
 }
 type TierDetails{
+    displayName:String
+    description:String
+    policyContent:String
+    tierAttributes:String
+    requestsPerMin:Int
+    requestCount:Int
+    unitTime:Int
+    timeUnit:String
     tierPlan:String
+    stopOnQuotaReached:Boolean
     monetizationAttributes:String
+
 }
 
 type Operation{

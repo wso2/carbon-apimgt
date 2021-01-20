@@ -1,13 +1,10 @@
 package org.wso2.carbon.graphql.api.devportal;
 
 import org.wso2.carbon.graphql.api.devportal.data.*;
-import org.wso2.carbon.graphql.api.devportal.modules.APIEndpointURLsDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.Api;
+import org.wso2.carbon.graphql.api.devportal.modules.*;
 import graphql.schema.DataFetcher;
 import org.springframework.stereotype.Component;
 import org.wso2.carbon.graphql.api.devportal.data.*;
-import org.wso2.carbon.graphql.api.devportal.modules.TierDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.TierNameDTO;
 //import org.wso2.carbon.apimgt.graphql.api.devportal.data.*;
 
 
@@ -40,34 +37,34 @@ public class ApiService {
 //
 //        };
 //    }
-    public DataFetcher getApiName(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getApiName(api.getId());
-
-        };
-    }
-    public DataFetcher getApiContext(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getApiContext(api.getId());
-
-        };
-    }
-    public DataFetcher getApiVersion(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getApiVersion(api.getId());
-
-        };
-    }
-    public DataFetcher getApiProvider(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getApiProvider(api.getId());
-
-        };
-    }
+//    public DataFetcher getApiName(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apidtoData.getApiName(api.getId());
+//
+//        };
+//    }
+//    public DataFetcher getApiContext(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apidtoData.getApiContext(api.getId());
+//
+//        };
+//    }
+//    public DataFetcher getApiVersion(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apidtoData.getApiVersion(api.getId());
+//
+//        };
+//    }
+//    public DataFetcher getApiProvider(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apidtoData.getApiProvider(api.getId());
+//
+//        };
+//    }
     public DataFetcher getApiType(){
         return env->{
             Api api = env.getSource();
@@ -90,13 +87,13 @@ public class ApiService {
         };
     }
 
-    public DataFetcher getAdditionalProperties(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getAdditionalProperties(api.getId());
-
-        };
-    }
+//    public DataFetcher getAdditionalProperties(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apidtoData.getAdditionalProperties(api.getId());
+//
+//        };
+//    }
     public DataFetcher getApiDefinition(){
         return env->{
             Api api = env.getSource();
@@ -105,13 +102,13 @@ public class ApiService {
         };
     }
 
-    public DataFetcher getApiTags(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getTags(api.getId());
-
-        };
-    }
+//    public DataFetcher getApiTags(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apidtoData.getTags(api.getId());
+//
+//        };
+//    }
     public DataFetcher getApisFromArtifact(){
 
 
@@ -179,7 +176,13 @@ public class ApiService {
     public DataFetcher getLabelInformation(){
         return env->{
           Api api = env.getSource();
-          return labelData.getLabeldata(api.getId());
+          return labelData.getLabelNames(api.getId());
+        };
+    }
+    public DataFetcher getLabelsDetails(){
+        return env->{
+            LabelNameDTO labelNameDTO = env.getSource();
+            return labelData.getLabeldata(labelNameDTO.getId(),labelNameDTO.getName());
         };
     }
     public DataFetcher getScopeInformation(){

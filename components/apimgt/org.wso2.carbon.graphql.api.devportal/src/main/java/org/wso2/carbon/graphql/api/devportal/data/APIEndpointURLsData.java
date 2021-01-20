@@ -27,7 +27,7 @@ public class APIEndpointURLsData {
                 .getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
 
-        Set<String> environmentsPublishedByAPI = ApiDetails.getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));//new HashSet<>(apiTypeWrapper.getApi().getEnvironments());
+        Set<String> environmentsPublishedByAPI = artifactData.getApiFromUUID(Id).getEnvironments();//new HashSet<>(apiTypeWrapper.getApi().getEnvironments());
         environmentsPublishedByAPI.remove("none");
 
 

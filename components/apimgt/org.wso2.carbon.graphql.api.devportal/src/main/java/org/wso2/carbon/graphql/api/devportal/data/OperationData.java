@@ -21,23 +21,17 @@ public class OperationData {
     public List<OperationDTO> getOperationData(String Id) throws GovernanceException, APIManagementException {
 
 
-        ArtifactData artifactData = new ArtifactData();
 
-        List<String> operationParams = artifactData.getApiIdentifireParams(Id);
+        APIDTOData apidtoData = new APIDTOData();
 
-        String providerName = operationParams.get(1);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        String apiName = operationParams.get(0);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_NAME);
-        String apiVersion = operationParams.get(2);//artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
 
-        String type = operationParams.get(3);
-
-        //artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_TYPE
+        String type = apidtoData.getApiType(Id);
 
         List<OperationDTO> operationList = null;
         if (APIConstants.APITransportType.GRAPHQL.toString().equals(type)) {
             operationList = new ArrayList<>();
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiIdentifier);
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiIdentifier1);
             for (URITemplate template : uriTemplates) {
                 String target = template.getUriTemplate();
                 String verb = template.getHTTPVerb();
