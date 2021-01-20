@@ -213,7 +213,7 @@ const useStyles = makeStyles((theme) => ({
     },
     cardActionHeight: {
         boxShadow: 1,
-        height: '25%%',
+        height: '25%',
     },
     dialogContent: {
         overflow: 'auto',
@@ -238,8 +238,15 @@ const useStyles = makeStyles((theme) => ({
         width: '800px',
         height: '600px',
     },
+    createRevisionDialogStyle: {
+        width: '800px',
+    },
     sectionTitle: {
         marginBottom: theme.spacing(2),
+    },
+    deployNewRevButtonStyle: {
+        marginRight: theme.spacing(3),
+        marginBottom: theme.spacing(3),
     },
 }));
 
@@ -278,6 +285,7 @@ export default function Environments() {
     const [revisionToDelete, setRevisionToDelete] = useState([]);
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
+    const [openDeployPopup, setOpenDeployPopup] = useState(false);
 
     useEffect(() => {
         restApi.getDeployments()
@@ -308,6 +316,14 @@ export default function Environments() {
     const toggleOpenConfirmRestore = (revisionName, revisionId) => {
         setRevisionToRestore([revisionName, revisionId]);
         setConfirmRestoreOpen(!confirmRestoreOpen);
+    };
+
+    const toggleDeployRevisionPopup = () => {
+        setOpenDeployPopup(!openDeployPopup);
+    };
+
+    const handleCloseDeployPopup = () => {
+        setOpenDeployPopup(false);
     };
 
     const handleClickOpen = () => {
@@ -405,13 +421,13 @@ export default function Environments() {
     function restoreRevision(revisionId) {
         restApi.restoreRevision(api.id, revisionId)
             .then(() => {
-                Alert.info('Revision Restore Successfully');
+                Alert.info('Revision Restored Successfully');
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 } else {
-                    Alert.error('Something went wrong while restore the revision');
+                    Alert.error('Something went wrong while restoring the revision');
                 }
                 console.error(error);
             }).finally(() => {
@@ -438,13 +454,13 @@ export default function Environments() {
         }];
         restApi.undeployRevision(api.id, revisionId, body)
             .then(() => {
-                Alert.info('Undeploy revision Successfully');
+                Alert.info('Revision Undeployed Successfully');
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 } else {
-                    Alert.error('Something went wrong while undeploy the revision');
+                    Alert.error('Something went wrong while undeploying the revision');
                 }
                 console.error(error);
             }).finally(() => {
@@ -487,7 +503,7 @@ export default function Environments() {
         };
         restApi.createRevision(api.id, body)
             .then((response) => {
-                Alert.info('Revision Create Successfully');
+                Alert.info('Revision Created Successfully');
                 const body1 = [];
                 for (let i = 0; i < length1; i++) {
                     body1.push({
@@ -497,13 +513,13 @@ export default function Environments() {
                 }
                 restApi.deployRevision(api.id, response.body.id, body1)
                     .then(() => {
-                        Alert.info('Deploy revision Successfully');
+                        Alert.info('Revision Deployed Successfully');
                     })
                     .catch((error) => {
                         if (error.response) {
                             Alert.error(error.response.body.description);
                         } else {
-                            Alert.error('Something went wrong while deploy the revision');
+                            Alert.error('Something went wrong while deploying the revision');
                         }
                         console.error(error);
                     });
@@ -811,12 +827,6 @@ export default function Environments() {
                         <Grid className={classes.textShapeMiddle}>
                             {item5}
                         </Grid>
-                        <Grid className={classes.textDelete}>
-                            <FormattedMessage
-                                id='Apis.Details.Environments.Environments.Deployments.delete.first.revision'
-                                defaultMessage='Revision 1 will be deleted'
-                            />
-                        </Grid>
                     </Grid>,
                 );
             }
@@ -885,6 +895,254 @@ export default function Environments() {
     }
     return (
         <>
+            <Grid container>
+                <Button
+                    onClick={toggleDeployRevisionPopup}
+                    variant='contained'
+                    color='primary'
+                    size='large'
+                    className={classes.deployNewRevButtonStyle}
+                >
+                    <FormattedMessage
+                        id='Apis.Details.Environments.Environments.deploy.new.revision'
+                        defaultMessage='Deploy New Revision'
+                    />
+                </Button>
+            </Grid>
+            <Grid container>
+                <Dialog
+                    open={openDeployPopup}
+                    onClose={handleCloseDeployPopup}
+                    aria-labelledby='form-dialog-title'
+                    classes={{ paper: classes.dialogPaper }}
+                >
+                    <DialogTitle id='form-dialog-title' variant='h2'>
+                        <FormattedMessage
+                            id='Apis.Details.Environments.Environments.deploy.new.revision.heading'
+                            defaultMessage='Deploy New Revision'
+                        />
+                    </DialogTitle>
+                    <DialogContent className={classes.dialogContent}>
+                        <Box mb={3}>
+                            <TextField
+                                name='name'
+                                margin='dense'
+                                variant='outlined'
+                                label='Name'
+                                value='REVISION'
+                                fullWidth
+                                disabled
+                            />
+                        </Box>
+                        <Box mb={3}>
+                            <TextField
+                                autoFocus
+                                name='description'
+                                margin='dense'
+                                variant='outlined'
+                                label='Description'
+                                value={description}
+                                helperText={(
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.Revision.Description'
+                                        defaultMessage='Brief description of the revision'
+                                    />
+                                )}
+                                fullWidth
+                                multiline
+                                rows={3}
+                                rowsMax={4}
+                                onChange={handleChange}
+                            />
+                        </Box>
+                        <Box mt={2}>
+                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.api.gateways.heading'
+                                    defaultMessage='API Gateways'
+                                />
+                            </Typography>
+                            <Grid
+                                container
+                                spacing={3}
+                            >
+                                {settings.environment.map((row) => (
+                                    <Grid item xs={4}>
+                                        <Card
+                                            className={clsx(SelectedEnvironment
+                                                && SelectedEnvironment.includes(row.name)
+                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
+                                            variant='outlined'
+                                        >
+                                            <Box height='80%'>
+                                                <CardContent className={classes.cardContentHeight}>
+                                                    <Grid
+                                                        container
+                                                        direction='column'
+                                                        spacing={2}
+                                                    >
+                                                        <Grid item>
+                                                            <Typography variant='subtitle2'>
+                                                                {row.name}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'
+                                                                color='textSecondary'
+                                                                gutterBottom
+                                                            >
+                                                                {row.type}
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            {allEnvRevision
+                                                                && (
+                                                                    allEnvRevision.filter(
+                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                            (o2) => o2.name === row.name,
+                                                                        ),
+                                                                    ).length
+                                                                ) !== 0 ? (
+                                                                    allEnvRevision && allEnvRevision.filter(
+                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                            (o2) => o2.name === row.name,
+                                                                        ),
+                                                                    ).map((o3) => (
+                                                                        <div>
+                                                                            <Chip
+                                                                                label={o3.displayName}
+                                                                                style={{ backgroundColor: '#15B8CF' }}
+                                                                            />
+                                                                        </div>
+                                                                    ))) : (
+                                                                // eslint-disable-next-line react/jsx-indent
+                                                                    <div />
+                                                                )}
+                                                        </Grid>
+                                                        <Grid item />
+                                                    </Grid>
+                                                </CardContent>
+                                            </Box>
+                                            <Box height='20%'>
+                                                <CardActions className={classes.cardActionHeight}>
+                                                    <Checkbox
+                                                        id={row.name.split(' ').join('')}
+                                                        value={row.name}
+                                                        checked={SelectedEnvironment.includes(row.name)}
+                                                        onChange={handleChange}
+                                                        color='primary'
+                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                                    />
+                                                </CardActions>
+                                            </Box>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
+                        <Box mt={2}>
+                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.gateway.labels.heading'
+                                    defaultMessage='Gateway Labels'
+                                />
+                            </Typography>
+                            <Grid
+                                container
+                                spacing={3}
+                            >
+                                {mgLabels.length > 0 && mgLabels.map((row) => (
+                                    <Grid item xs={4}>
+                                        <Card
+                                            className={clsx(SelectedEnvironment
+                                                && SelectedEnvironment.includes(row.name)
+                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
+                                            variant='outlined'
+                                        >
+                                            <Box height='75%'>
+                                                <CardContent className={classes.cardContentHeight}>
+                                                    <Grid
+                                                        container
+                                                        direction='column'
+                                                        spacing={2}
+                                                    >
+                                                        <Grid item>
+                                                            <Typography variant='subtitle2'>
+                                                                {row.name}
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body2'
+                                                                color='textSecondary'
+                                                                gutterBottom
+                                                            >
+                                                                {row.type}
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            {allEnvRevision && (allEnvRevision.filter(
+                                                                (o1) => o1.deploymentInfo.filter(
+                                                                    (o2) => o2.name === row.name,
+                                                                ),
+                                                            ).length) !== 0 ? (
+                                                                    allEnvRevision && allEnvRevision.filter(
+                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                            (o2) => o2.name === row.name,
+                                                                        ),
+                                                                    ).map((o3) => (
+                                                                        <div>
+                                                                            <Chip
+                                                                                label={o3.displayName}
+                                                                                style={{ backgroundColor: '#15B8CF' }}
+                                                                            />
+                                                                        </div>
+                                                                    ))) : (
+                                                                    // eslint-disable-next-line react/jsx-indent
+                                                                    <div />
+                                                                )}
+                                                        </Grid>
+                                                        <Grid item />
+                                                    </Grid>
+                                                </CardContent>
+                                            </Box>
+                                            <Box height='25%'>
+                                                <CardActions className={classes.cardActionHeight}>
+                                                    <Checkbox
+                                                        id={row.name.split(' ').join('')}
+                                                        value={row.name}
+                                                        checked={SelectedEnvironment.includes(row.name)}
+                                                        onChange={handleChange}
+                                                        color='primary'
+                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                                    />
+                                                </CardActions>
+                                            </Box>
+                                        </Card>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDeployPopup}>
+                            <FormattedMessage
+                                id='Apis.Details.Environments.Environments.deploy.cancel'
+                                defaultMessage='Cancel'
+                            />
+                        </Button>
+                        <Button
+                            type='submit'
+                            variant='contained'
+                            onClick={() => createDeployRevision(SelectedEnvironment, SelectedEnvironment.length)}
+                            color='primary'
+                            disabled={SelectedEnvironment.length === 0}
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.Environments.Environments.deploy.deploy'
+                                defaultMessage='Deploy'
+                            />
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Grid>
             <Grid
                 container
                 direction='row'
@@ -934,14 +1192,26 @@ export default function Environments() {
                     open={open}
                     onClose={handleClose}
                     aria-labelledby='form-dialog-title'
-                    classes={{ paper: classes.dialogPaper }}
+                    classes={{ paper: classes.createRevisionDialogStyle }}
                 >
-                    <DialogTitle id='form-dialog-title' variant='h2'>Deploy</DialogTitle>
+                    <DialogTitle id='form-dialog-title' variant='h2'>
+                        <FormattedMessage
+                            id='Apis.Details.Environments.Environments.revision.create.heading'
+                            defaultMessage='Create Revision'
+                        />
+                    </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        {/* <Typography variant='h6' gutterBottom> */}
-                        {/* Revision {(allRevisions && allRevisions.length !== 0) ?
-                                (parseInt(allRevisions[allRevisions.length-1].displayName.slice(-1)) +1) : 0} */}
-                        {/* </Typography> */}
+                        <Box mb={3}>
+                            <TextField
+                                name='name'
+                                margin='dense'
+                                variant='outlined'
+                                label='Name'
+                                value='REVISION'
+                                fullWidth
+                                disabled
+                            />
+                        </Box>
                         <Box mb={3}>
                             <TextField
                                 autoFocus
@@ -963,178 +1233,13 @@ export default function Environments() {
                                 onChange={handleChange}
                             />
                         </Box>
-                        <Box mt={2}>
-                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.api.gateways.heading'
-                                    defaultMessage='API Gateways'
-                                />
-                            </Typography>
-                            <Grid
-                                container
-                                // spacing={3}
-                            >
-                                {settings.environment.map((row) => (
-                                    <Grid item xs={4}>
-                                        <Card
-                                            // className={clsx(SelectedEnvironment
-                                            //     && SelectedEnvironment.includes(row.name)
-                                            //     ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
-                                            variant='outlined'
-                                        >
-                                            <Box height='70%'>
-                                                <CardContent className={classes.cardContentHeight}>
-                                                    <Grid
-                                                        container
-                                                        direction='column'
-                                                        spacing={2}
-                                                    >
-                                                        <Grid item>
-                                                            <Typography variant='subtitle2'>
-                                                                {row.name}
-                                                            </Typography>
-                                                            <Typography
-                                                                variant='body2'
-                                                                color='textSecondary'
-                                                                gutterBottom
-                                                            >
-                                                                {row.type}
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item>
-                                                            {allEnvRevision
-                                                                && (
-                                                                    allEnvRevision.filter(
-                                                                        (o1) => o1.deploymentInfo.filter(
-                                                                            (o2) => o2.name === row.name,
-                                                                        ),
-                                                                    ).length
-                                                                ) !== 0 ? (
-                                                                    allEnvRevision && allEnvRevision.filter(
-                                                                        (o1) => o1.deploymentInfo.filter(
-                                                                            (o2) => o2.name === row.name,
-                                                                        ),
-                                                                    ).map((o3) => (
-                                                                        <div>
-                                                                            <Chip
-                                                                                label={o3.displayName}
-                                                                                style={{ backgroundColor: '#15B8CF' }}
-                                                                            />
-                                                                        </div>
-                                                                    ))) : (
-                                                                // eslint-disable-next-line react/jsx-indent
-                                                                    <div />
-                                                                )}
-                                                        </Grid>
-                                                        <Grid item />
-                                                    </Grid>
-                                                </CardContent>
-                                            </Box>
-                                            <Box height='30%'>
-                                                <CardActions className={classes.cardActionHeight}>
-
-                                                    <Checkbox
-                                                        id={row.name.split(' ').join('')}
-                                                        value={row.name}
-                                                        checked={SelectedEnvironment.includes(row.name)}
-                                                        onChange={handleChange}
-                                                        color='primary'
-                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                    />
-                                                </CardActions>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Box>
-                        {mgLabels.length > 0 && mgLabels.map((row) => (
-                            <Box mt={2}>
-                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.gateway.labels.heading'
-                                        defaultMessage='Gateway Labels'
-                                    />
-                                </Typography>
-                                <Grid
-                                    container
-                                    spacing={3}
-                                >
-                                    <Grid item xs={4}>
-                                        <Card
-                                            className={clsx(SelectedEnvironment
-                                                && SelectedEnvironment.includes(row.name)
-                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
-                                            variant='outlined'
-                                        >
-                                            <Box height='70%'>
-                                                <CardContent className={classes.cardContentHeight}>
-                                                    <Grid
-                                                        container
-                                                        direction='column'
-                                                        spacing={2}
-                                                    >
-                                                        <Grid item>
-                                                            <Typography variant='subtitle2'>
-                                                                {row.name}
-                                                            </Typography>
-                                                            <Typography
-                                                                variant='body2'
-                                                                color='textSecondary'
-                                                                gutterBottom
-                                                            >
-                                                                {row.type}
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item>
-                                                            {allEnvRevision && (allEnvRevision.filter(
-                                                                (o1) => o1.deploymentInfo.filter(
-                                                                    (o2) => o2.name === row.name,
-                                                                ),
-                                                            ).length) !== 0 ? (
-                                                                    allEnvRevision && allEnvRevision.filter(
-                                                                        (o1) => o1.deploymentInfo.filter(
-                                                                            (o2) => o2.name === row.name,
-                                                                        ),
-                                                                    ).map((o3) => (
-                                                                        <div>
-                                                                            <Chip
-                                                                                label={o3.displayName}
-                                                                                style={{ backgroundColor: '#15B8CF' }}
-                                                                            />
-                                                                        </div>
-                                                                    ))) : (
-                                                                    // eslint-disable-next-line react/jsx-indent
-                                                                    <div />
-                                                                )}
-                                                        </Grid>
-                                                        {' '}
-                                                        <Grid item />
-                                                    </Grid>
-                                                </CardContent>
-                                            </Box>
-                                            <Box height='30%'>
-                                                <CardActions className={classes.cardActionHeight}>
-
-                                                    <Checkbox
-                                                        id={row.name.split(' ').join('')}
-                                                        value={row.name}
-                                                        checked={SelectedEnvironment.includes(row.name)}
-                                                        onChange={handleChange}
-                                                        color='primary'
-                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                    />
-                                                </CardActions>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        ))}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose}>
-                            Cancel
+                            <FormattedMessage
+                                id='Apis.Details.Environments.Environments.create.cancel'
+                                defaultMessage='Cancel'
+                            />
                         </Button>
                         <Button
                             onClick={handleClickAddRevision}
@@ -1142,21 +1247,14 @@ export default function Environments() {
                             variant='contained'
                             color='primary'
                         >
-                            Create
-                        </Button>
-                        <Button
-                            type='submit'
-                            variant='contained'
-                            onClick={() => createDeployRevision(SelectedEnvironment, SelectedEnvironment.length)}
-                            color='primary'
-                            disabled={SelectedEnvironment.length === 0}
-                        >
-                            Deploy
+                            <FormattedMessage
+                                id='Apis.Details.Environments.Environments.create.create'
+                                defaultMessage='Create'
+                            />
                         </Button>
                     </DialogActions>
                 </Dialog>
             </Grid>
-
             <Box mx='auto' mt={5}>
                 <Typography variant='h6' className={classes.sectionTitle}>
                     <FormattedMessage
