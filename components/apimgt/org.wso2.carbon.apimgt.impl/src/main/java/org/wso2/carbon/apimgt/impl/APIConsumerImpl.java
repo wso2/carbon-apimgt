@@ -3489,13 +3489,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      */
     @Override
-    public void addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
-        apiMgtDAO.addComment(identifier, commentText, user);
+    public void addComment(APIIdentifier identifier, String commentText, String user, String organizationId)
+            throws APIManagementException {
+        apiMgtDAO.addComment(identifier, commentText, user, organizationId);
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user);
+    public String addComment(Identifier identifier, Comment comment, String user, String organizationId) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user, organizationId);
     }
 
     @Override
@@ -5435,13 +5436,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String requestedTenantDomain) throws APIManagementException {
-        return null;
+    public List<Documentation> getAllDocumentation(String uuid, String orgId)
+            throws APIManagementException {
+        return super.getAllDocumentation(uuid, orgId);
     }
 
     @Override
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain) throws APIManagementException {
-        return null;
+    public Documentation getDocumentation(String apiId, String docId, String orgId) throws APIManagementException {
+        return super.getDocumentation(apiId, docId, orgId);
     }
 
     @Override

@@ -1464,18 +1464,18 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Get a documentation by artifact Id
      *
-     * @param apiId                 artifact id of the api
-     * @param docId                 artifact id of the document
+     * @param apiId                Artifact id of the api
+     * @param docId                Artifact id of the document
+     * @param orgId                Identifier of the organization
      * @return Document object which represents the artifact id
      * @throws APIManagementException
      */
-    public Documentation getDocumentation(String apiId, String docId, String organizationId)
-            throws APIManagementException {
+    public Documentation getDocumentation(String apiId, String docId, String orgId) throws APIManagementException {
         Documentation documentation;
         try {
-            Organization org = Organization.getInstance(organizationId);
-            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance
-                    .getDocumentation(org, apiId, docId);
+            Organization org = Organization.getInstance(orgId);
+            org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance.getDocumentation(org,
+                    apiId, docId);
             if (doc != null) {
                if(log.isDebugEnabled()) {
                    log.debug("Retrieved doc: " + doc);

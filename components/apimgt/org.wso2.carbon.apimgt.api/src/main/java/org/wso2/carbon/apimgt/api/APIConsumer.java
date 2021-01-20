@@ -428,7 +428,7 @@ public interface APIConsumer extends APIManager {
      * @deprecated
      * This method needs to be removed once the Jaggery web apps are removed.
      */
-    void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
+    void addComment(APIIdentifier identifier, String comment, String user, String organizationId) throws APIManagementException;
 
     /**
      * This method is to add a comment.
@@ -438,7 +438,7 @@ public interface APIConsumer extends APIManager {
      * @param user Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
-    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+    String addComment(Identifier identifier, Comment comment, String user, String organizationId) throws APIManagementException;
 
     /**
      * @param identifier Api identifier

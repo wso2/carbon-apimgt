@@ -839,10 +839,10 @@ public class APIConsumerImplTest {
     public void testAddComment() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.addComment(apiIdentifier, "testComment", "testUser")).thenReturn(1111);
-        apiConsumer.addComment(apiIdentifier, "testComment", "testUser");
+        Mockito.when(apiMgtDAO.addComment(apiIdentifier, "testComment", "testUser", null)).thenReturn(1111);
+        apiConsumer.addComment(apiIdentifier, "testComment", "testUser", null);
         Mockito.verify(apiMgtDAO, Mockito.times(1)).
-                addComment(apiIdentifier, "testComment", "testUser");
+                addComment(apiIdentifier, "testComment", "testUser", null);
     }
 
     @Test

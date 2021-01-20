@@ -780,7 +780,7 @@ public class AbstractAPIManagerTestCase {
         
         Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN), swaggerContent);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier, abstractAPIManager.tenantDomain), swaggerContent);
+        Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier, SAMPLE_TENANT_DOMAIN), swaggerContent);
     }
 
     @Test
@@ -1549,7 +1549,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testIsDuplicateContextTemplate() throws APIManagementException {
-        Mockito.when(apiMgtDAO.isDuplicateContextTemplate(Mockito.anyString(), null)).thenReturn(true, false, true, false);
+        Mockito.when(apiMgtDAO.isDuplicateContextTemplate(Mockito.anyString(), Mockito.anyString())).thenReturn(true, false, true, false);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertTrue(abstractAPIManager.isDuplicateContextTemplate("/t/context", null));

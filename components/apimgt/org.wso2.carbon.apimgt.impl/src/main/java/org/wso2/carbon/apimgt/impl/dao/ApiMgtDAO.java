@@ -7206,6 +7206,7 @@ public class ApiMgtDAO {
         }
     }
 
+
     public int getAPIID(Identifier apiId, Connection connection) throws APIManagementException {
         boolean created = false;
         PreparedStatement prepStmt = null;
@@ -7230,6 +7231,53 @@ public class ApiMgtDAO {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             prepStmt.setString(2, apiId.getName());
             prepStmt.setString(3, apiId.getVersion());
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt("API_ID");
+            }
+            if (id == -1) {
+                String msg = "Unable to find the API: " + apiId + " in the database";
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+        } catch (SQLException e) {
+            handleException("Error while locating API: " + apiId + " from the database", e);
+        } finally {
+            if (created) {
+                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            } else {
+                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+            }
+        }
+        return id;
+    }
+
+    public int getAPIIDMatchesOrgID(Identifier apiId, String organizationId, Connection connection) throws APIManagementException {
+        boolean created = false;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        int id = -1;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL_MATCHES_ORGANIZATION_ID;
+
+        try {
+            if (connection == null) {
+
+                // If connection is not provided a new one will be created.
+                connection = APIMgtDBUtil.getConnection();
+                created = true;
+            }
+
+            prepStmt = connection.prepareStatement(getAPIQuery);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            prepStmt.setString(2, apiId.getName());
+            prepStmt.setString(3, apiId.getVersion());
+            if (organizationId != null) {
+                prepStmt.setString(4, organizationId);
+            } else {
+                prepStmt.setNull(4, Types.VARCHAR);
+            }
+
             rs = prepStmt.executeQuery();
             if (rs.next()) {
                 id = rs.getInt("API_ID");
@@ -7631,7 +7679,7 @@ public class ApiMgtDAO {
      * @deprecated
      * This method needs to be removed once the Jaggery web apps are removed.
      */
-    public int addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
+    public int addComment(APIIdentifier identifier, String commentText, String user, String organizationId) throws APIManagementException {
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7640,16 +7688,28 @@ public class ApiMgtDAO {
         PreparedStatement insertPrepStmt = null;
         int commentId = -1;
         int apiId = -1;
+        String getApiQuery;
 
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
 
-            String getApiQuery = SQLConstants.GET_API_ID_SQL;
+            if (organizationId != null) {
+                getApiQuery = SQLConstants.GET_API_ID_SQL_MATCHES_ORGANIZATION_ID;
+            } else {
+                getApiQuery = SQLConstants.GET_API_ID_SQL;
+            }
+
             getPrepStmt = connection.prepareStatement(getApiQuery);
             getPrepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             getPrepStmt.setString(2, identifier.getApiName());
             getPrepStmt.setString(3, identifier.getVersion());
+            if (organizationId != null) {
+                getPrepStmt.setString(4, organizationId);
+            } else {
+                getPrepStmt.setNull(4, Types.VARCHAR);
+            }
+
             resultSet = getPrepStmt.executeQuery();
             if (resultSet.next()) {
                 apiId = resultSet.getInt("API_ID");
@@ -7705,7 +7765,7 @@ public class ApiMgtDAO {
      * @param user       User who did the comment
      * @return Comment ID
      */
-    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
+    public String addComment(Identifier identifier, Comment comment, String user, String organizationId) throws APIManagementException {
         Connection connection = null;
         ResultSet insertSet = null;
         PreparedStatement insertPrepStmt = null;
@@ -7715,8 +7775,14 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
+
             //Get API Id
-            id = getAPIID(identifier, connection);
+            if (organizationId != null ) {
+                id = getAPIIDMatchesOrgID(identifier, organizationId, connection);
+            } else {
+                id = getAPIID(identifier, connection);
+            }
+
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
@@ -7998,6 +8064,7 @@ public class ApiMgtDAO {
 
         String context = null;
         String sql = SQLConstants.GET_API_CONTEXT_BY_API_NAME_SQL;
+
         try (PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());

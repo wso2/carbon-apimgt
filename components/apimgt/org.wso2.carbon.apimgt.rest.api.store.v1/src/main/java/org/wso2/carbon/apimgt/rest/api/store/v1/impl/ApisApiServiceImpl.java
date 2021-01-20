@@ -129,6 +129,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Get details of a given API
+     * @param apiId          apiId
+     * @param organizationId  Identifier of an organization
+     * @param messageContext message context
+     * @return Response with details of the API
+     */
+
     @Override
     public Response apisApiIdGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch,
                                  MessageContext messageContext) {
@@ -259,7 +267,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
-            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            String createdCommentId = apiConsumer.addComment(identifier, comment, username, organizationId);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
@@ -495,7 +503,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
             //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId,orgId);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, orgId);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 
@@ -577,10 +585,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Rest api implementation to downloading the client sdk for given api in given sdk language.
      *
-     * @param apiId : The id of the api.
-     * @param language : Preferred sdk language.
-     * @param messageContext : messageContext
-     * @return : The sdk as a zip archive.
+     * @param apiId           The id of the api.
+     * @param language        Preferred sdk language.
+     * @param messageContext  messageContext
+     * @param organizationId  Identifier of an organization
+     * @return  The sdk as a zip archive.
      */
     @Override
     public Response apisApiIdSdksLanguageGet(String apiId, String language, String organizationId, String xWSO2Tenant,
