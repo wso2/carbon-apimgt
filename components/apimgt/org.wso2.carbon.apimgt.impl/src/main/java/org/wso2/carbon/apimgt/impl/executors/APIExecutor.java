@@ -91,6 +91,7 @@ public class APIExecutor implements Execution {
      * @return Returns whether the execution was successful or not.
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
+        /*
         boolean executed = false;
         String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -153,6 +154,8 @@ public class APIExecutor implements Execution {
                     "RegistryException:" + e.getMessage());
         }
         return executed;
+        */
+        return true;
     }
 
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,

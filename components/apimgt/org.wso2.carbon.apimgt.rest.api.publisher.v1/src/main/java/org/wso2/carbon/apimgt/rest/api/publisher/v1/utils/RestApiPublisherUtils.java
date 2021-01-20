@@ -29,6 +29,9 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -87,15 +90,21 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
-            APIIdentifier apiIdentifier = APIMappingUtil
-                    .getAPIIdentifierFromUUID(apiId);
+            //APIIdentifier apiIdentifier = APIMappingUtil
+            //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            apiProvider.addFileToDocumentation(apiIdentifier, documentation, filename, docInputStream, mediaType);
-            apiProvider.updateDocumentation(apiIdentifier, documentation);
+            DocumentationContent content = new DocumentationContent();
+            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
+            resourceFile.setName(filename);
+            content.setResourceFile(resourceFile);
+            content.setSourceType(ContentSourceType.FILE);
+            //apiProvider.addFileToDocumentation(apiIdentifier, documentation, filename, docInputStream, mediaType);
+            //apiProvider.updateDocumentation(apiIdentifier, documentation);
+            apiProvider.addDocumentationContent(apiId, documentId, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
@@ -173,15 +182,21 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
-            APIProductIdentifier productIdentifier = APIMappingUtil
-                    .getAPIProductIdentifierFromUUID(productId, tenantDomain);
+            //APIProductIdentifier productIdentifier = APIMappingUtil
+            //        .getAPIProductIdentifierFromUUID(productId, tenantDomain);
 
             RestApiUtil.transferFile(inputStream, filename, docFile.getAbsolutePath());
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
-            apiProvider.updateDocumentation(productIdentifier, documentation);
+            DocumentationContent content = new DocumentationContent();
+            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
+            resourceFile.setName(filename);
+            content.setResourceFile(resourceFile);
+            content.setSourceType(ContentSourceType.FILE);
+            //apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
+            //apiProvider.updateDocumentation(productIdentifier, documentation);
+            apiProvider.addDocumentationContent(productId, documentId, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);

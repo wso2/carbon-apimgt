@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.xml.sax.InputSource;
@@ -339,8 +340,8 @@ public class PublisherCommonUtils {
         assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
 
         //preserve monetization status in the update flow
-        apiProvider.configureMonetizationInAPIArtifact(originalAPI);
-
+        //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
+        apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
             String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
@@ -362,9 +363,10 @@ public class PublisherCommonUtils {
             }
         }
 
-        apiProvider.manageAPI(apiToUpdate);
-
-        return apiProvider.getAPI(apiIdentifier);
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+        
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
     }
 
     /**
@@ -707,8 +709,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        //adding the api
-        apiProvider.addAPI(apiToAdd);
+        
 
         if (!isWSAPI) {
             APIDefinition oasParser;
@@ -719,8 +720,10 @@ public class PublisherCommonUtils {
             }
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+            apiToAdd.setSwaggerDefinition(apiDefinition);
         }
+        //adding the api
+        apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
 
@@ -960,10 +963,13 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-        apiProvider.updateAPI(existingAPI);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
+        existingAPI.setSwaggerDefinition(updatedApiDefinition);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        existingAPI.setStatus(unModifiedAPI.getStatus());
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -1104,17 +1110,14 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid document sourceUrl Format",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
-        //this will fail if user does not have access to the API or the API does not exist
-        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
+
+        if (apiProvider.isDocumentationExist(apiId, documentName)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        apiProvider.addDocumentation(apiIdentifier, documentation);
+        documentation = apiProvider.addDocumentation(apiId, documentation);
 
-        //retrieve the newly added document
-        String newDocumentId = documentation.getId();
-        return apiProvider.getDocumentation(newDocumentId, tenantDomain);
+        return documentation;
     }
 
     /**

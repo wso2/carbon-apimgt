@@ -135,6 +135,7 @@ import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -10604,6 +10605,16 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
+    
+    public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
+            properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
+        }
+        properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
+
+        return properties;
+    }
 
     /**
      * append the tenant domain to the username when an email is used as the username and EmailUserName is not enabled
@@ -11817,5 +11828,37 @@ public final class APIUtil {
      */
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
+    }
+    
+    public static String getconvertedId(Identifier apiId) {
+        String id = null;
+        if (apiId instanceof APIIdentifier) {
+            id = APIType.API + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
+        } else if (apiId instanceof APIProductIdentifier) {
+            id = APIType.API_PRODUCT + ":" + apiId.getProviderName() + ":" + apiId.getName() + ":" + apiId.getVersion();
+        }
+        return id;
+    }
+
+    public static String[] getFilteredUserRoles(String username) throws APIManagementException {
+        String[] userRoles = APIUtil.getListOfRoles(username);
+        String skipRolesByRegex = APIUtil.getSkipRolesByRegex();
+        if (StringUtils.isNotEmpty(skipRolesByRegex)) {
+            List<String> filteredUserRoles = new ArrayList<>(Arrays.asList(userRoles));
+            String[] regexList = skipRolesByRegex.split(",");
+            for (int i = 0; i < regexList.length; i++) {
+                Pattern p = Pattern.compile(regexList[i]);
+                Iterator<String> itr = filteredUserRoles.iterator();
+                while (itr.hasNext()) {
+                    String role = itr.next();
+                    Matcher m = p.matcher(role);
+                    if (m.matches()) {
+                        itr.remove();
+                    }
+                }
+            }
+            userRoles = filteredUserRoles.toArray(new String[0]);
+        }
+        return userRoles;
     }
 }

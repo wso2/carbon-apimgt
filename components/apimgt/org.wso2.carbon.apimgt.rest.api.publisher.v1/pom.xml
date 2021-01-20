@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.131-SNAPSHOT</version>
+        <version>6.8.148-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -227,7 +227,6 @@
                                 <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1</apiPackage>
                                 <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
-                                <dateLibrary>custom</dateLibrary>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
