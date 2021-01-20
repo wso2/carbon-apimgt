@@ -92,7 +92,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private AuthClient authClient;
     private ScopeClient scopeClient;
     private UserClient userClient;
-    private String reservedAppOwnerUsername = "apim_reserved_user";
+    private String reservedAppOwnerUsername = APIConstants.DEFAULT_RESERVED_USERNAME;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -183,7 +183,15 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } else {
             clientInfo.setTokenType(info.getTokenType());
         }
-        clientInfo.setApplication_owner(reservedAppOwnerUsername);
+
+        // Use a generated user as the app owner for cross tenant subscription scenarios, to avoid the tenant admin
+        // being exposed in the JWT token.
+        if (APIUtil.isCrossTenantSubscriptionsEnabled()) {
+            clientInfo.setApplication_owner(reservedAppOwnerUsername);
+        } else {
+            clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+        }
+
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
@@ -572,11 +580,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         if(StringUtils.isNotBlank(reservedUserConfig)) {
             reservedAppOwnerUsername = reservedUserConfig;
-            if(log.isDebugEnabled()) {
-                log.debug("Reserved App Owner Username set to: " + reservedAppOwnerUsername);
-            }
-        } else {
-            log.warn("Using default reserved username for app ownership: " + reservedUserConfig);
+        }
+
+        if(log.isDebugEnabled()) {
+            log.debug("Reserved App Owner Username used: " + reservedAppOwnerUsername);
         }
 
         String dcrEndpoint;

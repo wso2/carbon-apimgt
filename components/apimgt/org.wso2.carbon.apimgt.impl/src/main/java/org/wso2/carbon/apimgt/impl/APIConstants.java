@@ -576,6 +576,9 @@ public final class APIConstants {
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
+    public static final String DEFAULT_RESERVED_USERNAME = "apim_reserved_user";
+    public static final String DEFAULT_RESERVED_USER_PASSWORD = "apimuserpass";
+
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";

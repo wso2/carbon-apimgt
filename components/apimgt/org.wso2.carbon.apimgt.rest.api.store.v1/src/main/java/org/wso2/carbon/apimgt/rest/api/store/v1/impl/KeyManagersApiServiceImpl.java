@@ -24,6 +24,10 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersGet(String xWSO2Tenant, MessageContext messageContext) {
 
+        if (StringUtils.isBlank(xWSO2Tenant)) {
+            xWSO2Tenant = RestApiUtil.getLoggedInUserTenantDomain();
+        }
+
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =

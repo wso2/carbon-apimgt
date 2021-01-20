@@ -1337,6 +1337,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Populating additional parameters.
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            String keyManagerTenant = tenantDomain;
             if (keyManagerConfiguration == null) {
                 keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
                 if (keyManagerConfiguration == null) {
@@ -1344,6 +1345,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             ExceptionCodes.KEY_MANAGER_NOT_FOUND);
                 }
                 keyManagerName = keyManagerConfiguration.getName();
+                keyManagerTenant = keyManagerConfiguration.getTenantDomain();
             }
             if (keyManagerConfiguration.isEnabled()) {
                 Object enableTokenGeneration =
@@ -1353,7 +1355,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             "Key Manager didn't support to generate token Generation From portal",
                             ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
                 }
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
                 if (keyManager == null) {
                     throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
                             ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
@@ -4722,6 +4724,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            String keyManagerID = null;
+            String keyManagerTenant = tenantDomain;
+            if (keyManagerConfiguration == null) {
+                keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                if (keyManagerConfiguration != null) {
+                    keyManagerID = keyManagerName;
+                    keyManagerName = keyManagerConfiguration.getName();
+                    keyManagerTenant = keyManagerConfiguration.getTenantDomain();
+                }
+            } else {
+                keyManagerID = keyManagerConfiguration.getUuid();
+            }
+
             if (keyManagerConfiguration == null) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " not found in the requested Tenant",
                         ExceptionCodes.KEY_MANAGER_NOT_FOUND);
@@ -4731,15 +4746,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                    tokenScope, jsonString, application.getTokenType(), this.tenantDomain, keyManagerName);
+                    tokenScope, jsonString, application.getTokenType(), keyManagerTenant, keyManagerName);
 
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             String consumerKey = apiMgtDAO
-                    .getConsumerKeyByApplicationIdKeyTypeKeyManager(application.getId(), tokenType, keyManagerName);
+                    .getConsumerKeyByApplicationIdKeyTypeKeyManager(application.getId(), tokenType, keyManagerID);
 
             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
             //get key manager instance.
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
             if (keyManager == null) {
                 throw new APIManagementException(
                         "Key Manager " + keyManagerName + " not initialized in the requested" + "Tenant",

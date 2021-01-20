@@ -22,6 +22,7 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -53,11 +54,19 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
         notifyTenantLoad();
     }
 
+    /**
+     * Creates a reserved user to be used in cross tenant subscription scenarios, so that the tenant admin is
+     * not exposed in JWT tokens generated. This logic will be run to add this user to the tenants if it
+     * is not existing. This value can be changed from a config as well.
+     */
     public void createReservedUser() {
         APIManagerConfiguration config = getAPIManagerConfiguration();
-        String username = "apim_reserved_user";
+        String username = APIConstants.DEFAULT_RESERVED_USERNAME;
         if (config != null) {
-            username = config.getFirstProperty(APIConstants.KEY_MANAGER_RESERVED_USER);
+            String usernameConfig = config.getFirstProperty(APIConstants.KEY_MANAGER_RESERVED_USER);
+            if (StringUtils.isNotBlank(usernameConfig)) {
+                username = usernameConfig;
+            }
         }
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
@@ -67,8 +76,9 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
                         (UserStoreManager) realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 boolean isReservedUserCreated = userStoreManager.isExistingUser(username);
                 if (!isReservedUserCreated) {
-                    userStoreManager.addUser(username, "apimuserpass", new String[]{"Internal/everyone"},
-                            new HashMap<>(), "apim_reserved_user", false);
+                    userStoreManager.addUser(username, APIConstants.DEFAULT_RESERVED_USER_PASSWORD,
+                            new String[]{APIConstants.EVERYONE_ROLE},
+                            new HashMap<>(), username, false);
                 }
             }
         } catch (UserStoreException e) {

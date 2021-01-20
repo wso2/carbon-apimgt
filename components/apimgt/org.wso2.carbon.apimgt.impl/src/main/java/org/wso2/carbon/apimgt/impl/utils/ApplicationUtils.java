@@ -96,7 +96,6 @@ public class ApplicationUtils {
 
         if (clientDetails != null) {
             //parse json string and set applicationInfo parameters.
-            // TODO: 2021-01-04 The key Manager name here is the id. Need to sort this out
             KeyManager keyManagerInstance = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
             if (keyManagerInstance != null) {
                 authApplicationInfo = keyManagerInstance.buildFromJSON(authApplicationInfo, clientDetails);
