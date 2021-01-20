@@ -38,6 +38,8 @@ public class APIRevisionAPIInfoDTO   {
   public void setId(String id) {
     this.id = id;
   }
+
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -59,6 +61,7 @@ public class APIRevisionAPIInfoDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIRevisionAPIInfoDTO {\n");
+    
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("}");
     return sb.toString();

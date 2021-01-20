@@ -825,12 +825,22 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        return fromAPItoDTO(model, false);
+        return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        return fromAPItoDTO(model, false, apiProvider);
+    }
+
+    public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
+            throws APIManagementException {
+        APIProvider apiProvider;
+        if(apiProviderParam != null) {
+            apiProvider = apiProviderParam;
+        } else {
+            apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        }
         String uuid = "uuid";
         String path = "path";
         APIDTO dto = new APIDTO();
@@ -1020,7 +1030,7 @@ public class APIMappingUtil {
             apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
-            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
+            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -2571,6 +2581,27 @@ public class APIMappingUtil {
 
         List<APIScopeDTO> apiScopeDTOS = new ArrayList<>();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
+        scopeDTOS.forEach(scopeDTO -> {
+            APIScopeDTO apiScopeDTO = new APIScopeDTO();
+            apiScopeDTO.setScope(scopeDTO);
+            apiScopeDTO.setShared(allSharedScopeKeys.contains(scopeDTO.getName()) ? Boolean.TRUE : Boolean.FALSE);
+            apiScopeDTOS.add(apiScopeDTO);
+        });
+        return apiScopeDTOS;
+    }
+
+    /**
+     * Convert ScopeDTO List to APIScopesDTO List adding the attribute 'isShared'.
+     *
+     * @param scopeDTOS ScopeDTO List
+     * @return APIScopeDTO List
+     * @throws APIManagementException if an error occurs while converting ScopeDTOs to APIScopeDTOs
+     */
+    private static List<APIScopeDTO> getAPIScopesFromScopeDTOs(List<ScopeDTO> scopeDTOS, APIProvider apiProvider) throws APIManagementException {
+
+        List<APIScopeDTO> apiScopeDTOS = new ArrayList<>();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         Set<String> allSharedScopeKeys = apiProvider.getAllSharedScopeKeys(tenantDomain);
         scopeDTOS.forEach(scopeDTO -> {

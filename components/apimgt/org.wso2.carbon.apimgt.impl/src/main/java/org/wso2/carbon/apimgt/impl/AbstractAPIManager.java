@@ -520,6 +520,9 @@ public abstract class AbstractAPIManager implements APIManager {
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
             api.setSwaggerDefinition(getOpenAPIDefinition(identifier));
+            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+            }
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
                 return api;
@@ -1248,9 +1251,14 @@ public abstract class AbstractAPIManager implements APIManager {
 
     @Override
     public String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException {
-        String definition = null;
+        String definition;
         try {
-            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
+            if (apiRevision.getApiUUID() != null) {
+                definition = apiPersistenceInstance.getRevisionGraphQLSchema(new Organization(tenantDomain), apiId, apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+            }
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
                     e);
@@ -1275,7 +1283,13 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
+            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(id);
+            if (apiRevision.getApiUUID() != null) {
+                definition = apiPersistenceInstance.getRevisionOASDefinition(new Organization(apiTenantDomain),
+                        apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
+            }
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1286,7 +1300,13 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
+            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
+            if (apiRevision.getApiUUID() != null) {
+                definition = apiPersistenceInstance.getRevisionOASDefinition(new Organization(tenantDomain),
+                        apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
+            }
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -3775,14 +3795,23 @@ public abstract class AbstractAPIManager implements APIManager {
         //Scopes 
         Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-        
+
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(uuid);
         //templates
         String resourceConfigsString = null;
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
-            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            if (apiRevision.getApiUUID() != null) {
+                resourceConfigsString = apiPersistenceInstance.getRevisionOASDefinition(org, apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            }
             api.setSwaggerDefinition(resourceConfigsString);
+        }
+
+        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+                api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, requestedTenantDomain));
         }
 
         JSONParser jsonParser = new JSONParser();

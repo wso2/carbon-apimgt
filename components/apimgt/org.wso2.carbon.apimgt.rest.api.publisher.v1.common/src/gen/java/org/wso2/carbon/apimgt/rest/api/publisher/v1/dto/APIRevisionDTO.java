@@ -162,6 +162,7 @@ public class APIRevisionDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIRevisionDTO {\n");
+    
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -67,6 +68,37 @@ public interface APIPersistence {
     PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
 
     /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiIdentifier API Identifier Object
+     * @param revisionId API Revision ID
+     * @return ID of Added API
+     * @throws APIPersistenceException
+     */
+    String addAPIRevision(Organization org, APIIdentifier apiIdentifier, int revisionId) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiIdentifier API Identifier Object
+     * @param revisionId API Revision ID
+     * @throws APIPersistenceException
+     */
+    void restoreAPIRevision(Organization org, APIIdentifier apiIdentifier, int revisionId) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiIdentifier API Identifier Object
+     * @param revisionId API Revision ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPIRevision(Organization org, APIIdentifier apiIdentifier, int revisionId) throws APIPersistenceException;
+
+    /**
      * Update API in the persistence layer
      *
      * @param org          Organization the API is owned by
@@ -84,6 +116,16 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Get the API Revision information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org   Organization the API is owned by
+     * @param revisionUUID API ID
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPI getPublisherRevisionAPI(Organization org, String revisionUUID, String apiUUID, int revisionId) throws APIPersistenceException;
 
     /**
      * Get the API information stored in persistence layer, that is used for DevPortal operations
@@ -203,7 +245,6 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException;
-
     /**
      * Get OAS Schema definition of the API
      *
@@ -213,6 +254,17 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     String getOASDefinition(Organization org, String apiId) throws OASPersistenceException;
+
+    /**
+     * Get OAS Schema definition of the API Revision
+     *
+     * @param org   Organization the OAS definition is owned by
+     * @param apiId API ID
+     * @param revisionId Revision ID
+     * @return OAS Schema definition
+     * @throws OASPersistenceException
+     */
+    String getRevisionOASDefinition(Organization org, String apiId, int revisionId) throws OASPersistenceException;
 
 
     /* ==== GraphQL API Schema Definition ==========
@@ -238,6 +290,18 @@ public interface APIPersistence {
      * @throws GraphQLPersistenceException
      */
     String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException;
+
+    /**
+     * Get GraphQL schema definition
+     *
+     * @param org   Organization the GraphQL definition is owned by
+     * @param revisionUUID REVISION UUID
+     * @param apiUUID API UUID
+     * @param revisionId REVISION ID
+     * @return GraphQL schema definition
+     * @throws GraphQLPersistenceException
+     */
+    String getRevisionGraphQLSchema(Organization org, String revisionUUID, String apiUUID, int revisionId) throws GraphQLPersistenceException;
 
 
     /* ======= Documentation  =======
