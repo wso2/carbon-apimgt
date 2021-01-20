@@ -6000,7 +6000,7 @@ paths:
         200:
           description: |
             OK.
-            The Devportal alert configuration.
+            The Developer Portal alert configuration.
           headers:
             Content-Type:
               description: |
@@ -6731,7 +6731,7 @@ components:
           - apim:api_publish
         visibleRoles:
           type: array
-          description: The user roles that are able to access the API in Devportal
+          description: The user roles that are able to access the API in Developer Portal
           example: []
           items:
             type: string
@@ -7059,7 +7059,7 @@ components:
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the Devportal
+            State of the API product. Only published api products are visible on the Developer Portal
           enum:
           - CREATED
           - PUBLISHED
@@ -7111,7 +7111,7 @@ components:
         state:
           type: string
           description: |
-            State of the API product. Only published api products are visible on the Devportal
+            State of the API product. Only published api products are visible on the Developer Portal
           enum:
           - CREATED
           - PUBLISHED
