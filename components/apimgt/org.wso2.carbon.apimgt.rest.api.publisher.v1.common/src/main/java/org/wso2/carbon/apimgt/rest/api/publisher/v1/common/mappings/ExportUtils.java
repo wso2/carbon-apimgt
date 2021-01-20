@@ -384,7 +384,8 @@ public class ExportUtils {
             try {
                 for (Documentation doc : docList) {
                     // Retrieving the document again since objects in docList might have missing fields
-                    Documentation individualDocument = apiProvider.getDocumentation(doc.getId(), tenantDomain);
+                    Documentation individualDocument = apiProvider.getDocumentation(identifier.getUUID(), doc.getId(),
+                            tenantDomain);
                     String sourceType = individualDocument.getSourceType().name();
                     String resourcePath = null;
                     String localFileName = null;
