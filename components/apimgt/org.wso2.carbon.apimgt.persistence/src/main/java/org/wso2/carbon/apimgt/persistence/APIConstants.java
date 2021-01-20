@@ -367,4 +367,5 @@ public final class APIConstants {
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 
+    public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.yml";
 }

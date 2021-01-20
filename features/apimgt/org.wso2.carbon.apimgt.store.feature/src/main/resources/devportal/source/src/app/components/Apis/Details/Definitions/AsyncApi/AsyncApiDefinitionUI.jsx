@@ -27,102 +27,11 @@ import Grid from '@material-ui/core/Grid';
 import { ApiContext } from '../../ApiContext';
 
 const styles = (theme) => ({
-    paper: {
-        padding: theme.spacing(2),
-        color: theme.palette.text.secondary,
-        minHeight: 400,
-        position: 'relative',
-    },
-    paperMenu: {
-        color: theme.palette.text.secondary,
-        minHeight: 400 + theme.spacing(4),
-        height: '100%',
-    },
-    docContent: {
-        paddingTop: theme.spacing(1),
-    },
-    parentListItem: {
-        borderTop: 'solid 1px #ccc',
-        borderBottom: 'solid 1px #ccc',
-        color: theme.palette.grey[100],
-        background: theme.palette.grey[100],
-        cursor: 'default',
-    },
-    listRoot: {
-        paddingTop: 0,
-    },
-    nested: {
-        paddingLeft: theme.spacing(3),
-        paddingTop: 3,
-        paddingBottom: 3,
-    },
-    childList: {
-        paddingTop: 0,
-        marginTop: 0,
-        paddingBottom: 0,
-    },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing(3),
-        paddingTop: theme.spacing(3),
-        paddingRight: theme.spacing(3),
-    },
     titleSub: {
         marginLeft: theme.spacing(3),
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
         color: theme.palette.getContrastText(theme.palette.background.default),
-    },
-    generateCredentialWrapper: {
-        marginLeft: 0,
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-    },
-    genericMessageWrapper: {
-        margin: theme.spacing(2),
-    },
-    typeText: {
-        color: '#000',
-    },
-    docLinkRoot: {
-        paddingLeft: 0,
-    },
-    toggler: {
-        height: '100%',
-        paddingTop: 20,
-        cursor: 'pointer',
-        marginLeft: '-20px',
-        display: 'block',
-    },
-    togglerTextParent: {
-        writingMode: 'vertical-rl',
-        transform: 'rotate(180deg)',
-    },
-    togglerText: {
-        textOrientation: 'sideways',
-    },
-    toggleWrapper: {
-        position: 'relative',
-        background: '#fff9',
-        paddingLeft: 20,
-    },
-    docsWrapper: {
-        margin: 0,
-    },
-    docContainer: {
-        display: 'flex',
-        marginLeft: theme.spacing(3),
-        marginRight: theme.spacing(2),
-        marginTop: theme.spacing(2),
-    },
-    docListWrapper: {
-        width: 285,
-    },
-    docView: {
-        flex: 1,
-    },
-    listItemRoot: {
-        minWidth: 30,
     },
     editorPane: {
         width: '100%',
@@ -141,16 +50,9 @@ class AsyncApiDefinitionUI extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { spec: '' };
-    }
-
-    componentDidMount() {
-        const context = this.context;
-        this.setState({ spec: context.api.apiDefinition });
     }
 
     render() {
-        const { spec } = this.state;
         const { classes } = this.props;
         return (
             <>
@@ -162,7 +64,7 @@ class AsyncApiDefinitionUI extends Component {
                 </Typography>
                 <Grid container spacing={1} className={classes.editorRoot}>
                     <Grid item className={classes.editorPane}>
-                        <AsyncApiComponent schema={spec} />
+                        <AsyncApiComponent schema={this.context.api.apiDefinition} />
                     </Grid>
                 </Grid>
             </>

@@ -109,11 +109,10 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         }
 
-        //Get Swagger definition which has URL templates, scopes and resource details
         String apiDefinition = null;
-        if (isAsyncAPI(model)) {
+        if (model.isAsync()) {
             // for asyncAPI retrieve asyncapi.yml specification
-            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getId());
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
         } else {
             // retrieve open API definition
             if (model.getSwaggerDefinition() != null) {
@@ -280,11 +279,10 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         } */
 
-        //Get Swagger definition which has URL templates, scopes and resource details
         String apiDefinition = null;
-        if (isAsyncAPI(model)) {
+        if (model.isAsync()) {
             // for asyncAPI retrieve asyncapi.yml specification
-            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getId());
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
         } else {
             // retrieve open API definition
             if (model.getDefinition() != null) {
@@ -1077,25 +1075,4 @@ public class APIMappingUtil {
         }
         return subscriptionAllowed;
     }
-
-    private static boolean isAsyncAPI(API api) {
-        String apiType = api.getType();
-        if (APIConstants.APITransportType.WS.toString().equals(apiType) ||
-                APIConstants.APITransportType.SSE.toString().equals(apiType) ||
-                APIConstants.APITransportType.WEBSUB.toString().equals(apiType)) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean isAsyncAPI(APIProduct api) {
-        String apiType = api.getType();
-        if (APIConstants.APITransportType.WS.toString().equals(apiType) ||
-                APIConstants.APITransportType.SSE.toString().equals(apiType) ||
-                APIConstants.APITransportType.WEBSUB.toString().equals(apiType)) {
-            return true;
-        }
-        return false;
-    }
-
 }

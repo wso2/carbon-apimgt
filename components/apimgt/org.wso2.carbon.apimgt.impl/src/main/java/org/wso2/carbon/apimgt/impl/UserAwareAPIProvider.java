@@ -257,12 +257,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAsyncAPIDefinition(apiId);
-    }
-
-    @Override
     public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
         checkCreatePermission();
         checkAccessControlPermission(apiId);

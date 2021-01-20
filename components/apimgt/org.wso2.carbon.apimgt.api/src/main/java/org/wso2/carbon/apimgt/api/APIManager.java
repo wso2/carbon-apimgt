@@ -213,7 +213,7 @@ public interface APIManager {
      * @return async specification string
      * @throws APIManagementException
      */
-    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
+    String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api/product

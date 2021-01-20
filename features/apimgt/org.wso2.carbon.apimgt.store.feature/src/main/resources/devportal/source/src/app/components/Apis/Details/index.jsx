@@ -72,7 +72,7 @@ const LoadableSwitch = withRouter((props) => {
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/documents' component={Documents} />
-                <Route path='/apis/:apiUuid/playground' component={AsyncApiDefinition} />
+                <Route path='/apis/:apiUuid/definition' component={AsyncApiDefinition} />
                 <Route exact path='/apis/:apiUuid/credentials/wizard' component={Wizard} />
                 {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
@@ -364,12 +364,7 @@ class Details extends React.Component {
     }
 
     isAsyncAPI(api) {
-        if (api) {
-            if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
-                return true;
-            }
-            return false;
-        }
+        return (api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE'));
     }
 
     /**
@@ -471,7 +466,6 @@ class Details extends React.Component {
                                 </>
                             )}
                             {!isAsyncApi && showTryout && (
-                               // TODO: Add conditions to not show try out if the type is Async
                                     <LeftMenuItem
                                         text={<FormattedMessage id='Apis.Details.index.try.out'
                                             defaultMessage='Try out' />}
@@ -482,13 +476,13 @@ class Details extends React.Component {
                                     />
                                 
                             )}
-                            {!isAsyncApi && showAsyncSpecification && (
+                            {isAsyncApi && showAsyncSpecification && (
                                 <LeftMenuItem
-                                    text={<FormattedMessage id='Apis.Details.index.playground'
-                                                            defaultMessage='Playground'/>}
-                                    route='playground'
-                                    iconText='Playground'
-                                    to={pathPrefix + 'playground'}
+                                    text={<FormattedMessage id='Apis.Details.index.definition'
+                                                            defaultMessage='Definition'/>}
+                                    route='definition'
+                                    iconText='Definition'
+                                    to={pathPrefix + 'definition'}
                                     open={open}
                                 />
                             )}

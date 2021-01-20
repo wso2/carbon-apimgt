@@ -74,7 +74,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -93,6 +92,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -1281,28 +1281,14 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
-        String apiTenantDomain = getTenantDomain(apiId);
-        String asyncAPISpec;
+    public String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+        String definition = null;
         try {
-            Registry registryType;
-            //Tenant store anonymous mode if current tenant and the required tenant is not matching
-            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
-                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
-                registryType = getRegistryService().getGovernanceUserRegistry(
-                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                registryType = registry;
-            }
-            asyncAPISpec = AsyncApiUtil.getAPIDefinition(apiId, registryType);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get Async API specification of API : " + apiId;
-            throw new APIManagementException(msg, e);
-        } catch (RegistryException e) {
-            String msg = "Failed to get Async API specification of API : " + apiId;
-            throw new APIManagementException(msg, e);
+            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(tenantDomain), apiId);
+        } catch (AsyncSpecPersistenceException e) {
+            throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
         }
-        return asyncAPISpec;
+        return definition;
     }
 
     public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile) throws APIManagementException {
