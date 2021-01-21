@@ -5968,6 +5968,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Organization org = new Organization(requestedTenantDomain);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
                     uuid);
+            checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
+                    devPortalApi.getVisibleRoles());
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
@@ -5990,6 +5992,42 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
+    }
+    
+    protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
+            throws APIManagementException {
+
+        if (visibility == null || visibility.trim().isEmpty()
+                || visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)) {
+            if (log.isDebugEnabled()) {
+                log.debug("API does not have any visibility restriction");
+            }
+            return;
+        }
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
+            return;
+        }
+
+        if (visibilityRoles != null && !visibilityRoles.trim().isEmpty()) {
+            String[] visibilityRolesList = visibilityRoles.replaceAll("\\s+", "").split(",");
+            if (log.isDebugEnabled()) {
+                log.debug("API has restricted visibility with the roles : "
+                        + Arrays.toString(visibilityRolesList));
+            }
+            String[] userRoleList = APIUtil.getListOfRoles(userNameWithTenantDomain);
+            if (log.isDebugEnabled()) {
+                log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+            }
+            for (String role : visibilityRolesList) {
+                if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)
+                        && APIUtil.compareRoleList(userRoleList, role)) {
+                    return;
+                }
+            }
+            throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
+            //throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
+        }
+
     }
 
     private API addTiersToAPI(API api, String requestedTenantDomain) throws APIManagementException {
@@ -6029,6 +6067,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             Organization org = new Organization(requestedTenantDomain);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
+                    devPortalApi.getVisibleRoles());
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
                 
