@@ -10267,9 +10267,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
                 String existingPath = existingUriTemplate.getUriTemplate();
                 boolean isReusedResourceRemoved = true;
+
                 for (URITemplate updatedUriTemplate : updatedUriTemplates) {
                     String updatedVerb = updatedUriTemplate.getHTTPVerb();
                     String updatedPath = updatedUriTemplate.getUriTemplate();
+
                     //Check if existing reused resource is among updated resources
                     if (existingVerb.equalsIgnoreCase(updatedVerb) &&
                             existingPath.equalsIgnoreCase(updatedPath)) {
