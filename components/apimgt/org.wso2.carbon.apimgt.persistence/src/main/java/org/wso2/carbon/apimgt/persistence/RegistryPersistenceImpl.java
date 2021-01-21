@@ -702,7 +702,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             log.debug("Modified query for publisher search: " + modifiedQuery);
 
             String userNameLocal = getTenantAwareUsername(ctx.getUserame());
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ctx.getUserame());
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 result = searchPaginatedPublisherAPIsByDoc(userRegistry, tenantIDLocal, searchQuery.split(":")[1],
@@ -1319,10 +1319,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherContentSearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(ctx.getUserame(), org.getName());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ctx.getUserame());
+            String tenantAwareUsername = getTenantAwareUsername(ctx.getUserame());
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
             
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -1473,7 +1475,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryHolder holder = getRegistry(ctx.getUserame(), org.getName());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ctx.getUserame());
+            String tenantAwareUsername = getTenantAwareUsername(ctx.getUserame());
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
             
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
