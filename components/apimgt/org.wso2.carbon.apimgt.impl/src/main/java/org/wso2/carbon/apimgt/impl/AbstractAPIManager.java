@@ -2942,7 +2942,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         String apiArtifactId = apiResource.getUUID();
                         if (apiArtifactId != null) {
                             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                            if (APIConstants.AuditLogConstants.API_PRODUCT.equals(
+                            if (APIConstants.API_PRODUCT.equals(
                                     apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
                                 associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
                             } else {
