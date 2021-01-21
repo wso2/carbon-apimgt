@@ -25,7 +25,7 @@ public class HistoryEvent {
     private String description;
     private String operationId;
     private String user;
-    private Object payload;
+    private byte[] payload;
     private Date createdTime;
     private String apiId;
     private String revisionKey;
@@ -70,12 +70,12 @@ public class HistoryEvent {
         this.user = user;
     }
 
-    public Object getPayload() {
+    public byte[] getPayload() {
 
         return payload;
     }
 
-    public void setPayload(Object payload) {
+    public void setPayload(byte[] payload) {
 
         this.payload = payload;
     }

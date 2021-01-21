@@ -48,6 +48,39 @@ public class URITemplate implements Serializable{
     private Set<APIProductIdentifier> usedByProducts = new HashSet<>();
     private String amznResourceName;
     private int amznResourceTimeout;
+    private boolean recordHistory;
+    private boolean recordHistoryPayload;
+    private String operationId;
+
+    public String getOperationId() {
+
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+
+        this.operationId = operationId;
+    }
+
+    public boolean isRecordHistory() {
+
+        return recordHistory;
+    }
+
+    public void setRecordHistory(boolean recordHistory) {
+
+        this.recordHistory = recordHistory;
+    }
+
+    public boolean isRecordHistoryPayload() {
+
+        return recordHistoryPayload;
+    }
+
+    public void setRecordHistoryPayload(boolean recordHistoryPayload) {
+
+        this.recordHistoryPayload = recordHistoryPayload;
+    }
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;

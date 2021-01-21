@@ -259,6 +259,8 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_post.yaml
       operationId: createAPI
+      x-record-history: true
+      x-record-history-payload : true
 
   ######################################################
   # The "Individual API" resource APIs
@@ -389,6 +391,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: updateAPI
+      x-record-history: true
+      x-record-history-payload : true
 
     delete:
       tags:
@@ -550,6 +554,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F apiDefinition=@swagger.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/swagger"'
       operationId: updateAPISwagger
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/generate-mock-scripts:
     post:
@@ -605,6 +611,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/generated-mock-scripts:
     get:
@@ -853,6 +861,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/resource-policies/8efc32a4-c7f1-4bee-b860-b7566e2bc0d5"'
       operationId: updateAPIResourcePoliciesByPolicyId
+      x-record-history: true
+      x-record-history-payload : true
 
   /apis/{apiId}/thumbnail:
     get:
@@ -974,6 +984,8 @@ paths:
       - lang: Curl
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=image.jpeg "https://127.0.0.1:9443/api/am/publisher/v1/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/thumbnail"'
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/subscription-policies:
     get:
@@ -1080,6 +1092,8 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_copyapi.yaml#/post
       operationId: createNewAPIVersion
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/change-lifecycle:
     post:
@@ -1170,6 +1184,8 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
       operationId: changeAPILifecycle
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/lifecycle-history:
     get:
@@ -1300,6 +1316,8 @@ paths:
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPILifecycleStatePendingTasks
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/import-openapi:
     post:
@@ -1366,6 +1384,8 @@ paths:
           -F file=@openapi.json -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/import-openapi"'
       x-examples:
         $ref: docs/examples/apis/import_openapi_post.yaml
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/import-wsdl:
     post:
@@ -1455,6 +1475,8 @@ paths:
           -F file=@api.wsdl -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/import-wsdl"'
       x-examples:
         $ref: docs/examples/apis/wsdl/import_wsdl_post.yaml
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/import-graphql-schema:
     post:
@@ -1526,6 +1548,8 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@schema.graphql -F additionalProperties=@data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/import-graphql-schema"'
       operationId: importGraphQLSchema
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/validate-openapi:
     post:
@@ -1901,6 +1925,8 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F schemaDefinition=@schema.graphql "https://127.0.0.1:9443/api/am/publisher/v1/apis/e0824883-3e86-403a-aec1-22bbc454eb7c/graphql-schema"'
       operationId: updateAPIGraphQLSchema
+      x-record-history: true
+      x-record-history-payload : true
 
   /apis/{apiId}/amznResourceNames:
     get:
@@ -1983,6 +2009,8 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/monetize'
       operationId: addAPIMonetization
+      x-record-history: true
+      x-record-history-payload : true
 
   /apis/{apiId}/monetization:
     get:
@@ -2169,6 +2197,8 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents"'
       operationId: addAPIDocument
+      x-record-history: true
+      x-record-history-payload : true
 
   /apis/{apiId}/documents/{documentId}:
     get:
@@ -2290,6 +2320,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @doc.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
       operationId: updateAPIDocument
+      x-record-history: true
+      x-record-history-payload : true
 
     delete:
       tags:
@@ -2320,6 +2352,8 @@ paths:
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5"'
       operationId: deleteAPIDocument
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/documents/{documentId}/content:
     get:
@@ -2473,6 +2507,8 @@ paths:
         source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"'
       operationId: addAPIDocumentContent
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/documents/validate:
     post:
@@ -2647,6 +2683,8 @@ paths:
           -F type=in "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/mediation-policies/{mediationPolicyId}:
     get:
@@ -2740,6 +2778,8 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/mediation-policies/{mediationPolicyId}/content:
     get:
@@ -2873,6 +2913,8 @@ paths:
           -F file=@TokenExchange.xml -F type=@type.txt "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/mediation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
       x-examples:
         $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_put.yaml
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/wsdl-info:
     get:
@@ -3027,6 +3069,8 @@ paths:
           -F file=@api.wsdl "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/wsdl"'
       x-examples:
         $ref: docs/examples/apis/wsdl/apiId_wsdl_put.yaml
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/graphql-policies/complexity:
     get:
@@ -3086,6 +3130,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/graphql-policies/complexity"'
       operationId: updateGraphQLPolicyComplexityOfAPI
+      x-record-history: true
+      x-record-history-payload : true
 
   /apis/{apiId}/graphql-policies/complexity/types:
     get:
@@ -3318,6 +3364,8 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
       x-examples:
         $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/export:
     get:
@@ -3451,6 +3499,8 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@admin-PizzaShackAPI-1.0.0.zip "https://127.0.0.1:9443/api/am/publisher/v1/apis/import?preserveProvider=false&overwrite=false"'
       operationId: importAPI
+      x-record-history: true
+      x-record-history-payload : false
 
   ######################################################
   # The "Subscription Collection" resource APIs
@@ -4037,6 +4087,8 @@ paths:
           -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
           -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v1/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates"'
       operationId: addAPIClientCertificate
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/client-certificates/{alias}:
     get:
@@ -4146,6 +4198,8 @@ paths:
           -H "Content-Type: multipart/form-data" -F certificate=@test.crt -F alias=wso2carbon
           -F apiId=fea749dd-d548-4a8b-b308-34903b39a34b -F tier=Gold "https://127.0.0.1:9443/api/am/publisher/v1/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
       operationId: updateAPIClientCertificateByAlias
+      x-record-history: true
+      x-record-history-payload : false
 
     delete:
       tags:
@@ -4189,6 +4243,8 @@ paths:
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/d48a3412-1b85-49be-99f4-b81a3722ae73/client-certificates/wso2carbon"'
       operationId: deleteAPIClientCertificateByAlias
+      x-record-history: true
+      x-record-history-payload : false
 
   /apis/{apiId}/client-certificates/{alias}/content:
     get:
@@ -4706,6 +4762,8 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products"'
       operationId: createAPIProduct
+      x-record-history: true
+      x-record-history-payload : true
 
   ################################################################
   # The "Individual API Product" resource APIs
@@ -4829,7 +4887,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
       operationId: updateAPIProduct
-
+      x-record-history: true
+      x-record-history-payload : true
 
     delete:
       tags:
@@ -4861,6 +4920,8 @@ paths:
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33"'
       operationId: deleteAPIProduct
+      x-record-history: true
+      x-record-history-payload : false
 
   /api-products/{apiProductId}/thumbnail:
     get:
@@ -4983,6 +5044,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F file=@image.jpeg "https://127.0.0.1:9443/api/am/publisher/v1/api-products/d48a3412-1b85-49be-99f4-b81a3722ae73/thumbnail"'
       operationId: updateAPIProductThumbnail
+      x-record-history: true
+      x-record-history-payload : false
 
   /api-products/{apiProductId}/swagger:
     get:
@@ -5192,6 +5255,8 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
       operationId: addAPIProductDocument
+      x-record-history: true
+      x-record-history-payload : true
 
   /api-products/{apiProductId}/documents/{documentId}:
     get:
@@ -5313,6 +5378,8 @@ paths:
         source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
       operationId: updateAPIProductDocument
+      x-record-history: true
+      x-record-history-payload : true
 
     delete:
       tags:
@@ -5342,6 +5409,8 @@ paths:
         source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
       operationId: deleteAPIProductDocument
+      x-record-history: true
+      x-record-history-payload : false
 
   /api-products/{apiProductId}/documents/{documentId}/content:
     get:
@@ -5492,6 +5561,8 @@ paths:
         source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: multipart/form-data" -F file=@sample.pdf "https://127.0.0.1:9443/api/am/publisher/v1/api-products/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3/content"'
       operationId: addAPIProductDocumentContent
+      x-record-history: true
+      x-record-history-payload : false
 
   /api-products/export:
     get:
@@ -5631,6 +5702,8 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -F file=@admin-PizzaShackAPIProduct.zip "https://127.0.0.1:9443/api/am/admin/v1/api-products/importt?preserveProvider=false&overwriteAPIProduct=false&overwriteAPIs=false&importAPIs=false"'
       operationId: importAPIProduct
+      x-record-history: true
+      x-record-history-payload : false
 
   ######################################################
   # Roles resource APIs

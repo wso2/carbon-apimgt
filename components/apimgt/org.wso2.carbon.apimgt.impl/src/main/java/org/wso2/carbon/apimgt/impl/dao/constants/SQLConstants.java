@@ -3660,7 +3660,8 @@ public class SQLConstants {
                         + "AND ID <= (SELECT ID FROM AM_API_HISTORY WHERE REVISION_KEY = ?)";
         public static final String ADD_HISTORY_EVENT =
                 "INSERT INTO AM_API_HISTORY (UUID, CREATED_TIME, OPERATION_ID, DESCRIPTION, REVISION_KEY, PAYLOAD, "
-                        + "API_ID, USERNAME) VALUES (?,?,?,?,?,?,?,?)";
+                        + "API_ID, USERNAME) VALUES (?,?,?,?,?,?,(SELECT API_ID FROM AM_API WHERE API_UUID = ?),?)";
+        public static final String REMOVE_FROM_API_HISTORY_SQL = "DELETE FROM AM_API_HISTORY WHERE API_ID = ? ";
     }
 
     public static final String GET_REVISION_ID_BY_REVISION_UUID = "SELECT ID FROM AM_REVISION WHERE REVISION_UUID = ?";
