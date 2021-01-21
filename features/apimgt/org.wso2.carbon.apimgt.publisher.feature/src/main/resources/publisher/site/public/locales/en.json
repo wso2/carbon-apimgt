@@ -522,6 +522,8 @@
   "Apis.Details.Environments.Environments.deploy.new.revision": "Deploy New Revision",
   "Apis.Details.Environments.Environments.deploy.new.revision.heading": "Deploy New Revision",
   "Apis.Details.Environments.Environments.gateway.labels.heading": "Gateway Labels",
+  "Apis.Details.Environments.Environments.new.revision.name.heading1": "Revision Name:",
+  "Apis.Details.Environments.Environments.new.revision.name.heading2": "Revision Name:",
   "Apis.Details.Environments.Environments.revision.create.heading": "Create Revision",
   "Apis.Details.Environments.Environments.revision.delete": "Delete",
   "Apis.Details.Environments.Environments.revision.delete.cancel": "Cancel",

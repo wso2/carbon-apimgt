@@ -522,6 +522,8 @@
   "Apis.Details.Environments.Environments.deploy.new.revision": "",
   "Apis.Details.Environments.Environments.deploy.new.revision.heading": "",
   "Apis.Details.Environments.Environments.gateway.labels.heading": "",
+  "Apis.Details.Environments.Environments.new.revision.name.heading1": "",
+  "Apis.Details.Environments.Environments.new.revision.name.heading2": "",
   "Apis.Details.Environments.Environments.revision.create.heading": "",
   "Apis.Details.Environments.Environments.revision.delete": "",
   "Apis.Details.Environments.Environments.revision.delete.cancel": "",

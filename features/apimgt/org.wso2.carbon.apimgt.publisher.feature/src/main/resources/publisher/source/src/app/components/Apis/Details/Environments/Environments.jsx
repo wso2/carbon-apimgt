@@ -260,6 +260,12 @@ const useStyles = makeStyles((theme) => ({
     timePaddingStyle: {
         marginTop: theme.spacing(1),
     },
+    labelSpace: {
+        paddingLeft: theme.spacing(1),
+    },
+    labelSpacingDown: {
+        marginBottom: theme.spacing(2),
+    },
 }));
 
 /**
@@ -298,6 +304,17 @@ export default function Environments() {
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
+    const [lastRevisionCount, setLastRevisionCount] = useState(0);
+
+    const extractLastRevisionNumber = (list) => {
+        if (list[list.length - 1]) {
+            const lastRevisionName = list[list.length - 1].displayName;
+            const splitList = lastRevisionName.split(' ');
+            setLastRevisionCount(splitList[1]);
+        } else {
+            setLastRevisionCount(0);
+        }
+    };
 
     useEffect(() => {
         restApi.getDeployments()
@@ -310,6 +327,8 @@ export default function Environments() {
             });
         restApi.getRevisions(api.id).then((result) => {
             setRevisions(result.body.list);
+            setLastRevisionCount(result.body.count);
+            extractLastRevisionNumber(result.body.list);
         });
 
         restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
@@ -385,6 +404,7 @@ export default function Environments() {
             }).finally(() => {
                 restApi.getRevisions(api.id).then((result) => {
                     setRevisions(result.body.list);
+                    extractLastRevisionNumber(result.body.list);
                 });
             });
         setOpen(false);
@@ -414,6 +434,7 @@ export default function Environments() {
             }).finally(() => {
                 restApi.getRevisions(api.id).then((result) => {
                     setRevisions(result.body.list);
+                    extractLastRevisionNumber(result.body.list);
                 });
             });
     }
@@ -1042,17 +1063,18 @@ export default function Environments() {
                         />
                     </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Box mb={3}>
-                            <TextField
-                                name='name'
-                                margin='dense'
-                                variant='outlined'
-                                label='Name'
-                                value='REVISION'
-                                fullWidth
-                                disabled
-                            />
-                        </Box>
+                        <Typography variant='body1' className={classes.labelSpacingDown}>
+                            <b>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.new.revision.name.heading1'
+                                    defaultMessage='Revision Name:'
+                                />
+                            </b>
+                            <span className={classes.labelSpace}>
+                                {'REVISION '}
+                                {parseInt(lastRevisionCount, 0) + 1}
+                            </span>
+                        </Typography>
                         <Box mb={3}>
                             <TextField
                                 autoFocus
@@ -1320,17 +1342,18 @@ export default function Environments() {
                         />
                     </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Box mb={3}>
-                            <TextField
-                                name='name'
-                                margin='dense'
-                                variant='outlined'
-                                label='Name'
-                                value='REVISION'
-                                fullWidth
-                                disabled
-                            />
-                        </Box>
+                        <Typography variant='body1' className={classes.labelSpacingDown}>
+                            <b>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.new.revision.name.heading2'
+                                    defaultMessage='Revision Name:'
+                                />
+                            </b>
+                            <span className={classes.labelSpace}>
+                                {'REVISION '}
+                                {parseInt(lastRevisionCount, 0) + 1}
+                            </span>
+                        </Typography>
                         <Box mb={3}>
                             <TextField
                                 autoFocus
