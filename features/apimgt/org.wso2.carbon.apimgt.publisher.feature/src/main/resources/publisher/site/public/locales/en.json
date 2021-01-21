@@ -276,6 +276,7 @@
   "Apis.Details.Documents.CreateEditForm.exceeds.document.name.length.helper.text": "Document name exceeds the maximum length of 60 characters",
   "Apis.Details.Documents.CreateEditForm.source": "Source",
   "Apis.Details.Documents.CreateEditForm.source.file": "File",
+  "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": "Error when validating the document source file name",
   "Apis.Details.Documents.CreateEditForm.source.inline": "Inline",
   "Apis.Details.Documents.CreateEditForm.source.markdown": "Markdown",
   "Apis.Details.Documents.CreateEditForm.source.url": "URL",
