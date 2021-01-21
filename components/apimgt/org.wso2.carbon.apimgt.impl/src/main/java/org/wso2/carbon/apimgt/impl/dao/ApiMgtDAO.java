@@ -15879,11 +15879,15 @@ public class ApiMgtDAO {
                     APIRevision apiRevision = new APIRevision();
                     List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    APIRevision previousRevision = null;
                     for (APIRevision apiRevisionObject : revisionList) {
                         if (apiRevisionObject.getId() == rs.getInt(1)) {
                             apiRevisionDeploymentList = apiRevisionObject.getApiRevisionDeploymentList();
-                            revisionList.remove(apiRevisionObject);
+                            previousRevision = apiRevisionObject;
                         }
+                    }
+                    if (previousRevision != null) {
+                        revisionList.remove(previousRevision);
                     }
                     apiRevision.setId(rs.getInt(1));
                     apiRevision.setApiUUID(rs.getString(2));

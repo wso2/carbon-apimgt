@@ -21,6 +21,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -39,6 +41,13 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
             RegistryService registryService, Registry registry, TenantManager tenantManager)
             throws APIManagementException {
         super(genericArtifactManager, registryService, registry, tenantManager);
+    }
+
+    public AbstractAPIManagerWrapperExtended(GenericArtifactManager genericArtifactManager,
+                                             RegistryService registryService, Registry registry,
+                                             TenantManager tenantManager, ApiMgtDAO apiMgtDAO, APIPersistence persistance)
+            throws APIManagementException {
+        super(genericArtifactManager, registryService, registry, tenantManager, apiMgtDAO, persistance);
     }
 
     @Override
