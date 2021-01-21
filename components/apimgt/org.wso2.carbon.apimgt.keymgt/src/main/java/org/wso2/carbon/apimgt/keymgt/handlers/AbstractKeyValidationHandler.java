@@ -217,10 +217,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         //TODO add a check to see whether datastore is initialized an load data using rest api if it is not loaded
         if (datastore != null) {
             api = datastore.getApiByContextAndVersion(context, version);
-            if (api == null && APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(version)) {
-                // for websocket default version.
-                api = datastore.getDefaultApiByContext(context);
-            }
             if (api != null) {
                 key = datastore.getKeyMappingByKeyAndKeyManager(consumerKey, keyManager);
                 if (key != null) {
