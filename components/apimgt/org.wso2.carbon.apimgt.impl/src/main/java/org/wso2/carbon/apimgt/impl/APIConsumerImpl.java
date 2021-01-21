@@ -5989,7 +5989,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, tenantDomain, org, apiProduct);
+                    populateAPIProductInformation(uuid, orgId, org, apiProduct);
                     
                     return new ApiTypeWrapper(apiProduct);
                 } else {

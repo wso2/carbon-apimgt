@@ -8148,12 +8148,25 @@ public class ApiMgtDAO {
     public String getUUIDFromIdentifier(APIIdentifier identifier) throws APIManagementException {
 
         String uuid = null;
-        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+
+        String sql;
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier
+                .getProviderName()));
+        String orgId = tenantDomain;
+        if (orgId.equals(tenantDomain)) {
+            sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        } else {
+            sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_ID_SQL;
+        }
+
         try(Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
             prepStmt.setString(3, identifier.getVersion());
+            if (orgId.equals(tenantDomain)) {
+                prepStmt.setString(4, orgId);
+            }
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);

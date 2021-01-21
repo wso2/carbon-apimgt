@@ -984,6 +984,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
 
+        String provider = api.getId().getProviderName();
+        if (provider.contains("AT")) {
+            provider = provider.replace("-AT-", "@");
+            tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        }
+
         try {
             Organization org = null;
             if (api.getOrganizationId() != null) {
@@ -1914,6 +1922,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             api.setEndpointSecured(true);
                         }
                     }
+                }
+                String provider = api.getId().getProviderName();
+                if (provider.contains("AT")) {
+                    provider = provider.replace("-AT-", "@");
+                    tenantDomain = MultitenantUtils.getTenantDomain(provider);
+                } else {
+                    tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
                 }
                 try {
                     Organization org = null;
@@ -3098,7 +3113,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
-
+                    if (provider.contains("AT")) {
+                        provider = provider.replace("-AT-", "@");
+                        tenantDomain = MultitenantUtils.getTenantDomain(provider);
+                    } else {
+                        tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                    }
                     try {
                         Organization org;
                         if (api.getOrganizationId() != null) {
@@ -4116,7 +4136,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
             Organization org = new Organization(orgId);
-
             PublisherAPI api = apiPersistenceInstance.getPublisherAPI(org , apiId);
             api.setDefaultVersion(value);
             apiPersistenceInstance.updateAPI(org, api);
@@ -4594,7 +4613,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param docName name of the document
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
+    public void removeDocumentation(APIIdentifier apiId, String docName, String docType, String orgId) throws APIManagementException {
         String docPath = APIUtil.getAPIDocPath(apiId) + docName;
 
         try {

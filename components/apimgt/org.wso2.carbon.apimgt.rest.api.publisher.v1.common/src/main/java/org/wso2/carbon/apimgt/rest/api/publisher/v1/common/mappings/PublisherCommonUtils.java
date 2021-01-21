@@ -940,6 +940,22 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * Getting the Identifier of an Organization
+     * @param organizationId UUID of the Organization which the API belongs to
+     * @return tenantDomain or OrganizationUUID
+     */
+    public static String getOrgId(String organizationId) {
+        String orgId;
+        if (organizationId != null) {
+            orgId = organizationId;
+        } else {
+            orgId = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        }
+        return orgId;
+    }
+
+
+    /**
      * update swagger definition of the given api
      *
      * @param apiId    API Id
@@ -1000,6 +1016,7 @@ public class PublisherCommonUtils {
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         if (orgId != null) {
             unModifiedAPI.setOrganizationId(orgId);
+            existingAPI.setOrganizationId(orgId);
         }
         existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);

@@ -774,10 +774,7 @@ public class AbstractAPIManagerTestCase {
         identifier.setUuid(SAMPLE_RESOURCE_ID);
         PowerMockito.mockStatic(OASParserUtil.class);
         String swaggerContent = "sample swagger";
-        PowerMockito.when(apiPersistenceInstance.getOASDefinition(org ,
-                SAMPLE_RESOURCE_ID)).thenReturn(swaggerContent);
-        
-        
+        PowerMockito.when(apiPersistenceInstance.getOASDefinition(org , SAMPLE_RESOURCE_ID)).thenReturn(swaggerContent);
         Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN), swaggerContent);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
         Assert.assertEquals(abstractAPIManager.getOpenAPIDefinition(identifier, SAMPLE_TENANT_DOMAIN), swaggerContent);
@@ -1043,7 +1040,6 @@ public class AbstractAPIManagerTestCase {
 
         Assert.assertNotNull(
                 abstractAPIManager.getDocumentation(SAMPLE_API_RESOURCE_ID, SAMPLE_RESOURCE_ID, SAMPLE_TENANT_DOMAIN));
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
         Documentation doc = abstractAPIManager.getDocumentation(SAMPLE_API_RESOURCE_ID, SAMPLE_RESOURCE_ID,
                 SAMPLE_TENANT_DOMAIN);
         Assert.assertEquals(doc.getName(), docName);

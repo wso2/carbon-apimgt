@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.SearchResultMappingUtil;
@@ -49,7 +50,8 @@ public class SearchApiServiceImpl implements SearchApiService {
 
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
 
-    public Response searchGet(String organizationId, Integer limit, Integer offset, String query, String ifNoneMatch,
+    @Override
+    public Response search(String organizationId, Integer limit, Integer offset, String query, String ifNoneMatch,
                               MessageContext messageContext) {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
@@ -68,7 +70,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = null;
-            String orgId = getOrgId(organizationId);
+            String orgId = PublisherCommonUtils.getOrgId(organizationId);
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = apiProvider.searchPaginatedContent(query, orgId, offset, limit);
             } else {
@@ -129,27 +131,6 @@ public class SearchApiServiceImpl implements SearchApiService {
             String errorMessage = "Error while retrieving search results";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
         return Response.ok().entity(resultListDTO).build();
-    }
-
-    /**
-     * Getting the Identifier of an Organization
-     * @param organizationId UUID of the Organization which the API belongs to
-     * @return tenantDomain or OrganizationUUID
-     */
-    private String getOrgId(String organizationId) {
-        String orgId;
-        if (organizationId != null) {
-            orgId = organizationId;
-        } else {
-            orgId = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        }
-        return orgId;
-    }
-
-    @Override
-    public Response search(String organizationId, Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
-        return null;
     }
 }

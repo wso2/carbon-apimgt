@@ -423,6 +423,7 @@ public interface APIConsumer extends APIManager {
      * @param identifier Api identifier
      * @param comment comment text
      * @param user Username of the comment author
+     * @param organizationId Identifier of an organization
      * @throws APIManagementException if failed to add comment for API
      *
      * @deprecated
@@ -436,6 +437,7 @@ public interface APIConsumer extends APIManager {
      * @param identifier Api identifier
      * @param comment comment object
      * @param user Username of the comment author
+     * @param organizationId Identifier of an organization
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user, String organizationId) throws APIManagementException;
@@ -913,7 +915,7 @@ public interface APIConsumer extends APIManager {
      * @param api API  
      * @param environmentName environment name
      * @param environmentType environment type
-     * @param orgId tenant domain
+     * @param orgId Identifier of an organization
      * @return WSDL of the API
      * @throws APIManagementException when error occurred while getting the WSDL
      */
