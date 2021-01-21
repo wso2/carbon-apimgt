@@ -8148,24 +8148,15 @@ public class ApiMgtDAO {
 
         String uuid = null;
 
-        String sql;
+        String sql  = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier
                 .getProviderName()));
         String orgId = tenantDomain;
-        if (orgId.equals(tenantDomain)) {
-            sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
-        } else {
-            sql = SQLConstants.GET_UUID_BY_IDENTIFIER_AND_ORGANIZATION_ID_SQL;
-        }
-
         try(Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
             prepStmt.setString(3, identifier.getVersion());
-            if (orgId.equals(tenantDomain)) {
-                prepStmt.setString(4, orgId);
-            }
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
@@ -10147,25 +10138,16 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public boolean isDuplicateContextTemplate(String contextTemplate, String organizationId) throws APIManagementException {
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        String sqlQuery = null;
-
-        if (organizationId != null) {
-            sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION_ID;
-        } else {
-            sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL;
-        }
+        String sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL;
 
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, contextTemplate.toLowerCase());
-            if (organizationId != null) {
-                ps.setString(2, organizationId);
-            }
             resultSet = ps.executeQuery();
             if (resultSet.next()) {
                 int count = resultSet.getInt("CTX_COUNT");

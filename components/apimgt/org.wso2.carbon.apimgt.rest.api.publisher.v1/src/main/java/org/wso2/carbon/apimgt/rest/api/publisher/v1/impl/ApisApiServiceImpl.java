@@ -490,6 +490,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
             originalAPI.setOrganizationId(orgId);
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, orgId);
+            //TODO - PASS apiprovider and remove tenanr flow
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -1842,7 +1843,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
                     API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId);
-                    api.setOrganizationId(orgId);// TODO do a deep copy
+                    oldAPI.setOrganizationId(orgId);// TODO do a deep copy
                     apiProvider.updateAPI(oldAPI, api);
                 }
             } else {

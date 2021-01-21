@@ -2069,7 +2069,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
 
-    public boolean isDuplicateContextTemplate(String contextTemplate, String organizationId) throws APIManagementException {
+    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException {
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             if (contextTemplate != null && contextTemplate.startsWith("/t/")) {
@@ -2078,7 +2078,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             contextTemplate = "/t/" + tenantDomain + contextTemplate;
         }
-        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate, organizationId);
+        return apiMgtDAO.isDuplicateContextTemplate(contextTemplate);
     }
 
     @Override

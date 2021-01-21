@@ -1518,7 +1518,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (oldApi.getStatus().equals(api.getStatus())) {
-
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
 
@@ -1842,7 +1841,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             boolean isAPIPublished = false;
-
             // gatewayType check is required when API Management is deployed on other servers to avoid synapse
             if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                 isAPIPublished = isAPIPublished(api);
@@ -1903,13 +1901,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            String provider = api.getId().getProviderName();
-            if (provider.contains("AT")) {
-                provider = provider.replace("-AT-", "@");
-                tenantDomain = MultitenantUtils.getTenantDomain(provider);
-            } else {
-                tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            }
             try {
                 Organization org = null;
                 if (existingAPI.getOrganizationId() != null) {
@@ -1951,8 +1942,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         return api;
-
-
     }
     
     private void updateOtherAPIversionsForNewDefautlAPIChange(API api, String previousDefaultVersion)
@@ -2059,7 +2048,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
     }
-
 
     private void republish(API api, Map<String, Map<String, String>> failedGateways, API oldApi,
             String previousDefaultVersion, String publishedDefaultVersion) throws APIManagementException {
@@ -2787,7 +2775,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             org = new Organization(tenantDomain);
         }
-        //TODO remove orgID
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             String apiUUID = api.getUuid();
@@ -3400,7 +3387,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId(), tenantDomain));
 
         if (apiProduct.getDefinition() == null) {
             apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getUuid(), tenantDomain));
@@ -4639,8 +4625,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
     }
-
-
 
     /**
      * Adds Documentation to an API/Product
@@ -7019,7 +7003,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return response;
     }
-
 
     @Override
     public APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action, Map<String, Boolean> checklist)
@@ -9419,12 +9402,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
-
-
         } catch (APIPersistenceException e) {
             handleException("Failed to remove the API product", e);
         }
-
     }
 
     @Override
@@ -9629,7 +9609,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Validate Transports and Security
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
-
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
         try {
@@ -10861,7 +10840,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             Organization org = new Organization(orgId);
             apiPersistenceInstance.saveGraphQLSchemaDefinition(org, apiId, definition);
-
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);

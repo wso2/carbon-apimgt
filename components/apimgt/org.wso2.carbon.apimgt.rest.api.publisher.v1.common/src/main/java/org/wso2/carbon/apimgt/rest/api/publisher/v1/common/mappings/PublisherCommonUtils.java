@@ -367,7 +367,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        originalAPI.setOrganizationId(orgId);
+        apiToUpdate.setOrganizationId(orgId);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), orgId);// TODO use returend api
@@ -837,8 +837,7 @@ public class PublisherCommonUtils {
         //Get all existing versions of  api been adding
         List<String> apiVersions;
         if (organizationId != null) {
-            apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(), username,
-                    organizationId);
+            apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(), organizationId);
         } else {
             apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
         }
@@ -847,7 +846,7 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(context, organizationId)) {
+                    if (apiProvider.isDuplicateContextTemplate(context)) {
                         if (organizationId != null ) {
                             throw new APIManagementException(
                                     "Error occurred while " + "adding the API. A duplicate API already exists for "
@@ -874,7 +873,7 @@ public class PublisherCommonUtils {
             }
         } else {
             //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplate(context, organizationId)) {
+            if (apiProvider.isDuplicateContextTemplate(context)) {
                 if (organizationId != null) {
                     throw new APIManagementException(
                             "Error occurred while adding API. API with name " + body.getName()
@@ -1027,7 +1026,6 @@ public class PublisherCommonUtils {
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         if (orgId != null) {
-            unModifiedAPI.setOrganizationId(orgId);
             existingAPI.setOrganizationId(orgId);
         }
         existingAPI.setStatus(unModifiedAPI.getStatus());

@@ -523,7 +523,7 @@ public interface APIManager {
      * @return boolean - true if the template exists, false otherwise.
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
-    boolean isDuplicateContextTemplate(String contextTemplate, String organizationId) throws APIManagementException;
+    boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
 
     /**
      * get a set of API names that matches given context template
