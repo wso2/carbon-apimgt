@@ -30,7 +30,6 @@ import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
 import Avatar from 'AppComponents/Base/Header/Avatar';
 import Themes from 'Themes';
-import merge from 'lodash.merge';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider, injectIntl } from 'react-intl';
@@ -43,131 +42,9 @@ import Progress from 'AppComponents/Shared/Progress';
 import Dashboard from 'AppComponents/AdminPages/Dashboard/Dashboard';
 import Alert from 'AppComponents/Shared/Alert';
 
-const drawerWidth = 256;
 
-const themeJSON = merge(Themes.light, {
-    palette: {
-        primary: {
-            light: '#63ccff',
-            main: '#009be5',
-            dark: '#006db3',
-        },
-    },
-    typography: {
-        h5: {
-            fontWeight: 500,
-            fontSize: 26,
-            letterSpacing: 0.5,
-        },
-    },
-    shape: {
-        borderRadius: 8,
-    },
-    props: {
-        MuiTab: {
-            disableRipple: true,
-        },
-    },
-    mixins: {
-        toolbar: {
-            minHeight: 48,
-        },
-    },
-    custom: {
-        drawerWidth,
-    },
-});
-let theme = createMuiTheme(themeJSON);
-
-theme = {
-    ...theme,
-    overrides: {
-        MuiRadio: {
-            colorSecondary: {
-                '&$checked': { color: theme.palette.primary.main },
-                '&$disabled': {
-                    color: theme.palette.action.disabled,
-                },
-            },
-        },
-        MuiDrawer: {
-            paper: {
-                backgroundColor: '#18202c',
-            },
-        },
-        MuiButton: {
-            label: {
-                textTransform: 'none',
-            },
-            contained: {
-                boxShadow: 'none',
-                '&:active': {
-                    boxShadow: 'none',
-                },
-            },
-        },
-        MuiTabs: {
-            root: {
-                marginLeft: theme.spacing(1),
-            },
-            indicator: {
-                height: 3,
-                borderTopLeftRadius: 3,
-                borderTopRightRadius: 3,
-                backgroundColor: theme.palette.common.white,
-            },
-        },
-        MuiTab: {
-            root: {
-                textTransform: 'none',
-                margin: '0 16px',
-                minWidth: 0,
-                padding: 0,
-                [theme.breakpoints.up('md')]: {
-                    padding: 0,
-                    minWidth: 0,
-                },
-            },
-        },
-        MuiIconButton: {
-            root: {
-                padding: theme.spacing(1),
-            },
-        },
-        MuiTooltip: {
-            tooltip: {
-                borderRadius: 4,
-            },
-        },
-        MuiDivider: {
-            root: {
-                backgroundColor: '#404854',
-            },
-        },
-        MuiListItemText: {
-            primary: {
-                fontWeight: theme.typography.fontWeightMedium,
-            },
-        },
-        MuiListItemIcon: {
-            root: {
-                color: 'inherit',
-                marginRight: 0,
-                '& svg': {
-                    fontSize: 20,
-                },
-            },
-        },
-        MuiAvatar: {
-            root: {
-                width: 32,
-                height: 32,
-            },
-        },
-    },
-};
-
-
+const theme = createMuiTheme(Themes.light);
+const { drawerWidth } = Themes.light.custom;
 /**
  * Language.
  * @type {string}

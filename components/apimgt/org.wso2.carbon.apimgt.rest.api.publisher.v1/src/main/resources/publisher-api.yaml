@@ -7394,7 +7394,7 @@ parameters:
     in: query
     description: |
       Maximum size of resource array to return.
-    default: 25
+    default: 80
     type: integer
 
   # The HTTP Accept header

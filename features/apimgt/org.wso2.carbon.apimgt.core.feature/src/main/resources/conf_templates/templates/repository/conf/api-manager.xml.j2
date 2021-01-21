@@ -32,7 +32,7 @@
         <Password>${admin.password}</Password>
         <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
            via a remote service. The check will be done on the local server when false. -->
-        <CheckPermissionsRemotely>false</CheckPermissionsRemotely>
+        <CheckPermissionsRemotely>{{apim.auth_manager.check_permissions_remotely}}</CheckPermissionsRemotely>
     </AuthManager>
 
     {% if apim.idp is defined %}
@@ -418,6 +418,12 @@
 
     </OAuthConfigurations>
 
+    <AccessTokenBinding>
+        {% if apim.access_token_binding.enable is defined %}
+        <Enabled>{{apim.access_token_binding.enable}}</Enabled>
+        {% endif %}
+    </AccessTokenBinding>
+
     <TokenRevocationNotifiers class="{{apim.token.revocation.notifier_impl}}">
         {% if apim.token.revocation.enable_realtime_notifier %}
         <RealtimeNotifier>
@@ -456,7 +462,7 @@
         <DefaultGroupExtractorClaimUri>{{apim.devportal.application_sharing_claim}}</DefaultGroupExtractorClaimUri>
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>{{apim.devportal.login_username_case_insensitive}}</CompareCaseInsensitively>
-        <DisplayURL>false</DisplayURL>
+        <DisplayURL>{{apim.devportal.display_url}}</DisplayURL>
         <URL>{{apim.devportal.url}}</URL>
 
         <!-- Server URL of the API Developer Portal. -->
@@ -501,7 +507,7 @@
     </APIStore>
 
     <APIPublisher>
-        <DisplayURL>false</DisplayURL>
+        <DisplayURL>{{apim.publisher.display_url}}</DisplayURL>
         <URL>https://localhost:${mgt.transport.https.port}/publisher</URL>
         <!-- This parameter specifies enabling the capability of setting API documentation level granular visibility levels.
              By default any document associate with an API will have the same permissions set as the API.With enabling below

@@ -163,15 +163,14 @@
             <definition type="RDBMS">
                 <configuration>
                     <url>jdbc:h2:./repository/database/WSO2MB_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;MVCC=TRUE</url>
-                    <username>wso2carbon</username>
-                    <password>wso2carbon</password>
-                    <driverClassName>org.h2.Driver</driverClassName>
-                    <maxActive>50</maxActive>
-                    <maxWait>60000</maxWait>
-                    <testOnBorrow>true</testOnBorrow>
-                    <validationQuery>SELECT 1</validationQuery>
-                    <validationInterval>30000</validationInterval>
-                    <defaultAutoCommit>false</defaultAutoCommit>
+                    <url>{{database.mb.store_db.url}}</url>
+                    <username>{{database.mb.store_db.username}}</username>
+                    <password>{{database.mb.store_db.password}}</password>
+                    <driverClassName>{{database.mb.store_db.driver}}</driverClassName>
+                    <validationQuery>{{database.mb.store_db.validationQuery}}</validationQuery>
+                    {% for property_name,property_value in database.mb.store_db.pool_options.items() %}
+                    <{{property_name}}>{{property_value}}</{{property_name}}>
+                        {% endfor %}
                 </configuration>
             </definition>
         </datasource>

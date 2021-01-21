@@ -632,7 +632,7 @@ class Details extends Component {
                             Icon={<DocumentsIcon />}
                         />
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
-                            api) && (
+                            api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.Tryout',

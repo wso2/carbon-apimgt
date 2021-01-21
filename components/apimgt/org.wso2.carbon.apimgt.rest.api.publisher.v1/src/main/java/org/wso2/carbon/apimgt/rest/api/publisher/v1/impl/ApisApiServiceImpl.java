@@ -42,6 +42,7 @@ import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -332,6 +333,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         String username = RestApiUtil.getLoggedInUsername();
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+        String context = body.getContext();
+        //Make sure context starts with "/". ex: /pizza
+        context = context.startsWith("/") ? context : ("/" + context);
+
         if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
             for (String apiSecurityScheme : apiSecuritySchemes) {
                 if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
@@ -355,13 +360,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         if (body.getContext() == null) {
             RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
-        } else if (body.getContext().endsWith("/")) {
+        }
+        if (body.getContext().endsWith("/")) {
             RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
         }
+
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                     + " already exists.", log);
         }
+
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil
                     .getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
@@ -388,10 +396,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                    if (apiProvider.isDuplicateContextTemplate(context)) {
                         RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
                                 "adding the API. A duplicate API already exists for "
-                                + body.getName() + "-" + body.getVersion(), log);
+                                + context, log);
                     } else {
                         RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
                                 body.getName() + " already exists with different " +
@@ -401,9 +409,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } else {
             //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+            if (apiProvider.isDuplicateContextTemplate(context)) {
                 RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
-                        "already exists for " + body.getContext(), log);
+                        "already exists for " + context, log);
             }
         }
 
@@ -1109,7 +1117,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+                                new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8));
                         String inputLine;
                         StringBuilder responseString = new StringBuilder();
 
@@ -1124,7 +1132,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         Integer numErrors = Integer.valueOf(
                                 (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
                                         .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
-                        String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
+                        String decodedReport = new String(Base64Utils.decode(report), StandardCharsets.UTF_8);
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
@@ -1163,7 +1171,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Set the property to be attached in the body of the request
         // Attach API Definition to property called specfile to be sent in the request
         JSONObject jsonBody = new JSONObject();
-        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes("UTF-8")));
+        jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes(StandardCharsets.UTF_8)));
         // Logic for HTTP Request
         String putUrl = baseUrl + "/" + auditUuid;
         URL updateApiUrl = new URL(putUrl);
@@ -1223,7 +1231,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
         httpConn.setRequestProperty(APIConstants.HEADER_USER_AGENT, APIConstants.USER_AGENT_APIM);
         outputStream = httpConn.getOutputStream();
-        writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
+        writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8), true);
         // Name property
         writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
                 .append("Content-Disposition: form-data; name=\"name\"")
@@ -1254,7 +1262,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 log.debug("HTTP status " + status);
             }
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+                    new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
             String inputLine;
             StringBuilder responseString = new StringBuilder();
 
@@ -3749,8 +3757,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
             } else if (fileDetail != null && fileInputStream != null) {
-                ResourceFile wsdlResource = new ResourceFile(fileInputStream,
-                        fileDetail.getContentType().toString());
+                ResourceFile wsdlResource;
+                if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
+                        APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
+                    wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+                } else {
+                    wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+                }
                 apiToAdd.setWsdlResource(wsdlResource);
             }
 
@@ -3817,10 +3830,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileInputStream != null) {
                 String filename = fileDetail.getContentDisposition().getFilename();
                 if (filename.endsWith(".zip")) {
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath);;
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath, url);
                 } else if (filename.endsWith(".wsdl")) {
-                    byte[] wsdlContent = APIUtil.toByteArray(fileInputStream);
-                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlContent);
+                    wsdlArchiveExtractedPath = wsdlArchiveExtractedPath.substring(0,
+                            wsdlArchiveExtractedPath.lastIndexOf('/'));
+                    swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(wsdlArchiveExtractedPath, url);
                 } else {
                     throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
                 }
@@ -3828,7 +3842,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
             return createdApi;
-        } catch (FaultGatewaysException | IOException e) {
+        } catch (FaultGatewaysException  e) {
             throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }
     }
@@ -3891,8 +3905,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             api.setWsdlResource(null);
             apiProvider.updateWsdlFromUrl(api);
         } else {
-            ResourceFile wsdlResource = new ResourceFile(fileInputStream,
-                    fileDetail.getContentType().toString());
+            ResourceFile wsdlResource;
+            if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
+                    APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
+                wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+            } else {
+                wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+            }
             api.setWsdlResource(wsdlResource);
             api.setWsdlUrl(null);
             apiProvider.updateWsdlFromResourceFile(api);
@@ -4530,8 +4549,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             log.debug("Proxy configured, hence routing through configured proxy");
             String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
             String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
-            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-                    new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
+            HostConfiguration hostConfiguration = client.getHostConfiguration();
+            hostConfiguration.setProxy(proxyHost, Integer.parseInt(proxyPort));
+            client.setHostConfiguration(hostConfiguration);
         }
         try {
             int statusCode = client.executeMethod(method);
