@@ -79,5 +79,11 @@ public class ArtifactData {
         return devPortalApi;
     }
 
+    public int apiCount() throws UserStoreException, RegistryException, APIPersistenceException, APIManagementException {
+        List<DevPortalAPI> list = getDevportalAPIS();
+
+        return list.size();
+    }
+
 
 }

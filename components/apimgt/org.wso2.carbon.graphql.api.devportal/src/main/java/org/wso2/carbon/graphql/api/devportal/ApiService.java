@@ -29,6 +29,8 @@ public class ApiService {
 
     APIDTOData apidtoData = new APIDTOData();
 
+    ArtifactData artifactData = new ArtifactData();
+
 
 
     public DataFetcher getApiType(){
@@ -90,7 +92,7 @@ public class ApiService {
         };
     }
     public DataFetcher getApiCount(){
-        return env-> apidtoData.getApiCount();
+        return env-> artifactData.apiCount();
     }
 
     public DataFetcher  getApiRating(){

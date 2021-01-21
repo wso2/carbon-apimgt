@@ -63,7 +63,7 @@ public class ApiDetails {
             Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
             String monetizationLabel = "";//monetizationLabelData.getMonetizationLabelData(definedTiers,tiers,name);
-            boolean isDefault = false ; //devPortalAPI.getIsDefaultVersion();
+            boolean isDefault = devPortalAPI.getIsDefaultVersion();
 
             String authorizationHeader = devPortalAPI.getAuthorizationHeader();
 
@@ -77,7 +77,7 @@ public class ApiDetails {
 
             String categories = "";//devPortalAPI.getGatewayLabels().toString();
 
-            String allkeyManagers = "";
+            String allkeyManagers = devPortalAPI.getKeyManagers().toString();
 
             Api api1 = new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
             apiDTOList.add(api1);
@@ -157,13 +157,6 @@ public class ApiDetails {
     }
 
 
-    public int getApiCount() throws UserStoreException, RegistryException, APIManagementException, APIPersistenceException {
-
-       ArtifactData artifactData = new ArtifactData();
-       //return artifactData.getAllApis().length;
-        return  2;
-    }
-
     public Float getApiRating(String Id) throws APIManagementException {
 
 
@@ -205,7 +198,7 @@ public class ApiDetails {
         boolean hasthumbnail = HasThumbnail(thumbnailUrl);
 
         Set<String> environmentSet = devPortalAPI.getEnvironments();
-        String environments = "";
+        String environments = environmentSet.toString();
         String wsdUrl = devPortalAPI.getWsdlUrl();
         String status = devPortalAPI.getStatus();
 

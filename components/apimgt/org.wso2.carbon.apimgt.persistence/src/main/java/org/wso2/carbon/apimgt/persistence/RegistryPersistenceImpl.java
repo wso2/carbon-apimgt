@@ -25,6 +25,7 @@ import java.util.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -1059,13 +1060,22 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 devPortalAPI.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
                         (APIConstants.Monetization.API_MONETIZATION_STATUS)));
-                Set<String> labels = new HashSet<>(Arrays.asList(artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS)));
-                devPortalAPI.setGatewayLabels(labels);
+                //Set<String> labels = new HashSet<>(Arrays.asList(artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS)));
+                //devPortalAPI.setGatewayLabels(labels);
+
+                devPortalAPI.setIsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
 
                 //devPortalAPI.setApiCategories();
               // devPortalAPI.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
                devPortalAPI.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
                devPortalAPI.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
+
+                String keyManagers = artifact.getAttribute(APIConstants.API_OVERVIEW_KEY_MANAGERS);
+                if (StringUtils.isNotEmpty(keyManagers)) {
+                    devPortalAPI.setKeyManagers(new Gson().fromJson(keyManagers, List.class));
+                } else {
+                    devPortalAPI.setKeyManagers(Arrays.asList(APIConstants.API_LEVEL_ALL_KEY_MANAGERS));
+                }
 
                devPortalAPIList.add(devPortalAPI);
 
