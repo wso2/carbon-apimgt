@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
@@ -459,20 +458,22 @@ public class APIKeyValidationService {
     }
 
     /**
-     * validate access token for websocket handshake
+     * Validate access token for websocket handshake
      *
-     * @param context context of the API
-     * @param version version of the API
-     * @param accessToken access token of the request
-     * @return api information
+     * @param context          context of the API
+     * @param version          version of the API
+     * @param accessToken      access token of the request
+     * @param tenantDomain
+     * @param keyManagers
+     * @param matchingResource matching resource
+     * @return
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public APIKeyValidationInfoDTO validateKeyForHandshake(String context, String version,
-                                                           String accessToken, String tenantDomain,
-                                                           List<String> keyManagers)
+    public APIKeyValidationInfoDTO validateKeyForHandshake(String context, String version, String accessToken,
+                                                           String tenantDomain, List<String> keyManagers,
+                                                           String matchingResource)
             throws APIKeyMgtException, APIManagementException {
-        boolean defaultVersionInvoked = false;
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
         info.setAuthorized(false);
         TokenValidationContext validationContext = new TokenValidationContext();
@@ -483,19 +484,16 @@ public class APIKeyValidationService {
         validationContext.setTenantDomain(tenantDomain);
         validationContext.setRequiredAuthenticationLevel("Any");
         validationContext.setKeyManagers(keyManagers);
+        validationContext.setMatchingResource(matchingResource);
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         if (state) {
             state = keyValidationHandler.validateSubscription(validationContext);
             if (state) {
-                if (APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(version)) {
-                    version = info.getApiVersion();
-                    defaultVersionInvoked = true;
-                }
-                if (defaultVersionInvoked) {
-                    validationContext.getValidationInfoDTO().setApiName(info.getApiName() + "*" + version);
-                }
+                state = keyValidationHandler.validateScopes(validationContext);
+            }
+            if (state) {
                 if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
                         validationContext.getValidationInfoDTO().getEndUserName() != null
                         && !validationContext.isCacheHit()) {

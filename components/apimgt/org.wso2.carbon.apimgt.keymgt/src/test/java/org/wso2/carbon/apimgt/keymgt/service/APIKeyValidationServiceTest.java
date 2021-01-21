@@ -61,6 +61,7 @@ public class APIKeyValidationServiceTest {
 
     private final String USER_NAME = "admin";
     private final String API_CONTEXT = "apicontext";
+    private final String API_RESOURCE = "";
     private final String API_NAME = "apiname";
     private final String API_VERSION = "1.0.0";
     private final String TENANT_DOMAIN = "foo.com";
@@ -158,8 +159,8 @@ public class APIKeyValidationServiceTest {
                 .thenThrow(ClassNotFoundException.class);
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
-            apiKeyValidationService
-                    .validateKeyForHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN, keymanagers);
+            apiKeyValidationService.validateKeyForHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,
+                                                            keymanagers, API_RESOURCE);
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
@@ -167,8 +168,8 @@ public class APIKeyValidationServiceTest {
 
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
-            apiKeyValidationService
-                    .validateKeyForHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN, keymanagers);
+            apiKeyValidationService.validateKeyForHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,
+                                                            keymanagers, API_RESOURCE);
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());
@@ -176,8 +177,8 @@ public class APIKeyValidationServiceTest {
 
         try {
             APIKeyValidationService apiKeyValidationService = new APIKeyValidationService();
-            apiKeyValidationService
-                    .validateKeyForHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN, keymanagers);
+            apiKeyValidationService.validateKeyForHandshake(API_CONTEXT, API_VERSION, ACCESS_TOKEN, TENANT_DOMAIN,
+                                                            keymanagers, API_RESOURCE);
             Assert.fail("NullPointerException expected");
         } catch (Exception e) {
             Assert.assertEquals(e.getMessage(), e.getMessage());

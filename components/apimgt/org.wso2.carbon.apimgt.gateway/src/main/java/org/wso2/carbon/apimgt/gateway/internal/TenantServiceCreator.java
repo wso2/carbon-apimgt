@@ -60,6 +60,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String mainSequenceName = "main";
     private String corsSequenceName = "_cors_request_handler_";
     private String threatFaultSequenceName = "_threat_fault_";
+    private String webSocketInboundEp = "WebSocketInboundEndpoint";
+    private String securedWebSocketInboundEp = "SecureWebSocketEP";
+    private String webHookServerHTTP = "WebhookServer";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -236,6 +239,18 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + threatFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + threatFaultSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + webSocketInboundEp + ".xml"), new File(
+                        synapseConfigDir.getAbsolutePath() + File.separator
+                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator
+                                + webSocketInboundEp + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + securedWebSocketInboundEp + ".xml"), new File(
+                        synapseConfigDir.getAbsolutePath() + File.separator
+                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator
+                                + securedWebSocketInboundEp + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTP + ".xml"), new File(
+                        synapseConfigDir.getAbsolutePath() + File.separator
+                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTP
+                                + ".xml"));
             } catch (IOException e) {
                 log.error("Error while copying API manager specific synapse sequences" + e);
             }

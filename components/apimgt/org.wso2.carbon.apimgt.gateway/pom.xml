@@ -341,9 +341,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.ops4j.pax.logging:pax-logging-api</classpathDependencyExclude>
                         <classpathDependencyExclude>org.wso2.orbit.com.fasterxml.jackson.core:jackson-core</classpathDependencyExclude>
                     </classpathDependencyExcludes>
                     <systemProperties>
+                        <java.util.logging.manager>org.apache.logging.log4j.jul.LogManager</java.util.logging.manager>
                         <property>
                             <name>org.opensaml.httpclient.https.disableHostnameVerification</name>
                             <value>true</value>
