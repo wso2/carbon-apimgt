@@ -17,15 +17,14 @@
 
 package org.wso2.carbon.apimgt.impl.handlers;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -33,14 +32,15 @@ import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 
-import java.util.Map;
+import java.util.UUID;
 
 public class GAConfigMediaTypeHandler extends Handler {
     private static Log log = LogFactory.getLog(GAConfigMediaTypeHandler.class);
 
     public void put(RequestContext requestContext) throws RegistryException {
+
         ResourceImpl resource = (ResourceImpl) requestContext.getResource();
-        if (! resource.isContentModified()) {
+        if (!resource.isContentModified()) {
             return;
         }
 
@@ -55,27 +55,13 @@ public class GAConfigMediaTypeHandler extends Handler {
             log.warn("The resource content is not of expected type");
             return;
         }
-
-        APIManagerConfiguration config = getAPIManagerConfig();
-        if (config == null) {
-            return;
-        }
-
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
-        for (String environmentName : environments.keySet()) {
-            Environment environment = environments.get(environmentName);
-
-            try {
-                LocalEntryAdminClient localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
-                localEntryAdminClient.deleteEntry(APIConstants.GA_CONF_KEY);
-                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + APIConstants.GA_CONF_KEY + "\">"
-                        + resourceContent + "</localEntry>");
-            } catch (AxisFault e) {
-                log.error("Error occurred while adding local entry(GA-config) to gateway " + environmentName, e);
-            }
-        }
+        GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
+                new GoogleAnalyticsConfigEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                        APIConstants.EventType.GACONFIG_UPDATE.toString(), tenantId, tenantDomain);
+        APIUtil.sendNotification(googleAnalyticsConfigEvent, APIConstants.NotifierType.GA_CONFIG.name());
     }
 
     private APIManagerConfiguration getAPIManagerConfig() {

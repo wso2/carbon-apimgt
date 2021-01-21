@@ -1556,7 +1556,7 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testGetPolicies() throws APIManagementException, org.wso2.carbon.user.api.UserStoreException,
-            RegistryException {
+            RegistryException, XMLStreamException {
         APIPolicy[] policies1 = { new APIPolicy("policy1") };
         ApplicationPolicy[] policies2 = { new ApplicationPolicy("policy2"), new ApplicationPolicy("policy3") };
         SubscriptionPolicy[] policies3 = { new SubscriptionPolicy("policy4"), new SubscriptionPolicy("policy5"),
@@ -1597,7 +1597,8 @@ public class AbstractAPIManagerTestCase {
 
     @Test
     public void testSearchPaginatedAPIs()
-            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException {
+            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException,
+            XMLStreamException {
         Map<String, Object> subContextResult = new HashMap<String, Object>();
         subContextResult.put("1", new Object());
         UserRegistry registry = Mockito.mock(UserRegistry.class);

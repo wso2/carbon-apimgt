@@ -16,34 +16,24 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.JwtConfigContext;
 
-public class EnvironmentConfigContextTest {
+public class JwtConfigContextTest {
 
     @Test
-    public void testEnvironmentConfigContext() throws Exception {
-
+    public void testJwtConfigContext() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
-        String url = "http://maps.googleapis.com/maps/api/geocode/json?address=Colombo";
-        String endpointConfig = "{\"production_endpoints\":{\"url\":\"" + url + "\", \"config\":null}," +
-                "\"sandbox_endpoint\":{\"url\":\"" + url + "\",\"config\":null},\"endpoint_type\":\"http\"}";
-        api.setEndpointConfig(endpointConfig);
-        api.setUrl(url);
-        api.setSandboxUrl(url);
         ConfigContext configcontext = new APIConfigContext(api);
-        Environment environment = new Environment();
-        environment.setType("production");
-        EnvironmentConfigContext environmentConfigContext = new EnvironmentConfigContext(configcontext, environment);
-        Assert.assertNotNull(environmentConfigContext.getContext().get("environment"));
-        Assert.assertNotNull(environmentConfigContext.getContext().get("environmentType"));
+        JwtConfigContext jwtConfigContext = new JwtConfigContext(configcontext);
+        Assert.assertNotNull(jwtConfigContext.getContext());
     }
 }

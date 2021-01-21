@@ -16,8 +16,6 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -25,6 +23,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ResourceConfigContext;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

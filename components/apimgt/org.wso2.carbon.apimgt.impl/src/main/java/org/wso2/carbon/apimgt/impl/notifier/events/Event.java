@@ -31,6 +31,19 @@ public abstract class Event implements Serializable {
     public int tenantId;
     public String tenantDomain;
 
+    public Event(String eventId, long timeStamp, String type, int tenantId, String tenantDomain) {
+
+        this.eventId = eventId;
+        this.timeStamp = timeStamp;
+        this.type = type;
+        this.tenantId = tenantId;
+        this.tenantDomain = tenantDomain;
+    }
+
+    public Event() {
+
+    }
+
     public String getTenantDomain() {
         return tenantDomain;
     }

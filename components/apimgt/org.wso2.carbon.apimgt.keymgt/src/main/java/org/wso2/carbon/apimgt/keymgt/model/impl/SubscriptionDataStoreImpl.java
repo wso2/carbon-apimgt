@@ -63,6 +63,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
     private Map<String, API> apiMap;
+    private Map<String,API> apiByUUIDMap;
     private Map<String, ApiPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
@@ -95,6 +96,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.applicationKeyMappingMap = new ConcurrentHashMap<>();
         this.applicationMap = new ConcurrentHashMap<>();
         this.apiMap = new ConcurrentHashMap<>();
+        this.apiByUUIDMap  = new ConcurrentHashMap<>();
         this.subscriptionPolicyMap = new ConcurrentHashMap<>();
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
@@ -120,6 +122,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         String key = context + DELEM_PERIOD + version;
         return apiMap.get(key);
+    }
+
+    @Override
+    public API getAPIByUUID(String apiUUID) {
+
+        return apiByUUIDMap.get(apiUUID);
     }
 
     @Override
@@ -159,6 +167,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     try {
                         log.debug("Calling loadAllApis. ");
                         List<API> apiList = new SubscriptionDataLoaderImpl().loadAllApis(tenantDomain);
+                        apiByUUIDMap.clear();
+                        for (API api : apiList) {
+                            apiByUUIDMap.put(api.getUuid(), api);
+                        }
                         apisInitialized = true;
                         return apiList;
                     } catch (APIManagementException e) {

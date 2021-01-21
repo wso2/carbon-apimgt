@@ -9,7 +9,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 
 import java.util.List;
@@ -20,6 +19,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface ApisApiService {
-      public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String accept, MessageContext messageContext) throws APIManagementException;
+public interface GaConfigApiService {
+      public Response gaConfigGet(String xWSO2Tenant, String apiId, MessageContext messageContext) throws APIManagementException;
 }

@@ -6,6 +6,8 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -27,11 +29,11 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -47,6 +49,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -60,22 +63,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.validation.Valid;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 public class TemplateBuilderUtil {
+
+    private static final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
+    private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
     private static final String PRODUCT_VERSION = "1.0.0";
 
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
-                                                               List<ClientCertificateDTO> clientCertificateDTOS)
+                                                               List<ClientCertificateDTO> clientCertificateDTOS,
+                                                               List<SoapToRestMediationDto> soapToRestInMediationDtoList,
+                                                               List<SoapToRestMediationDto> soapToRestOutMediationDtoList)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
+        APITemplateBuilderImpl vtb =
+                new APITemplateBuilderImpl(api, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
         vtb.addHandler(
@@ -238,7 +246,7 @@ public class TemplateBuilderUtil {
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(APIProduct apiProduct, String tenantDomain,
                                                                List<ClientCertificateDTO> clientCertificateDTOS,
-                                                               Map<String,APIDTO> associatedAPIMap)
+                                                               Map<String, APIDTO> associatedAPIMap)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
@@ -418,8 +426,13 @@ public class TemplateBuilderUtil {
 
         List<ClientCertificateDTO> clientCertificatesDTOList =
                 ImportUtils.retrieveClientCertificates(extractedFolderPath);
+        List<SoapToRestMediationDto> soapToRestInMediationDtoList =
+                ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.IN);
+        List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
+                ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
+
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
-                clientCertificatesDTOList);
+                clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
         if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
             return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
                     extractedFolderPath, apidto);
@@ -427,11 +440,11 @@ public class TemplateBuilderUtil {
         return null;
     }
 
-
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
                                                       APIDTO apidto, String extractedFolderPath,
                                                       APIDefinitionValidationResponse apiDefinitionValidationResponse)
             throws APIManagementException, XMLStreamException, APITemplateException, CertificateManagementException {
+
         if (apiDefinitionValidationResponse.isValid()) {
             APIDefinition parser = apiDefinitionValidationResponse.getParser();
             String definition = apiDefinitionValidationResponse.getJsonContent();
@@ -466,19 +479,19 @@ public class TemplateBuilderUtil {
         for (APIProductResource productResource : apiProduct.getProductResources()) {
             String apiId = productResource.getApiId();
             APIDTO apidto = associatedAPIsMap.get(apiId);
-            if (apidto != null){
-                API api  = APIMappingUtil.fromDTOtoAPI(apidto,apidto.getProvider());
+            if (apidto != null) {
+                API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                 productResource.setApiIdentifier(api.getId());
                 productResource.setEndpointConfig(api.getEndpointConfig());
-                if (StringUtils.isNotEmpty(api.getInSequence())){
+                if (StringUtils.isNotEmpty(api.getInSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
                     productResource.setInSequenceName(sequenceName);
-                 }
-                if (StringUtils.isNotEmpty(api.getOutSequence())){
+                }
+                if (StringUtils.isNotEmpty(api.getOutSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
                     productResource.setOutSequenceName(sequenceName);
                 }
-                if (StringUtils.isNotEmpty(api.getFaultSequence())){
+                if (StringUtils.isNotEmpty(api.getFaultSequence())) {
                     String sequenceName = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
                     productResource.setFaultSequenceName(sequenceName);
                 }
@@ -553,15 +566,12 @@ public class TemplateBuilderUtil {
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             //Build schema with additional info
-            GraphqlComplexityInfo graphqlComplexityInfo = APIUtil.getComplexityDetails(api);
-            GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
-            definition = schemaDefinition.buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
             gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUUID() + "_graphQL",
                     gatewayAPIDTO.getLocalEntriesToBeRemove()));
             GatewayContentDTO graphqlLocalEntry = new GatewayContentDTO();
             graphqlLocalEntry.setName(api.getUUID() + "_graphQL");
             graphqlLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
-                    definition + "</localEntry>");
+                    api.getGraphQLSchema() + "</localEntry>");
             gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(graphqlLocalEntry,
                     gatewayAPIDTO.getLocalEntriesToBeAdd()));
             Set<URITemplate> uriTemplates = new HashSet<>();
@@ -656,7 +666,8 @@ public class TemplateBuilderUtil {
 
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
         gatewayAPIDTO
-                .setSequencesToBeRemove(GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
+                .setSequencesToBeRemove(
+                        GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
         List<MediationPolicyDTO> mediationPolicies = apidto.getMediationPolicies();
         GatewayContentDTO faultSequenceContent =
                 retrieveSequence(extractedPath, mediationPolicies, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
@@ -665,7 +676,8 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(faultSequenceContent, gatewayAPIDTO.getSequenceToBeAdd()));
         }
-        gatewayAPIDTO.setSequencesToBeRemove(GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
+        gatewayAPIDTO.setSequencesToBeRemove(
+                GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
     }
 
     /**
@@ -702,9 +714,6 @@ public class TemplateBuilderUtil {
     private static void setClientCertificatesToBeAdded(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO)
             throws CertificateManagementException {
 
-        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
-            return;
-        }
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
                 .getClientCertificates(tenantId, null, api.getId());
@@ -730,9 +739,6 @@ public class TemplateBuilderUtil {
                                                        GatewayAPIDTO gatewayAPIDTO)
             throws CertificateManagementException {
 
-        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
-            return;
-        }
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
                 .getClientCertificates(tenantId, null, identifier);
@@ -909,4 +915,225 @@ public class TemplateBuilderUtil {
         }
         return apidtoMap;
     }
+
+    public static GatewayAPIDTO retrieveGatewayAPIDtoForWebSocket(API api) throws APIManagementException {
+
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setApiId(api.getUUID());
+        gatewayAPIDTO.setName(api.getId().getName());
+        gatewayAPIDTO.setVersion(api.getId().getVersion());
+        gatewayAPIDTO.setProvider(api.getId().getProviderName());
+        gatewayAPIDTO.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        String production_endpoint = null;
+        String sandbox_endpoint = null;
+        org.json.JSONObject obj = new org.json.JSONObject(api.getEndpointConfig());
+        if (obj.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+            production_endpoint = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
+        }
+        if (obj.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+            sandbox_endpoint = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
+        }
+        OMElement element;
+        try {
+            if (production_endpoint != null) {
+                String content = createSeqString(api, production_endpoint, ENDPOINT_PRODUCTION);
+                element = AXIOMUtil.stringToOM(content);
+                String fileName = element.getAttributeValue(new QName("name"));
+                gatewayAPIDTO.setSequencesToBeRemove(GatewayUtils.addStringToList(fileName,
+                        gatewayAPIDTO.getSequencesToBeRemove()));
+                GatewayContentDTO productionSequence = new GatewayContentDTO();
+                productionSequence.setContent(APIUtil.convertOMtoString(element));
+                productionSequence.setName(fileName);
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(productionSequence,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            if (sandbox_endpoint != null) {
+                String content = createSeqString(api, sandbox_endpoint, ENDPOINT_SANDBOX);
+                element = AXIOMUtil.stringToOM(content);
+                String fileName = element.getAttributeValue(new QName("name"));
+                gatewayAPIDTO.setSequencesToBeRemove(GatewayUtils.addStringToList(fileName,
+                        gatewayAPIDTO.getSequencesToBeRemove()));
+                GatewayContentDTO sandboxEndpointSequence = new GatewayContentDTO();
+                sandboxEndpointSequence.setContent(APIUtil.convertOMtoString(element));
+                sandboxEndpointSequence.setName(fileName);
+                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sandboxEndpointSequence,
+                        gatewayAPIDTO.getSequenceToBeAdd()));
+            }
+            return gatewayAPIDTO;
+        } catch (XMLStreamException e) {
+            String msg = "Error while parsing the Sequence";
+            log.error(msg, e);
+            throw new APIManagementException(msg);
+        }
+    }
+
+    /**
+     * create body of sequence
+     *
+     * @param api
+     * @param url
+     * @return
+     */
+    public static String createSeqString(API api, String url, String urltype) throws JSONException {
+
+        String context = api.getContext();
+        context = urltype + context;
+        String[] endpointConfig = websocketEndpointConfig(api, urltype);
+        String timeout = endpointConfig[0];
+        String suspendOnFailure = endpointConfig[1];
+        String markForSuspension = endpointConfig[2];
+        String endpointConf = "<default>\n" +
+                "\t<timeout>\n" +
+                timeout +
+                "\t</timeout>\n" +
+                "\t<suspendOnFailure>\n" +
+                suspendOnFailure + "\n" +
+                "\t</suspendOnFailure>\n" +
+                "\t<markForSuspension>\n" +
+                markForSuspension +
+                "\t</markForSuspension>\n" +
+                "</default>";
+        String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
+                context.replace('/', '-') + "\">\n" +
+                "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
+                "   <script language=\"js\">var sub_path = mc.getProperty(\"websocket.subscriber.path\");\t    \n" +
+                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\n" +
+                "                if(queryParamString != undefined) {\t    \n" +
+                "\t\tmc.setProperty('queryparams', \"?\" + queryParamString);\n" +
+                "\t\t}\t\t\n" +
+                "   </script>\n" +
+                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns=\"http://org.apache.synapse/xsd\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"queryparams\"\n" +
+                "             expression=\"$ctx:queryparams\"/>\n" +
+                "   <property name=\"urlVal\" value=\"" + url + "\"/>\n" +
+                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "             name=\"fullUrl\"\n" +
+                "             expression=\"fn:concat(get-property('urlVal'), get-property('queryparams'))\"\n" +
+                "             type=\"STRING\"/>\n" +
+                "   <header xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
+                "           xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
+                "           name=\"To\"\n" +
+                "           expression=\"$ctx:fullUrl\"/>\n" +
+                "   <send>\n" +
+                "      <endpoint>\n" +
+                endpointConf + "\n" +
+                "      </endpoint>\n" +
+                "   </send>\n" +
+                "</sequence>";
+        return seq;
+    }
+
+    /**
+     * Construct the timeout, suspendOnFailure, markForSuspension to add suspend
+     * configuration to the websocket endpoint (Simply assign config values according to the endpoint-template)
+     *
+     * @param api
+     * @param urlType - Whether production or sandbox
+     * @return timeout, suspendOnFailure, markForSuspension which will use to construct the endpoint configuration
+     */
+    private static String[] websocketEndpointConfig(API api, String urlType) throws JSONException {
+
+        org.json.JSONObject obj = new org.json.JSONObject(api.getEndpointConfig());
+        org.json.JSONObject endpointObj = null;
+
+        if (ENDPOINT_PRODUCTION.equalsIgnoreCase(urlType)) {
+            org.json.JSONObject prodEP = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+            if (prodEP.has("config") && prodEP.get("config") instanceof org.json.JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very
+                // first time)
+                endpointObj = prodEP.getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
+        } else if (ENDPOINT_SANDBOX.equalsIgnoreCase(urlType)) {
+            org.json.JSONObject sandEP = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+            if (sandEP.has("config") && sandEP.get("config") instanceof org.json.JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very
+                // first time)
+                endpointObj = sandEP.getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
+        }
+        String duration = validateJSONObjKey("actionDuration", endpointObj) ? "\t\t<duration>" +
+                endpointObj.get("actionDuration") + "</duration>\n" : "";
+        String responseAction = validateJSONObjKey("actionSelect", endpointObj) ? "\t\t<responseAction>" +
+                endpointObj.get("actionSelect") + "</responseAction>\n" : "";
+        String timeout = duration + "\n" + responseAction;
+        String retryErrorCode;
+        String suspendErrorCode;
+
+        if (validateJSONObjKey("suspendDuration", endpointObj)) {
+            //Avoid suspending the endpoint when suspend duration is zero
+            if (Integer.parseInt(endpointObj.get("suspendDuration").toString()) == 0) {
+                String suspendOnFailure = "\t\t<errorCodes>-1</errorCodes>\n" +
+                        "\t\t<initialDuration>0</initialDuration>\n" +
+                        "\t\t<progressionFactor>1.0</progressionFactor>\n" +
+                        "\t\t<maximumDuration>0</maximumDuration>";
+                String markForSuspension = "\t\t<errorCodes>-1</errorCodes>";
+                return new String[]{timeout, suspendOnFailure, markForSuspension};
+            }
+        }
+        suspendErrorCode = parseWsEndpointConfigErrorCodes(endpointObj, "suspendErrorCode");
+        String suspendDuration = validateJSONObjKey("suspendDuration", endpointObj) ? "\t\t<initialDuration>" +
+                endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
+        String suspendMaxDuration = validateJSONObjKey("suspendMaxDuration", endpointObj) ?
+                "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
+        String factor = validateJSONObjKey("factor", endpointObj) ? "\t\t<progressionFactor>" +
+                endpointObj.get("factor") + "</progressionFactor>" : "";
+        String suspendOnFailure = suspendErrorCode + "\n" + suspendDuration + "\n" + suspendMaxDuration + "\n" + factor;
+
+        retryErrorCode = parseWsEndpointConfigErrorCodes(endpointObj,
+                "retryErroCode"); //todo: fix typo retryErroCode from client side
+        String retryTimeOut = validateJSONObjKey("retryTimeOut", endpointObj) ? "\t\t<retriesBeforeSuspension>" +
+                endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
+        String retryDelay = validateJSONObjKey("retryDelay", endpointObj) ? "\t\t<retryDelay>" +
+                endpointObj.get("retryDelay") + "</retryDelay>" : "";
+        String markForSuspension = retryErrorCode + "\n" + retryTimeOut + "\n" + retryDelay;
+        return new String[]{timeout, suspendOnFailure, markForSuspension};
+    }
+
+    /**
+     * Checks if a given key is available in the endpoint config and if it's value is a valid String
+     *
+     * @param key         Key that needs to be validated
+     * @param endpointObj Endpoint config JSON object
+     * @return True if the given key is available with a valid String value
+     */
+    private static boolean validateJSONObjKey(String key, org.json.JSONObject endpointObj) {
+
+        return endpointObj.has(key) && endpointObj.get(key) instanceof String &&
+                StringUtils.isNotEmpty(endpointObj.getString(key));
+    }
+
+    /**
+     * Parse the error codes defined in the WebSocket endpoint config
+     *
+     * @param endpointObj   WebSocket endpoint config JSONObject
+     * @param errorCodeType The error code type (retryErroCode/suspendErrorCode)
+     * @return The parsed error codes
+     */
+    private static String parseWsEndpointConfigErrorCodes(org.json.JSONObject endpointObj, String errorCodeType) {
+
+        if (endpointObj.has(errorCodeType)) {
+            //When there are/is multiple/single retry error codes
+            if (endpointObj.get(errorCodeType) instanceof JSONArray &&
+                    ((JSONArray) endpointObj.get(errorCodeType)).length() != 0) {
+                StringBuilder codeListBuilder = new StringBuilder();
+                for (int i = 0; i < endpointObj.getJSONArray(errorCodeType).length(); i++) {
+                    codeListBuilder.append(endpointObj.getJSONArray(errorCodeType).get(i).toString()).append(",");
+                }
+                String codeList = codeListBuilder.toString();
+                return "\t\t<errorCodes>" + codeList.substring(0, codeList.length() - 1) + "</errorCodes>";
+            } else if (endpointObj.get(errorCodeType) instanceof String) {
+                return "\t\t<errorCodes>" + endpointObj.get(errorCodeType) + "</errorCodes>";
+            }
+        }
+        return "";
+    }
+
 }

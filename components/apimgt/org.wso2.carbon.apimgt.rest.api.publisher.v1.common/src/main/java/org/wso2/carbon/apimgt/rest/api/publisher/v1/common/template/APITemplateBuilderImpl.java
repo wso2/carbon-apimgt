@@ -32,20 +32,16 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -69,6 +65,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     private static final String TEMPLATE_TYPE_ENDPOINT = "endpoint_template";
     private static final String TEMPLATE_TYPE_API_PRODUCT = "api_product_template";
+    private  List<SoapToRestMediationDto> soapToRestOutMediationDtoList;
+    private  List<SoapToRestMediationDto> soapToRestInMediationDtoList;
     private API api;
     private APIProduct apiProduct;
     private String velocityLogPath = null;
@@ -82,6 +80,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                                   Map<String, APIDTO> associatedAPIMap) {
         this.apiProduct = apiProduct;
         this.associatedAPIMap = associatedAPIMap;
+    }
+
+    public APITemplateBuilderImpl(API api, List<SoapToRestMediationDto> soapToRestInMediationDtoList,
+                                  List<SoapToRestMediationDto> soapToRestOutMediationDtoList) {
+
+        this(api);
+        this.soapToRestInMediationDtoList = soapToRestInMediationDtoList;
+        this.soapToRestOutMediationDtoList = soapToRestOutMediationDtoList;
     }
 
     @Override
@@ -296,23 +302,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new TemplateUtilContext(configcontext);
 
         if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()) || !StringUtils.isEmpty(api.getWsdlUrl())) {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
-                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
-            String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
-                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
-            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-            configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceInPath,
+            configcontext = SequenceUtils.getSequenceTemplateConfigContext(soapToRestInMediationDtoList,
                     SOAPToRESTConstants.Template.IN_SEQUENCES, configcontext);
-            configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceOutPath,
+            configcontext = SequenceUtils.getSequenceTemplateConfigContext(soapToRestOutMediationDtoList,
                     SOAPToRESTConstants.Template.OUT_SEQUENCES, configcontext);
         }
 

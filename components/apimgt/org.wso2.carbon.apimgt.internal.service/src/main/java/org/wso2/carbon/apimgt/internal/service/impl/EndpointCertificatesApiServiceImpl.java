@@ -19,7 +19,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
 
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
-        int tenantId = APIUtil.getTenantId(xWSO2Tenant);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(xWSO2Tenant);
         List<CertificateMetadataDTO> certificates =
                 CertificateManagerImpl.getInstance().getCertificates(tenantId, alias, null);
         return Response.ok().entity(certificates).build();
