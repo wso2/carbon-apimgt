@@ -161,7 +161,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, String organizationId, 
                                                           MessageContext messageContext) {
         try {
-            checkAPIExistsInOrganization(apiId, organizationId);
+            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = getOrgId(organizationId, null);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -197,7 +197,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            checkAPIExistsInOrganization(apiId,organizationId);
+            RestApiCommonUtil.checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = getOrgId(organizationId, null);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, orgId);
             API api = apiConsumer.getAPIbyUUID(apiId, orgId);
@@ -405,7 +405,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                            String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
 
         try {
-            checkAPIExistsInOrganization(apiId,organizationId);
+            RestApiCommonUtil.checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = getOrgId(organizationId, xWSO2Tenant);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId,
@@ -494,7 +494,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
-            checkAPIExistsInOrganization(apiId, organizationId);
+            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = getOrgId(organizationId, requestedTenantDomain);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -1028,23 +1028,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
-    }
-
-    /**
-     * Validate whether the provided API exists in the specific organization
-     * @param apiId API UUID
-     * @param organizationId UUID of the Organization which the API belongs to
-     *
-     */
-    private void checkAPIExistsInOrganization(String apiId, String organizationId) throws APIManagementException {
-        if (organizationId != null) {
-            String retrivedorgId = RestApiCommonUtil.getLoggedInUserProvider().getOrganizationIDbyAPIUUID(apiId);
-            if (retrivedorgId == null || !retrivedorgId.equals(organizationId)) {
-                String errorMessage =
-                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
-            }
-        }
     }
 
     /**

@@ -822,9 +822,7 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials) throws APIManagementException {
 
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-        RestApiCommonUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String uuid = "uuid";
         String path = "path";
         APIDTO dto = new APIDTO();
@@ -1005,9 +1003,13 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), model.getOrganizationId());
+                if (model.getOrganizationId() != null) {
+                    apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), model.getOrganizationId());
+                } else {
+                    apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(),
+                            RestApiCommonUtil.getLoggedInUserTenantDomain());
+                }
             }
-            
             apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
@@ -1949,7 +1951,7 @@ public class APIMappingUtil {
         return operationsDTOs;
     }
 
-    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList, String orgId) {
+    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
         APIProductListDTO listDto = new APIProductListDTO();
         List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
         for (APIProduct apiProduct : productList) {

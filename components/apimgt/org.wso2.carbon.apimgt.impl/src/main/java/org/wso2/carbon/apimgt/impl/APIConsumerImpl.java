@@ -5431,17 +5431,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String orgId)
-            throws APIManagementException {
-        return super.getAllDocumentation(uuid, orgId);
-    }
-
-    @Override
-    public Documentation getDocumentation(String apiId, String docId, String orgId) throws APIManagementException {
-        return super.getDocumentation(apiId, docId, orgId);
-    }
-
-    @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
         return getOpenAPIDefinitionForDeployment(api, environmentName, null);

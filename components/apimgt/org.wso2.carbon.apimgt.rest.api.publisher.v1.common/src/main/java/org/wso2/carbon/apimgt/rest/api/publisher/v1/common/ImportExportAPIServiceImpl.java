@@ -126,7 +126,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes,
-                null);
+                RestApiCommonUtil.getLoggedInUserTenantDomain());
     }
 
     @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,

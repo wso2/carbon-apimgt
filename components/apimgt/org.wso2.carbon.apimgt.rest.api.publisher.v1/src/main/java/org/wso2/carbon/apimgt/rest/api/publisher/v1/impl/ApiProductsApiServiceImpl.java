@@ -662,7 +662,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");
             allMatchedProducts.addAll(apiProducts);
 
-            apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(allMatchedProducts, tenantDomain);
+            apiProductListDTO = APIMappingUtil.fromAPIProductListtoDTO(allMatchedProducts);
 
             //Add pagination section in the response
             Object totalLength = result.get("length");

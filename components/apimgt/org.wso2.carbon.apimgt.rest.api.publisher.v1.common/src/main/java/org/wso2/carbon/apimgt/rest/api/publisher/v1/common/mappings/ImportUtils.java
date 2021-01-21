@@ -161,7 +161,6 @@ public class ImportUtils {
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiDTO.getProvider());
 
-
             // Validate swagger content except for WebSocket APIs
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -199,9 +198,8 @@ public class ImportUtils {
                 if (importedApiDTO.getOperations().isEmpty()) {
                     setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
                 }
-                importedApi = PublisherCommonUtils
-                        .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes,
-                                orgId);
+                importedApi = PublisherCommonUtils.updateApi(targetApi, importedApiDTO,
+                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes, orgId);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -222,7 +220,8 @@ public class ImportUtils {
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), importedApi.getOrganizationId(), swaggerDefinitionValidationResponse);
+                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), currentTenantDomain,
+                        swaggerDefinitionValidationResponse);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -1462,7 +1461,7 @@ public class ImportUtils {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
                 importedApiProductDTO = importDependentAPIs(extractedFolderPath, userName, preserveProvider,
-                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes, null);
+                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes, currentTenantDomain);
             } else {
                 // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are already in the APIM
                 importedApiProductDTO = updateDependentApiUuids(importedApiProductDTO, apiProvider,
@@ -1617,6 +1616,7 @@ public class ImportUtils {
      * @param overwriteAPIs            Whether to overwrite the APIs or not
      * @param apiProductDto            API Product DTO
      * @param tokenScopes              Scopes of the token
+     * @param orgId                    Identifier of an organization
      * @return Modified API Product DTO with the correct API UUIDs
      * @throws IOException              If there is an error while reading an API file
      * @throws APIImportExportException If there is an error in importing an API
@@ -1624,8 +1624,8 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes, String organizationId)
-            throws IOException, APIManagementException {
+            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes,
+                                                     String orgId) throws IOException, APIManagementException {
 
         String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
@@ -1653,12 +1653,12 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes, organizationId);
+                                    Boolean.TRUE, tokenScopes, orgId);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes, organizationId);
+                                Boolean.FALSE, tokenScopes, orgId);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -1673,13 +1673,13 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes, organizationId);
+                                Boolean.FALSE, tokenScopes, orgId);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes, organizationId);
+                                    Boolean.TRUE, tokenScopes, orgId);
                         }
                     }
                 }

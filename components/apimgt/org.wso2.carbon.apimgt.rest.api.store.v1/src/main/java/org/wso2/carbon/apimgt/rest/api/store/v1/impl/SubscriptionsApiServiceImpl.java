@@ -533,23 +533,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     /**
-     * Validate whether the provided API exists in the specific organization
-     * @param apiId API UUID
-     * @param organizationId UUID of the Organization which the API belongs to
-     *
-     */
-    private void checkAPIExistsInOrganization(String apiId, String organizationId) throws APIManagementException {
-        if (organizationId != null) {
-            String retrivedorgId = RestApiCommonUtil.getLoggedInUserProvider().getOrganizationIDbyAPIUUID(apiId);
-            if (retrivedorgId == null || !retrivedorgId.equals(organizationId)) {
-                String errorMessage =
-                        "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
-                RestApiUtil.handleInternalServerError(errorMessage, log);
-            }
-        }
-    }
-
-    /**
      * Getting the Identifier of an Organization
      * @param organizationId UUID of the Organization which the API belongs to
      * @param tenantDomain   TenantDomain which the API belongs to

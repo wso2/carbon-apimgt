@@ -325,9 +325,6 @@ public class PublisherCommonUtils {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
-        if (originalAPI.getOrganizationId() != null) {
-            apiToUpdate.setOrganizationId(originalAPI.getOrganizationId());
-        }
 
         if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(apiToUpdate.getVisibility())) {
             apiToUpdate.setVisibleRoles(StringUtils.EMPTY);
