@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
@@ -36,12 +37,13 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(
-    {LogFactory.class, CarbonContext.class, Tier.class, APIManagerFactory.class, APIProvider.class, RestApiUtil.class
-        , ErrorDTO.class})
+        {LogFactory.class, RestApiCommonUtil.class, CarbonContext.class, Tier.class, APIManagerFactory.class, APIProvider.class, RestApiUtil.class
+                , ErrorDTO.class})
 public class RestApiUtilTest {
 
     @Test
     public void testGetLoggedInUsername() {
+
         System.setProperty(CARBON_HOME, "");
         String defaultUsername = "default@user.com";
 
@@ -57,6 +59,7 @@ public class RestApiUtilTest {
 
     @Test
     public void testHandleBadRequest() {
+
         String errorMessage = "Application name or owner should not be empty or null.";
 
         Log log = Mockito.mock(Log.class);
@@ -98,11 +101,11 @@ public class RestApiUtilTest {
     public void testIsDueToResourceNotFoundWithAPIMgtResourceNotFoundException() throws Exception {
 
         APIMgtResourceNotFoundException sampleAPIMgtResourceNotFoundException = new APIMgtResourceNotFoundException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(sampleAPIMgtResourceNotFoundException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToResourceNotFound(testThrowable));
     }
@@ -114,7 +117,7 @@ public class RestApiUtilTest {
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(testResourceNotFoundException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToResourceNotFound(testThrowable));
     }
@@ -123,12 +126,12 @@ public class RestApiUtilTest {
     public void testIsDueToResourceNotFoundWithInvalidException() throws Exception {
 
         APIMgtAuthorizationFailedException testAPIMgtAuthorizationFailedException =
-            new APIMgtAuthorizationFailedException(
-                "New Sample exception");
+                new APIMgtAuthorizationFailedException(
+                        "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(testAPIMgtAuthorizationFailedException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertFalse("Invalid exception has been passed.", RestApiUtil.isDueToResourceNotFound(testThrowable));
     }
@@ -137,11 +140,11 @@ public class RestApiUtilTest {
     public void testisDueToAuthorizationFailureWithAuthorizationFailedException() throws Exception {
 
         AuthorizationFailedException sampleAuthorizationFailedException = new AuthorizationFailedException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(sampleAuthorizationFailedException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToAuthorizationFailure(testThrowable));
     }
@@ -150,12 +153,12 @@ public class RestApiUtilTest {
     public void testisDueToAuthorizationFailureWithAPIMgtAuthorizationFailedException() throws Exception {
 
         APIMgtAuthorizationFailedException sampleAPIMgtAuthorizationFailedException =
-            new APIMgtAuthorizationFailedException(
-                "New Sample exception");
+                new APIMgtAuthorizationFailedException(
+                        "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(sampleAPIMgtAuthorizationFailedException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToAuthorizationFailure(testThrowable));
     }
@@ -164,16 +167,15 @@ public class RestApiUtilTest {
     public void testisDueToAuthorizationFailureWithInvalidException() throws Exception {
 
         ResourceNotFoundException sampleResourceNotFoundException = new ResourceNotFoundException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(sampleResourceNotFoundException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert
-            .assertFalse("Invalid exception has been passed.", RestApiUtil.isDueToAuthorizationFailure(testThrowable));
+                .assertFalse("Invalid exception has been passed.", RestApiUtil.isDueToAuthorizationFailure(testThrowable));
     }
-
 
     @Test
     public void testHandleAuthorizationFailure() {
@@ -198,7 +200,7 @@ public class RestApiUtilTest {
 
         String apiId = "testapiid_4567ui456789";
         String expectedErrormessage = "You don't have permission to access the " + RestApiConstants.RESOURCE_API + " " +
-                                      "with Id " + apiId;
+                "with Id " + apiId;
         APIManagementException apiManagementException = new APIManagementException("API management exception test");
 
         Log log = Mockito.mock(Log.class);
@@ -248,10 +250,10 @@ public class RestApiUtilTest {
         when(RestApiUtil.getErrorDTO(Mockito.any(), Mockito.any(), Mockito.eq(expectedErrormessage))).thenReturn(errorDTO);
         when(RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId)).thenCallRealMethod();
 
-        ForbiddenException forbiddenException = RestApiUtil.buildForbiddenException( RestApiConstants.RESOURCE_API,
-                                                                                     apiId);
+        ForbiddenException forbiddenException = RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API,
+                apiId);
 
-        Assert.assertEquals(expectedErrormessage,forbiddenException.getMessage());
+        Assert.assertEquals(expectedErrormessage, forbiddenException.getMessage());
     }
 
     @Test
@@ -271,52 +273,54 @@ public class RestApiUtilTest {
         when(RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId)).thenCallRealMethod();
         ForbiddenException forbiddenException = RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
 
-        Assert.assertEquals(expectedErrormessage,forbiddenException.getMessage());
+        Assert.assertEquals(expectedErrormessage, forbiddenException.getMessage());
     }
 
     @Test
     public void testRootCauseMessageMatches() throws Exception {
+
         String rootCauseMessage = "Entered start index seems to be greater than the limit count. Please verify your " +
-                                  "parameters";
+                "parameters";
         ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException(
-            "Resource Not Found Exception");
+                "Resource Not Found Exception");
 
         Throwable testThrowable = Mockito.mock(Throwable.class);
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(testThrowable)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", resourceNotFoundException);
+                .when(RestApiUtil.class, "getPossibleErrorCause", resourceNotFoundException);
         when(testThrowable.getMessage()).thenReturn(rootCauseMessage);
 
         Assert.assertTrue(RestApiUtil.rootCauseMessageMatches(resourceNotFoundException,
-                                                              "index seems to be greater than the limit count"));
+                "index seems to be greater than the limit count"));
     }
 
     @Test
     public void testRootCauseMessageMatchesNegative() throws Exception {
+
         String rootCauseMessage = "Entered start index seems to be greater than the limit count. Please verify your " +
-                                  "parameters";
+                "parameters";
         ResourceNotFoundException resourceNotFoundException = new ResourceNotFoundException(
-            "Resource Not Found Exception");
+                "Resource Not Found Exception");
 
         Throwable testThrowable = Mockito.mock(Throwable.class);
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(testThrowable)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", resourceNotFoundException);
+                .when(RestApiUtil.class, "getPossibleErrorCause", resourceNotFoundException);
         when(testThrowable.getMessage()).thenReturn(rootCauseMessage);
 
         Assert.assertFalse(RestApiUtil.rootCauseMessageMatches(resourceNotFoundException,
-                                                               "Caused by exceeded limit count"));
+                "Caused by exceeded limit count"));
     }
 
     @Test
     public void testisDueToResourceAlreadyExistsWithAPIMgtResourceAlreadyExistsException() throws Exception {
 
         APIMgtResourceAlreadyExistsException apiMgtResourceAlreadyExistsException = new APIMgtResourceAlreadyExistsException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(apiMgtResourceAlreadyExistsException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToResourceAlreadyExists(testThrowable));
     }
@@ -325,11 +329,11 @@ public class RestApiUtilTest {
     public void testisDueToResourceAlreadyExistsWithDuplicateAPIException() throws Exception {
 
         DuplicateAPIException duplicateAPIException = new DuplicateAPIException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(duplicateAPIException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToResourceAlreadyExists(testThrowable));
     }
@@ -338,11 +342,11 @@ public class RestApiUtilTest {
     public void testisDueToResourceAlreadyExistsWithInvalidException() throws Exception {
 
         APIMgtResourceNotFoundException apiMgtResourceNotFoundException = new APIMgtResourceNotFoundException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(apiMgtResourceNotFoundException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertFalse("Invalid exception has been passed.", RestApiUtil.isDueToResourceAlreadyExists(testThrowable));
     }
@@ -351,11 +355,11 @@ public class RestApiUtilTest {
     public void testisDueToApplicationNameWhiteSpaceValidation() throws Exception {
 
         ApplicationNameWhiteSpaceValidationException applicationNameWhiteSpaceValidationException = new ApplicationNameWhiteSpaceValidationException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(applicationNameWhiteSpaceValidationException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(testThrowable));
     }
@@ -364,11 +368,11 @@ public class RestApiUtilTest {
     public void testisDueToApplicationNameWhiteSpaceValidationWithInvalidException() throws Exception {
 
         ApplicationNameWithInvalidCharactersException applicationNameWithInvalidCharactersException = new ApplicationNameWithInvalidCharactersException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(applicationNameWithInvalidCharactersException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertFalse("Invalid exception has been passed.", RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(testThrowable));
     }
@@ -377,11 +381,11 @@ public class RestApiUtilTest {
     public void testisDueToApplicationNameWithInvalidCharacters() throws Exception {
 
         ApplicationNameWithInvalidCharactersException applicationNameWithInvalidCharactersException = new ApplicationNameWithInvalidCharactersException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(applicationNameWithInvalidCharactersException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertTrue("Invalid exception has been passed.", RestApiUtil.isDueToApplicationNameWithInvalidCharacters(testThrowable));
     }
@@ -390,17 +394,18 @@ public class RestApiUtilTest {
     public void testisDueToApplicationNameWithInvalidCharactersWithInvalidException() throws Exception {
 
         ApplicationNameWhiteSpaceValidationException applicationNameWhiteSpaceValidationException = new ApplicationNameWhiteSpaceValidationException(
-            "New Sample exception");
+                "New Sample exception");
         Throwable testThrowable = new Throwable();
         PowerMockito.spy(RestApiUtil.class);
         PowerMockito.doReturn(applicationNameWhiteSpaceValidationException)
-                    .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
+                .when(RestApiUtil.class, "getPossibleErrorCause", testThrowable);
 
         Assert.assertFalse("Invalid exception has been passed.", RestApiUtil.isDueToApplicationNameWithInvalidCharacters(testThrowable));
     }
 
     @Test
     public void testHandleResourceAlreadyExistsError() {
+
         String errorMessage = "Requested new version already exists";
         Throwable throwable = new Throwable();
         Exception exceptionCaught = null;
@@ -421,6 +426,7 @@ public class RestApiUtilTest {
 
     @Test
     public void testHandleResourceNotFoundError() {
+
         String errorMessage = "Requested new version already exists";
         Throwable throwable = new Throwable();
         Exception exceptionCaught = null;
@@ -432,10 +438,35 @@ public class RestApiUtilTest {
         try {
             RestApiUtil.handleResourceAlreadyExistsError(errorMessage, throwable, log);
         } catch (ConflictException exception) {
-            exceptionCaught = exception; }
+            exceptionCaught = exception;
+        }
 
         Assert.assertEquals(errorMessage, exceptionCaught.getMessage());
         Mockito.verify(log).error(errorMessage, throwable);
+    }
+
+    @Test
+    public void testGetRequestedTenantDomain() {
+
+        System.setProperty(CarbonBaseConstants.CARBON_HOME, "");
+        String tenantDomain = "anotherTenant.com";
+
+        mockStatic(RestApiCommonUtil.class);
+        Mockito.when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(tenantDomain);
+        String expectedDomain = RestApiUtil.getRequestedTenantDomain(tenantDomain);
+
+        Assert.assertEquals(tenantDomain, expectedDomain);
+    }
+
+    @Test
+    public void testGetRequestedTenantDomainWithEmptyTenants() {
+
+        String tenantDomain = "anotherTenant.com";
+        mockStatic(RestApiCommonUtil.class);
+        when(RestApiCommonUtil.getLoggedInUserTenantDomain()).thenReturn(tenantDomain);
+
+        String expectedDomain = RestApiUtil.getRequestedTenantDomain("");
+        Assert.assertEquals(tenantDomain, expectedDomain);
     }
 
 }

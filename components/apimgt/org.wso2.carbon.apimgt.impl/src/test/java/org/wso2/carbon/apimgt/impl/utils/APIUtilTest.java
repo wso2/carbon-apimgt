@@ -115,12 +115,13 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class,
-                 GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
+        GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
     @Test
     public void testGetAPINamefromRESTAPI() throws Exception {
+
         String restAPI = "admin--map";
         String apiName = APIUtil.getAPINamefromRESTAPI(restAPI);
 
@@ -129,6 +130,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetAPIProviderFromRESTAPI() throws Exception {
+
         String restAPI = "admin--map";
         String providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, null);
 
@@ -146,6 +148,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsValidURL() throws Exception {
+
         String validURL = "http://fsdfsfd.sda";
 
         Assert.assertTrue(APIUtil.isValidURL(validURL));
@@ -158,6 +161,7 @@ public class APIUtilTest {
 
     @Test
     public void testgGetUserNameWithTenantSuffix() throws Exception {
+
         String plainUserName = "john";
 
         String userNameWithTenantSuffix = APIUtil.getUserNameWithTenantSuffix(plainUserName);
@@ -173,6 +177,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetRESTAPIScopesFromConfig() throws Exception {
+
         File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("tenant-conf.json").getFile());
 
@@ -200,6 +205,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetRESTAPIScopesFromConfigWithRoleMappings() throws Exception {
+
         File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("tenant-conf.json").getFile());
 
@@ -231,6 +237,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsSandboxEndpointsExists() throws Exception {
+
         API api = Mockito.mock(API.class);
 
         JSONObject sandboxEndpoints = new JSONObject();
@@ -248,6 +255,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsSandboxEndpointsNotExists() throws Exception {
+
         API api = Mockito.mock(API.class);
 
         JSONObject productionEndpoints = new JSONObject();
@@ -261,11 +269,12 @@ public class APIUtilTest {
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
         Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(root.toJSONString
-        ()));
+                ()));
     }
 
     @Test
     public void testIsProductionEndpointsExists() throws Exception {
+
         API api = Mockito.mock(API.class);
 
         JSONObject productionEndpoints = new JSONObject();
@@ -279,11 +288,12 @@ public class APIUtilTest {
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
         Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(root.toJSONString
-        ()));
+                ()));
     }
 
     @Test
     public void testIsProductionEndpointsNotExists() throws Exception {
+
         API api = Mockito.mock(API.class);
 
         JSONObject sandboxEndpoints = new JSONObject();
@@ -297,11 +307,12 @@ public class APIUtilTest {
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
         Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(root
-        .toJSONString()));
+                .toJSONString()));
     }
 
     @Test
     public void testIsProductionSandboxEndpointsExists() throws Exception {
+
         API api = Mockito.mock(API.class);
 
         JSONObject productionEndpoints = new JSONObject();
@@ -320,12 +331,13 @@ public class APIUtilTest {
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
         Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(root.toJSONString
-        ()));
+                ()));
         Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(root.toJSONString()));
     }
 
     @Test
     public void testIsProductionEndpointsInvalidJSON() throws Exception {
+
         Log log = Mockito.mock(Log.class);
         PowerMockito.mockStatic(LogFactory.class);
         Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
@@ -345,11 +357,12 @@ public class APIUtilTest {
         Mockito.when(api.getEndpointConfig()).thenReturn(jsonArray.toJSONString());
 
         Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(jsonArray
-        .toJSONString()));
+                .toJSONString()));
     }
 
     @Test
     public void testIsSandboxEndpointsInvalidJSON() throws Exception {
+
         Log log = Mockito.mock(Log.class);
         PowerMockito.mockStatic(LogFactory.class);
         Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
@@ -369,11 +382,12 @@ public class APIUtilTest {
         Mockito.when(api.getEndpointConfig()).thenReturn(jsonArray.toJSONString());
 
         Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(jsonArray
-        .toJSONString()));
+                .toJSONString()));
     }
 
     @Test
     public void testGetAPIInformation() throws Exception {
+
         GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
         Registry registry = Mockito.mock(Registry.class);
         Resource resource = Mockito.mock(Resource.class);
@@ -402,7 +416,6 @@ public class APIUtilTest {
                 thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
         Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                 thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
-
 
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).
                 thenReturn(expectedAPI.getId().getProviderName());
@@ -438,9 +451,9 @@ public class APIUtilTest {
         Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
     }
 
-
     @Test
     public void testGetMediationSequenceUuidInSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -454,7 +467,7 @@ public class APIUtilTest {
 
         Collection collection = Mockito.mock(Collection.class);
         String path = APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator + APIConstants
-        .API_CUSTOM_SEQUENCE_TYPE_IN;
+                .API_CUSTOM_SEQUENCE_TYPE_IN;
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
 
         String[] childPaths = {"test"};
@@ -469,7 +482,6 @@ public class APIUtilTest {
         Mockito.when(registry.get(eq("test"))).thenReturn(resource);
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
-
 
         String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "in", apiIdentifier);
 
@@ -479,6 +491,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetMediationSequenceUuidOutSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -492,7 +505,7 @@ public class APIUtilTest {
 
         Collection collection = Mockito.mock(Collection.class);
         String path = APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator + APIConstants
-        .API_CUSTOM_SEQUENCE_TYPE_OUT;
+                .API_CUSTOM_SEQUENCE_TYPE_OUT;
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
 
         String[] childPaths = {"test"};
@@ -507,7 +520,6 @@ public class APIUtilTest {
         Mockito.when(registry.get(eq("test"))).thenReturn(resource);
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
-
 
         String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "out", apiIdentifier);
 
@@ -517,6 +529,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetMediationSequenceUuidFaultSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -530,7 +543,7 @@ public class APIUtilTest {
 
         Collection collection = Mockito.mock(Collection.class);
         String path = APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator + APIConstants
-        .API_CUSTOM_SEQUENCE_TYPE_FAULT;
+                .API_CUSTOM_SEQUENCE_TYPE_FAULT;
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
 
         String[] childPaths = {"test"};
@@ -546,16 +559,15 @@ public class APIUtilTest {
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
 
-
         String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "fault", apiIdentifier);
 
         Assert.assertEquals(expectedUUID, actualUUID);
         sampleSequence.close();
     }
 
-
     @Test
     public void testGetMediationSequenceUuidCustomSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -588,16 +600,15 @@ public class APIUtilTest {
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
 
-
         String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "custom", apiIdentifier);
 
         Assert.assertEquals(expectedUUID, actualUUID);
         sampleSequence.close();
     }
 
-
     @Test
     public void testGetMediationSequenceUuidCustomSequenceNotFound() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -630,7 +641,6 @@ public class APIUtilTest {
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
 
-
         String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "custom", apiIdentifier);
 
         Assert.assertEquals(expectedUUID, actualUUID);
@@ -639,6 +649,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsPerAPISequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -663,7 +674,7 @@ public class APIUtilTest {
         Mockito.when(collection.getChildren()).thenReturn(childPaths);
 
         InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
-                        getResource("sampleSequence.xml").getFile());
+                getResource("sampleSequence.xml").getFile());
         Resource resource = Mockito.mock(Resource.class);
         Mockito.when(registry.get(eq("test"))).thenReturn(resource);
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
@@ -675,6 +686,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsPerAPISequenceResourceMissing() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -699,6 +711,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsPerAPISequenceSequenceMissing() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -724,6 +737,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsPerAPISequenceNoPathsInCollection() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -752,9 +766,9 @@ public class APIUtilTest {
         Assert.assertFalse(isPerAPiSequence);
     }
 
-
     @Test
     public void testGetCustomInSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -784,7 +798,6 @@ public class APIUtilTest {
         Mockito.when(registry.get(eq("test"))).thenReturn(resource);
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
 
-
         OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "in", apiIdentifier);
 
         Assert.assertNotNull(customSequence);
@@ -793,6 +806,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetCustomOutSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -822,7 +836,6 @@ public class APIUtilTest {
         Mockito.when(registry.get(eq("test"))).thenReturn(resource);
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
 
-
         OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "out", apiIdentifier);
 
         Assert.assertNotNull(customSequence);
@@ -831,6 +844,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetCustomFaultSequence() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -860,7 +874,6 @@ public class APIUtilTest {
         Mockito.when(registry.get(eq("test"))).thenReturn(resource);
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
 
-
         OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "fault", apiIdentifier);
 
         Assert.assertNotNull(customSequence);
@@ -869,6 +882,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetCustomSequenceNotFound() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -901,7 +915,6 @@ public class APIUtilTest {
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
 
-
         OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "custom", apiIdentifier);
 
         Assert.assertNotNull(customSequence);
@@ -910,6 +923,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetCustomSequenceNull() throws Exception {
+
         APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -942,7 +956,6 @@ public class APIUtilTest {
         Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
         Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
 
-
         OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "custom", apiIdentifier);
 
         Assert.assertNull(customSequence);
@@ -951,9 +964,10 @@ public class APIUtilTest {
 
     @Test
     public void testCreateSwaggerJSONContent() throws Exception {
+
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
-        .class);
+                .class);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Environment environment = Mockito.mock(Environment.class);
         Map<String, Environment> environmentMap = new HashMap<String, Environment>();
@@ -962,7 +976,7 @@ public class APIUtilTest {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
-        (apiManagerConfigurationService);
+                (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
         Mockito.when(environment.getApiGatewayEndpoint()).thenReturn("");
@@ -974,6 +988,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsRoleNameExist() throws Exception {
+
         String userName = "John";
         String roleName = "developer";
 
@@ -1002,6 +1017,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsRoleNameNotExist() throws Exception {
+
         String userName = "John";
         String roleName = "developer";
 
@@ -1024,6 +1040,7 @@ public class APIUtilTest {
 
     @Test
     public void testIsRoleNameExistDisableRoleValidation() throws Exception {
+
         String userName = "John";
         String roleName = "developer";
 
@@ -1040,6 +1057,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetRoleNamesSuperTenant() throws Exception {
+
         String userName = "John";
 
         String[] roleNames = {"role1", "role2"};
@@ -1053,12 +1071,12 @@ public class APIUtilTest {
         Mockito.when(AuthorizationManager.getInstance()).thenReturn(authorizationManager);
         Mockito.when(authorizationManager.getRoleNames()).thenReturn(roleNames);
 
-
         Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
     }
 
     @Test
     public void testCreateAPIArtifactContent() throws Exception {
+
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -1067,7 +1085,7 @@ public class APIUtilTest {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
             API api = getUniqueAPI();
-            Mockito.when(genericArtifact.getAttributeKeys()).thenReturn(new String[] {"URITemplate"}).thenThrow
+            Mockito.when(genericArtifact.getAttributeKeys()).thenReturn(new String[]{"URITemplate"}).thenThrow
                     (GovernanceException.class);
             ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
             PowerMockito.mockStatic(ApiMgtDAO.class);
@@ -1088,6 +1106,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetDocumentation() throws GovernanceException, APIManagementException {
+
         PowerMockito.mockStatic(CarbonUtils.class);
         ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
@@ -1117,6 +1136,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetDocumentationByDocCreator() throws Exception {
+
         PowerMockito.mockStatic(CarbonUtils.class);
         ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
@@ -1146,6 +1166,7 @@ public class APIUtilTest {
 
     @Test
     public void testVisibilityOfDoc() throws Exception {
+
         PowerMockito.mockStatic(CarbonUtils.class);
         ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
@@ -1184,6 +1205,7 @@ public class APIUtilTest {
 
     @Test
     public void testCreateDocArtifactContent() throws GovernanceException, APIManagementException {
+
         API api = getUniqueAPI();
         PowerMockito.mockStatic(CarbonUtils.class);
         ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
@@ -1215,7 +1237,8 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetArtifactManager()  {
+    public void testGetArtifactManager() {
+
         PowerMockito.mockStatic(GenericArtifactManager.class);
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         Registry registry = Mockito.mock(UserRegistry.class);
@@ -1225,7 +1248,7 @@ public class APIUtilTest {
                     .SUPER_TENANT_DOMAIN_NAME);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
             PowerMockito.mockStatic(GovernanceUtils.class);
-            PowerMockito.doNothing().when(GovernanceUtils.class, "loadGovernanceArtifacts",(UserRegistry)registry);
+            PowerMockito.doNothing().when(GovernanceUtils.class, "loadGovernanceArtifacts", (UserRegistry) registry);
             Mockito.when(GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry))
                     .thenReturn(Mockito.mock(GovernanceArtifactConfiguration.class)).thenReturn(null).thenThrow
                     (RegistryException.class);
@@ -1250,9 +1273,9 @@ public class APIUtilTest {
 
     }
 
-
     @Test
     public void testGetRoleNamesNonSuperTenant() throws Exception {
+
         String userName = "John";
 
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -1277,9 +1300,9 @@ public class APIUtilTest {
         Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
     }
 
-
     @Test
     public void testGetAPI() throws Exception {
+
         API expectedAPI = getUniqueAPI();
 
         final String provider = expectedAPI.getId().getProviderName();
@@ -1294,7 +1317,7 @@ public class APIUtilTest {
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
-        .class);
+                .class);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
         SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
@@ -1322,7 +1345,7 @@ public class APIUtilTest {
         Mockito.when(registry.get(artifactPath)).thenReturn(resource);
         Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
-        (apiManagerConfigurationService);
+                (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
@@ -1333,18 +1356,18 @@ public class APIUtilTest {
 
         HashMap<String, String> urlPatterns = getURLTemplatePattern(expectedAPI.getUriTemplates());
         Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(APIIdentifier.class))).thenReturn
-        (urlPatterns);
+                (urlPatterns);
 
         CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
                 thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
                 thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                 thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
         API api = APIUtil.getAPI(artifact, registry);
@@ -1354,6 +1377,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetAPIForPublishing() throws Exception {
+
         API expectedAPI = getUniqueAPI();
 
         final String provider = expectedAPI.getId().getProviderName();
@@ -1368,7 +1392,7 @@ public class APIUtilTest {
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
-        .class);
+                .class);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
         SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
@@ -1398,7 +1422,7 @@ public class APIUtilTest {
         Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
         Mockito.when(resource.getCreatedTime()).thenReturn(expectedAPI.getLastUpdated());
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
-        (apiManagerConfigurationService);
+                (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
         Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
@@ -1409,18 +1433,18 @@ public class APIUtilTest {
 
         HashMap<String, String> urlPatterns = getURLTemplatePattern(expectedAPI.getUriTemplates());
         Mockito.when(apiMgtDAO.getURITemplatesPerAPIAsString(Mockito.any(APIIdentifier.class))).thenReturn
-        (urlPatterns);
+                (urlPatterns);
 
         CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
                 thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
                 thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                 thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG))
@@ -1441,6 +1465,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetAPIWithGovernanceArtifact() throws Exception {
+
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -1451,7 +1476,7 @@ public class APIUtilTest {
 
             final String provider = expectedAPI.getId().getProviderName();
             final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants
-            .SUPER_TENANT_DOMAIN_NAME;
+                    .SUPER_TENANT_DOMAIN_NAME;
 
             final int tenantId = -1234;
 
@@ -1470,11 +1495,11 @@ public class APIUtilTest {
             RealmService realmService = Mockito.mock(RealmService.class);
             TenantManager tenantManager = Mockito.mock(TenantManager.class);
             APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock
-            (APIManagerConfigurationService.class);
+                    (APIManagerConfigurationService.class);
             APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
             ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
             SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
-            SubscriptionPolicy[] policies = new SubscriptionPolicy[] {policy};
+            SubscriptionPolicy[] policies = new SubscriptionPolicy[]{policy};
             QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
             RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
             PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
@@ -1489,7 +1514,7 @@ public class APIUtilTest {
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
             Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
             Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
-            String[] {"Unlimited"});
+                    String[]{"Unlimited"});
             Mockito.when(artifact.getId()).thenReturn("");
             Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
             Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
@@ -1511,9 +1536,9 @@ public class APIUtilTest {
             Mockito.when(resource.getCreatedTime()).thenReturn(expectedAPI.getLastUpdated());
             Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
             Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
-            (apiManagerConfigurationService);
+                    (apiManagerConfigurationService);
             Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn
-            (apiManagerConfiguration);
+                    (apiManagerConfiguration);
             Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
             Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
             Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
@@ -1526,124 +1551,125 @@ public class APIUtilTest {
             CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
 
             Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-            .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                    .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
                     thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
             Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-            .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                    .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
                     thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
             Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-            .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                    .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                     thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
-
 
             API api = APIUtil.getAPI(artifact);
 
             Assert.assertNotNull(api);
-        }finally {
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
     @Test
     public void testGetAPIWithGovernanceArtifactAdvancedThrottlingDisabled() throws Exception {
+
         System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
                     .SUPER_TENANT_DOMAIN_NAME);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        API expectedAPI = getUniqueAPI();
+            API expectedAPI = getUniqueAPI();
 
-        final String provider = expectedAPI.getId().getProviderName();
-        final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        final int tenantId = -1234;
+            final String provider = expectedAPI.getId().getProviderName();
+            final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            final int tenantId = -1234;
 
-        System.setProperty("carbon.home", "");
+            System.setProperty("carbon.home", "");
 
-        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
-                getResource("tenant-conf.json").getFile());
+            File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                    getResource("tenant-conf.json").getFile());
 
-        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+            String tenantConfValue = FileUtils.readFileToString(siteConfFile);
 
-        GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
-        Registry registry = Mockito.mock(Registry.class);
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        Resource resource = Mockito.mock(Resource.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
-        .class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
-        SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
-        SubscriptionPolicy[] policies = new SubscriptionPolicy[]{policy};
-        QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
-        RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
+            GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
+            Registry registry = Mockito.mock(Registry.class);
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            Resource resource = Mockito.mock(Resource.class);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            RealmService realmService = Mockito.mock(RealmService.class);
+            TenantManager tenantManager = Mockito.mock(TenantManager.class);
+            APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                    .class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
+            SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
+            SubscriptionPolicy[] policies = new SubscriptionPolicy[]{policy};
+            QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
+            RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
             RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+            UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
 
-        PowerMockito.mockStatic(ApiMgtDAO.class);
-        PowerMockito.mockStatic(GovernanceUtils.class);
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
-        Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
-        String[]{"Unlimited"});
-        Mockito.when(artifact.getId()).thenReturn("");
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_TIER)).thenReturn("Unlimited");
-        Mockito.when(MultitenantUtils.getTenantDomain(provider)).thenReturn(tenantDomain);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
-        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            PowerMockito.mockStatic(GovernanceUtils.class);
+            PowerMockito.mockStatic(MultitenantUtils.class);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
+            Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
+                    String[]{"Unlimited"});
+            Mockito.when(artifact.getId()).thenReturn("");
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_TIER)).thenReturn("Unlimited");
+            Mockito.when(MultitenantUtils.getTenantDomain(provider)).thenReturn(tenantDomain);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+            Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+            Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
+            Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+            Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+            Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
 
-        String artifactPath = "";
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
-        Mockito.when(registry.get(artifactPath)).thenReturn(resource);
-        Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
-        Mockito.when(resource.getCreatedTime()).thenReturn(expectedAPI.getLastUpdated());
-        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
-        (apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
-        Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
-        Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
-        Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
-        Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
+            String artifactPath = "";
+            Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
+            Mockito.when(registry.get(artifactPath)).thenReturn(resource);
+            Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
+            Mockito.when(resource.getCreatedTime()).thenReturn(expectedAPI.getLastUpdated());
+            Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                    (apiManagerConfigurationService);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+            Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+            Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
+            Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
+            Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
 
-        ArrayList<URITemplate> urlList = getURLTemplateList(expectedAPI.getUriTemplates());
-        Mockito.when(apiMgtDAO.getAllURITemplates(Mockito.anyString(), Mockito.anyString())).thenReturn(urlList);
+            ArrayList<URITemplate> urlList = getURLTemplateList(expectedAPI.getUriTemplates());
+            Mockito.when(apiMgtDAO.getAllURITemplates(Mockito.anyString(), Mockito.anyString())).thenReturn(urlList);
 
-        CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
+            CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
 
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
-                thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
-                thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
-        .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
-                thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
+            Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
+                    .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                    thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
+            Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
+                    .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                    thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
+            Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants
+                    .CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                    thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
-        API api = APIUtil.getAPI(artifact);
+            API api = APIUtil.getAPI(artifact);
 
-        Assert.assertNotNull(api);
-    }finally {
+            Assert.assertNotNull(api);
+        } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
     private API getUniqueAPI() {
+
         APIIdentifier apiIdentifier = new APIIdentifier(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 UUID.randomUUID().toString());
         API api = new API(apiIdentifier);
@@ -1740,6 +1766,7 @@ public class APIUtilTest {
     }
 
     private Tag[] getTagsFromSet(Set<String> tagSet) {
+
         String[] tagNames = tagSet.toArray(new String[tagSet.size()]);
 
         Tag[] tags = new Tag[tagNames.length];
@@ -1754,6 +1781,7 @@ public class APIUtilTest {
     }
 
     private HashMap<String, String> getURLTemplatePattern(Set<URITemplate> uriTemplates) {
+
         HashMap<String, String> pattern = new HashMap<String, String>();
 
         for (URITemplate uriTemplate : uriTemplates) {
@@ -1766,6 +1794,7 @@ public class APIUtilTest {
     }
 
     private ArrayList<URITemplate> getURLTemplateList(Set<URITemplate> uriTemplates) {
+
         ArrayList<URITemplate> list = new ArrayList<URITemplate>();
         list.addAll(uriTemplates);
 
@@ -1774,13 +1803,15 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testWsdlDefinitionFilePath () {
+    public void testWsdlDefinitionFilePath() {
+
         Assert.assertEquals(APIUtil.getWSDLDefinitionFilePath("test", "1.0.0", "publisher1")
                 , APIConstants.API_WSDL_RESOURCE_LOCATION + "publisher1" + "--" + "test" + "1.0.0" + ".wsdl");
     }
 
     @Test
-    public void testGetOAuthConfigurationFromTenantRegistry () throws Exception{
+    public void testGetOAuthConfigurationFromTenantRegistry() throws Exception {
+
         final int tenantId = -1234;
         final String property = "AuthorizationHeader";
 
@@ -1800,13 +1831,14 @@ public class APIUtilTest {
         Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(tenantConfValue);
-        String authorizationHeader = (String)json.get(property);
-        String authHeader = getOAuthConfigurationFromTenantRegistry(tenantId,property);
+        String authorizationHeader = (String) json.get(property);
+        String authHeader = getOAuthConfigurationFromTenantRegistry(tenantId, property);
         Assert.assertEquals(authorizationHeader, authHeader);
     }
 
     @Test
-    public void testGetOAuthConfigurationFromAPIMConfig () throws Exception {
+    public void testGetOAuthConfigurationFromAPIMConfig() throws Exception {
+
         String property = "AuthorizationHeader";
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -1825,7 +1857,8 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetGatewayEndpoint () throws Exception {
+    public void testGetGatewayEndpoint() throws Exception {
+
         Environment environment = new Environment();
         environment.setType("Production");
         environment.setName("Production");
@@ -1846,88 +1879,104 @@ public class APIUtilTest {
         String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production", "Production");
         Assert.assertEquals("https://localhost:8243", gatewayEndpoint);
     }
+
     @Test
     public void testGetConditionDtoListWithHavingIPSpecificConditionOnly() throws ParseException {
+
         String base64EncodedString = "W3siaXBzcGVjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNjg0MzAwOTAsImludmVydCI6ZmFsc2V9fV0=";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),1);
+        Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
         Assert.assertNotNull(conditionDto.getIpCondition());
     }
+
     @Test
     public void testGetConditionDtoListWithHavingIPRangeConditionOnly() throws ParseException {
+
         String base64EncodedString = "W3siaXByYW5nZSI6eyJzdGFydGluZ0lwIjoxNjg0MzAwOTAsImVuZGluZ0lwIjoxNjg0MzAwOTEsImludmVydCI6dHJ1ZX19XQ==";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),1);
+        Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
         Assert.assertNotNull(conditionDto.getIpRangeCondition());
         Assert.assertTrue(conditionDto.getIpRangeCondition().isInvert());
     }
+
     @Test
     public void testGetConditionDtoListWithHavingHeaderConditionOnly() throws ParseException {
+
         String base64EncodedString = "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),1);
+        Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
         Assert.assertNotNull(conditionDto.getHeaderConditions());
-        Assert.assertEquals(conditionDto.getHeaderConditions().getValues().size(),1);
+        Assert.assertEquals(conditionDto.getHeaderConditions().getValues().size(), 1);
     }
+
     @Test
     public void testGetConditionDtoListWithHavingJWTClaimConditionOnly() throws ParseException {
+
         String base64EncodedString = "W3siand0Y2xhaW1zIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),1);
+        Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
         Assert.assertNotNull(conditionDto.getJwtClaimConditions());
-        Assert.assertEquals(conditionDto.getJwtClaimConditions().getValues().size(),1);
+        Assert.assertEquals(conditionDto.getJwtClaimConditions().getValues().size(), 1);
     }
+
     @Test
     public void testGetConditionDtoListWithHavingQueryParamConditionOnly() throws ParseException {
+
         String base64EncodedString =
                 "W3sicXVlcnlwYXJhbWV0ZXJ0eXBlIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),1);
+        Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
         Assert.assertNotNull(conditionDto.getQueryParameterConditions());
-        Assert.assertEquals(conditionDto.getQueryParameterConditions().getValues().size(),1);
+        Assert.assertEquals(conditionDto.getQueryParameterConditions().getValues().size(), 1);
     }
+
     @Test
     public void testGetConditionDtoListWithHavingMultipleConditionTypes() throws ParseException {
+
         String base64EncodedString =
-        "W3siaXBzcGVjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNzQzMjcxODksImludmVydCI6ZmFsc2V9LCJoZW" +
-                "FkZXIiOnsiaW52ZXJ0IjpmYWxzZSwidmFsdWVzIjp7ImFiYyI6ImRlZiJ9fSwiand0Y2xhaW1zIjp7ImludmVydCI6ZmFsc2UsI" +
-                "nZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
+                "W3siaXBzcGVjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNzQzMjcxODksImludmVydCI6ZmFsc2V9LCJoZW" +
+                        "FkZXIiOnsiaW52ZXJ0IjpmYWxzZSwidmFsdWVzIjp7ImFiYyI6ImRlZiJ9fSwiand0Y2xhaW1zIjp7ImludmVydCI6ZmFsc2UsI" +
+                        "nZhbHVlcyI6eyJhYmMiOiJkZWYifX19XQo=";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),1);
+        Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
         Assert.assertNotNull(conditionDto.getIpCondition());
         Assert.assertNotNull(conditionDto.getHeaderConditions());
         Assert.assertNotNull(conditionDto.getJwtClaimConditions());
-        Assert.assertEquals(conditionDto.getHeaderConditions().getValues().size(),1);
-        Assert.assertEquals(conditionDto.getJwtClaimConditions().getValues().size(),1);
+        Assert.assertEquals(conditionDto.getHeaderConditions().getValues().size(), 1);
+        Assert.assertEquals(conditionDto.getJwtClaimConditions().getValues().size(), 1);
     }
+
     @Test
     public void testGetConditionDtoListWithHavingMultiplePipelines() throws ParseException {
+
         String base64EncodedString =
-        "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19LHsiaXBzcG" +
-                "VjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNjg0MzAwOTAsImludmVydCI6ZmFsc2V9fV0=";
+                "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19LHsiaXBzcG" +
+                        "VjaWZpYyI6eyJzcGVjaWZpY0lwIjoxNjg0MzAwOTAsImludmVydCI6ZmFsc2V9fV0=";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),2);
+        Assert.assertEquals(conditionDtoList.size(), 2);
         Assert.assertNotNull(conditionDtoList.get(0).getIpCondition());
         Assert.assertNotNull(conditionDtoList.get(1).getHeaderConditions());
 
     }
+
     @Test
     public void testGetConditionDtoListWithHavingMultiplePipelinesWithVariousConditions() throws ParseException {
+
         String base64EncodedString =
-        "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19LHsiaXBzcGV" +
-                "jaWZpYyI6eyJzcGVjaWZpY0lwIjoxNzQzMjcxODksImludmVydCI6ZmFsc2V9LCJoZWFkZXIiOnsiaW52ZXJ0IjpmYWxzZSwidmF" +
-                "sdWVzIjp7ImFiYyI6ImRlZiJ9fX0seyJqd3RjbGFpbXMiOnsiaW52ZXJ0IjpmYWxzZSwidmFsdWVzIjp7ImFiYyI6ImRlZiJ9fX0" +
-                "seyJpcHNwZWNpZmljIjp7InNwZWNpZmljSXAiOjE3NDMyNzE4OSwiaW52ZXJ0IjpmYWxzZX0sImp3dGNsYWltcyI6eyJpbnZlcnQ" +
-                "iOmZhbHNlLCJ2YWx1ZXMiOnsiYWJjIjoiZGVmIn19fSx7ImlwcmFuZ2UiOnsic3RhcnRpbmdJcCI6MTc0MzI3MTg5LCJlbmRpbmd" +
-                "JcCI6MTc0MzI3MjAwLCJpbnZlcnQiOmZhbHNlfX1d";
+                "W3siaGVhZGVyIjp7ImludmVydCI6ZmFsc2UsInZhbHVlcyI6eyJhYmMiOiJkZWYifX19LHsiaXBzcGV" +
+                        "jaWZpYyI6eyJzcGVjaWZpY0lwIjoxNzQzMjcxODksImludmVydCI6ZmFsc2V9LCJoZWFkZXIiOnsiaW52ZXJ0IjpmYWxzZSwidmF" +
+                        "sdWVzIjp7ImFiYyI6ImRlZiJ9fX0seyJqd3RjbGFpbXMiOnsiaW52ZXJ0IjpmYWxzZSwidmFsdWVzIjp7ImFiYyI6ImRlZiJ9fX0" +
+                        "seyJpcHNwZWNpZmljIjp7InNwZWNpZmljSXAiOjE3NDMyNzE4OSwiaW52ZXJ0IjpmYWxzZX0sImp3dGNsYWltcyI6eyJpbnZlcnQ" +
+                        "iOmZhbHNlLCJ2YWx1ZXMiOnsiYWJjIjoiZGVmIn19fSx7ImlwcmFuZ2UiOnsic3RhcnRpbmdJcCI6MTc0MzI3MTg5LCJlbmRpbmd" +
+                        "JcCI6MTc0MzI3MjAwLCJpbnZlcnQiOmZhbHNlfX1d";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
-        Assert.assertEquals(conditionDtoList.size(),5);
+        Assert.assertEquals(conditionDtoList.size(), 5);
         Assert.assertNotNull(conditionDtoList.get(0).getIpCondition());
         Assert.assertNotNull(conditionDtoList.get(0).getHeaderConditions());
         Assert.assertNotNull(conditionDtoList.get(1).getIpCondition());
@@ -1939,6 +1988,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetAppAttributeKeysFromRegistry() throws Exception {
+
         final int tenantId = -1234;
         final String property = APIConstants.ApplicationAttributes.APPLICATION_CONFIGURATIONS;
 
@@ -1965,6 +2015,7 @@ public class APIUtilTest {
 
     @Test
     public void testSanitizeUserRole() throws Exception {
+
         Assert.assertEquals("Test%26123", APIUtil.sanitizeUserRole("Test&123"));
         Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));
         Assert.assertEquals("Test123", APIUtil.sanitizeUserRole("Test123"));
@@ -1988,6 +2039,7 @@ public class APIUtilTest {
 
     @Test
     public void testHasPermissionWhenPermissionCheckDisabled() throws APIManagementException {
+
         String userNameWithoutChange = "Drake";
         String permission = APIConstants.Permissions.API_PUBLISH;
 
@@ -2003,6 +2055,7 @@ public class APIUtilTest {
 
     @Test
     public void testHasPermissionWithUserNameNull() {
+
         String userNameWithoutChange = null;
         String permission = APIConstants.Permissions.APIM_ADMIN;
         String expectedExceptionMessage = "Attempt to execute privileged operation as the anonymous user";
@@ -2018,6 +2071,7 @@ public class APIUtilTest {
 
     @Test
     public void testHasPermission() throws Exception {
+
         int tenantId = 2;
         String userNameWithoutChange = "Drake";
         String permission = APIConstants.Permissions.API_PUBLISH;
@@ -2026,7 +2080,7 @@ public class APIUtilTest {
 
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(false).when(APIUtil.class, "isPermissionCheckDisabled");
-        PowerMockito.doReturn(1).when(APIUtil.class, "getValueFromCache",APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
+        PowerMockito.doReturn(1).when(APIUtil.class, "getValueFromCache", APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(userNameWithoutChange)).thenReturn(tenantDomain);
@@ -2052,7 +2106,7 @@ public class APIUtilTest {
         Mockito.when(realmService.getTenantUserRealm(tenantId)).thenReturn(userRealm);
 
         org.wso2.carbon.user.api.AuthorizationManager authorizationManager = Mockito
-            .mock(org.wso2.carbon.user.api.AuthorizationManager.class);
+                .mock(org.wso2.carbon.user.api.AuthorizationManager.class);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
 
         Mockito.when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
@@ -2070,55 +2124,59 @@ public class APIUtilTest {
         Mockito.when(LogFactory.getLog(any(Class.class))).thenReturn(logMock);
 
         boolean expectedResult = APIUtil.hasPermission(userNameWithoutChange, permission);
-        Assert.assertEquals(true,expectedResult);
+        Assert.assertEquals(true, expectedResult);
     }
 
     @Test
-    public void testgetORBasedSearchCriteria() {
+    public void testGetORBasedSearchCriteria() {
+
         String[] statusList = {"PUBLISHED", "PROTOTYPED", "DEPRECATED"};
         String expectedCriteria = "(PUBLISHED OR PROTOTYPED OR DEPRECATED)";
         Assert.assertEquals(expectedCriteria, APIUtil.getORBasedSearchCriteria(statusList));
     }
 
     @Test
-    public void testgetORBasedSearchCriteriaWithEmptyCriteria() {
+    public void testGetORBasedSearchCriteriaWithEmptyCriteria() {
+
         String[] statusList = null;
         Assert.assertEquals(null, APIUtil.getORBasedSearchCriteria(statusList));
     }
 
     @Test
     public void testisAllowDisplayAPIsWithMultipleStatus() {
+
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
 
         APIManagerConfigurationService apiManagerConfigurationService = Mockito
-            .mock(APIManagerConfigurationService.class);
+                .mock(APIManagerConfigurationService.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
-               .thenReturn(apiManagerConfigurationService);
+                .thenReturn(apiManagerConfigurationService);
 
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS))
-               .thenReturn("true");
+                .thenReturn("true");
         Assert.assertEquals(true, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS))
-               .thenReturn("false");
+                .thenReturn("false");
         Assert.assertEquals(false, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS)).thenReturn("");
         Assert.assertEquals(false, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS))
-               .thenReturn(null);
+                .thenReturn(null);
         Assert.assertEquals(false, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
     }
 
     @Test
     public void testGetTiersWhenTierTypeIsAPI() throws Exception {
+
         System.setProperty(CARBON_HOME, "");
         int tierType = APIConstants.TIER_API_TYPE;
         int tenantID = 1;
@@ -2145,6 +2203,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetTiersWhenTierTypeIsResource() throws Exception {
+
         System.setProperty(CARBON_HOME, "");
         int tierType = APIConstants.TIER_RESOURCE_TYPE;
         int tenantID = 1;
@@ -2173,6 +2232,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetTiersWhenTierTypeIsApplication() throws Exception {
+
         System.setProperty(CARBON_HOME, "");
         int tierType = APIConstants.TIER_APPLICATION_TYPE;
         int tenantID = 1;
@@ -2201,6 +2261,7 @@ public class APIUtilTest {
 
     @Test
     public void testValidateAPICategoriesWithValidCategories() throws Exception {
+
         String tenantDomain = "Wso2.com";
         List<APICategory> inputApiCategories = new ArrayList<>();
         List<APICategory> availableApiCategories = new ArrayList<>();
@@ -2219,11 +2280,12 @@ public class APIUtilTest {
         PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfTenant", tenantDomain);
 
         Assert.assertTrue("Failed to Validate API categories",
-                          APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
+                APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
     }
 
     @Test
     public void testValidateAPICategoriesWithInvalidCategories() throws APIManagementException {
+
         String tenantDomain = "Wso2.com";
         List<APICategory> inputApiCategories = new ArrayList<>();
         List<APICategory> availableApiCategories = new ArrayList<>();
@@ -2243,11 +2305,12 @@ public class APIUtilTest {
         Mockito.when(APIUtil.validateAPICategories(inputApiCategories, tenantDomain)).thenCallRealMethod();
 
         Assert.assertFalse("Invalid API categories are validate!!!",
-                           APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
+                APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
     }
 
     @Test
     public void testGetListOfRoles() throws Exception {
+
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
 
@@ -2259,6 +2322,7 @@ public class APIUtilTest {
 
     @Test
     public void testGetListOfRolesNonSuperTenant() throws Exception {
+
         int tenantID = 1;
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
@@ -2288,13 +2352,14 @@ public class APIUtilTest {
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(userStoreManager.getRoleListOfUser(tenantAwareUsername)).thenReturn(roles);
 
-        PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(),Mockito.any(),Mockito.any());
+        PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
     }
 
     @Test
     public void testGetListOfRolesSuperTenant() throws Exception {
+
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
         String tenantDomain = "carbon.super";
@@ -2313,13 +2378,14 @@ public class APIUtilTest {
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(authorizationManager.getRolesOfUser(tenantAwareUsername)).thenReturn(roles);
 
-        PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(),Mockito.any(),Mockito.any());
+        PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
     }
 
     @Test
     public void testGetListOfRolesWithNullUsername() {
+
         String username = null;
         APIManagementException exception = null;
         try {
@@ -2332,6 +2398,7 @@ public class APIUtilTest {
 
     @Test
     public void testCompareRoleList() {
+
         String accessControlRole = "creator";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE", "CREATOR"};
         Assert.assertEquals(true, APIUtil.compareRoleList(roles, accessControlRole));
@@ -2339,6 +2406,7 @@ public class APIUtilTest {
 
     @Test
     public void testCompareRoleListWithNewRole() {
+
         String accessControlRole = "Non-creator";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE", "CREATOR"};
         Assert.assertEquals(false, APIUtil.compareRoleList(roles, accessControlRole));
@@ -2346,6 +2414,7 @@ public class APIUtilTest {
 
     @Test
     public void testCompareRoleListWithNull() {
+
         String accessControlRole = "Non-creator";
         String[] roles = null;
         Assert.assertEquals(false, APIUtil.compareRoleList(roles, accessControlRole));
@@ -2353,6 +2422,7 @@ public class APIUtilTest {
 
     @Test
     public void testConstructApisGetQuery() throws APIManagementException {
+
         String searchQuery = "status:PUBLISHED";
         String expectedQuery = "status=*published*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
@@ -2360,6 +2430,7 @@ public class APIUtilTest {
 
     @Test
     public void testConstructApisGetQuery2() throws APIManagementException {
+
         String searchQuery = "status PUBLISHED";
         String expectedQuery = "name=*status*&name=*PUBLISHED*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
@@ -2367,6 +2438,7 @@ public class APIUtilTest {
 
     @Test
     public void testConstructApisGetQuery3() throws APIManagementException {
+
         String searchQuery = "status:PUBLISHED provider:wso2";
         String expectedQuery = "status=*published*&provider=*wso2*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
@@ -2374,6 +2446,7 @@ public class APIUtilTest {
 
     @Test
     public void testConstructApisGetQuery4() {
+
         String searchQuery = "status:PUBLISHED doc:wso2";
         String expectedError = "Invalid query. AND based search is not supported for doc and subcontext prefixes";
         APIManagementException exception = null;
@@ -2386,7 +2459,8 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetTokenEndpointsByType () throws Exception {
+    public void testGetTokenEndpointsByType() throws Exception {
+
         Environment environment = new Environment();
         environment.setType("production");
         environment.setName("Production");
