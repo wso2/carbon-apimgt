@@ -24,6 +24,8 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import Popover from '@material-ui/core/Popover';
+import moment from 'moment';
 // import CircularProgress from '@material-ui/core/CircularProgress';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -247,6 +249,16 @@ const useStyles = makeStyles((theme) => ({
     deployNewRevButtonStyle: {
         marginRight: theme.spacing(3),
         marginBottom: theme.spacing(3),
+    },
+    popover: {
+        pointerEvents: 'none',
+    },
+    paper: {
+        padding: theme.spacing(1),
+        maxWidth: '300px',
+    },
+    timePaddingStyle: {
+        marginTop: theme.spacing(1),
     },
 }));
 
@@ -605,7 +617,23 @@ export default function Environments() {
     );
 
     let item1;
-    const returnItem1 = (revDescription) => {
+    /**
+     * Returns modified item1
+     * @param {*} revDescription The description of the revision
+     * @returns {Object} Returns the item1
+     */
+    function ReturnItem1({ revDescription, revName, revCreatedTime }) {
+        const [anchorEl, setAnchorEl] = useState(null);
+
+        const handlePopoverOpen = (event) => {
+            setAnchorEl(event.currentTarget);
+        };
+
+        const handlePopoverClose = () => {
+            setAnchorEl(null);
+        };
+
+        const openPopover = Boolean(anchorEl);
         item1 = (
             <Grid
                 container
@@ -613,17 +641,51 @@ export default function Environments() {
             >
                 <Grid item className={classes.shapeRec} />
                 <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
-                    <Tooltip
-                        title={revDescription}
-                        placement='top'
+                    <Grid
+                        className={clsx(classes.shapeInnerComplete, classes.shapeCircle)}
+                        onMouseEnter={handlePopoverOpen}
+                        onMouseLeave={handlePopoverClose}
+                    />
+                    <Popover
+                        id='mouse-over-popover'
+                        className={classes.popover}
+                        classes={{
+                            paper: classes.paper,
+
+                        }}
+                        open={openPopover}
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                        }}
+                        onClose={handlePopoverClose}
+                        disableRestoreFocus
                     >
-                        <Grid className={clsx(classes.shapeInnerComplete, classes.shapeCircle)} />
-                    </Tooltip>
+                        <div>
+                            <Typography variant='body1'>
+                                <b>{revName}</b>
+                            </Typography>
+                            <Typography variant='body2'>
+                                {revDescription}
+                            </Typography>
+                            <div className={classes.timePaddingStyle}>
+                                <Typography variant='caption'>
+                                    <span>{moment(revCreatedTime).fromNow()}</span>
+                                </Typography>
+                            </div>
+                        </div>
+                    </Popover>
                 </Grid>
                 <Grid item className={classes.shapeRecBack} />
             </Grid>
         );
-    };
+        return item1;
+    }
     const item2 = (
         <Grid
             container
@@ -672,7 +734,23 @@ export default function Environments() {
         </Grid>
     );
     let item6;
-    const returnItem6 = (revDescription) => {
+    /**
+     * Returns modified item6
+     * @param {*} revDescription The description of the revision
+     * @returns {Object} Returns the item6
+     */
+    function ReturnItem6({ revDescription, revName, revCreatedTime }) {
+        const [anchorEl1, setAnchorEl1] = useState(null);
+
+        const handlePopoverOpen = (event) => {
+            setAnchorEl1(event.currentTarget);
+        };
+
+        const handlePopoverClose = () => {
+            setAnchorEl1(null);
+        };
+
+        const openPopover = Boolean(anchorEl1);
         item6 = (
             <Grid
                 container
@@ -680,17 +758,50 @@ export default function Environments() {
             >
                 <Grid item className={classes.shapeRec} />
                 <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
-                    <Tooltip
-                        title={revDescription}
-                        placement='bottom'
+                    <Grid
+                        className={clsx(classes.shapeDottedStart1, classes.shapeCircle)}
+                        onMouseEnter={handlePopoverOpen}
+                        onMouseLeave={handlePopoverClose}
+                    />
+                    <Popover
+                        id='mouse-over-popover'
+                        className={classes.popover}
+                        classes={{
+                            paper: classes.paper,
+                        }}
+                        open={openPopover}
+                        anchorEl={anchorEl1}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left',
+                        }}
+                        onClose={handlePopoverClose}
+                        disableRestoreFocus
                     >
-                        <Grid className={clsx(classes.shapeDottedStart1, classes.shapeCircle)} />
-                    </Tooltip>
+                        <div>
+                            <Typography variant='body1'>
+                                <b>{revName}</b>
+                            </Typography>
+                            <Typography variant='body2'>
+                                {revDescription}
+                            </Typography>
+                            <div className={classes.timePaddingStyle}>
+                                <Typography variant='caption' className={classes.timePaddingStyle}>
+                                    <span>{moment(revCreatedTime).fromNow()}</span>
+                                </Typography>
+                            </div>
+                        </div>
+                    </Popover>
                 </Grid>
                 <Grid item className={classes.shapeRecBack} />
             </Grid>
         );
-    };
+        return item6;
+    }
 
 
     const items = [];
@@ -704,7 +815,11 @@ export default function Environments() {
                     items.push(
                         <Grid item>
                             <Grid className={classes.textShape4} />
-                            {returnItem1(allRevisions[revision].description)}
+                            <ReturnItem1
+                                revDescription={allRevisions[revision].description}
+                                revName={allRevisions[revision].displayName}
+                                revCreatedTime={allRevisions[revision].createdTime}
+                            />
                             {item1}
                             <Grid className={classes.textShape2}>
                                 {allRevisions[revision].displayName}
@@ -778,7 +893,11 @@ export default function Environments() {
                                     />
                                 </Button>
                             </Grid>
-                            {returnItem6(allRevisions[revision].description)}
+                            <ReturnItem6
+                                revDescription={allRevisions[revision].description}
+                                revName={allRevisions[revision].displayName}
+                                revCreatedTime={allRevisions[revision].createdTime}
+                            />
                             {item6}
                         </Grid>,
                     );
