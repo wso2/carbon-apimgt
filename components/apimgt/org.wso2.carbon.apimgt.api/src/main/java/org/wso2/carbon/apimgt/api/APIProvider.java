@@ -1462,9 +1462,9 @@ public interface APIProvider extends APIManager {
     /**
      * This method used to save the documentation content
      *
-     * @param apiProduct,        API Product
-     * @param documentationName, name of the inline documentation
-     * @param text,              content of the inline documentation
+     * @param apiProduct        API Product
+     * @param documentationName name of the inline documentation
+     * @param text              content of the inline documentation
      * @throws APIManagementException if failed to add the document as a resource to registry
      */
     public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException;
@@ -1507,7 +1507,7 @@ public interface APIProvider extends APIManager {
      * Find the resources that should be removed from API Products,
      * because those have been already removed from the swagger definition of the updating API.
      *
-     * @param apiId API Identifier
+     * @param apiId         API Identifier
      * @param apiDefinition swagger definition
      * @return  List of resources to be removed that are reused among API Products
      * @throws APIManagementException when error updating resources
@@ -1576,7 +1576,7 @@ public interface APIProvider extends APIManager {
     /**
      * Delete shared scope.
      *
-     * @param scopeName Shared scope name
+     * @param scopeName     Shared scope name
      * @param tenantDomain  tenant domain
      * @throws APIManagementException If failed to delete the scope
      */
@@ -1629,7 +1629,7 @@ public interface APIProvider extends APIManager {
     
     /**
      * Retrieve list of resources of the provided api that are used in other API products
-     * @param apiId api id
+     * @param apiId ID of the API
      * @return APIResource list of resources
      * @throws APIManagementException
      */
@@ -1641,29 +1641,38 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deleteAPI(API api) throws APIManagementException;
+    /**
+     * Checks whether the given document already exists for the given api/product
+     *
+     * @param uuid       API/Product id
+     * @param docName    Name of the document
+     * @return true if document already exists for the given api/product
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
     
     /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
-     * @param apiId id of the api
+     * @param apiId    ID of the API
      * @param resource Resource
-     * @param orgId  Identifier of an organization
-     * @param url wsdl url
+     * @param orgId    Identifier of an organization
+     * @param url      wsdl url
      * @throws APIManagementException
      */
     void addWSDLResource(String apiId, ResourceFile resource, String url, String orgId) throws APIManagementException;
     
     /**
      * Add or update thumbnail image of an api
-     * @param apiId apiid
-     * @param resource image resource
-     * @param orgId  Identifier of an organization
+     * @param apiId    ID of the API
+     * @param resource Image resource
+     * @param orgId    Identifier of an organization
      * @throws APIManagementException
      */
     void setThumbnailToAPI(String apiId, ResourceFile resource, String orgId) throws APIManagementException;
     
     /**
      * List all the mediation policies for the api
-     * @param apiId api id
+     * @param apiId  ID of the API
      * @param orgId  Identifier of an organization
      * @return
      * @throws APIManagementException
@@ -1672,9 +1681,9 @@ public interface APIProvider extends APIManager {
 
     /**
      * The mediation policies for the api
-     * @param apiId api id
-     * @param policyId policy id
-     * @param orgId  Identifier of an organization
+     * @param apiId     ID of the API
+     * @param policyId  Policy id
+     * @param orgId     Identifier of an organization
      * @return
      * @throws APIManagementException
      */
@@ -1682,9 +1691,9 @@ public interface APIProvider extends APIManager {
 
     /**
      * upload mediation policy to api
-     * @param apiId apiid
-     * @param mediationPolicy policy
-     * @param orgId  Identifier of an organization
+     * @param apiId           ID of the API
+     * @param mediationPolicy Mediation Policy
+     * @param orgId           Identifier of an organization
      * @return added policy
      * @throws APIManagementException
      */
@@ -1692,9 +1701,9 @@ public interface APIProvider extends APIManager {
     
     /**
      * update mediation policy content
-     * @param apiId apiid
-     * @param mediationPolicy poilicy
-     * @param orgId  Identifier of an organization
+     * @param apiId           ID of the API
+     * @param mediationPolicy Mediation Policy
+     * @param orgId           Identifier of an organization
      * @return added policy
      * @throws APIManagementException
      */
@@ -1703,26 +1712,26 @@ public interface APIProvider extends APIManager {
 
     /**
      * delete mediation policy
-     * @param apiId apiId
-     * @param mediationPolicyId mediation Policy Id
-     * @param orgId  Identifier of an organization
+     * @param apiId             ID of the API
+     * @param mediationPolicyId Mediation Policy Id
+     * @param orgId             Identifier of an organization
      * @throws APIManagementException
      */
     void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId, String orgId) throws APIManagementException;
     
     /**
      * Add or update graphql definition
-     * @param apiId
-     * @param definition
-     * @param orgId  Identifier of an organization
+     * @param apiId       ID of the API
+     * @param definition  API Definition
+     * @param orgId       Identifier of an organization
      * @throws APIManagementException
      */
     void saveGraphqlSchemaDefinition(String apiId, String definition, String orgId) throws APIManagementException;
 
     /**
      * Get API product by uuid
-     * @param uuid id of the api product
-     * @param requestedTenantDomain domain
+     * @param uuid Id of the api product
+     * @param requestedTenantDomain tenant domain requested
      * @return APIProduct product
      * @throws APIManagementException
      */

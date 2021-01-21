@@ -84,11 +84,11 @@ public interface APIManager {
 
     /**
      * Returns the UUID of the organization which the API belongs to
-     * @param apiUUID UUID of the API's registry artifact
+     * @param apiId UUID of the API
      * @return Organization UUID of the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException;
+    String getOrganizationIDbyAPIUUID(String apiId) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id
@@ -190,7 +190,7 @@ public interface APIManager {
 
     /**
      * Get graphql schema definition
-     * @param apiId  ID of the APIIdentifier
+     * @param apiId  ID of the API
      * @param orgId  Identifier of an organization
      * @return
      * @throws APIManagementException
@@ -210,7 +210,7 @@ public interface APIManager {
     /**
      * Returns the OpenAPI definition as a string
      *
-     * @param apiId id of the api
+     * @param apiId  ID of the API
      * @param orgId  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
@@ -219,13 +219,12 @@ public interface APIManager {
     /**
      * Checks whether the given document already exists for the given api/product
      *
-     * @param uuid API/Product id
+     * @param identifier API/Product id
      * @param docName    Name of the document
-     * @param orgId  Identifier of an organization
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException;
+    boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API/API Product
@@ -281,8 +280,8 @@ public interface APIManager {
     /**
      * Get a documentation Content by apiid and doc id
      *
-     * @param apiId uuid of the API
-     * @param docId DocumentID
+     * @param apiId  ID of the API
+     * @param docId  DocumentID
      * @param orgId  Identifier of an organization
      * @return DocumentationContent
      * @throws APIManagementException if failed to get Documentation
@@ -293,8 +292,8 @@ public interface APIManager {
     /**
      * This method used to get the content of a documentation
      *
-     * @param identifier,        API/Product identifier
-     * @param documentationName, name of the inline documentation
+     * @param identifier        API/Product identifier
+     * @param documentationName name of the inline documentation
      * @return if failed to get doc content
      * @throws APIManagementException if the asking documentation content is unavailable
      */
@@ -303,7 +302,7 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param apiId API ID
+     * @param  apiId ID of the API
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
@@ -324,7 +323,7 @@ public interface APIManager {
     /**
      * Retrieves the subscriber from the given access token
      *
-     * @param accessToken Subscriber key
+     * @param  accessToken Subscriber key
      * @return Subscriber
      * @throws APIManagementException if failed to get Subscriber from access token
      */
@@ -333,7 +332,7 @@ public interface APIManager {
     /**
      * returns the SubscribedAPI object which is related to the UUID
      *
-     * @param uuid UUID of Subscription
+     * @param  uuid UUID of Subscription
      * @return SubscribedAPI object which is related to the UUID
      * @throws APIManagementException
      */
@@ -797,7 +796,7 @@ public interface APIManager {
      * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
      * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
      *
-     * @param apiId api identifier of the API
+     * @param apiId ID of the API
      * @param tenantDomain tenant
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
@@ -806,7 +805,7 @@ public interface APIManager {
     /**
      * Returns the graphql schema content in registry specified by the schema name
      *
-     * @param apiId api identifier of the API
+     * @param  apiId  ID of the API
      * @return schema content matching name if exist else null
      */
     String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
@@ -903,7 +902,7 @@ public interface APIManager {
     
     /**
      * @param searchQuery search query. ex : provider:admin
-     * @param orgId identifier of an organization
+     * @param orgId Identifier of an organization
      * @param start starting number
      * @param end ending number
      * @return
@@ -916,7 +915,7 @@ public interface APIManager {
     /**
      * Search in content of apis, api products and documents and provide the results
      * @param searchQuery search query 
-     * @param orgId identifier of an organization
+     * @param orgId Identifier of an organization
      * @param start
      * @param end
      * @return
