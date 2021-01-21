@@ -2612,9 +2612,9 @@ public abstract class AbstractAPIManager implements APIManager {
 
 
     @Override
-    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName,String username, String organizationId)
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
             throws APIManagementException {
-        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, username, organizationId);
+        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, organizationId);
     }
 
 

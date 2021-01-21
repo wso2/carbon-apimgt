@@ -5431,11 +5431,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException {
-        return false;
-    }
-
-    @Override
     public List<Documentation> getAllDocumentation(String uuid, String orgId)
             throws APIManagementException {
         return super.getAllDocumentation(uuid, orgId);
@@ -5938,7 +5933,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-        Organization org = Organization.getInstance(orgId);
+        Organization org =  new Organization(orgId);
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
@@ -5974,11 +5969,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
-        return null;
-    }
-
-    @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId)
             throws APIManagementException {
         try {
@@ -5995,7 +5985,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, orgId, org, api);
-                    api = addTiersToAPI(api, orgId);
+                    api = addTiersToAPI(api, tenantDomain);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -6008,11 +5998,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    private API addTiersToAPI(API api, String orgId) throws APIManagementException {
+    private API addTiersToAPI(API api, String requestedTenantDomain) throws APIManagementException {
         int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(orgId);
+                    .getTenantId(requestedTenantDomain);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error when getting tiers");
         }
@@ -6043,7 +6033,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException {
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org =  new Organization(orgId);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
@@ -6082,7 +6072,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String uuid = null;
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org =  new Organization(orgId);
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
             } else {

@@ -83,14 +83,6 @@ public interface APIManager {
     API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
 
     /**
-     * Returns the UUID of the organization which the API belongs to
-     * @param apiId UUID of the API
-     * @return Organization UUID of the given artifact id or null
-     * @throws APIManagementException if failed get API from APIIdentifier
-     */
-    String getOrganizationIDbyAPIUUID(String apiId) throws APIManagementException;
-
-    /**
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid   Registry artifact id
@@ -115,11 +107,10 @@ public interface APIManager {
      * Get minimal details of API by API identifier
      *
      * @param identifier APIIdentifier object
-     * @param orgId  Identifier of an organization
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
-    API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException;
+    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Returns details of an API
@@ -717,12 +708,11 @@ public interface APIManager {
      * Returns a list of api versions that matches the given context template and organziationId
      *
      * @param apiName        API name in the payload
-     * @param username       logged in user name of the user
      * @param organizationId UUID of the organization to which the API belongs to
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName,String username, String organizationId)
+    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
             throws APIManagementException;
 
     /**

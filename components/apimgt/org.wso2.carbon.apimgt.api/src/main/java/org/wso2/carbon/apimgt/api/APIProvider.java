@@ -355,6 +355,14 @@ public interface APIProvider extends APIManager {
     void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
 
     /**
+     * Returns the UUID of the organization which the API belongs to
+     * @param apiId UUID of the API
+     * @return Organization UUID of the given artifact id or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    String getOrganizationIDbyAPIUUID(String apiId) throws APIManagementException;
+
+    /**
      * Update the WSDL of an API from a ResourceFile set to the API object
      *
      * @param api API object

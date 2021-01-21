@@ -195,7 +195,7 @@ public class ApiMgtDAO {
         return versionList;
     }
 
-    public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String username, String organizationId)
+    public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
             throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -207,8 +207,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiName);
-            ps.setString(2, username);
-            ps.setString(3, organizationId);
+            ps.setString(2, organizationId);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 versionList.add(resultSet.getString("API_VERSION"));
