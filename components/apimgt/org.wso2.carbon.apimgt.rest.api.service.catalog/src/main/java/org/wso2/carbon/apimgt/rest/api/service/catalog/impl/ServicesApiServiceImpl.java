@@ -187,6 +187,23 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         List<ServiceCRUDStatusDTO> serviceStatusList;
         PaginationDTO paginationDTO = null;
 
+        // Dummy verifier
+        List<VerifierDTO> dummyVerifier = new ArrayList<>();
+        VerifierDTO verifierDTO1 = new VerifierDTO();
+        verifierDTO1.setKey("swagger petstore 1-1.0.0");
+        verifierDTO1.setMd5("");
+        dummyVerifier.add(verifierDTO1);
+        VerifierDTO verifierDTO2 = new VerifierDTO();
+        verifierDTO2.setKey("swagger petstore 2-1.0.0");
+        verifierDTO2.setMd5("");
+        dummyVerifier.add(verifierDTO2);
+        VerifierDTO verifierDTO3 = new VerifierDTO();
+        verifierDTO3.setKey("swagger petstore 3-1.0.0");
+        verifierDTO3.setMd5("");
+        dummyVerifier.add(verifierDTO3);
+        verifier = dummyVerifier;
+        // End of dummy data
+
         // unzip the uploaded zip
         try {
             consumer = RestApiCommonUtil.getConsumer(userName);
@@ -200,6 +217,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         if (verifier.size() != DataMappingUtil.dirCount(tempDirPath)) {
             RestApiUtil.handleBadRequest("Number of elements in verifier must equals to number of directories in the zip archive.", log);
         }
+
         if (overwrite) {
             newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
             catalogEntries = DataMappingUtil.fromDirToServiceCatalogEntryMap(tempDirPath);
@@ -207,8 +225,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             newServices = ServiceCatalogUtils.filterNewServices(verifier, tenantId);
 
             // Adding new services
-            for (String newService : newServices.get(APIConstants.MAP_KEY_ACCEPTED)) {
+            List<String> keyList = newServices.get(APIConstants.MAP_KEY_ACCEPTED);
+            for (String newService : keyList) {
                 if (catalogEntries.containsKey(newService)) {
+                    catalogEntries.get(newService).getServiceCatalogInfo().setMd5(newResourcesHash.get(newService));
                     String uuid = serviceCatalog.addServiceCatalog(catalogEntries.get(newService), tenantId);
                     if (uuid != null) {
                         catalogEntries.get(newService).getServiceCatalogInfo().setUuid(uuid);
@@ -222,6 +242,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             // Adding updated services
             for (String updatedService : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
                 if (catalogEntries.containsKey(updatedService)) {
+                    catalogEntries.get(updatedService).getServiceCatalogInfo().setMd5(newResourcesHash.get(updatedService));
                     String uuid = serviceCatalog.addServiceCatalog(catalogEntries.get(updatedService), tenantId);
                     if (uuid != null) {
                         catalogEntries.get(updatedService).getServiceCatalogInfo().setUuid(uuid);

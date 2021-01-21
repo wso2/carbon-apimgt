@@ -151,8 +151,8 @@ public class DataMappingUtil {
         serviceCRUDStatusDTO.setDefinitionType(ServiceCRUDStatusDTO.DefinitionTypeEnum.fromValue(serviceCatalogInfo.getDefType()));
         serviceCRUDStatusDTO.setSecurityType(ServiceCRUDStatusDTO.SecurityTypeEnum.fromValue(serviceCatalogInfo.getSecurityType()));
         serviceCRUDStatusDTO.setMutualSSLEnabled(serviceCatalogInfo.isMutualSSLEnabled());
-        serviceCRUDStatusDTO.setCreatedTime(serviceCatalogInfo.getCreatedTime().toString());
-        serviceCRUDStatusDTO.setLastUpdatedTime(serviceCatalogInfo.getLastUpdatedTime().toString());
+//        serviceCRUDStatusDTO.setCreatedTime(serviceCatalogInfo.getCreatedTime().toString());
+//        serviceCRUDStatusDTO.setLastUpdatedTime(serviceCatalogInfo.getLastUpdatedTime().toString());
         serviceCRUDStatusDTO.setCatalogUpdated(status);
 
         return serviceCRUDStatusDTO;
@@ -191,7 +191,7 @@ public class DataMappingUtil {
         for (String element : existingServices.get(APIConstants.MAP_KEY_NOT_CHANGED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), false));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -200,7 +200,7 @@ public class DataMappingUtil {
         for (String element : existingServices.get(APIConstants.MAP_KEY_IGNORED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), false));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -218,7 +218,7 @@ public class DataMappingUtil {
         for (String element : newServices.get(APIConstants.MAP_KEY_IGNORED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), false));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }

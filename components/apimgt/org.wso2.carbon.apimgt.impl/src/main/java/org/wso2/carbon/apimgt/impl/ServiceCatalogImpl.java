@@ -18,6 +18,7 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
 
     @Override
     public String addServiceCatalog(ServiceCatalogEntry serviceCatalog, int tenantId) throws APIManagementException {
+        //uuid gen
         if (serviceCatalogImpl.getMD5HashByKey(serviceCatalog.getServiceCatalogInfo().getKey(), tenantId) != null){
             return null; //Exceptions??
         }

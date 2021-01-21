@@ -25,8 +25,8 @@ public class ServiceCatalogUtils {
             String key = verifierDTO.getKey();
             if (StringUtils.isBlank(verifierDTO.getMd5()) && serviceCatalog.getMD5HashByKey(key, tenantId) == null) {
                 newServices.add(key);
-            } else if (StringUtils.isBlank(verifierDTO.getMd5()) && serviceCatalog.getMD5HashByKey(key, tenantId) != null) {
-                ignoredNewServices.add(key);
+            } else {
+//                ignoredNewServices.add(key);
             }
         }
         filteredNewServices.put(APIConstants.MAP_KEY_ACCEPTED, newServices);
@@ -51,7 +51,7 @@ public class ServiceCatalogUtils {
                 } else {
                     statusNotChanged.add(key);
                 }
-            } else {
+            } else if (StringUtils.isBlank(verifierDTO.getMd5()) && serviceCatalog.getMD5HashByKey(key, tenantId) != null){
                 ignoredServices.add(key);
             }
         }
