@@ -30,7 +30,7 @@ import java.util.Map;
  * Entity for keeping API related information.
  */
 public class API implements CacheableEntity<String> {
-
+    private String uuid;
     private Integer apiId = null;
     private String provider = null;
     private String name = null;
@@ -146,5 +146,14 @@ public class API implements CacheableEntity<String> {
     public void setDefaultVersion(boolean isDefaultVersion) {
         this.isDefaultVersion = isDefaultVersion;
     }
-    
+
+    public String getUuid() {
+
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+
+        this.uuid = uuid;
+    }
 }

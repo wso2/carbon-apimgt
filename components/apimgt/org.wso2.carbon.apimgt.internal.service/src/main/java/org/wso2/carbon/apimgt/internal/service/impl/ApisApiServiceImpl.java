@@ -21,18 +21,19 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApisApiService;
-import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
+
 import javax.ws.rs.core.Response;
 
 public class ApisApiServiceImpl implements ApisApiService {
@@ -40,18 +41,21 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisGet(String xWSO2Tenant, String context, String version, String revisionUUID, String accept,
+    public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String revisionUUID, String accept,
                             MessageContext messageContext) throws APIManagementException {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
-
+        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
+        if (StringUtils.isNotEmpty(apiId)) {
+            API api = subscriptionValidationDAO.getApiByUUID(apiId);
+            return Response.ok().entity(SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api)).build();
+        }
         if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
             API api = subscriptionValidationDAO.getApi(version, context, revisionUUID);
             return Response.ok().entity(SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api)).build();
         }
 
         APIListDTO apiListDTO;
-        xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
             apiListDTO = SubscriptionValidationDataUtil.fromAPIListToAPIListDTO(
                     subscriptionValidationDAO.getAllApis(xWSO2Tenant));

@@ -16,39 +16,23 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import com.google.gson.Gson;
-import org.apache.axiom.om.OMAttribute;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
-import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
@@ -61,17 +45,10 @@ import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
-import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
-import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -82,12 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
-import java.io.ByteArrayInputStream;
-import java.util.*;
 
 public class APIGatewayManager {
 
@@ -101,10 +72,7 @@ public class APIGatewayManager {
     private ArtifactSaver artifactSaver;
     private boolean saveArtifactsToStorage = false;
 
-    private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
-    private final String ENDPOINT_SANDBOX = "_SANDBOX_";
     private static final String PRODUCT_PREFIX = "prod";
-    private static final String PRODUCT_VERSION = "1.0.0";
 
     private APIGatewayManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -123,67 +91,6 @@ public class APIGatewayManager {
             instance = new APIGatewayManager();
         }
         return instance;
-    }
-
-    /**
-     * Publishes an API to all configured Gateways.
-     *
-     * @param api          - The API to be published
-     * @param builder      - The template builder
-     * @param tenantDomain - Tenant Domain of the publisher
-     * @return a map of environments that failed to publish the API
-     */
-    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
-
-        Map<String, String> failedGatewaysMap = new HashMap<String, String>(0);
-        Set<String> publishedGateways = new HashSet<>();
-
-        if (debugEnabled) {
-            log.debug("API to be published: " + api.getId());
-            if (api.getEnvironments() != null) {
-                log.debug("Number of environments to be published to: " + (api.getEnvironments().size()));
-            }
-            if (api.getGatewayLabels() != null) {
-                log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
-            }
-        }
-
-        if (api.getEnvironments() != null) {
-            for (String environmentName : api.getEnvironments()) {
-                Environment environment = environments.get(environmentName);
-                //If the environment is removed from the configuration, continue without publishing
-                if (environment == null) {
-                    continue;
-                }
-                if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " is publishing to the environment of "
-                            + environment.getName());
-                }
-                failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, false,
-                        publishedGateways, failedGatewaysMap);
-            }
-        }
-
-        if (api.getGatewayLabels() != null) {
-            for (Label label : api.getGatewayLabels()) {
-                Environment environment = getEnvironmentFromLabel(label);
-                if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " is publishing to the label " + label);
-                }
-                failedGatewaysMap = publishAPIToGatewayEnvironment(environment, api, builder, tenantDomain, true,
-                        publishedGateways, failedGatewaysMap);
-            }
-        }
-
-
-        // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
-            Thread recommendationThread = new Thread(extractor);
-            recommendationThread.start();
-        }
-
-        return failedGatewaysMap;
     }
 
     private void sendDeploymentEvent(API api, String tenantDomain, Set<String> publishedGateways) {
@@ -473,50 +380,6 @@ public class APIGatewayManager {
         }
     }
 
-    private void setSecureVaultPropertyToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO) {
-
-        boolean isSecureVaultEnabled =
-                Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
-        if (api.isEndpointSecured() && isSecureVaultEnabled) {
-            String secureVaultAlias =
-                    api.getId().getProviderName() + "--" + api.getId().getApiName() + api.getId().getVersion();
-
-            CredentialDto credentialDto = new CredentialDto();
-            credentialDto.setAlias(secureVaultAlias);
-            credentialDto.setPassword(api.getEndpointUTPassword());
-            gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
-                    gatewayAPIDTO.getCredentialsToBeAdd()));
-        }
-
-    }
-
-    private CredentialDto[] addCredentialsToList(CredentialDto credential, CredentialDto[] credentials) {
-
-        if (credentials == null) {
-            return new CredentialDto[]{credential};
-        } else {
-            Set<CredentialDto> credentialList = new HashSet<>();
-            Collections.addAll(credentialList, credentials);
-            credentialList.add(credential);
-            return credentialList.toArray(new CredentialDto[credentialList.size()]);
-        }
-    }
-
-    private void addEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
-            throws APITemplateException, XMLStreamException {
-
-        ArrayList<String> arrayListToAdd = getEndpointType(api);
-        for (String type : arrayListToAdd) {
-            String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
-            GatewayContentDTO endpoint = new GatewayContentDTO();
-            endpoint.setName(getEndpointName(endpointConfigContext));
-            endpoint.setContent(endpointConfigContext);
-            gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentToList(endpoint,
-                    gatewayAPIDTO.getEndpointEntriesToBeAdd()));
-        }
-    }
-
     /**
      * Returns the defined endpoint types of the in the publisher
      *
@@ -536,138 +399,6 @@ public class APIGatewayManager {
             arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
         }
         return arrayList;
-    }
-
-    /**
-     * Publishes an API Product to all configured Gateways.
-     *
-     * @param apiProduct     - The API Product to be published
-     * @param builder        - The template builder
-     * @param tenantDomain   - Tenant Domain of the publisher
-     * @param associatedAPIs - APIs associated with the current API Product
-     */
-    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain,
-            Set<API> associatedAPIs) {
-
-        Map<String, String> failedEnvironmentsMap = new HashMap<>(0);
-        Set<String> publishedGateways = new HashSet<>();
-
-        if (apiProduct.getEnvironments() == null) {
-            return failedEnvironmentsMap;
-        }
-        long startTime = 0;
-        long startTimePublishToGateway = 0;
-
-        APIProductIdentifier apiProductId = apiProduct.getId();
-
-        APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProductId.getName(), PRODUCT_VERSION);
-
-        if (debugEnabled) {
-            log.debug("API to be published: " + id);
-            log.debug("Number of environments to be published to: " + apiProduct.getEnvironments().size());
-        }
-
-        for (String environmentName : apiProduct.getEnvironments()) {
-            if (debugEnabled) {
-                startTimePublishToGateway = System.currentTimeMillis();
-            }
-            Environment environment = environments.get(environmentName);
-            //If the environment is removed from the configuration, continue without publishing
-            if (environment == null) {
-                continue;
-            }
-            APIGatewayAdminClient client;
-            try {
-                client = new APIGatewayAdminClient(environment);
-                GatewayAPIDTO productAPIDto = new GatewayAPIDTO();
-                productAPIDto.setProvider(id.getProviderName());
-                productAPIDto.setApiId(apiProduct.getUuid());
-                productAPIDto.setName(id.getName());
-                productAPIDto.setVersion(id.getVersion());
-                productAPIDto.setTenantDomain(tenantDomain);
-                productAPIDto.setOverride(false);
-                String definition = apiProduct.getDefinition();
-                productAPIDto.setLocalEntriesToBeRemove(addStringToList(apiProduct.getUuid(),
-                        productAPIDto.getLocalEntriesToBeRemove()));
-                GatewayContentDTO productLocalEntry = new GatewayContentDTO();
-                productLocalEntry.setName(apiProduct.getUuid());
-                productLocalEntry.setContent("<localEntry key=\"" + apiProduct.getUuid() + "\">" +
-                        definition.replaceAll("&(?!amp;)", "&amp;").
-                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                        + "</localEntry>");
-                productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
-                        productAPIDto.getLocalEntriesToBeAdd()));
-
-                // Retrieve ga-config from the registry and publish to gateway as a local entry
-                addGAConfigLocalEntry(productAPIDto, tenantDomain);
-
-                // If the Gateway type is 'production' and a production url has
-                // not been specified
-                // Or if the Gateway type is 'sandbox' and a sandbox url has not
-                // been specified
-                if (debugEnabled) {
-                    startTime = System.currentTimeMillis();
-                }
-
-                //Add the API
-                APIIdentifier apiId = new APIIdentifier(apiProductId.getProviderName(), apiProductId.getName(), PRODUCT_VERSION);
-                setClientCertificatesToBeRemoved(apiId, tenantDomain, productAPIDto);
-                setClientCertificatesToBeAdded(apiId, tenantDomain, productAPIDto);
-
-                productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
-
-                for (API api : associatedAPIs) {
-                    setCustomSequencesToBeRemoved(api, productAPIDto);
-                    setClientCertificatesToBeRemoved(api, tenantDomain, productAPIDto);
-                    APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
-                    addEndpoints(api, apiTemplateBuilder, productAPIDto);
-                    setCustomSequencesToBeAdded(api, tenantDomain, productAPIDto);
-                    setAPIFaultSequencesToBeAdded(api, tenantDomain, productAPIDto);
-                    setSecureVaultProperty(client, api, tenantDomain);
-                    setClientCertificatesToBeAdded(api, tenantDomain, productAPIDto);
-                }
-
-                if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
-                    client.deployAPI(productAPIDto);
-                }
-
-                if (saveArtifactsToStorage) {
-                    artifactSaver.saveArtifact(new Gson().toJson(productAPIDto), environmentName,
-                            APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    publishedGateways.add(environment.getName());
-                }
-
-                if (debugEnabled) {
-                    long endTime = System.currentTimeMillis();
-                    log.debug("Publishing API (if the API does not exist in the Gateway) took " +
-                            (endTime - startTime) / 1000 + "  seconds");
-                }
-
-            } catch (AxisFault | APIManagementException | APITemplateException
-                    | XMLStreamException e) {
-                /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway publishing if one gateway unreachable
-                 */
-                failedEnvironmentsMap.put(environmentName, e.getMessage());
-                log.error("Error occurred when publishing API directly to gateway" + environmentName, e);
-            } catch (ArtifactSynchronizerException e) {
-                failedEnvironmentsMap.put(environmentName, e.getMessage());
-                log.error("Error occurred when saving API Product artifacts to storage" + environmentName, e);
-            } catch (CertificateManagementException ex) {
-                log.error("Error occurred while adding/updating client certificate in " + environmentName, ex);
-                failedEnvironmentsMap.put(environmentName, ex.getMessage());
-            }
-            if (debugEnabled) {
-                long endTimePublishToGateway = System.currentTimeMillis();
-                log.debug("Publishing to gateway : " + environmentName + " total time taken : " +
-                        (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
-            }
-        }
-
-
-        return failedEnvironmentsMap;
     }
 
     public Map<String, String> updateLocalEntry(APIProduct apiProduct, String tenantDomain) {
@@ -695,67 +426,6 @@ public class APIGatewayManager {
         return failedEnvironmentsMap;
     }
 
-    /**
-     * Remove an API from the configured Gateways
-     *
-     * @param api          - The API to be removed
-     * @param tenantDomain - Tenant Domain of the publisher
-     * @return a map of environments that failed to remove the API
-     */
-    public Map<String, String> removeFromGateway(API api, String tenantDomain) {
-
-        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
-        Set<String> removedGateways = new HashSet<>();
-
-        if (debugEnabled) {
-            log.debug("API to be published: " + api.getId());
-            if (api.getEnvironments() != null) {
-                log.debug("Number of environments to be published to: " + (api.getEnvironments().size()));
-            }
-            if (api.getGatewayLabels() != null) {
-                log.debug("Number of labeled gateways to be published to: " + (api.getGatewayLabels().size()));
-            }
-        }
-
-        if (api.getEnvironments() != null) {
-            for (String environmentName : api.getEnvironments()) {
-                Environment environment = environments.get(environmentName);
-                //If the environment is removed from the configuration, continue without removing
-                if (environment == null) {
-                    continue;
-                }
-                if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " is removing from the environment of "
-                            + environment.getName());
-                }
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
-                        false, removedGateways, failedEnvironmentsMap);
-            }
-        }
-
-        if (api.getGatewayLabels() != null) {
-            for (Label label : api.getGatewayLabels()) {
-                Environment environment = getEnvironmentFromLabel(label);
-                if (debugEnabled) {
-                    log.debug("API with " + api.getId() + " is removing from the label " + label);
-                }
-                failedEnvironmentsMap = removeAPIFromGatewayEnvironment(api, tenantDomain, environment,
-                        true, removedGateways, failedEnvironmentsMap);
-            }
-        }
-
-
-        updateRemovedClientCertificates(api, tenantDomain);
-
-        // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
-            Thread recommendationThread = new Thread(extractor);
-            recommendationThread.start();
-        }
-        return failedEnvironmentsMap;
-    }
-
     private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways) {
         APIIdentifier apiIdentifier = api.getId();
 
@@ -780,402 +450,6 @@ public class APIGatewayManager {
                 apiProduct.getUuid(), removedGateways, apiProductIdentifier.getName(),
                 apiProductIdentifier.getVersion(), PRODUCT_PREFIX, APIConstants.API_PRODUCT, apiEvents);
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
-    }
-
-    /**
-     * Remove an API from a given environment
-     *
-     * @param api                       - The API to be published
-     * @param tenantDomain              - Tenant Domain of the publisher
-     * @param environment               - Gateway environment
-     * @param isGatewayDefinedAsALabel  - Whether the environment is from a label or not
-     * @param failedEnvironmentsMap     - This map will be updated with the environment if the publishing failed
-     * @return failedEnvironmentsMap
-     */
-    public Map<String, String> removeAPIFromGatewayEnvironment(API api, String tenantDomain, Environment environment,
-            boolean isGatewayDefinedAsALabel,
-            Set<String> removedGateways,
-            Map<String, String> failedEnvironmentsMap) {
-
-        try {
-            GatewayAPIDTO gatewayAPIDTO = createGatewayAPIDTOtoRemoveAPI(api, tenantDomain, environment);
-            if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()
-                    && !isGatewayDefinedAsALabel) {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
-                client.unDeployAPI(gatewayAPIDTO);
-            }
-
-            if (saveArtifactsToStorage) {
-                artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
-                        APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
-                removedGateways.add(environment.getName());
-                if (debugEnabled) {
-                    log.debug("Status of " + api.getId() + " has been updated to DB");
-                }
-            }
-        } catch (AxisFault axisFault) {
-            /*
-            didn't throw this exception to handle multiple gateway publishing if gateway is unreachable we collect
-            that environments into map with issue and show on popup in ui therefore this didn't break the gateway
-            unpublisihing if one gateway unreachable
-            */
-            log.error("Error occurred when removing API directly from the gateway " + environment.getName(),
-                    axisFault);
-            failedEnvironmentsMap.put(environment.getName(), axisFault.getMessage());
-        } catch (CertificateManagementException ex) {
-            log.error("Error occurred when deleting certificate from gateway" + environment.getName(), ex);
-            failedEnvironmentsMap.put(environment.getName(), ex.getMessage());
-        } catch (ArtifactSynchronizerException e) {
-            log.error("Error occurred when updating the remove instruction in the storage " + environment.getName(), e);
-            failedEnvironmentsMap.put(environment.getName(), e.getMessage());
-        }
-        return failedEnvironmentsMap;
-    }
-
-    /**
-     * Create a DTO object required to remove the API from a given gateway environment
-     *
-     * @param api                   - The API to be published
-     * @param tenantDomain          - Tenant Domain of the publisher
-     * @param environment           - Gateway environment
-     * @return DTO object with API artifacts
-     */
-    public GatewayAPIDTO createGatewayAPIDTOtoRemoveAPI(API api, String tenantDomain, Environment environment)
-            throws CertificateManagementException {
-
-        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
-        gatewayAPIDTO.setName(api.getId().getName());
-        gatewayAPIDTO.setVersion(api.getId().getVersion());
-        gatewayAPIDTO.setProvider(api.getId().getProviderName());
-        gatewayAPIDTO.setTenantDomain(tenantDomain);
-        gatewayAPIDTO.setOverride(true);
-        gatewayAPIDTO.setApiId(api.getUUID());
-
-        setClientCertificatesToBeRemoved(api, tenantDomain, gatewayAPIDTO);
-        setEndpointsToBeRemoved(api, gatewayAPIDTO);
-        if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-            if (debugEnabled) {
-                log.debug("Removing API " + api.getId().getApiName() + " From environment " +
-                        environment.getName());
-            }
-            setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-            setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
-        } else {
-            String fileName = api.getContext().replace('/', '-');
-            String[] fileNames = new String[2];
-            fileNames[0] = ENDPOINT_PRODUCTION + fileName;
-            fileNames[1] = ENDPOINT_SANDBOX + fileName;
-            gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileNames[0],
-                    gatewayAPIDTO.getSequencesToBeRemove()));
-            gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileNames[1],
-                    gatewayAPIDTO.getSequencesToBeRemove()));
-        }
-
-        String localEntryUUId = api.getUUID();
-        if (localEntryUUId != null && !localEntryUUId.isEmpty()) {
-            if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
-            }
-            gatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(localEntryUUId,
-                    gatewayAPIDTO.getLocalEntriesToBeRemove()));
-        }
-        return gatewayAPIDTO;
-    }
-
-    /**
-     * Removed an API Product from the configured Gateways
-     *
-     * @param apiProduct   - The API Product to be removed
-     * @param tenantDomain - Tenant Domain of the publisher
-     */
-    public Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs) {
-
-        Map<String, String> failedEnvironmentsMap = new HashMap<>();
-        Set<String> removedGateways = new HashSet<>();
-
-        GatewayAPIDTO productAPIGatewayAPIDTO = new GatewayAPIDTO();
-        productAPIGatewayAPIDTO.setApiId(apiProduct.getUuid());
-        productAPIGatewayAPIDTO.setName(apiProduct.getId().getName());
-        productAPIGatewayAPIDTO.setVersion(apiProduct.getId().getVersion());
-        productAPIGatewayAPIDTO.setProvider(PRODUCT_PREFIX);
-        productAPIGatewayAPIDTO.setTenantDomain(tenantDomain);
-        productAPIGatewayAPIDTO.setOverride(true);
-        if (apiProduct.getEnvironments() != null) {
-            for (String environmentName : apiProduct.getEnvironments()) {
-                try {
-                    Environment environment = environments.get(environmentName);
-                    //If the environment is removed from the configuration, continue without removing
-                    if (environment == null) {
-                        continue;
-                    }
-
-                    for (API api : associatedAPIs) {
-                        if (!APIStatus.PUBLISHED.getStatus().equals(api.getStatus())) {
-                            setEndpointsToBeRemoved(api, productAPIGatewayAPIDTO);
-                            setCustomSequencesToBeRemoved(api, productAPIGatewayAPIDTO);
-                            setClientCertificatesToBeRemoved(api, tenantDomain, productAPIGatewayAPIDTO);
-                        }
-                    }
-                    productAPIGatewayAPIDTO.setLocalEntriesToBeRemove(addStringToList(apiProduct.getUuid(),
-                            productAPIGatewayAPIDTO.getLocalEntriesToBeRemove()));
-                    if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
-                        APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
-                        client.unDeployAPI(productAPIGatewayAPIDTO);
-                    }
-
-                    if (saveArtifactsToStorage) {
-                        artifactSaver.saveArtifact(new Gson().toJson(productAPIGatewayAPIDTO), environmentName,
-                                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_REMOVE);
-                        removedGateways.add(environmentName);
-                    }
-
-                } catch (AxisFault e) {
-                    /*
-                    didn't throw this exception to handle multiple gateway publishing
-                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                    therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                    */
-                    log.error("Error occurred when removing API product directly from the gateway" + environmentName, e);
-                    failedEnvironmentsMap.put(environmentName, e.getMessage());
-                } catch (ArtifactSynchronizerException e) {
-                    log.error("Error occurred when updating the remove instructions in storage " + environmentName, e);
-                    failedEnvironmentsMap.put(environmentName, e.getMessage());
-                } catch (CertificateManagementException ex) {
-                    log.error("Error occurred while removing client certificate in " + environmentName, ex);
-                    failedEnvironmentsMap.put(environmentName, ex.getMessage());
-                }
-            }
-        }
-
-        return failedEnvironmentsMap;
-    }
-
-    /**
-     * add websoocket api to the gateway
-     *
-     * @param api
-     * @param client
-     * @throws APIManagementException
-     */
-    public void deployWebsocketAPI(API api, APIGatewayAdminClient client, boolean isGatewayDefinedAsALabel,
-            Set<String> publishedGateways,Environment environment)
-            throws APIManagementException, JSONException {
-
-        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
-        gatewayAPIDTO.setApiId(api.getUUID());
-        gatewayAPIDTO.setName(api.getId().getName());
-        gatewayAPIDTO.setVersion(api.getId().getVersion());
-        gatewayAPIDTO.setProvider(api.getId().getProviderName());
-        gatewayAPIDTO.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        try {
-            String production_endpoint = null;
-            String sandbox_endpoint = null;
-            JSONObject obj = new JSONObject(api.getEndpointConfig());
-            if (obj.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-                production_endpoint = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
-            }
-            if (obj.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-                sandbox_endpoint = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
-            }
-            OMElement element;
-            try {
-                if (production_endpoint != null) {
-                    String content = createSeqString(api, production_endpoint, ENDPOINT_PRODUCTION);
-                    element = AXIOMUtil.stringToOM(content);
-                    String fileName = element.getAttributeValue(new QName("name"));
-                    gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileName,
-                            gatewayAPIDTO.getSequencesToBeRemove()));
-                    GatewayContentDTO productionSequence = new GatewayContentDTO();
-                    productionSequence.setContent(APIUtil.convertOMtoString(element));
-                    productionSequence.setName(fileName);
-                    gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(productionSequence,
-                            gatewayAPIDTO.getSequenceToBeAdd()));
-                }
-                if (sandbox_endpoint != null) {
-                    String content = createSeqString(api, sandbox_endpoint, ENDPOINT_SANDBOX);
-                    element = AXIOMUtil.stringToOM(content);
-                    String fileName = element.getAttributeValue(new QName("name"));
-                    gatewayAPIDTO.setSequencesToBeRemove(addStringToList(fileName,
-                            gatewayAPIDTO.getSequencesToBeRemove()));
-                    GatewayContentDTO sandboxEndpointSequence = new GatewayContentDTO();
-                    sandboxEndpointSequence.setContent(APIUtil.convertOMtoString(element));
-                    sandboxEndpointSequence.setName(fileName);
-                    gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sandboxEndpointSequence,
-                            gatewayAPIDTO.getSequenceToBeAdd()));
-                }
-                if (gatewayArtifactSynchronizerProperties.isPublishDirectlyToGatewayEnabled()) {
-                    if (!isGatewayDefinedAsALabel) {
-                        client.deployAPI(gatewayAPIDTO);
-                    }
-                }
-
-                if (saveArtifactsToStorage) {
-                    artifactSaver.saveArtifact(new Gson().toJson(gatewayAPIDTO), environment.getName(),
-                            APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-                    publishedGateways.add(environment.getName());
-                }
-
-            } catch (AxisFault | ArtifactSynchronizerException e) {
-                String msg = "Error while deploying WebsocketSequence";
-                log.error(msg, e);
-                throw new APIManagementException(msg);
-            }
-        } catch (XMLStreamException e) {
-            String msg = "Error while parsing the Sequence";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
-        }
-    }
-
-    /**
-     * add new api version at the API Gateway
-     *
-     * @param artifact
-     * @param api
-     */
-    public void createNewWebsocketApiVersion(GenericArtifact artifact, API api) {
-
-        try {
-            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-            APIGatewayAdminClient client;
-            Set<String> environments = APIUtil.extractEnvironmentsForAPI(
-                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
-            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
-            for (String environmentName : environments) {
-                Environment environment = this.environments.get(environmentName);
-                client = new APIGatewayAdminClient(environment);
-                boolean isGatewayDefinedAsALabel = api.getEnvironments() != null;
-                Set<String> publishedGateways = new HashSet<>();
-                try {
-                    gatewayManager.deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
-                } catch (JSONException ex) {
-                    /*
-                    didn't throw this exception to handle multiple gateway publishing
-                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                    therefore this didn't break the gateway publishing if one gateway unreachable
-                    */
-                    log.error("Error occurred deploying sequences on " + environmentName, ex);
-                }
-            }
-        } catch (APIManagementException ex) {
-            /*
-            didn't throw this exception to handle multiple gateway publishing
-            if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-            therefore this didn't break the gateway unpublisihing if one gateway unreachable
-            */
-            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
-        } catch (AxisFault ex) {
-            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
-        } catch (GovernanceException ex) {
-            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
-        }
-    }
-
-    /**
-     * add new api version at the API Gateway
-     *
-     * @param artifact
-     * @param api
-     */
-    public void createNewWebsocketApiVersion(API api) {
-
-        try {
-            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-            APIGatewayAdminClient client;
-            /*
-            Set<String> environments = APIUtil.extractEnvironmentsForAPI(
-                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
-            api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-            api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
-            */
-            Set<String> environments = api.getEnvironments();
-            for (String environmentName : environments) {
-                Environment environment = this.environments.get(environmentName);
-                client = new APIGatewayAdminClient(environment);
-                boolean isGatewayDefinedAsALabel = api.getEnvironments() != null;
-                Set<String> publishedGateways = new HashSet<>();
-                try {
-                    gatewayManager.deployWebsocketAPI(api, client, isGatewayDefinedAsALabel, publishedGateways, environment);
-                } catch (JSONException ex) {
-                    /*
-                    didn't throw this exception to handle multiple gateway publishing
-                    if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                    therefore this didn't break the gateway publishing if one gateway unreachable
-                    */
-                    log.error("Error occurred deploying sequences on " + environmentName, ex);
-                }
-            }
-        } catch (APIManagementException ex) {
-            /*
-            didn't throw this exception to handle multiple gateway publishing
-            if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-            therefore this didn't break the gateway unpublisihing if one gateway unreachable
-            */
-            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
-        } catch (AxisFault ex) {
-            log.error("Error in deploying to gateway :" + ex.getMessage(), ex);
-        }
-    }
-
-    /**
-     * create body of sequence
-     *
-     * @param api
-     * @param url
-     * @return
-     */
-    public String createSeqString(API api, String url, String urltype) throws JSONException  {
-
-        String context = api.getContext();
-        context = urltype + context;
-        String[] endpointConfig = websocketEndpointConfig(api, urltype);
-        String timeout = endpointConfig[0];
-        String suspendOnFailure = endpointConfig[1];
-        String markForSuspension = endpointConfig[2];
-        String endpointConf = "<default>\n" +
-                "\t<timeout>\n" +
-                timeout +
-                "\t</timeout>\n" +
-                "\t<suspendOnFailure>\n" +
-                suspendOnFailure + "\n" +
-                "\t</suspendOnFailure>\n" +
-                "\t<markForSuspension>\n" +
-                markForSuspension +
-                "\t</markForSuspension>\n" +
-                "</default>";
-        String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
-                context.replace('/', '-') + "\">\n" +
-                "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
-                "   <script language=\"js\">var sub_path = mc.getProperty(\"websocket.subscriber.path\");\t    \n" +
-                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\n" +
-                "                if(queryParamString != undefined) {\t    \n" +
-                "\t\tmc.setProperty('queryparams', \"?\" + queryParamString);\n" +
-                "\t\t}\t\t\n" +
-                "   </script>\n" +
-                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
-                "             xmlns:ns=\"http://org.apache.synapse/xsd\"\n" +
-                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
-                "             name=\"queryparams\"\n" +
-                "             expression=\"$ctx:queryparams\"/>\n" +
-                "   <property name=\"urlVal\" value=\""+ url + "\"/>\n" +
-                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
-                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
-                "             name=\"fullUrl\"\n" +
-                "             expression=\"fn:concat(get-property('urlVal'), get-property('queryparams'))\"\n" +
-                "             type=\"STRING\"/>\n" +
-                "   <header xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
-                "           xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
-                "           name=\"To\"\n" +
-                "           expression=\"$ctx:fullUrl\"/>\n" +
-                "   <send>\n" +
-                "      <endpoint>\n" +
-                endpointConf + "\n" +
-                "      </endpoint>\n" +
-                "   </send>\n" +
-                "</sequence>";
-        return seq;
     }
 
     public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
@@ -1295,88 +569,6 @@ public class APIGatewayManager {
         return APIConstants.APIEndpointSecurityConstants.BASIC_AUTH;
     }
 
-    public void setProductResourceSequences(APIProviderImpl apiProvider, APIProduct apiProduct)
-            throws APIManagementException {
-
-        for (APIProductResource resource : apiProduct.getProductResources()) {
-            String uuid = resource.getApiId();
-            if (StringUtils.isEmpty(uuid)) {
-                APIIdentifier apiIdentifier = resource.getApiIdentifier();
-                uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
-            }
-
-            API api = apiProvider.getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
-
-            String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
-            if (APIUtil.isSequenceDefined(api.getInSequence())) {
-                resource.setInSequenceName(inSequenceKey);
-            }
-
-            String outSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
-            if (APIUtil.isSequenceDefined(api.getOutSequence())) {
-                resource.setOutSequenceName(outSequenceKey);
-            }
-
-            String faultSequenceKey = APIUtil.getFaultSequenceName(api);
-            if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
-                resource.setFaultSequenceName(faultSequenceKey);
-            }
-        }
-    }
-
-    /**
-     * To deploy client certificate in given API environment.
-     *
-     * @param api          Relevant API.
-     * @param tenantDomain Tenant domain.
-     * @throws CertificateManagementException Certificate Management Exception.
-     */
-    private void setClientCertificatesToBeAdded(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO)
-            throws CertificateManagementException {
-
-        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
-            return;
-        }
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                .getClientCertificates(tenantId, null, api.getId());
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                GatewayContentDTO clientCertificate = new GatewayContentDTO();
-                clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
-                clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
-            }
-        }
-    }
-
-    /**
-     * To deploy client certificate in given API environment.
-     *
-     * @param identifier  Relevant API ID.
-     * @param tenantDomain Tenant domain.
-     * @throws CertificateManagementException Certificate Management Exception.
-     */
-    private void setClientCertificatesToBeAdded(APIIdentifier identifier, String tenantDomain, GatewayAPIDTO gatewayAPIDTO)
-            throws CertificateManagementException {
-        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
-            return;
-        }
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                .getClientCertificates(tenantId, null, identifier);
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                GatewayContentDTO clientCertificate = new GatewayContentDTO();
-                clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
-                clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
-            }
-        }
-    }
-
     /**
      * To update the database instance with the successfully removed client certificates from teh gateway.
      *
@@ -1385,9 +577,6 @@ public class APIGatewayManager {
      */
     private void updateRemovedClientCertificates(API api, String tenantDomain) {
 
-        if (!CertificateManagerImpl.getInstance().isClientCertificateBasedAuthenticationConfigured()) {
-            return;
-        }
         try {
             CertificateMgtDAO.getInstance().updateRemovedCertificatesFromGateways(api.getId(),
                     APIUtil.getTenantIdFromTenantDomain(tenantDomain));
@@ -2138,6 +1327,13 @@ public class APIGatewayManager {
 
     public void unDeployFromGateway(API api, String tenantDomain) throws APIManagementException {
 
+        updateRemovedClientCertificates(api, tenantDomain);
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
         String apiId = api.getUUID();
         APIIdentifier apiIdentifier = api.getId();
         try {
@@ -2169,19 +1365,6 @@ public class APIGatewayManager {
         }
         sendUnDeploymentEvent(apiProduct, tenantDomain, Collections.emptySet(), associatedAPIs);
 
-    }
-
-    public boolean isAPIDeployed(API api) throws APIManagementException {
-
-        if (saveArtifactsToStorage) {
-            try {
-                return artifactSaver.isAPIPublished(api.getUUID(), "Current");
-
-            } catch (ArtifactSynchronizerException e) {
-                throw new APIManagementException("Error while cehcking existence of API deployed", e);
-            }
-        }
-        return false;
     }
 
     private Set<APIEvent> transformAPIToAPIEvent(Set<API> apiSet) {

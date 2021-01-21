@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -35,10 +36,12 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
@@ -85,6 +88,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         } catch (CertificateManagementException e) {
             log.error("Error while Backup Truststore", e);
         }
+        cleanDeployment(CarbonUtils.getAxis2Repo());
     }
 
     private boolean deployArtifactsAtStartup(String tenantDomain) throws ArtifactSynchronizerException {
@@ -101,34 +105,27 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         return flag;
     }
 
-    private void cleanDeployment(String tenantDomain) throws ArtifactSynchronizerException {
+    private void cleanDeployment(String artifactRepositoryPath) {
 
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                ServiceReferenceHolder.getInstance()
-                        .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
-            inMemoryAPIDeployer.cleanDeployment(tenantDomain);
-        }
+        InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
+        inMemoryAPIDeployer.cleanDeployment(artifactRepositoryPath);
     }
 
     @Override
     public void completedServerStartup() {
 
-        try {
-            new Thread(() -> {
+        new Thread(() -> {
 
-                try {
-                    new EndpointCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
-                            .deployCertificatesAtStartup();
-                } catch (APIManagementException e) {
-                    log.error(e);
-                }
-            }).start();
-            cleanDeployment(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        } catch (ArtifactSynchronizerException e) {
-            log.error(e);
-        }
+            try {
+                new EndpointCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                        .deployCertificatesAtStartup();
+                new GoogleAnalyticsConfigDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).deploy();
+            } catch (APIManagementException e) {
+                log.error(e);
+            }
+        }).start();
+        SubscriptionDataHolder.getInstance()
+                .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveBlockConditionsAndKeyTemplates();
@@ -148,7 +145,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_STARTUP_SYNC
                     .equals(gatewayArtifactSynchronizerProperties.getGatewayStartup())) {
                 try {
-                    cleanDeployment(tenantDomain);
                     deployAPIsInSyncMode(tenantDomain);
                 } catch (ArtifactSynchronizerException e) {
                     log.error("Error in Deploying APIs togateway");
@@ -196,7 +192,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         new Thread(new AsyncAPIDeployment(tenantDomain)).start();
     }
-
 
     private void deployArtifactsInGateway(String tenantDomain) throws ArtifactSynchronizerException {
 
@@ -249,9 +244,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     public void createdConfigurationContext(ConfigurationContext configContext) {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
+
+        cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
         new Thread(() -> {
             try {
                 new EndpointCertificateDeployer(tenantDomain).deployCertificatesAtStartup();
+                new GoogleAnalyticsConfigDeployer(tenantDomain).deploy();
             } catch (APIManagementException e) {
                 log.error(e);
             }
@@ -265,17 +264,13 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         ServiceReferenceHolder.getInstance().removeUnloadedTenant(tenantDomain);
+        SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
     }
 
     @Override
     public void terminatingConfigurationContext(ConfigurationContext configCtx) {
 
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        try {
-            cleanDeployment(tenantDomain);
-        } catch (ArtifactSynchronizerException e) {
-            log.error(e);
-        }
+        cleanDeployment(configCtx.getAxisConfiguration().getRepository().getPath());
     }
 
     class AsyncAPIDeployment implements Runnable {
@@ -291,7 +286,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         public void run() {
 
             try {
-                cleanDeployment(tenantDomain);
                 deployArtifactsInGateway(tenantDomain);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error in Deploying APIs to gateway", e);

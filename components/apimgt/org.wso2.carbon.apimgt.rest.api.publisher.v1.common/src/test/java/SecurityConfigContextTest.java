@@ -16,14 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.apache.axis2.Constants;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.velocity.VelocityContext;
 import org.junit.Assert;
-import org.mockito.Mockito;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -32,6 +30,11 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.EndpointSecurityModel;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.SecurityConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -271,10 +274,11 @@ public class SecurityConfigContextTest {
 
         APIProduct apiProduct = new APIProduct(new APIProductIdentifier("admin", "TestProduct", "1.0.0"));
         apiProduct.setUuid(UUID.randomUUID().toString());
+        String apiid = UUID.randomUUID().toString();
         List<APIProductResource> apiProductResourceList = new ArrayList<>();
         APIProductResource apiProductResource = new APIProductResource();
         apiProductResource.setApiIdentifier(new APIIdentifier("admin_api1_v1"));
-        apiProductResource.setApiId(UUID.randomUUID().toString());
+        apiProductResource.setApiId(apiid);
         Map<String, EndpointSecurity> endpointSecurityMap = new HashMap<>();
         EndpointSecurity endpointSecurity = new EndpointSecurity();
         endpointSecurity.setType("BASIC");
@@ -282,14 +286,16 @@ public class SecurityConfigContextTest {
         endpointSecurity.setPassword("admin123");
         endpointSecurity.setEnabled(true);
         endpointSecurityMap.put("production", endpointSecurity);
-        apiProductResource.setApiId(UUID.randomUUID().toString());
+        apiProductResource.setApiId(apiid);
         apiProductResource.setEndpointSecurityMap(endpointSecurityMap);
         apiProductResourceList.add(apiProductResource);
         apiProduct.setProductResources(apiProductResourceList);
         ConfigContext configcontext = new APIConfigContext(apiProduct);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+        Map<String, APIDTO> apidtoMap = new HashMap<>();
+        apidtoMap.put(apiid, new APIDTO().name("api1").version("v1").provider("admin"));
         SecurityConfigContext securityConfigContext =
-                new SecurityConfigContextWrapper(configcontext, apiProduct, apiManagerConfiguration);
+                new SecurityConfigContextWrapper(configcontext, apiProduct, apiManagerConfiguration,apidtoMap);
         securityConfigContext.validate();
         VelocityContext velocityContext = securityConfigContext.getContext();
         Assert.assertNotNull(velocityContext.get("endpoint_security"));

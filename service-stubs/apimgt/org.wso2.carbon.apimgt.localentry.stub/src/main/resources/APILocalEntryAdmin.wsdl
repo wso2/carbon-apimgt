@@ -2,30 +2,15 @@
     <wsdl:documentation>APILocalEntryAdmin</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
-            <xs:element name="getEntry">
+            <xs:element name="isLocalEntryExists">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="getEntryResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:anyType"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addLocalEntry">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="content" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addLocalEntryResponse">
+            <xs:element name="isLocalEntryExistsResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
@@ -36,7 +21,7 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -47,8 +32,44 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="addLocalEntry">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="content" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addLocalEntryResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEntry">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="key" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getEntryResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="xs:anyType"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
         </xs:schema>
     </wsdl:types>
+    <wsdl:message name="isLocalEntryExistsRequest">
+        <wsdl:part name="parameters" element="ns:isLocalEntryExists"/>
+    </wsdl:message>
+    <wsdl:message name="isLocalEntryExistsResponse">
+        <wsdl:part name="parameters" element="ns:isLocalEntryExistsResponse"/>
+    </wsdl:message>
     <wsdl:message name="getEntryRequest">
         <wsdl:part name="parameters" element="ns:getEntry"/>
     </wsdl:message>
@@ -68,6 +89,10 @@
         <wsdl:part name="parameters" element="ns:deleteLocalEntryResponse"/>
     </wsdl:message>
     <wsdl:portType name="APILocalEntryAdminPortType">
+        <wsdl:operation name="isLocalEntryExists">
+            <wsdl:input message="ns:isLocalEntryExistsRequest" wsaw:Action="urn:isLocalEntryExists"/>
+            <wsdl:output message="ns:isLocalEntryExistsResponse" wsaw:Action="urn:isLocalEntryExistsResponse"/>
+        </wsdl:operation>
         <wsdl:operation name="getEntry">
             <wsdl:input message="ns:getEntryRequest" wsaw:Action="urn:getEntry"/>
             <wsdl:output message="ns:getEntryResponse" wsaw:Action="urn:getEntryResponse"/>
@@ -83,6 +108,15 @@
     </wsdl:portType>
     <wsdl:binding name="APILocalEntryAdminSoap11Binding" type="ns:APILocalEntryAdminPortType">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="isLocalEntryExists">
+            <soap:operation soapAction="urn:isLocalEntryExists" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getEntry">
             <soap:operation soapAction="urn:getEntry" style="document"/>
             <wsdl:input>
@@ -113,6 +147,15 @@
     </wsdl:binding>
     <wsdl:binding name="APILocalEntryAdminSoap12Binding" type="ns:APILocalEntryAdminPortType">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="isLocalEntryExists">
+            <soap12:operation soapAction="urn:isLocalEntryExists" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getEntry">
             <soap12:operation soapAction="urn:getEntry" style="document"/>
             <wsdl:input>
@@ -143,6 +186,15 @@
     </wsdl:binding>
     <wsdl:binding name="APILocalEntryAdminHttpBinding" type="ns:APILocalEntryAdminPortType">
         <http:binding verb="POST"/>
+        <wsdl:operation name="isLocalEntryExists">
+            <http:operation location="isLocalEntryExists"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="getEntry">
             <http:operation location="getEntry"/>
             <wsdl:input>
