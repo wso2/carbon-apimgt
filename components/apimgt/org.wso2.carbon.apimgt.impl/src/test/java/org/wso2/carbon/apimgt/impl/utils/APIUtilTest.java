@@ -114,10 +114,8 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFro
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
-                 GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class,
-                 GenericArtifactManager.class,
-                 APIUtil.class, KeyManagerHolder.class, ApiMgtDAO.class, APIUtil.class, PrivilegedCarbonContext.class})
+@PrepareForTest({LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class,
+                 GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -1997,9 +1995,7 @@ public class APIUtilTest {
         PowerMockito.mockStatic(LogFactory.class);
         Mockito.when(LogFactory.getLog(any(Class.class))).thenReturn(mockLog);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.isPermissionCheckDisabled()).thenReturn(true);
-        Mockito.when(APIUtil.hasPermission(any(), any())).thenCallRealMethod();
+        PowerMockito.stub(PowerMockito.method(APIUtil.class, "isPermissionCheckDisabled")).toReturn(true);
 
         boolean actualResult = APIUtil.hasPermission(userNameWithoutChange, permission);
         Assert.assertTrue(actualResult);
@@ -2021,19 +2017,16 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testHasPermission() throws APIManagementException, UserStoreException {
+    public void testHasPermission() throws Exception {
         int tenantId = 2;
         String userNameWithoutChange = "Drake";
         String permission = APIConstants.Permissions.API_PUBLISH;
         String tenantDomain = "WSO2.com";
         System.setProperty(CARBON_HOME, "");
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.isPermissionCheckDisabled()).thenReturn(false);
-        Mockito
-            .when(APIUtil.getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange))
-            .thenReturn(1);
-        Mockito.when(APIUtil.hasPermission(Mockito.anyString(), Mockito.anyString())).thenCallRealMethod();
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(false).when(APIUtil.class, "isPermissionCheckDisabled");
+        PowerMockito.doReturn(1).when(APIUtil.class, "getValueFromCache",APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(userNameWithoutChange)).thenReturn(tenantDomain);
@@ -2062,9 +2055,7 @@ public class APIUtilTest {
             .mock(org.wso2.carbon.user.api.AuthorizationManager.class);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
 
-        Mockito
-            .when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(true);
+        Mockito.when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
 
         org.wso2.carbon.user.core.UserRealm userRealm2 = Mockito.mock(org.wso2.carbon.user.core.UserRealm.class);
         Mockito.when(ServiceReferenceHolder.getUserRealm()).thenReturn((userRealm2));
@@ -2079,7 +2070,7 @@ public class APIUtilTest {
         Mockito.when(LogFactory.getLog(any(Class.class))).thenReturn(logMock);
 
         boolean expectedResult = APIUtil.hasPermission(userNameWithoutChange, permission);
-        Assert.assertTrue(expectedResult);
+        Assert.assertEquals(true,expectedResult);
     }
 
     @Test
@@ -2145,12 +2136,10 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantID)).thenReturn(tierMap);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_SUB, tenantID);
 
-        Mockito.when(APIUtil.getTiers(tierType, tenantDomain)).thenCallRealMethod();
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
-
         Assert.assertEquals(tierMap, appTierMap);
     }
 
@@ -2174,10 +2163,9 @@ public class APIUtilTest {
 
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_API, tenantID)).thenReturn(tierMap);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_API, tenantID);
 
-        Mockito.when(APIUtil.getTiers(tierType, tenantDomain)).thenCallRealMethod();
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
 
         Assert.assertEquals(tierMap, appTierMap);
@@ -2203,17 +2191,16 @@ public class APIUtilTest {
 
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_APP, tenantID)).thenReturn(tierMap);
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_APP, tenantID);
 
-        Mockito.when(APIUtil.getTiers(tierType, tenantDomain)).thenCallRealMethod();
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
 
         Assert.assertEquals(tierMap, appTierMap);
     }
 
     @Test
-    public void testValidateAPICategoriesWithValidCategories() throws APIManagementException {
+    public void testValidateAPICategoriesWithValidCategories() throws Exception {
         String tenantDomain = "Wso2.com";
         List<APICategory> inputApiCategories = new ArrayList<>();
         List<APICategory> availableApiCategories = new ArrayList<>();
@@ -2228,9 +2215,8 @@ public class APIUtilTest {
         availableApiCategories.add(apiCategory2);
         availableApiCategories.add(apiCategory3);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getAllAPICategoriesOfTenant(tenantDomain)).thenReturn(availableApiCategories);
-        Mockito.when(APIUtil.validateAPICategories(inputApiCategories, tenantDomain)).thenCallRealMethod();
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfTenant", tenantDomain);
 
         Assert.assertTrue("Failed to Validate API categories",
                           APIUtil.validateAPICategories(inputApiCategories, tenantDomain));
@@ -2238,7 +2224,6 @@ public class APIUtilTest {
 
     @Test
     public void testValidateAPICategoriesWithInvalidCategories() throws APIManagementException {
-
         String tenantDomain = "Wso2.com";
         List<APICategory> inputApiCategories = new ArrayList<>();
         List<APICategory> availableApiCategories = new ArrayList<>();
@@ -2262,29 +2247,26 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetListOfRoles() throws APIManagementException {
-
+    public void testGetListOfRoles() throws Exception {
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username)).thenReturn(roles);
-        Mockito.when(APIUtil.getListOfRoles(username)).thenCallRealMethod();
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(roles).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
     }
 
     @Test
-    public void testGetListOfRolesNonSuperTenant() throws APIManagementException, UserStoreException {
+    public void testGetListOfRolesNonSuperTenant() throws Exception {
         int tenantID = 1;
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
         String tenantDomain = "Insta.com";
         String tenantAwareUsername = "Insta_User";
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username)).thenReturn(null);
-        Mockito.when(APIUtil.getListOfRoles(username)).thenCallRealMethod();
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
@@ -2306,19 +2288,20 @@ public class APIUtilTest {
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(userStoreManager.getRoleListOfUser(tenantAwareUsername)).thenReturn(roles);
 
+        PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(),Mockito.any(),Mockito.any());
+
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
     }
 
     @Test
-    public void testGetListOfRolesSuperTenant() throws APIManagementException, UserStoreException {
+    public void testGetListOfRolesSuperTenant() throws Exception {
         String username = "Kelso";
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
         String tenantDomain = "carbon.super";
         String tenantAwareUsername = "Insta_User";
 
-        PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getValueFromCache(APIConstants.API_USER_ROLE_CACHE, username)).thenReturn(null);
-        Mockito.when(APIUtil.getListOfRoles(username)).thenCallRealMethod();
+        PowerMockito.spy(APIUtil.class);
+        PowerMockito.doReturn(null).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
@@ -2329,6 +2312,8 @@ public class APIUtilTest {
 
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(authorizationManager.getRolesOfUser(tenantAwareUsername)).thenReturn(roles);
+
+        PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(),Mockito.any(),Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
     }
