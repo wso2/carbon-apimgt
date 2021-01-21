@@ -444,12 +444,12 @@ public class CommonUtil {
             throws APIImportExportException, IOException {
 
         switch (exportFormat) {
-        case YAML:
-            String fileInYaml = jsonToYaml(fileContent);
-            writeFile(filePath + ImportExportConstants.YAML_EXTENSION, fileInYaml);
-            break;
-        case JSON:
-            writeFile(filePath + ImportExportConstants.JSON_EXTENSION, fileContent);
+            case YAML:
+                String fileInYaml = jsonToYaml(fileContent);
+                writeFile(filePath + ImportExportConstants.YAML_EXTENSION, fileInYaml);
+                break;
+            case JSON:
+                writeFile(filePath + ImportExportConstants.JSON_EXTENSION, fileContent);
         }
     }
 
