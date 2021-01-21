@@ -176,6 +176,12 @@ paths:
         This will provide access to apis in database.
       parameters:
         - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
         - name: context
           in: query
           description: |
@@ -751,6 +757,9 @@ definitions:
   #-----------------------------------------------------
   API:
     properties:
+      uuid:
+        type: string
+        description: UUID of API
       apiId:
         type: integer
       provider:

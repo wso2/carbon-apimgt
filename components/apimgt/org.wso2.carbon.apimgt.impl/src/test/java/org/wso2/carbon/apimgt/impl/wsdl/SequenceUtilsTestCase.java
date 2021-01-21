@@ -150,28 +150,7 @@ public class SequenceUtilsTestCase {
         }
     }
 
-    @Test
-    public void testGetSequenceTemplateConfigContext() throws Exception {
-        String seqType = "in_sequences";
-        String content = "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\""
-                + " value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>";
-        Collection collection = new CollectionImpl();
-        ResourceImpl resource = new ResourceImpl();
-        resource.setName("checkPhoneNumber_post.xml");
-        collection.setChildren(new String[] { INSEQUENCE_RESOURCES + "checkPhoneNumber_post.xml" });
-        Mockito.when(userRegistry.resourceExists(INSEQUENCE_RESOURCES)).thenReturn(true);
-        ConfigContext configContext = Mockito.mock(ConfigContext.class);
-        Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES)).thenReturn(collection);
-        Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES + "checkPhoneNumber_post.xml")).thenReturn(resource);
-        PowerMockito.when(RegistryUtils.decodeBytes(Mockito.any(byte[].class))).thenReturn(content);
-        try {
-            ConfigContext context = SequenceUtils
-                    .getSequenceTemplateConfigContext(userRegistry, INSEQUENCE_RESOURCES, seqType, configContext);
-            Assert.assertNotNull(context);
-        } catch (RegistryException e) {
-            Assert.fail("Failed to get the sequences from the registry");
-        }
-    }
+
 
     @Test
     public void testGetResourceParametersFromSwagger() throws Exception {

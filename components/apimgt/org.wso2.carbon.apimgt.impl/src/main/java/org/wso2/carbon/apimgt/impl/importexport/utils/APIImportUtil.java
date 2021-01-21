@@ -325,12 +325,10 @@ public final class APIImportUtil {
             addEndpointCertificates(pathToArchive, importedApi, apiProvider, tenantId);
             addSOAPToREST(pathToArchive, importedApi, registry);
 
-            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Importing client certificates.");
-                }
-                APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Importing client certificates.");
             }
+            APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
 
             // Change API lifecycle if state transition is required
             Map<String, Boolean> checklistMap = new HashMap<String, Boolean>();

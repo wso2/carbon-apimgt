@@ -21,9 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
-import kotlin.jvm.Throws;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -35,7 +32,6 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,7 +70,6 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -144,7 +139,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
-import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
@@ -155,7 +149,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
-import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
@@ -192,12 +185,10 @@ import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.common.util.CheckListItemBean;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -216,7 +207,6 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -239,13 +229,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -266,7 +254,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
-import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -3297,13 +3284,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private Map<String, String> publishToGateway(API api) throws APIManagementException {
-        Map<String, String> failedEnvironment;
-        String tenantDomain = null;
-        APITemplateBuilder builder = null;
-
-        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
-            api.setGraphQLSchema(getGraphqlSchema(api.getId()));
-        }
 
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
@@ -3311,41 +3291,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-        //update the swagger definition with content-aware property for policies with bandwidth type.
-        List<String> policyNames = apiMgtDAO
-                .getNamesOfTierWithBandwidthQuotaType(APIUtil.getTenantIdFromTenantDomain(tenantDomain));
-        String swagger;
-        if (api.getSwaggerDefinition() == null) { // If definition is not in the API object
-            if (api.getUuid() != null) {
-                swagger = getOpenAPIDefinition(api.getUuid(), tenantDomain); 
-            } else {
-                swagger = getOpenAPIDefinition(api.getId()); // TODO this needs to be changed to uuid based one
-            }
-        } else {
-            swagger = api.getSwaggerDefinition();
-        }
-        String definition = OASParserUtil.getOASDefinitionWithTierContentAwareProperty(swagger,
-                policyNames, api.getApiLevelPolicy());
-        api.setSwaggerDefinition(definition);
-        try {
-            builder = getAPITemplateBuilder(api);
-        } catch (Exception e) {
-            handleException("Error while publishing to Gateway ", e);
-        }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         gatewayManager.deployToGateway(api, tenantDomain);
-        failedEnvironment = gatewayManager.publishToGateway(api, builder, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " published to gateway";
             log.debug(logMessage);
         }
-        return failedEnvironment;
+        return Collections.emptyMap();
     }
 
     private Map<String, String> publishToGateway(APIProduct apiProduct) throws APIManagementException {
-        Map<String, String> failedEnvironment;
+
         String tenantDomain = null;
         APITemplateBuilder builder = null;
         APIProductIdentifier apiProductId = apiProduct.getId();
@@ -3357,18 +3315,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-        if (apiProduct.getDefinition() == null) {
-            apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getUuid(), tenantDomain));
-        }
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.setProductResourceSequences(this, apiProduct);
-
-        try {
-            builder = getAPITemplateBuilder(apiProduct);
-        } catch (Exception e) {
-            handleException("Error while publishing to Gateway ", e);
-        }
 
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
         List<APIIdentifier> apisWithoutEndpoints = new ArrayList<>();
@@ -3383,17 +3331,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (!apisWithoutEndpoints.isEmpty()) {
             throw new APIManagementException("Cannot publish API Product: " + apiProductId + " to gateway",
-            ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
-            apisWithoutEndpoints.toString()));
+                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
+                            apisWithoutEndpoints.toString()));
         }
         gatewayManager.deployToGateway(apiProduct, tenantDomain);
-        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
                     + " published to gateway";
             log.debug(logMessage);
         }
-        return failedEnvironment;
+        return new HashMap<>();
     }
 
 
@@ -3744,320 +3691,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return gatewayManager.isAPIPublished(api, tenantDomain);
     }
 
-    private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
-        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
-        Map<String, String> latencyStatsProperties = new HashMap<String, String>();
-        latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
-        vtb.addHandler(
-                "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler",
-                latencyStatsProperties);
-        Map<String, String> corsProperties = new HashMap<String, String>();
-        corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
-
-        //Get authorization header from the API object or from the tenant registry
-        String authorizationHeader;
-        if (!StringUtils.isBlank(api.getAuthorizationHeader())) {
-            authorizationHeader = api.getAuthorizationHeader();
-        } else {
-            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
-            // in tenant registry
-            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
-        }
-        if (!StringUtils.isBlank(authorizationHeader)) {
-            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        }
-
-        if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
-            CORSConfiguration corsConfiguration = api.getCorsConfiguration();
-            if (corsConfiguration.getAccessControlAllowHeaders() != null) {
-                StringBuilder allowHeaders = new StringBuilder();
-                for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
-                    allowHeaders.append(header).append(',');
-                }
-                if (allowHeaders.length() != 0) {
-                    allowHeaders.deleteCharAt(allowHeaders.length() - 1);
-                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
-                }
-            }
-            if (corsConfiguration.getAccessControlAllowOrigins() != null) {
-                StringBuilder allowOrigins = new StringBuilder();
-                for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
-                    allowOrigins.append(origin).append(',');
-                }
-                if (allowOrigins.length() != 0) {
-                    allowOrigins.deleteCharAt(allowOrigins.length() - 1);
-                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
-                }
-            }
-            if (corsConfiguration.getAccessControlAllowMethods() != null) {
-                StringBuilder allowedMethods = new StringBuilder();
-                for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
-                    allowedMethods.append(methods).append(',');
-                }
-                if (allowedMethods.length() != 0) {
-                    allowedMethods.deleteCharAt(allowedMethods.length() - 1);
-                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
-                }
-            }
-            if (corsConfiguration.isAccessControlAllowCredentials()) {
-                corsProperties.put(APIConstants.CORSHeaders.ALLOW_CREDENTIALS_HANDLER_VALUE,
-                        String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
-            }
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
-                    , corsProperties);
-        } else if (APIUtil.isCORSEnabled()) {
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
-                    , corsProperties);
-        }
-        if (APIConstants.PROTOTYPED.equals(api.getStatus())) {
-            String extensionHandlerPosition = getExtensionHandlerPosition();
-            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
-                vtb.addHandlerPriority(
-                        "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap(), 0);
-            } else {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap());
-            }
-        }
-        if(!APIConstants.PROTOTYPED.equals(api.getStatus())) {
-
-            List<ClientCertificateDTO> clientCertificateDTOS = null;
-            if (isClientCertificateBasedAuthenticationConfigured()) {
-                clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, api.getId());
-            }
-            Map<String, String> clientCertificateObject = null;
-            CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-            if (clientCertificateDTOS != null) {
-                clientCertificateObject = new HashMap<>();
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                    clientCertificateObject.put(certificateMgtUtils
-                                    .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
-                            clientCertificateDTO.getTierName());
-                }
-            }
-
-            Map<String, String> authProperties = new HashMap<>();
-            if (!StringUtils.isBlank(authorizationHeader)) {
-                authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
-            }
-            String apiSecurity = api.getApiSecurity();
-            String apiLevelPolicy = api.getApiLevelPolicy();
-            authProperties.put(APIConstants.API_SECURITY, apiSecurity);
-            authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
-            if (clientCertificateObject != null) {
-                authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
-            }
-            //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
-            String removeHeaderFromOutMessage = APIUtil
-                    .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
-            if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
-                authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
-            } else {
-                authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
-                        APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
-            }
-            authProperties.put(APIConstants.API_UUID, api.getUUID());
-            authProperties.put("keyManagers", String.join(",", api.getKeyManagers()));
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                Map<String, String> apiUUIDProperty = new HashMap<String, String>();
-                apiUUIDProperty.put(APIConstants.API_UUID, api.getUUID());
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
-                        apiUUIDProperty);
-            }
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
-                    authProperties);
-
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler", Collections.<String, String>emptyMap());
-            }
-
-            Map<String, String> properties = new HashMap<String, String>();
-
-            if (api.getProductionMaxTps() != null) {
-                properties.put("productionMaxCount", api.getProductionMaxTps());
-            }
-
-            if (api.getSandboxMaxTps() != null) {
-                properties.put("sandboxMaxCount", api.getSandboxMaxTps());
-            }
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                    , properties);
-
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
-                    , Collections.<String, String>emptyMap());
-
-            properties = new HashMap<String, String>();
-            properties.put("configKey", APIConstants.GA_CONF_KEY);
-            vtb.addHandler(
-                    "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
-                    , properties);
-
-            String extensionHandlerPosition = getExtensionHandlerPosition();
-            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
-                vtb.addHandlerPriority(
-                        "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap(), 0);
-            } else {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap());
-            }
-
-
-        }
-
-        return vtb;
-    }
-
-
-    private APITemplateBuilder getAPITemplateBuilder(APIProduct apiProduct) throws APIManagementException {
-        APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct);
-        Map<String, String> latencyStatsProperties = new HashMap<String, String>();
-        latencyStatsProperties.put(APIConstants.API_UUID, apiProduct.getUuid());
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler",
-                latencyStatsProperties);
-
-        Map<String, String> corsProperties = new HashMap<>();
-        corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE,
-                APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
-
-        //Get authorization header from the API object or from the tenant registry
-        String authorizationHeader;
-        if (!StringUtils.isBlank(apiProduct.getAuthorizationHeader())) {
-            authorizationHeader = apiProduct.getAuthorizationHeader();
-        } else {
-            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
-            // in tenant registry
-            authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
-        }
-        if (!StringUtils.isBlank(authorizationHeader)) {
-            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        }
-
-        if (apiProduct.getCorsConfiguration() != null &&
-                apiProduct.getCorsConfiguration().isCorsConfigurationEnabled()) {
-            CORSConfiguration corsConfiguration = apiProduct.getCorsConfiguration();
-            if (corsConfiguration.getAccessControlAllowHeaders() != null) {
-                StringBuilder allowHeaders = new StringBuilder();
-                for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
-                    allowHeaders.append(header).append(',');
-                }
-                if (allowHeaders.length() != 0) {
-                    allowHeaders.deleteCharAt(allowHeaders.length() - 1);
-                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
-                }
-            }
-            if (corsConfiguration.getAccessControlAllowOrigins() != null) {
-                StringBuilder allowOrigins = new StringBuilder();
-                for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
-                    allowOrigins.append(origin).append(',');
-                }
-                if (allowOrigins.length() != 0) {
-                    allowOrigins.deleteCharAt(allowOrigins.length() - 1);
-                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
-                }
-            }
-            if (corsConfiguration.getAccessControlAllowMethods() != null) {
-                StringBuilder allowedMethods = new StringBuilder();
-                for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
-                    allowedMethods.append(methods).append(',');
-                }
-                if (allowedMethods.length() != 0) {
-                    allowedMethods.deleteCharAt(allowedMethods.length() - 1);
-                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
-                }
-            }
-            if (corsConfiguration.isAccessControlAllowCredentials()) {
-                corsProperties.put(APIConstants.CORSHeaders.ALLOW_CREDENTIALS_HANDLER_VALUE,
-                        String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
-            }
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
-                    , corsProperties);
-        } else if (APIUtil.isCORSEnabled()) {
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
-                    , corsProperties);
-        }
-
-        APIIdentifier apiProductIdentifier = new APIIdentifier(apiProduct.getId().getProviderName(),
-                apiProduct.getId().getName(), apiProduct.getId().getVersion());
-
-        List<ClientCertificateDTO> clientCertificateDTOS = null;
-        if (isClientCertificateBasedAuthenticationConfigured()) {
-            clientCertificateDTOS = certificateManager.searchClientCertificates(tenantId, null, apiProductIdentifier);
-        }
-        Map<String, String> clientCertificateObject = null;
-        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-        if (clientCertificateDTOS != null) {
-            clientCertificateObject = new HashMap<>();
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                clientCertificateObject.put(certificateMgtUtils
-                                .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
-                        clientCertificateDTO.getTierName());
-            }
-        }
-
-        Map<String, String> authProperties = new HashMap<String, String>();
-        if (!StringUtils.isBlank(authorizationHeader)) {
-            authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        }
-        String apiSecurity = apiProduct.getApiSecurity();
-        String apiLevelPolicy = apiProduct.getProductLevelPolicy();
-        authProperties.put(APIConstants.API_SECURITY, apiSecurity);
-        authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
-        if (clientCertificateObject != null) {
-            authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
-        }
-
-        //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
-        String removeHeaderFromOutMessage = APIUtil
-                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
-        if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
-            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
-        } else {
-            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
-                    APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
-        }
-
-        authProperties.put("apiType", APIConstants.ApiTypes.PRODUCT_API.name());
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
-                authProperties);
-        Map<String, String> properties = new HashMap<String, String>();
-
-        if (apiProduct.getProductionMaxTps() != null) {
-            properties.put("productionMaxCount", apiProduct.getProductionMaxTps());
-        }
-
-        if (apiProduct.getSandboxMaxTps() != null) {
-            properties.put("sandboxMaxCount", apiProduct.getSandboxMaxTps());
-        }
-
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                , properties);
-
-
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
-                , Collections.<String, String>emptyMap());
-
-        properties = new HashMap<String, String>();
-        properties.put("configKey", APIConstants.GA_CONF_KEY);
-        vtb.addHandler(
-                "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
-                , properties);
-
-        String extensionHandlerPosition = getExtensionHandlerPosition();
-        if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
-            vtb.addHandlerPriority(
-                    "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                    Collections.<String, String>emptyMap(), 0);
-        } else {
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                    Collections.<String, String>emptyMap());
-        }
-        return vtb;
-    }
-
     public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value) throws APIManagementException {
         try {
             String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
@@ -4138,10 +3771,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
         
-        if (APIConstants.APITransportType.WS.toString().equals(existingAPI.getType())){
-            APIGatewayManager.getInstance().createNewWebsocketApiVersion(existingAPI);
-        }
-        
+
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         
@@ -4308,9 +3938,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String contextTemplate = artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE);
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, contextTemplate.replace("{version}", newVersion));
 
-            if ("true".equalsIgnoreCase(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSOCKET))) {
-                APIGatewayManager.getInstance().createNewWebsocketApiVersion(artifact, api);
-            }
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             //Attach the API lifecycle
@@ -5631,32 +5258,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return apiList;
-    }
-
-    /**
-     * Retrieves Extension Handler Position from the tenant-config.json
-     *
-     * @return ExtensionHandlerPosition
-     * @throws APIManagementException
-     */
-    private String getExtensionHandlerPosition() throws APIManagementException {
-        String extensionHandlerPosition = null;
-        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-        try {
-            String content = getTenantConfigContent();
-            if (content != null) {
-                JSONParser jsonParser = new JSONParser();
-                JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-                extensionHandlerPosition = (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
-            }
-        } catch (RegistryException e) {
-            handleException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (UserStoreException e) {
-            handleException("Couldn't read tenant configuration from tenant registry", e);
-        } catch (ParseException e) {
-            handleException("Couldn't parse tenant configuration for reading extension handler position", e);
-        }
-        return extensionHandlerPosition;
     }
 
     /**
@@ -8508,10 +8109,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return certificateManager.isConfigured();
     }
 
-    @Override
-    public boolean isClientCertificateBasedAuthenticationConfigured() {
-        return certificateManager.isClientCertificateBasedAuthenticationConfigured();
-    }
 
     @Override
     public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
@@ -8704,37 +8301,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
     }
 
-    protected Map<String, String> publishToGateway(API api, String tenantDomain) throws APIManagementException {
-        APITemplateBuilder builder = null;
-        String definition = "";
-
-        try {
-            builder = getAPITemplateBuilder(api);
-        } catch (Exception e) {
-            handleException("Error while publishing to Gateway ", e);
-        }
-
-        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-            api.setGraphQLSchema(getGraphqlSchema(api.getId()));
-            api.setType(APIConstants.GRAPHQL_API);
-        }
-        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.deployToGateway(api, tenantDomain);
-        return gatewayManager.publishToGateway(api, builder, tenantDomain);
-    }
-
     protected Map<String, String> removeFromGateway(API api, String tenantDomain) throws APIManagementException {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         gatewayManager.unDeployFromGateway(api,tenantDomain);
-        return gatewayManager.removeFromGateway(api, tenantDomain);
+        return Collections.emptyMap();
     }
 
     protected Map<String, String> removeFromGateway(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
         gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs);
-        return gatewayManager.removeFromGateway(apiProduct, tenantDomain, associatedAPIs);
+        return Collections.emptyMap();
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {

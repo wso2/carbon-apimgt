@@ -1,15 +1,16 @@
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CertificateDataHolder {
+public class DataHolder {
 
-    private static final CertificateDataHolder Instance = new CertificateDataHolder();
+    private static final DataHolder Instance = new DataHolder();
     private Map<String, List<String>> apiToCertificatesMap = new HashMap();
 
-    private CertificateDataHolder() {
+    private DataHolder() {
 
     }
 
@@ -23,7 +24,7 @@ public class CertificateDataHolder {
         this.apiToCertificatesMap = apiToCertificatesMap;
     }
 
-    public static CertificateDataHolder getInstance() {
+    public static DataHolder getInstance() {
 
         return Instance;
     }
@@ -34,6 +35,7 @@ public class CertificateDataHolder {
     }
 
     public List<String> getCertificateAliasListForAPI(String apiId) {
-       return apiToCertificatesMap.get(apiId);
+
+        return apiToCertificatesMap.getOrDefault(apiId, Collections.emptyList());
     }
 }

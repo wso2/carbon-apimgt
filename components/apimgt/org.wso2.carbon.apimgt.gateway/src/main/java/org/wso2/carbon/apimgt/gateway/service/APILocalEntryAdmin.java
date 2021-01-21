@@ -39,6 +39,7 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @throws AxisFault
      */
     public boolean addLocalEntry(String content, String tenantDomain) throws AxisFault {
+
         LocalEntryServiceProxy localEntryServiceProxy = getLocalEntryAdminClient(tenantDomain);
         return localEntryServiceProxy.addLocalEntry(content);
     }
@@ -65,6 +66,20 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
     public Object getEntry(String key, String tenantDomain) throws AxisFault {
         LocalEntryServiceProxy localEntryServiceProxy = getLocalEntryAdminClient(tenantDomain);
         return localEntryServiceProxy.getEntry(key);
+    }
+
+    /**
+     *
+     * LocalEntry Exists in Gateway.
+     * @param key localentry key
+     * @param tenantDomain tenantDomain
+     * @return true if exists.
+     * @throws AxisFault
+     */
+    public boolean isLocalEntryExists(String key, String tenantDomain) throws AxisFault {
+
+        LocalEntryServiceProxy localEntryServiceProxy = getLocalEntryAdminClient(tenantDomain);
+        return localEntryServiceProxy.isEntryExists(key);
     }
 
     /**
