@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.utils;
 
-import javafx.scene.chart.Axis;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;

@@ -20,32 +20,36 @@ package org.wso2.carbon.apimgt.gateway;
 
 import com.google.gson.Gson;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.description.AxisService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseConstants;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.gateway.internal.CertificateDataHolder;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -287,21 +291,47 @@ public class InMemoryAPIDeployer {
                         GatewayUtils
                                 .addStringToList(gatewayEvent.getApiId(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
+                DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getApiId());
             }
         } catch (AxisFault axisFault) {
             throw new ArtifactSynchronizerException("Error while unDeploying api ", axisFault);
         }
-
     }
 
-    public void cleanDeployment(String tenantDomain) throws ArtifactSynchronizerException {
+    public void cleanDeployment(String artifactRepositoryPath) {
 
-        if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            try {
-                APIGatewayAdminClient apiGatewayAdmin = new APIGatewayAdminClient();
-                apiGatewayAdmin.cleanDeployment(tenantDomain);
-            } catch (AxisFault axisFault) {
-                throw new ArtifactSynchronizerException("Error while running cleanup", axisFault);
+        File artifactRepoPath =
+                Paths.get(artifactRepositoryPath, SynapseConstants.SYNAPSE_CONFIGS, SynapseConstants.DEFAULT_DIR)
+                        .toFile();
+        if (artifactRepoPath.exists() && artifactRepoPath.isDirectory()) {
+            GatewayCleanupSkipList gatewayCleanupSkipList =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getGatewayCleanupSkipList();
+            File apiPath = Paths.get(artifactRepoPath.getAbsolutePath(), "api").toFile();
+            if (apiPath.exists() && apiPath.isDirectory()) {
+                clean(apiPath, gatewayCleanupSkipList.getApis());
+            }
+            File localEntryPath = Paths.get(artifactRepoPath.getAbsolutePath(), "local-entries").toFile();
+            if (localEntryPath.exists() && localEntryPath.isDirectory()) {
+                clean(localEntryPath, gatewayCleanupSkipList.getLocalEntries());
+            }
+            File endpointPath = Paths.get(artifactRepoPath.getAbsolutePath(), "endpoints").toFile();
+            if (endpointPath.exists() && endpointPath.isDirectory()) {
+                clean(endpointPath, gatewayCleanupSkipList.getEndpoints());
+            }
+            File sequencesPath = Paths.get(artifactRepoPath.getAbsolutePath(), "sequences").toFile();
+            if (sequencesPath.exists() && sequencesPath.isDirectory()) {
+                clean(sequencesPath, gatewayCleanupSkipList.getSequences());
+            }
+        }
+    }
+
+    private void clean(File artifactRepoPath, Set<String> skippedList) {
+
+        if (artifactRepoPath != null && artifactRepoPath.isDirectory()) {
+            for (File file : Objects.requireNonNull(artifactRepoPath.listFiles())) {
+                if (!skippedList.contains(file.getName())) {
+                    file.delete();
+                }
             }
         }
     }
@@ -316,7 +346,7 @@ public class InMemoryAPIDeployer {
                     aliasList.add(gatewayContentDTO.getName());
                 }
             }
-            CertificateDataHolder.getInstance().addApiToAliasList(apiId, aliasList);
+            DataHolder.getInstance().addApiToAliasList(apiId, aliasList);
         }
     }
 
@@ -325,7 +355,7 @@ public class InMemoryAPIDeployer {
         if (gatewayDTO != null) {
             if (StringUtils.isNotEmpty(gatewayDTO.getApiId())) {
                 List<String> certificateAliasListForAPI =
-                        CertificateDataHolder.getInstance().getCertificateAliasListForAPI(gatewayDTO.getApiId());
+                        DataHolder.getInstance().getCertificateAliasListForAPI(gatewayDTO.getApiId());
                 gatewayDTO.setClientCertificatesToBeRemove(certificateAliasListForAPI.toArray(new String[0]));
             }
         }

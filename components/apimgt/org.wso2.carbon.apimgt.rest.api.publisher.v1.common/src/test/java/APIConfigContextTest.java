@@ -16,23 +16,21 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
 
-public class JwtConfigContextTest {
-
+public class APIConfigContextTest {
     @Test
-    public void testJwtConfigContext() throws Exception {
+    public void testGetContext() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
-        api.setStatus(APIConstants.CREATED);
+        api.setStatus(APIConstants.BLOCKED);
         api.setContextTemplate("/");
-        ConfigContext configcontext = new APIConfigContext(api);
-        JwtConfigContext jwtConfigContext = new JwtConfigContext(configcontext);
-        Assert.assertNotNull(jwtConfigContext.getContext());
+        APIConfigContext configContext = new APIConfigContext(api);
+        boolean isBlocked = (Boolean) configContext.getContext().get("apiIsBlocked");
+        Assert.assertTrue(isBlocked);
     }
 }

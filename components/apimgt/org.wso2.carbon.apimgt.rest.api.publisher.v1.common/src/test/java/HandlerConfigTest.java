@@ -16,10 +16,9 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.HandlerConfig;
 
 import java.util.HashMap;
 import java.util.Map;

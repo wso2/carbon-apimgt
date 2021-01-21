@@ -206,6 +206,12 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
           "name" : "context",
           "in" : "query",
           "description" : "**Search condition**.\n context of the api\n",
@@ -599,33 +605,27 @@
         }
       }
     },
-    "/runtime-artifacts" : {
+    "/ga-config" : {
       "get" : {
         "tags" : [ "Retrieving Runtime artifacts" ],
-        "summary" : "Get all the runtime artifacts for a given API UUID and gateway label",
+        "summary" : "Get Google analytics config related to tenant.",
         "description" : "This will provide access to runtime artifacts in database.\n",
         "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
           "name" : "apiId",
           "in" : "query",
           "description" : "**Search condition**.\n  Api ID\n",
           "required" : false,
           "type" : "string"
-        }, {
-          "name" : "gatewayLabel",
-          "in" : "query",
-          "description" : "**Search condition**.\n label associated with the APIs\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "type",
-          "in" : "query",
-          "description" : "**Search condition**.\n type of gateway\n",
-          "required" : false,
-          "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "List of runtime Artifacts"
+            "description" : "google analytics configuration"
           },
           "default" : {
             "description" : "Unexpected error",
@@ -950,6 +950,10 @@
     },
     "API" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string",
+          "description" : "UUID of API"
+        },
         "apiId" : {
           "type" : "integer"
         },

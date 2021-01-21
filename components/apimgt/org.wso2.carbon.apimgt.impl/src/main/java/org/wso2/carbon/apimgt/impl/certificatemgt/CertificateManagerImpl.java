@@ -333,12 +333,6 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public boolean isClientCertificateBasedAuthenticationConfigured() {
-
-        return true;
-    }
-
-    @Override
     public List<CertificateMetadataDTO> getCertificates(String endpoint, int tenantId) {
 
         List<CertificateMetadataDTO> certificateMetadataList = null;

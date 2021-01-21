@@ -14,11 +14,14 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.SecurityConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+
+import java.util.Map;
 
 /**
  * Wrapper class for SecurityConfigContext
@@ -29,16 +32,21 @@ public class SecurityConfigContextWrapper extends SecurityConfigContext {
 
     public SecurityConfigContextWrapper(ConfigContext context, API api,
                                         APIManagerConfiguration apiManagerConfiguration) {
+
         super(context, api);
         this.apiManagerConfiguration = apiManagerConfiguration;
     }
 
     public SecurityConfigContextWrapper(ConfigContext context, APIProduct apiProduct,
-                                        APIManagerConfiguration apiManagerConfiguration) {
-        super(context, apiProduct);
+                                        APIManagerConfiguration apiManagerConfiguration,
+                                        Map<String, APIDTO> associatedApiMap) {
+
+        super(context, apiProduct, associatedApiMap);
         this.apiManagerConfiguration = apiManagerConfiguration;
     }
+
     protected APIManagerConfiguration getApiManagerConfiguration() {
+
         return apiManagerConfiguration;
     }
 }

@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
@@ -268,6 +270,14 @@ public class GatewayJMSMessageListener implements MessageListener {
                         PrivilegedCarbonContext.endTenantFlow();
                     }
                 }
+            }
+        } else if (EventType.GACONFIG_UPDATE.toString().equals(eventType)) {
+            GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
+                    new Gson().fromJson(eventJson, GoogleAnalyticsConfigEvent.class);
+            try {
+                new GoogleAnalyticsConfigDeployer(googleAnalyticsConfigEvent.getTenantDomain()).deploy();
+            } catch (APIManagementException e) {
+                log.error(e);
             }
         }
     }

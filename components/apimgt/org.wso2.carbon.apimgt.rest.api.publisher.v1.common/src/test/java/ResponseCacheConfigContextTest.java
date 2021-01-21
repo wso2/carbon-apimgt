@@ -16,34 +16,31 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.template;
-
-import org.apache.axis2.Constants;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ResponseCacheConfigContext;
 
-public class TransportConfigContextTest {
+public class ResponseCacheConfigContextTest {
 
     @Test
-    public void testTransportConfigContext() throws Exception {
-
+    public void testResponseCacheConfigContext() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
-        api.setTransports(Constants.TRANSPORT_HTTP);
+        api.setResponseCache(APIConstants.DISABLED);
         ConfigContext configcontext = new APIConfigContext(api);
-        TransportConfigContext transportConfigContext = new TransportConfigContext(configcontext, api);
-        transportConfigContext.validate();
-        Assert.assertTrue(Constants.TRANSPORT_HTTP.equalsIgnoreCase
-                (transportConfigContext.getContext().get("transport").toString()));
-        api.setTransports(Constants.TRANSPORT_HTTP + "," + Constants.TRANSPORT_HTTPS);
-        configcontext = new APIConfigContext(api);
-        transportConfigContext = new TransportConfigContext(configcontext, api);
-        Assert.assertTrue(StringUtils.EMPTY.equalsIgnoreCase
-                (transportConfigContext.getContext().get("transport").toString()));
+        ResponseCacheConfigContext responseCacheConfigContext = new ResponseCacheConfigContext(configcontext, api);
+        Assert.assertFalse((Boolean) responseCacheConfigContext.getContext().get("responseCacheEnabled"));
+
+        api.setResponseCache(APIConstants.ENABLED);
+        api.setCacheTimeout(100);
+        responseCacheConfigContext = new ResponseCacheConfigContext(configcontext, api);
+        Assert.assertTrue((Boolean) responseCacheConfigContext.getContext().get("responseCacheEnabled"));
+        Assert.assertEquals(100, responseCacheConfigContext.getContext().get("responseCacheTimeOut"));
     }
 }

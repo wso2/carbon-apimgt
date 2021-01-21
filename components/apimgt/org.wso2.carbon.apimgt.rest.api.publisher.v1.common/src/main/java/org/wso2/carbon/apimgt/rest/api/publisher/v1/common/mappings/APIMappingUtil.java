@@ -339,6 +339,13 @@ public class APIMappingUtil {
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, model, provider);
+        if (dto.getKeyManagers() instanceof List) {
+            model.setKeyManagers((List<String>) dto.getKeyManagers());
+        } else if (dto.getKeyManagers() == null) {
+            model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        } else {
+            throw new APIManagementException("KeyManagers value need to be an array");
+        }
 
         return model;
     }

@@ -596,6 +596,7 @@ public final class APIConstants {
     public static final String DELEM_UNDERSCORE = "_";
     public static final String CHAR_ASTERIX = "*";
     public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
+    public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
 
     public static class TokenStatus {
 
@@ -2383,7 +2384,8 @@ public final class APIConstants {
         POLICY,
         SUBSCRIPTIONS,
         SCOPE,
-        CERTIFICATE
+        CERTIFICATE,
+        GA_CONFIG
     }
 
     // Supported Event Types
@@ -2409,7 +2411,8 @@ public final class APIConstants {
         SCOPE_UPDATE,
         SCOPE_DELETE,
         ENDPOINT_CERTIFICATE_ADD,
-        ENDPOINT_CERTIFICATE_REMOVE
+        ENDPOINT_CERTIFICATE_REMOVE,
+        GACONFIG_UPDATE
     }
 
     public static class GatewayArtifactSynchronizer {

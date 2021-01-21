@@ -682,7 +682,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
             for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                 if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                    if (!APIConstants.GA_CONF_KEY.equals(localEntry.getName()) && gatewayAPIDTO.isOverride()) {
+                    if (gatewayAPIDTO.isOverride()) {
                         localEntryServiceProxy.deleteEntry(localEntry.getName());
                         localEntryServiceProxy.addLocalEntry(localEntry.getContent());
                     }
@@ -917,59 +917,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
         unDeployAPI(certificateManager, sequenceAdminServiceProxy, restapiAdminServiceProxy, localEntryServiceProxy,
                 endpointAdminServiceProxy, gatewayAPIDTO, mediationSecurityAdminServiceProxy);
-        return true;
-    }
-
-    public boolean cleanDeployment(String tenantDomain) throws AxisFault {
-
-        RESTAPIAdminServiceProxy restapiAdminServiceProxy = getRestapiAdminClient(tenantDomain);
-        SequenceAdminServiceProxy sequenceAdminServiceProxy = getSequenceAdminServiceClient(tenantDomain);
-        LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
-        EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
-        GatewayCleanupSkipList gatewayCleanupSkipList =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getGatewayCleanupSkipList();
-        if (gatewayCleanupSkipList != null) {
-
-            boolean tenantFlowStarted = false;
-            try {
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                    tenantFlowStarted = true;
-
-                }
-                Set<String> apis = new HashSet<>(gatewayCleanupSkipList.getApis());
-                List<String> deployedApis = new ArrayList(Arrays.asList(restapiAdminServiceProxy.getapis()));
-                deployedApis.removeAll(apis);
-                for (String api : deployedApis) {
-                    restapiAdminServiceProxy.deleteApi(api);
-                }
-                Set<String> endpoints = gatewayCleanupSkipList.getEndpoints();
-                List<String> deployedEndpoints = new ArrayList(Arrays.asList(endpointAdminServiceProxy.getEndpoints()));
-                deployedEndpoints.removeAll(endpoints);
-                for (String endpoint : deployedEndpoints) {
-                    endpointAdminServiceProxy.deleteEndpoint(endpoint);
-                }
-                Set<String> sequences = gatewayCleanupSkipList.getSequences();
-                Set<String> deployedSequences = sequenceAdminServiceProxy.getSequences();
-                deployedSequences.removeAll(sequences);
-                for (String sequence : deployedSequences) {
-                    sequenceAdminServiceProxy.deleteSequence(sequence);
-                }
-                Set<String> localEntries = gatewayCleanupSkipList.getLocalEntries();
-                List<String> deployedLocalEntries =
-                        new ArrayList(Arrays.asList(localEntryServiceProxy.getLocalEntries()));
-                deployedLocalEntries.removeAll(localEntries);
-                for (String localEntry : deployedLocalEntries) {
-                    localEntryServiceProxy.deleteEntry(localEntry);
-                }
-
-            } finally {
-                if (tenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }
-        }
         return true;
     }
 }

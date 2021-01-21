@@ -16,28 +16,29 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.impl.template;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.HandlerConfig;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.HandlerConfigContex;
 
-public class TemplateUtilContextTest {
+import java.util.ArrayList;
+import java.util.List;
+
+public class HandlerConfigContextTest {
 
     @Test
-    public void testTemplateUtilContext() throws Exception {
+    public void testHandlerConfigContex() throws Exception {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         ConfigContext configcontext = new APIConfigContext(api);
-        TemplateUtilContext templateUtilContext = new TemplateUtilContext(configcontext);
-        String xmlSampleText = "<data>TemplateUtilContextTest Class</data>";
-        String xmlEscapedText = "&lt;data&gt;TemplateUtilContextTest Class&lt;/data&gt;";
-        String result = templateUtilContext.escapeXml(xmlSampleText);
-        Assert.assertTrue("Failed to escape XML tags in the provided string : " + xmlSampleText,
-                xmlEscapedText.equalsIgnoreCase(result));
-        Assert.assertNotNull(templateUtilContext.getContext().get("util"));
+        List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
+        HandlerConfigContex handlerConfigContex = new HandlerConfigContex(configcontext, handlers);
+        Assert.assertNotNull(handlerConfigContex.getContext().get("handlers"));
     }
 }

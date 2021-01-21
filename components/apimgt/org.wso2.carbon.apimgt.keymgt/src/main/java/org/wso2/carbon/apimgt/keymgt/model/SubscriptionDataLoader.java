@@ -131,6 +131,15 @@ public interface SubscriptionDataLoader {
     /**
      * Retrieve {@link API} object.
      *
+     * @param uuid Version of the API
+     * @return An {@link API}
+     * @throws DataLoadingException If any error
+     */
+    public API getApi(String uuid) throws DataLoadingException;
+
+    /**
+     * Retrieve {@link API} object.
+     *
      * @param context context of the API
      * @param version Version of the API
      * @param revisionUUID Revision UUID of the API
