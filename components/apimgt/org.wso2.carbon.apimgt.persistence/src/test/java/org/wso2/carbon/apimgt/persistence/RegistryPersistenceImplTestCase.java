@@ -79,8 +79,7 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(context.getTenantDomain()).thenReturn(SUPER_TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(SUPER_TENANT_ID);
         
-        String username = "admin";
-        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(username, tenantManager,
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(tenantManager,
                 registryService);
         // return null artifact because we are not testing artifact related params. this is only to get the registry obj
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class); 
@@ -92,9 +91,8 @@ public class RegistryPersistenceImplTestCase {
         // trigger registry object creation
         apiPersistenceInstance.getDevPortalAPI(new Organization(SUPER_TENANT_DOMAIN), "xxxxx");
         Mockito.verify(registryService, times(1)).getGovernanceUserRegistry("admin", SUPER_TENANT_ID);
-        
-        username = "wso2.anonymous.user";
-        apiPersistenceInstance = new RegistryPersistenceImplWrapper(username, tenantManager,
+
+        apiPersistenceInstance = new RegistryPersistenceImplWrapper(tenantManager,
                 registryService);
         // trigger registry object creation
         apiPersistenceInstance.getDevPortalAPI(new Organization(SUPER_TENANT_DOMAIN), "xxxxx");
@@ -138,18 +136,14 @@ public class RegistryPersistenceImplTestCase {
                 .thenReturn(artifactManager);
         Mockito.when(artifactManager.getGenericArtifact(Mockito.any(String.class))).thenReturn(null);
         
-        String username = "admin@wso2.com";
-        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(username, tenantManager,
-                registryService);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(tenantManager, registryService);
         
         // trigger registry object creation
         apiPersistenceInstance.getDevPortalAPI(new Organization(TENANT_DOMAIN), "xxxxx");
         
         Mockito.verify(registryService, times(1)).getGovernanceUserRegistry("admin", TENANT_ID);
         
-        username = "wso2.anonymous.user@wso2.com";
-        apiPersistenceInstance = new RegistryPersistenceImplWrapper(username, tenantManager,
-                registryService);
+        apiPersistenceInstance = new RegistryPersistenceImplWrapper(tenantManager, registryService);
         // trigger registry object creation
         apiPersistenceInstance.getDevPortalAPI(new Organization(TENANT_DOMAIN), "xxxxx");
         Mockito.verify(registryService, times(1)).getGovernanceUserRegistry("wso2.anonymous.user", TENANT_ID);
@@ -188,9 +182,7 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(context.getTenantDomain()).thenReturn(TENANT_DOMAIN);
         Mockito.when(context.getTenantId()).thenReturn(TENANT_ID);
         
-        String username = "test@wso2.com";
-        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(username, tenantManager,
-                registryService);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(tenantManager, registryService);
         
         // return null artifact because we are not testing artifact related params. this is only to get the registry obj
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class); 

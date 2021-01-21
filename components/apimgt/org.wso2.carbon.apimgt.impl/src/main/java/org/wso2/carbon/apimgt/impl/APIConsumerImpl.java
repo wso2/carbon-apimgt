@@ -6004,7 +6004,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             return;
         }
-        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)) {
+        if (APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.APIM_ADMIN)
+                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_CREATE)
+                || APIUtil.hasPermission(userNameWithTenantDomain, APIConstants.Permissions.API_PUBLISH)) {
             return;
         }
 
@@ -6025,7 +6027,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             throw new APIMgtResourceNotFoundException("API not found "); // for backword compatibility we send 404
-            //throw new APIManagementException(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the api");
         }
 
     }

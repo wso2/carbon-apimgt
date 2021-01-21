@@ -127,11 +127,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
 
-    //protected String username;
-    public RegistryPersistenceImpl(String username) {
-        //this.username = username;
-    }
-
     protected String getTenantAwareUsername(String username) {
         return MultitenantUtils.getTenantAwareUsername(username);
     }
@@ -163,7 +158,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when creating API " + api.getId().getApiName();
                 log.error(errorMessage);
@@ -360,7 +356,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryPersistenceUtil.notifyAPIStateChangeToAssociatedDocuments(artifact, registry);
             }
 
-            // TODO Improve: add a visibility change check and only update if needed
             RegistryPersistenceUtil.clearResourcePermissions(artifactPath, api.getId(),
                     ((UserRegistry) registry).getTenantId());
             String visibleRolesList = api.getVisibleRoles();
@@ -2888,7 +2883,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         private Registry registry;
         private boolean isTenantFlowStarted;
         private int tenantId;
-        private String registryUser;
 
         public Registry getRegistry() {
             return registry;
@@ -2913,36 +2907,25 @@ public class RegistryPersistenceImpl implements APIPersistence {
         public void setTenantId(int tenantId) {
             this.tenantId = tenantId;
         }
-
-        public String getRegistryUser() {
-            return registryUser;
-        }
-
-        public void setRegistryUser(String registryUser) {
-            this.registryUser = registryUser;
-        }
     }
     
     protected RegistryHolder getRegistry(String requestedTenantDomain) throws APIPersistenceException {
-        // String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        String tenantAwareUserName = null;//getTenantAwareUsername(username);
+
         String userTenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-        log.debug("Accessing registry for user:" + tenantAwareUserName + " in tenant domain " + userTenantDomain
-                + ". Requested tenant domain: " + requestedTenantDomain);
+        log.debug("Accessing system registry in tenant domain " + userTenantDomain + ". Requested tenant domain: "
+                + requestedTenantDomain);
         boolean tenantFlowStarted = false;
         Registry registry;
         RegistryHolder holder = new RegistryHolder();
-        holder.setRegistryUser(tenantAwareUserName);
+
         try {
             if (requestedTenantDomain != null) {
                 int id = getTenantManager().getTenantId(requestedTenantDomain);
                 RegistryPersistenceUtil.startTenantFlow(requestedTenantDomain);
                 tenantFlowStarted = true;
                 
-                if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross
-                                                                                                          // tenant
-                                                                                                          // scenario
+                if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant
                     log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);
@@ -2951,23 +2934,21 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     ServiceReferenceHolder
                             .setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
                 } else {
-                    log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
-                            + userTenantDomain + ":" + tenantId);
+                    log.debug("Same tenant accessing registry of tenant " + userTenantDomain + ":" + tenantId);
                     loadTenantRegistry(tenantId);
                     registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
-                    RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                    RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
+                    RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
+                    RegistryPersistenceUtil.loadTenantAPIPolicy(null, tenantId);
                     holder.setTenantId(tenantId);
                     ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance()
                             .getRealmService().getTenantUserRealm(tenantId)));
                 }
             } else {
-                log.debug("Same tenant user : " + tenantAwareUserName + " accessing registry of tenant "
-                        + userTenantDomain + ":" + tenantId);
+                log.debug("Same tenant user accessing registry of tenant " + userTenantDomain + ":" + tenantId);
                 loadTenantRegistry(tenantId);
                 registry = getRegistryService().getGovernanceSystemRegistry(tenantId);
-                RegistryPersistenceUtil.loadloadTenantAPIRXT(tenantAwareUserName, tenantId);
-                RegistryPersistenceUtil.loadTenantAPIPolicy(tenantAwareUserName, tenantId);
+                RegistryPersistenceUtil.loadloadTenantAPIRXT(null, tenantId);
+                RegistryPersistenceUtil.loadTenantAPIPolicy(null, tenantId);
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().getRealmService()
                         .getTenantUserRealm(tenantId)));
                 holder.setTenantId(tenantId);
@@ -2991,7 +2972,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean tenantFlowStarted = false;
         Registry registry;
         RegistryHolder holder = new RegistryHolder();
-        holder.setRegistryUser(tenantAwareUserName);
         try {
             if (requestedTenantDomain != null) {
                 int id = getTenantManager().getTenantId(requestedTenantDomain);
@@ -3002,19 +2982,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
                     holder.setTenantId(id);
-                } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross
-                                                                                                          // tenant
-                                                                                                          // scenario
+                } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant
                     log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);
                     registry = getRegistryService().getGovernanceSystemRegistry(id);
                     holder.setTenantId(id);
-                    /*
-                     * int requestedTenantId = getTenantManager().getTenantId(requestedTenantDomain);
-                     * registry = getRegistryService()
-                     * .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, requestedTenantId);
-                     */
                     ServiceReferenceHolder
                             .setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
                 } else {

@@ -27,15 +27,12 @@ public class RegistryPersistenceImplWrapper extends RegistryPersistenceImpl {
     RegistryService registryService;
     Registry registry;
 
-    public RegistryPersistenceImplWrapper(String username, TenantManager tenantManager,
-            RegistryService registryService) {
-        super(username);
+    public RegistryPersistenceImplWrapper(TenantManager tenantManager, RegistryService registryService) {
         this.tenantManager = tenantManager;
         this.registryService = registryService;
     }
 
-    public RegistryPersistenceImplWrapper(String username, Registry registry) {
-        super(username);
+    public RegistryPersistenceImplWrapper(Registry registry) {
         this.registry = registry;
     }
 
@@ -56,7 +53,6 @@ public class RegistryPersistenceImplWrapper extends RegistryPersistenceImpl {
         if (registry != null) {
             RegistryHolder holder = new RegistryHolder();
             holder.setRegistry(registry);
-            //holder.setRegistryUser(username);
             holder.setTenantId(CarbonContext.getThreadLocalCarbonContext().getTenantId());
             return holder;
         } else {

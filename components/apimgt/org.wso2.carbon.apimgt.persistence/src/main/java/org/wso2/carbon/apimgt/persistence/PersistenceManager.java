@@ -17,9 +17,13 @@
 package org.wso2.carbon.apimgt.persistence;
 
 public class PersistenceManager {
+    
+    public static APIPersistence persistence = null;
 
-    public static APIPersistence getPersistenceInstance(String userName) {
-        // TODO add method to configure
-        return new RegistryPersistenceImpl(userName);
+    public static APIPersistence getPersistenceInstance() {
+        if (persistence == null) {
+            persistence = new RegistryPersistenceImpl();
+        }
+        return persistence;
     }
 }
