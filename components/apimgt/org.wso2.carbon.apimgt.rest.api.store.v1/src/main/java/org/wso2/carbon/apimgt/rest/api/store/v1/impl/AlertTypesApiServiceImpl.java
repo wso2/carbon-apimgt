@@ -38,7 +38,7 @@ public class AlertTypesApiServiceImpl implements AlertTypesApiService {
     private static final String AGENT = "subscriber";
     private static final Log log = LogFactory.getLog(AlertTypesApiServiceImpl.class);
 
-    public Response getDevportalAlertTypes(MessageContext messageContext) {
+    public Response getDevPortalAlertTypes(MessageContext messageContext) {
         try {
             AlertConfigurator storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             List<AlertTypeDTO> alertTypes = storeAlertConfigurator.getSupportedAlertTypes(AGENT);

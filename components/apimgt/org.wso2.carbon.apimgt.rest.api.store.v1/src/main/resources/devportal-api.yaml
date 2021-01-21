@@ -2812,9 +2812,9 @@ paths:
     get:
       tags:
       - Settings
-      summary: Retreive Devportal settings
+      summary: Retreive Developer Portal settings
       description: |
-        Retreive Devportal Settings
+        Retreive Developer Portal Settings
       parameters:
       - $ref: '#/components/parameters/requestedTenant'
       responses:
@@ -2972,7 +2972,7 @@ paths:
         Get the List of API Developer Portal Alert Types.
       description: |
         This operation is used to get the list of supportd alert types for the 'subscriber' agent.
-      operationId: getDevportalAlertTypes
+      operationId: getDevPortalAlertTypes
       responses:
         200:
           description: |
@@ -4948,7 +4948,7 @@ components:
         advertised:
           type: boolean
           example: true
-        originalDevportalUrl:
+        originalDevPortalUrl:
           type: string
           example: https://localhost:9443/devportal
         apiOwner:

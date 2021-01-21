@@ -21,7 +21,7 @@ import Settings from 'Settings';
 import AuthManager from "./AuthManager";
 
 /**
- * Utility class for Devportal application
+ * Utility class for Developer Portal application
  */
 class Utils {
 

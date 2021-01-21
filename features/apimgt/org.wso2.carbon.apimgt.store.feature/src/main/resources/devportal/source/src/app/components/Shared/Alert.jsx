@@ -29,7 +29,7 @@ import Message from './Message';
 const theme = createMuiTheme(merge(DefaultConfigurations, Configurations));
 
 /**
- * Common alerting/message displaying component for Devportal application, Pre-set vertical: 'top',
+ * Common alerting/message displaying component for Developer Portal application, Pre-set vertical: 'top',
  horizontal: 'center' and close action for consistent UX through out the app.
  Alert messages are mounted outside the app's root DOM element
  */

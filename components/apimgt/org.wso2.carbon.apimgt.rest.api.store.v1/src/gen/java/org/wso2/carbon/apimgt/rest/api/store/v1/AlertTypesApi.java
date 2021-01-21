@@ -48,7 +48,7 @@ AlertTypesApiService delegate = new AlertTypesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The list of subscriber alert types are returned. ", response = AlertTypesListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getDevportalAlertTypes() throws APIManagementException{
-        return delegate.getDevportalAlertTypes(securityContext);
+    public Response getDevPortalAlertTypes() throws APIManagementException{
+        return delegate.getDevPortalAlertTypes(securityContext);
     }
 }
