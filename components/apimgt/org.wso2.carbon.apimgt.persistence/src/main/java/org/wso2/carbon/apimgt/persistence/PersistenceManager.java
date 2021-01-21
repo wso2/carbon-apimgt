@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.persistence;
 
 public class PersistenceManager {
     
-    public static APIPersistence persistence = null;
+    private static APIPersistence persistence = null;
 
     public static APIPersistence getPersistenceInstance() {
         if (persistence == null) {
