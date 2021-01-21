@@ -19,13 +19,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import PermissionAPI from 'AppData/PermissionScopes';
 import Grid from '@material-ui/core/Grid';
-import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import cloneDeep from 'lodash.clonedeep';
 import { FormattedMessage, useIntl } from 'react-intl';
 import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
+import { Alert as MUIAlert } from '@material-ui/lab';
 import PermissionsSelector from './TreeView/PermissionsSelector';
 import AdminTable from './AdminTable/AdminTable';
 import AdminTableHead from './AdminTable/AdminTableHead';
@@ -139,6 +139,7 @@ export default function ListRoles() {
     const [isOpen, setIsOpen] = useState(false);
     const [hasListPermission, setHasListPermission] = useState(true);
     const intl = useIntl();
+    const [errorMessage, setError] = useState(null);
 
     useEffect(() => {
         PermissionAPI.getRoleAliases();
@@ -153,7 +154,10 @@ export default function ListRoles() {
             if (status === 401) {
                 setHasListPermission(false);
             } else {
-                Alert.error('Error while retrieving permission info');
+                setError(intl.formatMessage({
+                    id: 'RolePermissions.ListRoles.error.retrieving.perm',
+                    defaultMessage: 'Error while retrieving permission info',
+                }));
                 console.error(error);
             }
         });
@@ -231,8 +235,21 @@ export default function ListRoles() {
             />
         );
     }
-    if (!permissionMappings || !appMappings) {
-        return <Progress message='Resolving user ...' />;
+    if (!errorMessage && (!permissionMappings || !appMappings)) {
+        return (
+            <ContentBase pageStyle='paperLess'>
+                <Progress message='Resolving user ...' />
+            </ContentBase>
+
+        );
+    }
+    if (errorMessage) {
+        return (
+            <ContentBase title='Role Permissions'>
+                <MUIAlert severity='error'>{errorMessage}</MUIAlert>
+            </ContentBase>
+
+        );
     }
     return (
         <ContentBase title='Scope Assignments' pageDescription={pageDesc}>
