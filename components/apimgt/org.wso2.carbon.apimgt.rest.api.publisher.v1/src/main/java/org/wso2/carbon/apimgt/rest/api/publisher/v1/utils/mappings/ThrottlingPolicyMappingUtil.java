@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
@@ -122,6 +123,11 @@ public class ThrottlingPolicyMappingUtil {
         dto.setStopOnQuotaReach(tier.isStopOnQuotaReached());
         dto.setPolicyLevel((ThrottlingPolicyDTO.PolicyLevelEnum.fromValue(tierLevel)));
         dto.setTimeUnit(tier.getTimeUnit());
+        dto.setRateLimitCount(tier.getRateLimitCount());
+        dto.setRateLimitTimeUnit(tier.getRateLimitTimeUnit());
+        if (tier.getQuotaPolicyType() != null) {
+            dto.setQuotaPolicyType(mapQuotaPolicyTypeFromModeltoDTO(tier.getQuotaPolicyType()));
+        }
         if (tier.getTierPlan() != null) {
             dto.setTierPlan(ThrottlingPolicyDTO.TierPlanEnum.fromValue(tier.getTierPlan()));
         }
@@ -133,5 +139,24 @@ public class ThrottlingPolicyMappingUtil {
             dto.setAttributes(additionalProperties);
         }
         return dto;
+    }
+
+    /**
+     * Map quota policy type from data model to DTO
+     *
+     * @param quotaPolicyType quota policy type
+     * @return ThrottlingPolicyDTO.QuotaPolicyTypeEnum
+     */
+    private static ThrottlingPolicyDTO.QuotaPolicyTypeEnum mapQuotaPolicyTypeFromModeltoDTO(String quotaPolicyType) {
+
+        switch (quotaPolicyType) {
+            case PolicyConstants.REQUEST_COUNT_TYPE:
+                return ThrottlingPolicyDTO.QuotaPolicyTypeEnum.fromValue(PolicyConstants.
+                        REQUEST_COUNT_TYPE.toUpperCase());
+            case PolicyConstants.BANDWIDTH_TYPE:
+                return ThrottlingPolicyDTO.QuotaPolicyTypeEnum.fromValue(PolicyConstants.BANDWIDTH_TYPE.toUpperCase());
+            default:
+                return null;
+        }
     }
 }
