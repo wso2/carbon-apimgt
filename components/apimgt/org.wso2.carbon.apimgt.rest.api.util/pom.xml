@@ -195,7 +195,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-store-api-def</id>
+                        <id>copy-devportal-api-def</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -208,7 +208,7 @@
                                         ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources
                                     </directory>
                                     <includes>
-                                        <include>store-api.yaml</include>
+                                        <include>devportal-api.yaml</include>
                                     </includes>
                                 </resource>
                             </resources>

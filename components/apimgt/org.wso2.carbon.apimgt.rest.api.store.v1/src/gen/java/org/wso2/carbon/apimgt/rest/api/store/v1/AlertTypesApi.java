@@ -42,13 +42,13 @@ AlertTypesApiService delegate = new AlertTypesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the List of API Developer Portal Alert Types. ", notes = "This operation is used to get the list of supportd alert types for the 'subscriber' agent. ", response = AlertTypesListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure Developer Portal alert types")
         })
     }, tags={ "Alerts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The list of subscriber alert types are returned. ", response = AlertTypesListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getStoreAlertTypes() throws APIManagementException{
-        return delegate.getStoreAlertTypes(securityContext);
+    public Response getDevPortalAlertTypes() throws APIManagementException{
+        return delegate.getDevPortalAlertTypes(securityContext);
     }
 }

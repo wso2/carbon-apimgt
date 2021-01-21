@@ -88,7 +88,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#store.war</destFileName>
+                                    <destFileName>api#am#devportal.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
