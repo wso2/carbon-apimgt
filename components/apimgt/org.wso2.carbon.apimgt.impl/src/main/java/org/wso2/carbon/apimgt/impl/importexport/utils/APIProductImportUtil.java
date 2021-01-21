@@ -177,7 +177,7 @@ public class APIProductImportUtil {
                 importedApiProduct.setID(targetApiProduct.getId());
             } else {
                 if (apiProvider.isAPIProductAvailable(importedApiProduct.getId())
-                        || apiProvider.isApiNameWithDifferentCaseExist(apiProductName, currentTenantDomain)) {
+                        || apiProvider.isApiNameWithDifferentCaseExist(apiProductName)) {
                     String errorMessage = "Error occurred while adding the API Product. A duplicate API Product already exists " +
                             "for " + importedApiProduct.getId().getName() + '-' + importedApiProduct.getId().getVersion();
                     throw new APIMgtResourceAlreadyExistsException(errorMessage);

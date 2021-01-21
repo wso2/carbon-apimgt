@@ -3489,14 +3489,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      *
      */
     @Override
-    public void addComment(APIIdentifier identifier, String commentText, String user, String organizationId)
+    public void addComment(APIIdentifier identifier, String commentText, String user)
             throws APIManagementException {
-        apiMgtDAO.addComment(identifier, commentText, user, organizationId);
+        apiMgtDAO.addComment(identifier, commentText, user);
     }
 
     @Override
-    public String addComment(Identifier identifier, Comment comment, String user, String organizationId) throws APIManagementException {
-        return apiMgtDAO.addComment(identifier, comment, user, organizationId);
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user);
     }
 
     @Override
@@ -6114,6 +6114,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, e);
         }
     }
+
     @Override
     public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException {

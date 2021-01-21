@@ -218,7 +218,7 @@ public final class APIImportUtil {
                 importedApi.setId(targetApi.getId());
             } else {
                 if (apiProvider.isAPIAvailable(importedApi.getId())
-                        || apiProvider.isApiNameWithDifferentCaseExist(apiName, currentTenantDomain)) {
+                        || apiProvider.isApiNameWithDifferentCaseExist(apiName)) {
                     String errorMessage = "Error occurred while adding the API. A duplicate API already exists " +
                             "for " + importedApi.getId().getApiName() + '-' + importedApi.getId().getVersion();
                     throw new APIMgtResourceAlreadyExistsException(errorMessage);

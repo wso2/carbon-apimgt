@@ -2703,7 +2703,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 switch (queryTokens[0]) {
                     case "name":
                         isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1], orgId) ||
-                                apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1], orgId);
+                                apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
                         break;
                     case "context":
                     default: // API version validation.
@@ -2713,7 +2713,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             } else { // consider the query as api name
                 isSearchArtifactExists = apiProvider.isApiNameExist(query, orgId) ||
-                        apiProvider.isApiNameWithDifferentCaseExist(query, orgId);
+                        apiProvider.isApiNameWithDifferentCaseExist(query);
             }
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);

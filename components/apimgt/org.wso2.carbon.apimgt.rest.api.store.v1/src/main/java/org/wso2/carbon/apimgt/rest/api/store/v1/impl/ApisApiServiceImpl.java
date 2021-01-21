@@ -267,7 +267,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
-            String createdCommentId = apiConsumer.addComment(identifier, comment, username, organizationId);
+            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 

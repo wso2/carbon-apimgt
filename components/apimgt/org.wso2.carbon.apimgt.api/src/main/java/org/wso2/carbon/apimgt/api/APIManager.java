@@ -171,11 +171,10 @@ public interface APIManager {
      * Checks whether a different letter case of the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
-     * @param orgId  Identifier of an organization
      * @return true if a different letter case of the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the different letter case api name availability
      */
-    boolean isApiNameWithDifferentCaseExist(String apiName, String orgId) throws APIManagementException;
+    boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name
@@ -709,11 +708,22 @@ public interface APIManager {
      *
      * @param apiName        API name in the payload
      * @param username       logged in user name of the user
+     * @return api versions that matches context template
+     * @throws APIManagementException If failed to get the list of api versions
+     */
+    List<String> getApiVersionsMatchingApiName(String apiName,String username)
+            throws APIManagementException;
+
+    /**
+     * Returns a list of api versions that matches the given context template and organziationId
+     *
+     * @param apiName        API name in the payload
+     * @param username       logged in user name of the user
      * @param organizationId UUID of the organization to which the API belongs to
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiName(String apiName,String username, String organizationId)
+    List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName,String username, String organizationId)
             throws APIManagementException;
 
     /**

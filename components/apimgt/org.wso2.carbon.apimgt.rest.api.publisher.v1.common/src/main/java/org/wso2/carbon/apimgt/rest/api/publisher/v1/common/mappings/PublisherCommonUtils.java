@@ -804,11 +804,17 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
         }
 
-        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organizationId)) {
-            throw new APIManagementException(
-                    "Error occurred while adding API. API with name " + body.getName() + " already exists.",
-                    ExceptionCodes.API_ALREADY_EXISTS);
+
+        if (organizationId != null) {
+
+        } else {
+            if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+                throw new APIManagementException(
+                        "Error occurred while adding API. API with name " + body.getName() + " already exists.",
+                        ExceptionCodes.API_ALREADY_EXISTS);
+            }
         }
+
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
         }
@@ -829,7 +835,13 @@ public class PublisherCommonUtils {
         }
 
         //Get all existing versions of  api been adding
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username, organizationId);
+        List<String> apiVersions;
+        if (organizationId != null) {
+            apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(), username,
+                    organizationId);
+        } else {
+            apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+        }
         if (apiVersions.size() > 0) {
             //If any previous version exists
             for (String version : apiVersions) {

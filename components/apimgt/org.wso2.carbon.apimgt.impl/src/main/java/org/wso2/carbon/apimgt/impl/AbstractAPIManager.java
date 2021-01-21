@@ -1663,15 +1663,15 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameExist(apiName, orgId);
     }
 
-    public boolean isApiNameWithDifferentCaseExist(String apiName, String orgId) throws APIManagementException {
-        if (orgId == null) {
-            orgId = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                orgId = tenantDomain;
-            }
+
+    public boolean isApiNameWithDifferentCaseExist(String apiName) throws APIManagementException {
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
         }
-        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, orgId);
+        return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName);
     }
+
 
     public void addSubscriber(String username, String groupingId)
             throws APIManagementException {
@@ -2612,9 +2612,16 @@ public abstract class AbstractAPIManager implements APIManager {
 
 
     @Override
-    public List<String> getApiVersionsMatchingApiName(String apiName,String username, String organizationId)
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName,String username, String organizationId)
             throws APIManagementException {
-        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName, username, organizationId);
+        return apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(apiName, username, organizationId);
+    }
+
+
+    @Override
+    public List<String> getApiVersionsMatchingApiName(String apiName,String username)
+            throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName, username);
     }
     
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,

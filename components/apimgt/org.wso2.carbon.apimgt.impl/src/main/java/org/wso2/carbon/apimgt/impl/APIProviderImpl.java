@@ -984,6 +984,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error occurred while adding default API LifeCycle.", e);
         }
 
+
         String provider = api.getId().getProviderName();
         if (provider.contains("AT")) {
             provider = provider.replace("-AT-", "@");
@@ -10584,6 +10585,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
         return null;
     }
+
 
     @Override
     public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {

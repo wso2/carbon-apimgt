@@ -785,7 +785,35 @@ public class APIMgtDAOTest {
         api2.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api2, -1234);
         List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiName("getAPIVersionsMatchingApiName",
-                "getAPIVersionsMatchingApiName", null);
+                "getAPIVersionsMatchingApiName");
+        assertNotNull(versionList);
+        assertTrue(versionList.contains("1.0.0"));
+        assertTrue(versionList.contains("2.0.0"));
+        apiMgtDAO.deleteAPI(apiId);
+        apiMgtDAO.deleteAPI(apiId2);
+    }
+
+    @Test
+    public void testGetAPIVersionsMatchingApiNameAndOrganization() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
+                "getAPIVersionsMatchingApiNameAndOrganization", "1.0.0");
+        String organizationId = "1234";
+        API api = new API(apiId);
+        api.setOrganizationId(organizationId);
+        api.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
+        api.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
+        api.setUUID(UUID.randomUUID().toString());
+        apiMgtDAO.addAPI(api, -1234);
+        APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
+                "getAPIVersionsMatchingApiNameAndOrganization", "2.0.0");
+        API api2 = new API(apiId2);
+        api.setOrganizationId(organizationId);
+        api2.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
+        api2.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
+        api2.setUUID(UUID.randomUUID().toString());
+        apiMgtDAO.addAPI(api2, -1234);
+        List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(
+                "getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName", organizationId);
         assertNotNull(versionList);
         assertTrue(versionList.contains("1.0.0"));
         assertTrue(versionList.contains("2.0.0"));

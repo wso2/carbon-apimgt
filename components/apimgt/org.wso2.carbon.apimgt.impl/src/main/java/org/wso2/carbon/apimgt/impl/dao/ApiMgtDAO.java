@@ -172,27 +172,43 @@ public class ApiMgtDAO {
         multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
-    public List<String> getAPIVersionsMatchingApiName(String apiName, String username, String organizationId)
-            throws APIManagementException {
+    public List<String> getAPIVersionsMatchingApiName(String apiName, String username) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         List<String> versionList = new ArrayList<String>();
         ResultSet resultSet = null;
-        String sqlQuery = null;
-
-        if (organizationId != null) {
-            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL;
-        } else {
-            sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
-        }
+        String sqlQuery = sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiName);
             ps.setString(2, username);
-            if (organizationId != null) {
-                ps.setString(3, organizationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                versionList.add(resultSet.getString("API_VERSION"));
             }
+        } catch (SQLException e) {
+            handleException("Failed to get API versions matches API name" + apiName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return versionList;
+    }
+
+    public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String username, String organizationId)
+            throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        List<String> versionList = new ArrayList<String>();
+        ResultSet resultSet = null;
+        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiName);
+            ps.setString(2, username);
+            ps.setString(3, organizationId);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 versionList.add(resultSet.getString("API_VERSION"));
@@ -7679,7 +7695,7 @@ public class ApiMgtDAO {
      * @deprecated
      * This method needs to be removed once the Jaggery web apps are removed.
      */
-    public int addComment(APIIdentifier identifier, String commentText, String user, String organizationId) throws APIManagementException {
+    public int addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7693,23 +7709,12 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-
-            if (organizationId != null) {
-                getApiQuery = SQLConstants.GET_API_ID_SQL_MATCHES_ORGANIZATION_ID;
-            } else {
-                getApiQuery = SQLConstants.GET_API_ID_SQL;
-            }
+            getApiQuery = SQLConstants.GET_API_ID_SQL;
 
             getPrepStmt = connection.prepareStatement(getApiQuery);
             getPrepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             getPrepStmt.setString(2, identifier.getApiName());
             getPrepStmt.setString(3, identifier.getVersion());
-            if (organizationId != null) {
-                getPrepStmt.setString(4, organizationId);
-            } else {
-                getPrepStmt.setNull(4, Types.VARCHAR);
-            }
-
             resultSet = getPrepStmt.executeQuery();
             if (resultSet.next()) {
                 apiId = resultSet.getInt("API_ID");
@@ -7765,7 +7770,7 @@ public class ApiMgtDAO {
      * @param user       User who did the comment
      * @return Comment ID
      */
-    public String addComment(Identifier identifier, Comment comment, String user, String organizationId) throws APIManagementException {
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
         Connection connection = null;
         ResultSet insertSet = null;
         PreparedStatement insertPrepStmt = null;
@@ -7775,13 +7780,8 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-
             //Get API Id
-            if (organizationId != null ) {
-                id = getAPIIDMatchesOrgID(identifier, organizationId, connection);
-            } else {
-                id = getAPIID(identifier, connection);
-            }
+            id = getAPIID(identifier, connection);
 
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
@@ -10024,16 +10024,16 @@ public class ApiMgtDAO {
      * @return true if a different letter case name is already available
      * @throws APIManagementException If failed to check different letter case api name availability
      */
-    public boolean isApiNameWithDifferentCaseExist(String apiName, String orgId) throws APIManagementException {
+    public boolean isApiNameWithDifferentCaseExist(String apiName, String tenantDomain) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet resultSet = null;
         String contextParam = "/t/";
 
         String query = SQLConstants.GET_API_NAME_DIFF_CASE_NOT_MATCHING_CONTEXT_SQL;
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(orgId)) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             query = SQLConstants.GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL;
-            contextParam += orgId + '/';
+            contextParam += tenantDomain + '/';
         }
 
         try {
