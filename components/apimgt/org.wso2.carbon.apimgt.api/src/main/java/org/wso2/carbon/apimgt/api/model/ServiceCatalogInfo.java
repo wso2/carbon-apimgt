@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.InputStream;
 import java.sql.Timestamp;
 
 public class ServiceCatalogInfo {
@@ -20,6 +21,24 @@ public class ServiceCatalogInfo {
     private String updatedBy = null;
     private Timestamp createdTime = null;
     private Timestamp lastUpdatedTime = null;
+    private InputStream endpointDef = null;
+    private InputStream metadata = null;
+
+    public InputStream getEndpointDef() {
+        return endpointDef;
+    }
+
+    public void setEndpointDef(InputStream endpointDef) {
+        this.endpointDef = endpointDef;
+    }
+
+    public InputStream getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(InputStream metadata) {
+        this.metadata = metadata;
+    }
 
     public Timestamp getLastUpdatedTime() {
         return lastUpdatedTime;

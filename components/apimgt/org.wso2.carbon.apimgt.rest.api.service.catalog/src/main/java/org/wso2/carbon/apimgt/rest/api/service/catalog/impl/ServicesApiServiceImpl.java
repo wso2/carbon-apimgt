@@ -8,7 +8,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -34,7 +33,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 
 public class ServicesApiServiceImpl implements ServicesApiService {
@@ -117,7 +115,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String archiveName = name + APIConstants.KEY_SEPARATOR + version;
-        EndPointInfo endPointInfo;
+        ServiceCatalogInfo serviceCatalogInfo;
         String exportedFileName = null;
         ExportArchive exportArchive;
 
@@ -126,12 +124,12 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         }
 
         try {
-            endPointInfo = serviceCatalog.getEndPointResourcesByNameAndVersion(name, version, tenantId);
-            if (endPointInfo != null) {
+            serviceCatalogInfo = serviceCatalog.getEndPointResourcesByNameAndVersion(name, version, tenantId);
+            if (serviceCatalogInfo != null) {
                 consumer = RestApiCommonUtil.getConsumer(userName);
                 FileBasedServicesImportExportManager importExportManager =
                         new FileBasedServicesImportExportManager(consumer, pathToExportDir);
-                exportArchive = importExportManager.createArchiveFromExportedServices(DataMappingUtil.fromEndPointInfoToFiles(endPointInfo),
+                exportArchive = importExportManager.createArchiveFromExportedServices(DataMappingUtil.filesGenerator(serviceCatalogInfo),
                         pathToExportDir, archiveName);
                 exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
                 exportedFileName = exportedServiceArchiveFile.getName();
@@ -181,7 +179,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         int tenantId = APIUtil.getTenantId(userName);
         String tempDirPath = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
         HashMap<String, String> newResourcesHash;
-        HashMap<String, ServiceCatalogEntry> catalogEntries;
+        HashMap<String, ServiceCatalogInfo> catalogEntries;
         HashMap<String, List<String>> existingServices;
         HashMap<String, List<String>> newServices;
         List<ServiceCRUDStatusDTO> serviceStatusList;
@@ -220,7 +218,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
         if (overwrite) {
             newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
-            catalogEntries = DataMappingUtil.fromDirToServiceCatalogEntryMap(tempDirPath);
+            catalogEntries = DataMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath);
             existingServices = ServiceCatalogUtils.verifierListValidate(verifier, newResourcesHash, tenantId);
             newServices = ServiceCatalogUtils.filterNewServices(verifier, tenantId);
 
@@ -228,10 +226,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             List<String> keyList = newServices.get(APIConstants.MAP_KEY_ACCEPTED);
             for (String newService : keyList) {
                 if (catalogEntries.containsKey(newService)) {
-                    catalogEntries.get(newService).getServiceCatalogInfo().setMd5(newResourcesHash.get(newService));
-                    String uuid = serviceCatalog.addServiceCatalog(catalogEntries.get(newService), tenantId);
+                    catalogEntries.get(newService).setMd5(newResourcesHash.get(newService));
+                    String uuid = serviceCatalog.addService(catalogEntries.get(newService), tenantId);
                     if (uuid != null) {
-                        catalogEntries.get(newService).getServiceCatalogInfo().setUuid(uuid);
+                        catalogEntries.get(newService).setUuid(uuid);
                     } else {
                         newServices.get(APIConstants.MAP_KEY_IGNORED).add(newService);
                         newServices.get(APIConstants.MAP_KEY_ACCEPTED).remove(newService);
@@ -242,10 +240,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             // Adding updated services
             for (String updatedService : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
                 if (catalogEntries.containsKey(updatedService)) {
-                    catalogEntries.get(updatedService).getServiceCatalogInfo().setMd5(newResourcesHash.get(updatedService));
-                    String uuid = serviceCatalog.addServiceCatalog(catalogEntries.get(updatedService), tenantId);
+                    catalogEntries.get(updatedService).setMd5(newResourcesHash.get(updatedService));
+                    String uuid = serviceCatalog.addService(catalogEntries.get(updatedService), tenantId);
                     if (uuid != null) {
-                        catalogEntries.get(updatedService).getServiceCatalogInfo().setUuid(uuid);
+                        catalogEntries.get(updatedService).setUuid(uuid);
                     } else {
                         existingServices.get(APIConstants.MAP_KEY_IGNORED).add(updatedService);
                         existingServices.get(APIConstants.MAP_KEY_VERIFIED).remove(updatedService);

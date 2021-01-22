@@ -16,7 +16,7 @@ public interface ServiceCatalogApi {
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String addServiceCatalog(ServiceCatalogEntry serviceCatalog, int tenantId) throws APIManagementException;
+    String addService(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException;
 
     /**
      * Returns details of an Service Catalog
@@ -26,7 +26,7 @@ public interface ServiceCatalogApi {
      * @return An ServiceCatalogInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Service Catalog
      */
-    ServiceCatalogInfo getServiceCatalogByUUID(String serviceCatalogId, int tenantId)
+    ServiceCatalogInfo getServiceByUUID(String serviceCatalogId, int tenantId)
             throws APIManagementException;
 
     /**
@@ -35,7 +35,7 @@ public interface ServiceCatalogApi {
      * @param serviceCatalogUuid ServiceCatalog Identifier(UUID)
      * @throws APIManagementException if failed to delete the Service Catalog
      */
-    void deleteServiceCatalog(String serviceCatalogUuid) throws APIManagementException;
+    void deleteService(String serviceCatalogUuid) throws APIManagementException;
 
     /**
      * Returns details of all Service Catalogs belong to a given tenant
@@ -44,16 +44,16 @@ public interface ServiceCatalogApi {
      * @return A list of ServiceCatalogInfo objects
      * @throws APIManagementException if failed to get details of Service Catalogs
      */
-    List<ServiceCatalogInfo> getServiceCatalogs(int tenantId) throws APIManagementException;
+    List<ServiceCatalogInfo> getService(int tenantId) throws APIManagementException;
 
     /**
      * Adds a new end-point definition
      *
-     * @param endPointInfo EndPoint related information
+     * @param serviceCatalog End-point related information from ServiceCatalogEntry
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String addEndPointDefinition(EndPointInfo endPointInfo, String uuid) throws APIManagementException;
+    String addEndPointDefinition(ServiceCatalogInfo serviceCatalogInfo, String uuid) throws APIManagementException;
 
     /**
      * Get MD5 hash value of a service endpoint
@@ -81,7 +81,7 @@ public interface ServiceCatalogApi {
      * @return EndPointInfo Endpoint resources
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    EndPointInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
+    ServiceCatalogInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
 
     /**
      * Get information of a service endpoint by key
@@ -102,5 +102,5 @@ public interface ServiceCatalogApi {
      * @return EndPointInfo Endpoint resources
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    EndPointInfo getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException;
+    ServiceCatalogInfo getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException;
 }

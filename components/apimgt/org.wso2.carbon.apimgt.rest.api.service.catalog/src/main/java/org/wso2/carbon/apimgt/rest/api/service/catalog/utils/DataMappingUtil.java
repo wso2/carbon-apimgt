@@ -91,37 +91,33 @@ public class DataMappingUtil {
         return count;
     }
 
-    public static HashMap<String, ServiceCatalogEntry> fromDirToServiceCatalogEntryMap(String path) {
+    public static HashMap<String, ServiceCatalogInfo> fromDirToServiceCatalogInfoMap(String path) {
 
         // We can use list: then we can go through it and if we need name or something we can just use getters
 
-        HashMap<String, ServiceCatalogEntry> endpointDetails = new HashMap<String, ServiceCatalogEntry>();
+        HashMap<String, ServiceCatalogInfo> endpointDetails = new HashMap<String, ServiceCatalogInfo>();
         File[] files = new File(path).listFiles();
         assert files != null;
         for (File file : files) {
             if (file.isDirectory()) {
-                ServiceCatalogEntry serviceCatalogEntry = new ServiceCatalogEntry();
-                EndPointInfo endPointInfo = new EndPointInfo();
-                ServiceCatalogInfo serviceInfo;
+                ServiceCatalogInfo serviceInfo = new ServiceCatalogInfo();
                 File[] fList = Objects.requireNonNull(file.listFiles());
                 String key = null;
                 try {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
                             serviceInfo = fromServiceDTOToServiceCatalogInfo(aFile);
-                            serviceCatalogEntry.setServiceCatalogInfo(serviceInfo);
                             key = keyGenerator(serviceInfo);
                             serviceInfo.setKey(key);
-                            endPointInfo.setMetadata(new FileInputStream(aFile));
+                            serviceInfo.setMetadata(new FileInputStream(aFile));
                         } else {
-                            endPointInfo.setEndPointDef(new FileInputStream(aFile));
+                            serviceInfo.setEndpointDef(new FileInputStream(aFile));
                         }
                     }
                 } catch (IOException e) {
                     log.error("Failed to fetch metadata information from zip due to " + e.getMessage(), e);
                 }
-                serviceCatalogEntry.setEndPointInfo(endPointInfo);
-                endpointDetails.put(key, serviceCatalogEntry);
+                endpointDetails.put(key, serviceInfo);
             }
         }
         return endpointDetails;
@@ -175,14 +171,14 @@ public class DataMappingUtil {
         return servicesStatusListDTO;
     }
 
-    public static List<ServiceCRUDStatusDTO> responsePayloadListBuilder(HashMap<String, ServiceCatalogEntry> catalogEntries,
+    public static List<ServiceCRUDStatusDTO> responsePayloadListBuilder(HashMap<String, ServiceCatalogInfo> catalogEntries,
                                                                         HashMap<String, List<String>> existingServices,
                                                                         HashMap<String, List<String>> newServices){
         List<ServiceCRUDStatusDTO> serviceStatusList = new ArrayList<>();
         for (String element : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), true));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -191,7 +187,7 @@ public class DataMappingUtil {
         for (String element : existingServices.get(APIConstants.MAP_KEY_NOT_CHANGED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), false));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), false));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -200,7 +196,7 @@ public class DataMappingUtil {
         for (String element : existingServices.get(APIConstants.MAP_KEY_IGNORED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), false));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), false));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -209,7 +205,7 @@ public class DataMappingUtil {
         for (String element : newServices.get(APIConstants.MAP_KEY_ACCEPTED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), true));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), true));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -218,7 +214,7 @@ public class DataMappingUtil {
         for (String element : newServices.get(APIConstants.MAP_KEY_IGNORED)) {
             if (catalogEntries.containsKey(element)) {
                 try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element).getServiceCatalogInfo(), false));
+                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), false));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
                 }
@@ -263,16 +259,16 @@ public class DataMappingUtil {
     }
 
     /**
-     * Converts EndPointInfo object's input stream entries to files
+     * Converts ServiceCatalogInfo object's input stream entries to files
      *
-     * @param endPointInfo metadata list of services provided in zip
+     * @param serviceCatalogInfo metadata list of services provided in zip
      *
      * @return location to the files
      */
-    public static String fromEndPointInfoToFiles(EndPointInfo endPointInfo) {
+    public static String filesGenerator(ServiceCatalogInfo serviceCatalogInfo) {
         String pathToCreateFiles = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
-        fromInputStreamToFile(endPointInfo.getMetadata(), pathToCreateFiles + File.separator + APIConstants.METADATA_FILE);
-        fromInputStreamToFile(endPointInfo.getEndPointDef(), pathToCreateFiles + File.separator + APIConstants.DEFINITION_FILE);
+        fromInputStreamToFile(serviceCatalogInfo.getMetadata(), pathToCreateFiles + File.separator + APIConstants.METADATA_FILE);
+        fromInputStreamToFile(serviceCatalogInfo.getEndpointDef(), pathToCreateFiles + File.separator + APIConstants.DEFINITION_FILE);
 
         return pathToCreateFiles;
     }

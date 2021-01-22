@@ -21,19 +21,15 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.EndPointInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.user.core.util.UserCoreUtil;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ServiceCatalogDAO {
 
@@ -57,6 +53,7 @@ public class ServiceCatalogDAO {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
+
     /**
      * Add a new serviceCatalog
      *
@@ -65,12 +62,8 @@ public class ServiceCatalogDAO {
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceCatalog(ServiceCatalogInfo serviceCatalogInfo, int tenantID) throws APIManagementException {
+    public String addServiceCatalog(ServiceCatalogInfo serviceCatalogInfo, int tenantID, String uuid) throws APIManagementException {
 
-
-        // Check createApplicationRegistrationEntry in ApiMgtDAO
-
-        String uuid = UUID.randomUUID().toString();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
@@ -89,10 +82,12 @@ public class ServiceCatalogDAO {
             ps.setString(11, serviceCatalogInfo.getDescription());
             ps.setString(12, serviceCatalogInfo.getSecurityType());
             ps.setBoolean(13, serviceCatalogInfo.isMutualSSLEnabled());
-            ps.setTimestamp(14, serviceCatalogInfo.getCreatedTime());
+            ps.setTimestamp(14, serviceCatalogInfo.getCreatedTime());//check whether using utc
             ps.setTimestamp(15, serviceCatalogInfo.getLastUpdatedTime());
             ps.setString(16, serviceCatalogInfo.getCreatedBy());
             ps.setString(17, serviceCatalogInfo.getUpdatedBy());
+            ps.setBinaryStream(18, serviceCatalogInfo.getEndpointDef());
+            ps.setBinaryStream(19, serviceCatalogInfo.getMetadata());
 
             ps.executeUpdate();
             connection.commit();
@@ -106,28 +101,28 @@ public class ServiceCatalogDAO {
     /**
      * Add a new end-point definition entry
      *
-     * @param endPointInfo EndPoint related information
+     * @param serviceCatalogInfo EndPoint related information
      * @return uuid
      * throws APIManagementException if failed to create service catalog
      */
-    public String addEndPointDefinition(EndPointInfo endPointInfo, String uuid) throws APIManagementException {
+    public String addEndPointDefinition(ServiceCatalogInfo serviceCatalogInfo, String uuid) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
-                     .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_ENDPOINT_DEFINITION_ENTRY)) {
+                     .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_ENDPOINT_RESOURCES)) {
             connection.setAutoCommit(false);
 
             ps.setString(1, uuid);
-            ps.setBlob(2, endPointInfo.getEndPointDef());
-            ps.setBlob(3, endPointInfo.getMetadata());
+            ps.setBinaryStream(2, serviceCatalogInfo.getEndpointDef());
+            ps.setBinaryStream(3, serviceCatalogInfo.getMetadata());
 
             ps.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to add end point definition for service catalog entry ID "
-                    + endPointInfo.getUuid(), e);
+                    + uuid, e);
         }
-        return endPointInfo.getUuid();
+        return uuid;
     }
 
     public ServiceCatalogInfo getMd5Hash(ServiceCatalogInfo serviceInfo, int tenantId) throws APIManagementException {
@@ -178,12 +173,12 @@ public class ServiceCatalogDAO {
         return md5;
     }
 
-    public EndPointInfo getCatalogResourcesByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceCatalogInfo getCatalogResourcesByKey(String key, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_DEFINITION_ENTRY_BY_KEY;
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_KEY;
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
@@ -191,11 +186,11 @@ public class ServiceCatalogDAO {
             ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                EndPointInfo endPointInfo = new EndPointInfo();
-                endPointInfo.setUuid(rs.getString("UUID"));
-                endPointInfo.setMetadata(rs.getBlob("METADATA").getBinaryStream());
-                endPointInfo.setEndPointDef(rs.getBlob("ENDPOINT_DEFINITION").getBinaryStream());
-                return endPointInfo;
+                ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
+                serviceCatalogInfo.setUuid(rs.getString("UUID"));
+                serviceCatalogInfo.setMetadata(rs.getBinaryStream("METADATA"));
+                serviceCatalogInfo.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                return serviceCatalogInfo;
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL for getting catalog entry resources : SQL " + sqlQuery, e);
@@ -236,6 +231,8 @@ public class ServiceCatalogDAO {
                 serviceCatalogInfo.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
                 serviceCatalogInfo.setCreatedBy(rs.getString("CREATED_BY"));
                 serviceCatalogInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+                serviceCatalogInfo.setMetadata(rs.getBinaryStream("METADATA"));
+                serviceCatalogInfo.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
 
                 return serviceCatalogInfo;
             }
@@ -247,25 +244,25 @@ public class ServiceCatalogDAO {
         return null;
     }
 
-    public EndPointInfo getCatalogResourcesByNameAndVersion(String key, String version, int tenantId) throws APIManagementException {
+    public ServiceCatalogInfo getCatalogResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_DEFINITION_ENTRY_BY_NAME_AND_VERSION;
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION;
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, key);
+            ps.setString(1, name);
             ps.setString(2, version);
             ps.setInt(3, tenantId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                EndPointInfo endPointInfo = new EndPointInfo();
-                endPointInfo.setUuid(rs.getString("UUID"));
-                endPointInfo.setMetadata(rs.getBlob("METADATA").getBinaryStream());
-                endPointInfo.setEndPointDef(rs.getBlob("ENDPOINT_DEFINITION").getBinaryStream());
-                return endPointInfo;
+                ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
+                serviceCatalogInfo.setUuid(rs.getString("UUID"));
+                serviceCatalogInfo.setMetadata(rs.getBinaryStream("METADATA"));
+                serviceCatalogInfo.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                return serviceCatalogInfo;
             }
         } catch (SQLException e) {
             handleException("Error while executing SQL for getting catalog entry resources : SQL " + sqlQuery, e);
