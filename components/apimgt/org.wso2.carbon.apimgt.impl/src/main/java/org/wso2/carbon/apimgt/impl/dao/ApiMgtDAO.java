@@ -232,7 +232,7 @@ public class ApiMgtDAO {
         List<API> apis = new ArrayList<>();
 
         try {
-            String sqlQuery = SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_UUID;
+            String sqlQuery = SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_ID;
             connection = APIMgtDBUtil.getConnection();
 
             ps = connection.prepareStatement(sqlQuery);
@@ -274,7 +274,7 @@ public class ApiMgtDAO {
             result = ps.executeQuery();
 
             while (result.next()) {
-                organizationId = result.getString("ORGANIZATION_UUID");
+                organizationId = result.getString("ORGANIZATION_ID");
             }
         } catch (SQLException e) {
             handleException("Error occurred while fetching organization ID from database", e);
