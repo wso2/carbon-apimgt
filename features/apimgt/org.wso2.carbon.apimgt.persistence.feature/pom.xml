@@ -47,6 +47,21 @@
             <groupId>org.wso2.orbit.org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-core</artifactId>
+            <version>${mongodb.driver.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -65,19 +80,31 @@
                             <id>org.wso2.carbon.apimgt.persistence</id>
                             <propertiesFile>../../etc/feature.properties</propertiesFile>
                             <adviceFile>
-                                <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server
-                                    </propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
-                                    </propertyDef>
-                                </properties>
-                            </adviceFile>
+                            <properties>
+                                <propertyDef>org.wso2.carbon.p2.category.type:server
+                                </propertyDef>
+                                <propertyDef>org.eclipse.equinox.p2.type.group:false
+                                </propertyDef>
+                            </properties>
+                        </adviceFile>
                             <bundles>
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.persistence:${carbon.apimgt.version}
                                 </bundleDef>
                                 <bundleDef>
                                     org.wso2.orbit.org.mapstruct:mapstruct:${org.wso2.orbit.org.mapstruct.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.mongodb.persistence:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.mongodb:mongodb-driver-sync:${mongodb.driver.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.mongodb:mongodb-driver-core:${mongodb.driver.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.mongodbo:bson:${mongodb.driver.version}
                                 </bundleDef>
                             </bundles>
                             <importFeatures>
@@ -93,5 +120,4 @@
 
         </plugins>
     </build>
-
 </project>

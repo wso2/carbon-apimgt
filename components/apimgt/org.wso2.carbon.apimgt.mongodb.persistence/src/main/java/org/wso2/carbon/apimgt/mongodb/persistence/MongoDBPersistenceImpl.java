@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.mongodb.persistence.utils.MongoDBConnectionUtil;
 import org.wso2.carbon.apimgt.mongodb.persistence.utils.MongoDBUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.persistence.dto.APIDocumentation;
+import org.wso2.carbon.apimgt.mongodb.persistence.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -51,6 +51,8 @@ import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
@@ -635,6 +637,31 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
+
+    }
+
+    @Override
+    public PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct) throws APIPersistenceException {
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct) throws APIPersistenceException {
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId) throws APIPersistenceException {
+        return null;
+    }
+
+    @Override
+    public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
+        return null;
+    }
+
+    @Override
+    public void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException {
 
     }
 

@@ -17,14 +17,7 @@
  */
 package org.wso2.carbon.apimgt.persistence.mapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.Gson;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -37,7 +30,13 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Mapper
 public interface APIProductMapper {
@@ -63,7 +62,7 @@ public interface APIProductMapper {
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
     PublisherAPIProduct toPublisherApiProduct(APIProduct product);
     
-    default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {
+    default JSONObject mapJSONMapToJSONObject(Map<String, String> jsonMap) throws ParseException {
         if (jsonMap != null) {
             JSONParser parser = new JSONParser();
             String jsonText = JSONValue.toJSONString(jsonMap);

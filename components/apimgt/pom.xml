@@ -31,6 +31,7 @@
     <modules>
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.persistence</module>
+        <module>org.wso2.carbon.apimgt.mongodb.persistence</module>
         <module>org.wso2.carbon.apimgt.impl</module>
         <module>org.wso2.carbon.apimgt.tracing</module>
         <module>org.wso2.carbon.apimgt.keymgt</module>

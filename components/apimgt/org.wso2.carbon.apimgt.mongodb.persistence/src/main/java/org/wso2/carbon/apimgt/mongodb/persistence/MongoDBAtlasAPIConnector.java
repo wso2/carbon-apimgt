@@ -115,7 +115,8 @@ public class MongoDBAtlasAPIConnector {
                 log.info("Created atlas search index with status " + statusCode);
                 return true;
             } else {
-                log.info("Failed to create atlas search index with status " + statusCode);
+                // add payload
+                log.error("Failed to create atlas search index with status " + statusCode);
                 return false;
             }
 

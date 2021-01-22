@@ -16,7 +16,7 @@
  * under the License.
  *
  */
-package org.wso2.carbon.apimgt.mongodb.persistence.mappers;
+package org.wso2.carbon.apimgt.persistence.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

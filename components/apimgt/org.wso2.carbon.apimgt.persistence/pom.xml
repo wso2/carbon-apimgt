@@ -64,6 +64,12 @@
     </build>
 	<dependencies>
 		<dependency>
+			<groupId>net.consensys.cava</groupId>
+			<artifactId>cava-toml</artifactId>
+			<version>0.5.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.registry.core</artifactId>
 		</dependency>

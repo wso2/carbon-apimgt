@@ -17,16 +17,7 @@
  */
 package org.wso2.carbon.apimgt.persistence.mapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.gson.Gson;
-import org.apache.poi.ss.formula.functions.T;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -43,6 +34,14 @@ import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 //@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
 @Mapper
@@ -123,7 +122,7 @@ public interface APIMapper {
     @Mapping(source = "swaggerDefinition", target = "definition")
     APIProduct toApiProduct(DevPortalAPI api);
 
-    default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {
+    default JSONObject mapJSONMapToJSONObject(Map<String, String> jsonMap) throws ParseException {
         if (jsonMap != null) {
             JSONParser parser = new JSONParser();
             String jsonText = JSONValue.toJSONString(jsonMap);

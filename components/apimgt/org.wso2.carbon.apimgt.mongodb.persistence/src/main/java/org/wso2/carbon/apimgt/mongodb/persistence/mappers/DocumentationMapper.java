@@ -22,7 +22,7 @@ import org.bson.types.ObjectId;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.wso2.carbon.apimgt.persistence.dto.APIDocumentation;
+import org.wso2.carbon.apimgt.mongodb.persistence.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 
 @Mapper
