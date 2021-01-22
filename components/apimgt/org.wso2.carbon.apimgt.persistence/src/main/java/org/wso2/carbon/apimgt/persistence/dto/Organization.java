@@ -38,8 +38,4 @@ public class Organization {
     public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
-
-    public static Organization getInstance(String orgId) {
-        return new Organization(orgId);
-    }
 }

@@ -538,7 +538,7 @@ public final class APIImportUtil {
 
         try {
             String orgId = apiProvider.getOrganizationIDbyAPIUUID(apiId.getUUID());
-            apiProvider.saveSwagger20Definition(apiId, swaggerContent, orgId );
+            apiProvider.saveSwagger20Definition(apiId, swaggerContent, orgId);
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();

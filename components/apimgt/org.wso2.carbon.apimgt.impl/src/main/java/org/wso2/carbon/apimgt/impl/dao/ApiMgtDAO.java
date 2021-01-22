@@ -7267,53 +7267,6 @@ public class ApiMgtDAO {
         return id;
     }
 
-    public int getAPIIDMatchesOrgID(Identifier apiId, String organizationId, Connection connection) throws APIManagementException {
-        boolean created = false;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-
-        int id = -1;
-        String getAPIQuery = SQLConstants.GET_API_ID_SQL_MATCHES_ORGANIZATION_ID;
-
-        try {
-            if (connection == null) {
-
-                // If connection is not provided a new one will be created.
-                connection = APIMgtDBUtil.getConnection();
-                created = true;
-            }
-
-            prepStmt = connection.prepareStatement(getAPIQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmt.setString(2, apiId.getName());
-            prepStmt.setString(3, apiId.getVersion());
-            if (organizationId != null) {
-                prepStmt.setString(4, organizationId);
-            } else {
-                prepStmt.setNull(4, Types.VARCHAR);
-            }
-
-            rs = prepStmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt("API_ID");
-            }
-            if (id == -1) {
-                String msg = "Unable to find the API: " + apiId + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-        } catch (SQLException e) {
-            handleException("Error while locating API: " + apiId + " from the database", e);
-        } finally {
-            if (created) {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            } else {
-                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
-            }
-        }
-        return id;
-    }
-
     /**
      * Get product Id from the product name and the provider.
      * @param product product identifier
@@ -7718,7 +7671,6 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 apiId = resultSet.getInt("API_ID");
             }
-
             if (apiId == -1) {
                 String msg = "Unable to get the API ID for: " + identifier;
                 log.error(msg);
@@ -7781,7 +7733,6 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             //Get API Id
             id = getAPIID(identifier, connection);
-
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 log.error(msg);
@@ -8063,7 +8014,6 @@ public class ApiMgtDAO {
 
         String context = null;
         String sql = SQLConstants.GET_API_CONTEXT_BY_API_NAME_SQL;
-
         try (PreparedStatement prepStmt = connection.prepareStatement(sql)) {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
@@ -10143,7 +10093,6 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         String sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL;
-
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);

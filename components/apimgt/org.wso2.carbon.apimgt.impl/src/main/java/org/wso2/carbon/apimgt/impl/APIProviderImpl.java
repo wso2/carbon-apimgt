@@ -1516,7 +1516,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-
         if (oldApi.getStatus().equals(api.getStatus())) {
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
@@ -1794,7 +1793,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (oldApi.getStatus().equals(api.getStatus())) {
-
             String previousDefaultVersion = getDefaultVersion(api.getId());
             String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
             updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);
@@ -4093,7 +4091,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value, String orgId) throws APIManagementException {
         try {
             String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
-            Organization org = new Organization(orgId);
+            Organization org;
+            if (orgId != null ) {
+                org = new Organization(orgId);
+            } else {
+                org = new Organization(tenantDomain);
+            }
             PublisherAPI api = apiPersistenceInstance.getPublisherAPI(org , apiId);
             api.setDefaultVersion(value);
             apiPersistenceInstance.updateAPI(org, api);
@@ -5096,9 +5099,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         apiMgtDAO.updateSubscription(subscribedAPI);
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
-        int apiId = apiMgtDAO.getAPIID(subscribedAPI.getApiId(), null);
+        Identifier identifier =
+                subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
+        int apiId = apiMgtDAO.getAPIID(identifier, null);
         String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, tenantDomain,
                 subscribedAPI.getSubscriptionId(), apiId,
@@ -5437,7 +5442,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-            Organization org = Organization.getInstance(api.getOrganizationId());
+            Organization org = new Organization(api.getOrganizationId());
             apiPersistenceInstance.deleteAPI(org, api.getUuid());
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
@@ -6796,9 +6801,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
-
         apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
-
         saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
         apiProduct.setDefinition(apiProductSwagger);
     }
@@ -6810,13 +6813,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
-
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
-
         saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
         apiProduct.setDefinition(updatedProductSwagger);
-
         updateLocalEntry(apiProduct);
     }
 
@@ -9618,13 +9618,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             addedAPIProduct = apiPersistenceInstance.addAPIProduct(
                     new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
                     publisherAPIProduct);
-
             apiProductUUID = addedAPIProduct.getId();
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while creating API product ", e);
         }
-
-
         return apiProductUUID;
     }
 
@@ -9669,7 +9666,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports and Security
         validateAndSetTransports(apiProduct);
         validateAndSetAPISecurity(apiProduct);
-
         PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
         PublisherAPIProduct addedAPIProduct;
         try {
@@ -10297,7 +10293,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIResource> removedReusedResources = new ArrayList<>();
 
         for (URITemplate existingUriTemplate : existingUriTemplates) {
-
             // If existing URITemplate is used by any API Products
             if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
@@ -10315,7 +10310,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         break;
                     }
                 }
-
                 // Existing reused resource is not among updated resources
                 if (isReusedResourceRemoved) {
                     APIResource removedResource = new APIResource(existingVerb, existingPath);

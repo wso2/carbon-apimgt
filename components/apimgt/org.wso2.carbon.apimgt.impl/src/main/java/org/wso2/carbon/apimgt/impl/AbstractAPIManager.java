@@ -1100,7 +1100,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public ResourceFile getWSDL(String apiId, String orgId) throws APIManagementException {
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getWSDL(org, apiId);
             if (resource != null) {
                 return new ResourceFile(resource.getContent(), resource.getContentType());
@@ -1182,7 +1182,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException {
         String definition = null;
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             definition = apiPersistenceInstance.getGraphQLSchema(org, apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
@@ -1211,7 +1211,7 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             definition = apiPersistenceInstance.getOASDefinition(org, id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
@@ -1222,8 +1222,11 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException {
         String definition;
+        if (orgId == null) {
+            orgId = tenantDomain;
+        }
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             definition = apiPersistenceInstance.getOASDefinition(org, apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
@@ -1283,7 +1286,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<Documentation> getAllDocumentation(String uuid, String orgId) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        Organization org = Organization.getInstance(orgId);
+        Organization org = new Organization(orgId);
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
@@ -1473,7 +1476,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public Documentation getDocumentation(String apiId, String docId, String orgId) throws APIManagementException {
         Documentation documentation;
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Documentation doc = apiPersistenceInstance.getDocumentation(org,
                     apiId, docId);
             if (doc != null) {
@@ -1496,7 +1499,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public DocumentationContent getDocumentationContent(String apiId, String docId, String orgId)
             throws APIManagementException {
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             DocumentContent content = apiPersistenceInstance
                     .getDocumentationContent(org, apiId, docId);
             DocumentationContent docContent = null;
@@ -3928,7 +3931,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public ResourceFile getIcon(String apiId, String orgId) throws APIManagementException {
         try {
-            Organization org = Organization.getInstance(orgId);
+            Organization org = new Organization(orgId);
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getThumbnail(org,
                     apiId);
             if (resource != null) {

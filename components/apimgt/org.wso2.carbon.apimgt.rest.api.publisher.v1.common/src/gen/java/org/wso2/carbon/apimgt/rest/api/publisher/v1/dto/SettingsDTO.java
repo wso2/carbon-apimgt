@@ -25,7 +25,7 @@ import javax.validation.Valid;
 
 public class SettingsDTO   {
   
-    private String storeUrl = null;
+    private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
@@ -36,21 +36,21 @@ public class SettingsDTO   {
     private List<DeploymentsDTO> deployments = new ArrayList<DeploymentsDTO>();
 
   /**
-   * Store URL
+   * The Developer Portal URL
    **/
-  public SettingsDTO storeUrl(String storeUrl) {
-    this.storeUrl = storeUrl;
+  public SettingsDTO devportalUrl(String devportalUrl) {
+    this.devportalUrl = devportalUrl;
     return this;
   }
 
   
-  @ApiModelProperty(example = "https://localhost:9443/devportal", value = "Store URL")
-  @JsonProperty("storeUrl")
-  public String getStoreUrl() {
-    return storeUrl;
+  @ApiModelProperty(example = "https://localhost:9443/devportal", value = "The Developer Portal URL")
+  @JsonProperty("devportalUrl")
+  public String getDevportalUrl() {
+    return devportalUrl;
   }
-  public void setStoreUrl(String storeUrl) {
-    this.storeUrl = storeUrl;
+  public void setDevportalUrl(String devportalUrl) {
+    this.devportalUrl = devportalUrl;
   }
 
   /**
@@ -206,7 +206,7 @@ public class SettingsDTO   {
       return false;
     }
     SettingsDTO settings = (SettingsDTO) o;
-    return Objects.equals(storeUrl, settings.storeUrl) &&
+    return Objects.equals(devportalUrl, settings.devportalUrl) &&
         Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
@@ -219,7 +219,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(storeUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, deployments);
+    return Objects.hash(devportalUrl, environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, crossTenantSubscriptionEnabled, deployments);
   }
 
   @Override
@@ -227,7 +227,7 @@ public class SettingsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SettingsDTO {\n");
     
-    sb.append("    storeUrl: ").append(toIndentedString(storeUrl)).append("\n");
+    sb.append("    devportalUrl: ").append(toIndentedString(devportalUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");

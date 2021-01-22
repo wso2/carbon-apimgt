@@ -181,11 +181,6 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    public boolean isDocumentationExist(String uuid, String docName, String orgId) throws APIManagementException {
-        return false;
-    }
-
-    @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
         return null;
     }
@@ -200,19 +195,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return null;
     }
 
-
-    @Override
-    public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
-        return null;
-    }
-
     public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
         return null;
     }
 }

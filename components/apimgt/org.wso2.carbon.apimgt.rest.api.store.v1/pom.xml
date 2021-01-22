@@ -20,15 +20,15 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.142-SNAPSHOT</version>
+        <version>6.8.150-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.store.v1</artifactId>
     <packaging>war</packaging>
-    <name>WSO2 API Manager Store REST API - v1</name>
-    <description>WSO2 API Manager REST API for API Store</description>
+    <name>WSO2 API Manager Developer Portal REST API - v2</name>
+    <description>WSO2 API Manager REST API for API Developer Portal</description>
 
 
     <dependencies>
@@ -187,7 +187,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/devportal-api.yaml</inputSpec>
                             <language>jaxrs-cxf-cdi</language>
                             <configOptions>
                                 <apiPackage>org.wso2.carbon.apimgt.rest.api.store.v1</apiPackage>
@@ -238,7 +238,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#store</warName>
+                    <warName>api#am#devportal</warName>
                 </configuration>
             </plugin>
             <plugin>

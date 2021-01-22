@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Date;
@@ -411,7 +412,6 @@ public class RestApiCommonUtil {
             }
         }
     }
-
 
     /**
      * Url validator, Allow any url with https and http.
