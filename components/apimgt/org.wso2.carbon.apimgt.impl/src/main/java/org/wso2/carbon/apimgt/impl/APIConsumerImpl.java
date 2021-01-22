@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -5968,9 +5969,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Organization org = new Organization(requestedTenantDomain);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
                     uuid);
-            checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                    devPortalApi.getVisibleRoles());
             if (devPortalApi != null) {
+                checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
+                        devPortalApi.getVisibleRoles());
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
@@ -6068,9 +6069,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             Organization org = new Organization(requestedTenantDomain);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
-            checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
-                    devPortalApi.getVisibleRoles());
             if (devPortalApi != null) {
+                checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
+                        devPortalApi.getVisibleRoles());
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
                 
                 /// populate relavant external info
@@ -6195,5 +6196,36 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("apis", compoundResult);
         result.put("length", totalLength );
         return result;
+    }
+    
+    protected void checkAPIVisibilityRestriction(String apiId, String tenantDomain) throws APIManagementException {
+        try {
+            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(tenantDomain), apiId);
+            if (api != null) {
+                checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
+            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while accessing dev portal API", e);
+        }
+    }
+    
+    @Override
+    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, tenantDomain);
+        return super.getAllDocumentation(uuid, tenantDomain);
+    }
+    
+    @Override
+    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException {
+        checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
+        return super.getDocumentation(apiId, docId, requestedTenantDomain);
+    }
+    
+    @Override
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+            throws APIManagementException {
+        checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
+        return super.getDocumentationContent(apiId, docId, requestedTenantDomain);
     }
 }
