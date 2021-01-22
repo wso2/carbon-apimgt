@@ -84,7 +84,7 @@
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#service#catalog.war</destFileName>
+                                    <destFileName>api#am#service-catalog.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

@@ -5,8 +5,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.EndPointInfo;
-import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -14,11 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.*;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class DataMappingUtil {
 
@@ -31,11 +25,11 @@ public class DataMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static ServiceDTO fromMetadataFileToServiceDTO(File file) throws IOException {
+    public static ServiceMetadataDTO fromMetadataFileToServiceDTO(File file) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        ServiceDTO serviceDTO = mapper.readValue(file, ServiceDTO.class);
-        return serviceDTO;
+        ServiceMetadataDTO serviceMetadataDTO = mapper.readValue(file, ServiceMetadataDTO.class);
+        return serviceMetadataDTO;
     }
 
     /**
@@ -45,20 +39,19 @@ public class DataMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static ServiceCatalogInfo fromServiceDTOToServiceCatalogInfo(File file) throws IOException {
+    public static ServiceCatalogInfo fromFileToServiceCatalogInfo(File file) throws IOException {
 
-        ServiceDTO serviceDTO = fromMetadataFileToServiceDTO(file);
+        ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
 
         ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
-        serviceCatalogInfo.setName(serviceDTO.getName());
-        serviceCatalogInfo.setVersion(serviceDTO.getVersion());
-        serviceCatalogInfo.setDisplayName(serviceDTO.getDisplayName());
-        serviceCatalogInfo.setServiceUrl(serviceDTO.getServiceUrl());
-        serviceCatalogInfo.setDefType(serviceDTO.getDefinitionType().value());
-        serviceCatalogInfo.setDescription(serviceDTO.getDescription());
-        serviceCatalogInfo.setSecurityType(serviceDTO.getSecurityType().value());
-        serviceCatalogInfo.setMutualSSLEnabled(serviceDTO.isMutualSSLEnabled());
-        serviceCatalogInfo.setCreatedTime(Timestamp.valueOf(serviceDTO.getCreatedTime()));
+        serviceCatalogInfo.setName(serviceMetadataDTO.getName());
+        serviceCatalogInfo.setVersion(serviceMetadataDTO.getVersion());
+        serviceCatalogInfo.setDisplayName(serviceMetadataDTO.getDisplayName());
+        serviceCatalogInfo.setServiceUrl(serviceMetadataDTO.getServiceUrl());
+        serviceCatalogInfo.setDefType(serviceMetadataDTO.getDefinitionType().value());
+        serviceCatalogInfo.setDescription(serviceMetadataDTO.getDescription());
+        serviceCatalogInfo.setSecurityType(serviceMetadataDTO.getSecurityType().value());
+        serviceCatalogInfo.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
         return serviceCatalogInfo;
     }
 
@@ -70,13 +63,13 @@ public class DataMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static EndPointInfo generateEndPointInfo(File file, String uuid) throws IOException {
+    public static ServiceCatalogInfo generateEndPointInfo(File file, String uuid) throws IOException {
 
-        EndPointInfo endPointInfo = new EndPointInfo();
+        ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
         InputStream inputFile = new FileInputStream(file);
-        endPointInfo.setUuid(uuid);
-        endPointInfo.setEndPointDef(inputFile);
-        return endPointInfo;
+        serviceCatalogInfo.setUuid(uuid);
+        serviceCatalogInfo.setEndpointDef(inputFile);
+        return serviceCatalogInfo;
     }
 
     public static int dirCount(String path) {
@@ -106,7 +99,7 @@ public class DataMappingUtil {
                 try {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            serviceInfo = fromServiceDTOToServiceCatalogInfo(aFile);
+                            serviceInfo = fromFileToServiceCatalogInfo(aFile);
                             key = keyGenerator(serviceInfo);
                             serviceInfo.setKey(key);
                             serviceInfo.setMetadata(new FileInputStream(aFile));
@@ -141,15 +134,10 @@ public class DataMappingUtil {
         serviceCRUDStatusDTO.setId(serviceCatalogInfo.getUuid());
         serviceCRUDStatusDTO.setName(serviceCatalogInfo.getName());
         serviceCRUDStatusDTO.setDisplayName(serviceCatalogInfo.getDisplayName());
-        serviceCRUDStatusDTO.setDescription(serviceCatalogInfo.getDescription());
         serviceCRUDStatusDTO.setVersion(serviceCatalogInfo.getVersion());
         serviceCRUDStatusDTO.setServiceUrl(serviceCatalogInfo.getServiceUrl());
-        serviceCRUDStatusDTO.setDefinitionType(ServiceCRUDStatusDTO.DefinitionTypeEnum.fromValue(serviceCatalogInfo.getDefType()));
-        serviceCRUDStatusDTO.setSecurityType(ServiceCRUDStatusDTO.SecurityTypeEnum.fromValue(serviceCatalogInfo.getSecurityType()));
-        serviceCRUDStatusDTO.setMutualSSLEnabled(serviceCatalogInfo.isMutualSSLEnabled());
-//        serviceCRUDStatusDTO.setCreatedTime(serviceCatalogInfo.getCreatedTime().toString());
-//        serviceCRUDStatusDTO.setLastUpdatedTime(serviceCatalogInfo.getLastUpdatedTime().toString());
-        serviceCRUDStatusDTO.setCatalogUpdated(status);
+        serviceCRUDStatusDTO.setCreatedTime(serviceCatalogInfo.getCreatedTime().toString());
+        serviceCRUDStatusDTO.setLastUpdatedTime(serviceCatalogInfo.getLastUpdatedTime().toString());
 
         return serviceCRUDStatusDTO;
     }
@@ -158,67 +146,53 @@ public class DataMappingUtil {
      * Converts a single metadata file content into a model object
      *
      * @param servicesList metadata list of services provided in zip
-     * @param paginationDTO Pagination data
      * @return build the ServicesStatusListDTO DTO object
      */
-    public static ServicesStatusListDTO responsePayloadBuilder(List<ServiceCRUDStatusDTO> servicesList, PaginationDTO paginationDTO) {
-        ServicesStatusListDTO servicesStatusListDTO = new ServicesStatusListDTO();
+    public static ServiceInfoListDTO responsePayloadBuilder(List<ServiceInfoDTO> servicesList) {
+        ServiceInfoListDTO serviceInfoListDTO = new ServiceInfoListDTO();
 
-        servicesStatusListDTO.setCount(servicesList.size());
-        servicesStatusListDTO.setList(servicesList);
-        servicesStatusListDTO.setPagination(paginationDTO);
+        serviceInfoListDTO.setCount(servicesList.size());
+        serviceInfoListDTO.setList(servicesList);
 
-        return servicesStatusListDTO;
+        return serviceInfoListDTO;
     }
 
-    public static List<ServiceCRUDStatusDTO> responsePayloadListBuilder(HashMap<String, ServiceCatalogInfo> catalogEntries,
+    public static List<ServiceInfoDTO> responsePayloadListBuilder(HashMap<String, ServiceCatalogInfo> catalogEntries,
                                                                         HashMap<String, List<String>> existingServices,
                                                                         HashMap<String, List<String>> newServices){
-        List<ServiceCRUDStatusDTO> serviceStatusList = new ArrayList<>();
+        List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
         for (String element : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
             if (catalogEntries.containsKey(element)) {
-                try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), true));
-                } catch (IOException e) {
-                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
-                }
+                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
             }
         }
-        for (String element : existingServices.get(APIConstants.MAP_KEY_NOT_CHANGED)) {
-            if (catalogEntries.containsKey(element)) {
-                try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), false));
-                } catch (IOException e) {
-                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
-                }
-            }
-        }
-        for (String element : existingServices.get(APIConstants.MAP_KEY_IGNORED)) {
-            if (catalogEntries.containsKey(element)) {
-                try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), false));
-                } catch (IOException e) {
-                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
-                }
-            }
-        }
+//        for (String element : existingServices.get(APIConstants.MAP_KEY_NOT_CHANGED)) {
+//            if (catalogEntries.containsKey(element)) {
+//                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
+//            }
+//        }
+//        for (String element : existingServices.get(APIConstants.MAP_KEY_IGNORED)) {
+//            if (catalogEntries.containsKey(element)) {
+//                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
+//            }
+//        }
         for (String element : newServices.get(APIConstants.MAP_KEY_ACCEPTED)) {
             if (catalogEntries.containsKey(element)) {
-                try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), true));
-                } catch (IOException e) {
-                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
-                }
+                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
             }
         }
-        for (String element : newServices.get(APIConstants.MAP_KEY_IGNORED)) {
-            if (catalogEntries.containsKey(element)) {
-                try {
-                    serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceCRUDStatusDTO(catalogEntries.get(element), false));
-                } catch (IOException e) {
-                    RestApiUtil.handleInternalServerError("Error while forming response dto", e, log);
-                }
-            }
+//        for (String element : newServices.get(APIConstants.MAP_KEY_IGNORED)) {
+//            if (catalogEntries.containsKey(element)) {
+//                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
+//            }
+//        }
+        return serviceStatusList;
+    }
+
+    public static List<ServiceInfoDTO> updateResponsePayloadListBuilder(HashMap<String, ServiceCatalogInfo> catalogEntries){
+        List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
+        for (Map.Entry<String,ServiceCatalogInfo> entry : catalogEntries.entrySet()) {
+            serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(entry.getKey())));
         }
         return serviceStatusList;
     }
@@ -245,17 +219,15 @@ public class DataMappingUtil {
      * Converts a single metadata file content into a model object
      *
      * @param servicesList metadata list of services provided in zip
-     * @param paginationDTO Pagination data
      * @return build the ServicesStatusListDTO DTO object
      */
-    public static ServicesListDTO StatusResponsePayloadBuilder(List<ServiceInfoDTO> servicesList, PaginationDTO paginationDTO) {
-        ServicesListDTO servicesListDTO = new ServicesListDTO();
+    public static ServiceInfoListDTO getServicesResponsePayloadBuilder(List<ServiceInfoDTO> servicesList) {
+        ServiceInfoListDTO serviceInfoListDTO = new ServiceInfoListDTO();
 
-        servicesListDTO.setCount(servicesList.size());
-        servicesListDTO.setList(servicesList);
-        servicesListDTO.setPagination(paginationDTO);
+        serviceInfoListDTO.setCount(servicesList.size());
+        serviceInfoListDTO.setList(servicesList);
 
-        return servicesListDTO;
+        return serviceInfoListDTO;
     }
 
     /**

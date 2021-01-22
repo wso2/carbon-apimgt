@@ -26,6 +26,11 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     }
 
     @Override
+    public String updateService(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().updateServiceCatalog(serviceCatalogInfo, tenantId);
+    }
+
+    @Override
     public ServiceCatalogInfo getServiceByUUID(String serviceCatalogId, int tenantId) throws APIManagementException {
         return null;
     }

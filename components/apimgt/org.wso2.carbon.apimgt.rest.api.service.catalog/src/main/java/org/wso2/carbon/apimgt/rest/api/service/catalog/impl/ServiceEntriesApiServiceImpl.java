@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,14 +10,13 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.model.ServiceCatalogEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.*;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil;
@@ -30,14 +31,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
-public class ServicesApiServiceImpl implements ServicesApiService {
+public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
 
-    private static final Log log = LogFactory.getLog(ServicesApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ServiceEntriesApiServiceImpl.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
     public final String RESOURCE_FOLDER_LOCATION = "repository" + File.separator + "data" + File.separator + "petstore";
     public final String ZIP_EXPORT_DIR = "repository" + File.separator + "data";
@@ -81,7 +80,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 servicesList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(serviceCatalogInfo));
             }
         }
-        return Response.ok().entity(DataMappingUtil.StatusResponsePayloadBuilder(servicesList, paginationDTO)).build();// set paginationDTO
+        return Response.ok().entity(DataMappingUtil.getServicesResponsePayloadBuilder(servicesList)).build();// set paginationDTO
     }
 
     public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
@@ -171,36 +170,26 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     @Override
-    public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail,
-                                  List<VerifierDTO> verifier, String ifMatch, Boolean overwrite, MessageContext messageContext)
-            throws APIManagementException {
+    public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String verifier, String ifMatch, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         APIConsumer consumer;
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String tempDirPath = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
+        List<VerifierDTO> verifierJSONList = null;
         HashMap<String, String> newResourcesHash;
         HashMap<String, ServiceCatalogInfo> catalogEntries;
         HashMap<String, List<String>> existingServices;
         HashMap<String, List<String>> newServices;
-        List<ServiceCRUDStatusDTO> serviceStatusList;
-        PaginationDTO paginationDTO = null;
+        List<ServiceInfoDTO> serviceStatusList;
 
-        // Dummy verifier
-        List<VerifierDTO> dummyVerifier = new ArrayList<>();
-        VerifierDTO verifierDTO1 = new VerifierDTO();
-        verifierDTO1.setKey("swagger petstore 1-1.0.0");
-        verifierDTO1.setMd5("");
-        dummyVerifier.add(verifierDTO1);
-        VerifierDTO verifierDTO2 = new VerifierDTO();
-        verifierDTO2.setKey("swagger petstore 2-1.0.0");
-        verifierDTO2.setMd5("");
-        dummyVerifier.add(verifierDTO2);
-        VerifierDTO verifierDTO3 = new VerifierDTO();
-        verifierDTO3.setKey("swagger petstore 3-1.0.0");
-        verifierDTO3.setMd5("");
-        dummyVerifier.add(verifierDTO3);
-        verifier = dummyVerifier;
-        // End of dummy data
+        // String to JSON conversion
+        final ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            VerifierDTO[] verifierJSONArray = objectMapper.readValue(verifier, VerifierDTO[].class);
+            verifierJSONList = new ArrayList(Arrays.asList(verifierJSONArray));
+        } catch (JsonProcessingException e) {
+            RestApiUtil.handleInternalServerError("Error while converting verifier JSON String to JSON object", e, log);
+        }
 
         // unzip the uploaded zip
         try {
@@ -212,15 +201,18 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
         }
 
-        if (verifier.size() != DataMappingUtil.dirCount(tempDirPath)) {
-            RestApiUtil.handleBadRequest("Number of elements in verifier must equals to number of directories in the zip archive.", log);
-        }
-
-        if (overwrite) {
+        if (overwrite == null || !overwrite) {
+            if (verifierJSONList != null && verifierJSONList.size() != DataMappingUtil.dirCount(tempDirPath)) {
+                RestApiUtil.handleBadRequest("Number of elements in verifier must equals to number of directories in the zip archive.", log);
+            }
             newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
             catalogEntries = DataMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath);
-            existingServices = ServiceCatalogUtils.verifierListValidate(verifier, newResourcesHash, tenantId);
-            newServices = ServiceCatalogUtils.filterNewServices(verifier, tenantId);
+
+            existingServices = ServiceCatalogUtils.verifierListValidate(verifierJSONList, newResourcesHash, tenantId);
+            if (!existingServices.get(APIConstants.MAP_KEY_IGNORED).isEmpty()){
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+            newServices = ServiceCatalogUtils.filterNewServices(verifierJSONList, tenantId);
 
             // Adding new services
             List<String> keyList = newServices.get(APIConstants.MAP_KEY_ACCEPTED);
@@ -252,16 +244,47 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             }
 
             serviceStatusList = DataMappingUtil.responsePayloadListBuilder(catalogEntries, existingServices, newServices);
-            return Response.ok().entity(DataMappingUtil.responsePayloadBuilder(serviceStatusList, paginationDTO)).build();// set paginationDTO
+            return Response.ok().entity(DataMappingUtil.responsePayloadBuilder(serviceStatusList)).build();
+        } else if (overwrite) {
+            newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
+            catalogEntries = DataMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath);
+            HashMap<String, ServiceCatalogInfo> serviceEntries = new HashMap<>();
+            for (Map.Entry<String,ServiceCatalogInfo> entry : catalogEntries.entrySet()) {
+                String key = entry.getKey();
+                catalogEntries.get(key).setMd5(newResourcesHash.get(key));
+                String uuid = serviceCatalog.addService(catalogEntries.get(key), tenantId);
+                if (uuid != null) {
+                    catalogEntries.get(key).setUuid(uuid);
+                } else {
+                    serviceCatalog.updateService(catalogEntries.get(key), tenantId);
+                    serviceEntries.put(key, entry.getValue());
+                }
+            }
+            serviceStatusList = DataMappingUtil.updateResponsePayloadListBuilder(serviceEntries);
+            return Response.ok().entity(DataMappingUtil.responsePayloadBuilder(serviceStatusList)).build();
         } else {
             return Response.status(Response.Status.CONFLICT).build();
         }
     }
 
-    public Response searchServices(String name, String version, String definitionType, String displayName, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) {
-        log.info("searchServices");
+    @Override
+    public Response searchServices(String name, String version, String definitionType, String displayName, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
+        if (shrink && StringUtils.isBlank(key)) {
+            RestApiUtil.handleBadRequest("Service key can not be an empty String with shrink=true", log);
+        } else if (shrink && !StringUtils.isBlank(key)) {
+            String userName = RestApiCommonUtil.getLoggedInUsername();
+            int tenantId = APIUtil.getTenantId(userName);
+            List<ServiceInfoDTO> servicesList = new ArrayList<>();
 
-        // remove errorObject and add implementation code!
+            String keys[] = key.trim().split("\\s*,\\s*");
+            for (String serviceKey : keys) {
+                ServiceCatalogInfo serviceCatalogInfo = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+                if (serviceCatalogInfo != null) {
+                    servicesList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(serviceCatalogInfo));
+                }
+            }
+            return Response.ok().entity(DataMappingUtil.getServicesResponsePayloadBuilder(servicesList)).build();
+        }
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());

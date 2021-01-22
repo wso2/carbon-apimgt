@@ -27,7 +27,7 @@ paths:
   ######################################################
   # The Service Catalog API operations
   ######################################################
-  /services:
+  /service-entries:
   
     #-----------------------------------------------------
     # Retrieve/search services in the service catalog
@@ -73,12 +73,24 @@ paths:
             Filter services by the display name
           schema:
             type: string
+        - name: key
+          in: query
+          description: |
+            Comma seperated keys of the services to check
+          schema:
+            type: string
+        - name: shrink
+          in: query
+          description: |
+            If this set to true, a minimal set of fields will be provided for each service including the md5
+          schema:
+            type: boolean
         - $ref: '#/components/parameters/servicesSortBy'
         - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       responses:
-        "200":
+        200:
           description: |
             Paginated matched list of services returned.
           content:
@@ -138,7 +150,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /services/{serviceId}:
+  /service-entries/{serviceId}:
     #-----------------------------------------------------
     # Retrieve a specific service in the service catalog
     #-----------------------------------------------------
@@ -260,7 +272,7 @@ paths:
   #-----------------------------------------------------
   # Retrieve definition of a service in the service catalog
   #-----------------------------------------------------
-  /services/{serviceId}/definition:
+  /service-entries/{serviceId}/definition:
     get:
       summary: Retrieve a service definition
       description: |
@@ -304,7 +316,7 @@ paths:
   #-------------------------------------------------------------------
   # Import a service into the service catalog from a zipped archive
   #-------------------------------------------------------------------
-  /services/import:
+  /service-entries/import:
     post:
       summary: Import a service
       description: |
@@ -340,9 +352,7 @@ paths:
                     Zip archive consisting of exported Application Configuration.
                   format: binary
                 verifier:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Verifier'
+                  type: string
               
       responses:
         "200":
@@ -351,7 +361,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServicesStatusList'
+                $ref: '#/components/schemas/ServiceInfoList'
           headers:
             ETag:
               $ref: '#/components/headers/ETag'
@@ -366,7 +376,7 @@ paths:
   #----------------------------------------------------------
   # Check the existence of a services and retrieve the MD5 hashes representing the currrent state of the resources.
   #----------------------------------------------------------
-  /services/status:
+  /service-entries/status:
     get:
       summary: Check services existence
       description: |
@@ -400,7 +410,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServicesList'
+                $ref: '#/components/schemas/ServiceInfoList'
         "404":
           description: |
             Not Found.
@@ -413,7 +423,7 @@ paths:
   #----------------------------------------------------------
   # Exporting a service as a zipped archive
   #----------------------------------------------------------
-  /services/export:
+  /service-entries/export:
 
     #--------------------------------------------------------------------------------------------------------------------
     # Check the existence of a service and retrieve the ETag header representing the currrent state of the resource.
@@ -561,8 +571,8 @@ components:
   # The definitions of resources used by some of the APIs
   #-------------------------------------------------------
   schemas:
-  
-    ServicesList:
+
+    ServiceInfoList:
       title: Services List
       type: object
       properties:
@@ -575,8 +585,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ServiceInfo'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
           
     ServicesStatusList:
       title: Services List
@@ -718,22 +726,16 @@ components:
           type: string
           readOnly: true
           example: '2020-02-20T13:57:16.229'
-          
     #-----------------------------------------------------
-    # Status of CRUD operations of Service Catalog Entry resource 
+    # The Service Catalog Entry resource
     #-----------------------------------------------------
-    ServiceCRUDStatus:
+    ServiceMetadata:
       type: object
-      title: The Service Catalog Entry object
-      required:
-        - entryName
-        - version
-        - serviceType
+      title: The Service Metadata Entry object
       properties:
-        id:
+        key:
           type: string
-          example: 01234567-0123-0123-0123-012345678901
-          readOnly: true
+          example: PizzashackEndpoint-1.0.0
         name:
           type: string
           pattern: '^[^\*]+$'
@@ -775,11 +777,36 @@ components:
           type: boolean
           description: Whether Mutual SSL is enabled for the endpoint
           default: false
-        usage:
-          type: integer
-          description: Number of usages of the service in APIs
+          
+    #-----------------------------------------------------
+    # Status of CRUD operations of Service Catalog Entry resource 
+    #-----------------------------------------------------
+    ServiceCRUDStatus:
+      type: object
+      title: The Service Catalog Entry object
+      required:
+        - entryName
+        - version
+        - serviceType
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
           readOnly: true
-          example: 1
+        name:
+          type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        displayName:
+          type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        version:
+          type: string
+          example: v1
+        serviceUrl:
+          type: string
+          example: http://localhost/pizzashack
         createdTime:
           type: string
           readOnly: true
@@ -788,10 +815,6 @@ components:
           type: string
           readOnly: true
           example: '2020-02-20T13:57:16.229'
-        catalogUpdated:
-          type: boolean
-          description: Whether the service participated to CRUD operations
-          default: false
     
     ServiceInfo:
       type: object

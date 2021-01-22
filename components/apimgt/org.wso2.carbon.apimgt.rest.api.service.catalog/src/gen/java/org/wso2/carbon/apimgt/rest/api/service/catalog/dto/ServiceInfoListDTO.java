@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
 import javax.validation.constraints.*;
 
@@ -22,16 +21,15 @@ import javax.validation.Valid;
 
 
 
-public class ServicesListDTO   {
+public class ServiceInfoListDTO   {
   
     private Integer count = null;
     private List<ServiceInfoDTO> list = new ArrayList<ServiceInfoDTO>();
-    private PaginationDTO pagination = null;
 
   /**
    * MD5 hashes of services returned. 
    **/
-  public ServicesListDTO count(Integer count) {
+  public ServiceInfoListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -48,7 +46,7 @@ public class ServicesListDTO   {
 
   /**
    **/
-  public ServicesListDTO list(List<ServiceInfoDTO> list) {
+  public ServiceInfoListDTO list(List<ServiceInfoDTO> list) {
     this.list = list;
     return this;
   }
@@ -64,24 +62,6 @@ public class ServicesListDTO   {
     this.list = list;
   }
 
-  /**
-   **/
-  public ServicesListDTO pagination(PaginationDTO pagination) {
-    this.pagination = pagination;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("pagination")
-  public PaginationDTO getPagination() {
-    return pagination;
-  }
-  public void setPagination(PaginationDTO pagination) {
-    this.pagination = pagination;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -91,25 +71,23 @@ public class ServicesListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ServicesListDTO servicesList = (ServicesListDTO) o;
-    return Objects.equals(count, servicesList.count) &&
-        Objects.equals(list, servicesList.list) &&
-        Objects.equals(pagination, servicesList.pagination);
+    ServiceInfoListDTO serviceInfoList = (ServiceInfoListDTO) o;
+    return Objects.equals(count, serviceInfoList.count) &&
+        Objects.equals(list, serviceInfoList.list);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list, pagination);
+    return Objects.hash(count, list);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ServicesListDTO {\n");
+    sb.append("class ServiceInfoListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
-    sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
     return sb.toString();
   }

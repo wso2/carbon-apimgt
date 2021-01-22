@@ -25,20 +25,13 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.fromServiceDTOToServiceCatalogInfo;
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.fromFileToServiceCatalogInfo;
 import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.keyGenerator;
 
 /**
@@ -83,7 +76,7 @@ public class Md5HashGenerator {
                     for (File aFile : fArray) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
                             try {
-                                key = keyGenerator(fromServiceDTOToServiceCatalogInfo(aFile));
+                                key = keyGenerator(fromFileToServiceCatalogInfo(aFile));
                             } catch (IOException e) {
                                 log.error("Failed to fetch metadata information from zip due to generate key" + e.getMessage(), e);
                             }
