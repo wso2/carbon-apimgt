@@ -2425,6 +2425,7 @@ paths:
       description: |
         This operation can be used to update a subscription providing the subscription id, api id, application Id, status and updated throttling policy tier.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/requestedTenant'
       - $ref: '#/components/parameters/subscriptionId'
       requestBody:
@@ -2504,6 +2505,7 @@ paths:
       description: |
         This operation can be used to remove a subscription.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/subscriptionId'
       - $ref: '#/components/parameters/If-Match'
       responses:

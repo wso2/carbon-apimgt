@@ -94,7 +94,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
-            String orgId = getOrgId(organizationId, xWSO2Tenant);
+            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
@@ -172,17 +172,17 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsPost(SubscriptionDTO body, String organizationId, String xWSO2Tenant,
                                       MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
 
         try {
+            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
 
             //check whether user is permitted to access the API. If the API does not exist,
             // this will throw a APIMgtResourceNotFoundException
             if (body.getApiId() != null) {
-                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), orgId)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
                 }
             } else {
@@ -210,7 +210,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), tenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), orgId);
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
@@ -251,6 +251,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         "Error while adding the subscription API:" + body.getApiId() + ", application:" + body
                                 .getApplicationId() + ", tier:" + body.getThrottlingPolicy(), e, log);
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -262,13 +265,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String xWSO2Tenant,
-                                                   MessageContext messageContext) {
+    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body,  String organizationId,
+                                                   String xWSO2Tenant, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer;
 
         try {
+            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             String currentThrottlingPolicy = body.getThrottlingPolicy();
@@ -295,7 +298,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             //check whether user is permitted to access the API. If the API does not exist,
             // this will throw a APIMgtResourceNotFoundException
             if (body.getApiId() != null) {
-                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), orgId)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
                 }
             } else {
@@ -316,7 +319,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), tenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), orgId);
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
@@ -330,7 +333,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
-                    tenantDomain);
+                    orgId);
             WorkflowResponse workflowResponse = subscriptionResponse.getWorkflowResponse();
             if (workflowResponse instanceof HttpWorkflowResponse) {
                 String payload = workflowResponse.getJSONPayload();
@@ -358,6 +361,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         "Error while adding the subscription API:" + body.getApiId() + ", application:" + body
                                 .getApplicationId() + ", tier:" + body.getThrottlingPolicy(), e, log);
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -372,14 +378,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String organizationId, String xWSO2Tenant,
                                               MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
             try {
+                String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
                 APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
                 String applicationId = subscriptionDTO.getApplicationId();
                 APIIdentifier apiIdentifier = APIMappingUtil
-                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), tenantDomain);
+                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), orgId);
 
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
@@ -401,7 +407,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 }
 
                 ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscriptionDTO.getApiId(),
-                        tenantDomain);
+                        orgId);
 
                 //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this
                 // will throw an APIMgtAuthorizationFailedException with the reason as the message
@@ -414,7 +420,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 SubscribedAPI addedSubscribedAPI = apiConsumer
                         .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
                 SubscriptionDTO addedSubscriptionDTO =
-                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI, tenantDomain);
+                        SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI, orgId);
                 subscriptions.add(addedSubscriptionDTO);
 
             } catch (APIMgtAuthorizationFailedException e) {
@@ -437,6 +443,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                                     ", application:" + subscriptionDTO.getApplicationId() + ", throttling policy:" +
                                     subscriptionDTO.getThrottlingPolicy(), e, log);
                 }
+            } catch (UserStoreException e) {
+                String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
         return Response.ok().entity(subscriptions).build();
@@ -457,11 +466,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI, tenantDomain);
+            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, null);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI, orgId);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant ";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -503,7 +515,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return 200 response if successfully deleted the subscription
      */
     @Override
-    public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
+    public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String organizationId, String ifMatch,
                                                       MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
@@ -531,27 +543,5 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
         }
         return subscribedAPI;
-    }
-
-    /**
-     * Getting the Identifier of an Organization
-     * @param organizationId UUID of the Organization which the API belongs to
-     * @param tenantDomain   TenantDomain which the API belongs to
-     * @return tenantDomain or OrganizationUUID
-     */
-    private String getOrgId(String organizationId, String tenantDomain) throws UserStoreException {
-        if (organizationId != null) {
-            return organizationId;
-        } else {
-            if (tenantDomain != null) {
-                if (!APIUtil.isTenantAvailable(tenantDomain)) {
-                    RestApiUtil.handleBadRequest("Provided tenant domain '" + tenantDomain + "' is invalid",
-                            ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
-                }
-                return tenantDomain;
-            } else {
-                return RestApiCommonUtil.getLoggedInUserTenantDomain();
-            }
-        }
     }
 }
