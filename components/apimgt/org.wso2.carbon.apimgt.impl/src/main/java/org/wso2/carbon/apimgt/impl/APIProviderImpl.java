@@ -1772,6 +1772,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Gson gson = new Gson();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
             Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
                     HashMap.class);

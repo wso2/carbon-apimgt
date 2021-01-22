@@ -2756,6 +2756,7 @@ paths:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/requestedTenant'
+      - $ref: '#/components/parameters/organizationId'
       - name: query
         in: query
         description: |

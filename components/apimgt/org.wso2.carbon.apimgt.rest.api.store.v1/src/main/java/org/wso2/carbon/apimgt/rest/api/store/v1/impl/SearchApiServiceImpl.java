@@ -48,14 +48,12 @@ import javax.ws.rs.core.Response;
 
 public class SearchApiServiceImpl implements SearchApiService {
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
-    String organizationId = null;
 
     @Override
-    public Response searchGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch,
-            MessageContext messageContext) {
+    public Response searchGet(Integer limit, Integer offset, String xWSO2Tenant, String organizationId, String query,
+                              String ifNoneMatch, MessageContext messageContext) {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
-
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -63,7 +61,6 @@ public class SearchApiServiceImpl implements SearchApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
         try {
-
             if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
@@ -71,6 +68,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
+            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -78,9 +76,9 @@ public class SearchApiServiceImpl implements SearchApiService {
             // Extracting search queries for the recommendation system
             apiConsumer.publishSearchQuery(query, username);
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiConsumer.searchPaginatedContent(query, requestedTenantDomain, offset, limit);
+                result = apiConsumer.searchPaginatedContent(query, orgId, offset, limit);
             } else {
-                result = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset, limit);
+                result = apiConsumer.searchPaginatedAPIs(query, orgId, offset, limit);
             }
 
             ArrayList<Object> apis;
@@ -136,4 +134,5 @@ public class SearchApiServiceImpl implements SearchApiService {
 
         return Response.ok().entity(resultListDTO).build();
     }
+
 }

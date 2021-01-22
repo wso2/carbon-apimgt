@@ -181,7 +181,8 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
-        dto.setEndpointURLs(extractEndpointURLs(model, orgId));
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
 
         dto.setIngressURLs(extractIngressURLs(model));
 
@@ -365,7 +366,8 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
-        dto.setEndpointURLs(extractEndpointURLs(model, orgId));
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
+        dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
