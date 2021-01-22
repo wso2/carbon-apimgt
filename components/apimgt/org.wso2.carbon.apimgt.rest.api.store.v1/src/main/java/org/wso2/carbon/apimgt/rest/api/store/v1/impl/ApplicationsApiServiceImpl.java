@@ -358,7 +358,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the required application object
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdGet(String applicationId, String organizationId, String ifNoneMatch,
+                                                 MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -696,7 +697,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
-            body, MessageContext messageContext) throws APIManagementException {
+            body, String organizationId, MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -1086,7 +1087,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysGet(String applicationId, MessageContext messageContext)
+    public Response applicationsApplicationIdOauthKeysGet(String applicationId, String organizationId, MessageContext messageContext)
             throws APIManagementException {
 
         Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
@@ -1125,11 +1126,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
     @Override
     public Response applicationsApplicationIdOauthKeysKeyMappingIdGenerateTokenPost(String applicationId,
-                                                                                    String keyMappingId,
-                                                                                    ApplicationTokenGenerateRequestDTO body,
-                                                                                    String ifMatch,
-                                                                                    MessageContext messageContext)
-            throws APIManagementException {
+                    String keyMappingId, ApplicationTokenGenerateRequestDTO body, String organizationId, String ifMatch,
+                    MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
@@ -1182,13 +1180,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
         }
         return null;
-
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String keyMappingId,
-                                                                      String groupId, MessageContext messageContext)
-            throws APIManagementException {
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String organizationId,
+                    String keyMappingId, String groupId, MessageContext messageContext) throws APIManagementException {
 
         return Response.ok().entity(getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId)).build();
     }

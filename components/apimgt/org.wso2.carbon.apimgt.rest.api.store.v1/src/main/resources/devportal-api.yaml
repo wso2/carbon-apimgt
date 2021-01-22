@@ -1231,6 +1231,7 @@ paths:
       description: |
         This operation can be used to retrieve details of an individual application specifying the application id in the URI.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/applicationId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -1383,6 +1384,7 @@ paths:
       description: |
         Generate keys (Consumer key/secret) for application
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/applicationId'
       requestBody:
         description: |
@@ -1710,6 +1712,7 @@ paths:
       description: |
         Retrieve keys (Consumer key/secret) of application
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/applicationId'
       responses:
         200:
@@ -1744,6 +1747,7 @@ paths:
       description: |
         This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/applicationId'
       - $ref: '#/components/parameters/keyMappingId'
       - $ref: '#/components/parameters/groupId'
@@ -1906,6 +1910,7 @@ paths:
       description: |
         Generate an access token for application by client_credentials grant type
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/applicationId'
       - $ref: '#/components/parameters/keyMappingId'
       - $ref: '#/components/parameters/If-Match'
@@ -2314,6 +2319,7 @@ paths:
       description: |
         This operation can be used to add a new subscriptions providing the ids of the APIs and the applications.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
@@ -2372,6 +2378,7 @@ paths:
       description: |
         This operation can be used to get details of a single subscription.
       parameters:
+      - $ref: '#/components/parameters/organizationId'
       - $ref: '#/components/parameters/subscriptionId'
       - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -2809,6 +2816,8 @@ paths:
         Get a List of Supported SDK Languages
       description: |
         This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Developer Portal
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |

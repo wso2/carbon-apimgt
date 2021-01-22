@@ -369,7 +369,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return list of newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String xWSO2Tenant,
+    public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, String organizationId, String xWSO2Tenant,
                                               MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
@@ -450,7 +450,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscription as a SubscriptionDTO
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String organizationId, String ifNoneMatch,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
@@ -519,6 +519,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         }
         return null;
     }
+
 
     private SubscribedAPI validateAndGetSubscription(String subscriptionId, APIConsumer apiConsumer)
             throws APIManagementException {

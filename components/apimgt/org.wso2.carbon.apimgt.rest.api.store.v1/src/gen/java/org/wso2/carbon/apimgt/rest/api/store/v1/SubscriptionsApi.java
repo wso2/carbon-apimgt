@@ -72,8 +72,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with the newly created objects as entity in the body. ", response = SubscriptionDTO.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response subscriptionsMultiplePost(@ApiParam(value = "Subscription objects that should to be added " ,required=true) List<SubscriptionDTO> subscriptionDTO,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.subscriptionsMultiplePost(subscriptionDTO, xWSO2Tenant, securityContext);
+    public Response subscriptionsMultiplePost(@ApiParam(value = "Subscription objects that should to be added " ,required=true) List<SubscriptionDTO> subscriptionDTO,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.subscriptionsMultiplePost(subscriptionDTO, organizationId, xWSO2Tenant, securityContext);
     }
 
     @POST
@@ -128,8 +128,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Subscription returned ", response = SubscriptionDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.subscriptionsSubscriptionIdGet(subscriptionId, ifNoneMatch, securityContext);
+    public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.subscriptionsSubscriptionIdGet(subscriptionId, organizationId, ifNoneMatch, securityContext);
     }
 
     @PUT
