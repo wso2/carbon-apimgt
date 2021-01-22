@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -118,6 +118,8 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
         GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
+
+    private String tenantDomain = "Wso2.com";
 
     @Test
     public void testGetAPINamefromRESTAPI() throws Exception {
@@ -370,9 +372,7 @@ public class APIUtilTest {
         API api = Mockito.mock(API.class);
 
         Mockito.when(api.getEndpointConfig()).thenReturn("</SomeXML>");
-
         Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists("</SomeXML>"));
-
         JSONObject sandboxEndpoints = new JSONObject();
         sandboxEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
         sandboxEndpoints.put("config", null);
@@ -2046,7 +2046,6 @@ public class APIUtilTest {
         Log mockLog = Mockito.mock(Log.class);
         PowerMockito.mockStatic(LogFactory.class);
         Mockito.when(LogFactory.getLog(any(Class.class))).thenReturn(mockLog);
-
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "isPermissionCheckDisabled")).toReturn(true);
 
         boolean actualResult = APIUtil.hasPermission(userNameWithoutChange, permission);
@@ -2075,7 +2074,6 @@ public class APIUtilTest {
         int tenantId = 2;
         String userNameWithoutChange = "Drake";
         String permission = APIConstants.Permissions.API_PUBLISH;
-        String tenantDomain = "WSO2.com";
         System.setProperty(CARBON_HOME, "");
 
         PowerMockito.spy(APIUtil.class);
@@ -2132,6 +2130,7 @@ public class APIUtilTest {
 
         String[] statusList = {"PUBLISHED", "PROTOTYPED", "DEPRECATED"};
         String expectedCriteria = "(PUBLISHED OR PROTOTYPED OR DEPRECATED)";
+
         Assert.assertEquals(expectedCriteria, APIUtil.getORBasedSearchCriteria(statusList));
     }
 
@@ -2157,18 +2156,14 @@ public class APIUtilTest {
 
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS))
                 .thenReturn("true");
         Assert.assertEquals(true, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
-
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS))
                 .thenReturn("false");
         Assert.assertEquals(false, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
-
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS)).thenReturn("");
         Assert.assertEquals(false, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
-
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS))
                 .thenReturn(null);
         Assert.assertEquals(false, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
@@ -2180,23 +2175,18 @@ public class APIUtilTest {
         System.setProperty(CARBON_HOME, "");
         int tierType = APIConstants.TIER_API_TYPE;
         int tenantID = 1;
-        String tenantDomain = "Wso2.com";
         Tier tier1 = Mockito.mock(Tier.class);
         Map<String, Tier> tierMap = new TreeMap<String, Tier>();
         tierMap.put("UNLIMITED", tier1);
 
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.doNothing().when(PrivilegedCarbonContext.class, "startTenantFlow");
-
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
-
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
-
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_SUB, tenantID);
-
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
         Assert.assertEquals(tierMap, appTierMap);
     }
@@ -2207,24 +2197,18 @@ public class APIUtilTest {
         System.setProperty(CARBON_HOME, "");
         int tierType = APIConstants.TIER_RESOURCE_TYPE;
         int tenantID = 1;
-        String tenantDomain = "Wso2.com";
         Tier tier1 = Mockito.mock(Tier.class);
         Map<String, Tier> tierMap = new TreeMap<String, Tier>();
         tierMap.put("UNLIMITED", tier1);
 
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.doNothing().when(PrivilegedCarbonContext.class, "startTenantFlow");
-
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
-
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
-
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
-
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_API, tenantID);
-
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
 
         Assert.assertEquals(tierMap, appTierMap);
@@ -2236,24 +2220,18 @@ public class APIUtilTest {
         System.setProperty(CARBON_HOME, "");
         int tierType = APIConstants.TIER_APPLICATION_TYPE;
         int tenantID = 1;
-        String tenantDomain = "Wso2.com";
         Tier tier1 = Mockito.mock(Tier.class);
         Map<String, Tier> tierMap = new TreeMap<String, Tier>();
         tierMap.put("UNLIMITED", tier1);
 
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.doNothing().when(PrivilegedCarbonContext.class, "startTenantFlow");
-
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
-
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
-
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
-
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_APP, tenantID);
-
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
 
         Assert.assertEquals(tierMap, appTierMap);
@@ -2262,7 +2240,6 @@ public class APIUtilTest {
     @Test
     public void testValidateAPICategoriesWithValidCategories() throws Exception {
 
-        String tenantDomain = "Wso2.com";
         List<APICategory> inputApiCategories = new ArrayList<>();
         List<APICategory> availableApiCategories = new ArrayList<>();
         APICategory apiCategory1 = Mockito.mock(APICategory.class);
@@ -2275,7 +2252,6 @@ public class APIUtilTest {
         availableApiCategories.add(apiCategory1);
         availableApiCategories.add(apiCategory2);
         availableApiCategories.add(apiCategory3);
-
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(availableApiCategories).when(APIUtil.class, "getAllAPICategoriesOfTenant", tenantDomain);
 
@@ -2286,7 +2262,6 @@ public class APIUtilTest {
     @Test
     public void testValidateAPICategoriesWithInvalidCategories() throws APIManagementException {
 
-        String tenantDomain = "Wso2.com";
         List<APICategory> inputApiCategories = new ArrayList<>();
         List<APICategory> availableApiCategories = new ArrayList<>();
         APICategory apiCategory1 = Mockito.mock(APICategory.class);
@@ -2299,7 +2274,6 @@ public class APIUtilTest {
         inputApiCategories.add(apiCategory3);
         availableApiCategories.add(apiCategory1);
         availableApiCategories.add(apiCategory2);
-
         PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(APIUtil.getAllAPICategoriesOfTenant(tenantDomain)).thenReturn(availableApiCategories);
         Mockito.when(APIUtil.validateAPICategories(inputApiCategories, tenantDomain)).thenCallRealMethod();
@@ -2334,7 +2308,6 @@ public class APIUtilTest {
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
-
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
@@ -2343,15 +2316,12 @@ public class APIUtilTest {
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
-
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         Mockito.when(realmService.getTenantUserRealm(tenantID)).thenReturn(userRealm);
         UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(userStoreManager.getRoleListOfUser(tenantAwareUsername)).thenReturn(roles);
-
         PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
@@ -2367,17 +2337,13 @@ public class APIUtilTest {
 
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(null).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
-
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
-
         PowerMockito.mockStatic(AuthorizationManager.class);
         AuthorizationManager authorizationManager = Mockito.mock(AuthorizationManager.class);
         Mockito.when(AuthorizationManager.getInstance()).thenReturn(authorizationManager);
-
         Mockito.when(MultitenantUtils.getTenantAwareUsername(username)).thenReturn(tenantAwareUsername);
         Mockito.when(authorizationManager.getRolesOfUser(tenantAwareUsername)).thenReturn(roles);
-
         PowerMockito.doNothing().when(APIUtil.class, "addToRolesCache", Mockito.any(), Mockito.any(), Mockito.any());
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
