@@ -1872,7 +1872,7 @@
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
-        <axis2.wso2.version>1.6.1-wso2v41</axis2.wso2.version>
+        <axis2.wso2.version>1.6.1-wso2v57</axis2.wso2.version>
         <axis2.osgi.version.range>[1.6.1, 1.7.0)</axis2.osgi.version.range>
 
         <!-- Apache Axiom -->
@@ -1896,7 +1896,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v196</synapse.version>
+	    <synapse.version>2.1.7-wso2v197</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -2006,7 +2006,7 @@
 
         <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
-        <httpcore.version>4.3.3.wso2v1</httpcore.version>
+        <httpcore.version>4.4.14.wso2v1</httpcore.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <re2j.version>1.2.wso2v1</re2j.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
