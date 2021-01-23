@@ -295,10 +295,11 @@ export default function Environments() {
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState(null);
+    const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState([]);
-    const [SelectedEnvironment, setSelectedEnvironment] = React.useState([]);
-    const [open, setOpen] = React.useState(false);
+    const [SelectedEnvironment, setSelectedEnvironment] = useState([]);
+    const [open, setOpen] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const [revisionToDelete, setRevisionToDelete] = useState([]);
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
@@ -361,6 +362,10 @@ export default function Environments() {
         setOpen(true);
     };
 
+    const handleDeleteSelect = (event) => {
+        setExtraRevisionToDelete(event.target.value);
+    };
+
     const handleSelect = (event) => {
         setRevision(event.target.value);
     };
@@ -383,40 +388,12 @@ export default function Environments() {
     };
 
     /**
-      * Handles adding a new revision
-      * @memberof Revisions
-      */
-    function handleClickAddRevision() {
-        const body = {
-            description,
-        };
-        restApi.createRevision(api.id, body)
-            .then(() => {
-                Alert.info('Revision Create Successfully');
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while creating the revision');
-                }
-                console.error(error);
-            }).finally(() => {
-                restApi.getRevisions(api.id).then((result) => {
-                    setRevisions(result.body.list);
-                    extractLastRevisionNumber(result.body.list);
-                });
-            });
-        setOpen(false);
-        setDescription('');
-    }
-
-    /**
-      * Handles deleting a revision
-      * @memberof Revisions
-      */
+     * Handles deleting a revision
+     * @param {Object} revisionId the revision Id
+     * @returns {Object} promised delete
+     */
     function deleteRevision(revisionId) {
-        restApi.deleteRevision(api.id, revisionId)
+        const promisedDelete = restApi.deleteRevision(api.id, revisionId)
             .then(() => {
                 Alert.info(intl.formatMessage({
                     defaultMessage: 'Revision Deleted Successfully',
@@ -438,6 +415,53 @@ export default function Environments() {
                     extractLastRevisionNumber(result.body.list);
                 });
             });
+        return promisedDelete;
+    }
+
+    /**
+     * Handles creating a new revision
+     * @param {Object} body the request body
+     * @returns {Object} promised create
+     */
+    function createRevision(body) {
+        const promisedCreate = restApi.createRevision(api.id, body)
+            .then(() => {
+                Alert.info('Revision Created Successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while creating the revision');
+                }
+                console.error(error);
+            }).finally(() => {
+                restApi.getRevisions(api.id).then((result) => {
+                    setRevisions(result.body.list);
+                    extractLastRevisionNumber(result.body.list);
+                });
+            });
+        return promisedCreate;
+    }
+
+    /**
+      * Handles adding a new revision
+      * @memberof Revisions
+      */
+    function handleClickAddRevision() {
+        const body = {
+            description,
+        };
+        if (extraRevisionToDelete) {
+            deleteRevision(extraRevisionToDelete)
+                .then(() => {
+                    createRevision(body);
+                }).finally(() => setExtraRevisionToDelete(null));
+        } else {
+            createRevision(body);
+        }
+        setOpen(false);
+        setDescription('');
     }
 
     const runActionDelete = (confirm, revisionId) => {
@@ -531,7 +555,7 @@ export default function Environments() {
       * Handles adding a new revision and deploy
       * @memberof Revisions
       */
-    function createDeployRevision(envList, length1) {
+    function createDeployRevision(envList) {
         const body = {
             description,
         };
@@ -539,7 +563,7 @@ export default function Environments() {
             .then((response) => {
                 Alert.info('Revision Created Successfully');
                 const body1 = [];
-                for (let i = 0; i < length1; i++) {
+                for (let i = 0; i < envList.length; i++) {
                     body1.push({
                         name: envList[i],
                         displayOnDevportal: true,
@@ -570,6 +594,22 @@ export default function Environments() {
                 updateAPI();
             });
         setOpen(false);
+    }
+
+    /**
+     * Handles creating and deploying a new revision
+     * @param {Object} envList the environment list
+     * @param {Object} length the length of the list
+     */
+    function handleCreateAndDeployRevision(envList) {
+        if (extraRevisionToDelete) {
+            deleteRevision(extraRevisionToDelete)
+                .then(() => {
+                    createDeployRevision(envList);
+                }).finally(() => setExtraRevisionToDelete(null));
+        } else {
+            createDeployRevision(envList);
+        }
     }
 
     const confirmDeleteDialog = (
@@ -1076,6 +1116,43 @@ export default function Environments() {
                                 {parseInt(lastRevisionCount, 0) + 1}
                             </span>
                         </Typography>
+                        { allRevisions && allRevisions.length === revisionCount && (
+                            <Box mb={3}>
+                                <TextField
+                                    fullWidth
+                                    id='revision-to-delete-selector'
+                                    select
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Environments.Environments.select.rev.delete'
+                                            defaultMessage='Revision to delete'
+                                        />
+                                    )}
+                                    name='extraRevisionToDelete'
+                                    onChange={handleDeleteSelect}
+                                    helperText={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Environments.Environments.select.rev.helper'
+                                            defaultMessage={'Please select a revision to delete as the '
+                                            + 'maximum allowed number of revisions, {count} has reached'}
+                                            values={{ count: revisionCount }}
+                                        />
+                                    )}
+                                    margin='normal'
+                                    variant='outlined'
+                                >
+                                    {allRevisions && allRevisions.filter(
+                                        (o1) => o1.deploymentInfo.length === 0,
+                                    ).map(
+                                        (revision) => (
+                                            <MenuItem value={revision.id}>
+                                                {revision.displayName}
+                                            </MenuItem>
+                                        ),
+                                    )}
+                                </TextField>
+                            </Box>
+                        )}
                         <Box mb={3}>
                             <TextField
                                 autoFocus
@@ -1086,8 +1163,8 @@ export default function Environments() {
                                 value={description}
                                 helperText={(
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.Revision.Description'
-                                        defaultMessage='Brief description of the revision'
+                                        id='Apis.Details.Environments.Environments.revision.description.deploy'
+                                        defaultMessage='Brief description of the new revision'
                                     />
                                 )}
                                 fullWidth
@@ -1291,9 +1368,12 @@ export default function Environments() {
                         <Button
                             type='submit'
                             variant='contained'
-                            onClick={() => createDeployRevision(SelectedEnvironment, SelectedEnvironment.length)}
+                            onClick={
+                                () => handleCreateAndDeployRevision(SelectedEnvironment)
+                            }
                             color='primary'
-                            disabled={SelectedEnvironment.length === 0}
+                            disabled={SelectedEnvironment.length === 0
+                                || (allRevisions.length === revisionCount && !extraRevisionToDelete)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.deploy.deploy'
@@ -1373,6 +1453,43 @@ export default function Environments() {
                                 {parseInt(lastRevisionCount, 0) + 1}
                             </span>
                         </Typography>
+                        { allRevisions && allRevisions.length === revisionCount && (
+                            <Box mb={3}>
+                                <TextField
+                                    fullWidth
+                                    id='revision-to-delete-selector'
+                                    select
+                                    label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Environments.Environments.select.rev.delete'
+                                            defaultMessage='Revision to delete'
+                                        />
+                                    )}
+                                    name='extraRevisionToDelete'
+                                    onChange={handleDeleteSelect}
+                                    helperText={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Environments.Environments.select.rev.helper'
+                                            defaultMessage={'Please select a revision to delete as the '
+                                            + 'maximum allowed number of revisions, {count} has reached'}
+                                            values={{ count: revisionCount }}
+                                        />
+                                    )}
+                                    margin='normal'
+                                    variant='outlined'
+                                >
+                                    {allRevisions && allRevisions.filter(
+                                        (o1) => o1.deploymentInfo.length === 0,
+                                    ).map(
+                                        (revision) => (
+                                            <MenuItem value={revision.id}>
+                                                {revision.displayName}
+                                            </MenuItem>
+                                        ),
+                                    )}
+                                </TextField>
+                            </Box>
+                        )}
                         <Box mb={3}>
                             <TextField
                                 autoFocus
@@ -1383,8 +1500,8 @@ export default function Environments() {
                                 value={description}
                                 helperText={(
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.Revision.Description'
-                                        defaultMessage='Brief description of the revision'
+                                        id='Apis.Details.Environments.Environments.revision.description.create'
+                                        defaultMessage='Brief description of the new revision'
                                     />
                                 )}
                                 fullWidth
