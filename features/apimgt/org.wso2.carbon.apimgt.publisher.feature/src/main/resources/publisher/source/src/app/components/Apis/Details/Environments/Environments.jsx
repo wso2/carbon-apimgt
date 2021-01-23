@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
     shapeRec: {
         backgroundColor: 'black',
         alignSelf: 'center',
-        width: 150,
+        width: 120,
         height: 3,
     },
     shapeCircaleBack: {
@@ -132,7 +132,7 @@ const useStyles = makeStyles((theme) => ({
     },
     textShape2: {
         marginTop: 8,
-        marginLeft: 140,
+        marginLeft: 100,
         fontFamily: 'sans-serif',
     },
     textDelete: {
@@ -146,7 +146,7 @@ const useStyles = makeStyles((theme) => ({
     },
     textShape3: {
         color: '#38536c',
-        marginLeft: 110,
+        marginLeft: 70,
     },
     textShape7: {
         color: '#38536c',
@@ -165,7 +165,7 @@ const useStyles = makeStyles((theme) => ({
     },
     textShape5: {
         marginTop: 10,
-        marginLeft: 110,
+        marginLeft: 85,
         marginBottom: 10,
     },
     textShape6: {
@@ -792,7 +792,6 @@ export default function Environments() {
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
                 <Grid className={clsx(classes.shapeDottedStart, classes.shapeCircle)} />
             </Grid>
-
         </Grid>
     );
     let item6;
@@ -852,7 +851,7 @@ export default function Environments() {
                                 {revDescription}
                             </Typography>
                             <div className={classes.timePaddingStyle}>
-                                <Typography variant='caption' className={classes.timePaddingStyle}>
+                                <Typography variant='caption'>
                                     <span>{moment(revCreatedTime).fromNow()}</span>
                                 </Typography>
                             </div>
