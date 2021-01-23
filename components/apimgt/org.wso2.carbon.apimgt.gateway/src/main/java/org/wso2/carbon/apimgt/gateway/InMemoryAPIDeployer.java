@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +79,7 @@ public class InMemoryAPIDeployer {
 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled() &&
                 gatewayArtifactSynchronizerProperties.getGatewayLabels().contains(gatewayLabel)) {
+            unDeployAPI(apiId, gatewayLabel);
             if (artifactRetriever != null) {
                 try {
                     String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(apiId, gatewayLabel,
@@ -360,4 +360,12 @@ public class InMemoryAPIDeployer {
             }
         }
     }
+
+    public void deployAPI(DeployAPIInGatewayEvent gatewayEvent, String gatewayLabel)
+            throws ArtifactSynchronizerException {
+
+        unDeployAPI(gatewayEvent);
+        deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+    }
+
 }

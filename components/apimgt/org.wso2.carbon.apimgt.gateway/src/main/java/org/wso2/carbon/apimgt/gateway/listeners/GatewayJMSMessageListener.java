@@ -50,6 +50,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -129,35 +130,39 @@ public class GatewayJMSMessageListener implements MessageListener {
             boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
             if (tenantLoaded) {
                 if (!gatewayEvent.getGatewayLabels().isEmpty()) {
-                    String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                    if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                    Iterator<String> gateways = gatewayEvent.getGatewayLabels().iterator();
+                    while (gateways.hasNext()){
+                        String gatewayLabel = gateways.next();
+                        if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
 
+                            boolean tenantFlowStarted = false;
+                            try {
+                                startTenantFlow(tenantDomain);
+                                tenantFlowStarted = true;
+                                inMemoryApiDeployer.deployAPI(gatewayEvent, gatewayLabel);
+                            } catch (ArtifactSynchronizerException e) {
+                                log.error("Error in deploying artifacts for " + gatewayEvent.getApiId() +
+                                        "in the Gateway");
+                            } finally {
+                                if (tenantFlowStarted) {
+                                    endTenantFlow();
+                                }
+                            }
+                        }
+
+                    }
+                    if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
                         boolean tenantFlowStarted = false;
                         try {
                             startTenantFlow(tenantDomain);
                             tenantFlowStarted = true;
-                            inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                            inMemoryApiDeployer.unDeployAPI(gatewayEvent);
                         } catch (ArtifactSynchronizerException e) {
-                            log.error("Error in deploying artifacts for "  + gatewayEvent.getApiId() +
-                                        "in the Gateway");
+                            log.error("Error in undeploying artifacts");
                         } finally {
                             if (tenantFlowStarted) {
                                 endTenantFlow();
                             }
-                        }
-                    }
-                }
-                if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                    boolean tenantFlowStarted = false;
-                    try {
-                        startTenantFlow(tenantDomain);
-                        tenantFlowStarted = true;
-                        inMemoryApiDeployer.unDeployAPI(gatewayEvent);
-                    } catch (ArtifactSynchronizerException e) {
-                        log.error("Error in undeploying artifacts");
-                    } finally {
-                        if (tenantFlowStarted) {
-                            endTenantFlow();
                         }
                     }
                 }
