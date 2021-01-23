@@ -131,6 +131,24 @@ public class ApplicationMappingUtil {
      */
     public static void setPaginationParams(ApplicationListDTO applicationListDTO, String groupId, int limit, int offset,
             int size) {
+        setPaginationParamsWithSortParams(applicationListDTO, groupId, limit, offset,size, null, null);
+    }
+
+    /**
+     * Sets pagination urls for a ApplicationListDTO object given pagination parameters and url parameters with
+     * sortOrder and sortBy params.
+     *
+     * @param applicationListDTO a SubscriptionListDTO object
+     * @param groupId            group id of the applications to be returned
+     * @param limit              max number of objects returned
+     * @param offset             starting index
+     * @param size               max offset
+     * @param sortOrder          sorting order
+     * @param sortBy             specified sort param
+     */
+    public static void setPaginationParamsWithSortParams(ApplicationListDTO applicationListDTO, String groupId,
+                                                         int limit, int offset, int size, String sortOrder,
+                                                         String sortBy) {
 
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
@@ -139,14 +157,15 @@ public class ApplicationMappingUtil {
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiCommonUtil
-                    .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), groupId);
+                    .getApplicationPaginatedURLWithSortParams(paginatedParams.get(RestApiConstants.
+                            PAGINATION_PREVIOUS_OFFSET), paginatedParams.get(
+                            RestApiConstants.PAGINATION_PREVIOUS_LIMIT), groupId, sortOrder, sortBy);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiCommonUtil
-                    .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), groupId);
+                .getApplicationPaginatedURLWithSortParams(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                        paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), groupId, sortOrder, sortBy);
         }
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
