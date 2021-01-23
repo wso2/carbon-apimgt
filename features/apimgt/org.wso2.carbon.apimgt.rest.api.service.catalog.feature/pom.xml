@@ -37,7 +37,6 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog</artifactId>
-            <version>6.8.131-SNAPSHOT</version>
             <type>war</type>
         </dependency>
         <dependency>
@@ -107,7 +106,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#service#catalog.war</include>
+                                        <include>api#am#service-catalog.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>
