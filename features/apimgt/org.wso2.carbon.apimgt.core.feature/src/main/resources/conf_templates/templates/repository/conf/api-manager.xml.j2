@@ -32,7 +32,7 @@
         <Password>${admin.password}</Password>
         <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
            via a remote service. The check will be done on the local server when false. -->
-        <CheckPermissionsRemotely>false</CheckPermissionsRemotely>
+        <CheckPermissionsRemotely>{{apim.auth_manager.check_permissions_remotely}}</CheckPermissionsRemotely>
         <!-- Indicates whether the authentication endpoint has been reverse proxied through the Gateway when using
              APIM with IS-KM. -->
         {% if apim.auth_manager.iskm_reverseproxy_enabled is defined %}
@@ -462,7 +462,7 @@
         <DefaultGroupExtractorClaimUri>{{apim.devportal.application_sharing_claim}}</DefaultGroupExtractorClaimUri>
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>{{apim.devportal.login_username_case_insensitive}}</CompareCaseInsensitively>
-        <DisplayURL>false</DisplayURL>
+        <DisplayURL>{{apim.devportal.display_url}}</DisplayURL>
         <URL>{{apim.devportal.url}}</URL>
 
         <!-- Server URL of the API Developer Portal. -->
@@ -505,7 +505,7 @@
     </APIStore>
 
     <APIPublisher>
-        <DisplayURL>false</DisplayURL>
+        <DisplayURL>{{apim.publisher.display_url}}</DisplayURL>
         <URL>https://localhost:${mgt.transport.https.port}/publisher</URL>
         <!-- This parameter specifies enabling the capability of setting API documentation level granular visibility levels.
              By default any document associate with an API will have the same permissions set as the API.With enabling below
@@ -572,7 +572,7 @@
             {% endfor %}
          {% endif %}
              <AllowedURI>
-                <URI>/api/am/store/{version}/tenants</URI>
+                <URI>/api/am/devportal/{version}/tenants</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
              </AllowedURI>
             <AllowedURI>
@@ -580,7 +580,7 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/swagger.json</URI>
+                <URI>/api/am/devportal/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -592,7 +592,7 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <URI>/api/am/devportal/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -600,111 +600,111 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis</URI>
+                <URI>/api/am/devportal/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/swagger</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/wsdl</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/wsdl</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/comments</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/comments</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/comments/{commentId}</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/comments/{commentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                 <URI>/api/am/store/{version}/apis/{apiId}/subscription-policies</URI>
+                 <URI>/api/am/devportal/{version}/apis/{apiId}/subscription-policies</URI>
                  <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/throttling-policies/{policyLevel}</URI>
+                <URI>/api/am/devportal/{version}/throttling-policies/{policyLevel}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/throttling-policies/{policyLevel}/{policyId}</URI>
+                <URI>/api/am/devportal/{version}/throttling-policies/{policyLevel}/{policyId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                 <URI>/api/am/store/{version}/apis/{apiId}/graphql-schema</URI>
+                 <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-schema</URI>
                  <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}/content</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/thumbnail</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/ratings</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/ratings</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products</URI>
+                <URI>/api/am/devportal/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/swagger</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/documents</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/documents/{documentId}</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/documents/{documentId}/content</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/thumbnail</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/tags</URI>
+                <URI>/api/am/devportal/{version}/tags</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/search</URI>
+                <URI>/api/am/devportal/{version}/search</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/settings</URI>
+                <URI>/api/am/devportal/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -720,53 +720,53 @@
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-categories</URI>
+                <URI>/api/am/devportal/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/graphql-policies/complexity</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-policies/complexity</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/apis</URI>
+                <URI>/api/am/devportal/{version}/apis</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/apis/generate-sdk</URI>
+                <URI>/api/am/devportal/{version}/apis/generate-sdk</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/applications</URI>
+                <URI>/api/am/devportal/{version}/applications</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/applications/generate-keys</URI>
+                <URI>/api/am/devportal/{version}/applications/generate-keys</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/subscriptions</URI>
+                <URI>/api/am/devportal/{version}/subscriptions</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/tags</URI>
+                <URI>/api/am/devportal/{version}/tags</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>

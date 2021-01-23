@@ -118,9 +118,9 @@ const APIDetailsTopMenu = (props) => {
     const { tenantList } = useContext(ApiContext);
     const userNameSplit = user.name.split('@');
     const tenantDomain = userNameSplit[userNameSplit.length - 1];
-    let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
+    let devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview`;
     if (tenantList && tenantList.length > 0) {
-        devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+        devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
     }
     // todo: need to support rev proxy ~tmkb
     return (
