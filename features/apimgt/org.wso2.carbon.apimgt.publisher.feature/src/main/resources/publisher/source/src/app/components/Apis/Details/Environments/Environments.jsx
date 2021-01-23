@@ -408,6 +408,7 @@ export default function Environments() {
                 });
             });
         setOpen(false);
+        setDescription('');
     }
 
     /**
@@ -1136,17 +1137,25 @@ export default function Environments() {
                                                         </Grid>
                                                         <Grid item>
                                                             {allEnvRevision
-                                                                && (
-                                                                    allEnvRevision.filter(
-                                                                        (o1) => o1.deploymentInfo.filter(
+                                                                && allEnvRevision.filter(
+                                                                    (o1) => {
+                                                                        if (o1.deploymentInfo.filter(
                                                                             (o2) => o2.name === row.name,
-                                                                        ),
-                                                                    ).length
-                                                                ) !== 0 ? (
+                                                                        ).length > 0) {
+                                                                            return o1;
+                                                                        }
+                                                                        return null;
+                                                                    },
+                                                                ).length !== 0 ? (
                                                                     allEnvRevision && allEnvRevision.filter(
-                                                                        (o1) => o1.deploymentInfo.filter(
-                                                                            (o2) => o2.name === row.name,
-                                                                        ),
+                                                                        (o1) => {
+                                                                            if (o1.deploymentInfo.filter(
+                                                                                (o2) => o2.name === row.name,
+                                                                            ).length > 0) {
+                                                                                return o1;
+                                                                            }
+                                                                            return null;
+                                                                        },
                                                                     ).map((o3) => (
                                                                         <div>
                                                                             <Chip
@@ -1180,18 +1189,18 @@ export default function Environments() {
                                 ))}
                             </Grid>
                         </Box>
-                        <Box mt={2}>
-                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.gateway.labels.heading'
-                                    defaultMessage='Gateway Labels'
-                                />
-                            </Typography>
-                            <Grid
-                                container
-                                spacing={3}
-                            >
-                                {mgLabels.length > 0 && mgLabels.map((row) => (
+                        {mgLabels.length > 0 && mgLabels.map((row) => (
+                            <Box mt={2}>
+                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.gateway.labels.heading'
+                                        defaultMessage='Gateway Labels'
+                                    />
+                                </Typography>
+                                <Grid
+                                    container
+                                    spacing={3}
+                                >
                                     <Grid item xs={4}>
                                         <Card
                                             className={clsx(SelectedEnvironment
@@ -1219,15 +1228,25 @@ export default function Environments() {
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item>
-                                                            {allEnvRevision && (allEnvRevision.filter(
-                                                                (o1) => o1.deploymentInfo.filter(
-                                                                    (o2) => o2.name === row.name,
-                                                                ),
-                                                            ).length) !== 0 ? (
+                                                            {allEnvRevision && allEnvRevision.filter(
+                                                                (o1) => {
+                                                                    if (o1.deploymentInfo.filter(
+                                                                        (o2) => o2.name === row.name,
+                                                                    ).length > 0) {
+                                                                        return o1;
+                                                                    }
+                                                                    return null;
+                                                                },
+                                                            ).length !== 0 ? (
                                                                     allEnvRevision && allEnvRevision.filter(
-                                                                        (o1) => o1.deploymentInfo.filter(
-                                                                            (o2) => o2.name === row.name,
-                                                                        ),
+                                                                        (o1) => {
+                                                                            if (o1.deploymentInfo.filter(
+                                                                                (o2) => o2.name === row.name,
+                                                                            ).length > 0) {
+                                                                                return o1;
+                                                                            }
+                                                                            return null;
+                                                                        },
                                                                     ).map((o3) => (
                                                                         <div>
                                                                             <Chip
@@ -1258,9 +1277,9 @@ export default function Environments() {
                                             </Box>
                                         </Card>
                                     </Grid>
-                                ))}
-                            </Grid>
-                        </Box>
+                                </Grid>
+                            </Box>
+                        ))}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDeployPopup}>
@@ -1404,28 +1423,51 @@ export default function Environments() {
                         defaultMessage='API Gateways'
                     />
                 </Typography>
-
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell align='left'>Name</TableCell>
-                                <TableCell align='left'>Type</TableCell>
-                                {api.isWebSocket() ? (
-                                    <>
-                                        <TableCell align='left'>Endpoints</TableCell>
-                                        {/* <TableCell align='left'>WSS Endpoint</TableCell> */}
-                                    </>
-                                ) : (
-                                    <>
-                                        <TableCell align='left'>Endpoints</TableCell>
-                                        {/* <TableCell align='left'>HTTPS Endpoint</TableCell> */}
-                                    </>
-                                )}
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.api.gateways.name'
+                                        defaultMessage='Name'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.api.gateways.type'
+                                        defaultMessage='Type'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.gateway.endpoints'
+                                        defaultMessage='Endpoints'
+                                    />
+                                </TableCell>
                                 {api && api.isDefaultVersion !== true
-                                    ? <TableCell align='left'>Deployed Revision</TableCell>
-                                    : <TableCell align='left'>Action</TableCell>}
-                                <TableCell align='left'>Display in devportal</TableCell>
+                                    ? (
+                                        <TableCell align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Environments.Environments.gateway.deployed.revision'
+                                                defaultMessage='Deployed Revision'
+                                            />
+                                        </TableCell>
+                                    )
+                                    : (
+                                        <TableCell align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Environments.Environments.gateway.action'
+                                                defaultMessage='Action'
+                                            />
+                                        </TableCell>
+                                    )}
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.display.in.devportal'
+                                        defaultMessage='Display in Devportal'
+                                    />
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -1433,7 +1475,6 @@ export default function Environments() {
                                 <TableRow key={row.name}>
                                     <TableCell component='th' scope='row'>
                                         {row.name}
-
                                     </TableCell>
                                     <TableCell align='left'>{row.type}</TableCell>
                                     {api.isWebSocket() ? (
@@ -1447,7 +1488,6 @@ export default function Environments() {
                                                     {row.endpoints.wss}
                                                 </div>
                                             </TableCell>
-                                            {/* <TableCell align='left'>{row.endpoints.wss}</TableCell> */}
                                         </>
                                     ) : (
                                         <>
@@ -1457,19 +1497,28 @@ export default function Environments() {
                                                     {row.endpoints.https}
                                                 </div>
                                             </TableCell>
-                                            {/* <TableCell align='left'>{row.endpoints.https}</TableCell> */}
                                         </>
                                     )}
-
-
                                     <TableCell align='left'>
-                                        {allEnvRevision && (allEnvRevision.filter(
-                                            (o1) => o1.deploymentInfo.filter(
-                                                (o2) => o2.name === row.name,
-                                            ),
-                                        ).length) !== 0 ? (
+                                        {allEnvRevision && allEnvRevision.filter(
+                                            (o1) => {
+                                                if (o1.deploymentInfo.filter(
+                                                    (o2) => o2.name === row.name,
+                                                ).length > 0) {
+                                                    return o1;
+                                                }
+                                                return null;
+                                            },
+                                        ).length !== 0 ? (
                                                 allEnvRevision && allEnvRevision.filter(
-                                                    (o1) => o1.deploymentInfo.filter((o2) => o2.name === row.name),
+                                                    (o1) => {
+                                                        if (o1.deploymentInfo.filter(
+                                                            (o2) => o2.name === row.name,
+                                                        ).length > 0) {
+                                                            return o1;
+                                                        }
+                                                        return null;
+                                                    },
                                                 ).map((o3) => (
                                                     <div>
                                                         <Chip
@@ -1483,7 +1532,10 @@ export default function Environments() {
                                                             onClick={() => undeployRevision(o3.id, row.name)}
                                                             size='small'
                                                         >
-                                                            Undepoly
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.Environments.undeploy.btn'
+                                                                defaultMessage='Undeploy'
+                                                            />
                                                         </Button>
                                                     </div>
                                                 ))) : (
@@ -1499,7 +1551,10 @@ export default function Environments() {
                                                             disabled={allRevisions}
                                                             id='demo-simple-select-label'
                                                         >
-                                                                Select Revision
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.Environments.select.rev'
+                                                                defaultMessage='Select Revision'
+                                                            />
                                                         </InputLabel>
                                                         <Select
                                                             labelId='demo-simple-select-helper-label'
@@ -1523,12 +1578,14 @@ export default function Environments() {
                                                         onClick={() => deployRevision(selectedRevision, row.name)}
 
                                                     >
-                                                        Depoly
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Environments.Environments.deploy.button'
+                                                            defaultMessage='Deploy'
+                                                        />
                                                     </Button>
                                                 </div>
                                             )}
                                     </TableCell>
-
                                     <TableCell align='left'>
                                         <Switch
                                             checked={row.showInApiConsole}
@@ -1536,7 +1593,6 @@ export default function Environments() {
                                             disabled={api.isRevision}
                                             name='checkedA'
                                         />
-
                                     </TableCell>
                                 </TableRow>
                             ))}

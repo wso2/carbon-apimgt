@@ -204,11 +204,25 @@ export default function MicroGateway(props) {
 
                                     </TableCell>
                                     <TableCell align='left'>
-                                        {allEnvRevision && (allEnvRevision.filter(
-                                            (o1) => o1.deploymentInfo.filter((o2) => o2.name === row.name),
-                                        ).length) !== 0 ? (
+                                        {allEnvRevision && allEnvRevision.filter(
+                                            (o1) => {
+                                                if (o1.deploymentInfo.filter(
+                                                    (o2) => o2.name === row.name,
+                                                ).length > 0) {
+                                                    return o1;
+                                                }
+                                                return null;
+                                            },
+                                        ).length !== 0 ? (
                                                 allEnvRevision && allEnvRevision.filter(
-                                                    (o1) => o1.deploymentInfo.filter((o2) => o2.name === row.name),
+                                                    (o1) => {
+                                                        if (o1.deploymentInfo.filter(
+                                                            (o2) => o2.name === row.name,
+                                                        ).length > 0) {
+                                                            return o1;
+                                                        }
+                                                        return null;
+                                                    },
                                                 ).map((o3) => (
                                                     <div>
                                                         <Chip

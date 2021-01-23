@@ -71,6 +71,8 @@ function APICreateDefault(props) {
         });
     }, []);
     const [isRevisioning, setIsRevisioning] = useState(false);
+    const [isDeploying, setIsDeploying] = useState(false);
+    const [isPublishButtonClicked, setIsPublishButtonClicked] = useState(false);
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -200,50 +202,112 @@ function APICreateDefault(props) {
 
     /**
      *
-     *
      */
     function createAndPublish() {
-        setIsPublishing(true);
-        createAPI().then((api) => api
-            .publish()
-            .then((response) => {
-                const { workflowStatus } = response.body;
-                if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
-                    Alert.info(intl.formatMessage({
-                        id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
-                        defaultMessage: 'Lifecycle state change request has been sent',
-                    }));
-                } else {
-                    Alert.info(intl.formatMessage({
-                        id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
-                        defaultMessage: 'API updated successfully',
-                    }));
-                }
-                setIsPublishing(false);
-                setIsRevisioning(true);
-                const body = {
-                    description: 'state',
-                };
-                const restApi = new API();
-                restApi.addRevision(api.id, body)
-                    .then(() => {
-                        Alert.info('Revision created succesfully');
-                    })
-                    .catch((error) => {
-                        if (error.response) {
-                            Alert.error(error.response.body.description);
-                        } else {
-                            Alert.error('Something went wrong while updating the environments');
-                        }
-                        console.error(error);
-                    });
-                setIsRevisioning(false);
-            })
-            .finally(() => {
-                history.push(`/apis/${api.id}/overview`);
-            }));
+        const restApi = new API();
+        setIsPublishButtonClicked(true);
+        createAPI().then((api) => {
+            setIsRevisioning(true);
+            const body = {
+                description: 'Initial Revision',
+            };
+            restApi.createRevision(api.id, body)
+                .then((api1) => {
+                    const revisionId = api1.body.id;
+                    Alert.info('API Revision created successfully');
+                    setIsRevisioning(false);
+                    const envList = settings.environment.map((env) => env.name);
+                    const body1 = [];
+                    // for (let i = 0; i < envList.length; i++) {
+                    //     body1.push({
+                    //         name: envList[i],
+                    //         displayOnDevportal: true,
+                    //     });
+                    // }
+                    if (envList.length > 0) {
+                        body1.push({
+                            name: envList[0],
+                            displayOnDevportal: true,
+                        });
+                    }
+                    setIsDeploying(true);
+                    restApi.deployRevision(api.id, revisionId, body1)
+                        .then(() => {
+                            Alert.info('API Revision Deployed Successfully');
+                            setIsDeploying(false);
+                        })
+                        .catch((error) => {
+                            if (error.response) {
+                                Alert.error(error.response.body.description);
+                                setPageError(error.response.body);
+                            } else {
+                                const message = 'Something went wrong while deploying the API Revision';
+                                Alert.error(intl.formatMessage({
+                                    id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.deploy.revision',
+                                    defaultMessage: message,
+                                }));
+                                setPageError(message);
+                            }
+                            console.error(error);
+                        })
+                        .finally(() => {
+                            setIsDeploying(false);
+                        });
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
+                    } else {
+                        const message = 'Something went wrong while creating the API Revision';
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.create.revision',
+                            defaultMessage: message,
+                        }));
+                        setPageError(message);
+                    }
+                    console.error(error);
+                })
+                .finally(() => {
+                    setIsRevisioning(false);
+                });
+            setIsPublishing(true);
+            api.publish()
+                .then((response) => {
+                    const { workflowStatus } = response.body;
+                    if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
+                        Alert.info(intl.formatMessage({
+                            id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
+                            defaultMessage: 'Lifecycle state change request has been sent',
+                        }));
+                    } else {
+                        Alert.info(intl.formatMessage({
+                            id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
+                            defaultMessage: 'API updated successfully',
+                        }));
+                    }
+                    history.push(`/apis/${api.id}/overview`);
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
+                    } else {
+                        const message = 'Something went wrong while publishing the API';
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
+                            defaultMessage: message,
+                        }));
+                        setPageError(message);
+                    }
+                    console.error(error);
+                })
+                .finally(() => {
+                    setIsPublishing(false);
+                    setIsPublishButtonClicked(false);
+                });
+        });
     }
-
 
     /**
      *
@@ -355,7 +419,7 @@ function APICreateDefault(props) {
                             >
                                 Create
                                 {' '}
-                                {isCreating && !isPublishing && <CircularProgress size={24} />}
+                                {isCreating && !isPublishButtonClicked && <CircularProgress size={24} />}
                             </Button>
                         </Grid>
                         {!AuthManager.isNotPublisher() && (
@@ -364,15 +428,18 @@ function APICreateDefault(props) {
                                     id='itest-id-apicreatedefault-createnpublish'
                                     variant='contained'
                                     color='primary'
-                                    disabled={isRevisioning || !isPublishable
+                                    disabled={isDeploying || isRevisioning || !isPublishable
                                         || isAPICreateDisabled || !apiInputs.isFormValid}
                                     onClick={createAndPublish}
                                 >
-                                    {(!isPublishing) && 'Create & Deploy'}
-                                    {(isPublishing || isRevisioning) && <CircularProgress size={24} />}
+                                    {(!isPublishing && !isRevisioning && !isDeploying) && 'Create & Publish'}
+                                    {(isPublishing || isRevisioning || isDeploying) && <CircularProgress size={24} />}
                                     {isCreating && isPublishing && 'Creating API . . .'}
-                                    {!isCreating && isPublishing && !isRevisioning && 'Publishing API . . .'}
-                                    {!isCreating && isPublishing && isRevisioning && 'Create Revision . . .'}
+                                    {!isCreating && isRevisioning && !isDeploying && 'Creating Revision . . .'}
+                                    {!isCreating && isPublishing
+                                        && !isRevisioning && !isDeploying && 'Publishing API . . .'}
+                                    {!isCreating && isPublishing
+                                        && !isRevisioning && isDeploying && 'Deploying Revision . . .'}
                                 </Button>
                             </Grid>
                         )}
