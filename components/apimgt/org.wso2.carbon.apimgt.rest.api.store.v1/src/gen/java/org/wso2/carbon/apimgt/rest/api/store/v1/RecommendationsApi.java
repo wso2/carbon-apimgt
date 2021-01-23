@@ -40,7 +40,7 @@ RecommendationsApiService delegate = new RecommendationsApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Give API Recommendations for a User", notes = "This API can be used to get recommended APIs for a user who logs into the API store", response = RecommendationsDTO.class, authorizations = {
+    @ApiOperation(value = "Give API Recommendations for a User", notes = "This API can be used to get recommended APIs for a user who logs into the API Developer Portal", response = RecommendationsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })

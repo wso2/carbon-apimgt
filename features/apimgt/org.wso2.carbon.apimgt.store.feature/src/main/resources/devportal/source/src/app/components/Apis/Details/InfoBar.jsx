@@ -430,7 +430,7 @@ class InfoBar extends React.Component {
                             <a
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                href={api.advertiseInfo.originalStoreUrl}
+                                href={api.advertiseInfo.originalDevportalUrl}
                                 className={classes.viewInPubStoreLauncher}
                             >
                                 <div>

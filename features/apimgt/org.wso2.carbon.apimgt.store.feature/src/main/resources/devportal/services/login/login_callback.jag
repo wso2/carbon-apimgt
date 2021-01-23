@@ -100,13 +100,13 @@
         var refreshTokenPart1 = refreshToken.substring(0, tokenLength / 2);
         var refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
 
-        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/store
+        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/devportal
         // because partial HTTP only cookie is required for get the user information from access token,
-        // hence setting the HTTP only access token path to /store/
+        // hence setting the HTTP only access token path to /devportal/
         var cookie = { 'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': app.context + "/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in) };
         response.addCookie(cookie);
 
-        cookie = { 'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in) };
+        cookie = { 'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': accessTokenPart2, 'path': "/api/am/devportal/", "httpOnly": true, "secure": true, "maxAge": Integer(tokenResponse.expires_in) };
         response.addCookie(cookie);
 
         cookie = {

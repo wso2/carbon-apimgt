@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.144-SNAPSHOT</version>
+        <version>6.8.153-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 API Manager Publisher REST API - v1</name>
+    <name>WSO2 API Manager Publisher REST API - v2</name>
     <description>WSO2 API Manager REST API for API Publisher</description>
 
 
