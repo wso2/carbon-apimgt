@@ -17,11 +17,8 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.AxisFault;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -1325,7 +1322,8 @@ public class APIGatewayManager {
             sendDeploymentEvent(api, tenantDomain, gateways);
     }
 
-    public void unDeployFromGateway(API api, String tenantDomain) throws APIManagementException {
+    public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove)
+            throws APIManagementException {
 
         updateRemovedClientCertificates(api, tenantDomain);
         // Extracting API details for the recommendation system
@@ -1346,7 +1344,7 @@ public class APIGatewayManager {
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendUnDeploymentEvent(api, tenantDomain, Collections.emptySet());
+        sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove);
     }
 
     public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain,Set<API> associatedAPIs) throws APIManagementException {
