@@ -284,7 +284,7 @@ public class APIGatewayManager {
         gatewayAPIDTO.setName(api.getId().getName());
         gatewayAPIDTO.setVersion(api.getId().getVersion());
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
-        gatewayAPIDTO.setApiId(api.getUUID());
+        gatewayAPIDTO.setApiId(api.getUuid());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
         gatewayAPIDTO.setOverride(true);
 
@@ -1800,7 +1800,7 @@ public class APIGatewayManager {
         DeployAPIInGatewayEvent
                 deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name(), tenantDomain,
-                api.getUUID(), publishedGateways, api.getContext(), api.getId().getVersion());
+                api.getUuid(), publishedGateways, api.getContext(), api.getId().getVersion());
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
         if (debugEnabled) {
             log.debug("Event sent to Gateway with eventID " + deployAPIInGatewayEvent.getEventId() + " for api "

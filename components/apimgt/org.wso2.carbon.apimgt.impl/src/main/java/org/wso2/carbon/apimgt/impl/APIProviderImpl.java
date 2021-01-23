@@ -1796,10 +1796,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 //                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
 //                            failedGateways.put("UNPUBLISHED", Collections.<String, String> emptyMap());
 //                        }
-//                    }
-//                } else {
-//                    log.debug("Gateway is not existed for the current API Provider");
 //                }
+//            } else {
+//                log.debug("Gateway is not existed for the current API Provider");
 //            }
 //
 //            // If gateway(s) exist, remove resource paths saved on the cache.
@@ -2662,15 +2661,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiUUID = api.getUuid();
             // get all policies
             try {
-                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+                APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiUUID);
+                List<MediationInfo> localPolicies;
+                if (apiRevision.getApiUUID() != null) {
+                    localPolicies = apiPersistenceInstance.getAllRevisionMediationPolicies(org, apiUUID,
+                            apiRevision.getApiUUID(), apiRevision.getId());
+                } else {
+                    localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
+                }
                 List<Mediation> globalPolicies = null;
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     boolean found = false;
                     for (MediationInfo mediationInfo : localPolicies) {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
                                 && api.getInSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy;
+                            if (apiRevision.getApiUUID() != null) {
+                                mediationPolicy = apiPersistenceInstance
+                                        .getRevisionMediationPolicy(org, apiUUID, mediationInfo.getId(),
+                                        apiRevision.getApiUUID(), apiRevision.getId());
+                            } else {
+                                mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            }
                             Mediation mediation = new Mediation();
                             mediation.setConfig(mediationPolicy.getConfig());
                             mediation.setName(mediationPolicy.getName());
@@ -2703,8 +2716,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     for (MediationInfo mediationInfo : localPolicies) {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
                                 && api.getOutSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy;
+                            if (apiRevision.getApiUUID() != null) {
+                                mediationPolicy = apiPersistenceInstance
+                                        .getRevisionMediationPolicy(org, apiUUID, mediationInfo.getId(),
+                                                apiRevision.getApiUUID(), apiRevision.getId());
+                            } else {
+                                mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            }
                             Mediation mediation = new Mediation();
                             mediation.setConfig(mediationPolicy.getConfig());
                             mediation.setName(mediationPolicy.getName());
@@ -2737,8 +2757,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     for (MediationInfo mediationInfo : localPolicies) {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
                                 && api.getFaultSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy;
+                            if (apiRevision.getApiUUID() != null) {
+                                mediationPolicy = apiPersistenceInstance
+                                        .getRevisionMediationPolicy(org, apiUUID, mediationInfo.getId(),
+                                                apiRevision.getApiUUID(), apiRevision.getId());
+                            } else {
+                                mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                            }
                             Mediation mediation = new Mediation();
                             mediation.setConfig(mediationPolicy.getConfig());
                             mediation.setName(mediationPolicy.getName());
@@ -5241,6 +5268,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
+            deleteAPIRevisions(api.getUuid());
             deleteAPIFromDB(api);
             /**
              * Delete the API in Kubernetes
@@ -5363,6 +5391,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.deleteAPI(apiIdentifier);
         if (log.isDebugEnabled()) {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
+        }
+    }
+
+    private void deleteAPIRevisions(String apiUUID) throws APIManagementException {
+        List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
+        for (APIRevision apiRevision : apiRevisionList) {
+            if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
+            }
+            deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID());
         }
     }
 
@@ -10256,6 +10294,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
+            APIIdentifier apiIdentifier = api.getId();
+            apiIdentifier.setUuid(uuid);
+            api.setId(apiIdentifier);
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
             populateAPIInformation(uuid, requestedTenantDomain, org, api);
@@ -10568,8 +10609,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId)
             throws APIManagementException {
         try {
-            org.wso2.carbon.apimgt.persistence.dto.Mediation policy = apiPersistenceInstance.getMediationPolicy(
-                    new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, policyId);
+            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
+            org.wso2.carbon.apimgt.persistence.dto.Mediation policy;
+            if (apiRevision.getApiUUID() != null) {
+                policy = apiPersistenceInstance.getRevisionMediationPolicy(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, policyId,
+                        apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                policy = apiPersistenceInstance.getMediationPolicy(
+                        new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId, policyId);
+            }
             if (policy != null) {
                 Mediation mediation = new Mediation();
                 mediation.setName(policy.getName());
@@ -10818,7 +10867,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String revisionUUID;
         try {
             revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
-                    apiId, revisionId);
+                    apiId.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
@@ -10943,6 +10992,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         API api = getAPIbyUUID(apiRevisionId, tenantDomain);
+        Set<URITemplate> resourceVerbs = api.getUriTemplates();
+        if (resourceVerbs != null) {
+            invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
+            if (log.isDebugEnabled()) {
+                log.debug("Calling invalidation cache");
+            }
+        }
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
@@ -10974,7 +11030,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiIdentifier.setUuid(apiId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
-                    apiIdentifier, apiRevision.getId());
+                    apiIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
@@ -11013,7 +11069,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiIdentifier.setUuid(apiId);
         try {
             apiPersistenceInstance.deleteAPIRevision(new Organization(tenantDomain),
-                    apiIdentifier, apiRevision.getId());
+                    apiIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.

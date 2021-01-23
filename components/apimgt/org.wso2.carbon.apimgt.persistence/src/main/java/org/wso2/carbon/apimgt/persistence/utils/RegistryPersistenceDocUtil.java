@@ -144,6 +144,18 @@ public class RegistryPersistenceDocUtil {
                 version + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
+
+    /**
+     * Get Document collection location path
+     * @param apiUUID API UUID
+     * @param revisionId revision Id
+     * @return
+     */
+    public static String getRevisionDocumentPath(String apiUUID, int revisionId) {
+        return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
     
     /**
      * Get file type content location
