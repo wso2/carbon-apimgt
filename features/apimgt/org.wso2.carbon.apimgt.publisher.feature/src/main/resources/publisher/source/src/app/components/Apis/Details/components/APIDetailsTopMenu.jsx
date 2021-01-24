@@ -104,6 +104,9 @@ const styles = (theme) => ({
     Typokk: {
         color: 'red',
     },
+    revisionWrapper: {
+        paddingRight: theme.spacing(2),
+    },
 });
 
 
@@ -268,7 +271,8 @@ const APIDetailsTopMenu = (props) => {
             )}
             {/* Page error banner */}
             {/* end of Page error banner */}
-            {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
+            {isAPIProduct || api.isRevision
+                ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
             {(isDownlodable) && <VerticalDivider height={70} />}
             <div className={classes.downloadApi}>
                 {(isDownlodable) && (
@@ -289,7 +293,9 @@ const APIDetailsTopMenu = (props) => {
                     </a>
                 )}
             </div>
-            <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
+            {!api.isRevision
+                ? (<DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />)
+                : (<div className={classes.revisionWrapper} />)}
         </div>
     );
 };

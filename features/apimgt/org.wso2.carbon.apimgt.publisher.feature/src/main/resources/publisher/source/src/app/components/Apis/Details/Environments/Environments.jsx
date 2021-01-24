@@ -1063,20 +1063,23 @@ export default function Environments() {
     }
     return (
         <>
-            <Grid container>
-                <Button
-                    onClick={toggleDeployRevisionPopup}
-                    variant='contained'
-                    color='primary'
-                    size='large'
-                    className={classes.deployNewRevButtonStyle}
-                >
-                    <FormattedMessage
-                        id='Apis.Details.Environments.Environments.deploy.new.revision'
-                        defaultMessage='Deploy New Revision'
-                    />
-                </Button>
-            </Grid>
+            {!api.isRevision
+            && (
+                <Grid container>
+                    <Button
+                        onClick={toggleDeployRevisionPopup}
+                        variant='contained'
+                        color='primary'
+                        size='large'
+                        className={classes.deployNewRevButtonStyle}
+                    >
+                        <FormattedMessage
+                            id='Apis.Details.Environments.Environments.deploy.new.revision'
+                            defaultMessage='Deploy New Revision'
+                        />
+                    </Button>
+                </Grid>
+            )}
             <Grid container>
                 <Dialog
                     open={openDeployPopup}

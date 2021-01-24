@@ -131,6 +131,7 @@ function Subscriptions(props) {
                         type='submit'
                         variant='contained'
                         color='primary'
+                        disabled={api.isRevision}
                         onClick={() => saveAPI()}
                     >
                         <FormattedMessage
