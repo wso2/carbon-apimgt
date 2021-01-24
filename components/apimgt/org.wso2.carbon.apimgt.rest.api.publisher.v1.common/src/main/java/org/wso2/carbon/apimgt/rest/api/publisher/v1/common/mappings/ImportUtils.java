@@ -985,25 +985,30 @@ public class ImportUtils {
     }
 
     public static String retrieveSequenceContent(String pathToArchive, boolean specific, String type,
-                                                 String sequenceName)  {
+                                                 String sequenceName) {
 
         String sequenceFileName = sequenceName + APIConstants.XML_EXTENSION;
         String sequenceFileLocation = null;
         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(type)) {
             sequenceFileLocation =
-                    pathToArchive + ImportExportConstants.IN_SEQUENCE_LOCATION + sequenceFileName;
+                    pathToArchive + ImportExportConstants.IN_SEQUENCE_LOCATION;
         } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(type)) {
             sequenceFileLocation =
-                    pathToArchive + ImportExportConstants.OUT_SEQUENCE_LOCATION + sequenceFileName;
+                    pathToArchive + ImportExportConstants.OUT_SEQUENCE_LOCATION;
 
         } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(type)) {
             sequenceFileLocation =
-                    pathToArchive + ImportExportConstants.FAULT_SEQUENCE_LOCATION + sequenceFileName;
+                    pathToArchive + ImportExportConstants.FAULT_SEQUENCE_LOCATION;
         }
         if (sequenceFileLocation != null) {
             if (specific) {
-                sequenceFileLocation = sequenceFileLocation + File.separator + ImportExportConstants.CUSTOM_TYPE;
+                if (sequenceFileLocation.endsWith(File.separator)) {
+                    sequenceFileLocation = sequenceFileLocation + ImportExportConstants.CUSTOM_TYPE;
+                } else {
+                    sequenceFileLocation = sequenceFileLocation + File.separator + ImportExportConstants.CUSTOM_TYPE;
+                }
             }
+            sequenceFileLocation = sequenceFileLocation + File.separator + sequenceFileName;
             try {
                 return retrieveSequenceContentFromLocation(sequenceFileLocation);
             } catch (IOException e) {
