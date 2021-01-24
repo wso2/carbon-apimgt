@@ -154,10 +154,10 @@ public class ApplicationUtils {
 
 
     public static void updateOAuthAppAssociation(Application application, String keyType,
-                                                 OAuthApplicationInfo oAuthApplication, String keyManagerName)
+                                                 OAuthApplicationInfo oAuthApplication, String keyManagerId)
             throws APIManagementException {
-        application.addOAuthApp(keyType,keyManagerName,oAuthApplication);
-        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType,keyManagerName);
+        application.addOAuthApp(keyType,keyManagerId,oAuthApplication);
+        ApiMgtDAO.getInstance().updateApplicationKeyTypeMapping(application,keyType,keyManagerId);
     }
 
     /**

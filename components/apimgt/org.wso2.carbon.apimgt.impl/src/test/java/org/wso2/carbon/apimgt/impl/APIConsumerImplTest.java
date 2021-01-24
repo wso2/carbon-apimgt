@@ -1036,7 +1036,7 @@ public class APIConsumerImplTest {
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default");
+                            "api_view", "2", null, "default", null);
             Assert.fail("User store exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Unable to retrieve the tenant information of the current user"));
@@ -1055,7 +1055,7 @@ public class APIConsumerImplTest {
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default");
+                            "api_view", "2", null, "default", null);
             Assert.fail("API management exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Token Type"));
@@ -1075,13 +1075,13 @@ public class APIConsumerImplTest {
                 .thenReturn(application);
         Map<String, Object> result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
-                        "identity.com/auth", null, "3600", "api_view", "2", null, "default");
+                        "identity.com/auth", null, "3600", "api_view", "2", null, "default", null);
         Assert.assertEquals(result.size(), 9);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
-                        "3600", "api_view", "2", null, "default");
+                        "3600", "api_view", "2", null, "default", null);
         Assert.assertEquals(result.size(), 9);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 

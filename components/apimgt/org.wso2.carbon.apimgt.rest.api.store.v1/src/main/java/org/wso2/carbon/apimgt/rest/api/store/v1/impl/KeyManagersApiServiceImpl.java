@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.codehaus.plexus.util.StringUtils;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -23,11 +24,14 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
     public Response keyManagersGet(String xWSO2Tenant, MessageContext messageContext) {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (StringUtils.isBlank(xWSO2Tenant)) {
+            xWSO2Tenant = RestApiUtil.getLoggedInUserTenantDomain();
+        }
+
         APIAdmin apiAdmin = new APIAdminImpl();
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =
-                    apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
+                    apiAdmin.getKeyManagerConfigurationsByTenant(xWSO2Tenant);
             for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
                 if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
                     APIUtil.setTokenAndRevokeEndpointsToDevPortal(keyManagerConfiguration);
@@ -36,7 +40,7 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
         } catch (APIManagementException e) {
             RestApiUtil
-                    .handleInternalServerError("Error while retrieving keyManager Details for Tenant " + tenantDomain,
+                    .handleInternalServerError("Error while retrieving keyManager Details for Tenant " + xWSO2Tenant,
                             log);
         }
         return null;

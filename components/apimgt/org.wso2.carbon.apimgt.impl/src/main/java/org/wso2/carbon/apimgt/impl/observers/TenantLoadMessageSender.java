@@ -22,13 +22,21 @@ import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.message.clustering.TenantLoadMessage;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+
+import java.util.HashMap;
 
 /**
  * Observer class for keeping track of tenant loading/unloading operations
@@ -138,5 +146,14 @@ public class TenantLoadMessageSender extends AbstractAxis2ConfigurationContextOb
      */
     public boolean isEnabled() {
         return Boolean.parseBoolean((System.getProperty(APIConstants.ENABLE_TENANT_LOAD_NOTIFICATION)));
+    }
+
+
+    /**
+     * Returns API manager configurations.
+     * @return APIManagerConfiguration object
+     */
+    private APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 }

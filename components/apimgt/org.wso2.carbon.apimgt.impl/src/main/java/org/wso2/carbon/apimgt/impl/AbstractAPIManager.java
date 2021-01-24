@@ -1848,6 +1848,28 @@ public abstract class AbstractAPIManager implements APIManager {
         return application;
     }
 
+    /**
+     * Returns the corresponding application given the uuid with keys for a specific tenant.
+     *
+     * @param uuid uuid of the Application.
+     * @param tenantDomain domain of the accessed store.
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid, String tenantDomain) throws APIManagementException {
+        Application application = apiMgtDAO.getApplicationByUUID(uuid);
+        if (application != null) {
+            Set<APIKey> keys = getApplicationKeys(application.getId(), tenantDomain);
+            for (APIKey key : keys) {
+                if (APIConstants.JWT.equals(application.getTokenType())) {
+                    key.setAccessToken("");
+                }
+                application.addKey(key);
+            }
+        }
+        return application;
+    }
+
     @Override
     public Application getLightweightApplicationByUUID(String uuid) throws APIManagementException {
         return apiMgtDAO.getApplicationByUUID(uuid);
@@ -3100,13 +3122,41 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     protected Set<APIKey> getApplicationKeys(int applicationId) throws APIManagementException {
+        return getApplicationKeys(applicationId, null);
+    }
+
+    /**
+     * Returns the key associated with given application id.
+     *
+     * @param applicationId Id of the Application.
+     * @return APIKey The key of the application.
+     * @throws APIManagementException
+     */
+    protected Set<APIKey> getApplicationKeys(int applicationId, String xWso2Tenant) throws APIManagementException {
 
         Set<APIKey> apiKeyList = apiMgtDAO.getKeyMappingsFromApplicationId(applicationId);
+        Set<APIKey> resultantApiKeyList = new HashSet<>();
         for (APIKey apiKey : apiKeyList) {
             String keyManagerName = apiKey.getKeyManager();
             String consumerKey = apiKey.getConsumerKey();
             if (StringUtils.isNotEmpty(consumerKey)) {
+                String tenantDomain = this.tenantDomain;
+                if (StringUtils.isNotEmpty(xWso2Tenant)) {
+                    tenantDomain = xWso2Tenant;
+                }
                 KeyManagerConfigurationDTO keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+                if (keyManagerConfigurationDTO == null) {
+                    keyManagerConfigurationDTO = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                    if (keyManagerConfigurationDTO != null) {
+                        keyManagerName = keyManagerConfigurationDTO.getName();
+                    } else {
+                        log.error("Key Manager: " + keyManagerName + " not found in database.");
+                        continue;
+                    }
+                }
+                if (!tenantDomain.equalsIgnoreCase(keyManagerConfigurationDTO.getTenantDomain())) {
+                        continue;
+                }
                 if (keyManagerConfigurationDTO  != null && keyManagerConfigurationDTO.isEnabled()) {
                     KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
                     if (keyManager != null) {
@@ -3161,13 +3211,15 @@ public abstract class AbstractAPIManager implements APIManager {
                                 log.debug("Access token does not exist for Consumer Key: " + consumerKey);
                             }
                         }
+                        apiKey.setKeyManager(keyManagerConfigurationDTO.getName());
+                        resultantApiKeyList.add(apiKey);
                     } else {
                         log.error("Key Manager " + keyManagerName + " not initialized in tenant " + tenantDomain);
                     }
                 }
             }
         }
-        return apiKeyList;
+        return resultantApiKeyList;
     }
 
     /**

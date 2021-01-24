@@ -251,6 +251,6 @@ public class ApplicationImportExportManager {
         apiConsumer.requestApprovalForApplicationRegistration(
                 username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
                 accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
-                jsonParams,apiKey.getKeyManager());
+                jsonParams,apiKey.getKeyManager(), null); // TODO: 2020-12-23 get the store domain and pass it as the tenant domain );
     }
 }

@@ -358,6 +358,15 @@ public interface APIManager {
     Application getApplicationByUUID(String uuid) throws APIManagementException;
 
     /**
+     * Returns the corresponding application given the uuid. It will also contain keys of the application
+     *
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid, String tenantDomain) throws APIManagementException;
+
+    /**
      * Returns the corresponding application given the uuid. The returned application will not contain key information
      *
      * @param uuid uuid of the Application

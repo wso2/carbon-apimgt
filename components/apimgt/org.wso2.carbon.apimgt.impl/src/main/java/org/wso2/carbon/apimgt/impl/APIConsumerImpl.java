@@ -1338,10 +1338,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Populating additional parameters.
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            String keyManagerTenant = tenantDomain;
             if (keyManagerConfiguration == null) {
-                throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
-            } else if (keyManagerConfiguration.isEnabled()) {
+                keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                if (keyManagerConfiguration == null) {
+                    throw new APIManagementException("Key Manager " + keyManagerName + " couldn't found.",
+                            ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                }
+                keyManagerName = keyManagerConfiguration.getName();
+                keyManagerTenant = keyManagerConfiguration.getTenantDomain();
+            }
+            if (keyManagerConfiguration.isEnabled()) {
                 Object enableTokenGeneration =
                         keyManagerConfiguration.getProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION);
                 if (enableTokenGeneration != null && !(Boolean) enableTokenGeneration) {
@@ -1349,7 +1356,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             "Key Manager didn't support to generate token Generation From portal",
                             ExceptionCodes.KEY_MANAGER_NOT_SUPPORTED_TOKEN_GENERATION);
                 }
-                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
                 if (keyManager == null) {
                     throw new APIManagementException("Key Manager " + keyManagerName + " not initialized",
                             ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
@@ -4073,12 +4080,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                                          String[] allowedDomains, String validityTime,
                                                                          String tokenScope, String groupingId,
                                                                          String jsonString,
-                                                                         String keyManagerName)
+                                                                         String keyManagerName, String tenantDomain)
             throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        if (StringUtils.isEmpty(tenantDomain)) {
+            tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        }
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -4106,9 +4114,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
         }
+
+        String keyManagerId = null;
         if (keyManagerName != null){
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            if (keyManagerConfiguration == null) {
+                keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                if (keyManagerConfiguration != null) {
+                    keyManagerId = keyManagerName;
+                    keyManagerName = keyManagerConfiguration.getName();
+                }
+            } else {
+                keyManagerId = keyManagerConfiguration.getUuid();
+            }
             if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
                 throw new APIManagementException(
                         "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
@@ -4202,7 +4221,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
             appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
             appRegWFDto.setApplication(application);
-            appRegWFDto.setKeyManager(keyManagerName);
+            appRegWFDto.setKeyManager(keyManagerId);
             request.setMappingId(appRegWFDto.getWorkflowReference());
             if (!application.getSubscriber().getName().equals(userId)) {
                 appRegWFDto.setUserName(application.getSubscriber().getName());
@@ -4221,7 +4240,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put("keyState", appRegWFDto.getStatus().toString());
             OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
             String keyMappingId = apiMgtDAO.getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(application.getId(),
-                    tokenType,keyManagerName);
+                    tokenType,keyManagerId);
             if (applicationInfo != null) {
                 keyDetails.put("consumerKey", applicationInfo.getClientId());
                 keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
@@ -4257,7 +4276,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
                         APIUtil.sendNotification(applicationRegistrationEvent,
                                 APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
@@ -4265,7 +4284,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
                     APIUtil.sendNotification(applicationRegistrationEvent,
                             APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                 }
@@ -4280,7 +4299,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
                         APIUtil.sendNotification(applicationRegistrationEvent,
                                 APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
@@ -4288,7 +4307,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
+                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
                     APIUtil.sendNotification(applicationRegistrationEvent,
                             APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                 }
@@ -4706,6 +4725,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             KeyManagerConfigurationDTO keyManagerConfiguration =
                     apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
+            String keyManagerID = null;
+            String keyManagerTenant = tenantDomain;
+            if (keyManagerConfiguration == null) {
+                keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
+                if (keyManagerConfiguration != null) {
+                    keyManagerID = keyManagerName;
+                    keyManagerName = keyManagerConfiguration.getName();
+                    keyManagerTenant = keyManagerConfiguration.getTenantDomain();
+                }
+            } else {
+                keyManagerID = keyManagerConfiguration.getUuid();
+            }
+
             if (keyManagerConfiguration == null) {
                 throw new APIManagementException("Key Manager " + keyManagerName + " not found in the requested Tenant",
                         ExceptionCodes.KEY_MANAGER_NOT_FOUND);
@@ -4715,15 +4747,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             //Create OauthAppRequest object by passing json String.
             OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                    tokenScope, jsonString, application.getTokenType(), this.tenantDomain, keyManagerName);
+                    tokenScope, jsonString, application.getTokenType(), keyManagerTenant, keyManagerName);
 
             oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             String consumerKey = apiMgtDAO
-                    .getConsumerKeyByApplicationIdKeyTypeKeyManager(application.getId(), tokenType, keyManagerName);
+                    .getConsumerKeyByApplicationIdKeyTypeKeyManager(application.getId(), tokenType, keyManagerID);
 
             oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
             //get key manager instance.
-            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(keyManagerTenant, keyManagerName);
             if (keyManager == null) {
                 throw new APIManagementException(
                         "Key Manager " + keyManagerName + " not initialized in the requested" + "Tenant",
@@ -5143,6 +5175,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException {
         Set<APIKey> apikeys = getApplicationKeys(applicationId);
         return apikeys;
+    }
+
+    public Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant)
+            throws APIManagementException {
+        return getApplicationKeys(applicationId, xWso2Tenant);
     }
 
 
@@ -5783,6 +5820,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiMgtDAO.deleteApplicationRegistration(applicationId, apiKey.getType(),apiKey.getKeyManager());
             apiMgtDAO.deleteApplicationKeyMappingByMappingId(keyMappingId);
         }
+    }
+
+    @Override
+    public APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId) throws APIManagementException {
+        return apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
     }
 
     /**

@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.keymgt.listeners;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -52,5 +54,22 @@ public class ServerStartupListener extends AbstractAxis2ConfigurationContextObse
     public void terminatedConfigurationContext(ConfigurationContext configCtx) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
+    }
+
+    /**
+     * Retrieves the tenant id from the Thread Local Carbon Context
+     *
+     * @return tenant id
+     */
+    int getTenantId() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+    }
+
+    /**
+     * Returns API manager configurations.
+     * @return APIManagerConfiguration object
+     */
+    private APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
     }
 }
