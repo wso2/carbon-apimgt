@@ -4993,9 +4993,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
         apiMgtDAO.updateSubscription(subscribedAPI);
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
-        int apiId = apiMgtDAO.getAPIID(subscribedAPI.getApiId(), null);
+        Identifier identifier =
+                subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
+        int apiId = apiMgtDAO.getAPIID(identifier, null);
         String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, tenantDomain,
                 subscribedAPI.getSubscriptionId(), apiId,
@@ -6699,9 +6701,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
-
         apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
-
         saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
         apiProduct.setDefinition(apiProductSwagger);
     }
@@ -6713,13 +6713,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
-
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
-
         saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
         apiProduct.setDefinition(updatedProductSwagger);
-
         updateLocalEntry(apiProduct);
     }
 
@@ -10201,7 +10198,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIResource> removedReusedResources = new ArrayList<>();
 
         for (URITemplate existingUriTemplate : existingUriTemplates) {
-
             // If existing URITemplate is used by any API Products
             if (!existingUriTemplate.retrieveUsedByProducts().isEmpty()) {
                 String existingVerb = existingUriTemplate.getHTTPVerb();
@@ -10219,7 +10215,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         break;
                     }
                 }
-
                 // Existing reused resource is not among updated resources
                 if (isReusedResourceRemoved) {
                     APIResource removedResource = new APIResource(existingVerb, existingPath);

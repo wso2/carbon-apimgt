@@ -25,7 +25,7 @@
     site.context = appUtils.getTenantBaseStoreContext();
     var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': site.context + "/", "httpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
-    cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': "/api/am/store/", "httpOnly": true, "secure": true, "maxAge": 2};
+    cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': "/api/am/devportal/", "httpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
     cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': '', 'path': site.context + "/", "httpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
