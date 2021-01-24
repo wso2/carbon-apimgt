@@ -33,7 +33,6 @@ import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-// import { useAppContext } from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AuthManager from 'AppData/AuthManager';
@@ -410,7 +409,7 @@ export default function CustomizedSteppers() {
                                 variant='contained'
                                 color='primary'
                                 onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                disabled={(!isEndpointAvailable || !isTierAvailable)
+                                disabled={(!isEndpointAvailable || !isTierAvailable) || api.isRevision
                                         || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
                             >
                                         Publish
