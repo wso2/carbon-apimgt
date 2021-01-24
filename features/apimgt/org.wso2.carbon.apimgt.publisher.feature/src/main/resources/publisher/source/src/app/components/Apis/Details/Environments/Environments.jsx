@@ -26,7 +26,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
 import moment from 'moment';
-// import CircularProgress from '@material-ui/core/CircularProgress';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -39,7 +38,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
-// import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
@@ -53,15 +51,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import RestoreIcon from '@material-ui/icons/Restore';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Checkbox from '@material-ui/core/Checkbox';
-import InputLabel from '@material-ui/core/InputLabel';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
 
@@ -284,13 +279,9 @@ export default function Environments() {
     } else {
         revisionCount = 5;
     }
-    // const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
     const [selectedMgLabel, setSelectedMgLabel] = useState([...api.labels]);
-    // const [isUpdating, setUpdating] = useState(false);
     const [selectedDeployments, setSelectedDeployments] = useState([...api.deploymentEnvironments]);
-
     const restApi = new API();
-    // const isdeploy = true;
     const [allDeployments, setAllDeployments] = useState([]);
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
@@ -331,13 +322,9 @@ export default function Environments() {
             setLastRevisionCount(result.body.count);
             extractLastRevisionNumber(result.body.list);
         });
-
         restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
             setEnvRevision(result.body.list);
         });
-        // restApi.getRevisionsEnv(api.id).then((result) => {
-        //     setEnvRevision(result.body.list);
-        // });
     }, []);
 
     const toggleOpenConfirmDelete = (revisionName, revisionId) => {
@@ -1120,6 +1107,7 @@ export default function Environments() {
                                 <TextField
                                     fullWidth
                                     id='revision-to-delete-selector'
+                                    required
                                     select
                                     label={(
                                         <FormattedMessage
@@ -1127,20 +1115,42 @@ export default function Environments() {
                                             defaultMessage='Revision to delete'
                                         />
                                     )}
+                                    SelectProps={{
+                                        MenuProps: {
+                                            anchorOrigin: {
+                                                vertical: 'bottom',
+                                                horizontal: 'left',
+                                            },
+                                            getContentAnchorEl: null,
+                                        },
+                                    }}
                                     name='extraRevisionToDelete'
                                     onChange={handleDeleteSelect}
-                                    helperText={(
-                                        <FormattedMessage
-                                            id='Apis.Details.Environments.Environments.select.rev.helper'
-                                            defaultMessage={'Please select a revision to delete as the '
-                                            + 'maximum allowed number of revisions, {count} has reached'}
-                                            values={{ count: revisionCount }}
-                                        />
-                                    )}
+                                    helperText={allRevisions && allRevisions.filter(
+                                        (o1) => o1.deploymentInfo.length === 0,
+                                    ).length === 0
+                                        ? (
+                                            <FormattedMessage
+                                                id='Apis.Details.Environments.Environments.select.rev.helper1'
+                                                defaultMessage={'Please undeploy and delete a revision as '
+                                                + 'the number of revisions have reached a maximum of {count}'}
+                                                values={{ count: revisionCount }}
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Apis.Details.Environments.Environments.select.rev.helper'
+                                                defaultMessage={'Please select a revision to delete as '
+                                                + 'the number of revisions have reached a maximum of {count}'}
+                                                values={{ count: revisionCount }}
+                                            />
+                                        )}
                                     margin='normal'
                                     variant='outlined'
+                                    disabled={api.isRevision || allRevisions.filter(
+                                        (o1) => o1.deploymentInfo.length === 0,
+                                    ).length === 0}
                                 >
-                                    {allRevisions && allRevisions.filter(
+                                    {allRevisions && allRevisions.length !== 0 && allRevisions.filter(
                                         (o1) => o1.deploymentInfo.length === 0,
                                     ).map(
                                         (revision) => (
@@ -1265,18 +1275,18 @@ export default function Environments() {
                                 ))}
                             </Grid>
                         </Box>
-                        {mgLabels.length > 0 && mgLabels.map((row) => (
-                            <Box mt={2}>
-                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.gateway.labels.heading'
-                                        defaultMessage='Gateway Labels'
-                                    />
-                                </Typography>
-                                <Grid
-                                    container
-                                    spacing={3}
-                                >
+                        <Box mt={2}>
+                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.gateway.labels.heading'
+                                    defaultMessage='Gateway Labels'
+                                />
+                            </Typography>
+                            <Grid
+                                container
+                                spacing={3}
+                            >
+                                {mgLabels.length > 0 && mgLabels.map((row) => (
                                     <Grid item xs={4}>
                                         <Card
                                             className={clsx(SelectedEnvironment
@@ -1353,9 +1363,9 @@ export default function Environments() {
                                             </Box>
                                         </Card>
                                     </Grid>
-                                </Grid>
-                            </Box>
-                        ))}
+                                ))}
+                            </Grid>
+                        </Box>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDeployPopup}>
@@ -1372,7 +1382,7 @@ export default function Environments() {
                             }
                             color='primary'
                             disabled={SelectedEnvironment.length === 0
-                                || (allRevisions.length === revisionCount && !extraRevisionToDelete)}
+                                || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.deploy.deploy'
@@ -1457,6 +1467,7 @@ export default function Environments() {
                                 <TextField
                                     fullWidth
                                     id='revision-to-delete-selector'
+                                    required
                                     select
                                     label={(
                                         <FormattedMessage
@@ -1464,20 +1475,42 @@ export default function Environments() {
                                             defaultMessage='Revision to delete'
                                         />
                                     )}
+                                    SelectProps={{
+                                        MenuProps: {
+                                            anchorOrigin: {
+                                                vertical: 'bottom',
+                                                horizontal: 'left',
+                                            },
+                                            getContentAnchorEl: null,
+                                        },
+                                    }}
                                     name='extraRevisionToDelete'
                                     onChange={handleDeleteSelect}
-                                    helperText={(
-                                        <FormattedMessage
-                                            id='Apis.Details.Environments.Environments.select.rev.helper'
-                                            defaultMessage={'Please select a revision to delete as the '
-                                            + 'maximum allowed number of revisions, {count} has reached'}
-                                            values={{ count: revisionCount }}
-                                        />
-                                    )}
+                                    helperText={allRevisions && allRevisions.filter(
+                                        (o1) => o1.deploymentInfo.length === 0,
+                                    ).length === 0
+                                        ? (
+                                            <FormattedMessage
+                                                id='Apis.Details.Environments.Environments.select.rev.helper1'
+                                                defaultMessage={'Please undeploy and delete a revision as '
+                                                + 'the number of revisions have reached a maximum of {count}'}
+                                                values={{ count: revisionCount }}
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Apis.Details.Environments.Environments.select.rev.helper'
+                                                defaultMessage={'Please select a revision to delete as '
+                                                + 'the number of revisions have reached a maximum of {count}'}
+                                                values={{ count: revisionCount }}
+                                            />
+                                        )}
                                     margin='normal'
                                     variant='outlined'
+                                    disabled={api.isRevision || allRevisions.filter(
+                                        (o1) => o1.deploymentInfo.length === 0,
+                                    ).length === 0}
                                 >
-                                    {allRevisions && allRevisions.filter(
+                                    {allRevisions && allRevisions.length !== 0 && allRevisions.filter(
                                         (o1) => o1.deploymentInfo.length === 0,
                                     ).map(
                                         (revision) => (
@@ -1523,6 +1556,8 @@ export default function Environments() {
                             type='submit'
                             variant='contained'
                             color='primary'
+                            disabled={api.isRevision
+                                || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.create.create'
@@ -1657,36 +1692,40 @@ export default function Environments() {
                                                 ))) : (
                                                 // eslint-disable-next-line react/jsx-indent
                                                 <div>
-                                                    <FormControl
-                                                        className={classes.formControl}
-                                                        variant='outlined'
-                                                        margin='dense'
-                                                        size='small'
-                                                    >
-                                                        <InputLabel
-                                                            disabled={allRevisions}
-                                                            id='demo-simple-select-label'
-                                                        >
+                                                    <TextField
+                                                        id='revision-selector'
+                                                        select
+                                                        label={(
                                                             <FormattedMessage
-                                                                id='Apis.Details.Environments.Environments.select.rev'
+                                                                id='Apis.Details.Environments.Environments.select.table'
                                                                 defaultMessage='Select Revision'
                                                             />
-                                                        </InputLabel>
-                                                        <Select
-                                                            labelId='demo-simple-select-helper-label'
-                                                            id='demo-simple-select-helper'
-                                                            disabled={api.isRevision}
-                                                            onChange={handleSelect}
-                                                        >
-                                                            {allRevisions && allRevisions.map(
-                                                                (number) => (
-                                                                    <MenuItem value={number.id}>
-                                                                        {number.displayName}
-                                                                    </MenuItem>
-                                                                ),
-                                                            )}
-                                                        </Select>
-                                                    </FormControl>
+                                                        )}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
+                                                            },
+                                                        }}
+                                                        name='selectRevision'
+                                                        onChange={handleSelect}
+                                                        margin='dense'
+                                                        variant='outlined'
+                                                        style={{ width: '50%' }}
+                                                        disabled={api.isRevision
+                                                            || !allRevisions || allRevisions.length === 0}
+                                                    >
+                                                        {allRevisions && allRevisions.length !== 0 && allRevisions.map(
+                                                            (number) => (
+                                                                <MenuItem value={number.id}>
+                                                                    {number.displayName}
+                                                                </MenuItem>
+                                                            ),
+                                                        )}
+                                                    </TextField>
                                                     <Button
                                                         className={classes.button2}
                                                         disabled={api.isRevision || !selectedRevision}

@@ -24,7 +24,6 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Alert from 'AppComponents/Shared/Alert';
-// import Box from '@material-ui/core/Box';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -32,16 +31,12 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Switch from '@material-ui/core/Switch';
-// import Checkbox from '@material-ui/core/Checkbox';
-import FormControl from '@material-ui/core/FormControl';
+import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import InputLabel from '@material-ui/core/InputLabel';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Chip from '@material-ui/core/Chip';
-// import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -95,8 +90,6 @@ const useStyles = makeStyles((theme) => ({
 export default function MicroGateway(props) {
     const classes = useStyles();
     const {
-        // selectedMgLabel,
-        // setSelectedMgLabel,
         api,
         updateAPI,
         mgLabels,
@@ -104,9 +97,6 @@ export default function MicroGateway(props) {
         allEnvRevision,
     } = props;
     const restApi = new API();
-    // const [mgLabels, setMgLabels] = useState(null);
-    // const [allRevisions, setRevisions] = useState(null);
-    // const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState(null);
 
     const handleSelect = (event) => {
@@ -173,7 +163,7 @@ export default function MicroGateway(props) {
         <>
             <Typography variant='h6' align='left' className={classes.mainTitle}>
                 <FormattedMessage
-                    id='Apis.Details.Environments.Environments.GatewayLabels'
+                    id='Apis.Details.Environments.MicroGateway.GatewayLabels'
                     defaultMessage='Gateway Labels'
                 />
             </Typography>
@@ -182,12 +172,36 @@ export default function MicroGateway(props) {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                {/* <TableCell /> */}
-                                <TableCell align='left'>Label</TableCell>
-                                <TableCell align='left'>Description</TableCell>
-                                <TableCell align='left'>Access URL</TableCell>
-                                <TableCell align='left'>Deployed Revision</TableCell>
-                                <TableCell align='left'>Display in devportal</TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.label'
+                                        defaultMessage='Label'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.description'
+                                        defaultMessage='Description'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.access.url'
+                                        defaultMessage='Access URL'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.deployed.revision'
+                                        defaultMessage='Deployed Revision'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.devportal.display'
+                                        defaultMessage='Display in devportal'
+                                    />
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -237,39 +251,49 @@ export default function MicroGateway(props) {
                                                             onClick={() => undeployRevision(o3.id, row.name)}
                                                             size='small'
                                                         >
-                                                            Undepoly
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.MicroGateway.undeploy.btn'
+                                                                defaultMessage='Undeploy'
+                                                            />
                                                         </Button>
                                                     </div>
                                                 ))) : (
                                                 // eslint-disable-next-line react/jsx-indent
                                                 <div>
-                                                    <FormControl
-                                                        className={classes.formControl}
-                                                        variant='outlined'
+                                                    <TextField
+                                                        id='revision-selector'
+                                                        select
+                                                        label={(
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.MicroGateway.select.table'
+                                                                defaultMessage='Select Revision'
+                                                            />
+                                                        )}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
+                                                            },
+                                                        }}
+                                                        name='selectRevision'
+                                                        onChange={handleSelect}
                                                         margin='dense'
-                                                        size='small'
+                                                        variant='outlined'
+                                                        style={{ width: '50%' }}
+                                                        disabled={api.isRevision
+                                                            || !allRevisions || allRevisions.length === 0}
                                                     >
-                                                        <InputLabel
-                                                            disabled={allRevisions}
-                                                            id='demo-simple-select-label'
-                                                        >
-                                                            Select Revision
-                                                        </InputLabel>
-                                                        <Select
-                                                            labelId='demo-simple-select-helper-label'
-                                                            id='demo-simple-select-helper'
-                                                            disabled={api.isRevision}
-                                                            onChange={handleSelect}
-                                                        >
-                                                            {allRevisions && allRevisions.map(
-                                                                (number) => (
-                                                                    <MenuItem value={number.id}>
-                                                                        {number.displayName}
-                                                                    </MenuItem>
-                                                                ),
-                                                            )}
-                                                        </Select>
-                                                    </FormControl>
+                                                        {allRevisions && allRevisions.length !== 0 && allRevisions.map(
+                                                            (number) => (
+                                                                <MenuItem value={number.id}>
+                                                                    {number.displayName}
+                                                                </MenuItem>
+                                                            ),
+                                                        )}
+                                                    </TextField>
                                                     <Button
                                                         className={classes.button2}
                                                         disabled={api.isRevision || !selectedRevision}
@@ -277,7 +301,10 @@ export default function MicroGateway(props) {
                                                         onClick={() => deployRevision(selectedRevision, row.name)}
 
                                                     >
-                                                        Depoly
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Environments.MicroGateway.deploy.button'
+                                                            defaultMessage='Deploy'
+                                                        />
                                                     </Button>
                                                 </div>
                                             )}
@@ -304,11 +331,11 @@ export default function MicroGateway(props) {
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
-                                    id='Apis.Details.Environments.Gateway.labels.emptym1'
+                                    id='Apis.Details.Environments.MicroGateway.labels.emptym1'
                                     defaultMessage='Gateway labels are not available.'
                                 />
                                 <FormattedMessage
-                                    id='Apis.Details.Environments.Gateway.labels.emptym2'
+                                    id='Apis.Details.Environments.MicroGateway.labels.emptym2'
                                     defaultMessage=' You can request the administrator to add labels.'
                                 />
                             </Typography>
@@ -320,11 +347,9 @@ export default function MicroGateway(props) {
 }
 
 MicroGateway.propTypes = {
-    // selectedMgLabel: PropTypes.arrayOf(PropTypes.string).isRequired,
-    // setSelectedMgLabel: PropTypes.func.isRequired,
     api: PropTypes.shape({}).isRequired,
     updateAPI: PropTypes.func.isRequired,
-    mgLabels: PropTypes.shape({}).isRequired,
-    allRevisions: PropTypes.shape({}).isRequired,
-    allEnvRevision: PropTypes.shape({}).isRequired,
+    mgLabels: PropTypes.shape({ length: PropTypes.func, map: PropTypes.func }).isRequired,
+    allRevisions: PropTypes.shape({ length: PropTypes.func, map: PropTypes.func }).isRequired,
+    allEnvRevision: PropTypes.shape({ filter: PropTypes.func }).isRequired,
 };
