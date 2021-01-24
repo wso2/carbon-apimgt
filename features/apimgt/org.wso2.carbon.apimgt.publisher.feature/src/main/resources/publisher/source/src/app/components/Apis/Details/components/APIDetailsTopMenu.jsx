@@ -32,8 +32,7 @@ import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import TextField from '@material-ui/core/TextField';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import API from 'AppData/api';
 import DeleteApiButton from './DeleteApiButton';
@@ -101,11 +100,15 @@ const styles = (theme) => ({
         display: 'flex',
         flexDirection: 'column',
     },
-    Typokk: {
-        color: 'red',
-    },
     revisionWrapper: {
         paddingRight: theme.spacing(2),
+    },
+    topRevisionStyle: {
+        marginLeft: theme.spacing(1),
+        maxWidth: 500,
+    },
+    readOnlyStyle: {
+        color: 'red',
     },
 });
 
@@ -115,7 +118,7 @@ const APIDetailsTopMenu = (props) => {
         classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
     const [revision, setRevision] = useState(null);
-    const [revisonid, setRevisionId] = useState(0);
+    const [revisionId, setRevisionId] = useState(api.id);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
  * The component for advanced endpoint configurations.
@@ -208,43 +211,48 @@ const APIDetailsTopMenu = (props) => {
 
             <div className={classes.dateWrapper} />
             {api.isRevision && (
-                <Typography variant='h6' gutterBottom color='red' className={classes.Typokk}>
-                    Read only
+                <Typography variant='subtitle2' className={classes.readOnlyStyle}>
+                    <FormattedMessage
+                        id='Apis.Details.components.APIDetailsTopMenu.read.only.label'
+                        defaultMessage='Read only'
+                    />
                 </Typography>
             )}
-            <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
-
-                <FormControl
+            <div className={classes.topRevisionStyle}>
+                <TextField
+                    id='revision-selector'
+                    value={revisionId}
+                    select
+                    SelectProps={{
+                        MenuProps: {
+                            anchorOrigin: {
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            },
+                            getContentAnchorEl: null,
+                        },
+                    }}
+                    name='selectRevision'
+                    onChange={handleChange}
+                    margin='dense'
                     variant='outlined'
-                    className={classes.formControl}
                 >
-                    <Select
-                        defaultValue={revisonid}
-                        id='grouped-select'
-                        onChange={handleChange}
-                    >
-                        <MenuItem value='0'>
-                            <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
-                                <Typography variant='body'>
-                                    <FormattedMessage
-                                        id='Apis.Details.components.APIDetailsTopMenu.working.copy'
-                                        defaultMessage='Working copy'
-                                    />
-                                </Typography>
+                    <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
+                        <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
+                            <FormattedMessage
+                                id='Apis.Details.components.APIDetailsTopMenu.working.copy'
+                                defaultMessage='Working Copy'
+                            />
+                        </Link>
+                    </MenuItem>
+                    {revision && revision.map((item) => (
+                        <MenuItem value={item.id}>
+                            <Link to={'/apis/' + item.id + '/overview'}>
+                                {item.displayName}
                             </Link>
                         </MenuItem>
-                        {revision && revision.map((item) => (
-                            <MenuItem value={item.id}>
-                                <Link to={'/apis/' + item.id + '/overview'}>
-                                    <Typography variant='body'>
-                                        {item.displayName}
-                                    </Typography>
-                                </Link>
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-
+                    ))}
+                </TextField>
             </div>
 
             <VerticalDivider height={70} />

@@ -912,6 +912,7 @@
   "Apis.Details.components.APIDetailsTopMenu.created.by": "",
   "Apis.Details.components.APIDetailsTopMenu.error": "",
   "Apis.Details.components.APIDetailsTopMenu.last.updated.time": "",
+  "Apis.Details.components.APIDetailsTopMenu.read.only.label": "",
   "Apis.Details.components.APIDetailsTopMenu.state": "",
   "Apis.Details.components.APIDetailsTopMenu.view.in.portal": "",
   "Apis.Details.components.APIDetailsTopMenu.working.copy": "",
