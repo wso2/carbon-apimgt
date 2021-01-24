@@ -102,6 +102,9 @@ export default function MicroGateway(props) {
     const handleSelect = (event) => {
         setRevision(event.target.value);
     };
+    const handleChange = () => {
+        // display in devportal check
+    };
 
     /**
       * Handles undeploy a revision
@@ -309,39 +312,36 @@ export default function MicroGateway(props) {
                                                 </div>
                                             )}
                                     </TableCell>
-
                                     <TableCell align='left'>
                                         <Switch
-                                            checked={row.showInApiConsole}
+                                            // checked={row.showInApiConsole}
+                                            checked={false}
+                                            onChange={handleChange}
                                             disabled={api.isRevision}
                                             name='checkedA'
                                         />
-
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
-
-            )
-                : (
-
-                    <InlineMessage type='info' height={100} className={classes.emptyBox}>
-                        <div className={classes.contentWrapper}>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.MicroGateway.labels.emptym1'
-                                    defaultMessage='Gateway labels are not available.'
-                                />
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.MicroGateway.labels.emptym2'
-                                    defaultMessage=' You can request the administrator to add labels.'
-                                />
-                            </Typography>
-                        </div>
-                    </InlineMessage>
-                )}
+            ) : (
+                <InlineMessage type='info' height={100} className={classes.emptyBox}>
+                    <div className={classes.contentWrapper}>
+                        <Typography component='p' className={classes.content}>
+                            <FormattedMessage
+                                id='Apis.Details.Environments.MicroGateway.labels.emptym1'
+                                defaultMessage='Gateway labels are not available.'
+                            />
+                            <FormattedMessage
+                                id='Apis.Details.Environments.MicroGateway.labels.emptym2'
+                                defaultMessage=' You can request the administrator to add labels.'
+                            />
+                        </Typography>
+                    </div>
+                </InlineMessage>
+            )}
         </>
     );
 }

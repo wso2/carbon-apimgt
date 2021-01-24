@@ -344,6 +344,7 @@ export default function Environments() {
 
     const handleCloseDeployPopup = () => {
         setOpenDeployPopup(false);
+        setExtraRevisionToDelete(null);
     };
 
     const handleClickOpen = () => {
@@ -360,6 +361,7 @@ export default function Environments() {
 
     const handleClose = () => {
         setOpen(false);
+        setExtraRevisionToDelete(null);
     };
 
     const handleChange = (event) => {
@@ -450,6 +452,7 @@ export default function Environments() {
         }
         setOpen(false);
         setDescription('');
+        setExtraRevisionToDelete(null);
     }
 
     const runActionDelete = (confirm, revisionId) => {
