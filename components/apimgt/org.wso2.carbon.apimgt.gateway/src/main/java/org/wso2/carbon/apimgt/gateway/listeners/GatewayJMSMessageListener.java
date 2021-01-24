@@ -22,12 +22,16 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
+import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
@@ -35,7 +39,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
@@ -44,10 +50,10 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -117,51 +123,50 @@ public class GatewayJMSMessageListener implements MessageListener {
         if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
                 && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
+            DeployAPIInGatewayEvent gatewayEvent =
+                    new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
-            if (!gatewayEvent.getGatewayLabels().isEmpty()) {
-                String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                String tenantDomain = gatewayEvent.getTenantDomain();
-                Runnable task = null;
-                if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-                    task = new Runnable() {
+            String tenantDomain = gatewayEvent.getTenantDomain();
+            boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
+            if (tenantLoaded) {
+                if (!gatewayEvent.getGatewayLabels().isEmpty()) {
+                    Iterator<String> gateways = gatewayEvent.getGatewayLabels().iterator();
+                    while (gateways.hasNext()){
+                        String gatewayLabel = gateways.next();
+                        if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
 
-                        @Override public void run() {
                             boolean tenantFlowStarted = false;
                             try {
                                 startTenantFlow(tenantDomain);
                                 tenantFlowStarted = true;
-                                inMemoryApiDeployer.deployAPI(gatewayEvent.getApiId(), gatewayLabel);
+                                inMemoryApiDeployer.deployAPI(gatewayEvent, gatewayLabel);
                             } catch (ArtifactSynchronizerException e) {
-                                log.error("Error in deploying artifacts for "  + gatewayEvent.getApiId() +
+                                log.error("Error in deploying artifacts for " + gatewayEvent.getApiId() +
                                         "in the Gateway");
                             } finally {
-                                if (tenantFlowStarted){
+                                if (tenantFlowStarted) {
                                     endTenantFlow();
                                 }
                             }
                         }
-                    };
-                } else if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
-                    task = new Runnable() {
 
-                        @Override public void run() {
-                            boolean tenantFlowStarted = false;
-                            try {
-                                startTenantFlow(tenantDomain);
-                                tenantFlowStarted = true;
-                                inMemoryApiDeployer.unDeployAPI(gatewayEvent.getApiId(), gatewayLabel);
-                            } catch (ArtifactSynchronizerException e) {
-                                log.error("Error in undeploying artifacts");
-                            } finally {
-                                if (tenantFlowStarted){
-                                    endTenantFlow();
-                                }
+                    }
+                    if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
+                        boolean tenantFlowStarted = false;
+                        try {
+                            startTenantFlow(tenantDomain);
+                            tenantFlowStarted = true;
+                            inMemoryApiDeployer.unDeployAPI(gatewayEvent);
+                        } catch (ArtifactSynchronizerException e) {
+                            log.error("Error in undeploying artifacts");
+                        } finally {
+                            if (tenantFlowStarted) {
+                                endTenantFlow();
                             }
                         }
-                    };
+                    }
                 }
-                artifactRetrievalScheduler.schedule(task, 1, TimeUnit.MILLISECONDS);
+
                 if (debugEnabled) {
                     log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
                             gatewayEvent.getApiId() + " is successfully deployed/undeployed");
@@ -211,7 +216,8 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
-        } else {
+        } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
+                EventType.POLICY_DELETE.toString().equals(eventType)) {
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
             boolean updatePolicy = false;
             boolean deletePolicy = false;
@@ -248,6 +254,38 @@ public class GatewayJMSMessageListener implements MessageListener {
                     ServiceReferenceHolder.getInstance().getKeyManagerDataService()
                             .removeApplicationPolicy(policyEvent);
                 }
+            }
+        } else if (EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType) ||
+                EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
+            CertificateEvent certificateEvent = new Gson().fromJson(eventJson, CertificateEvent.class);
+            if (EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType)) {
+                try {
+                    new EndpointCertificateDeployer(certificateEvent.getTenantDomain())
+                            .deployCertificate(certificateEvent.getAlias());
+                } catch (APIManagementException e) {
+                    log.error(e);
+                }
+            } else if (EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
+                boolean tenantFlowStarted = false;
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                            .setTenantDomain(certificateEvent.getTenantDomain(), true);
+                    tenantFlowStarted = true;
+                    CertificateManagerImpl.getInstance().deleteCertificateFromGateway(certificateEvent.getAlias());
+                } finally {
+                    if (tenantFlowStarted) {
+                        PrivilegedCarbonContext.endTenantFlow();
+                    }
+                }
+            }
+        } else if (EventType.GACONFIG_UPDATE.toString().equals(eventType)) {
+            GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
+                    new Gson().fromJson(eventJson, GoogleAnalyticsConfigEvent.class);
+            try {
+                new GoogleAnalyticsConfigDeployer(googleAnalyticsConfigEvent.getTenantDomain()).deploy();
+            } catch (APIManagementException e) {
+                log.error(e);
             }
         }
     }

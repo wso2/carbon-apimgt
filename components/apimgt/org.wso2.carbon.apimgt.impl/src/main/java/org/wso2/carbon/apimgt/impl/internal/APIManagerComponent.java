@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
@@ -64,7 +65,9 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -201,7 +204,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
-
+            bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
@@ -314,12 +318,10 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            if (configuration.getGatewayArtifactSynchronizerProperties().isSaveArtifactsEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
                     bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
                 }
-            }
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -904,8 +906,7 @@ public class APIManagerComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
 
-        if (gatewayArtifactSynchronizerProperties.isSaveArtifactsEnabled()
-                && gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
+        if (gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
             ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
 
             try {
@@ -976,6 +977,20 @@ public class APIManagerComponent {
         } else {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
+    }
+    @Reference(
+            name = "artifactGenerator.service",
+            service = GatewayArtifactGenerator.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeGatewayArtifactGenerator")
+    protected void addGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
+
+        ServiceReferenceHolder.getInstance().addGatewayArtifactGenerator(gatewayArtifactGenerator);
+    }
+
+    protected void removeGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
+        ServiceReferenceHolder.getInstance().removeGatewayArtifactGenerator(gatewayArtifactGenerator);
     }
 }
 

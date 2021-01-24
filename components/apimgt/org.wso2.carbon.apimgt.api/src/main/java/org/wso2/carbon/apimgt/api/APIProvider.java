@@ -1227,11 +1227,6 @@ public interface APIProvider extends APIManager {
      */
     boolean isConfigured();
 
-    /**
-     * Method to check whether mutual ssl based client verification is configured.
-     * @return : TRUE if client certificate related configurations are configured, FALSE otherwise.
-     */
-    boolean isClientCertificateBasedAuthenticationConfigured();
 
     /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
