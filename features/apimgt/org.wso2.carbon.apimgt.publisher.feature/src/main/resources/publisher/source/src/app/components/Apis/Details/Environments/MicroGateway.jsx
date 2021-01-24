@@ -117,13 +117,13 @@ export default function MicroGateway(props) {
         }];
         restApi.undeployRevision(api.id, revisionId, body)
             .then(() => {
-                Alert.info('Undeploy revision Successfully');
+                Alert.info('Revision Undeployed  Successfully');
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 } else {
-                    Alert.error('Something went wrong while undeploy the revision');
+                    Alert.error('Something went wrong while undeploying the revision');
                 }
                 console.error(error);
             }).finally(() => {
@@ -142,13 +142,13 @@ export default function MicroGateway(props) {
         }];
         restApi.deployRevision(api.id, revisionId, body)
             .then(() => {
-                Alert.info('Deploy revision Successfully');
+                Alert.info('Revision Deployed Successfully');
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 } else {
-                    Alert.error('Something went wrong while deploy the revision');
+                    Alert.error('Something went wrong while deploying the revision');
                 }
                 console.error(error);
             }).finally(() => {

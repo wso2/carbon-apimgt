@@ -1286,18 +1286,18 @@ export default function Environments() {
                                 ))}
                             </Grid>
                         </Box>
-                        <Box mt={2}>
-                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.gateway.labels.heading'
-                                    defaultMessage='Gateway Labels'
-                                />
-                            </Typography>
-                            <Grid
-                                container
-                                spacing={3}
-                            >
-                                {mgLabels.length > 0 && mgLabels.map((row) => (
+                        {mgLabels.length > 0 && mgLabels.map((row) => (
+                            <Box mt={2}>
+                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.gateway.labels.heading'
+                                        defaultMessage='Gateway Labels'
+                                    />
+                                </Typography>
+                                <Grid
+                                    container
+                                    spacing={3}
+                                >
                                     <Grid item xs={4}>
                                         <Card
                                             className={clsx(SelectedEnvironment
@@ -1378,9 +1378,9 @@ export default function Environments() {
                                             </Box>
                                         </Card>
                                     </Grid>
-                                ))}
-                            </Grid>
-                        </Box>
+                                </Grid>
+                            </Box>
+                        ))}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDeployPopup}>
