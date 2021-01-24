@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.securevault.SecretResolver;
@@ -841,5 +842,23 @@ public class CertificateMgtUtils {
         if (file.isFile()) {
             file.delete();
         }
+    }
+
+    public static void startListenerCertificateReLoader() {
+
+        try {
+            TrustStoreDTO listenerProfileTrustStore = getListenerProfileTrustStore();
+            File trustStoreFile = new File(listenerProfileTrustStore.getLocation());
+            try (FileInputStream trustStoreStream = new FileInputStream(trustStoreFile)) {
+                KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                trustStore.load(trustStoreStream, listenerProfileTrustStore.getPassword());
+                CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
+                CertificateReLoaderUtil.startCertificateReLoader();
+                ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+            }
+        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException | XMLStreamException e) {
+            log.error("Error in loading trust store.", e);
+        }
+
     }
 }

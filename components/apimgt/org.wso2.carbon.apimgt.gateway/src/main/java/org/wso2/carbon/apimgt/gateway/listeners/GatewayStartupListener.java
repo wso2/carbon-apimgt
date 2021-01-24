@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -85,6 +86,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         try {
             CertificateMgtUtils.backupOriginalTrustStore();
+            CertificateMgtUtils.startListenerCertificateReLoader();
         } catch (CertificateManagementException e) {
             log.error("Error while Backup Truststore", e);
         }
@@ -177,6 +179,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     @Override
     public void invoke() {
 
+        CertificateReLoaderUtil.shutDownCertificateReLoader();
         if (jmsTransportHandlerForTrafficManager != null) {
             // This method will make shutdown the Listener.
             log.debug("Unsubscribe from JMS Events...");
