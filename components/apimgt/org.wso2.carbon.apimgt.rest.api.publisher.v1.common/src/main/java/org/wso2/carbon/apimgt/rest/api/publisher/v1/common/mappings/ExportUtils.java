@@ -716,26 +716,30 @@ public class ExportUtils {
         List<String> urls = new ArrayList<>();
         if (endpointConfig != null) {
             try {
-                Object item;
-                item = endpointConfig.get(type);
-                if (item instanceof JSONArray) {
-                    JSONArray endpointsJSON = new JSONArray(endpointConfig.getJSONArray(type).toString());
-                    for (int i = 0; i < endpointsJSON.length(); i++) {
+                if (endpointConfig.has(type)) {
+                    Object item = endpointConfig.get(type);
+                    if (item instanceof JSONArray) {
+                        JSONArray endpointsJSON = new JSONArray(endpointConfig.getJSONArray(type).toString());
+                        for (int i = 0; i < endpointsJSON.length(); i++) {
+                            try {
+                                String urlValue =
+                                        endpointsJSON.getJSONObject(i).get(APIConstants.API_DATA_URL).toString();
+                                urls.add(urlValue);
+                            } catch (JSONException ex) {
+                                log.error(
+                                        "Endpoint URL extraction from endpoints JSON object failed in API: " + apiName,
+                                        ex);
+                            }
+                        }
+                    } else if (item instanceof JSONObject) {
+                        JSONObject endpointJSON = new JSONObject(endpointConfig.getJSONObject(type).toString());
                         try {
-                            String urlValue = endpointsJSON.getJSONObject(i).get(APIConstants.API_DATA_URL).toString();
+                            String urlValue = endpointJSON.get(APIConstants.API_DATA_URL).toString();
                             urls.add(urlValue);
                         } catch (JSONException ex) {
-                            log.error("Endpoint URL extraction from endpoints JSON object failed in API: " + apiName,
+                            log.error("Endpoint URL extraction from endpoint JSON object failed in API: " + apiName,
                                     ex);
                         }
-                    }
-                } else if (item instanceof JSONObject) {
-                    JSONObject endpointJSON = new JSONObject(endpointConfig.getJSONObject(type).toString());
-                    try {
-                        String urlValue = endpointJSON.get(APIConstants.API_DATA_URL).toString();
-                        urls.add(urlValue);
-                    } catch (JSONException ex) {
-                        log.error("Endpoint URL extraction from endpoint JSON object failed in API: " + apiName, ex);
                     }
                 }
             } catch (JSONException ex) {
