@@ -263,15 +263,6 @@ export default function CustomizedSteppers() {
         && api.endpointConfig.implementation_status === 'prototyped';
     const [lifecycleState, setlifecycleState] = useState(null);
     const [isUpdating, setUpdating] = useState(false);
-<<<<<<< HEAD
-    const { tenantList } = useContext(ApiContext);
-    const userNameSplit = user.name.split('@');
-    const tenantDomain = userNameSplit[userNameSplit.length - 1];
-    let devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview`;
-    if (tenantList && tenantList.length > 0) {
-        devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
-    }
-=======
     const [deploymentsAvailable, setDeploymentsAvailable] = useState(false);
     // const { tenantList } = useContext(ApiContext);
     // const userNameSplit = user.name.split('@');
@@ -280,7 +271,6 @@ export default function CustomizedSteppers() {
     // if (tenantList && tenantList.length > 0) {
     //     devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
     // }
->>>>>>> d6d653d08da... Add Review Fixes
 
     useEffect(() => {
         api.getLcState(api.id)
