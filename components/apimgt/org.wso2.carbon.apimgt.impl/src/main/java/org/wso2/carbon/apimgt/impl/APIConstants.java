@@ -702,8 +702,6 @@ public final class APIConstants {
     public static final String AUTHSERVER_URL = "ServerURL";
     public static final String API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION =
             API_KEY_VALIDATOR + "EnableProvisionedAppValidation";
-    public static final String KEY_MANAGER_RESERVED_USER =
-            API_KEY_MANAGER + "ReservedUsername";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_BASE_PATH = "/api/identity/oauth2/v1.0/scopes";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
