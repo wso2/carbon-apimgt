@@ -44,7 +44,6 @@ import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -56,7 +55,10 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import CardHeader from '@material-ui/core/CardHeader';
 import Checkbox from '@material-ui/core/Checkbox';
+import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
 
@@ -193,8 +195,7 @@ const useStyles = makeStyles((theme) => ({
     changeCard: {
         boxShadow: 15,
         borderRadius: '10px',
-        borderWidth: '2px',
-        borderColor: 'cyan',
+        backgroundColor: theme.palette.secondary.highlight,
     },
     noChangeCard: {
         boxShadow: 15,
@@ -1202,25 +1203,41 @@ export default function Environments() {
                                                 ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
                                             variant='outlined'
                                         >
-                                            <Box height='80%'>
+                                            <Box height='100%'>
+                                                <CardHeader
+                                                    action={(
+                                                        <Checkbox
+                                                            id={row.name.split(' ').join('')}
+                                                            value={row.name}
+                                                            checked={SelectedEnvironment.includes(row.name)}
+                                                            onChange={handleChange}
+                                                            color='primary'
+                                                            icon={<RadioButtonUncheckedIcon />}
+                                                            checkedIcon={<CheckCircleIcon color='primary' />}
+                                                            inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                                        />
+                                                    )}
+                                                    title={(
+                                                        <Typography variant='subtitle2'>
+                                                            {row.name}
+                                                        </Typography>
+                                                    )}
+                                                    subheader={(
+                                                        <Typography
+                                                            variant='body2'
+                                                            color='textSecondary'
+                                                            gutterBottom
+                                                        >
+                                                            {row.type}
+                                                        </Typography>
+                                                    )}
+                                                />
                                                 <CardContent className={classes.cardContentHeight}>
                                                     <Grid
                                                         container
                                                         direction='column'
                                                         spacing={2}
                                                     >
-                                                        <Grid item>
-                                                            <Typography variant='subtitle2'>
-                                                                {row.name}
-                                                            </Typography>
-                                                            <Typography
-                                                                variant='body2'
-                                                                color='textSecondary'
-                                                                gutterBottom
-                                                            >
-                                                                {row.type}
-                                                            </Typography>
-                                                        </Grid>
                                                         <Grid item>
                                                             {allEnvRevision
                                                                 && allEnvRevision.filter(
@@ -1258,18 +1275,6 @@ export default function Environments() {
                                                     </Grid>
                                                 </CardContent>
                                             </Box>
-                                            <Box height='20%'>
-                                                <CardActions className={classes.cardActionHeight}>
-                                                    <Checkbox
-                                                        id={row.name.split(' ').join('')}
-                                                        value={row.name}
-                                                        checked={SelectedEnvironment.includes(row.name)}
-                                                        onChange={handleChange}
-                                                        color='primary'
-                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                    />
-                                                </CardActions>
-                                            </Box>
                                         </Card>
                                     </Grid>
                                 ))}
@@ -1294,25 +1299,41 @@ export default function Environments() {
                                                 ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
                                             variant='outlined'
                                         >
-                                            <Box height='75%'>
+                                            <Box height='100%'>
+                                                <CardHeader
+                                                    action={(
+                                                        <Checkbox
+                                                            id={row.name.split(' ').join('')}
+                                                            value={row.name}
+                                                            checked={SelectedEnvironment.includes(row.name)}
+                                                            onChange={handleChange}
+                                                            color='primary'
+                                                            icon={<RadioButtonUncheckedIcon />}
+                                                            checkedIcon={<CheckCircleIcon color='primary' />}
+                                                            inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                                        />
+                                                    )}
+                                                    title={(
+                                                        <Typography variant='subtitle2'>
+                                                            {row.name}
+                                                        </Typography>
+                                                    )}
+                                                    subheader={(
+                                                        <Typography
+                                                            variant='body2'
+                                                            color='textSecondary'
+                                                            gutterBottom
+                                                        >
+                                                            {row.type}
+                                                        </Typography>
+                                                    )}
+                                                />
                                                 <CardContent className={classes.cardContentHeight}>
                                                     <Grid
                                                         container
                                                         direction='column'
                                                         spacing={2}
                                                     >
-                                                        <Grid item>
-                                                            <Typography variant='subtitle2'>
-                                                                {row.name}
-                                                            </Typography>
-                                                            <Typography
-                                                                variant='body2'
-                                                                color='textSecondary'
-                                                                gutterBottom
-                                                            >
-                                                                {row.type}
-                                                            </Typography>
-                                                        </Grid>
                                                         <Grid item>
                                                             {allEnvRevision && allEnvRevision.filter(
                                                                 (o1) => {
@@ -1348,18 +1369,6 @@ export default function Environments() {
                                                         <Grid item />
                                                     </Grid>
                                                 </CardContent>
-                                            </Box>
-                                            <Box height='25%'>
-                                                <CardActions className={classes.cardActionHeight}>
-                                                    <Checkbox
-                                                        id={row.name.split(' ').join('')}
-                                                        value={row.name}
-                                                        checked={SelectedEnvironment.includes(row.name)}
-                                                        onChange={handleChange}
-                                                        color='primary'
-                                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                    />
-                                                </CardActions>
                                             </Box>
                                         </Card>
                                     </Grid>
