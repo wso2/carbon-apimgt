@@ -372,17 +372,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            GraphqlComplexityInfo graphqlComplexityInfo =
-                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifier == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
+
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 apiProvider.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
                 return Response.ok().build();
@@ -1887,13 +1890,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, tenantDomain);
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
-                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain); // TODO do a deep copy 
+                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain); // TODO do a deep copy
                     apiProvider.updateAPI(oldAPI, api);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
-            
+
             apiProvider.deleteApiSpecificMediationPolicy(apiId, mediationPolicyId, tenantDomain);
 
         } catch (APIManagementException e) {
@@ -1932,7 +1935,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Getting specified mediation policy
-            Mediation mediation = 
+            Mediation mediation =
                     apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, tenantDomain);
             if (mediation != null) {
                 MediationDTO mediationDTO =
@@ -2011,7 +2014,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     throw new APIManagementException("Sequence is malformed");
                 }
-                
+
                 if (returnedPolicy != null) {
                     String uuid = returnedPolicy.getUuid();
                     String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
@@ -2019,7 +2022,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     URI uri = new URI(uriString);
                     MediationDTO updatedMediationDTO =
                             MediationMappingUtil.fromMediationToDTO(returnedPolicy);
-                    
+
                     return Response.ok(uri).entity(updatedMediationDTO).build();
                 }
 
@@ -2135,7 +2138,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 type = "in";
             }
-            
+
             Mediation returnedPolicy = null;
             if (fileInputStream != null) {
                 fileName = fileDetail.getDataHandler().getName();
@@ -2154,7 +2157,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
                 fileName = seqElement.getAttributeValue(new QName("name"));
-                
+
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     Mediation mediationPolicy = new Mediation();
                     mediationPolicy.setConfig(content);
@@ -3214,7 +3217,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //adding the api
             apiProvider.addAPI(apiToAdd);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            
+
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
                 apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, tenantDomain);
