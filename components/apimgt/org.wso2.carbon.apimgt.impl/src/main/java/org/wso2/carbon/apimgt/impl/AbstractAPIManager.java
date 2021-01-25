@@ -240,7 +240,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
         }
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username);
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance();
 
     }
 
