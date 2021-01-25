@@ -166,7 +166,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisApiIdGraphqlPoliciesComplexityGet(String apiId, String organizationId,
                                                           MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, null);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -203,7 +202,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, null);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, orgId);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -413,7 +411,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                            String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
 
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId,organizationId);
             String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId,
@@ -502,7 +499,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, requestedTenantDomain);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);

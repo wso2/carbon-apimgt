@@ -297,7 +297,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAPI(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch,
                                  MessageContext messageContext) throws APIManagementException {
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIDTO apiToReturn = getAPIByID(apiId, orgId);
         return Response.ok().entity(apiToReturn).build();
@@ -315,7 +314,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getGraphQLPolicyComplexityOfAPI(String apiId, String organizationId,
                                                           MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -363,7 +361,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             GraphqlComplexityInfo graphqlComplexityInfo =
@@ -412,7 +409,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIGraphQLSchema(String apiId, String organizationId, String accept, String ifNoneMatch,
                                         MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //this will fail if user does not have access to the API or the API does not exist
@@ -454,7 +450,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                               String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -491,7 +486,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .get(RestApiConstants.USER_REST_API_SCOPES);
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -539,7 +533,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -575,7 +568,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAmazonResourceNamesOfAPI(String apiId, String organizationId, MessageContext messageContext) {
         JSONObject arns = new JSONObject();
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -661,7 +653,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         boolean isDebugEnabled = log.isDebugEnabled();
         try {
             String username = RestApiCommonUtil.getLoggedInUsername();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -874,7 +865,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String certFileName = alias + ".crt";
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -905,7 +895,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
             API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
@@ -959,7 +948,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -992,7 +980,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             String fileName;
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -1084,7 +1071,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             int totalCount = apiProvider.getClientCertificateCount(tenantId);
             if (totalCount > 0) {
                 APIIdentifier apiIdentifier = null;
-                RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
                 String orgId = PublisherCommonUtils.getOrgId(organizationId);
                 String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -1129,7 +1115,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "The client certificate based authentication is not configured for this " + "server", log);
             }
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -1198,7 +1183,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteAPI(String apiId, String organizationId, String ifMatch, MessageContext messageContext) {
 
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
@@ -1273,7 +1257,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                            String organizationId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
 
             DocumentationContent docContent = apiProvider.getDocumentationContent(apiId, documentId, orgId);
@@ -1337,7 +1320,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                   InputStream inputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             //API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
             if (inputStream != null && inlineContent != null) {
@@ -1415,7 +1397,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
 
             //this will fail if user does not have access to the API or the API does not exist
@@ -1447,7 +1428,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
 
             documentation = apiProvider.getDocumentation(apiId, documentId, orgId);
@@ -1490,7 +1470,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //this will fail if user does not have access to the API or the API does not exist
             String sourceUrl = body.getSourceUrl();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             Documentation oldDocument = apiProvider.getDocumentation(apiId, documentId, orgId);
 
@@ -1561,7 +1540,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             //List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiId, orgId);
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
@@ -1595,7 +1573,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response addAPIDocument(String apiId, DocumentDTO body, String organizationId, String ifMatch,
                                            MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId, orgId);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
@@ -1636,7 +1613,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         APIIdentifier apiIdentifier = null;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         try {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         } catch (APIManagementException e) {
@@ -1668,7 +1644,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getGeneratedMockScriptsOfAPI(String apiId, String organizationId, String ifNoneMatch,
                                                  MessageContext messageContext) throws APIManagementException {
 
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -1718,7 +1693,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response  getAPILifecycleHistory(String apiId, String organizationId, String ifNoneMatch,
                                             MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             List<LifeCycleEvent> lifeCycleEvents = apiProvider.getLifeCycleEvents(apiIdentifier);
@@ -1749,7 +1723,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response  getAPILifecycleState(String apiId, String organizationId, String ifNoneMatch,
                                                MessageContext messageContext) throws APIManagementException {
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId, orgId);
         return Response.ok().entity(lifecycleStateDTO).build();
@@ -1813,7 +1786,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteAPILifecycleStatePendingTasks(String apiId, String organizationId,
                                                         MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, orgId);
@@ -1834,7 +1806,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             List<Mediation> mediationList =
@@ -1864,7 +1835,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                                       String ifMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1915,7 +1885,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String organizationId,
                                                                    String ifNoneMatch, MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Getting specified mediation policy
@@ -1964,7 +1933,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                   String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
                   String inlineContent, MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Mediation mediationResource = apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId,
@@ -2047,7 +2015,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             // Getting resource correspond to the given uuid
             Mediation mediationResource = apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId,
@@ -2098,7 +2065,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         String fileName = "";
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (fileInputStream != null && inlineContent != null) {
@@ -2198,7 +2164,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null when retrieving monetized plans.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -2307,7 +2272,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String organizationId,
                     String ifMatch, MessageContext messageContext) throws APIManagementException {
 
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
@@ -2348,7 +2312,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIResourcePolicies(String apiId, String sequenceType, String organizationId, String resourcePath,
                                                  String verb, String ifNoneMatch, MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils
                     .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
@@ -2415,7 +2378,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                                  String organizationId, String ifNoneMatch,
                                                                  MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
                     apiIdentifier.getVersion(), apiIdentifier.getProviderName());
@@ -2453,7 +2415,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
                  ResourcePolicyInfoDTO body,  String organizationId, String ifMatch, MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             boolean isSoapToRESTApi = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
                     apiIdentifier.getVersion(), apiIdentifier.getProviderName());
@@ -2502,7 +2463,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "API ID cannot be empty or null when getting revenue details.";
             RestApiUtil.handleBadRequest(errorMessage, log);
         }
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
@@ -2539,7 +2499,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                         MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             //this will fail if user does not have access to the API or the API does not exist
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -2582,7 +2541,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                      String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
@@ -2651,7 +2609,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getAPIThumbnail(String apiId,  String organizationId, String ifNoneMatch,
                                           MessageContext messageContext) {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //this will fail if user does not have access to the API or the API does not exist
@@ -2685,7 +2642,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                        String organizationId, String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String fileName = fileDetail.getDataHandler().getName();
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
@@ -2764,7 +2720,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("API Id and/ or document name should not be empty", log);
         }
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             return apiProvider.isDocumentationExist(apiId, name, orgId) ? Response.status(Response.Status.OK).build() :
@@ -3261,7 +3216,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getWSDLOfAPI(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //this will fail if user does not have access to the API or the API does not exist
@@ -3301,7 +3255,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -3328,7 +3281,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiId, orgId);
@@ -3385,7 +3337,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
         try {
-            RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -3602,7 +3553,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response generateMockScripts(String apiId,  String organizationId, String ifNoneMatch,
                                         MessageContext messageContext) throws APIManagementException {
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -3617,8 +3567,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAPISubscriptionPolicies(String apiId, String organizationId, String ifNoneMatch, String
-            xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
+            xWSO2Tenant, MessageContext messageContext) {
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIDTO apiInfo = getAPIByID(apiId, orgId);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
@@ -3646,7 +3595,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deploymentsGetStatus(String apiId, String organizationId, MessageContext messageContext)
             throws APIManagementException{
-        RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         DeploymentStatusListDTO deploymentStatusListDTO = APIMappingUtil.fromDeploymentStatustoDTO(apiIdentifier);

@@ -338,6 +338,9 @@ public class PublisherCommonUtils {
         } else {
             apiToUpdate.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         }
+        if (apiDtoToUpdate.getApiThrottlingPolicy() != null) {
+            apiToUpdate.setApiLevelPolicy(apiDtoToUpdate.getApiThrottlingPolicy());
+        }
 
         //attach micro-geteway labels
         assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
