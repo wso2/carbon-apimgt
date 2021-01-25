@@ -36,6 +36,10 @@ type Api{
     createdTime:String
     lastUpdate:String
 }
+type Tag{
+    value:String
+    count:Int
+}
 type Label{
     name:String
     labelDetails:[LabelDetails]
@@ -75,7 +79,6 @@ type TierDetails{
     tierPlan:String
     stopOnQuotaReached:Boolean
     monetizationAttributes:String
-
 }
 
 type Operation{
@@ -130,19 +133,10 @@ type Pagination{
     previous:String
 }
 
-type ApiDTO{
-    id:String
-    name:String
-    context:String
-    version:String
-    provider:String
-    type:String
-    createdTime:String
-    lastUpdate:String
-}
 type Query{
     getApi(id:String):Api
     getApis:[Api]
+    getTags:[Tag]
     getApisCount:Int
     getPagination:Pagination
 }

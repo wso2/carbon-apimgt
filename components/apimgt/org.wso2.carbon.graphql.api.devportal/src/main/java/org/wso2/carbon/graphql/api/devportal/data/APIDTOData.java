@@ -29,36 +29,11 @@ public class APIDTOData {
     APIPersistence apiPersistenceInstance;
 
 
-    public static final String GET_API_DATA = "SELECT * FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_NAME = "SELECT API.API_NAME FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_CONTEXT = "SELECT API.CONTEXT FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_VERSION = "SELECT API.API_VERSION FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_PROVIDER = "SELECT API.API_PROVIDER FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_TYPE = "SELECT API.API_TYPE FROM AM_API API WHERE API.API_UUID = ? ";
+   public static final String GET_API_TYPE = "SELECT API.API_TYPE FROM AM_API API WHERE API.API_UUID = ? ";
     public static final String GET_API_CREATED_TIME = "SELECT API.CREATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
     public static final String GET_API_UPDATED_TIME = "SELECT API.UPDATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_ID = "SELECT API.API_ID FROM AM_API API ";
-   public int getApiCount() throws RegistryException, UserStoreException, APIManagementException, APIPersistenceException {
-        int count = 0;
-        //int apiId = 0;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_API_ID)) {
-            //statement.setString(1, Id);
 
-            ResultSet resultSet = statement.executeQuery();
 
-            while (resultSet.next()) {
-                //apiId = resultSet.getInt("API_ID");
-                count = count+1;
-            }
-        } catch (SQLException e) {
-
-        }
-        return count;
-
-//        ArtifactData artifactData = new ArtifactData();
-//        return artifactData.getDevportalAPIS();
-    }
     public String getApiType(String Id){
         String type = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -107,51 +82,6 @@ public class APIDTOData {
         }
         return lastUpdate;
     }
-
-//    public String getAdditionalProperties(String Id) throws UserStoreException, RegistryException {
-//
-//        ArtifactData artifactData = new ArtifactData();
-//        Registry registry = artifactData.getRegistry();
-//
-//        String artifactPath = GovernanceUtils.getArtifactPath(registry, Id);
-//
-//        Map<String,String> additionalProperties = new HashMap<>();
-//
-//
-//        Resource apiResource = registry.get(artifactPath);
-//        Properties properties = apiResource.getProperties();
-//
-//        if (properties != null) {
-//            Enumeration propertyNames = properties.propertyNames();
-//            while (propertyNames.hasMoreElements()) {
-//                String propertyName = (String) propertyNames.nextElement();
-//                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
-//                    additionalProperties.put(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
-//                            apiResource.getProperty(propertyName));
-//                }
-//            }
-//        }
-//        return getAdditionalPropertiesFromMap(additionalProperties);
-//    }
-
-//    public String getAdditionalPropertiesFromMap(Map<String, String> additionalProperties){
-//        //Map<String, String> additionalProperties = apiTypeWrapper.getApi().getAdditionalProperties();
-//
-//        List<String> additionalPropertiesList = new ArrayList<>();
-//
-//        String alladditionalProperties= null;
-//
-//        for (String key : additionalProperties.keySet()) {
-//            String properties = key + ":" + additionalProperties.get(key);
-//            additionalPropertiesList.add(properties);
-//        }
-//        if(additionalPropertiesList!=null){
-//            alladditionalProperties= String.join(",",additionalPropertiesList);
-//
-//        }
-//        return alladditionalProperties;
-//    }
-
     public String getApiDefinition(String Id) throws OASPersistenceException {
 
 
@@ -163,26 +93,5 @@ public class APIDTOData {
         return apiDefinition;
 
     }
-//    public String getTags(String Id) throws UserStoreException, RegistryException {
-//
-//        ArtifactData artifactData = new ArtifactData();
-//        Registry registry = artifactData.getRegistry();
-//        String artifactPath = GovernanceUtils.getArtifactPath(registry, Id);
-//
-//        Set<String> tagSet = new HashSet<String>();
-//        org.wso2.carbon.registry.core.Tag[] tag = registry.getTags(artifactPath);
-//        for (Tag tag1 : tag) {
-//            tagSet.add(tag1.getTagName());
-//        }
-//        return getTags(tagSet);
-//    }
-//    public String getTags(Set<String> tagset){
-//
-//        String tags = null;
-//        if (tagset!=null){
-//            List<String> tagList = new ArrayList<>(tagset);
-//            tags = String.join(",",tagList);
-//        }
-//        return tags;
-//    }
+
 }

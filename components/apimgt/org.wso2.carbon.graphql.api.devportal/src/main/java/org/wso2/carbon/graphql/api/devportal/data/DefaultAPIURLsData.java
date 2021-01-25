@@ -53,8 +53,6 @@ public class DefaultAPIURLsData {
                     StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
                     endpointBuilder.append(devPortalAPI.getContext());
                     if(devPortalAPI.getIsDefaultVersion()){
-                        //artifactData.getDevportalApis(Id).getAttribute(
-                        //                            APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)
                         int index = endpointBuilder.indexOf(devPortalAPI.getVersion());
                         endpointBuilder.replace(index, endpointBuilder.length(), "");
                         if (gwEndpoint.contains("http:") && apiTransports.contains("http")){

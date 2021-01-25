@@ -23,11 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.getLabelsFromAPIGovernanceArtifact;
 
 public class LabelData {
 
-    public List<LabelDTO> getLabeldata(String Id, String name) throws RegistryException, APIManagementException, APIPersistenceException, UserStoreException {
+    public List<LabelDTO> getLabeldata(String Id, String name) throws APIManagementException {
 
 
        List<Label> labels = ApiMgtDAO.getInstance().getAllLabels(MultitenantUtils.getTenantDomain("wso2.anonymous.user"));//getLabelsFromAPIGovernanceArtifact(apiArtifact,apiIdentifier.getProviderName());

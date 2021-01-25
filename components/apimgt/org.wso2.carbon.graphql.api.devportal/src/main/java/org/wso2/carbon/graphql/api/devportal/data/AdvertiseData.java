@@ -17,7 +17,6 @@ public class AdvertiseData {
     public AdvertiseDTO getAdvertiseInformation(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
 
         ArtifactData artifactData = new ArtifactData();
-        //GenericArtifact apiArtifact = artifactData.getDevportalApis(Id);
 
         DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
         boolean advertised = devPortalAPI.isAdvertiseOnly();//Boolean.parseBoolean(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY));

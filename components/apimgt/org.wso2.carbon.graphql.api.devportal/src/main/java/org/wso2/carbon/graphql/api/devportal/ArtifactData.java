@@ -42,7 +42,7 @@ public class ArtifactData {
 
 
 
-    public List<DevPortalAPI> getDevportalAPIS() throws APIManagementException, UserStoreException, RegistryException, APIPersistenceException {
+    public List<DevPortalAPI> getDevportalAPIS() throws APIPersistenceException {
 
         Organization org = new Organization("carbon.super");
 

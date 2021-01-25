@@ -8,11 +8,9 @@ public class Api {
     private String context;
     private String version;
     private String provider;
-
     private String type;
     private String transport;
     private boolean hasthumbnail;
-
     private String environments;
     private String wsdUrl;
     private String status;
@@ -21,9 +19,7 @@ public class Api {
     private boolean isDefault;
     private String authorizationHeader;
     private String apiSecurity;
-
     private boolean isMonetizationEnabled;
-
     private String throttlingPolicies;
     private  String thumbnailUrl;
     private String categories;
@@ -36,11 +32,9 @@ public class Api {
         this.context = context;
         this.version = version;
         this.provider = provider;
-
         this.type = type;
         this.transport=transport;
         this.hasthumbnail = hasthumbnail;
-
         this.environments = environments;
         this.wsdUrl = wsdUrl;
         this.status = status;
@@ -49,9 +43,7 @@ public class Api {
         this.isDefault = isDefault;
         this.authorizationHeader = authorizationHeader;
         this.apiSecurity = apiSecurity;
-
         this.isMonetizationEnabled = isMonetizationEnabled;
-
         this.throttlingPolicies = throttlingPolicies;
         this.thumbnailUrl = thumbnailUrl;
         this.categories = categories;

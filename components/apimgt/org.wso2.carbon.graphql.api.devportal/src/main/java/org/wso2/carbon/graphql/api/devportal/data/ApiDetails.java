@@ -16,8 +16,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.*;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTiers;
-//import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.getAPICategoriesFromAPIGovernanceArtifact;
 
 
 public class ApiDetails {
@@ -34,7 +32,6 @@ public class ApiDetails {
 
         ArtifactData artifactData = new ArtifactData();
 
-       // GenericArtifact[] artifacts = artifactData.getAllApis();;
 
         List<Api> apiDTOList = new ArrayList<Api>();
 
@@ -61,6 +58,7 @@ public class ApiDetails {
             boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(id);////
 
             Set<String> tiers = devPortalAPI.getAvailableTierNames();
+            //Set<Tier> throttlingPolicies = devPortalAPI.getAvailableTiers();
 
             String monetizationLabel = "";//monetizationLabelData.getMonetizationLabelData(definedTiers,tiers,name);
             boolean isDefault = devPortalAPI.getIsDefaultVersion();
@@ -71,7 +69,7 @@ public class ApiDetails {
 
             boolean isMonetizationEnabled = devPortalAPI.isMonetizationEnabled();
 
-            String throttlingPolicies = throttlingPoliciesData.getThrottlingPoliciesData(id);
+            String throttlingPolicies = throttlingPoliciesData.getThrottlingPoliciesData(tiers);
 
             Set<String> categoriesSet = devPortalAPI.getApiCategories();
 
@@ -89,15 +87,6 @@ public class ApiDetails {
         }
      return apiDTOList;
     }
-//    public String getTags(Set<String> tagset){
-//
-//        String tags = null;
-//        if (tagset!=null){
-//            List<String> tagList = new ArrayList<>(tagset);
-//            tags = String.join(",",tagList);
-//        }
-//        return tags;
-//    }
     public String getKeymanagers(List<String> keyManagersList){
 
         String keyManagers = null;
@@ -215,7 +204,7 @@ public class ApiDetails {
 
         boolean isMonetizationEnabled = devPortalAPI.isMonetizationEnabled();
 
-        String throttlingPolicies = throttlingPoliciesData.getThrottlingPoliciesData(id);;
+        String throttlingPolicies = throttlingPoliciesData.getThrottlingPoliciesData(tiers);;
 
         Set<String> categoriesSet = devPortalAPI.getApiCategories();
 

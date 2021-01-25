@@ -25,6 +25,9 @@ public class GraphqlProvider {
     @Autowired
     ApiService apiService;
 
+    @Autowired
+    TagSevice tagSevice;
+
 
 
 
@@ -55,24 +58,19 @@ public class GraphqlProvider {
 
     private RuntimeWiring buildRuntime(){
         return RuntimeWiring.newRuntimeWiring()
-                .type(queryBuilder())
+                .type(queryAllApis())
                 .type(queryApi())
-                //.type(queryApiDetails())
-//                .type(ApiNameDataFetcher())
-//                .type(ApiContextDataFetcher())
-//                .type(ApiVersionDataFetcher())
-//                .type(ApiProviderDataFetcher())
+                .type(queryApiTags())
                 .type(ApiTypeDataFetcher())
                 .type(ApiCreateTimeDataFetcher())
                 .type(ApiUpdateTimeDataFetcher())
-                //.type(ApiAdditionalPropertiesDataFetcher())
                 .type(ApiDefinitionDataFetcher())
-                //.type(ApiTagsDataFetcher())
                 .type(queryApiCount())
                 .type(ApiRatingDataFetcher())
                 .type(OperationInformationDataFetcher())
-                .type(TierDataFetcher())
+                .type(TierNamesDataFetcher())
                 .type(TierDetailsDataFetcher())
+                .type(MonetizationLabelDataFetcher())
                 .type(IngressUrlDataFetcher())
                 .type(ClusterInformationDataFetcher())
                 .type(BusinessInformationDataFetcher())
@@ -81,14 +79,14 @@ public class GraphqlProvider {
                 .type(ScopeInformationDataFetcher())
                 .type(AdvertiseInformationDataFetcher())
                 .type(ApiEndPointUrlsInformationDataFetcher())
-                .type(APIURLsDTODataFetcher())
-                .type(DefaultAPIURLsDTODataFetcher())
+                .type(APIURLsDataFetcher())
+                .type(DefaultAPIURLsDataFetcher())
                 .type(PaginationDataFetcher())
                 .build();
     }
 
 
-    private TypeRuntimeWiring.Builder queryBuilder(){
+    private TypeRuntimeWiring.Builder queryAllApis(){
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getApis",apiService.getApisFromArtifact());
     }
@@ -99,6 +97,10 @@ public class GraphqlProvider {
     private TypeRuntimeWiring.Builder queryApiCount(){
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getApisCount",apiService.getApiCount());
+    }
+    private TypeRuntimeWiring.Builder queryApiTags(){
+        return TypeRuntimeWiring.newTypeWiring("Query")
+                .dataFetcher("getTags", tagSevice.getTagsData());
     }
     private TypeRuntimeWiring.Builder ApiTypeDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
@@ -112,34 +114,27 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("lastUpdate",apiService.getApiUpdatedTime());
     }
-//    private TypeRuntimeWiring.Builder ApiAdditionalPropertiesDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("additionalProperties",apiService.getAdditionalProperties());
-//    }
     private TypeRuntimeWiring.Builder ApiDefinitionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiDefinition",apiService.getApiDefinition());
     }
-//    private TypeRuntimeWiring.Builder ApiTagsDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("tags",apiService.getApiTags());
-//    }
-
-
-
 
     private TypeRuntimeWiring.Builder ApiRatingDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("rating",apiService.getApiRating());
     }
 
-    private TypeRuntimeWiring.Builder TierDataFetcher(){
+    private TypeRuntimeWiring.Builder TierNamesDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("tierInformation",apiService.getTierInformation());
+                .dataFetcher("tierInformation",apiService.getTierNames());
     }
     private TypeRuntimeWiring.Builder TierDetailsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Tier")
-                .dataFetcher("tierDetails",apiService.getTiers());
+                .dataFetcher("tierDetails",apiService.getTierDetails());
+    }
+    private TypeRuntimeWiring.Builder MonetizationLabelDataFetcher(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("monetizationLabel",apiService.getMonetizationLabel());
     }
 
     private TypeRuntimeWiring.Builder IngressUrlDataFetcher(){
@@ -150,17 +145,14 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("IngressUrl")
                 .dataFetcher("clusterDetails",apiService.getDeploymentClusterInformation());
     }
-
     private TypeRuntimeWiring.Builder OperationInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("operationInformation",apiService.getOperationInformation());
     }
-
     private TypeRuntimeWiring.Builder BusinessInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("businessInformation",apiService.getBusinessInformation());
     }
-
     private TypeRuntimeWiring.Builder LabelInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("label",apiService.getLabelInformation());
@@ -169,12 +161,10 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Label")
                 .dataFetcher("labelDetails",apiService.getLabelsDetails());
     }
-
     private TypeRuntimeWiring.Builder ScopeInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("scope",apiService.getScopeInformation());
     }
-
     private TypeRuntimeWiring.Builder AdvertiseInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("advertiseInfo",apiService.getAdvertiseInformation());
@@ -184,11 +174,11 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiEndPointInformation",apiService.getApiUrlsEndPoint());
     }
-    private TypeRuntimeWiring.Builder APIURLsDTODataFetcher(){
+    private TypeRuntimeWiring.Builder APIURLsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("APIEndpointURLsDTO")
                 .dataFetcher("urLs",apiService.getApiUrlsDTO());
     }
-    private TypeRuntimeWiring.Builder DefaultAPIURLsDTODataFetcher(){
+    private TypeRuntimeWiring.Builder DefaultAPIURLsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("APIEndpointURLsDTO")
                 .dataFetcher("defaultUrls",apiService.getDefaultApiUrlsDTO());
     }
