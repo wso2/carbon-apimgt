@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,19 +32,24 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApiService;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.*;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.Md5HashGenerator;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceCatalogUtils;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
@@ -34,31 +57,7 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     private static final Log log = LogFactory.getLog(ServiceEntriesApiServiceImpl.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
-//    @Override
-//    public Response checkServicesExistence(String key, Boolean shrink, MessageContext messageContext) throws APIManagementException {
-//        if (StringUtils.isBlank(key)) {
-//            RestApiUtil.handleBadRequest("Service key can not be an empty String", log);
-//        }
-//
-//        String userName = RestApiCommonUtil.getLoggedInUsername();
-//        int tenantId = APIUtil.getTenantId(userName);
-//        List<ServiceInfoDTO> servicesList = new ArrayList<>();
-//        PaginationDTO paginationDTO = null;
-//
-//        String keys[] = key.trim().split("\\s*,\\s*");
-//        for (String serviceKey : keys) {
-//            ServiceCatalogInfo serviceCatalogInfo = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-//            if (serviceCatalogInfo != null) {
-//                servicesList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(serviceCatalogInfo));
-//            }
-//        }
-//        return Response.ok().entity(DataMappingUtil.getServicesResponsePayloadBuilder(servicesList)).build();// set paginationDTO
-//    }
-
     public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
-        log.info("createService");
-
-        // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
@@ -68,9 +67,6 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     }
 
     public Response deleteService(String serviceId, MessageContext messageContext) {
-        log.info("deleteService");
-
-        // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
@@ -81,7 +77,8 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
 
     public Response exportService(String name, String version, MessageContext messageContext) {
         File exportedServiceArchiveFile = null;
-        String pathToExportDir = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR); //creates a directory in default temporary-file directory
+        // creates a directory in default temporary-file directory
+        String pathToExportDir = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String archiveName = name + APIConstants.KEY_SEPARATOR + version;
@@ -103,7 +100,7 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
                 exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
                 exportedFileName = exportedServiceArchiveFile.getName();
             } else {
-                return Response.ok("Empty result set").build(); //404**************
+                return Response.status(Response.Status.NOT_FOUND).build();
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while exporting Services: " + archiveName, e, log);
@@ -116,9 +113,6 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     }
 
     public Response getServiceById(String serviceId, MessageContext messageContext) {
-        log.info("getServiceById");
-
-        // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
@@ -128,9 +122,6 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     }
 
     public Response getServiceDefinition(String serviceId, MessageContext messageContext) {
-        log.info("getServiceDefinition");
-
-        // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
@@ -141,14 +132,15 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
 
     @Override
     public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, String verifier, MessageContext messageContext) throws APIManagementException {
+        if (overwrite == null || !overwrite) {
+            return Response.status(Response.Status.PRECONDITION_FAILED).build();
+        }
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
-        String tempDirPath = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
-        List<VerifierDTO> verifierJSONList;
+        String tempDirPath = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
         List<ServiceInfoDTO> serviceStatusList;
         HashMap<String, String> newResourcesHash;
         HashMap<String, ServiceEntry> catalogEntries;
-        HashMap<String, List<String>> filteredServices;
 
         // unzip the uploaded zip
         try {
@@ -159,80 +151,31 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
             RestApiUtil.handleResourceAlreadyExistsError("Error while importing Service", e, log);
         }
 
-        if (overwrite == null || !overwrite) {
-            if (StringUtils.isBlank(verifier)) {
-                RestApiUtil.handleBadRequest("When overwrite is not true, verifier cannot be empty.", log);
-            }
-            // String to JSON conversion
-            verifierJSONList = ServiceEntryMappingUtil.fromStringToJSON(verifier);
-            if (verifierJSONList != null && verifierJSONList.size() != ServiceEntryMappingUtil.dirCount(tempDirPath)) {
-                RestApiUtil.handleBadRequest("Number of elements in verifier must equals to number of " +
-                        "directories in the zip archive.", log);
-            }
-//OAS Validation
-            newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
-            catalogEntries = ServiceEntryMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath);
+        newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
+        catalogEntries = ServiceEntryMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath);
 
-            filteredServices = ServiceCatalogUtils.validateVerifierList(verifierJSONList, newResourcesHash, tenantId);
-            if (!filteredServices.get(APIConstants.MAP_KEY_IGNORED_EXISTING_SERVICE).isEmpty()){
-                return Response.status(Response.Status.PRECONDITION_FAILED).build(); // RESPONSE BODY?
-            }
-
-            // *********these 2 will be moved to ServiceCatalogUtils
-            // Adding new services
-            List<String> keyList = filteredServices.get(APIConstants.MAP_KEY_ACCEPTED_NEW_SERVICE);
-            for (String newService : keyList) {
-                if (catalogEntries.containsKey(newService)) { // we can remove this since in two flows we use same key
-                    catalogEntries.get(newService).setMd5(newResourcesHash.get(newService));
-                    String uuid = serviceCatalog.addService(catalogEntries.get(newService), tenantId);
-                    if (uuid != null) {
-                        catalogEntries.get(newService).setUuid(uuid); // no need any more
-                        // get values from db.. not from user
-                    } else {
-                        filteredServices.get(APIConstants.MAP_KEY_IGNORED_EXISTING_SERVICE).add(newService);
-                        filteredServices.get(APIConstants.MAP_KEY_ACCEPTED_NEW_SERVICE).remove(newService);
-                    }
-                }
-            }
-
-            // Adding updated existing services
-            for (String updatedService : filteredServices.get(APIConstants.MAP_KEY_VERIFIED_EXISTING_SERVICE)) {
-                if (catalogEntries.containsKey(updatedService)) { // as above
-                    catalogEntries.get(updatedService).setMd5(newResourcesHash.get(updatedService)); // validation will come here
-                    String uuid = serviceCatalog.addService(catalogEntries.get(updatedService), tenantId);
-                    if (uuid != null) {
-                        catalogEntries.get(updatedService).setUuid(uuid);
-                    } else {
-                        filteredServices.get(APIConstants.MAP_KEY_IGNORED_EXISTING_SERVICE).add(updatedService);
-                        filteredServices.get(APIConstants.MAP_KEY_VERIFIED_EXISTING_SERVICE).remove(updatedService);
-                    }
-                }
-            }
-
-            serviceStatusList = ServiceEntryMappingUtil.fromServiceCatalogInfoToDTOList(catalogEntries, filteredServices);
-            return Response.ok().entity(ServiceEntryMappingUtil.fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
-        } else if (overwrite) {
-            newResourcesHash = Md5HashGenerator.generateHash(tempDirPath); // take this out from if-else
-            catalogEntries = ServiceEntryMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath); // take out
+        if (overwrite) {
             HashMap<String, ServiceEntry> serviceEntries = new HashMap<>();
             for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
                 String key = entry.getKey();
                 catalogEntries.get(key).setMd5(newResourcesHash.get(key));
-                String uuid = serviceCatalog.addService(catalogEntries.get(key), tenantId); // before this there will be validation whether or not update
-//Use try catch
-                if (uuid != null) {
-                    catalogEntries.get(key).setUuid(uuid);
-                    serviceEntries.put(key, entry.getValue());
-                } else {
-                    String ServiceKey = serviceCatalog.updateService(catalogEntries.get(key), tenantId); // do the validation here - remove from add
-                    if (!StringUtils.isBlank(ServiceKey))
-                        serviceEntries.put(key, entry.getValue());
+                try {
+                    if (ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
+                        serviceCatalog.updateService(catalogEntries.get(key), tenantId, userName);
+                    } else {
+                        serviceCatalog.addService(catalogEntries.get(key), tenantId, userName);
+                    }
+                    ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(key, tenantId);
+                    serviceEntries.put(key, serviceEntry);
+                } catch (APIManagementException e) {
+                    // client will only be informed by the list of successfully added services
+                    log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
                 }
             }
             serviceStatusList = ServiceEntryMappingUtil.fromServiceCatalogInfoToDTOList(serviceEntries);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
         } else {
-            return Response.status(Response.Status.CONFLICT).build(); // remove this and keep only if and else
+            return Response.status(Response.Status.CONFLICT).build();
         }
     }
 
@@ -258,19 +201,16 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
         errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
+        errorObject.setDescription("The requested resource has not been implemented for this purpose");
         return Response.status(status).entity(errorObject).build();
     }
 
     public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
-        log.info("updateService");
-
-        // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
         errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
+        errorObject.setDescription("The requested resource has not been implemented for updating services");
         return Response.status(status).entity(errorObject).build();
     }
 }

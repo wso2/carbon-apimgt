@@ -1,6 +1,5 @@
-package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,12 +16,15 @@ package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
  * under the License.
  */
 
+package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
+
 import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,13 +72,17 @@ public class Md5HashGenerator {
     private static HashMap<String, String> validateInputParams(File[] files) {
 
         for (File file : files) {
-            if (file.isDirectory()) { //else ignore zip
+            if (file.isDirectory()) {
+                // Else is not required since this for taking only the directories. If it is an empty zip, then
+                // the final map will be empty.
                 File[] fArray = file.listFiles();
                 if (fArray != null) {
+                    // Order files according to the alphabetical order of file names when concatenating hashes.
                     Arrays.sort(fArray, NameFileComparator.NAME_COMPARATOR);
                     String key = null;
                     for (File aFile : fArray) {
-                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) { //else!!
+                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
+                            // This if only check whether the file start with the name "metadata".
                             try {
                                 ServiceEntry serviceEntry = fromFileToServiceCatalogInfo(aFile);
                                 if (!StringUtils.isBlank(serviceEntry.getKey())) {
@@ -85,15 +91,15 @@ public class Md5HashGenerator {
                                     key = generateServiceKey(serviceEntry);
                                 }
                             } catch (IOException e) {
-                                // Missing metadata throw Error!! ****add to definition
-                                log.error("Failed to fetch metadata information from zip due to generate key" + e.getMessage(), e);
+                                RestApiUtil.handleBadRequest("Failed to fetch metadata information", log);
                             }
                         }
                     }
                     try {
                         endpoints.put(key, calculateHash(fArray));
                     } catch (NoSuchAlgorithmException | IOException e) {
-                        log.error("Failed to generate MD5 Hash due to " + e.getMessage(), e);
+                        RestApiUtil.handleInternalServerError("Failed to generate MD5 Hash due to " +
+                                e.getMessage(), log);
                     }
                 }
             }

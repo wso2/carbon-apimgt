@@ -3640,7 +3640,6 @@ public class SQLConstants {
                 "SECURITY_TYPE = ?," +
                 "MUTUAL_SSL_ENABLED = ?," +
                 "LAST_UPDATED_TIME = ?," +
-                "CREATED_BY = ?," +
                 "UPDATED_BY = ?," +
                 "ENDPOINT_DEFINITION = ?," +
                 "METADATA = ? " +

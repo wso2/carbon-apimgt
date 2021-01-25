@@ -26,7 +26,11 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class ServiceCatalogDAO {
 
@@ -56,11 +60,12 @@ public class ServiceCatalogDAO {
      * Add a new serviceCatalog
      *
      * @param serviceEntry ServiceCatalogInfo
-     * @param tenantID           ID of the owner's tenant
+     * @param tenantID     ID of the owner's tenant
+     * @param userName     Logged in user name
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceCatalog(ServiceEntry serviceEntry, int tenantID, String uuid) throws APIManagementException {
+    public String addServiceCatalog(ServiceEntry serviceEntry, int tenantID, String uuid, String userName) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -84,8 +89,8 @@ public class ServiceCatalogDAO {
                 ps.setBoolean(13, serviceEntry.isMutualSSLEnabled());
                 ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
                 ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
-                ps.setString(16, serviceEntry.getCreatedBy()); //get from logged in user
-                ps.setString(17, serviceEntry.getUpdatedBy()); //here too
+                ps.setString(16, userName);
+                ps.setString(17, userName);
                 ps.setBinaryStream(18, serviceEntry.getEndpointDef());
                 ps.setBinaryStream(19, serviceEntry.getMetadata());
 
@@ -108,11 +113,12 @@ public class ServiceCatalogDAO {
      * Update an existing serviceCatalog
      *
      * @param serviceEntry ServiceCatalogInfo
-     * @param tenantID           ID of the owner's tenant
+     * @param tenantID     ID of the owner's tenant
+     * @param userName     Logged in user name
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID) throws APIManagementException {
+    public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID, String userName) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -133,12 +139,11 @@ public class ServiceCatalogDAO {
                 ps.setString(10, serviceEntry.getSecurityType());
                 ps.setBoolean(11, serviceEntry.isMutualSSLEnabled());
                 ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
-                ps.setString(13, serviceEntry.getCreatedBy());
-                ps.setString(14, serviceEntry.getUpdatedBy());
-                ps.setBinaryStream(15, serviceEntry.getEndpointDef());
-                ps.setBinaryStream(16, serviceEntry.getMetadata());
-                ps.setString(17, serviceEntry.getKey());
-                ps.setInt(18, tenantID);
+                ps.setString(13, userName);
+                ps.setBinaryStream(14, serviceEntry.getEndpointDef());
+                ps.setBinaryStream(15, serviceEntry.getMetadata());
+                ps.setString(16, serviceEntry.getKey());
+                ps.setInt(17, tenantID);
 
                 ps.executeUpdate();
                 connection.commit();

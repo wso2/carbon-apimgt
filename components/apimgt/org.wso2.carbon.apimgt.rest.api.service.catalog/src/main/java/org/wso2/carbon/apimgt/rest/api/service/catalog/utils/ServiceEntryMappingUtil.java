@@ -1,8 +1,26 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -13,23 +31,23 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.VerifierDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-//Add class comments*********
+/**
+ * Mapping class for Service Catalog services
+ */
 public class ServiceEntryMappingUtil {
 
     private static final Log log = LogFactory.getLog(Md5HashGenerator.class);
@@ -73,39 +91,13 @@ public class ServiceEntryMappingUtil {
     }
 
     /**
-     * Generate EndPointInfo model
+     * Generate Hash Map to hold all the ServiceEntry objects relevant to the services included in zip
      *
-     * @param file Metadata file
-     * @param uuid unique id for each entry in service catalog
-     * @return Converted ServiceCatalogInfo model object
-     * @throws IOException
+     * @param path path to the directory which include files
+     * @return HashMap with service key as key and ServiceEntry object as value
      */
-    public static ServiceEntry generateEndPointInfo(File file, String uuid) throws IOException {
-
-        ServiceEntry serviceEntry = new ServiceEntry();
-        InputStream inputFile = new FileInputStream(file);
-        serviceEntry.setUuid(uuid);
-        serviceEntry.setEndpointDef(inputFile);
-        return serviceEntry;
-    }
-
-    public static int dirCount(String path) {
-        File[] files = new File(path).listFiles();
-        int count = 0;
-        assert files != null;
-        for (File file : files) {
-            if (file.isDirectory()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     public static HashMap<String, ServiceEntry> fromDirToServiceCatalogInfoMap(String path) {
-
-        // We can use list: then we can go through it and if we need name or something we can just use getters
-
-        HashMap<String, ServiceEntry> endpointDetails = new HashMap<String, ServiceEntry>();
+        HashMap<String, ServiceEntry> endpointDetails = new HashMap<>();
         File[] files = new File(path).listFiles();
         assert files != null;
         for (File file : files) {
@@ -123,13 +115,14 @@ public class ServiceEntryMappingUtil {
                                 key = generateServiceKey(serviceInfo);
                             }
                             serviceInfo.setKey(key);
-                            serviceInfo.setMetadata(new FileInputStream(aFile));
-                        } else { //else if to check oas - check branch there is validation (After M5)
-                            serviceInfo.setEndpointDef(new FileInputStream(aFile)); //Closing streams?*******Keep this as ByteStream
+                            serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
+                        } else {
+                            serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
                         }
                     }
                 } catch (IOException e) {
-                    log.error("Failed to fetch metadata information from zip due to " + e.getMessage(), e);
+                    RestApiUtil.handleInternalServerError("Error while reading service resource files. " +
+                            "Zip might not include valid data", e, log);
                 }
                 endpointDetails.put(key, serviceInfo);
             }
@@ -142,32 +135,11 @@ public class ServiceEntryMappingUtil {
         return key.toLowerCase();
     }
 
-//    /**
-//     * Converts a single metadata file content into a model object
-//     *
-//     * @param serviceCatalogInfo ServiceCatalogInfo model object
-//     * @return Converted ServiceCRUDStatusDTO DTO object
-//     * @throws IOException
-//     */
-//    public static ServiceCRUDStatusDTO fromServiceCatalogInfoToServiceCRUDStatusDTO(ServiceCatalogInfo serviceCatalogInfo, boolean status) throws IOException {
-//        ServiceCRUDStatusDTO serviceCRUDStatusDTO = new ServiceCRUDStatusDTO();
-//
-//        serviceCRUDStatusDTO.setId(serviceCatalogInfo.getUuid());
-//        serviceCRUDStatusDTO.setName(serviceCatalogInfo.getName());
-//        serviceCRUDStatusDTO.setDisplayName(serviceCatalogInfo.getDisplayName());
-//        serviceCRUDStatusDTO.setVersion(serviceCatalogInfo.getVersion());
-//        serviceCRUDStatusDTO.setServiceUrl(serviceCatalogInfo.getServiceUrl());
-//        serviceCRUDStatusDTO.setCreatedTime(serviceCatalogInfo.getCreatedTime().toString());
-//        serviceCRUDStatusDTO.setLastUpdatedTime(serviceCatalogInfo.getLastUpdatedTime().toString());
-//
-//        return serviceCRUDStatusDTO;
-//    }
-
     /**
-     * Converts a single metadata file content into a model object
+     * Convert list of ServiceInfoDTO objects to ServiceInfoListDTO object
      *
-     * @param servicesList metadata list of services provided in zip
-     * @return build the ServicesStatusListDTO DTO object
+     * @param servicesList list of ServiceInfoDTO objects
+     * @return build the ServiceInfoListDTO DTO object
      */
     public static ServiceInfoListDTO fromServiceInfoDTOToServiceInfoListDTO(List<ServiceInfoDTO> servicesList) {
         ServiceInfoListDTO serviceInfoListDTO = new ServiceInfoListDTO();
@@ -178,23 +150,12 @@ public class ServiceEntryMappingUtil {
         return serviceInfoListDTO;
     }
 
-    public static List<ServiceInfoDTO> fromServiceCatalogInfoToDTOList(HashMap<String, ServiceEntry> catalogEntries,
-                                                                       HashMap<String, List<String>> filteredServices) {
-        List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
-        for (String element : filteredServices.get(APIConstants.MAP_KEY_VERIFIED_EXISTING_SERVICE)) { // we can merge these two from utils level
-            if (catalogEntries.containsKey(element)) {
-                serviceStatusList.add(ServiceEntryMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
-            }
-        }
-        for (String element : filteredServices.get(APIConstants.MAP_KEY_ACCEPTED_NEW_SERVICE)) {
-            if (catalogEntries.containsKey(element)) {
-                serviceStatusList.add(ServiceEntryMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
-            }
-        }
-        return serviceStatusList;
-
-    }
-
+    /**
+     * Convert entries in Hash Map to list of ServiceInfoDTO objects
+     *
+     * @param catalogEntries Hash Map of services provided in zip
+     * @return build the List<ServiceInfoDTO> list
+     */
     public static List<ServiceInfoDTO> fromServiceCatalogInfoToDTOList(HashMap<String, ServiceEntry> catalogEntries) {
         List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
         for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
@@ -204,10 +165,10 @@ public class ServiceEntryMappingUtil {
     }
 
     /**
-     * Converts a single metadata file content into a model object
+     * Converts ServiceEntry object to ServiceInfoDTO object
      *
-     * @param serviceEntry ServiceCatalogInfo model object
-     * @return Converted ServiceCRUDStatusDTO DTO object
+     * @param serviceEntry ServiceEntry model object
+     * @return Converted ServiceInfoDTO object
      */
     public static ServiceInfoDTO fromServiceCatalogInfoToServiceInfoDTO(ServiceEntry serviceEntry) {
         ServiceInfoDTO serviceInfoDTO = new ServiceInfoDTO();
@@ -222,10 +183,10 @@ public class ServiceEntryMappingUtil {
     }
 
     /**
-     * Converts a single metadata file content into a model object
+     * Convert list of ServiceInfoDTO objects to ServiceInfoListDTO object
      *
      * @param servicesList metadata list of services provided in zip
-     * @return build the ServicesStatusListDTO DTO object
+     * @return build the ServiceInfoListDTO object
      */
     public static ServiceInfoListDTO getServicesResponsePayloadBuilder(List<ServiceInfoDTO> servicesList) {
         ServiceInfoListDTO serviceInfoListDTO = new ServiceInfoListDTO();
@@ -237,19 +198,26 @@ public class ServiceEntryMappingUtil {
     }
 
     /**
-     * Converts ServiceCatalogInfo object's input stream entries to files
+     * Converts ServiceEntry object's input stream entries to files
      *
-     * @param serviceEntry metadata list of services provided in zip
+     * @param serviceEntry Service catalog entry
      * @return location to the files
      */
     public static String generateServiceFiles(ServiceEntry serviceEntry) {
-        String pathToCreateFiles = FileBasedServicesImportExportManager.directoryCreator(RestApiConstants.JAVA_IO_TMPDIR);
+        String pathToCreateFiles = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
         fromInputStreamToFile(serviceEntry.getMetadata(), pathToCreateFiles + File.separator + APIConstants.METADATA_FILE);
         fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator + APIConstants.DEFINITION_FILE);
 
         return pathToCreateFiles;
     }
 
+    /**
+     * Write ServiceEntry object's input stream entries to files
+     *
+     * @param inputStream inputStream of files
+     * @param outputFile  output file name
+     * @return location to the files
+     */
     private static void fromInputStreamToFile(InputStream inputStream, String outputFile) {
         File file = new File(outputFile);
         try (OutputStream outputStream = new FileOutputStream(file)) {
@@ -257,24 +225,5 @@ public class ServiceEntryMappingUtil {
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error while preparing resource files before zip", e, log);
         }
-    }
-
-    /**
-     * Converts JSON String to JSON Object
-     *
-     * @param jsonInput String json provided in parameter
-     * @return list of VerifierDTOs
-     */
-    public static List<VerifierDTO> fromStringToJSON(String jsonInput) {
-        List<VerifierDTO> verifierJSONList;
-        final ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            VerifierDTO[] verifierJSONArray = objectMapper.readValue(jsonInput, VerifierDTO[].class);
-            verifierJSONList = new ArrayList(Arrays.asList(verifierJSONArray));
-            return verifierJSONList;
-        } catch (JsonProcessingException e) {
-            RestApiUtil.handleInternalServerError("Error while converting verifier JSON String to JSON object", e, log);
-        }
-        return null;
     }
 }
