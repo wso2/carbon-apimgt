@@ -58,8 +58,6 @@
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

@@ -1669,9 +1669,11 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getWSDLInfoOfAPI(String apiId, String organizationId, MessageContext messageContext)
             throws APIManagementException {
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String orgId = PublisherCommonUtils.getOrgId(organizationId);
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+        API api = apiProvider.getLightweightAPIByUUID(apiId, organizationDTO);
         WSDLInfoDTO wsdlInfoDTO = APIMappingUtil.getWsdlInfoDTO(api);
         if (wsdlInfoDTO == null) {
             throw new APIManagementException(

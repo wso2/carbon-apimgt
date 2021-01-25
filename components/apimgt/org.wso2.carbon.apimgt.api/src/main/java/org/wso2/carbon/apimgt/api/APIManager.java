@@ -86,21 +86,21 @@ public interface APIManager {
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid   Registry artifact id
-     * @param orgId  Identifier of an organization
+     * @param organizationDTO  Organization DTO object
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
-    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId) throws APIManagementException;
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException;
 
     /**
      * Get minimal details of API by registry artifact id
      *
      * @param uuid Registry artifact id
-     * @param orgId  Identifier of an organization
+     * @param organizationDTO  Organization DTO object
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException;
 
     /**
      * Get minimal details of API by API identifier

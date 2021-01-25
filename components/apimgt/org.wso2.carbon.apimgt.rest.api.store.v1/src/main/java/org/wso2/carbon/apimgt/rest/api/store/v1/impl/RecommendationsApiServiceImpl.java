@@ -24,12 +24,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.RecommendationsApiService;
 
@@ -66,8 +68,10 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                         try {
                             JSONObject apiObj = apiList.getJSONObject(i);
                             apiId = apiObj.getString("id");
+                            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(requestedTenantDomain,
+                                    requestedTenantDomain);
                             ApiTypeWrapper apiWrapper = apiConsumer
-                                    .getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+                                    .getAPIorAPIProductByUUID(apiId, organizationDTO);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);

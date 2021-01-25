@@ -5959,22 +5959,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, OrganizationDTO organizationDTO)
             throws APIManagementException {
         try {
-            Organization org = new Organization(orgId);
+            Organization org = new Organization(organizationDTO.getOrgId());
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, orgId, org, apiProduct);
+                    populateAPIProductInformation(uuid, organizationDTO.getRequestedTenantDomain(), org, apiProduct);
                     
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, orgId, org, api);
+                    populateAPIInformation(uuid, organizationDTO.getRequestedTenantDomain(), org, api);
                     api = addTiersToAPI(api, tenantDomain);
                     return new ApiTypeWrapper(api);
                 }
@@ -6021,9 +6021,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
         try {
-            Organization org =  new Organization(orgId);
+            Organization org =  new Organization(organizationDTO.getOrgId());
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);

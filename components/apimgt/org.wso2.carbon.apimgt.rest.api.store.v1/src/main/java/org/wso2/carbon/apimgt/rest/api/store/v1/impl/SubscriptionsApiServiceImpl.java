@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -100,9 +101,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (!StringUtils.isEmpty(apiId)) {
                 // todo : FIX properly, need to done properly with backend side pagination.
                 // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow.
-
+                OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
                 // This will fail with an authorization failed exception if user does not have permission to access the API
-                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, orgId);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, organizationDTO);
 
                 if (apiTypeWrapper.isAPIProduct()) {
                     subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber,
@@ -209,8 +210,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 //application access failure occurred
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), orgId);
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organizationDTO);
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
@@ -318,8 +319,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 //application access failure occurred
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
-            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), orgId);
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organizationDTO);
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
@@ -384,8 +385,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
                 APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
                 String applicationId = subscriptionDTO.getApplicationId();
+                OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
                 APIIdentifier apiIdentifier = APIMappingUtil
-                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), orgId);
+                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), organizationDTO);
 
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
@@ -405,9 +407,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     //application access failure occurred
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
-
+              
                 ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscriptionDTO.getApiId(),
-                        orgId);
+                        organizationDTO);
 
                 //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this
                 // will throw an APIMgtAuthorizationFailedException with the reason as the message

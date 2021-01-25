@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -211,7 +212,7 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain)
+                public API getLightweightAPIByUUID(String uuid, OrganizationDTO organizationDTO)
                         throws APIManagementException {
                     // TODO Auto-generated method stub
                     return null;

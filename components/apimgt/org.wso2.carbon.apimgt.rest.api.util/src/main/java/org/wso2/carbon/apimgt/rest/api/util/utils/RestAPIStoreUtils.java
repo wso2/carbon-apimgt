@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -180,9 +181,11 @@ public class RestAPIStoreUtils {
     public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String orgId) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer consumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this is just to check whether the user has access to the api or the api exists. 
         try {
-            consumer.getLightweightAPIByUUID(apiId, orgId);
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            consumer.getLightweightAPIByUUID(apiId, organizationDTO);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =
@@ -326,7 +329,8 @@ public class RestAPIStoreUtils {
     public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(requestedTenantDomain);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organizationDTO);
         return  api.getId();
     }
 

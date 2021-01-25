@@ -2781,7 +2781,9 @@ public final class APIUtil {
 
     public static OrganizationDTO getOrganizationDTOFromOrgID(String orgId, String requestedTenantDomain) {
         OrganizationDTO organizationDTO = new OrganizationDTO(orgId);
-        organizationDTO.setRequestedTenantDomain(requestedTenantDomain);
+        if (requestedTenantDomain != null) {
+            organizationDTO.setRequestedTenantDomain(requestedTenantDomain);
+        }
         return  organizationDTO;
     }
 

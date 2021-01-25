@@ -24,6 +24,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -431,16 +432,16 @@ public class APIMappingUtil {
      * Returns an API with minimal info given the uuid.
      *
      * @param apiUUID API UUID
-     * @param orgId   Identifier of an organization / tenant domain of the API
+     * @param organizationDTO  Identifier of an organization / tenant domain of the API
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIInfoFromUUID(String apiUUID, String orgId)
+    public static API getAPIInfoFromUUID(String apiUUID, OrganizationDTO organizationDTO)
             throws APIManagementException {
         API api;
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        api = apiConsumer.getLightweightAPIByUUID(apiUUID, orgId);
+        api = apiConsumer.getLightweightAPIByUUID(apiUUID, organizationDTO);
         return api;
     }
 
@@ -448,13 +449,13 @@ public class APIMappingUtil {
      * Returns the APIIdentifier given the uuid
      *
      * @param apiId  API UUID
-     * @param orgId  Identifier of an Organization
+     * @param organizationDTO  Identifier of an Organization
      * @return APIIdentifier which represents the given id
      * @throws APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String orgId)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, OrganizationDTO organizationDTO)
             throws APIManagementException {
-        return getAPIInfoFromUUID(apiId, orgId).getId();
+        return getAPIInfoFromUUID(apiId, organizationDTO).getId();
     }
 
     /**

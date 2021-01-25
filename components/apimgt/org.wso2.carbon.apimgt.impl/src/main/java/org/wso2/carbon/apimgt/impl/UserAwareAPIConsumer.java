@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -134,9 +135,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
     
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, OrganizationDTO organizationDTO)
             throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, requestedTenantDomain);
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organizationDTO);
         Identifier identifier;
         if (apiTypeWrapper.isAPIProduct()) {
             identifier = apiTypeWrapper.getApiProduct().getId();

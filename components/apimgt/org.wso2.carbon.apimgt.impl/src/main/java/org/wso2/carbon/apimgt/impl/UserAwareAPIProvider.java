@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
@@ -236,8 +237,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException {
-        API api = super.getLightweightAPIByUUID(uuid, orgId);
+    public API getLightweightAPIByUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
+        API api = super.getLightweightAPIByUUID(uuid, organizationDTO);
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }

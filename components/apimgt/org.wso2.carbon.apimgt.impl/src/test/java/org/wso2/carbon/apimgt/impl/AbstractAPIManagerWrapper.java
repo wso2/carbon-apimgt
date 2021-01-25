@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -195,7 +196,7 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return null;
     }
 
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
         // TODO Auto-generated method stub
         return null;
     }

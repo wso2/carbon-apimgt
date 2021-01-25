@@ -574,11 +574,12 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, OrganizationDTO organizationDTO)
             throws APIManagementException {
         boolean tenantFlowStarted = false;
         try {
             Registry registry;
+            String requestedTenantDomain = organizationDTO.getRequestedTenantDomain();
             if (requestedTenantDomain != null) {
                 int id = getTenantManager().getTenantId(requestedTenantDomain);
                 startTenantFlow(requestedTenantDomain);

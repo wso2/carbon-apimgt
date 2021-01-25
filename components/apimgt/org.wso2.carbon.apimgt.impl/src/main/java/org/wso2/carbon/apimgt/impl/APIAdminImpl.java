@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -181,8 +182,8 @@ public class APIAdminImpl implements APIAdmin {
             UserAwareAPIProvider userAwareAPIProvider = new UserAwareAPIProvider(user);
             for (API api : apiList) {
                 String uuid = api.getUUID();
-                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, apiProvider.
-                        tenantDomain);
+                OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(apiProvider.tenantDomain);
+                API lightweightAPIByUUID = userAwareAPIProvider.getLightweightAPIByUUID(uuid, organizationDTO);
                 List<Label> attachedLabelsWithoutID = lightweightAPIByUUID.getGatewayLabels();
                 for (Label labelWithoutId : attachedLabelsWithoutID) {
                     if (labelName.equalsIgnoreCase(labelWithoutId.getName())) {

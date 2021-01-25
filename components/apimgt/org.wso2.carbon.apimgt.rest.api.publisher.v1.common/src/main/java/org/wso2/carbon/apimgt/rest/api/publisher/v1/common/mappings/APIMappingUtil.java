@@ -520,7 +520,8 @@ public class APIMappingUtil {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        api = apiProvider.getLightweightAPIByUUID(apiUUID, requestedTenantDomain);
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(requestedTenantDomain);
+        api = apiProvider.getLightweightAPIByUUID(apiUUID, organizationDTO);
         return api;
     }
 
@@ -2589,8 +2590,11 @@ public class APIMappingUtil {
 
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        OrganizationDTO organizationDTO;
         if (RestApiCommonUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, orgId).getId();
+            organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId,
+                    RestApiCommonUtil.getLoggedInUserTenantDomain());
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, organizationDTO).getId();
         } else {
             apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), orgId).getId();
         }
