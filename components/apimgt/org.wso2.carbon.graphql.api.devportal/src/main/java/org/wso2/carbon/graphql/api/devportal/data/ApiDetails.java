@@ -20,13 +20,12 @@ import java.util.*;
 
 public class ApiDetails {
 
-    APIPersistence apiPersistenceInstance;
 
 
 
-    public List<Api> getAllApis() throws UserStoreException, RegistryException, OASPersistenceException, APIManagementException, APIPersistenceException {
+
+    public List<Api> getAllApis(int start, int offset) throws APIPersistenceException {
         SubscribeAvailableData subscribeAvailableData = new SubscribeAvailableData();
-        MonetizationLabelData monetizationLabelData = new MonetizationLabelData();
         ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
 
 
@@ -36,7 +35,7 @@ public class ApiDetails {
         List<Api> apiDTOList = new ArrayList<Api>();
 
 
-        List<DevPortalAPI> list = artifactData.getDevportalAPIS();
+        List<DevPortalAPI> list = artifactData.getDevportalAPIS(start,offset);
         for (DevPortalAPI devPortalAPI: list){
             String id = devPortalAPI.getId();
             String name = devPortalAPI.getApiName();
@@ -58,7 +57,6 @@ public class ApiDetails {
             boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(id);////
 
             Set<String> tiers = devPortalAPI.getAvailableTierNames();
-            //Set<Tier> throttlingPolicies = devPortalAPI.getAvailableTiers();
 
             String monetizationLabel = "";//monetizationLabelData.getMonetizationLabelData(definedTiers,tiers,name);
             boolean isDefault = devPortalAPI.getIsDefaultVersion();

@@ -135,7 +135,7 @@ type Pagination{
 
 type Query{
     getApi(id:String):Api
-    getApis:[Api]
+    getApis(start:Int,offset:Int):[Api]
     getTags:[Tag]
     getApisCount:Int
     getPagination:Pagination

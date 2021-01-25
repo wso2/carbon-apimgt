@@ -42,14 +42,10 @@ public class ArtifactData {
 
 
 
-    public List<DevPortalAPI> getDevportalAPIS() throws APIPersistenceException {
+    public List<DevPortalAPI> getDevportalAPIS(int start, int offset) throws APIPersistenceException {
 
         Organization org = new Organization("carbon.super");
 
-        //final String userNameWithoutChange = "wso2.anonymous.user";
-        //String userame = (userNameWithoutChange != null)? userNameWithoutChange: username;
-
-        //String[] roles = APIUtil.getListOfRoles("wso2.anonymous.user");
         String[] roles = new String[1];
         roles[0] = "system/wso2.anonymous.role";
         Map<String, Object> properties = null;
@@ -62,7 +58,7 @@ public class ArtifactData {
 
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
         DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
-                0, 25, userCtx);
+                start, offset, userCtx);
 
         List<DevPortalAPI> list = searchAPIs.getDevPortalAPIList();
 
@@ -79,9 +75,8 @@ public class ArtifactData {
         return devPortalApi;
     }
 
-    public int apiCount() throws UserStoreException, RegistryException, APIPersistenceException, APIManagementException {
-        List<DevPortalAPI> list = getDevportalAPIS();
-
+    public int apiCount() throws APIPersistenceException{
+        List<DevPortalAPI> list = getDevportalAPIS(0,4);
         return list.size();
     }
 

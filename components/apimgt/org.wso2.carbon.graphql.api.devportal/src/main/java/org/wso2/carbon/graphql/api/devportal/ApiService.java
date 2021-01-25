@@ -64,7 +64,11 @@ public class ApiService {
     public DataFetcher getApisFromArtifact(){
 
 
-        return env-> apiDetails.getAllApis();
+        return env->{
+            int start = env.getArgument("start");
+            int offset = env.getArgument("offset");
+            return apiDetails.getAllApis(start,offset);
+        };
 
     }
 
