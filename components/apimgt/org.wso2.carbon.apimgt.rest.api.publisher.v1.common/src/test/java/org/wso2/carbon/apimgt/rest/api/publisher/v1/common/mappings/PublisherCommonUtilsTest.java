@@ -38,9 +38,7 @@ public class PublisherCommonUtilsTest {
     @Test
     public void testGetInvalidTierNames() throws Exception {
 
-        List<String> currentTiers;
-        currentTiers = Arrays.asList(new String[]{"Unlimitted", "Platinum", "gold"});
-
+        List<String>  currentTiers = Arrays.asList(new String[]{"Unlimitted", "Platinum", "gold"});
         Tier mockTier = Mockito.mock(Tier.class);
         Tier tier1 = new Tier("Gold");
         Tier tier2 = new Tier("Unlimitted");
@@ -51,7 +49,6 @@ public class PublisherCommonUtilsTest {
         allTiers.add(tier3);
         PowerMockito.whenNew(Tier.class).withAnyArguments().thenReturn(mockTier);
         Mockito.when(mockTier.getName()).thenReturn("Unlimitted");
-
         List<String> expectedInvalidTier = Arrays.asList(new String[]{"Platinum", "gold"});
         Assert.assertEquals(PublisherCommonUtils.getInvalidTierNames(allTiers, currentTiers), expectedInvalidTier);
     }
