@@ -78,7 +78,7 @@ $(document).ready(function () {
 		if((ssoEnabled && ssoEnabled == 'true') || (oidcEnabled && oidcEnabled == 'true')){
 			var targetLocation = $(this).attr('href');
 			if(targetLocation == undefined){
-			targetLocation = window.location.href;		
+			targetLocation = window.location.pathname;
 			//targetLocation = currentLocation;
 			}
 			var redirectURL = siteContext + '/site/pages/sso-filter.jag?passiveAuthRequired=false&requestedPage='+encodeURIComponent(targetLocation);

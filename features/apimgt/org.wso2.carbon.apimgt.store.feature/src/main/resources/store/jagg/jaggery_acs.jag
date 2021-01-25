@@ -265,8 +265,14 @@
                         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                             jagg.module("manager").loadTenantAxisConfiguration(String(domainName));
                         }
-                        response.sendRedirect(requestedURI);
-                        return;
+                        var siteContext = jagg.getSiteContext();
+                        if (jagg.startsWith(requestedURI, siteContext)){
+                            response.sendRedirect(requestedURI);
+                            return;
+                        } else {
+                            response.sendRedirect(siteContext);
+                            return;
+                        }
                    }
                 }else{
                         // if the saml response is log out request from IDP, we log out from web app.
