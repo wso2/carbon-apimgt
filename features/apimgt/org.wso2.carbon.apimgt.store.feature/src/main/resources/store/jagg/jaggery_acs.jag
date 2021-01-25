@@ -266,7 +266,7 @@
                             jagg.module("manager").loadTenantAxisConfiguration(String(domainName));
                         }
                         var siteContext = jagg.getSiteContext();
-                        if (jagg.startsWith(requestedURI, siteContext)){
+                        if (jagg.startsWith(requestedURI, siteContext)) {
                             response.sendRedirect(requestedURI);
                             return;
                         } else {
