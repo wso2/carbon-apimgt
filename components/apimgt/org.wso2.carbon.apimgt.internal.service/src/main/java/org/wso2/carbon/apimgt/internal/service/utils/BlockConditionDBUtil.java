@@ -128,11 +128,12 @@ public final class BlockConditionDBUtil {
                 String tenantDomain = rs.getString("DOMAIN");
                 int conditionId = rs.getInt("CONDITION_ID");
                 if (Boolean.parseBoolean(enabled)) {
-                    if ("API".equals(type)) {
+                    if (APIConstants.BLOCKING_CONDITIONS_API.equals(type)) {
                         api.add(value);
-                    } else if ("APPLICATION".equals(type)) {
+                    } else if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(type)) {
                         application.add(value);
-                    } else if ("IP".equals(type) || "IPRANGE".equals(type)) {
+                    } else if (APIConstants.BLOCKING_CONDITIONS_IP.equals(type) || APIConstants.
+                            BLOCK_CONDITION_IP_RANGE.equals(type)) {
                         IPLevelDTO ipLevelDTO = new IPLevelDTO();
                         ipLevelDTO.setTenantDomain(tenantDomain);
                         ipLevelDTO.setId(conditionId);
@@ -164,7 +165,7 @@ public final class BlockConditionDBUtil {
                             }
                         }
                         ip.add(ipLevelDTO);
-                    } else if ("USER".equals(type)) {
+                    } else if (APIConstants.BLOCKING_CONDITIONS_USER.equals(type)) {
                         user.add(value);
                     } else if ("CUSTOM".equals(type)) {
                         custom.add(value);
