@@ -179,6 +179,8 @@ public class APIConsumerImplTest {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
+
+        PowerMockito.when(keyManagerConfigurationDTO.getTenantDomain()).thenReturn("carbon.super");
     }
 
     @Test
@@ -1461,9 +1463,9 @@ public class APIConsumerImplTest {
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
 
+        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1));
         assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
-        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
     }
 }

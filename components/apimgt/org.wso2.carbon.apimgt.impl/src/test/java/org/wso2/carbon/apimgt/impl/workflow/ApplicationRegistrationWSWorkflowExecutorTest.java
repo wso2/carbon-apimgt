@@ -32,6 +32,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -101,6 +102,10 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         workflowDTO.setKeyType("PRODUCTION");
         workflowDTO.setAppInfoDTO(oAuthAppRequest);
 
+        KeyManagerConfigurationDTO kmConfigDTO = new KeyManagerConfigurationDTO();
+        kmConfigDTO.setTenantDomain("carbon.super");
+        kmConfigDTO.setName("default");
+        PowerMockito.when(apiMgtDAO.getKeyManagerConfigurationByUUID("default")).thenReturn(kmConfigDTO);
     }
 
     @Test
