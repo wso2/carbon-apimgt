@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,19 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-package org.wso2.carbon.apimgt.impl.keymgt;
+package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 
 import java.util.List;
 import java.util.Map;
 
-public interface KeyManagerEventHandler extends EventHandler {
+/*
+Event handler interface to handle notification events
+ */
+
+public interface EventHandler {
 
     boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException;
 
     String getType();
-
 }
