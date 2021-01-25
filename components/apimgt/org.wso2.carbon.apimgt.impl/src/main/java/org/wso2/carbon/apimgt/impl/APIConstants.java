@@ -2482,8 +2482,8 @@ public final class APIConstants {
     public static final String METADATA_FILE = "metadata.yaml";
     public static final String DEFINITION_FILE = "oas.yaml";
     public static final String KEY_SEPARATOR = "-";
-    public static final String MAP_KEY_ACCEPTED = "accepted";
-    public static final String MAP_KEY_IGNORED = "ignored";
-    public static final String MAP_KEY_VERIFIED = "verified";
-    public static final String MAP_KEY_NOT_CHANGED = "notChanged";
+    public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
+    public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
+    public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
+    public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
 }

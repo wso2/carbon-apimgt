@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ServiceCatalogApi;
-import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
 import java.util.List;
@@ -16,22 +16,22 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     private static final ServiceCatalogImpl serviceCatalogImpl = new ServiceCatalogImpl();
 
     @Override
-    public String addService(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException {
+    public String addService(ServiceEntry serviceEntry, int tenantId) throws APIManagementException {
         String uuid = UUID.randomUUID().toString();
-        if (serviceCatalogImpl.getMD5HashByKey(serviceCatalogInfo.getKey(), tenantId) != null){
+        if (serviceCatalogImpl.getMD5HashByKey(serviceEntry.getKey(), tenantId) != null){ //Don't need
             return null;
         }
-        ServiceCatalogDAO.getInstance().addServiceCatalog(serviceCatalogInfo, tenantId, uuid);
+        ServiceCatalogDAO.getInstance().addServiceCatalog(serviceEntry, tenantId, uuid);
         return uuid;
     }
 
     @Override
-    public String updateService(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().updateServiceCatalog(serviceCatalogInfo, tenantId);
+    public String updateService(ServiceEntry serviceEntry, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().updateServiceCatalog(serviceEntry, tenantId);
     }
 
     @Override
-    public ServiceCatalogInfo getServiceByUUID(String serviceCatalogId, int tenantId) throws APIManagementException {
+    public ServiceEntry getServiceByUUID(String serviceCatalogId, int tenantId) throws APIManagementException {
         return null;
     }
 
@@ -41,19 +41,19 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     }
 
     @Override
-    public List<ServiceCatalogInfo> getService(int tenantId) throws APIManagementException {
+    public List<ServiceEntry> getService(int tenantId) throws APIManagementException {
         return null;
     }
 
     @Override
-    public String addEndPointDefinition(ServiceCatalogInfo serviceCatalogInfo, String uuid) throws APIManagementException {
+    public String addEndPointDefinition(ServiceEntry serviceEntry, String uuid) throws APIManagementException {
 
-        return ServiceCatalogDAO.getInstance().addEndPointDefinition(serviceCatalogInfo, uuid);
+        return ServiceCatalogDAO.getInstance().addEndPointDefinition(serviceEntry, uuid);
     }
 
     @Override
-    public ServiceCatalogInfo getMD5Hash(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().getMd5Hash(serviceCatalogInfo, tenantId);
+    public ServiceEntry getMD5Hash(ServiceEntry serviceEntry, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getMd5Hash(serviceEntry, tenantId);
     }
 
     @Override
@@ -62,17 +62,17 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     }
 
     @Override
-    public ServiceCatalogInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().getCatalogResourcesByKey(key, tenantId);
     }
 
     @Override
-    public ServiceCatalogInfo getServiceByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().getServiceByKey(key, tenantId);
     }
 
     @Override
-    public ServiceCatalogInfo getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
+    public ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().getCatalogResourcesByNameAndVersion(name, version, tenantId);
     }
 }

@@ -46,8 +46,7 @@ public class FileBasedServicesImportExportManager {
     private String path;
     private APIConsumer apiConsumer;
 
-    public FileBasedServicesImportExportManager(APIConsumer apiConsumer, String path) {
-        this.apiConsumer = apiConsumer;
+    public FileBasedServicesImportExportManager(String path) {
         this.path = path;
     }
 

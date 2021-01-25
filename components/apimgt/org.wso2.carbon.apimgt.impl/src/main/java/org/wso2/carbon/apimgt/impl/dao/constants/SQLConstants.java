@@ -3632,19 +3632,18 @@ public class SQLConstants {
                 "ENTRY_NAME = ?," +
                 "DISPLAY_NAME = ?," +
                 "ENTRY_VERSION = ?," +
-                "TENANT_ID = ?" +
+                "TENANT_ID = ?," +
                 "SERVICE_URL = ?," +
                 "DEFINITION_TYPE = ?," +
                 "DEFINITION_URL = ?," +
                 "DESCRIPTION = ?," +
                 "SECURITY_TYPE = ?," +
                 "MUTUAL_SSL_ENABLED = ?," +
-                "CREATED_TIME = ?," +
                 "LAST_UPDATED_TIME = ?," +
                 "CREATED_BY = ?," +
                 "UPDATED_BY = ?," +
                 "ENDPOINT_DEFINITION = ?," +
-                "METADATA = ?" +
+                "METADATA = ? " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String DELETE_SERVICE = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ?";
         public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT * FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? AND TENANT_ID = ?";

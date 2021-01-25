@@ -39,38 +39,6 @@ public class ServiceEntriesApi  {
 ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
 
 
-    @HEAD
-    @Path("/export")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Check service existence", notes = "Check service existence by name and version. Upon successful response, this will also return the current state of the service as ETag header. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
-        })
-    }, tags={ "Services",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with the available service's current state as the ETag header. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response checkServiceExistence( @NotNull @ApiParam(value = "Name of the service to export ",required=true)  @QueryParam("name") String name,  @NotNull @ApiParam(value = "Version of the service to export ",required=true)  @QueryParam("version") String version) throws APIManagementException{
-        return delegate.checkServiceExistence(name, version, securityContext);
-    }
-
-    @GET
-    @Path("/status")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Check services existence", notes = "Check multiple services existence by service keys. Upon successful response, this will also return the current states of the services as MD5 hash values. ", response = ServiceInfoListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
-        })
-    }, tags={ "Services",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with the available services' current states as the MD5 hashes. ", response = ServiceInfoListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response checkServicesExistence( @NotNull @ApiParam(value = "Comma seperated keys of the services to check ",required=true)  @QueryParam("key") String key,  @ApiParam(value = "If this set to true, a minimal set of fields will be provided for each service including the md5 ")  @QueryParam("shrink") Boolean shrink) throws APIManagementException{
-        return delegate.checkServicesExistence(key, shrink, securityContext);
-    }
-
     @POST
     
     @Consumes({ "multipart/form-data" })
@@ -89,7 +57,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @DELETE
-    @Path("/{serviceId}")
+    @Path("/{serviceKey}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a service", notes = "Delete a service by providing the service id ", response = Void.class, authorizations = {
@@ -101,8 +69,8 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
         @ApiResponse(code = 204, message = "Successfully deleted the catalog entry. ", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response deleteService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
-        return delegate.deleteService(serviceId, securityContext);
+    public Response deleteService(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
+        return delegate.deleteService(serviceKey, securityContext);
     }
 
     @GET
@@ -122,7 +90,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @GET
-    @Path("/{serviceId}")
+    @Path("/{serviceKey}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a service", notes = "Get details of a service using the id of the service. ", response = ServiceDTO.class, authorizations = {
@@ -134,12 +102,12 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
         @ApiResponse(code = 200, message = "Requested service in the service catalog is returned. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested service does not exist in the service catalog. ", response = ErrorDTO.class) })
-    public Response getServiceById(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
-        return delegate.getServiceById(serviceId, securityContext);
+    public Response getServiceById(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
+        return delegate.getServiceById(serviceKey, securityContext);
     }
 
     @GET
-    @Path("/{serviceId}/definition")
+    @Path("/{serviceKey}/definition")
     
     @Produces({ "application/json", "application/yaml" })
     @ApiOperation(value = "Retrieve a service definition", notes = "Retrieve the definition of a service identified by the service id. ", response = String.class, authorizations = {
@@ -151,8 +119,8 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
         @ApiResponse(code = 200, message = "Successful response with the definition file as entity in the body. ", response = String.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response getServiceDefinition(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
-        return delegate.getServiceDefinition(serviceId, securityContext);
+    public Response getServiceDefinition(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
+        return delegate.getServiceDefinition(serviceKey, securityContext);
     }
 
     @POST
@@ -167,8 +135,8 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successful response with the imported service metadata. ", response = ServiceInfoListDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class) })
-    public Response importService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @Multipart(value = "verifier")  String verifier,  @ApiParam(value = "ETag of the service resource to update" )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
-        return delegate.importService(serviceId, fileInputStream, fileDetail, verifier, ifMatch, overwrite, securityContext);
+    public Response importService( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite, @Multipart(value = "verifier", required = false)  String verifier) throws APIManagementException{
+        return delegate.importService(fileInputStream, fileDetail, overwrite, verifier, securityContext);
     }
 
     @GET
@@ -188,7 +156,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @PUT
-    @Path("/{serviceId}")
+    @Path("/{serviceKey}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a service", notes = "Update a service's details and definition ", response = ServiceDTO.class, authorizations = {
@@ -200,7 +168,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
         @ApiResponse(code = 200, message = "Updated. Successful response with the newly updated service as entity in the body. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response updateService(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId, @Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
-        return delegate.updateService(serviceId, catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+    public Response updateService(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey, @Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
+        return delegate.updateService(serviceKey, catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
     }
 }

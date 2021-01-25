@@ -18,8 +18,10 @@ package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
  */
 
 import org.apache.commons.io.comparator.NameFileComparator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
@@ -31,8 +33,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.fromFileToServiceCatalogInfo;
-import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.DataMappingUtil.keyGenerator;
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.fromFileToServiceCatalogInfo;
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.generateServiceKey;
 
 /**
  * This class generates MD5 hash value for the given files of the zip
@@ -56,7 +58,7 @@ public class Md5HashGenerator {
     public static HashMap<String, String> generateHash(String path) {
 
         File dir = new File(path);
-        return loopDirectories(Objects.requireNonNull(dir.listFiles()));
+        return validateInputParams(Objects.requireNonNull(dir.listFiles()));
     }
 
     /**
@@ -65,19 +67,25 @@ public class Md5HashGenerator {
      * @param files list of files available directory location
      * @return HashMap<String, String>
      */
-    private static HashMap<String, String> loopDirectories(File[] files) {
+    private static HashMap<String, String> validateInputParams(File[] files) {
 
         for (File file : files) {
-            if (file.isDirectory()) {
+            if (file.isDirectory()) { //else ignore zip
                 File[] fArray = file.listFiles();
                 if (fArray != null) {
                     Arrays.sort(fArray, NameFileComparator.NAME_COMPARATOR);
                     String key = null;
                     for (File aFile : fArray) {
-                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
+                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) { //else!!
                             try {
-                                key = keyGenerator(fromFileToServiceCatalogInfo(aFile));
+                                ServiceEntry serviceEntry = fromFileToServiceCatalogInfo(aFile);
+                                if (!StringUtils.isBlank(serviceEntry.getKey())) {
+                                    key  = serviceEntry.getKey();
+                                } else {
+                                    key = generateServiceKey(serviceEntry);
+                                }
                             } catch (IOException e) {
+                                // Missing metadata throw Error!! ****add to definition
                                 log.error("Failed to fetch metadata information from zip due to generate key" + e.getMessage(), e);
                             }
                         }

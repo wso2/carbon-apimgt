@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.api.model;
 import java.io.InputStream;
 import java.sql.Timestamp;
 
-public class ServiceCatalogInfo {
+public class ServiceEntry {
 
     private String uuid = null;
     private String key = null;

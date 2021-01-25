@@ -150,7 +150,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /service-entries/{serviceId}:
+  /service-entries/{serviceKey}:
     #-----------------------------------------------------
     # Retrieve a specific service in the service catalog
     #-----------------------------------------------------
@@ -165,7 +165,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceId'
+        - $ref: '#/components/parameters/serviceKey'
       responses:
         "200":
           description: |
@@ -204,7 +204,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceId'
+        - $ref: '#/components/parameters/serviceKey'
       requestBody:
         content:
           multipart/form-data:
@@ -248,7 +248,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceId'
+        - $ref: '#/components/parameters/serviceKey'
       responses:
         "204":
           description: |
@@ -272,7 +272,7 @@ paths:
   #-----------------------------------------------------
   # Retrieve definition of a service in the service catalog
   #-----------------------------------------------------
-  /service-entries/{serviceId}/definition:
+  /service-entries/{serviceKey}/definition:
     get:
       summary: Retrieve a service definition
       description: |
@@ -284,7 +284,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceId'
+        - $ref: '#/components/parameters/serviceKey'
       responses:
         "200":
           description: |
@@ -328,8 +328,6 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceId'
-        - $ref: '#/components/parameters/ifMatch'
         - name: overwrite
           in: query
           description: |
@@ -338,13 +336,12 @@ paths:
           schema:
             type: boolean
       requestBody:
-        required: true
+        required: false
         content:
           multipart/form-data:
             schema:
               required:
                 - file
-                - verifier
               properties:
                 file:
                   type: string
@@ -374,102 +371,10 @@ paths:
                 $ref: '#/components/schemas/Error'
                 
   #----------------------------------------------------------
-  # Check the existence of a services and retrieve the MD5 hashes representing the currrent state of the resources.
-  #----------------------------------------------------------
-  /service-entries/status:
-    get:
-      summary: Check services existence
-      description: |
-        Check multiple services existence by service keys.
-        Upon successful response, this will also return the current states of the services as MD5 hash values.
-      security:
-        - OAuth2Security:
-            - service_catalog:entry_view
-      operationId: checkServicesExistence
-      tags:
-        - Services
-      parameters:
-        - name: key
-          in: query
-          description: |
-            Comma seperated keys of the services to check
-          required: true
-          schema:
-            type: string
-        - name: shrink
-          in: query
-          description: |
-            If this set to true, a minimal set of fields will be provided for each service including the md5
-          required: false
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: |
-            Successful response with the available services' current states as the MD5 hashes.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceInfoList'
-        "404":
-          description: |
-            Not Found.
-            Requested Service does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-                
-  #----------------------------------------------------------
   # Exporting a service as a zipped archive
   #----------------------------------------------------------
   /service-entries/export:
 
-    #--------------------------------------------------------------------------------------------------------------------
-    # Check the existence of a service and retrieve the ETag header representing the currrent state of the resource.
-    #--------------------------------------------------------------------------------------------------------------------
-    head:
-      summary: Check service existence
-      description: |
-        Check service existence by name and version.
-        Upon successful response, this will also return the current state of the service as ETag header.
-      security:
-        - OAuth2Security:
-            - service_catalog:entry_view
-      operationId: checkServiceExistence
-      tags:
-        - Services
-      parameters:
-        - name: name
-          in: query
-          description: |
-            Name of the service to export
-          required: true
-          schema:
-            type: string
-        - name: version
-          in: query
-          description: |
-            Version of the service to export
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: |
-            Successful response with the available service's current state as the ETag header.
-          headers:
-            ETag:
-              $ref: '#/components/headers/ETag'
-        "404":
-          description: |
-            Not Found.
-            Requested Service does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-                
     #-----------------------------------------
     # Retrieve a service as a zipped archive
     #-----------------------------------------
@@ -960,6 +865,16 @@ components:
       schema:
         type: string
         
+    #-------------------------------------------------------
+    # serviceKey - A key which represents a service in the service catalog
+    #-------------------------------------------------------
+    serviceKey:
+      name: serviceKey
+      in: path
+      description: service key of the catalog entry
+      required: true
+      schema:
+        type: string
 
     #-------------------------------------------------------
     # ifMatch - If-Match header value to be used for concurrency control

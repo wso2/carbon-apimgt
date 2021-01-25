@@ -24,14 +24,12 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ServiceEntriesApiService {
-      public Response checkServiceExistence(String name, String version, MessageContext messageContext) throws APIManagementException;
-      public Response checkServicesExistence(String key, Boolean shrink, MessageContext messageContext) throws APIManagementException;
       public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
-      public Response deleteService(String serviceId, MessageContext messageContext) throws APIManagementException;
+      public Response deleteService(String serviceKey, MessageContext messageContext) throws APIManagementException;
       public Response exportService(String name, String version, MessageContext messageContext) throws APIManagementException;
-      public Response getServiceById(String serviceId, MessageContext messageContext) throws APIManagementException;
-      public Response getServiceDefinition(String serviceId, MessageContext messageContext) throws APIManagementException;
-      public Response importService(String serviceId, InputStream fileInputStream, Attachment fileDetail, String verifier, String ifMatch, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
+      public Response getServiceById(String serviceKey, MessageContext messageContext) throws APIManagementException;
+      public Response getServiceDefinition(String serviceKey, MessageContext messageContext) throws APIManagementException;
+      public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, String verifier, MessageContext messageContext) throws APIManagementException;
       public Response searchServices(String name, String version, String definitionType, String displayName, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
-      public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
+      public Response updateService(String serviceKey, ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
 }

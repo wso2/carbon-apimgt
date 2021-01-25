@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -55,12 +55,12 @@ public class ServiceCatalogDAO {
     /**
      * Add a new serviceCatalog
      *
-     * @param serviceCatalogInfo ServiceCatalogInfo
+     * @param serviceEntry ServiceCatalogInfo
      * @param tenantID           ID of the owner's tenant
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceCatalog(ServiceCatalogInfo serviceCatalogInfo, int tenantID, String uuid) throws APIManagementException {
+    public String addServiceCatalog(ServiceEntry serviceEntry, int tenantID, String uuid) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -70,24 +70,24 @@ public class ServiceCatalogDAO {
             try {
                 initialAutoCommit = connection.getAutoCommit();
                 ps.setString(1, uuid);
-                ps.setString(2, serviceCatalogInfo.getKey());
-                ps.setString(3, serviceCatalogInfo.getMd5());
-                ps.setString(4, serviceCatalogInfo.getName());
-                ps.setString(5, serviceCatalogInfo.getDisplayName());
-                ps.setString(6, serviceCatalogInfo.getVersion());
+                ps.setString(2, serviceEntry.getKey());
+                ps.setString(3, serviceEntry.getMd5());
+                ps.setString(4, serviceEntry.getName());
+                ps.setString(5, serviceEntry.getDisplayName());
+                ps.setString(6, serviceEntry.getVersion());
                 ps.setInt(7, tenantID);
-                ps.setString(8, serviceCatalogInfo.getServiceUrl());
-                ps.setString(9, serviceCatalogInfo.getDefType());
-                ps.setString(10, serviceCatalogInfo.getDefUrl());
-                ps.setString(11, serviceCatalogInfo.getDescription());
-                ps.setString(12, serviceCatalogInfo.getSecurityType());
-                ps.setBoolean(13, serviceCatalogInfo.isMutualSSLEnabled());
+                ps.setString(8, serviceEntry.getServiceUrl());
+                ps.setString(9, serviceEntry.getDefType());
+                ps.setString(10, serviceEntry.getDefUrl());
+                ps.setString(11, serviceEntry.getDescription());
+                ps.setString(12, serviceEntry.getSecurityType());
+                ps.setBoolean(13, serviceEntry.isMutualSSLEnabled());
                 ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
                 ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
-                ps.setString(16, serviceCatalogInfo.getCreatedBy());
-                ps.setString(17, serviceCatalogInfo.getUpdatedBy());
-                ps.setBinaryStream(18, serviceCatalogInfo.getEndpointDef());
-                ps.setBinaryStream(19, serviceCatalogInfo.getMetadata());
+                ps.setString(16, serviceEntry.getCreatedBy()); //get from logged in user
+                ps.setString(17, serviceEntry.getUpdatedBy()); //here too
+                ps.setBinaryStream(18, serviceEntry.getEndpointDef());
+                ps.setBinaryStream(19, serviceEntry.getMetadata());
 
                 ps.executeUpdate();
                 connection.commit();
@@ -107,12 +107,12 @@ public class ServiceCatalogDAO {
     /**
      * Update an existing serviceCatalog
      *
-     * @param serviceCatalogInfo ServiceCatalogInfo
+     * @param serviceEntry ServiceCatalogInfo
      * @param tenantID           ID of the owner's tenant
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String updateServiceCatalog(ServiceCatalogInfo serviceCatalogInfo, int tenantID) throws APIManagementException {
+    public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -121,25 +121,24 @@ public class ServiceCatalogDAO {
 
             try {
                 initialAutoCommit = connection.getAutoCommit();
-                ps.setString(1, serviceCatalogInfo.getMd5());
-                ps.setString(2, serviceCatalogInfo.getName());
-                ps.setString(3, serviceCatalogInfo.getDisplayName());
-                ps.setString(4, serviceCatalogInfo.getVersion());
+                ps.setString(1, serviceEntry.getMd5());
+                ps.setString(2, serviceEntry.getName());
+                ps.setString(3, serviceEntry.getDisplayName());
+                ps.setString(4, serviceEntry.getVersion());
                 ps.setInt(5, tenantID);
-                ps.setString(6, serviceCatalogInfo.getServiceUrl());
-                ps.setString(7, serviceCatalogInfo.getDefType());
-                ps.setString(8, serviceCatalogInfo.getDefUrl());
-                ps.setString(9, serviceCatalogInfo.getDescription());
-                ps.setString(10, serviceCatalogInfo.getSecurityType());
-                ps.setBoolean(11, serviceCatalogInfo.isMutualSSLEnabled());
-                ps.setTimestamp(12, serviceCatalogInfo.getCreatedTime());
-                ps.setTimestamp(13, new Timestamp(System.currentTimeMillis()));
-                ps.setString(14, serviceCatalogInfo.getCreatedBy());
-                ps.setString(15, serviceCatalogInfo.getUpdatedBy());
-                ps.setBinaryStream(16, serviceCatalogInfo.getEndpointDef());
-                ps.setBinaryStream(17, serviceCatalogInfo.getMetadata());
-                ps.setString(18, serviceCatalogInfo.getKey());
-                ps.setInt(19, tenantID);
+                ps.setString(6, serviceEntry.getServiceUrl());
+                ps.setString(7, serviceEntry.getDefType());
+                ps.setString(8, serviceEntry.getDefUrl());
+                ps.setString(9, serviceEntry.getDescription());
+                ps.setString(10, serviceEntry.getSecurityType());
+                ps.setBoolean(11, serviceEntry.isMutualSSLEnabled());
+                ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
+                ps.setString(13, serviceEntry.getCreatedBy());
+                ps.setString(14, serviceEntry.getUpdatedBy());
+                ps.setBinaryStream(15, serviceEntry.getEndpointDef());
+                ps.setBinaryStream(16, serviceEntry.getMetadata());
+                ps.setString(17, serviceEntry.getKey());
+                ps.setInt(18, tenantID);
 
                 ps.executeUpdate();
                 connection.commit();
@@ -153,17 +152,17 @@ public class ServiceCatalogDAO {
             handleException("Failed to update service catalog of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantID), e);
         }
-        return serviceCatalogInfo.getKey();
+        return serviceEntry.getKey();
     }
 
     /**
      * Add a new end-point definition entry
      *
-     * @param serviceCatalogInfo EndPoint related information
+     * @param serviceEntry EndPoint related information
      * @return uuid
      * throws APIManagementException if failed to create service catalog
      */
-    public String addEndPointDefinition(ServiceCatalogInfo serviceCatalogInfo, String uuid) throws APIManagementException {
+    public String addEndPointDefinition(ServiceEntry serviceEntry, String uuid) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -173,8 +172,8 @@ public class ServiceCatalogDAO {
             try {
                 initialAutoCommit = connection.getAutoCommit();
                 ps.setString(1, uuid);
-                ps.setBinaryStream(2, serviceCatalogInfo.getEndpointDef());
-                ps.setBinaryStream(3, serviceCatalogInfo.getMetadata());
+                ps.setBinaryStream(2, serviceEntry.getEndpointDef());
+                ps.setBinaryStream(3, serviceEntry.getMetadata());
 
                 ps.executeUpdate();
                 connection.commit();
@@ -191,7 +190,7 @@ public class ServiceCatalogDAO {
         return uuid;
     }
 
-    public ServiceCatalogInfo getMd5Hash(ServiceCatalogInfo serviceInfo, int tenantId) throws APIManagementException {
+    public ServiceEntry getMd5Hash(ServiceEntry serviceInfo, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -253,7 +252,7 @@ public class ServiceCatalogDAO {
         return md5;
     }
 
-    public ServiceCatalogInfo getCatalogResourcesByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceEntry getCatalogResourcesByKey(String key, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -266,11 +265,11 @@ public class ServiceCatalogDAO {
             ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
-                serviceCatalogInfo.setUuid(rs.getString("UUID"));
-                serviceCatalogInfo.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceCatalogInfo.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
-                return serviceCatalogInfo;
+                ServiceEntry serviceEntry = new ServiceEntry();
+                serviceEntry.setUuid(rs.getString("UUID"));
+                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
+                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                return serviceEntry;
             }
         } catch (SQLException e) {
             if (conn != null) {
@@ -287,7 +286,7 @@ public class ServiceCatalogDAO {
         return null;
     }
 
-    public ServiceCatalogInfo getServiceByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -300,28 +299,28 @@ public class ServiceCatalogDAO {
             ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
+                ServiceEntry serviceEntry = new ServiceEntry();
 
-                serviceCatalogInfo.setUuid(rs.getString("UUID"));
-                serviceCatalogInfo.setKey(rs.getString("SERVICE_KEY"));
-                serviceCatalogInfo.setMd5(rs.getString("MD5"));
-                serviceCatalogInfo.setName(rs.getString("ENTRY_NAME"));
-                serviceCatalogInfo.setDisplayName(rs.getString("DISPLAY_NAME"));
-                serviceCatalogInfo.setVersion(rs.getString("ENTRY_VERSION"));
-                serviceCatalogInfo.setServiceUrl(rs.getString("SERVICE_URL"));
-                serviceCatalogInfo.setDescription(rs.getString("DESCRIPTION"));
-                serviceCatalogInfo.setDefType(rs.getString("DEFINITION_TYPE"));
-                serviceCatalogInfo.setDefUrl(rs.getString("DEFINITION_URL"));
-                serviceCatalogInfo.setSecurityType(rs.getString("SECURITY_TYPE"));
-                serviceCatalogInfo.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
-                serviceCatalogInfo.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
-                serviceCatalogInfo.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
-                serviceCatalogInfo.setCreatedBy(rs.getString("CREATED_BY"));
-                serviceCatalogInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-                serviceCatalogInfo.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceCatalogInfo.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                serviceEntry.setUuid(rs.getString("UUID"));
+                serviceEntry.setKey(rs.getString("SERVICE_KEY"));
+                serviceEntry.setMd5(rs.getString("MD5"));
+                serviceEntry.setName(rs.getString("ENTRY_NAME"));
+                serviceEntry.setDisplayName(rs.getString("DISPLAY_NAME"));
+                serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
+                serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
+                serviceEntry.setDescription(rs.getString("DESCRIPTION"));
+                serviceEntry.setDefType(rs.getString("DEFINITION_TYPE"));
+                serviceEntry.setDefUrl(rs.getString("DEFINITION_URL"));
+                serviceEntry.setSecurityType(rs.getString("SECURITY_TYPE"));
+                serviceEntry.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
+                serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
+                serviceEntry.setCreatedBy(rs.getString("CREATED_BY"));
+                serviceEntry.setUpdatedBy(rs.getString("UPDATED_BY"));
+                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
+                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
 
-                return serviceCatalogInfo;
+                return serviceEntry;
             }
         } catch (SQLException e) {
             if (conn != null) {
@@ -338,7 +337,7 @@ public class ServiceCatalogDAO {
         return null;
     }
 
-    public ServiceCatalogInfo getCatalogResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
+    public ServiceEntry getCatalogResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -352,11 +351,11 @@ public class ServiceCatalogDAO {
             ps.setInt(3, tenantId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
-                serviceCatalogInfo.setUuid(rs.getString("UUID"));
-                serviceCatalogInfo.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceCatalogInfo.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
-                return serviceCatalogInfo;
+                ServiceEntry serviceEntry = new ServiceEntry();
+                serviceEntry.setUuid(rs.getString("UUID"));
+                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
+                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                return serviceEntry;
             }
         } catch (SQLException e) {
             if (conn != null) {

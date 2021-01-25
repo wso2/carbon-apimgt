@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 
 import java.util.List;
 
@@ -9,22 +9,22 @@ public interface ServiceCatalogApi {
     /**
      * Adds a new Service Catalog
      *
-     * @param serviceCatalogInfo ServiceCatalogInfo
+     * @param serviceEntry ServiceCatalogInfo
      * @param tenantId       Tenant Identifier
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String addService(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException;
+    String addService(ServiceEntry serviceEntry, int tenantId) throws APIManagementException;
 
     /**
      * Update an existing Service Catalog
      *
-     * @param serviceCatalogInfo ServiceCatalogInfo
+     * @param serviceEntry ServiceCatalogInfo
      * @param tenantId       Tenant Identifier
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String updateService(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException;
+    String updateService(ServiceEntry serviceEntry, int tenantId) throws APIManagementException;
 
     /**
      * Returns details of an Service Catalog
@@ -34,7 +34,7 @@ public interface ServiceCatalogApi {
      * @return An ServiceCatalogInfo object related to the given identifier or null
      * @throws APIManagementException if failed to get details of an Service Catalog
      */
-    ServiceCatalogInfo getServiceByUUID(String serviceCatalogId, int tenantId)
+    ServiceEntry getServiceByUUID(String serviceCatalogId, int tenantId)
             throws APIManagementException;
 
     /**
@@ -52,7 +52,7 @@ public interface ServiceCatalogApi {
      * @return A list of ServiceCatalogInfo objects
      * @throws APIManagementException if failed to get details of Service Catalogs
      */
-    List<ServiceCatalogInfo> getService(int tenantId) throws APIManagementException;
+    List<ServiceEntry> getService(int tenantId) throws APIManagementException;
 
     /**
      * Adds a new end-point definition
@@ -61,16 +61,16 @@ public interface ServiceCatalogApi {
      * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String addEndPointDefinition(ServiceCatalogInfo serviceCatalogInfo, String uuid) throws APIManagementException;
+    String addEndPointDefinition(ServiceEntry serviceEntry, String uuid) throws APIManagementException;
 
     /**
      * Get MD5 hash value of a service endpoint
      *
-     * @param serviceCatalogInfo EndPoint related information
+     * @param serviceEntry EndPoint related information
      * @return ServiceCatalogInfo Endpoint information with md5 hash value
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceCatalogInfo getMD5Hash(ServiceCatalogInfo serviceCatalogInfo, int tenantId) throws APIManagementException;
+    ServiceEntry getMD5Hash(ServiceEntry serviceEntry, int tenantId) throws APIManagementException;
 
     /**
      * Get MD5 hash value of a service endpoint
@@ -89,7 +89,7 @@ public interface ServiceCatalogApi {
      * @return EndPointInfo Endpoint resources
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceCatalogInfo getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
+    ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
 
     /**
      * Get information of a service endpoint by key
@@ -99,7 +99,7 @@ public interface ServiceCatalogApi {
      * @return ServiceCatalogInfo object including endpoint information
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceCatalogInfo getServiceByKey(String key, int tenantId) throws APIManagementException;
+    ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException;
 
     /**
      * Get metadata and endpoint definition resources of a service endpoint
@@ -110,5 +110,5 @@ public interface ServiceCatalogApi {
      * @return EndPointInfo Endpoint resources
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceCatalogInfo getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException;
+    ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException;
 }
