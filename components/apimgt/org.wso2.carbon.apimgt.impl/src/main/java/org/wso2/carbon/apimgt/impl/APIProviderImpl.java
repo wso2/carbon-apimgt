@@ -22,8 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
-import kotlin.jvm.Throws;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -35,7 +33,6 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,15 +52,10 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
-import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.dto.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -192,12 +184,10 @@ import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryLCManager;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.common.util.CheckListItemBean;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -216,7 +206,6 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -239,13 +228,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -266,7 +253,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
-import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -3434,8 +3420,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<API> apis = new HashSet<>();
 
         for (APIProductResource productResource : productResources) {
-            API api = getAPIbyUUID(productResource.getApiId(),
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(
                     CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            API api = getAPIbyUUID(productResource.getApiId(), organizationDTO);
             apis.add(api);
         }
 
@@ -4148,7 +4135,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
                                    String orgId) throws DuplicateAPIException, APIManagementException {
-        API existingAPI = getAPIbyUUID(existingApiId, orgId);
+
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        API existingAPI = getAPIbyUUID(existingApiId, organizationDTO);
 
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
@@ -6634,6 +6624,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void validateAPIThrottlingTier(API api, String tenantDomain) throws APIManagementException {
+        if (tenantDomain != null ) {
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        }
         if (log.isDebugEnabled()) {
             log.debug("Validating apiLevelPolicy defined in the API");
         }
@@ -6649,6 +6642,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void validateProductThrottlingTier(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+        if (tenantDomain != null ) {
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiProduct.getId().getProviderName()));
+        }
         if (log.isDebugEnabled()) {
             log.debug("Validating productLevelPolicy defined in the API Product");
         }
@@ -7017,7 +7013,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
             //GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
-            API api = getAPIbyUUID(uuid, orgId);
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(
+                    CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+
+            API api = getAPIbyUUID(uuid, organizationDTO);
             String targetStatus;
             if (api != null) {
 
@@ -7553,7 +7552,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Map<String, Object> getAPILifeCycleData(String uuid, String orgId) throws APIManagementException {
 
         Map<String, Object> lcData = new HashMap<String, Object>();
-        API api = getAPIbyUUID(uuid, orgId);
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+
+        API api = getAPIbyUUID(uuid, organizationDTO);
 
         List<String> actionsList;
         try {
@@ -9250,6 +9252,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(tenantDomain);
 
         if (log.isDebugEnabled()) {
             log.debug("API Product details successfully added to the registry. API Product Name: " + product.getId().getName()
@@ -9271,10 +9274,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
                 apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier);
-                api = getAPIbyUUID(apiUUID, tenantDomain);
+                api = getAPIbyUUID(apiUUID, organizationDTO);
             } else {
                 apiUUID = apiProductResource.getApiId();
-                api = getAPIbyUUID(apiUUID, tenantDomain);
+                api = getAPIbyUUID(apiUUID, organizationDTO);
                 // if API does not exist, getLightweightAPIByUUID() method throws exception.
             }
             if (api != null) {
@@ -9427,6 +9430,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = new HashMap<>();
         //validate resources and set api identifiers and resource ids to product
         List<APIProductResource> resources = product.getProductResources();
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
+
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(tenantDomain);
         for (APIProductResource apiProductResource : resources) {
             API api;
             APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
@@ -9437,10 +9444,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIIdentifier emailReplacedAPIIdentifier = new APIIdentifier(emailReplacedAPIProviderName,
                         productAPIIdentifier.getApiName(), productAPIIdentifier.getVersion());
                 apiUUID = apiMgtDAO.getUUIDFromIdentifier(emailReplacedAPIIdentifier);
-                api = getAPIbyUUID(apiUUID, tenantDomain);
+                api = getAPIbyUUID(apiUUID, organizationDTO);
             } else {
                 apiUUID = apiProductResource.getApiId();
-                api = getAPIbyUUID(apiUUID, tenantDomain);
+                api = getAPIbyUUID(apiUUID, organizationDTO);
             }
             if (api.getSwaggerDefinition() != null) {
                 api.setSwaggerDefinition(getOpenAPIDefinition(apiUUID, api.getOrganizationId()));
@@ -10374,17 +10381,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
     
     @Override
-    public API getAPIbyUUID(String uuid, String orgId) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
         try {
             //TODO remove this
-            Organization org = new Organization(orgId);
+            Organization org = new Organization(organizationDTO.getOrgId());
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
 
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
             checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
             /////////////////// Do processing on the data object//////////
-            populateAPIInformation(uuid, tenantDomain, org, api);
-            api.setOrganizationId(orgId);
+            populateAPIInformation(uuid, organizationDTO.getRequestedTenantDomain(), org, api);
+            api.setOrganizationId(organizationDTO.getOrgId());
             loadMediationPoliciesToAPI(api);
             return api;
         } catch (APIPersistenceException e) {

@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -510,13 +511,13 @@ public abstract class AbstractAPIManager implements APIManager {
      * Get API by registry artifact id
      *
      * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
         boolean tenantFlowStarted = false;
         try {
+            String requestedTenantDomain = organizationDTO.getRequestedTenantDomain();
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (requestedTenantDomain)) {

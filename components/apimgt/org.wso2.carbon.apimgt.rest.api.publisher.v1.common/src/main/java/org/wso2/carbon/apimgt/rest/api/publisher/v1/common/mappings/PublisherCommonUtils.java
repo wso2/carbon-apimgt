@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -366,8 +367,10 @@ public class PublisherCommonUtils {
         }
         apiToUpdate.setOrganizationId(orgId);
         apiProvider.updateAPI(apiToUpdate, originalAPI);
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
         
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), orgId);// TODO use returend api
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), organizationDTO);// TODO use returend api
     }
 
     /**
@@ -977,8 +980,9 @@ public class PublisherCommonUtils {
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
         //this will fail if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, orgId);
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         apiDefinition = OASParserUtil.preProcess(apiDefinition);
@@ -1021,7 +1025,7 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, orgId);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         if (orgId != null) {
             existingAPI.setOrganizationId(orgId);
         }

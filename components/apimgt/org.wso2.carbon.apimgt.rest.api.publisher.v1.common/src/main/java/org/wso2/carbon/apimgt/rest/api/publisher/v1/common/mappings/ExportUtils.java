@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -934,7 +935,8 @@ public class ExportUtils {
         List<ProductAPIDTO> apisList = apiProductDtoToReturn.getApis();
         for (ProductAPIDTO productAPIDTO : apisList) {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(apiProductRequesterDomain);
+            API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), organizationDTO);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,
                     isStatusPreserved, preserveDocs);

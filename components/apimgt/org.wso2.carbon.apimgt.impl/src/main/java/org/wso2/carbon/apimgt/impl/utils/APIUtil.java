@@ -94,6 +94,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -2770,6 +2771,18 @@ public final class APIUtil {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+    }
+
+    public static OrganizationDTO getOrganizationDTOFromTenantDomain(String requestedTenantDomain) {
+        OrganizationDTO organizationDTO = new OrganizationDTO(requestedTenantDomain);
+        organizationDTO.setRequestedTenantDomain(requestedTenantDomain);
+        return  organizationDTO;
+    }
+
+    public static OrganizationDTO getOrganizationDTOFromOrgID(String orgId, String requestedTenantDomain) {
+        OrganizationDTO organizationDTO = new OrganizationDTO(orgId);
+        organizationDTO.setRequestedTenantDomain(requestedTenantDomain);
+        return  organizationDTO;
     }
 
     /**

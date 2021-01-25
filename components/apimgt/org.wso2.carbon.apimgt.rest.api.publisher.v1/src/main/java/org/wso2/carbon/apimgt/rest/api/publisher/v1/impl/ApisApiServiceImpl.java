@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -157,6 +158,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -315,9 +317,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -365,7 +369,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             GraphqlComplexityInfo graphqlComplexityInfo =
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             if (organizationId != null && !organizationId.equals(api.getOrganizationId())) {
                 String errorMessage =
                         "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
@@ -450,8 +456,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             if (organizationId != null && !organizationId.equals(originalAPI.getOrganizationId())) {
                 String errorMessage =
                         "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
@@ -487,7 +494,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             originalAPI.setOrganizationId(orgId);
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, orgId);
             //TODO - PASS apiprovider and remove tenanr flow
@@ -533,7 +542,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -567,7 +578,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             String endpointConfigString = api.getEndpointConfig();
             if (!StringUtils.isEmpty(endpointConfigString)) {
                 JSONParser jsonParser = new JSONParser();
@@ -651,7 +664,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             APIIdentifier apiIdentifier = api.getId();
             String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, orgId);
             // Get configuration file, retrieve API token and collection id
@@ -861,7 +876,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
             if (clientCertificateDTO != null) {
@@ -890,7 +907,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
             int responseCode = apiProvider
@@ -943,7 +961,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
             CertificateInformationDTO certificateInformationDTO = certificateMgtUtils
@@ -974,7 +994,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(userName);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
@@ -1064,8 +1086,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIIdentifier apiIdentifier = null;
                 RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
                 String orgId = PublisherCommonUtils.getOrgId(organizationId);
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
                 if (StringUtils.isNotEmpty(apiId)) {
-                    API api = apiProvider.getAPIbyUUID(apiId, orgId);
+                    API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
                     apiIdentifier = api.getId();
                 }
                 certificates = apiProvider.searchClientCertificates(tenantId, alias, apiIdentifier);
@@ -1107,7 +1131,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier);
@@ -1176,7 +1202,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             api.setOrganizationId(orgId);
 
             //check if the API has subscriptions
@@ -1643,7 +1671,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         APIIdentifier apiIdentifier = originalAPI.getId();
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, orgId);
         Map<String, Object> examples = OASParserUtil.generateExamples(apiDefinition);
@@ -2282,8 +2312,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API api = null;
         List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
         try {
-            api = apiProvider.getAPIbyUUID(apiId, orgId);
+            api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -2510,7 +2542,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             //this will fail if user does not have access to the API or the API does not exist
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             if (orgId!= null) {
                 api.setOrganizationId(orgId);
             }
@@ -3269,7 +3303,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
-        API api = apiProvider.getAPIbyUUID(apiId, orgId);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+        API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         if (api == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
         }
@@ -3352,7 +3388,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             APIIdentifier apiIdentifier = api.getId();
             api.setAsDefaultVersion(true);
 
@@ -3567,7 +3605,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         RestApiCommonUtil.checkAPIExistsInOrganization(apiId, organizationId);
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API originalAPI = apiProvider.getAPIbyUUID(apiId, orgId);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
 
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, orgId);
         apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
@@ -3620,7 +3660,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     private APIDTO getAPIByID(String apiId, String orgId) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             return APIMappingUtil.fromAPItoDTO(api);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need

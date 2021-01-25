@@ -29,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
@@ -1031,8 +1032,6 @@ public class APIGatewayManager {
     
     /**
      * add new api version at the API Gateway
-     *
-     * @param artifact
      * @param api
      */
     public void createNewWebsocketApiVersion(API api) {
@@ -1257,8 +1256,9 @@ public class APIGatewayManager {
                 APIIdentifier apiIdentifier = resource.getApiIdentifier();
                 uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
             }
-
-            API api = apiProvider.getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(
+                    CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            API api = apiProvider.getAPIbyUUID(uuid, organizationDTO);
 
             String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
             if (APIUtil.isSequenceDefined(api.getInSequence())) {

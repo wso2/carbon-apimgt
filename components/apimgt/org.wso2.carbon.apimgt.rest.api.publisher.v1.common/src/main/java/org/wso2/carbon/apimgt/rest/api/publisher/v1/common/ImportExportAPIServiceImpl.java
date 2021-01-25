@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -73,7 +74,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            OrganizationDTO organizationDTO = new OrganizationDTO(tenantDomain);
+            organizationDTO.setRequestedTenantDomain(tenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api);
         }
         if (api != null) {
