@@ -299,8 +299,10 @@ export default function Environments() {
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [lastRevisionCount, setLastRevisionCount] = useState(0);
 
-    const extractLastRevisionNumber = (list) => {
-        if (list[list.length - 1]) {
+    const extractLastRevisionNumber = (list, lastRev) => {
+        if (lastRev !== null) {
+            setLastRevisionCount(lastRev);
+        } else if (list[list.length - 1]) {
             const lastRevisionName = list[list.length - 1].displayName;
             const splitList = lastRevisionName.split(' ');
             setLastRevisionCount(splitList[1]);
@@ -321,7 +323,7 @@ export default function Environments() {
         restApi.getRevisions(api.id).then((result) => {
             setRevisions(result.body.list);
             setLastRevisionCount(result.body.count);
-            extractLastRevisionNumber(result.body.list);
+            extractLastRevisionNumber(result.body.list, null);
         });
         restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
             setEnvRevision(result.body.list);
@@ -352,7 +354,7 @@ export default function Environments() {
     };
 
     const handleDeleteSelect = (event) => {
-        setExtraRevisionToDelete(event.target.value);
+        setExtraRevisionToDelete([event.target.value, event.target.name]);
     };
 
     const handleSelect = (event) => {
@@ -363,6 +365,19 @@ export default function Environments() {
         setOpen(false);
         setExtraRevisionToDelete(null);
     };
+
+    function checkIfDeletingLastRevision(list, revisionName) {
+        const splitList = revisionName.split(' ');
+        let splitList1;
+        if (list[list.length - 1]) {
+            const lastRevInList = list[list.length - 1].displayName;
+            splitList1 = lastRevInList.split(' ');
+        }
+        if (parseInt(splitList[1], 0) === parseInt(splitList1[1], 0)) {
+            return splitList[1];
+        }
+        return null;
+    }
 
     const handleChange = (event) => {
         if (event.target.checked) {
@@ -382,7 +397,8 @@ export default function Environments() {
      * @param {Object} revisionId the revision Id
      * @returns {Object} promised delete
      */
-    function deleteRevision(revisionId) {
+    function deleteRevision(revisionId, revisionName) {
+        const lastRev = checkIfDeletingLastRevision(allRevisions, revisionName);
         const promisedDelete = restApi.deleteRevision(api.id, revisionId)
             .then(() => {
                 Alert.info(intl.formatMessage({
@@ -402,7 +418,7 @@ export default function Environments() {
             }).finally(() => {
                 restApi.getRevisions(api.id).then((result) => {
                     setRevisions(result.body.list);
-                    extractLastRevisionNumber(result.body.list);
+                    extractLastRevisionNumber(result.body.list, lastRev);
                 });
             });
         return promisedDelete;
@@ -428,7 +444,7 @@ export default function Environments() {
             }).finally(() => {
                 restApi.getRevisions(api.id).then((result) => {
                     setRevisions(result.body.list);
-                    extractLastRevisionNumber(result.body.list);
+                    extractLastRevisionNumber(result.body.list, null);
                 });
             });
         return promisedCreate;
@@ -443,7 +459,7 @@ export default function Environments() {
             description,
         };
         if (extraRevisionToDelete) {
-            deleteRevision(extraRevisionToDelete)
+            deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
                 .then(() => {
                     createRevision(body);
                 }).finally(() => setExtraRevisionToDelete(null));
@@ -455,9 +471,9 @@ export default function Environments() {
         setExtraRevisionToDelete(null);
     }
 
-    const runActionDelete = (confirm, revisionId) => {
+    const runActionDelete = (confirm, revisionId, revisionName) => {
         if (confirm) {
-            deleteRevision(revisionId);
+            deleteRevision(revisionId, revisionName);
         }
         setConfirmDeleteOpen(!confirmDeleteOpen);
         setRevisionToDelete([]);
@@ -584,7 +600,7 @@ export default function Environments() {
             .finally(() => {
                 updateAPI();
             });
-        setOpen(false);
+        setOpenDeployPopup(false);
     }
 
     /**
@@ -594,7 +610,7 @@ export default function Environments() {
      */
     function handleCreateAndDeployRevision(envList) {
         if (extraRevisionToDelete) {
-            deleteRevision(extraRevisionToDelete)
+            deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
                 .then(() => {
                     createDeployRevision(envList);
                 }).finally(() => setExtraRevisionToDelete(null));
@@ -631,7 +647,7 @@ export default function Environments() {
                     defaultMessage='Yes'
                 />
             )}
-            callback={(e) => runActionDelete(e, revisionToDelete[1])}
+            callback={(e) => runActionDelete(e, revisionToDelete[1], revisionToDelete[0])}
             open={confirmDeleteOpen}
         />
     );
@@ -1161,7 +1177,7 @@ export default function Environments() {
                                         (o1) => o1.deploymentInfo.length === 0,
                                     ).map(
                                         (revision) => (
-                                            <MenuItem value={revision.id}>
+                                            <MenuItem value={revision.id} name={revision.displayName}>
                                                 {revision.displayName}
                                             </MenuItem>
                                         ),
@@ -1529,7 +1545,7 @@ export default function Environments() {
                                         (o1) => o1.deploymentInfo.length === 0,
                                     ).map(
                                         (revision) => (
-                                            <MenuItem value={revision.id}>
+                                            <MenuItem value={revision.id} name={revision.displayName}>
                                                 {revision.displayName}
                                             </MenuItem>
                                         ),
