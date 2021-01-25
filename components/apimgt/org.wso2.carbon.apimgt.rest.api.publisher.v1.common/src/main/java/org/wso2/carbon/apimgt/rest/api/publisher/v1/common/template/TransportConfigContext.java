@@ -1,10 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
 import java.util.ArrayList;
@@ -52,12 +54,19 @@ public class TransportConfigContext extends ConfigContextDecorator {
     }
 
     private void setTransportInVelocityContext(VelocityContext context, String transportsString) {
+
+        if (StringUtils.isNotEmpty(api.getApiSecurity()) &&
+                (api.getApiSecurity().contains(APIConstants.API_SECURITY_MUTUAL_SSL) ||
+                        api.getApiSecurity().contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY))) {
+            context.put("transport", "https");
+            return;
+        }
         if (transportsString.contains(",")) {
             List<String> transports = new ArrayList<String>(Arrays.asList(transportsString.split(",")));
-            if(transports.contains(Constants.TRANSPORT_HTTP) && transports.contains(Constants.TRANSPORT_HTTPS)){
-                context.put("transport","");
+            if (transports.contains(Constants.TRANSPORT_HTTP) && transports.contains(Constants.TRANSPORT_HTTPS)) {
+                context.put("transport", "");
             }
-        }else{
+        } else {
             context.put("transport", transportsString);
         }
     }
