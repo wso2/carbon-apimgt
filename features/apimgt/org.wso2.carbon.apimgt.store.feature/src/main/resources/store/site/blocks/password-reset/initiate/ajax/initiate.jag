@@ -4,10 +4,12 @@ include("/jagg/jagg.jag");
 (function () {
     var result, action = request.getParameter("action"),
             mod = jagg.module("password-reset"),
-            site = require("/site/conf/site.json");
+            site = require("/site/conf/site.json"),
+            encode = require('encode');
+            encode = new encode.Encode();
 
     if (action == "initiatePasswordReset") {
-        var email = request.getParameter("email");
+        var email = encode.forHtml(request.getParameter("email"));
         result = mod.initiatePasswordReset(email);
         if (result != null) {
             print(result);
