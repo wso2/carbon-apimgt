@@ -1,0 +1,40 @@
+{
+  "name": "org.wso2.apimgt.webhooks.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name": "API_KEY",
+      "type": "STRING"
+    },
+    {
+      "name": "APPLICATION_ID",
+      "type": "STRING"
+    },
+    {
+      "name": "TENANT_DOMAIN",
+      "type": "STRING"
+    },
+    {
+      "name": "HUB_CALLBACK_URL",
+      "type": "STRING"
+    },
+    {
+      "name": "HUB_TOPIC",
+      "type": "STRING"
+    },
+    {
+      "name": "HUB_MODE",
+      "type": "STRING"
+    },
+    {
+      "name": "HUB_SECRET",
+      "type": "STRING"
+    },   
+    {
+      "name": "EXPIRY_AT",
+      "type": "long"
+    }
+  ]
+}

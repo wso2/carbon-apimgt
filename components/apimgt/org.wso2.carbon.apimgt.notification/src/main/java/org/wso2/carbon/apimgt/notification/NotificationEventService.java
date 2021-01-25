@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.notification;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
+import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.apimgt.notification.internal.ServiceReferenceHolder;
 
 import java.util.List;
@@ -38,10 +38,10 @@ public class NotificationEventService {
         if (StringUtils.isEmpty(type)) {
             type = APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
         }
-        KeyManagerEventHandler keyManagerEventHandlerByType =
-                ServiceReferenceHolder.getInstance().getKeyManagerEventHandlerByType(type);
-        if (keyManagerEventHandlerByType != null) {
-            keyManagerEventHandlerByType.handleEvent(content, headers);
+        EventHandler eventHandlerByType =
+                ServiceReferenceHolder.getInstance().getEventHandlerByType(type);
+        if (eventHandlerByType != null) {
+            eventHandlerByType.handleEvent(content, headers);
         }
     }
 

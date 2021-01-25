@@ -33,9 +33,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.token.TokenRevocationNotifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.notification.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.apimgt.notification.util.NotificationUtil;
 import org.wso2.carbon.databridge.commons.Event;
 
 import java.io.IOException;
@@ -74,7 +72,7 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
                 new Object[]{eventId, revokedToken, realtimeNotifierTTL, expiryTimeForJWT, tokenType, tenantId};
         Event tokenRevocationMessage = new Event(APIConstants.TOKEN_REVOCATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
-        publishEventToStreamService(tokenRevocationMessage);
+        NotificationUtil.publishEventToStreamService(tokenRevocationMessage);
         log.debug("Successfully sent the revoked token notification on realtime");
     }
 
@@ -136,22 +134,6 @@ public class TokenRevocationNotifierImpl implements TokenRevocationNotifier {
 
         this.realTimeNotifierProperties = realTimeNotifierProperties;
         this.persistentNotifierProperties = persistentNotifierProperties;
-    }
-
-    private static void publishEventToStreamService(Event event) {
-
-        boolean tenantFlowStarted = false;
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-            tenantFlowStarted = true;
-            ServiceReferenceHolder.getInstance().getEventStreamService().publish(event);
-        } finally {
-            if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
     }
 
 }
