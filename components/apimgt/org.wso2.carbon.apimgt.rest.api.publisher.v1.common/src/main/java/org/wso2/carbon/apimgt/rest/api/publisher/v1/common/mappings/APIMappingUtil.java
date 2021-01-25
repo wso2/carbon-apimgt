@@ -1130,7 +1130,7 @@ public class APIMappingUtil {
             dto.setWsdlInfo(wsdlInfoDTO);
         }
         dto.setWsdlUrl(model.getWsdlUrl());
-        setEndpointSecurityFromModelToApiDTO(model, dto);
+        setEndpointSecurityFromModelToApiDTO(model, dto, preserveCredentials);
         setMaxTpsFromModelToApiDTO(model, dto);
 
         //setting micro-gateway labels if there are any
@@ -1237,7 +1237,7 @@ public class APIMappingUtil {
 
     }
 
-    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto)
+    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto, boolean preserveCredentials)
             throws APIManagementException {
 
         if (api.isEndpointSecured()) {
@@ -1246,7 +1246,7 @@ public class APIMappingUtil {
             securityDTO.setUsername(api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
-            if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+            if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
                 securityDTO.setPassword(api.getEndpointUTPassword());
             } else {
                 securityDTO.setPassword(""); //Do not expose password
