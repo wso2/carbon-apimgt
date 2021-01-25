@@ -1,8 +1,10 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.ServiceCatalogInfo;
@@ -44,6 +46,7 @@ public class DataMappingUtil {
         ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
 
         ServiceCatalogInfo serviceCatalogInfo = new ServiceCatalogInfo();
+        serviceCatalogInfo.setKey(serviceMetadataDTO.getKey());
         serviceCatalogInfo.setName(serviceMetadataDTO.getName());
         serviceCatalogInfo.setVersion(serviceMetadataDTO.getVersion());
         serviceCatalogInfo.setDisplayName(serviceMetadataDTO.getDisplayName());
@@ -100,7 +103,11 @@ public class DataMappingUtil {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
                             serviceInfo = fromFileToServiceCatalogInfo(aFile);
-                            key = keyGenerator(serviceInfo);
+                            if (!StringUtils.isBlank(serviceInfo.getKey())) {
+                                key = serviceInfo.getKey();
+                            } else {
+                                key = keyGenerator(serviceInfo);
+                            }
                             serviceInfo.setKey(key);
                             serviceInfo.setMetadata(new FileInputStream(aFile));
                         } else {
@@ -158,34 +165,18 @@ public class DataMappingUtil {
     }
 
     public static List<ServiceInfoDTO> responsePayloadListBuilder(HashMap<String, ServiceCatalogInfo> catalogEntries,
-                                                                        HashMap<String, List<String>> existingServices,
-                                                                        HashMap<String, List<String>> newServices){
+                                                                        HashMap<String, List<String>> filteredServices){
         List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
-        for (String element : existingServices.get(APIConstants.MAP_KEY_VERIFIED)) {
+        for (String element : filteredServices.get(APIConstants.MAP_KEY_VERIFIED_EXISTING_SERVICE)) {
             if (catalogEntries.containsKey(element)) {
                 serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
             }
         }
-//        for (String element : existingServices.get(APIConstants.MAP_KEY_NOT_CHANGED)) {
-//            if (catalogEntries.containsKey(element)) {
-//                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
-//            }
-//        }
-//        for (String element : existingServices.get(APIConstants.MAP_KEY_IGNORED)) {
-//            if (catalogEntries.containsKey(element)) {
-//                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
-//            }
-//        }
-        for (String element : newServices.get(APIConstants.MAP_KEY_ACCEPTED)) {
+        for (String element : filteredServices.get(APIConstants.MAP_KEY_ACCEPTED_NEW_SERVICE)) {
             if (catalogEntries.containsKey(element)) {
                 serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
             }
         }
-//        for (String element : newServices.get(APIConstants.MAP_KEY_IGNORED)) {
-//            if (catalogEntries.containsKey(element)) {
-//                serviceStatusList.add(DataMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(element)));
-//            }
-//        }
         return serviceStatusList;
     }
 
@@ -252,5 +243,25 @@ public class DataMappingUtil {
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error while preparing resource files before zip", e, log);
         }
+    }
+
+    /**
+     * Converts JSON String to JSON Object
+     *
+     * @param jsonInput String json provided in parameter
+     *
+     * @return list of VerifierDTOs
+     */
+    public static List<VerifierDTO> fromStringToJSON(String jsonInput) {
+        List<VerifierDTO> verifierJSONList;
+        final ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            VerifierDTO[] verifierJSONArray = objectMapper.readValue(jsonInput, VerifierDTO[].class);
+            verifierJSONList = new ArrayList(Arrays.asList(verifierJSONArray));
+            return verifierJSONList;
+        } catch (JsonProcessingException e) {
+            RestApiUtil.handleInternalServerError("Error while converting verifier JSON String to JSON object", e, log);
+        }
+        return null;
     }
 }
