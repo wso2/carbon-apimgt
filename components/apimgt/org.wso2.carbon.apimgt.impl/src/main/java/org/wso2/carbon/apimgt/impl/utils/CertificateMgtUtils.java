@@ -853,6 +853,7 @@ public class CertificateMgtUtils {
                 KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 trustStore.load(trustStoreStream, listenerProfileTrustStore.getPassword());
                 CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
+                CertificateReLoaderUtil.setCertificate(listenerProfileTrustStore);
                 CertificateReLoaderUtil.startCertificateReLoader();
                 ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
             }
