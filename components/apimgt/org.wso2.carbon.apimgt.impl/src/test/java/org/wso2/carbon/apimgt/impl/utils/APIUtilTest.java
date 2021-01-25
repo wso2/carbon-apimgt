@@ -114,8 +114,10 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFro
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class,
-        GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
+@PrepareForTest(
+        {LogFactory.class, APIUtil.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
+                GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class,
+                GenericArtifactManager.class, KeyManagerHolder.class, ApiMgtDAO.class, PrivilegedCarbonContext.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -582,7 +584,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
@@ -623,7 +626,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(null, collection);
@@ -658,7 +662,8 @@ public class APIUtilTest {
 
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -695,7 +700,8 @@ public class APIUtilTest {
 
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -720,7 +726,8 @@ public class APIUtilTest {
 
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -746,7 +753,8 @@ public class APIUtilTest {
 
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
 
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -783,7 +791,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
@@ -821,7 +830,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "out" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
@@ -859,7 +869,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "fault" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(collection);
@@ -897,7 +908,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(null, collection);
@@ -938,7 +950,8 @@ public class APIUtilTest {
         Collection collection = Mockito.mock(Collection.class);
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier
+                .getVersion();
         String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
 
         Mockito.when(registry.get(eq(path))).thenReturn(null, null);
@@ -1114,14 +1127,19 @@ public class APIUtilTest {
         GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
                 ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
-                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
-                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+                .getType())
+                .thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType())
+                .thenReturn(DocumentationType.OTHER.getType());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
                 (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
-                .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
+                .PRIVATE.name())
+                .thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
-                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+                .DocumentSourceType.URL
+                .name())
+                .thenReturn(Documentation.DocumentSourceType.FILE.name());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
@@ -1144,14 +1162,19 @@ public class APIUtilTest {
         GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
                 ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
-                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
-                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+                .getType())
+                .thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType())
+                .thenReturn(DocumentationType.OTHER.getType());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
                 (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
-                .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
+                .PRIVATE.name())
+                .thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
-                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+                .DocumentSourceType.URL
+                .name())
+                .thenReturn(Documentation.DocumentSourceType.FILE.name());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
@@ -1174,11 +1197,15 @@ public class APIUtilTest {
         GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
                 ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
-                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
-                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+                .getType())
+                .thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType())
+                .thenReturn(DocumentationType.OTHER.getType());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
-                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+                .DocumentSourceType.URL
+                .name())
+                .thenReturn(Documentation.DocumentSourceType.FILE.name());
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
         Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
@@ -1228,7 +1255,8 @@ public class APIUtilTest {
         try {
             documentation.setSourceType(Documentation.DocumentSourceType.URL);
             Mockito.doThrow(GovernanceException.class).when(genericArtifact).setAttribute(APIConstants
-                    .DOC_SOURCE_URL, documentation.getSourceUrl());
+                            .DOC_SOURCE_URL,
+                    documentation.getSourceUrl());
             APIUtil.createDocArtifactContent(genericArtifact, api.getId(), documentation);
             Assert.fail();
         } catch (APIManagementException ex) {
@@ -1580,7 +1608,8 @@ public class APIUtilTest {
             API expectedAPI = getUniqueAPI();
 
             final String provider = expectedAPI.getId().getProviderName();
-            final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            final String tenantDomain =
+                    org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             final int tenantId = -1234;
 
             System.setProperty("carbon.home", "");
@@ -1638,7 +1667,8 @@ public class APIUtilTest {
             Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
             Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
                     (apiManagerConfigurationService);
-            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration())
+                    .thenReturn(apiManagerConfiguration);
             Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
             Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
             Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
@@ -1893,7 +1923,8 @@ public class APIUtilTest {
     @Test
     public void testGetConditionDtoListWithHavingIPRangeConditionOnly() throws ParseException {
 
-        String base64EncodedString = "W3siaXByYW5nZSI6eyJzdGFydGluZ0lwIjoxNjg0MzAwOTAsImVuZGluZ0lwIjoxNjg0MzAwOTEsImludmVydCI6dHJ1ZX19XQ==";
+        String base64EncodedString =
+                "W3siaXByYW5nZSI6eyJzdGFydGluZ0lwIjoxNjg0MzAwOTAsImVuZGluZ0lwIjoxNjg0MzAwOTEsImludmVydCI6dHJ1ZX19XQ==";
         List<ConditionDto> conditionDtoList = APIUtil.extractConditionDto(base64EncodedString);
         Assert.assertEquals(conditionDtoList.size(), 1);
         ConditionDto conditionDto = conditionDtoList.get(0);
@@ -2078,7 +2109,9 @@ public class APIUtilTest {
 
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(false).when(APIUtil.class, "isPermissionCheckDisabled");
-        PowerMockito.doReturn(1).when(APIUtil.class, "getValueFromCache", APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
+        PowerMockito.doReturn(1)
+                .when(APIUtil.class, "getValueFromCache", APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE,
+                        userNameWithoutChange);
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(userNameWithoutChange)).thenReturn(tenantDomain);
@@ -2107,7 +2140,9 @@ public class APIUtilTest {
                 .mock(org.wso2.carbon.user.api.AuthorizationManager.class);
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
 
-        Mockito.when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+        Mockito
+                .when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
 
         org.wso2.carbon.user.core.UserRealm userRealm2 = Mockito.mock(org.wso2.carbon.user.core.UserRealm.class);
         Mockito.when(ServiceReferenceHolder.getUserRealm()).thenReturn((userRealm2));
@@ -2186,7 +2221,8 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_SUB, tenantID);
+        PowerMockito.doReturn(tierMap)
+                .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_SUB, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
         Assert.assertEquals(tierMap, appTierMap);
     }
@@ -2208,7 +2244,8 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_API, tenantID);
+        PowerMockito.doReturn(tierMap)
+                .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_API, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
 
         Assert.assertEquals(tierMap, appTierMap);
@@ -2231,7 +2268,8 @@ public class APIUtilTest {
         doNothing().when(privilegedCarbonContext).setTenantDomain(tenantDomain, true);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(tierMap).when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_APP, tenantID);
+        PowerMockito.doReturn(tierMap)
+                .when(APIUtil.class, "getTiersFromPolicies", PolicyConstants.POLICY_LEVEL_APP, tenantID);
         Map<String, Tier> appTierMap = APIUtil.getTiers(tierType, tenantDomain);
 
         Assert.assertEquals(tierMap, appTierMap);
@@ -2289,7 +2327,8 @@ public class APIUtilTest {
         String[] roles = {"PUBLISHER", "ADMIN", "TEST-ROLE"};
 
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(roles).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
+        PowerMockito.doReturn(roles)
+                .when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
 
         Assert.assertEquals(roles, APIUtil.getListOfRoles(username));
     }
@@ -2304,7 +2343,8 @@ public class APIUtilTest {
         String tenantAwareUsername = "Insta_User";
 
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(null).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
+        PowerMockito.doReturn(null)
+                .when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
 
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
@@ -2336,7 +2376,8 @@ public class APIUtilTest {
         String tenantAwareUsername = "Insta_User";
 
         PowerMockito.spy(APIUtil.class);
-        PowerMockito.doReturn(null).when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
+        PowerMockito.doReturn(null)
+                .when(APIUtil.class, "getValueFromCache", APIConstants.API_USER_ROLE_CACHE, username);
         PowerMockito.mockStatic(MultitenantUtils.class);
         Mockito.when(MultitenantUtils.getTenantDomain(username)).thenReturn(tenantDomain);
         PowerMockito.mockStatic(AuthorizationManager.class);
