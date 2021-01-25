@@ -3671,6 +3671,33 @@ public class SQLConstants {
 
     public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 
+    /**
+     * Static class to hold database queries related to webhooks subscriptions
+     */
+    public static class WebhooksSqlConstants {
+        public static final String FIND_SUBSCRIPTION =
+                "SELECT WH_SUBSCRIPTION_ID FROM AM_ASYNC_WEBHOOKS_SUBSCRIPTION WHERE UUID = ? AND " +
+                        "APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
+        public static final String ADD_SUBSCRIPTION =
+                "INSERT INTO AM_ASYNC_WEBHOOKS_SUBSCRIPTION (UUID, APPLICATION_ID, TENANT_DOMAIN, " +
+                        "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, UPDATED_AT, EXPIRY_AT, " +
+                        "DELIVERED_AT, DELIVERY_STATE) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE AM_ASYNC_WEBHOOKS_SUBSCRIPTION SET " +
+                "HUB_SECRET = ?, HUB_LEASE_SECONDS = ?, UPDATED_AT = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
+        public static final String DELETE_IF_EXISTS_SUBSCRIBER =
+                "DELETE FROM AM_ASYNC_WEBHOOKS_SUBSCRIPTION WHERE UUID = ?, APPLICATION_ID = ?, TENANT_DOMAIN = ?, " +
+                        "HUB_CALLBACK_URL = ?, HUB_TOPIC = ?";
+        public static final String ADD_UNSUBSCRIPTION =
+                "INSERT INTO AM_ASYNC_WEBHOOKS_UNSUBSCRIPTION (UUID, APPLICATION_ID, TENANT_DOMAIN, " +
+                        "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, ADDED_AT) VALUES (?,?,?,?,?,?,?,?)";
+        public static final String GET_ALL_VALID_SUBSCRIPTIONS =
+                "SELECT UUID, APPLICATION_ID, HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, EXPIRY_AT " +
+                        "FROM AM_ASYNC_WEBHOOKS_SUBSCRIPTION WHERE EXPIRY_AT >= ? AND TENANT_DOMAIN = ?";
+        public static final String UPDATE_DELIVERY_STATE =
+                "UPDATE AM_ASYNC_WEBHOOKS_SUBSCRIPTION SET DELIVERED_AT = ?, DELIVERY_STATE = ? WHERE UUID = ? AND " +
+                        "APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
+    }
+
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +

@@ -51,8 +51,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.Iterator;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -94,6 +92,14 @@ public class GatewayJMSMessageListener implements MessageListener {
                             handleNotificationMessage(payloadData.get(APIConstants.EVENT_TYPE).asText(),
                                     payloadData.get(APIConstants.EVENT_TIMESTAMP).asLong(),
                                     payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
+                        }
+                    } else if (APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA.equalsIgnoreCase
+                            (jmsDestination.getTopicName())) {
+                        String mode = payloadData.get(APIConstants.Webhooks.MODE).asText();
+                        if (APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode)) {
+                            handleAsyncWebhooksSubscriptionMessage(payloadData);
+                        } else if (APIConstants.Webhooks.UNSUBSCRIBE_MODE.equalsIgnoreCase(mode)) {
+                            handleAsyncWebhooksUnSubscriptionMessage(payloadData);
                         }
                     }
 
@@ -290,5 +296,36 @@ public class GatewayJMSMessageListener implements MessageListener {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 setTenantDomain(tenantDomain, true);
+    }
+
+    private synchronized void handleAsyncWebhooksSubscriptionMessage(JsonNode payloadData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received event for -  Async Webhooks API subscription for : " + payloadData.
+                    get(APIConstants.Webhooks.API_KEY).asText());
+        }
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_KEY).textValue();
+        String applicationID = payloadData.get(APIConstants.Webhooks.APPLICATION_ID).textValue();
+        String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).textValue();
+        String callback = payloadData.get(APIConstants.Webhooks.CALLBACK).textValue();
+        String secret = payloadData.get(APIConstants.Webhooks.SECRET).textValue();
+        String topicName = payloadData.get(APIConstants.Webhooks.TOPIC).textValue();
+        long expiredAt = payloadData.get(APIConstants.Webhooks.EXPIRY_AT).asLong();
+        ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
+                .addSubscription(apiKey, applicationID, tenantDomain, callback, secret, topicName, expiredAt);
+    }
+
+    private synchronized void handleAsyncWebhooksUnSubscriptionMessage(JsonNode payloadData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received event for -  Async Webhooks API unsubscription for : " + payloadData.
+                    get(APIConstants.Webhooks.API_KEY).asText());
+        }
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_KEY).asText();
+        String applicationID = payloadData.get(APIConstants.Webhooks.APPLICATION_ID).asText();
+        String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).asText();
+        String callback = payloadData.get(APIConstants.Webhooks.CALLBACK).asText();
+        String secret = payloadData.get(APIConstants.Webhooks.SECRET).asText();
+        String topicName = payloadData.get(APIConstants.Webhooks.TOPIC).asText();
+        ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
+                .removeSubscription(apiKey, applicationID, tenantDomain, callback, secret, topicName);
     }
 }
