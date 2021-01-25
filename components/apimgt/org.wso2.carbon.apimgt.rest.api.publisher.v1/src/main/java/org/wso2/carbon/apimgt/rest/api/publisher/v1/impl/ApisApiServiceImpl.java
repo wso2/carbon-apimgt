@@ -3980,13 +3980,16 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
             APIRevisionDTO createdApiRevisionDTO = APIMappingUtil.fromAPIRevisiontoDTO(createdApiRevision);
             //This URI used to set the location header of the POST response
-            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/" + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS
+                    + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
+                    + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API Revision for API : " + apIRevisionDTO.getApiInfo().getId();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving created revision API location for API : " + apIRevisionDTO.getApiInfo().getId();
+            String errorMessage = "Error while retrieving created revision API location for API : "
+                    + apIRevisionDTO.getApiInfo().getId();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -4072,7 +4075,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
         for (APIRevision apiRevision : apiRevisions) {
-            List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(apiRevision.getRevisionUUID());
+            List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
+                    apiProvider.getAPIRevisionDeploymentList(apiRevision.getRevisionUUID());
             for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
                 apiRevisionDeploymentsList.add(apiRevisionDeployment);
             }
