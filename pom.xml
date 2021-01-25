@@ -1790,6 +1790,11 @@
                 <artifactId>javax.cache.wso2</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.am.analytics.publisher</groupId>
+                <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+                <version>${analytics.event.publisher.client.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2052,5 +2057,6 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
+        <analytics.event.publisher.client.version>0.1.0-SNAPSHOT</analytics.event.publisher.client.version>
     </properties>
 </project>
