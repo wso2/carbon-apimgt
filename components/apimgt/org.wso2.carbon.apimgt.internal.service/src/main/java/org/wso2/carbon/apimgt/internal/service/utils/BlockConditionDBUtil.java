@@ -132,7 +132,7 @@ public final class BlockConditionDBUtil {
                         api.add(value);
                     } else if ("APPLICATION".equals(type)) {
                         application.add(value);
-                    } else if ("IP".equals(type)) {
+                    } else if ("IP".equals(type) || "IPRANGE".equals(type)) {
                         IPLevelDTO ipLevelDTO = new IPLevelDTO();
                         ipLevelDTO.setTenantDomain(tenantDomain);
                         ipLevelDTO.setId(conditionId);
