@@ -224,12 +224,6 @@ function APICreateDefault(props) {
                             displayOnDevportal: true,
                         });
                     }
-                    // for (let i = 0; i < envList.length; i++) {
-                    //     body1.push({
-                    //         name: envList[i],
-                    //         displayOnDevportal: true,
-                    //     });
-                    // }
                     setIsDeploying(true);
                     restApi.deployRevision(api.id, revisionId, body1)
                         .then(() => {

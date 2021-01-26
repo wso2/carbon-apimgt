@@ -836,7 +836,7 @@ public class APIMappingUtil {
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials, APIProvider apiProviderParam)
             throws APIManagementException {
         APIProvider apiProvider;
-        if(apiProviderParam != null) {
+        if (apiProviderParam != null) {
             apiProvider = apiProviderParam;
         } else {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2843,7 +2843,7 @@ public class APIMappingUtil {
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) throws APIManagementException {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
-        if(model.getRevisionUUID() != null) {
+        if (model.getRevisionUUID() != null) {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());

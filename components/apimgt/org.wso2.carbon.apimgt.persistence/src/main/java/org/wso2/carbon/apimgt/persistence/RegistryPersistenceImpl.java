@@ -281,9 +281,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
         String revisionUUID;
         boolean transactionCommitted = false;
         Registry registry = null;
+        boolean tenantFlowStarted = false;
         try {
             RegistryHolder holder = getRegistry(org.getName());
             registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -327,6 +329,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while creating API Revision", e);
         } finally {
             try {
+                if (tenantFlowStarted) {
+                    RegistryPersistenceUtil.endTenantFlow();
+                }
                 if (!transactionCommitted) {
                     registry.rollbackTransaction();
                 }
@@ -346,9 +351,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean transactionCommitted = false;
         Registry registry = null;
         APIIdentifier apiId = null;
+        boolean tenantFlowStarted = false;
         try {
             RegistryHolder holder = getRegistry(org.getName());
             registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -385,6 +392,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while performing registry transaction operation", e);
         } finally {
             try {
+                if (tenantFlowStarted) {
+                    RegistryPersistenceUtil.endTenantFlow();
+                }
                 if (!transactionCommitted) {
                     registry.rollbackTransaction();
                 }
@@ -404,9 +414,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 RegistryConstants.PATH_SEPARATOR + revisionId;
         boolean transactionCommitted = false;
         Registry registry = null;
+        boolean tenantFlowStarted = false;
         try {
             RegistryHolder holder = getRegistry(org.getName());
             registry = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted();
             registry.beginTransaction();
             registry.delete(revisionTargetPath);
             registry.commitTransaction();
@@ -427,6 +439,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException("Error while performing registry transaction operation", e);
         } finally {
             try {
+                if (tenantFlowStarted) {
+                    RegistryPersistenceUtil.endTenantFlow();
+                }
                 if (!transactionCommitted) {
                     registry.rollbackTransaction();
                 }
