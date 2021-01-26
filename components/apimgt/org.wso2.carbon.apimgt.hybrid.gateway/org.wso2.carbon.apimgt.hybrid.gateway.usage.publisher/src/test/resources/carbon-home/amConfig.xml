@@ -1,0 +1,87 @@
+<APIManager>
+    <DataSourceName>java:/comp/env/jdbc/WSO2AM_DB</DataSourceName>
+    <Database>
+        <URL>jdbc:h2:target/repository/database/WSO2AM_DB;AUTO_SERVER=TRUE</URL>
+        <Username>wso2carbon</Username>
+        <Password>wso2carbon</Password>
+        <Driver>org.h2.Driver</Driver>
+        <maxActive>50</maxActive>
+        <maxWait>60000</maxWait>
+        <minIdle>5</minIdle>
+    </Database>
+    <JWTConfiguration>
+        <EnableJWTGeneration>false</EnableJWTGeneration>
+	    <SignatureAlgorithm>NONE</SignatureAlgorithm>
+    </JWTConfiguration>
+    <APIUsageTracking>
+        <Enabled>false</Enabled>
+        <ThriftPort>7612</ThriftPort>
+        <BAMServerURL>https://localh22ost:9444/</BAMServerURL>
+        <BAMUsername>admin</BAMUsername>
+        <BAMPassword>admin</BAMPassword>
+    </APIUsageTracking>
+
+    <APIKeyValidator>
+        <ServerURL>https://localhost:9443/services/</ServerURL>
+        <Username>admin</Username>
+        <Password>admin</Password>
+        <EnableJWTCache>false</EnableJWTCache>
+        <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
+        <KeyValidatorClientType>WSClient</KeyValidatorClientType>
+        <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
+        <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
+        <TokenEndPointName>/oauth2/token</TokenEndPointName>
+        <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
+        <EncryptPersistedTokens>false</EncryptPersistedTokens>
+    </APIKeyValidator>
+
+    <ThrottlingConfigurations>
+    </ThrottlingConfigurations>
+
+    <SwaggerCodegen>
+        <ClientGeneration>
+            <GroupId>org.wso2</GroupId>
+            <ArtifactId>org.wso2.client.</ArtifactId>
+            <ModelPackage>org.wso2.client.model.</ModelPackage>
+            <ApiPackage>org.wso2.client.api.</ApiPackage>
+            <!-- Configure supported languages/Frameworks as comma separated values,
+             Supported Languages/Frameworks : android, java, scala, csharp, dart, flash, groovy, javascript, jmeter,
+             nodejs, perl, php, python, ruby, swift, clojure, asyncScala, csharpDotNet2-->
+            <SupportedLanguages>java,android</SupportedLanguages>
+        </ClientGeneration>
+    </SwaggerCodegen>
+    <APIGateway>
+        <!-- The environments to which an API will be published -->
+        <Environments>
+            <!-- Environments can be of different types. Allowed values are 'hybrid', 'production' and 'sandbox'.
+                 An API deployed on a 'production' type gateway will only support production keys
+                 An API deployed on a 'sandbox' type gateway will only support sandbox keys
+                 An API deployed on a 'hybrid' type gateway will support both production and sandbox keys. -->
+            <!-- api-console element specifies whether the environment should be listed in API Console or not -->
+            <Environment type="hybrid" api-console="true">
+                <Name>Production</Name>
+                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>
+                <!-- Server URL of the API gateway -->
+                <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
+                <!-- Admin username for the API gateway. -->
+                <Username>${admin.username}</Username>
+                <!-- Admin password for the API gateway.-->
+                <Password>${admin.password}</Password>
+                <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
+                <GatewayEndpoint>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</GatewayEndpoint>
+            </Environment>
+            <Environment type="hybrid" api-console="true">
+                <Name>Sandbox</Name>
+                <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>
+                <!-- Server URL of the API gateway -->
+                <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
+                <!-- Admin username for the API gateway. -->
+                <Username>${admin.username}</Username>
+                <!-- Admin password for the API gateway.-->
+                <Password>${admin.password}</Password>
+                <!-- Endpoint URLs for the APIs hosted in this API gateway.-->
+                <GatewayEndpoint>http://${carbon.local.ip}:${http.nio.port},https://${carbon.local.ip}:${https.nio.port}</GatewayEndpoint>
+            </Environment>
+        </Environments>
+    </APIGateway>
+</APIManager>
