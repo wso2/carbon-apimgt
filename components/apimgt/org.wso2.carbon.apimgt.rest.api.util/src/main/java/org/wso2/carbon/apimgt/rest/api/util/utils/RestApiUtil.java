@@ -984,7 +984,7 @@ public class RestApiUtil {
                             .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
                 } else {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
@@ -1318,7 +1318,7 @@ public class RestApiUtil {
     public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
         Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
+        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml"};
         for (String fileName : fileNameArray) {
             String definition = null;
             try {
