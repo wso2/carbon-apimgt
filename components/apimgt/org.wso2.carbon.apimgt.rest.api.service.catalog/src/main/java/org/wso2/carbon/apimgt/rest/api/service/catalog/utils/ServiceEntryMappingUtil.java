@@ -73,7 +73,7 @@ public class ServiceEntryMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static ServiceEntry fromFileToServiceCatalogInfo(File file) throws IOException {
+    public static ServiceEntry fromFileToServiceInfo(File file) throws IOException {
 
         ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
 
@@ -96,7 +96,7 @@ public class ServiceEntryMappingUtil {
      * @param path path to the directory which include files
      * @return HashMap with service key as key and ServiceEntry object as value
      */
-    public static HashMap<String, ServiceEntry> fromDirToServiceCatalogInfoMap(String path) {
+    public static HashMap<String, ServiceEntry> fromDirToServiceInfoMap(String path) {
         HashMap<String, ServiceEntry> endpointDetails = new HashMap<>();
         File[] files = new File(path).listFiles();
         assert files != null;
@@ -108,7 +108,7 @@ public class ServiceEntryMappingUtil {
                 try {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            serviceInfo = fromFileToServiceCatalogInfo(aFile);
+                            serviceInfo = fromFileToServiceInfo(aFile);
                             if (!StringUtils.isBlank(serviceInfo.getKey())) {
                                 key = serviceInfo.getKey();
                             } else {
@@ -156,10 +156,10 @@ public class ServiceEntryMappingUtil {
      * @param catalogEntries Hash Map of services provided in zip
      * @return build the List<ServiceInfoDTO> list
      */
-    public static List<ServiceInfoDTO> fromServiceCatalogInfoToDTOList(HashMap<String, ServiceEntry> catalogEntries) {
+    public static List<ServiceInfoDTO> fromServiceEntryToDTOList(HashMap<String, ServiceEntry> catalogEntries) {
         List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
         for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
-            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(
+            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceEntryToServiceInfoDTO(
                     catalogEntries.get(entry.getKey())));
         }
         return serviceStatusList;
@@ -171,7 +171,7 @@ public class ServiceEntryMappingUtil {
      * @param serviceEntry ServiceEntry model object
      * @return Converted ServiceInfoDTO object
      */
-    public static ServiceInfoDTO fromServiceCatalogInfoToServiceInfoDTO(ServiceEntry serviceEntry) {
+    public static ServiceInfoDTO fromServiceEntryToServiceInfoDTO(ServiceEntry serviceEntry) {
         ServiceInfoDTO serviceInfoDTO = new ServiceInfoDTO();
 
         serviceInfoDTO.setId(serviceEntry.getUuid());

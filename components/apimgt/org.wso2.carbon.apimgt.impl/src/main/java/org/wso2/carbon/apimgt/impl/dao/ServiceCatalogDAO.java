@@ -39,7 +39,6 @@ public class ServiceCatalogDAO {
 
     private static final Log log = LogFactory.getLog(ServiceCatalogDAO.class);
     private static ServiceCatalogDAO INSTANCE = null;
-    private static boolean initialAutoCommit = false;
 
     /**
      * Method to get the instance of the ServiceCatalogDAO.
@@ -74,10 +73,9 @@ public class ServiceCatalogDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
-            connection.setAutoCommit(false);
-
+            boolean initialAutoCommit = connection.getAutoCommit();
             try {
-                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
                 ps.setString(1, uuid);
                 ps.setString(2, serviceEntry.getKey());
                 ps.setString(3, serviceEntry.getMd5());
@@ -128,10 +126,10 @@ public class ServiceCatalogDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.UPDATE_SERVICE_BY_KEY)) {
-            connection.setAutoCommit(false);
+            boolean initialAutoCommit = connection.getAutoCommit();
 
             try {
-                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
                 ps.setString(1, serviceEntry.getMd5());
                 ps.setString(2, serviceEntry.getName());
                 ps.setString(3, serviceEntry.getDisplayName());
@@ -177,10 +175,9 @@ public class ServiceCatalogDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_ENDPOINT_RESOURCES)) {
-            connection.setAutoCommit(false);
-
+            boolean initialAutoCommit = connection.getAutoCommit();
             try {
-                initialAutoCommit = connection.getAutoCommit();
+                connection.setAutoCommit(false);
                 ps.setString(1, uuid);
                 ps.setBinaryStream(2, serviceEntry.getEndpointDef());
                 ps.setBinaryStream(3, serviceEntry.getMetadata());
@@ -431,9 +428,10 @@ public class ServiceCatalogDAO {
      * @param tenantId     ID of the owner's tenant
      * throws APIManagementException if failed to delete
      */
-    public void deleteService (String serviceKey, int tenantId) throws APIManagementException {
+    public void deleteService(String serviceKey, int tenantId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ServiceCatalogConstants.DELETE_SERVICE)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, serviceKey);
@@ -443,6 +441,8 @@ public class ServiceCatalogDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);

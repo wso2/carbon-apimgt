@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.11.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
@@ -173,16 +173,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.graphQL</groupId>
-            <artifactId>graphQL</artifactId>
-            <version>${graphql.java.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
-            <artifactId>awslambda</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>

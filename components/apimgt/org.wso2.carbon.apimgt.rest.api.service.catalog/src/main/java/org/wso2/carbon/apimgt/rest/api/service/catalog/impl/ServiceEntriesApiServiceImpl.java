@@ -25,7 +25,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
@@ -106,18 +105,18 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
                         pathToExportDir, archiveName);
                 exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
                 exportedFileName = exportedServiceArchiveFile.getName();
+                Response.ResponseBuilder responseBuilder =
+                        Response.status(Response.Status.OK).entity(exportedServiceArchiveFile)
+                                .type(MediaType.APPLICATION_OCTET_STREAM);
+                responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"");
+                return responseBuilder.build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while exporting Services: " + archiveName, e, log);
         }
-
-        Response.ResponseBuilder responseBuilder =
-                Response.status(Response.Status.OK).entity(exportedServiceArchiveFile)
-                        .type(MediaType.APPLICATION_OCTET_STREAM);
-        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"");
-        return responseBuilder.build();
+        return null;
     }
 
     public Response getServiceById(String serviceId, MessageContext messageContext) {
@@ -141,15 +140,12 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     @Override
     public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite,
                                   String verifier, MessageContext messageContext) throws APIManagementException {
-        if (overwrite == null || !overwrite) {
-            return Response.status(Response.Status.PRECONDITION_FAILED).build();
-        }
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String tempDirPath = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
         List<ServiceInfoDTO> serviceStatusList;
-        HashMap<String, String> newResourcesHash;
         HashMap<String, ServiceEntry> catalogEntries;
+        HashMap<String, String> newResourcesHash;
 
         // unzip the uploaded zip
         try {
@@ -161,31 +157,32 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
         }
 
         newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
-        catalogEntries = ServiceEntryMappingUtil.fromDirToServiceCatalogInfoMap(tempDirPath);
+        catalogEntries = ServiceEntryMappingUtil.fromDirToServiceInfoMap(tempDirPath);
 
-        if (overwrite) {
-            HashMap<String, ServiceEntry> serviceEntries = new HashMap<>();
-            for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
-                String key = entry.getKey();
-                try {
-                    if (ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
+        HashMap<String, ServiceEntry> serviceEntries = new HashMap<>();
+        for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
+            String key = entry.getKey();
+            catalogEntries.get(key).setMd5(newResourcesHash.get(key));
+            try {
+                if (ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
+                    if (overwrite) {
                         serviceCatalog.updateService(catalogEntries.get(key), tenantId, userName);
                     } else {
-                        serviceCatalog.addService(catalogEntries.get(key), tenantId, userName);
+                        return Response.status(Response.Status.CONFLICT).build();
                     }
-                    ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(key, tenantId);
-                    serviceEntries.put(key, serviceEntry);
-                } catch (APIManagementException e) {
-                    // client will only be informed by the list of successfully added services
-                    log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
+                } else {
+                    serviceCatalog.addService(catalogEntries.get(key), tenantId, userName);
                 }
+                ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(key, tenantId);
+                serviceEntries.put(key, serviceEntry);
+            } catch (APIManagementException e) {
+                // client will only be informed by the list of successfully added services
+                log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
             }
-            serviceStatusList = ServiceEntryMappingUtil.fromServiceCatalogInfoToDTOList(serviceEntries);
-            return Response.ok().entity(ServiceEntryMappingUtil
-                    .fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
-        } else {
-            return Response.status(Response.Status.CONFLICT).build();
         }
+        serviceStatusList = ServiceEntryMappingUtil.fromServiceEntryToDTOList(serviceEntries);
+        return Response.ok().entity(ServiceEntryMappingUtil
+                .fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
     }
 
     @Override
@@ -203,7 +200,7 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
             for (String serviceKey : keys) {
                 ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(serviceKey, tenantId);
                 if (serviceEntry != null) {
-                    servicesList.add(ServiceEntryMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(serviceEntry));
+                    servicesList.add(ServiceEntryMappingUtil.fromServiceEntryToServiceInfoDTO(serviceEntry));
                 }
             }
             return Response.ok().entity(ServiceEntryMappingUtil.getServicesResponsePayloadBuilder(servicesList)).build();

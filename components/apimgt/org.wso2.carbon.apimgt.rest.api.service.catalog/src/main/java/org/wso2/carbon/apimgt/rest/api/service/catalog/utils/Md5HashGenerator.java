@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.fromFileToServiceCatalogInfo;
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.fromFileToServiceInfo;
 import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.generateServiceKey;
 
 /**
@@ -84,7 +84,7 @@ public class Md5HashGenerator {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
                             // This if only check whether the file start with the name "metadata".
                             try {
-                                ServiceEntry serviceEntry = fromFileToServiceCatalogInfo(aFile);
+                                ServiceEntry serviceEntry = fromFileToServiceInfo(aFile);
                                 if (!StringUtils.isBlank(serviceEntry.getKey())) {
                                     key  = serviceEntry.getKey();
                                 } else {

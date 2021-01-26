@@ -135,7 +135,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successful response with the imported service metadata. ", response = ServiceInfoListDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class) })
-    public Response importService( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ")  @QueryParam("overwrite") Boolean overwrite, @Multipart(value = "verifier", required = false)  String verifier) throws APIManagementException{
+    public Response importService( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Whether to overwrite if there is any existing service with the same name and version. ", defaultValue="false") @DefaultValue("false") @QueryParam("overwrite") Boolean overwrite, @Multipart(value = "verifier", required = false)  String verifier) throws APIManagementException{
         return delegate.importService(fileInputStream, fileDetail, overwrite, verifier, securityContext);
     }
 

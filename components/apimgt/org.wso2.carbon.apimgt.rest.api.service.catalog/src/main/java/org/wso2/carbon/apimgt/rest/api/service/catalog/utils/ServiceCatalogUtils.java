@@ -28,9 +28,6 @@ public class ServiceCatalogUtils {
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
     public static boolean checkServiceExistence(String serviceKey, int tenantId) throws APIManagementException {
-        if (serviceCatalog.getMD5HashByKey(serviceKey, tenantId) != null) {
-            return true;
-        }
-        return false;
+        return serviceCatalog.getMD5HashByKey(serviceKey, tenantId) != null;
     }
 }

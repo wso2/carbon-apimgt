@@ -335,6 +335,8 @@ paths:
           required: false
           schema:
             type: boolean
+            default: false
+
       requestBody:
         required: false
         content:
