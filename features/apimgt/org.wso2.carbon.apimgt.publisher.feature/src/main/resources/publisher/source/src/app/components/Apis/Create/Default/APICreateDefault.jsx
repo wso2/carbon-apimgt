@@ -218,12 +218,18 @@ function APICreateDefault(props) {
                     setIsRevisioning(false);
                     const envList = settings.environment.map((env) => env.name);
                     const body1 = [];
-                    for (let i = 0; i < envList.length; i++) {
+                    if (envList.length > 0) {
                         body1.push({
-                            name: envList[i],
+                            name: envList[0],
                             displayOnDevportal: true,
                         });
                     }
+                    // for (let i = 0; i < envList.length; i++) {
+                    //     body1.push({
+                    //         name: envList[i],
+                    //         displayOnDevportal: true,
+                    //     });
+                    // }
                     setIsDeploying(true);
                     restApi.deployRevision(api.id, revisionId, body1)
                         .then(() => {

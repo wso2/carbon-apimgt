@@ -245,6 +245,7 @@ const useStyles = makeStyles((theme) => ({
     deployNewRevButtonStyle: {
         marginRight: theme.spacing(3),
         marginBottom: theme.spacing(3),
+        marginTop: theme.spacing(3),
     },
     popover: {
         pointerEvents: 'none',
@@ -1082,6 +1083,20 @@ export default function Environments() {
     }
     return (
         <>
+            <Grid md={12}>
+                <Typography variant='h5' gutterBottom>
+                    <FormattedMessage
+                        id='Apis.Details.Environments.Environments.deployments.heading'
+                        defaultMessage='Deployments'
+                    />
+                </Typography>
+                <Typography variant='caption'>
+                    <FormattedMessage
+                        id='Apis.Details.Environments.Environments.deployments.sub.heading'
+                        defaultMessage='Create revisions and deploy in Gateway Environments'
+                    />
+                </Typography>
+            </Grid>
             {!api.isRevision
             && (
                 <Grid container>
@@ -1647,7 +1662,7 @@ export default function Environments() {
                                 <TableCell align='left'>
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.display.in.devportal'
-                                        defaultMessage='Display in Devportal'
+                                        defaultMessage='Display in Developer Portal'
                                     />
                                 </TableCell>
                             </TableRow>

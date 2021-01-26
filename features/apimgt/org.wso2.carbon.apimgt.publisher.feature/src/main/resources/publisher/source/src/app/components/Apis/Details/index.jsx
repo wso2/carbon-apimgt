@@ -673,8 +673,8 @@ class Details extends Component {
                                     id: 'Apis.Details.index.environments',
                                     defaultMessage: 'Deployments',
                                 })}
-                                route='environments'
-                                to={pathPrefix + 'environments'}
+                                route='deployments'
+                                to={pathPrefix + 'deployments'}
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
@@ -849,7 +849,7 @@ Details.subPaths = {
     RUNTIME_CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/runtime-configuration',
     RUNTIME_CONFIGURATION_WEBSOCKET: '/apis/:api_uuid/runtime-configuration-websocket',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
-    ENVIRONMENTS: '/apis/:api_uuid/environments',
+    ENVIRONMENTS: '/apis/:api_uuid/deployments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',

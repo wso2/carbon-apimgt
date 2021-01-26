@@ -554,7 +554,7 @@ export default function CustomizedSteppers() {
                                                     fontSize='small'
                                                 />
                                             ) : (
-                                                <Link to={'/apis/' + api.id + '/environments'}>
+                                                <Link to={'/apis/' + api.id + '/deployments'}>
                                                     <LaunchIcon
                                                         style={{ marginLeft: '5px' }}
                                                         color='primary'
