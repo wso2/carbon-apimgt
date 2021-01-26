@@ -88,6 +88,8 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
@@ -377,46 +379,24 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<API> getAllAPIs() throws APIManagementException {
         List<API> apiSortedList = new ArrayList<API>();
-        boolean isTenantFlowStarted = false;
+
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(username);
+        Map<String, Object> properties = APIUtil.getUserProperties(username);
+        UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                startTenantFlow(tenantDomain);
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
-            for (GenericArtifact artifact : artifacts) {
-                API api = null;
-                try {
-                    api = APIUtil.getAPI(artifact);
-                    if (api != null) {
-                        try {
-                            checkAccessControlPermission(api.getId());
-                        } catch (APIManagementException e) {
-                            // This is a second level of filter to get apis based on access control and visibility.
-                            // Hence log is set as debug and continued.
-                            if(log.isDebugEnabled()) {
-                                log.debug("User is not authorized to view the api " + api.getId().getApiName(), e);
-                            }
-                            continue;
-                        }
-                    }
-                } catch (APIManagementException e) {
-                    //log and continue since we want to load the rest of the APIs.
-                    log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
-                }
-                if (api != null) {
-                    apiSortedList.add(api);
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
+                    Integer.MAX_VALUE, userCtx);
+
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    apiSortedList.add(mappedAPI);
                 }
             }
-        } catch (RegistryException e) {
-            String msg = "Failed to get APIs from the registry";
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
         }
 
         Collections.sort(apiSortedList, new APINameComparator());
@@ -1418,8 +1398,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (registry.resourceExists(apiOrAPIProductDocPath)) {
                 Resource resource = registry.get(apiOrAPIProductDocPath);
                 if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
-                    for (String docPath : docsPaths) {
+                    List<String> docPaths = getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
+                            apiOrAPIProductDocPath);
+                    for (String docPath : docPaths) {
                         if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
                             Resource docResource = registry.get(docPath);
                             GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
@@ -1452,6 +1433,40 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return documentationList;
+    }
+
+    /**
+     * Get API Documents within the provided registry collection
+     * In case the document names contained '/' character, need to get only leaf node documents within them
+     *
+     * @param docCollection registry collection
+     * @param apiOrAPIProductDocPath base api/api product document path
+     * @return
+     * @throws APIManagementException
+     */
+    private List<String> getDocPaths(org.wso2.carbon.registry.core.Collection docCollection,
+            String apiOrAPIProductDocPath) throws APIManagementException {
+        List<String> docPaths = new ArrayList<>();
+        String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+        String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
+        try {
+            String[] resourcePaths = docCollection.getChildren();
+            for (String resourcePath : resourcePaths) {
+                if (!(resourcePath.equals(pathToContent) || resourcePath.equals(pathToDocFile))) {
+                    Resource resource = registry.get(resourcePath);
+                    if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                        docPaths.addAll(getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
+                                apiOrAPIProductDocPath));
+                    } else {
+                        docPaths.add(resourcePath);
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get documents for api/product";
+            throw new APIManagementException(msg, e);
+        }
+        return docPaths;
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {

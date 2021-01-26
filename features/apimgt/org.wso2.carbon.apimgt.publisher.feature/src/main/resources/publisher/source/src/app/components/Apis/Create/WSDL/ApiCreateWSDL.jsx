@@ -15,12 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
+import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
@@ -43,10 +44,27 @@ import ProvideWSDL from './Steps/ProvideWSDL';
  * @returns
  */
 export default function ApiCreateWSDL(props) {
+    const intl = useIntl();
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
     const { settings } = useAppContext();
+    const [policies, setPolicies] = useState([]);
 
+    useEffect(() => {
+        API.policies('subscription').then((response) => {
+            const allPolicies = response.body.list;
+            if (allPolicies.length === 0) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available',
+                    defaultMessage: 'Throttling policies not available. Contact your administrator',
+                }));
+            } else if (allPolicies.filter((p) => p.name === 'Unlimited').length > 0) {
+                setPolicies(['Unlimited']);
+            } else {
+                setPolicies([allPolicies[0].name]);
+            }
+        });
+    }, []);
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -60,7 +78,6 @@ export default function ApiCreateWSDL(props) {
             case 'version':
             case 'endpoint':
             case 'context':
-            case 'policies':
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
@@ -110,7 +127,7 @@ export default function ApiCreateWSDL(props) {
     function createAPI() {
         setCreating(true);
         const {
-            name, version, context, endpoint, policies, type,
+            name, version, context, endpoint, type,
         } = apiInputs;
         const additionalProperties = {
             name,
