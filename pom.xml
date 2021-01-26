@@ -733,13 +733,19 @@
                 <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>war</type>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
@@ -1133,11 +1139,18 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.persistence.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.ws.commons.axiom.wso2</groupId>
                 <artifactId>axiom</artifactId>
