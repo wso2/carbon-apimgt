@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -69,6 +70,11 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
+import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -116,6 +122,7 @@ import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.mockito.Matchers.any;
 import static org.wso2.carbon.apimgt.impl.TestUtils.mockRegistryAndUserRealm;
 import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
 import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
@@ -238,29 +245,23 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test
-    public void testGetAllApis() throws GovernanceException, APIManagementException {
+    public void testGetAllApis() throws GovernanceException, APIManagementException, APIPersistenceException {
         PowerMockito.mockStatic(APIUtil.class);
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
-        API api = new API(identifier);
-
-        GenericArtifact[] genericArtifacts = new GenericArtifact[1];
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
-                "sample");
-        genericArtifacts[0] = genericArtifact;
-        Mockito.when(genericArtifactManager.getAllGenericArtifacts()).thenThrow(RegistryException.class)
-                .thenReturn(genericArtifacts);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager);
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        try {
-            abstractAPIManager.getAllAPIs(); //error scenario
-            Assert.fail("Registry exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get APIs from the registry"));
-        }
-        PowerMockito.when(APIUtil.getAPI((GenericArtifact)Mockito.any())).thenThrow(APIManagementException.class)
-                .thenReturn(api);
-        Assert.assertEquals(abstractAPIManager.getAllAPIs().size(),0);
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
+        PublisherAPISearchResult value = new PublisherAPISearchResult();
+        List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
+        PublisherAPIInfo pubInfo = new PublisherAPI();
+        pubInfo.setApiName("TestAPI");
+        pubInfo.setContext("/test");
+        pubInfo.setId("xxxxxx");
+        pubInfo.setProviderName("test");
+        pubInfo.setType("API");
+        pubInfo.setVersion("1");
+        publisherAPIInfoList.add(pubInfo);
+        value.setPublisherAPIInfoList(publisherAPIInfoList);
+        
+        PowerMockito.when(apiPersistenceInstance.searchAPIsForPublisher(any(Organization.class), any(String.class),
+                any(Integer.class), any(Integer.class), any(UserContext.class))).thenReturn(value);
         List<API> apis = abstractAPIManager.getAllAPIs();
         Assert.assertNotNull(apis);
         Assert.assertEquals(apis.size(), 1);

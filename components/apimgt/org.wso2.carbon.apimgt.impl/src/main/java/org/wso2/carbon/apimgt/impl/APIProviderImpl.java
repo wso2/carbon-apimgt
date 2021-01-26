@@ -10382,18 +10382,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     
     @Override
     public API getAPIbyUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
+        Organization org = new Organization(organizationDTO.getOrgId());
+        String requestedTenantDomain = organizationDTO.getRequestedTenantDomain();
         try {
-            //TODO remove this
-            Organization org = new Organization(organizationDTO.getOrgId());
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-
-            API api = APIMapper.INSTANCE.toApi(publisherAPI);
-            checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
-            /////////////////// Do processing on the data object//////////
-            populateAPIInformation(uuid, organizationDTO.getRequestedTenantDomain(), org, api);
-            api.setOrganizationId(organizationDTO.getOrgId());
-            loadMediationPoliciesToAPI(api);
-            return api;
+            if (publisherAPI != null) {
+                API api = APIMapper.INSTANCE.toApi(publisherAPI);
+                checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
+                /////////////////// Do processing on the data object//////////
+                populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                loadMediationPoliciesToAPI(api);
+                return api;
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Failed to get API", e);
         } catch (OASPersistenceException e) {
