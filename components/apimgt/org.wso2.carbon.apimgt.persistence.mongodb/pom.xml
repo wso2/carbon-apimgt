@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.mongodb.persistence</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.persistence.mongodb</artifactId>
     <packaging>bundle</packaging>
 
     <build>
@@ -23,10 +23,11 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.carbon.apimgt.mongodb.persistence.internal
+                            org.wso2.carbon.apimgt.persistence.mongodb.internal
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.mongodb.persistence.*; version="${carbon.apimgt.version}"
+                            org.wso2.carbon.apimgt.persistence.mongodb.*; version="${carbon.apimgt.version}",
+                            org.apache.http.*
                         </Export-Package>
                            <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",

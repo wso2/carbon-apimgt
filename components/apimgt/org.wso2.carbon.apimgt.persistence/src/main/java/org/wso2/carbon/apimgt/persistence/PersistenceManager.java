@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import java.util.Properties;
 
@@ -36,7 +37,7 @@ public class PersistenceManager {
     private static TomlParseResult tomlParseResult = null;
     private static Log log = LogFactory.getLog(PersistenceManager.class);
 
-    public static APIPersistence getPersistenceInstance(Properties properties) {
+    public static APIPersistence getPersistenceInstance(String userName, Map<String, String> configs ,Properties properties) {
 
         synchronized (RegistryPersistenceImpl.class) {
             if (apiPersistenceInstance == null) {
@@ -48,17 +49,17 @@ public class PersistenceManager {
                         log.error("error when parsing toml ");
                     }
                 }
-                String databaseType = tomlParseResult.getString("database.reg_db.type");
+                String databaseType = configs.get("RegistryConfigs.Type");
+                ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
+                serviceReferenceHolder.setPersistenceConfigs(configs);
                 if ("mongodb".equalsIgnoreCase(databaseType)) {
-                    apiPersistenceInstance = ServiceReferenceHolder.getInstance().getApiPersistence();
+                    apiPersistenceInstance = serviceReferenceHolder.getApiPersistence();
                 } else {
-                    if (persistence == null) {
-                        persistence = new RegistryPersistenceImpl(properties);
-                    }
-                }
+                    if (apiPersistenceInstance == null) {
+                        apiPersistenceInstance = new RegistryPersistenceImpl(properties);
+                    }                }
             }
             return apiPersistenceInstance;
         }
-        return persistence;
     }
 }

@@ -23,12 +23,15 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private RealmService realmService;
     private TenantIndexingLoader indexLoader;
     private static UserRealm userRealm;
-
+    private Map<String, String> persistenceConfigs;
     private RegistryService registryService;
 
     private APIPersistence apiPersistence;
@@ -83,6 +86,14 @@ public class ServiceReferenceHolder {
 
     public APIPersistence getApiPersistence() {
         return apiPersistence;
+    }
+
+    public Map<String, String> getPersistenceConfigs() {
+        return persistenceConfigs;
+    }
+
+    public void setPersistenceConfigs(Map<String, String> persistenceConfigs) {
+        this.persistenceConfigs = persistenceConfigs;
     }
 
     public void setApiPersistence(APIPersistence apiPersistence) {

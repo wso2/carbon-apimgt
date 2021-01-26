@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.mongodb.persistence.utils;
+package org.wso2.carbon.apimgt.persistence.mongodb.utils;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -28,9 +28,10 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBDevPortalAPI;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBPublisherAPI;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.APIDocumentation;
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -67,16 +68,10 @@ public class MongoDBConnectionUtil {
                     log.debug("Initializing mongodb datasource");
                 }
 
-                if (tomlParseResult == null) {
-                    Path source = Paths.get(CarbonUtils.getCarbonConfigDirPath() + File.separator + "deployment.toml");
-                    try {
-                        tomlParseResult = Toml.parse(source);
-                    } catch (IOException e) {
-                        log.error("error when parsing toml ",e);
-                    }
-                }
+                String parsedConnectionString = ServiceReferenceHolder.getInstance().getPersistenceConfigs().get
+                        ("RegistryConfigs.ConnectionString");
 
-                String parsedConnectionString = tomlParseResult.getString("database.reg_db.connectionString");
+
                 ConnectionString connectionString = new ConnectionString(parsedConnectionString);
                 database = connectionString.getDatabase();
                 ClassModel<MongoDBPublisherAPI> mongoDBAPIDocument = ClassModel.builder(MongoDBPublisherAPI.class)

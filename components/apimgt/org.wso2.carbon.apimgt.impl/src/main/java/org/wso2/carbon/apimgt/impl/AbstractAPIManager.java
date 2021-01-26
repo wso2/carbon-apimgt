@@ -157,6 +157,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -245,9 +246,24 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
         }
+        Map<String, String> configMap = new HashMap<>();
+        APIManagerConfiguration apiManagerConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        configMap.put("RegistryConfigs.Type", apiManagerConfig.getFirstProperty("RegistryConfigs.Type"));
+        configMap.put("RegistryConfigs.ConnectionString",
+                apiManagerConfig.getFirstProperty("RegistryConfigs.ConnectionString"));
+        configMap.put("RegistryConfigs.APIUri", apiManagerConfig.getFirstProperty("RegistryConfigs.APIUri"));
+        configMap.put("RegistryConfigs.GroupId", apiManagerConfig.getFirstProperty("RegistryConfigs.GroupId"));
+        configMap.put("RegistryConfigs.ClusterName",
+                apiManagerConfig.getFirstProperty("RegistryConfigs.ClusterName"));
+        configMap.put("RegistryConfigs.PublicKey", apiManagerConfig.getFirstProperty("RegistryConfigs.PublicKey"));
+        configMap.put("RegistryConfigs.PrivateKey",
+                apiManagerConfig.getFirstProperty("RegistryConfigs.PrivateKey"));
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(properties);
+
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username, configMap, properties);
 
     }
 

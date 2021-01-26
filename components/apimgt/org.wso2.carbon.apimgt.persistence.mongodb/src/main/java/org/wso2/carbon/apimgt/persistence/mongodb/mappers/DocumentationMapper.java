@@ -16,33 +16,28 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.mongodb.persistence.mappers;
+package org.wso2.carbon.apimgt.persistence.mongodb.mappers;
 
 import org.bson.types.ObjectId;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBDevPortalAPI;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBPublisherAPI;
-import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
-
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.APIDocumentation;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 
 @Mapper
-public interface MongoAPIMapper {
-    MongoAPIMapper INSTANCE = Mappers.getMapper(MongoAPIMapper.class);
+public interface DocumentationMapper {
+    DocumentationMapper INSTANCE = Mappers.getMapper(DocumentationMapper.class);
 
-    @Mapping(source = "id", target = "mongodbUuId")
-    MongoDBPublisherAPI toMongoDBPublisherApi(PublisherAPI api);
+    @Mapping(source = "sourceType", target = "sourceType")
+    @Mapping(source = "type", target = "type")
+    @Mapping(source = "id", target = "id")
+    Documentation toDocumentation(APIDocumentation apiDoc);
 
-    @Mapping(source = "mongodbUuId", target = "id")
-    PublisherAPI toPublisherApi(MongoDBPublisherAPI api);
-
-    @Mapping(source = "id", target = "mongodbUuId")
-    MongoDBDevPortalAPI toMongoDBDevPortalApi(DevPortalAPI api);
-
-    @Mapping(source = "mongodbUuId", target = "id")
-    DevPortalAPI toDevPortalApi(MongoDBDevPortalAPI api);
+    @Mapping(source = "sourceType", target = "sourceType")
+    @Mapping(source = "type", target = "type")
+    @Mapping(source = "id", target = "id")
+    APIDocumentation toAPIDocumentation(Documentation doc);
 
     default ObjectId mapStringIdToObjectId(String id) {
         if (id != null) {

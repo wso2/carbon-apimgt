@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.mongodb.persistence;
+package org.wso2.carbon.apimgt.persistence.mongodb;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -30,15 +30,15 @@ import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.InsertOneResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBDevPortalAPI;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.MongoDBPublisherAPI;
-import org.wso2.carbon.apimgt.mongodb.persistence.mappers.DocumentationMapper;
-import org.wso2.carbon.apimgt.mongodb.persistence.mappers.MongoAPIMapper;
-import org.wso2.carbon.apimgt.mongodb.persistence.utils.MongoDBConnectionUtil;
-import org.wso2.carbon.apimgt.mongodb.persistence.utils.MongoDBUtil;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.mappers.DocumentationMapper;
+import org.wso2.carbon.apimgt.persistence.mongodb.mappers.MongoAPIMapper;
+import org.wso2.carbon.apimgt.persistence.mongodb.utils.MongoDBConnectionUtil;
+import org.wso2.carbon.apimgt.persistence.mongodb.utils.MongoDBUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.mongodb.persistence.dto.APIDocumentation;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.APIDocumentation;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -78,8 +78,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Aggregates.match;

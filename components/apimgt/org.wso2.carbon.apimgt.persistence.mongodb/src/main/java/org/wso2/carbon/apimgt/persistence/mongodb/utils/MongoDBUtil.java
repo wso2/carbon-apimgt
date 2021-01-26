@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.mongodb.persistence.utils;
+package org.wso2.carbon.apimgt.persistence.mongodb.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;

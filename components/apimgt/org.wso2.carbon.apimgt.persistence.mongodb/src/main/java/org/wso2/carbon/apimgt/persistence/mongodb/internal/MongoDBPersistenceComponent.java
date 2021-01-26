@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.mongodb.persistence.internal;
+package org.wso2.carbon.apimgt.persistence.mongodb.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,10 +8,10 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
-import org.wso2.carbon.apimgt.mongodb.persistence.MongoDBPersistenceImpl;
+import org.wso2.carbon.apimgt.persistence.mongodb.MongoDBPersistenceImpl;
 
 @Component(
-        name = "org.wso2.carbon.apimgt.mongodb.persistence",
+        name = "org.wso2.carbon.apimgt.persistence.mongodb",
         immediate = true)
 public class MongoDBPersistenceComponent {
 

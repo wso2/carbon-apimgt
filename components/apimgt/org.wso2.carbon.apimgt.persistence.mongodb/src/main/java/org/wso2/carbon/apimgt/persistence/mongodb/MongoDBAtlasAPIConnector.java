@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.mongodb.persistence;
+package org.wso2.carbon.apimgt.persistence.mongodb;
 
 import com.google.gson.Gson;
 import net.consensys.cava.toml.Toml;
@@ -13,23 +13,19 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.MalformedChallengeException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.mongodb.persistence.utils.MongoDBConnectionUtil;
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.mongodb.utils.MongoDBConnectionUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -44,7 +40,6 @@ import java.util.Map;
 
 public class MongoDBAtlasAPIConnector {
 
-    private static TomlParseResult tomlParseResult = null;
     private static String database = null;
     private static final String DEFAULT_DATABASE = "APIM_DB";
     private static MongoDBAtlasAPIConnector instance = null;
@@ -56,20 +51,13 @@ public class MongoDBAtlasAPIConnector {
     private static String privateKey;
 
     public MongoDBAtlasAPIConnector() {
-        if (tomlParseResult == null) {
-            Path source = Paths.get(CarbonUtils.getCarbonConfigDirPath() + File.separator + "deployment.toml");
-            try {
-                tomlParseResult = Toml.parse(source);
-            } catch (IOException e) {
-                log.error("error when parsing toml ", e);
-            }
-        }
+        Map<String, String> persistenceConfigs = ServiceReferenceHolder.getInstance().getPersistenceConfigs();
         database = MongoDBConnectionUtil.getDatabase().getName();
-        apiUri = tomlParseResult.getString("mongodb.atlas.apiUri");
-        groupId = tomlParseResult.getString("mongodb.atlas.groupId");
-        clusterName = tomlParseResult.getString("mongodb.atlas.clusterName");
-        publicKey = tomlParseResult.getString("mongodb.atlas.publicKey");
-        privateKey = tomlParseResult.getString("mongodb.atlas.privateKey");
+        apiUri = persistenceConfigs.get("RegistryConfigs.APIUri");
+        groupId = persistenceConfigs.get("RegistryConfigs.GroupId");
+        clusterName = persistenceConfigs.get("RegistryConfigs.ClusterName");
+        publicKey = persistenceConfigs.get("RegistryConfigs.PublicKey");
+        privateKey = persistenceConfigs.get("RegistryConfigs.PrivateKey");
     }
 
     public static MongoDBAtlasAPIConnector getInstance() {

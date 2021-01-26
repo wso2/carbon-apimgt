@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.mongodb.persistence.dto;
+package org.wso2.carbon.apimgt.persistence.mongodb.dto;
 
 /*
  *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
