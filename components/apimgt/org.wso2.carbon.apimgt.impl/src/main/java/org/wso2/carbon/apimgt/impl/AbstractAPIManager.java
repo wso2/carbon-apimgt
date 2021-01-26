@@ -477,7 +477,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
     }
 
-    protected API getApiForPublishing(RegistrApiProductsApiServiceImpl.y registry, GovernanceArtifact apiArtifact) throws APIManagementException {
+    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
         API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
         APIUtil.updateAPIProductDependencies(api, registry);
         return api;
@@ -501,8 +501,7 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (requestedTenantDomain)) {
-                int id = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
+                int id = getTenantManager().getTenantId(requestedTenantDomain);
                 startTenantFlow(requestedTenantDomain);
                 tenantFlowStarted = true;
                 registry = getRegistryService().getGovernanceSystemRegistry(id);
