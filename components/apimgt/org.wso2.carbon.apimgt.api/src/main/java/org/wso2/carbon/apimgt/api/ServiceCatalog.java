@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 
 import java.util.List;
 
-public interface ServiceCatalogApi {
+public interface ServiceCatalog {
 
     /**
      * Adds a new Service Catalog

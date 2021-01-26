@@ -19,14 +19,14 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ServiceCatalogApi;
+import org.wso2.carbon.apimgt.api.ServiceCatalog;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
 import java.util.List;
 import java.util.UUID;
 
-public class ServiceCatalogImpl implements ServiceCatalogApi {
+public class ServiceCatalogImpl implements ServiceCatalog {
 
     @Override
     public String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
