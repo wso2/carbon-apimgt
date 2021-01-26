@@ -20,12 +20,16 @@ package org.wso2.carbon.apimgt.keymgt.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
@@ -39,6 +43,10 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class KeyManagerDataServiceImpl implements KeyManagerDataService {
 
@@ -416,5 +424,21 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
             log.debug("Converted : " + policy.toString());
         }
         return policy;
+    }
+
+    @Override
+    public void updateDeployedAPIRevision(DeployAPIInGatewayEvent event) {
+        if (log.isDebugEnabled()) {
+            log.debug("Add or Update API in datastore in tenant " + event.getTenantDomain());
+        }
+        SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
+                .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
+        store.addOrUpdateAPIRevisionWithUrlTemplates(event);
     }
 }

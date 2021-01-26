@@ -299,6 +299,30 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
+    public API getApi(String context, String version, String revisionUUID) throws DataLoadingException {
+
+        String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
+                "&version=" + version + "&revisionUUID=" + revisionUUID;
+        API api = new API();
+        String responseString;
+        try {
+            responseString = invokeService(endPoint, null);
+        } catch (IOException e) {
+            String msg = "Error while executing the http client " + endPoint;
+            log.error(msg, e);
+            throw new DataLoadingException(msg, e);
+        }
+        if (responseString != null && !responseString.isEmpty()) {
+            APIList list = new Gson().fromJson(responseString, APIList.class);
+            if (list.getList() != null && !list.getList().isEmpty()) {
+                api = list.getList().get(0);
+            }
+        }
+        return api;
+    }
+
+
+    @Override
     public SubscriptionPolicy getSubscriptionPolicy(String policyName, String tenantDomain) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.SUBSCRIPTION_POLICIES + "?policyName=" +

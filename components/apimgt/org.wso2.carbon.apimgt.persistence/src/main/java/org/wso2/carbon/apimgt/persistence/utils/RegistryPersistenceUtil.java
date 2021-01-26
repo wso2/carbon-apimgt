@@ -637,17 +637,17 @@ public class RegistryPersistenceUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
 
             api = new API(apiIdentifier);
             //set uuid
             api.setUuid(artifact.getId());
             // set rating
-            //String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
-                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+//            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+//                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+//                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+//                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
             Resource apiResource = registry.get(artifactPath);
             api = setResourceProperties(api, apiResource, artifactPath);
             //set description
@@ -1532,6 +1532,11 @@ public class RegistryPersistenceUtil {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(apiProvider)
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + APIConstants.API_RESOURCE_NAME;
+    }
+
+    public static String getRevisionPath(String apiUUID, int revisionId) {
+        return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId + RegistryConstants.PATH_SEPARATOR;
     }
 
     public static String[] getAuthorizedRoles(String apiPath, String tenantDomain) throws UserStoreException {

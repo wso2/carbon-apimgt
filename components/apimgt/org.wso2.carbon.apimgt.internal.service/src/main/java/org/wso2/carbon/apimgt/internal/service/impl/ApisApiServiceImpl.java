@@ -40,13 +40,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisGet(String xWSO2Tenant, String context, String version, String accept,
+    public Response apisGet(String xWSO2Tenant, String context, String version, String revisionUUID, String accept,
                             MessageContext messageContext) throws APIManagementException {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
 
         if (StringUtils.isNotEmpty(context) && StringUtils.isNotEmpty(version)) {
-            API api = subscriptionValidationDAO.getApi(version, context);
+            API api = subscriptionValidationDAO.getApi(version, context, revisionUUID);
             return Response.ok().entity(SubscriptionValidationDataUtil.fromAPIToAPIListDTO(api)).build();
         }
 
