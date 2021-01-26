@@ -218,6 +218,12 @@
           "required" : false,
           "type" : "string"
         }, {
+          "name" : "revisionUUID",
+          "in" : "query",
+          "description" : "**Search condition**.\n revision uuid of the api\n",
+          "required" : false,
+          "type" : "string"
+        }, {
           "name" : "Accept",
           "in" : "header",
           "description" : "Media types acceptable for the response. Default is application/json.\n",

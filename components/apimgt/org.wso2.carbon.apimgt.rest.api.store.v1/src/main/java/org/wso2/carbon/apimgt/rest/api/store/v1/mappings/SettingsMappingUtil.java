@@ -151,7 +151,7 @@ public class SettingsMappingUtil {
         String definition = null;
         try {
             definition = IOUtils
-                    .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                    .toString(RestApiUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
         } catch (IOException e) {
             log.error("Error while reading the swagger definition", e);
         }

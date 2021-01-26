@@ -287,6 +287,7 @@ class Monetization extends Component {
                             color='primary'
                             variant='contained'
                             className={classes.button}
+                            disabled={api.isRevision}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Monetization.Index.save'

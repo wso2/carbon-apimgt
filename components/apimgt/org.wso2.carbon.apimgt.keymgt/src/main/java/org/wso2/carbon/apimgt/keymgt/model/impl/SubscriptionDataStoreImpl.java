@@ -20,7 +20,13 @@ package org.wso2.carbon.apimgt.keymgt.model.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
@@ -36,6 +42,7 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 
+import javax.cache.Cache;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -515,5 +522,35 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public Map<String, Scope> getScopesByTenant(String tenantDomain) {
         return scopesMap;
+    }
+
+    @Override
+    public void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event) {
+        try {
+            if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
+                apiMap.remove(event.getContext() + ":" + event.getVersion());
+            } else {
+//                API api = apiMap.get(event.getContext() + ":" + event.getVersion());
+//                if (api != null) {
+//                    List<URLMapping> urlMappingList = api.getResources();
+//                    Cache cache = CacheProvider.getResourceCache();
+//                    String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(api.getContext(), api.getApiVersion());
+//                    if (cache.containsKey(apiCacheKey)) {
+//                        cache.remove(apiCacheKey);
+//                    }
+//                    for (URLMapping uriTemplate : urlMappingList) {
+//                        String resourceVerbCacheKey = APIUtil.getResourceInfoDTOCacheKey(api.getContext(), api.getApiVersion(),
+//                                uriTemplate.getUrlPattern(), uriTemplate.getHttpMethod());
+//                        if (cache.containsKey(resourceVerbCacheKey)) {
+//                            cache.remove(resourceVerbCacheKey);
+//                        }
+//                    }
+//                }
+                API newAPI = new SubscriptionDataLoaderImpl().getApi(event.getContext(), event.getVersion(), event.getApiId());
+                apiMap.put(event.getContext() + ":" + event.getVersion(), newAPI);
+            }
+        } catch (DataLoadingException e) {
+            log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
+        }
     }
 }
