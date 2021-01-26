@@ -34,6 +34,8 @@ import java.util.List;
  * and vice-versa
  */
 public class AdvancedThrottlePolicyMappingUtil {
+    private static final String ADVANCED_THROTTLING_POLICY_TYPE = "AdvancedThrottlePolicy";
+    private static final String ADVACNCED_THROTTLING_POLICY_INFO_TYPE = "AdvancedThrottlePolicyInfo";
 
     /**
      * Converts an array of Advanced Policy objects into a List DTO
@@ -99,6 +101,7 @@ public class AdvancedThrottlePolicyMappingUtil {
         List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil.fromPipelineListToConditionalGroupDTOList(
                 apiPolicy.getPipelines());
         policyDTO.setConditionalGroups(groupDTOs);
+        policyDTO.setType(ADVANCED_THROTTLING_POLICY_TYPE);
 
         if (apiPolicy.getDefaultQuotaPolicy() != null) {
             policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
@@ -122,6 +125,7 @@ public class AdvancedThrottlePolicyMappingUtil {
             policyDTO.setDefaultLimit(
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
         }
+        policyDTO.setType(ADVACNCED_THROTTLING_POLICY_INFO_TYPE);
         return policyDTO;
     }
 }

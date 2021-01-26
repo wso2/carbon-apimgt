@@ -407,7 +407,7 @@ public class ImportUtils {
             throws APIImportExportException {
         // Temporary directory is used to create the required folders
         File importFolder = CommonUtil.createTempDirectory(null);
-        String uploadFileName = ImportExportConstants.UPLOAD_FILE_NAME;
+        String uploadFileName = ImportExportConstants.UPLOAD_API_FILE_NAME;
         String absolutePath = importFolder.getAbsolutePath() + File.separator;
         CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
         String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
@@ -900,9 +900,9 @@ public class ImportUtils {
                             documentation.setFilePath(
                                     apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
                             if (!apiTypeWrapper.isAPIProduct()) {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getId(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation);
                             } else {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getId(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation);
                             }
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API

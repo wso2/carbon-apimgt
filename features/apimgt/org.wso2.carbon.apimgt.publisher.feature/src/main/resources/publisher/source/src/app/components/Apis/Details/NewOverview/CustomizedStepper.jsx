@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
@@ -33,7 +33,6 @@ import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import { useAppContext } from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AuthManager from 'AppData/AuthManager';
@@ -62,6 +61,15 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(1),
     },
     gridEndpoint: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: 0,
+        marginRight: theme.spacing(4.2),
+        marginTop: theme.spacing(0.5),
+    },
+    lifeCycleStateStyle: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
@@ -160,6 +168,36 @@ const useStyles = makeStyles((theme) => ({
             borderBottom: '41px solid transparent',
         },
     },
+    pointerMiddle1: {
+        height: 82,
+        position: 'relative',
+        background: theme.custom.overviewStepper.backgrounds.active,
+        margin: '0 20px',
+        '&:before': {
+            content: '""',
+            position: 'absolute',
+            right: '-41px',
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+        '&:after': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: 0,
+            height: 0,
+            borderLeft: '41px solid',
+            borderLeftColor: theme.custom.wrapperBackground,
+            borderTop: '41px solid transparent',
+            borderBottom: '41px solid transparent',
+        },
+    },
     pointerEnd: {
         height: 82,
         position: 'relative',
@@ -184,6 +222,18 @@ const useStyles = makeStyles((theme) => ({
             borderLeftColor: theme.custom.overviewStepper.backgrounds.completed,
         },
     },
+    pointerMiddleActive: {
+        background: theme.custom.overviewStepper.backgrounds.active,
+        '&:before': {
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
+        },
+    },
+    pointerMiddleDisabled: {
+        background: theme.custom.overviewStepper.backgrounds.inactive,
+        '&:before': {
+            borderLeftColor: theme.custom.overviewStepper.backgrounds.inactive,
+        },
+    },
     pointerEndActive: {
         background: theme.custom.overviewStepper.backgrounds.active,
     },
@@ -206,26 +256,30 @@ const useStyles = makeStyles((theme) => ({
 export default function CustomizedSteppers() {
     const [api, updateAPI] = useAPI();
     const classes = useStyles();
-    const { settings, user } = useAppContext();
+    // const { settings, user } = useAppContext();
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
     const isPrototypedAvailable = api.endpointConfig !== null
         && api.endpointConfig.implementation_status === 'prototyped';
     const [lifecycleState, setlifecycleState] = useState(null);
     const [isUpdating, setUpdating] = useState(false);
-    const { tenantList } = useContext(ApiContext);
-    const userNameSplit = user.name.split('@');
-    const tenantDomain = userNameSplit[userNameSplit.length - 1];
-    let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
-    if (tenantList && tenantList.length > 0) {
-        devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
-    }
+    const [deploymentsAvailable, setDeploymentsAvailable] = useState(false);
+    // const { tenantList } = useContext(ApiContext);
+    // const userNameSplit = user.name.split('@');
+    // const tenantDomain = userNameSplit[userNameSplit.length - 1];
+    // let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
+    // if (tenantList && tenantList.length > 0) {
+    //     devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+    // }
 
     useEffect(() => {
         api.getLcState(api.id)
             .then((result) => {
                 setlifecycleState(result.body.state);
             });
+        api.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
+            setDeploymentsAvailable(result.body.count > 0);
+        });
     }, []);
 
     /**
@@ -264,111 +318,103 @@ export default function CustomizedSteppers() {
         switch (state) {
             case 'Published':
                 return (
-                    <Grid xs={12} display='block'>
-                        <Grid xs={12}>
-                            <Typography variant='h5'>
+                    <>
+                        {lifecycleState === 'Published' ? (
+                            <CheckIcon className={classes.iconTrue} />
+                        ) : (
+                            <CloseIcon className={classes.iconFalse} />
+                        )}
+                        <Typography variant='h7'>
+                            <b>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.CustomizedStepper.published'
                                     defaultMessage='Published'
                                 />
-                            </Typography>
-                        </Grid>
-                        <Grid xs={12}>
-                            <a
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                href={devportalUrl}
-                                className={classes.viewInStoreLauncher}
-                            >
-                                <Typography
-                                    variant='h6'
-                                    color='primary'
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
-                                        defaultMessage='View in Dev Portal'
-                                    />
-                                    <LaunchIcon style={{ marginLeft: '5px' }} fontSize='small' />
-                                </Typography>
-                            </a>
-                        </Grid>
-                    </Grid>
+                            </b>
+                        </Typography>
+                    </>
                 );
             case 'Prototyped':
                 return (
-                    <Typography variant='h5'>
-                        <FormattedMessage
-                            id='Apis.Details.Overview.CustomizedStepper.prototyped'
-                            defaultMessage='Prototyped'
-                        />
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.prototyped'
+                                defaultMessage='Prototyped'
+                            />
+                        </b>
                     </Typography>
                 );
             case 'Blocked':
                 return (
-                    <Typography variant='h5'>
-                        <FormattedMessage
-                            id='Apis.Details.Overview.CustomizedStepper.blocked'
-                            defaultMessage='Blocked'
-                        />
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.blocked'
+                                defaultMessage='Blocked'
+                            />
+                        </b>
                     </Typography>
                 );
             case 'Deprecated':
                 return (
-                    <Typography variant='h5'>
-                        <FormattedMessage
-                            id='Apis.Details.Overview.CustomizedStepper.deprecated'
-                            defaultMessage='Deprecated'
-                        />
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.deprecated'
+                                defaultMessage='Deprecated'
+                            />
+                        </b>
                     </Typography>
                 );
             case 'Retired':
                 return (
-                    <Typography variant='h5'>
-                        <FormattedMessage
-                            id='Apis.Details.Overview.CustomizedStepper.retired'
-                            defaultMessage='Retired'
-                        />
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.retired'
+                                defaultMessage='Retired'
+                            />
+                        </b>
                     </Typography>
                 );
             default:
                 return (
-                    <Grid xs={12} display='block'>
-                        <Grid xs={12}>
-                            {isPrototypedAvailable ? (
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
-                                    disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
-                                >
+                    <>
+                        {isPrototypedAvailable ? (
+                            <Button
+                                size='small'
+                                variant='contained'
+                                color='primary'
+                                onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
+                                disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
+                            >
                                         Deploy as a prototype
-                                    {isUpdating && <CircularProgress size={20} />}
-                                </Button>
+                                {isUpdating && <CircularProgress size={20} />}
+                            </Button>
 
-                            ) : (
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                    disabled={(!isEndpointAvailable || !isTierAvailable)
+                        ) : (
+                            <Button
+                                size='small'
+                                variant='contained'
+                                color='primary'
+                                onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
+                                disabled={(!isEndpointAvailable || !isTierAvailable) || api.isRevision
                                         || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
-                                >
+                            >
                                         Publish
-                                    {isUpdating && <CircularProgress size={20} />}
-                                </Button>
-                            )}
-                        </Grid>
-                        {api.workflowStatus === 'CREATED' && (
-                            <Grid xs={12}>
-                                <Typography variant='caption' color='error'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.CustomizedStepper.pending'
-                                        defaultMessage='The request is pending'
-                                    />
-                                </Typography>
-                            </Grid>
+                                {isUpdating && <CircularProgress size={20} />}
+                            </Button>
                         )}
-                    </Grid>
+                        {api.workflowStatus === 'CREATED' && (
+                            <Typography variant='caption' color='error'>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.CustomizedStepper.pending'
+                                    defaultMessage='The request is pending'
+                                />
+                            </Typography>
+                        )}
+                    </>
                 );
         }
     }
@@ -385,8 +431,10 @@ export default function CustomizedSteppers() {
         activeStep = 2;
     } else if (lifecycleState === 'Created') {
         activeStep = 1;
-    } else if (lifecycleState !== 'Created') {
+    } else if (lifecycleState !== 'Created' && deploymentsAvailable) {
         activeStep = 3;
+    } else if (lifecycleState !== 'Created' && !deploymentsAvailable) {
+        activeStep = 2;
     }
 
     const step2Class = activeStep > 1 ? classes.pointerMiddleCompleted : '';
@@ -477,8 +525,45 @@ export default function CustomizedSteppers() {
                 <Step className={classes.label}>
                     <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
                         <div className={`${classes.pointerEnd} ${step3Class}`}>
-                            <Box className={classes.box}>
-                                {finalLifecycleState(lifecycleState)}
+                            <Box p={2} borderLeft='0' borderRight='0'>
+                                <Grid className={classes.lifeCycleStateStyle}>
+                                    {finalLifecycleState(lifecycleState)}
+                                </Grid>
+                                <Tooltip
+                                    title={deploymentsAvailable ? '' : 'Deploy a revision of this API to the Gateway'}
+                                    placement='bottom'
+                                >
+                                    <Grid xs={12} className={classes.gridSmall}>
+                                        {deploymentsAvailable ? (
+                                            <CheckIcon className={classes.iconTrue} />
+                                        ) : (
+                                            <CloseIcon className={classes.iconFalse} />
+                                        )}
+                                        <Typography variant='h7'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.Deployments'
+                                                defaultMessage=' Deployments'
+                                            />
+                                        </Typography>
+                                        {((!isEndpointAvailable || !isTierAvailable)
+                                        || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED')
+                                            ? (
+                                                <LaunchIcon
+                                                    style={{ marginLeft: '5px' }}
+                                                    color='default'
+                                                    fontSize='small'
+                                                />
+                                            ) : (
+                                                <Link to={'/apis/' + api.id + '/deployments'}>
+                                                    <LaunchIcon
+                                                        style={{ marginLeft: '5px' }}
+                                                        color='primary'
+                                                        fontSize='small'
+                                                    />
+                                                </Link>
+                                            )}
+                                    </Grid>
+                                </Tooltip>
                             </Box>
                         </div>
                     </StepLabel>

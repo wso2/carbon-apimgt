@@ -75,6 +75,8 @@ public final class APIConstants {
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
+    public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
+
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
     public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
@@ -1030,6 +1032,7 @@ public final class APIConstants {
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
+    public static final String LC_CACHE_NAME = "lcCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
@@ -1720,6 +1723,7 @@ public final class APIConstants {
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
+    public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
@@ -2120,7 +2124,7 @@ public final class APIConstants {
 
     public static class RestApiConstants {
 
-        public static final String REST_API_DEFAULT_VERSION = "v1";
+        public static final String REST_API_DEFAULT_VERSION = "v2";
         public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
@@ -2398,6 +2402,7 @@ public final class APIConstants {
         SUBSCRIPTIONS_DELETE,
         DEPLOY_API_IN_GATEWAY,
         REMOVE_API_FROM_GATEWAY,
+        REMOVE_APPLICATION_KEYMAPPING,
         SCOPE_CREATE,
         SCOPE_UPDATE,
         SCOPE_DELETE
@@ -2475,4 +2480,17 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+
+    public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
+    public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
+
+    // Constants related to Service Catalog
+    public static final String METADATA_FILE_NAME = "metadata";
+    public static final String METADATA_FILE = "metadata.yaml";
+    public static final String DEFINITION_FILE = "oas.yaml";
+    public static final String KEY_SEPARATOR = "-";
+    public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
+    public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
+    public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
+    public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
 }

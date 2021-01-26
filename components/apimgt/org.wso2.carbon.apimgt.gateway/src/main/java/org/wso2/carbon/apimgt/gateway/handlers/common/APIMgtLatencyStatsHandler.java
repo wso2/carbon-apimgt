@@ -45,6 +45,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);
         org.apache.axis2.context.MessageContext axis2MsgContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 

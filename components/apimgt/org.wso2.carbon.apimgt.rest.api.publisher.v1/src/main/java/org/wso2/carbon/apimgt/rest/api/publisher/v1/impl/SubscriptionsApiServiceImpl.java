@@ -28,12 +28,14 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
@@ -62,7 +64,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifMatch If-Match header value
      * @return 200 response and the updated subscription if subscription block is successful
      */
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
+    public Response blockSubscription(String subscriptionId, String blockState, String ifMatch,
                                                        MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -151,7 +153,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted subscriptions
      */
-    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query,
+    public Response getSubscriptions(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query,
             MessageContext messageContext) {
         // pre-processing
         // setting default limit and offset if they are null
@@ -166,7 +168,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             List<SubscribedAPI> apiUsages;
 
             if (apiId != null) {
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                APIIdentifier apiIdentifier;
+                APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
+                if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                } else {
+                    apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                }
                 apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
@@ -209,7 +217,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return monetization usage data for a subscription
      */
     @Override
-    public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) {
+    public Response getSubscriptionUsage(String subscriptionId, MessageContext messageContext) {
 
         if (StringUtils.isBlank(subscriptionId)) {
             String errorMessage = "Subscription ID cannot be empty or null when getting monetization usage.";
@@ -244,7 +252,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifMatch If-Match header value
      * @return 200 response and the updated subscription if subscription block is successful
      */
-    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
+    public Response unBlockSubscription(String subscriptionId, String ifMatch,
             MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -308,7 +316,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsSubscriptionIdSubscriberInfoGet(String subscriptionId, MessageContext messageContext)
+    public Response getSubscriberInfoBySubscriptionId(String subscriptionId, MessageContext messageContext)
             throws APIManagementException {
         if (StringUtils.isBlank(subscriptionId)) {
             String errorMessage = "Subscription ID cannot be empty or null when getting subscriber info.";

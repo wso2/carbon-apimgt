@@ -20,7 +20,7 @@ import SwaggerClient from 'swagger-client';
 // Parse the swagger definition in the worker thread and
 // pass the parsed plain JS object to main thread via postMessage
 SwaggerClient.resolve({
-    url: '/api/am/publisher/v1/swagger.yaml',
+    url: '/api/am/publisher/v2/swagger.yaml',
     requestInterceptor: (request) => {
         request.headers.Accept = 'text/yaml';
     },

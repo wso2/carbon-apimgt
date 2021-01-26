@@ -328,7 +328,7 @@ class CreateScope extends React.Component {
         const {
             intl, api, history, updateAPI,
         } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -386,7 +386,7 @@ class CreateScope extends React.Component {
      */
     render() {
         const { classes, api } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/scopes`;
         const {
             roleValidity, validRoles, invalidRoles, scopeAddDisabled,
@@ -560,6 +560,7 @@ class CreateScope extends React.Component {
                                             || this.state.valid.name.invalid
                                             || invalidRoles.length !== 0
                                             || scopeAddDisabled
+                                            || api.isRevision
                                             || this.state.valid.description.invalid
                                         }
                                         className={classes.saveButton}
