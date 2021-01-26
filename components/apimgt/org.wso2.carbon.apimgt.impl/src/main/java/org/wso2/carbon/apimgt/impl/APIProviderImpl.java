@@ -253,6 +253,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants.WF_TYPE_AM_API_STATE;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -1751,7 +1752,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
-
         validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = existingAPI;

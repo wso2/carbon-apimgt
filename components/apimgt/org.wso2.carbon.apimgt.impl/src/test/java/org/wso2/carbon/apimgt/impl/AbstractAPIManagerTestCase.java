@@ -123,7 +123,7 @@ import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 @RunWith (PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, MultitenantUtils.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class,
         GovernanceUtils.class, PaginationContext.class, IOUtils.class, AXIOMUtil.class, RegistryUtils.class,
-        AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class })
+        AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class, OrganizationDTO.class })
 public class AbstractAPIManagerTestCase {
 
     public static final String SAMPLE_API_NAME = "test";
@@ -145,6 +145,7 @@ public class AbstractAPIManagerTestCase {
     private GraphQLSchemaDefinition graphQLSchemaDefinition;
     private KeyManager keyManager;
     private APIPersistence apiPersistenceInstance;
+    private OrganizationDTO organizationDTO;
 
     @Before
     public void init() {
@@ -162,6 +163,7 @@ public class AbstractAPIManagerTestCase {
         genericArtifactManager = Mockito.mock(GenericArtifactManager.class);
         registryService = Mockito.mock(RegistryService.class);
         tenantManager = Mockito.mock(TenantManager.class);
+        organizationDTO = Mockito.mock(OrganizationDTO.class);
         graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
         keyManager = Mockito.mock(KeyManager.class);
         apiPersistenceInstance = Mockito.mock(APIPersistence.class);
@@ -197,17 +199,18 @@ public class AbstractAPIManagerTestCase {
                 }
 
                 @Override
-                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end) throws APIManagementException {
+                public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end) {
                     return null;
                 }
 
                 @Override
-                public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end) throws APIManagementException {
+                public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start,
+                                                                  int end) {
                     return null;
                 }
 
                 @Override
-                public API getAPIbyUUID(String uuid, String orgId) throws APIManagementException {
+                public API getAPIbyUUID(String uuid, OrganizationDTO organizationDTO) {
                     return null;
                 }
 
@@ -334,11 +337,16 @@ public class AbstractAPIManagerTestCase {
     @Test
     public void testGetAPIbyUUID()
             throws APIManagementException, GovernanceException, org.wso2.carbon.user.api.UserStoreException {
+
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getOrganizationDTOFromTenantDomain(Mockito.anyString())).thenReturn(organizationDTO);
+        OrganizationDTO organizationDTOTest = APIUtil.getOrganizationDTOFromTenantDomain("test");
+        Mockito.when(organizationDTO.getRequestedTenantDomain()).thenThrow(APIManagementException.class).thenReturn("test");
         Mockito.when(tenantManager.getTenantId("test")).thenThrow(UserStoreException.class).thenReturn(-1234);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
                 tenantManager);
         try {
-            abstractAPIManager.getAPIbyUUID("1", "test");
+            abstractAPIManager.getAPIbyUUID("1", organizationDTOTest);
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Failed to get API"));
         }
@@ -346,23 +354,25 @@ public class AbstractAPIManagerTestCase {
         GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
                 "sample");
         Mockito.when(genericArtifact.getPath()).thenReturn("test");
-        PowerMockito.mockStatic(APIUtil.class);
+
         Mockito.when(genericArtifactManager.getGenericArtifact("1")).thenThrow(RegistryException.class)
                 .thenReturn(null, genericArtifact);
 
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(SAMPLE_TENANT_DOMAIN);
         try {
-            abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN);
+            abstractAPIManager.getAPIbyUUID("1", organizationDTO);
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Failed to get API"));
         }
         try {
-            abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN);
+            abstractAPIManager.getAPIbyUUID("1", organizationDTO);
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("API artifact corresponding to artifactId"));
         }
-        API api = abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN);
+        API api = abstractAPIManager.getAPIbyUUID("1", organizationDTO);
         Assert.assertNotNull(api);
-        API api1 = abstractAPIManager.getAPIbyUUID("1", SAMPLE_TENANT_DOMAIN_1);
+        OrganizationDTO organizationDTO_1 = APIUtil.getOrganizationDTOFromTenantDomain(SAMPLE_TENANT_DOMAIN_1);
+        API api1 = abstractAPIManager.getAPIbyUUID("1", organizationDTO_1);
         Assert.assertNotNull(api1);
         Assert.assertEquals(api1.getId().getApiName(),SAMPLE_API_NAME);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
@@ -1115,8 +1125,8 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(apiMgtDAO.isApiNameExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false, true);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, null));
-        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME, null));
+        Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
+        Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
 
     }
 

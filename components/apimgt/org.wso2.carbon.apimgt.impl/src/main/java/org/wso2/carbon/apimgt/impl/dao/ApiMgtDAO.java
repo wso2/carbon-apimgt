@@ -9911,6 +9911,47 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Check the given api name is already available in the api table under given Organization
+     *
+     * @param apiName         candidate api name
+     * @param oraganizationId UUID of the oragnization
+     * @return true if the name is already available
+     * @throws APIManagementException
+     */
+    public boolean isApiNameExistInOrganization(String apiName, String organizationId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String contextParam = "/t/";
+
+        String query = SQLConstants.GET_API_NAME_MATCHING_ORGANIZATION;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiName);
+            prepStmt.setString(2, organizationId);
+            resultSet = prepStmt.executeQuery();
+
+            int apiCount = 0;
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    apiCount = resultSet.getInt("API_COUNT");
+                }
+            }
+            if (apiCount > 0) {
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check api Name availability : " + apiName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return false;
+    }
+
+    /**
      * Check the given api name is already available in the api table under given tenant domain
      *
      * @param apiName      candidate api name

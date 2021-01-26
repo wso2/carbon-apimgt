@@ -2688,15 +2688,19 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("The query should not be empty", log);
         }
         try {
-            String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             if (query.contains(":")) {
                 String[] queryTokens = query.split(":");
                 switch (queryTokens[0]) {
                     case "name":
-                        isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1], orgId) ||
-                                apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                        if (organizationId != null ) {
+                            isSearchArtifactExists = apiProvider.isApiNameExistInOrganization(queryTokens[1], organizationId) ||
+                                    apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                        } else {
+                            isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1]) ||
+                                    apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                        }
                         break;
                     case "context":
                     default: // API version validation.
@@ -2705,8 +2709,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
 
             } else { // consider the query as api name
-                isSearchArtifactExists = apiProvider.isApiNameExist(query, orgId) ||
-                        apiProvider.isApiNameWithDifferentCaseExist(query);
+                if (organizationId != null) {
+                    isSearchArtifactExists = apiProvider.isApiNameExistInOrganization(query, organizationId) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(query);
+                } else {
+                    isSearchArtifactExists = apiProvider.isApiNameExist(query) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(query);
+                }
             }
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);

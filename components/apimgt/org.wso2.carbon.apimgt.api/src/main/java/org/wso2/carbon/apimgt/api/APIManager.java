@@ -151,11 +151,19 @@ public interface APIManager {
      * Checks whether the given API name is already registered in the system
      *
      * @param apiName A String representing an API name
-     * @param orgId  Identifier of an organization
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the api name availability
      */
-    boolean isApiNameExist(String apiName, String orgId) throws APIManagementException;
+    boolean isApiNameExist(String apiName) throws APIManagementException;
+
+    /**
+     * Checks whether the given API name is already registered in the system
+     *
+     * @param apiName A String representing an API name
+     * @return true if the api name already exists and false otherwise
+     * @throws APIManagementException if failed to check the api name availability
+     */
+    boolean isApiNameExistInOrganization(String apiName, String organizationId) throws APIManagementException;
 
     /**
      * Checks whether a different letter case of the given API name is already registered in the system

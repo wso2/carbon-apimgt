@@ -62,7 +62,7 @@ import java.util.Set;
 
 public class APIMappingUtil {
 
-    public static APIDTO fromAPItoDTO(API model, String orgId) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, OrganizationDTO organizationDTO) throws APIManagementException {
 
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
@@ -117,7 +117,7 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), orgId);
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), organizationDTO.getOrgId());
             }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
@@ -146,6 +146,10 @@ public class APIMappingUtil {
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
         int tenantId = 0;
+        String tenantDomain = organizationDTO.getRequestedTenantDomain();
+        if (!StringUtils.isBlank(tenantDomain)) {
+            tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        }
         Set<String> deniedTiers = apiConsumer.getDeniedTiers(tenantId);
         for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
             if (!deniedTiers.contains(currentTier.getName())) {
@@ -181,8 +185,6 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
 
         dto.setIngressURLs(extractIngressURLs(model));
@@ -247,7 +249,7 @@ public class APIMappingUtil {
         return dto;
     }
 
-    public static APIDTO fromAPItoDTO(APIProduct model, String orgId) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(APIProduct model, String tenantDomain) throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getName());
@@ -283,7 +285,7 @@ public class APIMappingUtil {
             if (model.getDefinition() != null) {
                 apiSwaggerDefinition = model.getDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), orgId);
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
@@ -297,6 +299,9 @@ public class APIMappingUtil {
         List<APITiersDTO> tiersToReturn = new ArrayList<>();
 
         int tenantId = 0;
+        if (!StringUtils.isBlank(tenantDomain)) {
+            tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        }
 
         //set the monetization status of this API (enabled or disabled)
         APIMonetizationInfoDTO monetizationInfoDTO = new APIMonetizationInfoDTO();
@@ -366,8 +371,6 @@ public class APIMappingUtil {
         dto.setScopes(new ArrayList<>(uniqueScopes.values()));
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
@@ -420,11 +423,11 @@ public class APIMappingUtil {
     }
 
 
-    public static APIDTO fromAPItoDTO(ApiTypeWrapper model, String orgId) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(ApiTypeWrapper model, OrganizationDTO organizationDTO) throws APIManagementException {
         if (model.isAPIProduct()) {
-            return fromAPItoDTO(model.getApiProduct(), orgId);
+            return fromAPItoDTO(model.getApiProduct(), organizationDTO.getRequestedTenantDomain());
         } else {
-            return fromAPItoDTO(model.getApi(), orgId);
+            return fromAPItoDTO(model.getApi(), organizationDTO);
         }
     }
 

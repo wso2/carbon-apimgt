@@ -1658,14 +1658,16 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isScopeKeyAssignedLocally(apiIdentifier, scopeKey, tenantId);
     }
 
-    public boolean isApiNameExist(String apiName, String orgId) throws APIManagementException {
-        if (orgId == null) {
-            orgId = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                orgId = tenantDomain;
-            }
+    public boolean isApiNameExist(String apiName) throws APIManagementException {
+        String tenantName = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            tenantName = tenantDomain;
         }
-        return apiMgtDAO.isApiNameExist(apiName, orgId);
+        return apiMgtDAO.isApiNameExist(apiName, tenantName);
+    }
+
+    public boolean isApiNameExistInOrganization(String apiName, String organizationId) throws APIManagementException {
+        return apiMgtDAO.isApiNameExistInOrganization(apiName, organizationId);
     }
 
 

@@ -398,7 +398,7 @@ public class RestApiCommonUtil {
      * @param tenantDomain   TenantDomain which the API belongs to
      * @return tenantDomain or OrganizationUUID
      */
-    public static String getOrgIdMatchestenantDomain(String organizationId, String tenantDomain)
+    public static String getOrgIdMatchesTenantDomain(String organizationId, String tenantDomain)
             throws UserStoreException, APIManagementException {
         if (organizationId != null) {
             return organizationId;
@@ -412,6 +412,24 @@ public class RestApiCommonUtil {
             } else {
                 return RestApiCommonUtil.getLoggedInUserTenantDomain();
             }
+        }
+    }
+
+    /**
+     * Getting the Requested tenantDomain
+     * @param tenantDomain   TenantDomain which the API belongs to
+     * @return tenantDomain or OrganizationUUID
+     */
+    public static String getTenantDomain(String tenantDomain)
+            throws UserStoreException, APIManagementException {
+        if (tenantDomain != null) {
+            if (!APIUtil.isTenantAvailable(tenantDomain)) {
+                String errorMessage = "Provided tenant domain '" + tenantDomain + "' is invalid";
+                throw new APIManagementException(errorMessage);
+            }
+            return tenantDomain;
+        } else {
+            return RestApiCommonUtil.getLoggedInUserTenantDomain();
         }
     }
 

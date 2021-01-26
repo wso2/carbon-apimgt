@@ -95,7 +95,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
-            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
+            String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
@@ -176,7 +176,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         APIConsumer apiConsumer;
 
         try {
-            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
+            String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
 
@@ -272,7 +272,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         APIConsumer apiConsumer;
 
         try {
-            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
+            String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
             String currentThrottlingPolicy = body.getThrottlingPolicy();
@@ -382,12 +382,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         List<SubscriptionDTO> subscriptions = new ArrayList<>();
         for (SubscriptionDTO subscriptionDTO : body) {
             try {
-                String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
+                String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
+                String tenantDomain = RestApiCommonUtil.getTenantDomain(xWSO2Tenant);
+                OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
                 APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
                 String applicationId = subscriptionDTO.getApplicationId();
-                OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
-                APIIdentifier apiIdentifier = APIMappingUtil
-                        .getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), organizationDTO);
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(subscriptionDTO.getApiId(), 
+                        organizationDTO);
 
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
@@ -411,7 +412,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscriptionDTO.getApiId(),
                         organizationDTO);
 
-                //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this
+                //Validation for allowed throt0596db81ae58531bccc31d803b83b0e17bf44681
+                // tling tiers and Tenant based validation for subscription. If failed this
                 // will throw an APIMgtAuthorizationFailedException with the reason as the message
                 RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper,
                         subscriptionDTO.getThrottlingPolicy());
@@ -468,7 +470,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, null);
+            String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, null);
             SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI, orgId);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
