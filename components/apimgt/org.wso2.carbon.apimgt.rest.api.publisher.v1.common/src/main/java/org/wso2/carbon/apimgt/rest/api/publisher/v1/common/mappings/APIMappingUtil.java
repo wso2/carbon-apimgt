@@ -2804,7 +2804,7 @@ public class APIMappingUtil {
     public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {
         APIRevisionDTO apiRevisionDTO = new APIRevisionDTO();
         apiRevisionDTO.setId(model.getRevisionUUID());
-        String key = "REVISION " + model.getId();
+        String key = "Revision " + model.getId();
         apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
