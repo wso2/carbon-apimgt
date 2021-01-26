@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
@@ -68,12 +69,16 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     }
 
     public Response deleteService(String serviceId, MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        try {
+            serviceCatalog.deleteService(serviceId, tenantId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting the service with key " + serviceId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     public Response exportService(String name, String version, MessageContext messageContext) {
@@ -162,7 +167,6 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
             HashMap<String, ServiceEntry> serviceEntries = new HashMap<>();
             for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
                 String key = entry.getKey();
-                catalogEntries.get(key).setMd5(newResourcesHash.get(key));
                 try {
                     if (ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
                         serviceCatalog.updateService(catalogEntries.get(key), tenantId, userName);

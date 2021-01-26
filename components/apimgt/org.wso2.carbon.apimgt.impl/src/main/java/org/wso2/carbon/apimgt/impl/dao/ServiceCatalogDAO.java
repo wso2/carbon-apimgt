@@ -32,6 +32,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+/**
+ * This class represent the ServiceCatalogDAO.
+ */
 public class ServiceCatalogDAO {
 
     private static final Log log = LogFactory.getLog(ServiceCatalogDAO.class);
@@ -65,7 +68,7 @@ public class ServiceCatalogDAO {
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceCatalog(ServiceEntry serviceEntry, int tenantID, String uuid, String userName)
+    public String addServiceEntry(ServiceEntry serviceEntry, int tenantID, String uuid, String userName)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -167,7 +170,7 @@ public class ServiceCatalogDAO {
      *
      * @param serviceEntry EndPoint related information
      * @return uuid
-     * throws APIManagementException if failed to create service catalog
+     * throws APIManagementException if failed to update service catalog
      */
     public String addEndPointDefinition(ServiceEntry serviceEntry, String uuid) throws APIManagementException {
 
@@ -197,6 +200,14 @@ public class ServiceCatalogDAO {
         return uuid;
     }
 
+    /**
+     * Update MD5 hash value of existing ServiceEntry object
+     *
+     * @param serviceInfo  ServiceEntry object
+     * @param tenantId     ID of the owner's tenant
+     * @return ServiceEntry
+     * throws APIManagementException if failed
+     */
     public ServiceEntry getMd5Hash(ServiceEntry serviceInfo, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -228,6 +239,14 @@ public class ServiceCatalogDAO {
         return serviceInfo;
     }
 
+    /**
+     * Get MD5 hash value of a service
+     *
+     * @param key          Service key of service
+     * @param tenantId     ID of the owner's tenant
+     * @return String key
+     * throws APIManagementException if failed
+     */
     public String getMd5HashByKey(String key, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -259,7 +278,15 @@ public class ServiceCatalogDAO {
         return md5;
     }
 
-    public ServiceEntry getCatalogResourcesByKey(String key, int tenantId) throws APIManagementException {
+    /**
+     * Get service resources by service key
+     *
+     * @param key          Service key of service
+     * @param tenantId     ID of the owner's tenant
+     * @return ServiceEntry
+     * throws APIManagementException if failed to retrieve
+     */
+    public ServiceEntry getServiceResourcesByKey(String key, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -293,6 +320,14 @@ public class ServiceCatalogDAO {
         return null;
     }
 
+    /**
+     * Get service information by service key
+     *
+     * @param key          Service key of service
+     * @param tenantId     ID of the owner's tenant
+     * @return ServiceEntry
+     * throws APIManagementException if failed to retrieve
+     */
     public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -337,14 +372,23 @@ public class ServiceCatalogDAO {
                     handleException("Failed to rollback getting service by service key", ex);
                 }
             }
-            handleException("Error while executing SQL for getting User MD5 hash : SQL " + sqlQuery, e);
+            handleException("Error while executing SQL for getting service information : SQL " + sqlQuery, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return null;
     }
 
-    public ServiceEntry getCatalogResourcesByNameAndVersion(String name, String version, int tenantId)
+    /**
+     * Get service information by name and version
+     *
+     * @param name          Service name
+     * @param version       Service version
+     * @param tenantId     ID of the owner's tenant
+     * @return ServiceEntry
+     * throws APIManagementException if failed to retrieve
+     */
+    public ServiceEntry getServiceByNameAndVersion(String name, String version, int tenantId)
             throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -378,5 +422,30 @@ public class ServiceCatalogDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return null;
+    }
+
+    /**
+     * Delete service by service key
+     *
+     * @param serviceKey   Service key
+     * @param tenantId     ID of the owner's tenant
+     * throws APIManagementException if failed to delete
+     */
+    public void deleteService (String serviceKey, int tenantId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.ServiceCatalogConstants.DELETE_SERVICE)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, serviceKey);
+                statement.setInt(2, tenantId);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);
+        }
     }
 }

@@ -58,12 +58,13 @@ public interface ServiceCatalogApi {
             throws APIManagementException;
 
     /**
-     * Deletes an Service Catalog
+     * Deletes a Service from Catalog
      *
-     * @param serviceCatalogUuid ServiceCatalog Identifier(UUID)
+     * @param serviceKey Service key
+     *
      * @throws APIManagementException if failed to delete the Service Catalog
      */
-    void deleteService(String serviceCatalogUuid) throws APIManagementException;
+    void deleteService(String serviceKey, int tenantId) throws APIManagementException;
 
     /**
      * Returns details of all Service Catalogs belong to a given tenant

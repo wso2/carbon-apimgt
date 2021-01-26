@@ -31,7 +31,7 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     @Override
     public String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
         String uuid = UUID.randomUUID().toString();
-        ServiceCatalogDAO.getInstance().addServiceCatalog(serviceEntry, tenantId, uuid, user);
+        ServiceCatalogDAO.getInstance().addServiceEntry(serviceEntry, tenantId, uuid, user);
         return uuid;
     }
 
@@ -46,8 +46,8 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     }
 
     @Override
-    public void deleteService(String serviceCatalogUuid) throws APIManagementException {
-
+    public void deleteService(String serviceKey, int tenantId) throws APIManagementException {
+        ServiceCatalogDAO.getInstance().deleteService(serviceKey, tenantId);
     }
 
     @Override
@@ -57,7 +57,6 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
 
     @Override
     public String addEndPointDefinition(ServiceEntry serviceEntry, String uuid) throws APIManagementException {
-
         return ServiceCatalogDAO.getInstance().addEndPointDefinition(serviceEntry, uuid);
     }
 
@@ -73,7 +72,7 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
 
     @Override
     public ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().getCatalogResourcesByKey(key, tenantId);
+        return ServiceCatalogDAO.getInstance().getServiceResourcesByKey(key, tenantId);
     }
 
     @Override
@@ -84,6 +83,6 @@ public class ServiceCatalogImpl implements ServiceCatalogApi {
     @Override
     public ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId)
             throws APIManagementException {
-        return ServiceCatalogDAO.getInstance().getCatalogResourcesByNameAndVersion(name, version, tenantId);
+        return ServiceCatalogDAO.getInstance().getServiceByNameAndVersion(name, version, tenantId);
     }
 }
