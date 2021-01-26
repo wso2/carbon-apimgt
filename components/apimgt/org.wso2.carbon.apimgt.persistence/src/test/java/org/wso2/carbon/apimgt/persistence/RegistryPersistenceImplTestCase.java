@@ -15,33 +15,49 @@
  */
 package org.wso2.carbon.apimgt.persistence;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.utils.PersistenceHelper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.ResourceImpl;
+import org.wso2.carbon.registry.core.Tag;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+
+import junit.framework.Assert;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ CarbonContext.class, RegistryPersistenceUtil.class, ServiceReferenceHolder.class,
@@ -53,8 +69,21 @@ public class RegistryPersistenceImplTestCase {
     private final String TENANT_DOMAIN = "wso2.com";
 
     @Before
-    public void setupClass() {
+    public void setupClass() throws UserStoreException {
         System.setProperty("carbon.home", "");
+        ServiceReferenceHolder serviceRefHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceRefHolder);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        PowerMockito.when(serviceRefHolder.getRealmService()).thenReturn(realmService);
+
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        PowerMockito.when(tenantManager.getTenantId(SUPER_TENANT_DOMAIN)).thenReturn(SUPER_TENANT_ID);
+        
+        PowerMockito.mockStatic(CarbonContext.class);
+        CarbonContext context = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(context);
     }
 
     @Test
@@ -242,5 +271,206 @@ public class RegistryPersistenceImplTestCase {
         // check whether super tenant's system registy is accessed
         Mockito.verify(registryService, times(1)).getGovernanceSystemRegistry((SUPER_TENANT_ID));
 
+    }
+    
+    @Test
+    public void testGetPublisherAPI() throws Exception {
+
+        Registry registry = Mockito.mock(Registry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[1];
+        Tag tag = new Tag();
+        tag.setTagName("testTag");
+        tags[0] = tag;
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, apiUUID);
+        Assert.assertEquals("API UUID does not match", apiUUID, publisherAPI.getId());
+    }
+    
+    @Test
+    public void testGetDevPortalAPI() throws Exception {
+
+        Registry registry = Mockito.mock(Registry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[1];
+        Tag tag = new Tag();
+        tag.setTagName("testTag");
+        tags[0] = tag;
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        DevPortalAPI devAPI = apiPersistenceInstance.getDevPortalAPI(org, apiUUID);
+        Assert.assertEquals("API UUID does not match", apiUUID, devAPI.getId());
+    }
+    
+    @Test
+    public void testGetPublisherAPIProduct() throws Exception {
+
+        Registry registry = Mockito.mock(Registry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[1];
+        Tag tag = new Tag();
+        tag.setTagName("testTag");
+        tags[0] = tag;
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIProductArtifact();
+        String apiProductId = artifact.getId();
+        
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        PublisherAPIProduct productAPI = apiPersistenceInstance.getPublisherAPIProduct(org, apiProductId);
+        Assert.assertEquals("API Product UUID does not match", apiProductId, productAPI.getId());
+    }
+    
+    @Test
+    public void testThumbnailTasks() throws Exception {
+
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
+        String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+
+        Mockito.when(registry.resourceExists(thumbPath)).thenReturn(true);
+        Resource imageResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(thumbPath)).thenReturn(imageResource);
+        
+        apiPersistenceInstance.getThumbnail(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(thumbPath);
+        
+        apiPersistenceInstance.deleteThumbnail(org, apiUUID);
+        Mockito.verify(registry, times(1)).delete(thumbPath);
+
+    }
+    
+    @Test
+    public void testGetWSDL() throws Exception {
+        
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
+        
+        String wsdlResourcePath = artifactPath + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+
+        Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(true);
+        Resource wsdlResource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(wsdlResourcePath)).thenReturn(wsdlResource);
+        
+        apiPersistenceInstance.getWSDL(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(wsdlResourcePath);
+        
+        // WSDL zip test
+        String wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION
+                + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
+        Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(false);
+        Mockito.when(registry.resourceExists(wsdlResourcePathOld)).thenReturn(false);
+        //zip location
+        wsdlResourcePath = artifactPath + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiProviderName
+                + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion + APIConstants.ZIP_FILE_EXTENSION;
+        Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(true);
+        Mockito.when(registry.get(wsdlResourcePath)).thenReturn(wsdlResource);
+        apiPersistenceInstance.getWSDL(org, apiUUID);
+        Mockito.verify(registry, times(1)).get(wsdlResourcePath);
+        
+    }
+    
+    @Test
+    public void testGetGraphQLSchema() throws GraphQLPersistenceException, RegistryException {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        
+        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR;
+        String schemaName = apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + apiName
+                + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String schemaResourePath = path + schemaName;
+        
+        String schema = "{\n" + 
+                        "  hero {\n" + 
+                        "    name\n" + 
+                        "    friends {\n" + 
+                        "      name\n" + 
+                        "    }\n" + 
+                        "  }\n" + 
+                        "}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(schemaResourePath)).thenReturn(true);
+        Resource oasResource = new ResourceImpl();
+        oasResource.setContent(schema.getBytes());
+        Mockito.when(registry.get(schemaResourePath)).thenReturn(oasResource);
+        
+        String def = apiPersistenceInstance.getGraphQLSchema(org, apiUUID);
+        Assert.assertEquals("API graphql schema does not match", schema, def);
+    }
+    
+    @Test
+    public void testGetOASDefinition() throws OASPersistenceException, RegistryException {
+        Registry registry = Mockito.mock(Registry.class);
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = artifact.getId();
+        
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
+                + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+                + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+        
+        String definition = "{\"swagger\":\"2.0\",\"info\":{\"description\":\"This is a sample server Petstore server\"}}";
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        Mockito.when(registry.resourceExists(definitionPath)).thenReturn(true);
+        Resource oasResource = new ResourceImpl();
+        oasResource.setContent(definition.getBytes());
+        Mockito.when(registry.get(definitionPath)).thenReturn(oasResource);
+        
+        String def = apiPersistenceInstance.getOASDefinition(org, apiUUID);
+        Assert.assertEquals("API oas definition does not match", definition, def);
+        
     }
 }
