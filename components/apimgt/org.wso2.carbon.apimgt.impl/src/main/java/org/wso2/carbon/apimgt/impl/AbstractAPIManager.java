@@ -87,6 +87,8 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
@@ -376,46 +378,24 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<API> getAllAPIs() throws APIManagementException {
         List<API> apiSortedList = new ArrayList<API>();
-        boolean isTenantFlowStarted = false;
+
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(username);
+        Map<String, Object> properties = APIUtil.getUserProperties(username);
+        UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                startTenantFlow(tenantDomain);
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
-            for (GenericArtifact artifact : artifacts) {
-                API api = null;
-                try {
-                    api = APIUtil.getAPI(artifact);
-                    if (api != null) {
-                        try {
-                            checkAccessControlPermission(api.getId());
-                        } catch (APIManagementException e) {
-                            // This is a second level of filter to get apis based on access control and visibility.
-                            // Hence log is set as debug and continued.
-                            if(log.isDebugEnabled()) {
-                                log.debug("User is not authorized to view the api " + api.getId().getApiName(), e);
-                            }
-                            continue;
-                        }
-                    }
-                } catch (APIManagementException e) {
-                    //log and continue since we want to load the rest of the APIs.
-                    log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
-                }
-                if (api != null) {
-                    apiSortedList.add(api);
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
+                    Integer.MAX_VALUE, userCtx);
+
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    apiSortedList.add(mappedAPI);
                 }
             }
-        } catch (RegistryException e) {
-            String msg = "Failed to get APIs from the registry";
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
         }
 
         Collections.sort(apiSortedList, new APINameComparator());
