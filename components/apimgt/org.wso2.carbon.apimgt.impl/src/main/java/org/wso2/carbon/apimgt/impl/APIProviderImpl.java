@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
+import kotlin.jvm.Throws;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -90,6 +93,7 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -209,6 +213,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -995,6 +1000,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
+        String serviceId = api.getServiceInfo("serviceId");
+        if (StringUtils.isNotEmpty(serviceId)) {
+            apiMgtDAO.addAPIServiceMapping(api.getUuid(), serviceId, api.getServiceInfo("md5"), null);
+        }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -8227,6 +8236,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
+    }
+
+    @Override
+    public ServiceEntry retrieveServiceByID(String serviceId, int tenantId) throws APIManagementException {
+        ServiceEntry service = apiMgtDAO.retrieveServiceById(serviceId, tenantId);
+        if (service == null) {
+            String msg = "Failed to fetch the Service Info. Service with id " + serviceId + " does not exist";
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+        return service;
     }
 
     private void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {

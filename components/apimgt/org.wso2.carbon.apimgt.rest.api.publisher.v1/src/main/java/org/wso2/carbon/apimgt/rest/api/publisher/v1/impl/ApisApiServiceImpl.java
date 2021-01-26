@@ -38,7 +38,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,6 +88,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -131,6 +131,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
@@ -154,7 +155,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -168,8 +168,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.BufferedReader;
@@ -2632,8 +2630,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
                 // Validate and retrieve the OpenAPI definition
-                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream,
-                        fileDetail, true);
+                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail,
+                        true);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
                 if (!validationResponse.isValid()) {
@@ -2983,7 +2981,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
-
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
 
@@ -3064,7 +3061,6 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException if error occurred during validation of the WSDL
      */
     private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
-        handleInvalidParams(fileInputStream, fileDetail, url);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
 
@@ -3444,7 +3440,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion,
-                                    MessageContext messageContext) {
+                                        String serviceVersion, MessageContext messageContext) {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
         try {
@@ -4157,4 +4153,71 @@ public class ApisApiServiceImpl implements ApisApiService {
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
     }
+
+    @Override
+    public Response importServiceFromCatalog(String serviceId, APIPropertiesDTO apIPropertiesDTO,
+                                             MessageContext messageContext) throws APIManagementException {
+        if (StringUtils.isEmpty(serviceId)) {
+            RestApiUtil.handleBadRequest("Required parameter serviceId is missing", log);
+        }
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
+            int tenantId = APIUtil.getTenantId(userName);
+            ServiceEntry service = apiProvider.retrieveServiceByID(serviceId, tenantId);
+            if ("OAS3".equals(service.getDefType()) || "OAS2".equals(service.getDefType())) {
+                String openAPIContent = IOUtils.toString(service.getEndpointDef(), RestApiConstants.CHARSET);
+                APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent,
+                        true);
+                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIFromAPIPropertiesDTO(apIPropertiesDTO, apiProvider,
+                        RestApiCommonUtil.getLoggedInUsername(), service);
+                APIDefinition apiDefinition = validationResponse.getParser();
+                SwaggerData swaggerData;
+                String definitionToAdd = validationResponse.getJsonContent();
+                definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+                Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
+                apiToAdd.setUriTemplates(uriTemplates);
+                apiToAdd.setScopes(scopes);
+                //Set extensions from API definition to API object
+                apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
+                PublisherCommonUtils.validateScopes(apiToAdd);
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition
+                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+                apiToAdd.setSwaggerDefinition(definitionToAdd);
+                API addedAPI = apiProvider.addAPI(apiToAdd);
+                addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
+                APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
+                // This URI used to set the location header of the POST response
+                URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+                return Response.created(createdApiUri).entity(createdApiDTO).build();
+            } else {
+                RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot create API " +
+                        "using the service type " + service.getDefType(), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            } else {
+                String errorMessage = "Error while fetching Service with Id : " + serviceId + " from Service Catalog";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while creating API using service with Id " +
+                    serviceId, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location : " + apIPropertiesDTO.getName() + "-"
+                    + apIPropertiesDTO.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response reimportServiceFromCatalog(String apiId, MessageContext messageContext)
+            throws APIManagementException {
+        return null;
+    }
+
 }
