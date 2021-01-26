@@ -88,6 +88,11 @@ class SampleAPI extends Component {
      */
     handleDeploySample() {
         const { intl } = this.props;
+        const restApi = new API();
+        let settings;
+        restApi.getSettings().then((response) => {
+            settings = response;
+        });
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
@@ -100,6 +105,53 @@ class SampleAPI extends Component {
         });
         if (!AuthManager.isNotPublisher()) {
             swaggerUpdatePromise.then((sampleAPI) => {
+                const body = {
+                    description: 'Initial Revision',
+                };
+                restApi.createRevision(sampleAPI.id, body)
+                    .then((api1) => {
+                        const revisionId = api1.body.id;
+                        const envList = settings.environment.map((env) => env.name);
+                        const body1 = [];
+                        if (envList.length > 0) {
+                            body1.push({
+                                name: envList[0],
+                                displayOnDevportal: true,
+                            });
+                        }
+                        // for (let i = 0; i < envList.length; i++) {
+                        //     body1.push({
+                        //         name: envList[i],
+                        //         displayOnDevportal: true,
+                        //     });
+                        // }
+                        restApi.deployRevision(sampleAPI.id, revisionId, body1)
+                            .then(() => {
+                                Alert.info('API Revision Deployed Successfully');
+                            })
+                            .catch((error) => {
+                                if (error.response) {
+                                    Alert.error(error.response.body.description);
+                                } else {
+                                    const message = 'Something went wrong while deploying the API Revision';
+                                    Alert.error(intl.formatMessage({
+                                        id: 'Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision',
+                                        defaultMessage: message,
+                                    }));
+                                }
+                            });
+                    })
+                    .catch((error) => {
+                        if (error.response) {
+                            Alert.error(error.response.body.description);
+                        } else {
+                            const message = 'Something went wrong while creating the API Revision';
+                            Alert.error(intl.formatMessage({
+                                id: 'Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision',
+                                defaultMessage: message,
+                            }));
+                        }
+                    });
                 sampleAPI.publish()
                     .then(() => {
                         this.setState({ published: true, api: sampleAPI });

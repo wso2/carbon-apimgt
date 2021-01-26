@@ -436,7 +436,7 @@ class APIDefinition extends React.Component {
                                 size='small'
                                 className={classes.button}
                                 onClick={this.openEditor}
-                                disabled={isRestricted(['apim:api_create'], api)}
+                                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                             >
                                 <EditRounded className={classes.buttonIcon} />
                                 <FormattedMessage
