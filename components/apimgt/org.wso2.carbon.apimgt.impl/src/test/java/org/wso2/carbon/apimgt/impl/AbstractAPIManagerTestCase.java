@@ -339,9 +339,8 @@ public class AbstractAPIManagerTestCase {
             throws APIManagementException, GovernanceException, org.wso2.carbon.user.api.UserStoreException {
 
         PowerMockito.mockStatic(APIUtil.class);
-        Mockito.when(APIUtil.getOrganizationDTOFromTenantDomain(Mockito.anyString())).thenReturn(organizationDTO);
-        OrganizationDTO organizationDTOTest = APIUtil.getOrganizationDTOFromTenantDomain("test");
-        Mockito.when(organizationDTOTest.getRequestedTenantDomain()).thenThrow(APIManagementException.class).thenReturn("test");
+        OrganizationDTO organizationDTOTest = new OrganizationDTO("test");
+        organizationDTOTest.setRequestedTenantDomain("test");
         Mockito.when(tenantManager.getTenantId("test")).thenThrow(UserStoreException.class).thenReturn(-1234);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
                 tenantManager);
@@ -358,7 +357,8 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(genericArtifactManager.getGenericArtifact("1")).thenThrow(RegistryException.class)
                 .thenReturn(null, genericArtifact);
 
-        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(SAMPLE_TENANT_DOMAIN);
+        OrganizationDTO organizationDTO = new OrganizationDTO(SAMPLE_TENANT_DOMAIN);
+        organizationDTOTest.setRequestedTenantDomain(SAMPLE_TENANT_DOMAIN);
         try {
             abstractAPIManager.getAPIbyUUID("1", organizationDTO);
         } catch (APIManagementException e) {
@@ -371,12 +371,13 @@ public class AbstractAPIManagerTestCase {
         }
         API api = abstractAPIManager.getAPIbyUUID("1", organizationDTO);
         Assert.assertNotNull(api);
-        OrganizationDTO organizationDTO_1 = APIUtil.getOrganizationDTOFromTenantDomain(SAMPLE_TENANT_DOMAIN_1);
+        OrganizationDTO organizationDTO_1 = new OrganizationDTO(SAMPLE_TENANT_DOMAIN_1);
+        organizationDTO_1.setRequestedTenantDomain(SAMPLE_TENANT_DOMAIN_1);
         API api1 = abstractAPIManager.getAPIbyUUID("1", organizationDTO_1);
         Assert.assertNotNull(api1);
         Assert.assertEquals(api1.getId().getApiName(),SAMPLE_API_NAME);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(abstractAPIManager.getAPIbyUUID("1", null).getId().getApiName(),SAMPLE_API_NAME);
+        Assert.assertEquals(abstractAPIManager.getAPIbyUUID("1", organizationDTO_1).getId().getApiName(),SAMPLE_API_NAME);
     }
 
     @Test

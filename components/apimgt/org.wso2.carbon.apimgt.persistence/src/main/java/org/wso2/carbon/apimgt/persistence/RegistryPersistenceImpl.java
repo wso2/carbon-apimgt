@@ -3026,7 +3026,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean transactionCommitted = false;
         APIProduct apiProduct;
         try {
-            String tenantDomain = org.getName();
+            String tenantDomain = org.getOrgId();
             RegistryHolder holder = getRegistry(tenantDomain);
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
@@ -3121,7 +3121,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             throws APIPersistenceException {
         boolean tenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrgId());
             tenantFlowStarted  = holder.isTenantFlowStarted();
             Registry registry = holder.getRegistry();
 
@@ -3172,7 +3172,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery,
             int start, int offset, UserContext ctx) throws APIPersistenceException {
-        String requestedTenantDomain = org.getName();
+        String requestedTenantDomain = org.getOrgId();
         
         boolean isTenantFlowStarted = false;
         PublisherAPIProductSearchResult result = new PublisherAPIProductSearchResult();
@@ -3245,7 +3245,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException {
-        String requestedTenantDomain = org.getName();
+        String requestedTenantDomain = org.getOrgId();
         boolean isTenantFlowStarted = false;
         boolean transactionCommitted = false;
         APIProduct apiProduct;
@@ -3330,7 +3330,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         boolean tenantFlowStarted = false;
         try {
-            RegistryHolder holder = getRegistry(org.getName());
+            RegistryHolder holder = getRegistry(org.getOrgId());
             tenantFlowStarted = holder.isTenantFlowStarted();
             Registry registry = holder.getRegistry();
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
