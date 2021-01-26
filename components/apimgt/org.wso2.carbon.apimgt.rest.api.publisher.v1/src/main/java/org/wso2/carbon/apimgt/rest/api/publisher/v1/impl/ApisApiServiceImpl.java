@@ -1790,7 +1790,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, organizationDTO);
             apiProvider.deleteWorkflowTask(apiIdentifier);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -1838,13 +1840,15 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIIdentifier apiIdentifier;
         try {
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
-            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, organizationDTO);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Mediation mediation =
                     apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, orgId);
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
-                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, orgId);
+                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, organizationDTO);
                     oldAPI.setOrganizationId(orgId);// TODO do a deep copy
                     apiProvider.updateAPI(oldAPI, api);
                 }

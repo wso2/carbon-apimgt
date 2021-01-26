@@ -8099,9 +8099,6 @@ public class ApiMgtDAO {
         String uuid = null;
 
         String sql  = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier
-                .getProviderName()));
-        String orgId = tenantDomain;
         try(Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));

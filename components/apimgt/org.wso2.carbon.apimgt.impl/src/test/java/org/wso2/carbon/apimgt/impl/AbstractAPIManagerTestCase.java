@@ -341,7 +341,7 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         Mockito.when(APIUtil.getOrganizationDTOFromTenantDomain(Mockito.anyString())).thenReturn(organizationDTO);
         OrganizationDTO organizationDTOTest = APIUtil.getOrganizationDTOFromTenantDomain("test");
-        Mockito.when(organizationDTO.getRequestedTenantDomain()).thenThrow(APIManagementException.class).thenReturn("test");
+        Mockito.when(organizationDTOTest.getRequestedTenantDomain()).thenThrow(APIManagementException.class).thenReturn("test");
         Mockito.when(tenantManager.getTenantId("test")).thenThrow(UserStoreException.class).thenReturn(-1234);
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
                 tenantManager);
@@ -1128,6 +1128,15 @@ public class AbstractAPIManagerTestCase {
         Assert.assertFalse(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
         Assert.assertTrue(abstractAPIManager.isApiNameExist(SAMPLE_API_NAME));
 
+    }
+
+    @Test
+    public void testIsApiNameExistInOrganization() throws APIManagementException {
+        Mockito.when(apiMgtDAO.isApiNameExistInOrganization(Mockito.anyString(), Mockito.anyString())).thenReturn(false, true);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
+        Assert.assertFalse(abstractAPIManager.isApiNameExistInOrganization(SAMPLE_API_NAME, "1234"));
+        Assert.assertTrue(abstractAPIManager.isApiNameExistInOrganization(SAMPLE_API_NAME, "1234"));
     }
 
     @Test

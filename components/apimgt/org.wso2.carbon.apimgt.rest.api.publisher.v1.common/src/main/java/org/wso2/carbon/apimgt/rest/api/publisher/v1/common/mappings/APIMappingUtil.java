@@ -2583,20 +2583,18 @@ public class APIMappingUtil {
      * This method is used to retrieve APIIdentifier from the apiId or UUID
      *
      * @param apiId
-     * @param orgId
+     * @param organizationDTO
      */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String orgId)
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, OrganizationDTO organizationDTO)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        OrganizationDTO organizationDTO;
         if (RestApiCommonUtil.isUUID(apiId)) {
-            organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId,
-                    RestApiCommonUtil.getLoggedInUserTenantDomain());
             apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, organizationDTO).getId();
         } else {
-            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), orgId).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), organizationDTO.getOrgId())
+                    .getId();
         }
         return apiIdentifier;
     }
@@ -2640,19 +2638,17 @@ public class APIMappingUtil {
     /**
      * Returns the API given the uuid or the id in {provider}-{api}-{version} format
      *
-     * @param apiId        uuid or the id in {provider}-{api}-{version} format
-     * @param orgId        tenant domain of the API
+     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
+     * @param organizationDTO       OrganizationDTO object
      * @return API which represents the given id
      * @throws APIManagementException
      */
-    public static API getAPIFromApiIdOrUUID(String apiId, String orgId)
+    public static API getAPIFromApiIdOrUUID(String apiId, OrganizationDTO organizationDTO)
             throws APIManagementException {
 
         API api;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(requestedTenantDomain);
             api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);

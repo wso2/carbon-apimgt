@@ -68,7 +68,7 @@ public class SearchApiServiceImpl implements SearchApiService {
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
-            String orgId = RestApiCommonUtil.getOrgIdMatchestenantDomain(organizationId, xWSO2Tenant);
+            String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);

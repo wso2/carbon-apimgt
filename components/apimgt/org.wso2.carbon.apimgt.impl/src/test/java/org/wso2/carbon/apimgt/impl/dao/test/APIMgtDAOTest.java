@@ -807,13 +807,13 @@ public class APIMgtDAOTest {
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiNameAndOrganization",
                 "getAPIVersionsMatchingApiNameAndOrganization", "2.0.0");
         API api2 = new API(apiId2);
-        api.setOrganizationId(organizationId);
+        api2.setOrganizationId(organizationId);
         api2.setContext("/getAPIVersionsMatchingApiNameAndOrganization");
         api2.setContextTemplate("/getAPIVersionsMatchingApiNameAndOrganization/{version}");
         api2.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api2, -1234);
         List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiNameAndOrganization(
-                "getAPIVersionsMatchingApiName", organizationId);
+                "getAPIVersionsMatchingApiNameAndOrganization", organizationId);
         assertNotNull(versionList);
         assertTrue(versionList.contains("1.0.0"));
         assertTrue(versionList.contains("2.0.0"));

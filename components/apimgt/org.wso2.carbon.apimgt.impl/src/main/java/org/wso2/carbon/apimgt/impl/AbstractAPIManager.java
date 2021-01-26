@@ -570,7 +570,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * Get API or APIProduct by registry artifact id
      *
      * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param organizationDTO       OrganizationDTO Object
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
