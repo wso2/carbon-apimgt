@@ -1830,11 +1830,10 @@ public class APIGatewayManager {
      * @return failedEnvironmentsMap
      */
     private Map<String, String> deployAPIRevisionToGatewayEnvironment(Environment environment, API api,
-                                                               APITemplateBuilder builder,
-                                                               String tenantDomain, boolean isGatewayDefinedAsALabel,
-                                                               Set<String> publishedGateways,
-                                                               Map<String,String> failedGatewaysMap) {
-
+                                                                      APITemplateBuilder builder, String tenantDomain,
+                                                                      boolean isGatewayDefinedAsALabel,
+                                                                      Set<String> publishedGateways,
+                                                                      Map<String, String> failedGatewaysMap) {
         long startTime;
         long endTime;
         long startTimePublishToGateway = System.currentTimeMillis();
@@ -1951,8 +1950,7 @@ public class APIGatewayManager {
             }
         }
 
-        DeployAPIInGatewayEvent
-                deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+        DeployAPIInGatewayEvent deployAPIInGatewayEvent = new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
                 api.getUUID(), removedGateways, api.getContext(), api.getId().getVersion());
         APIUtil.sendNotification(deployAPIInGatewayEvent,

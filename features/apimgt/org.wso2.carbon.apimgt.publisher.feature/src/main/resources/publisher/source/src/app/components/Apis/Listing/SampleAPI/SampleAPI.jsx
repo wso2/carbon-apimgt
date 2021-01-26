@@ -119,12 +119,6 @@ class SampleAPI extends Component {
                                 displayOnDevportal: true,
                             });
                         }
-                        // for (let i = 0; i < envList.length; i++) {
-                        //     body1.push({
-                        //         name: envList[i],
-                        //         displayOnDevportal: true,
-                        //     });
-                        // }
                         restApi.deployRevision(sampleAPI.id, revisionId, body1)
                             .then(() => {
                                 Alert.info('API Revision Deployed Successfully');

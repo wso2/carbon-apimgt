@@ -1760,58 +1760,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
-//            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-//                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-//            boolean gatewayExists;
-//            if (config.getGatewayArtifactSynchronizerProperties().isPublishDirectlyToGatewayEnabled()) {
-//                gatewayExists = config.getApiGatewayEnvironments().size() > 0;
-//            } else {
-//                gatewayExists = config.getApiGatewayEnvironments().size() > 0 || getAllLabels(tenantDomain).size() > 0;
-//            }
-//            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-//            boolean isAPIPublished = false;
-//            // gatewayType check is required when API Management is deployed on other servers to avoid synapse
-//            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-//                isAPIPublished = isAPIPublished(api);
-//                if (gatewayExists) {
-//                    loadMediationPoliciesToAPI(api, tenantDomain);
-//                    if (isAPIPublished) {
-//                        replublish(api, failedGateways, oldApi, previousDefaultVersion, publishedDefaultVersion);
-//                    } else if (!APIConstants.CREATED.equals(api.getStatus())
-//                            && !APIConstants.RETIRED.equals(api.getStatus())) {
-//                        if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-//                            api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
-//                        }
-//                        if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-//                            api.setEnvironments(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-//                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
-//                        }
-//                        Map<String, String> failedToPublishEnvironments = publishToGateway(api);
-//                        if (!failedToPublishEnvironments.isEmpty()) {
-//                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
-//                            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-//                            api.setEnvironments(publishedEnvironments);
-//                            failedGateways.clear();
-//                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-//                            failedGateways.put("UNPUBLISHED", Collections.<String, String> emptyMap());
-//                        }
-//                }
-//            } else {
-//                log.debug("Gateway is not existed for the current API Provider");
-//            }
-//
-//            // If gateway(s) exist, remove resource paths saved on the cache.
-//            if (gatewayExists && isAPIPublished && !oldApi.getUriTemplates().equals(api.getUriTemplates())) {
-//                Set<URITemplate> resourceVerbs = api.getUriTemplates();
-//                if (resourceVerbs != null) {
-//                    invalidateResourceCache(api.getContext(), api.getId().getVersion(), resourceVerbs);
-//                    if (log.isDebugEnabled()) {
-//                        log.debug("Calling invalidation cache");
-//                    }
-//                }
-//            }
-
             //Validate Transports
             validateAndSetTransports(api);
             validateAndSetAPISecurity(api);
@@ -2573,20 +2521,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
-//                    if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-//                        loadMediationPoliciesToAPI(api, tenantDomain);
-//                        if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
-//                            || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
-//                            failedGateways = publishToGateway(api);
-//                            //Sending Notifications to existing subscribers
-//                            if (APIConstants.PUBLISHED.equals(newStatus)) {
-//                                sendEmailNotification(api);
-//                            }
-//                        } else { // API Status : RETIRED or CREATED
-//                            failedGateways = removeFromGateway(api);
-//                        }
-//                    }
-
                 }
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
@@ -2631,14 +2565,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
                     loadMediationPoliciesToAPI(api, tenantDomain);
-//                    if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-//                        if (APIConstants.PUBLISHED.equals(newStatus) || APIConstants.DEPRECATED.equals(newStatus)
-//                            || APIConstants.BLOCKED.equals(newStatus) || APIConstants.PROTOTYPED.equals(newStatus)) {
-//                            failedGateways = publishToGateway(api);
-//                        } else { // API Status : RETIRED or CREATED
-//                            failedGateways = removeFromGateway(api);
-//                        }
-//                    }
 
                 }
             } else {
