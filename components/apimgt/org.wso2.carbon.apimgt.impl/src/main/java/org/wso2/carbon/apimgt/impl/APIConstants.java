@@ -1030,6 +1030,7 @@ public final class APIConstants {
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
+    public static final String LC_CACHE_NAME = "lcCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
@@ -1720,6 +1721,7 @@ public final class APIConstants {
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
+    public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
@@ -2120,7 +2122,7 @@ public final class APIConstants {
 
     public static class RestApiConstants {
 
-        public static final String REST_API_DEFAULT_VERSION = "v1";
+        public static final String REST_API_DEFAULT_VERSION = "v2";
         public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
@@ -2476,6 +2478,9 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+
+    public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
+    public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
 
     // Constants related to Service Catalog
     public static final String METADATA_FILE_NAME = "metadata";

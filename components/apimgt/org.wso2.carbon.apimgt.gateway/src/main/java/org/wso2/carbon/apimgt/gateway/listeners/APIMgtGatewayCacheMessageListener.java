@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.gateway.listeners;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -29,16 +32,9 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
+import javax.jms.*;
 
 public class APIMgtGatewayCacheMessageListener implements MessageListener {
 
@@ -52,28 +48,25 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
                 Topic jmsDestination = (Topic) message.getJMSDestination();
-                if (message instanceof MapMessage) {
-                    MapMessage mapMessage = (MapMessage) message;
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    Enumeration enumeration = mapMessage.getMapNames();
-                    while (enumeration.hasMoreElements()) {
-                        String key = (String) enumeration.nextElement();
-                        map.put(key, mapMessage.getObject(key));
-                    }
+                if (message instanceof TextMessage) {
+                    String textMessage = ((TextMessage) message).getText();
+                    JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                            path(APIConstants.EVENT_PAYLOAD_DATA);
                     if (APIConstants.TopicNames.TOPIC_CACHE_INVALIDATION
                             .equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.CACHE_INVALIDATION_TYPE) != null) {
+                        if (payloadData.get(APIConstants.CACHE_INVALIDATION_TYPE).asText() != null) {
+                            String value = payloadData.get("value").asText();
+                            JSONParser jsonParser = new JSONParser();
                             if (APIConstants.RESOURCE_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleResourceCacheInvalidationMessage(map);
+                                    .equalsIgnoreCase(payloadData.get(APIConstants.CACHE_INVALIDATION_TYPE).asText())) {
+                                handleResourceCacheInvalidationMessage((JSONObject) jsonParser.parse(value));
                             } else if (APIConstants.GATEWAY_KEY_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleKeyCacheInvalidationMessage(map);
+                                    .equalsIgnoreCase(payloadData.get(APIConstants.CACHE_INVALIDATION_TYPE).asText())) {
+                                handleKeyCacheInvalidationMessage((JSONArray) jsonParser.parse(value));
                             } else if (APIConstants.GATEWAY_USERNAME_CACHE_NAME
-                                    .equalsIgnoreCase((String) map.get(APIConstants.CACHE_INVALIDATION_TYPE))) {
-                                handleUserCacheInvalidationMessage(map);
+                                    .equalsIgnoreCase(payloadData.get(APIConstants.CACHE_INVALIDATION_TYPE).asText())) {
+                                handleUserCacheInvalidationMessage((JSONArray) jsonParser.parse(value));
                             }
-
                         }
                     }
                 } else {
@@ -82,43 +75,24 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
         } catch (ParseException e) {
             log.error("Error while processing evaluatedConditions", e);
         }
     }
 
-    private void handleUserCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
-
-        if (map.containsKey("value")) {
-            String value = (String) map.get("value");
-            JSONParser jsonParser = new JSONParser();
-            JSONArray jsonValue = (JSONArray) jsonParser.parse(value);
-
-            ServiceReferenceHolder.getInstance().getCacheInvalidationService()
-                    .invalidateCachedUsernames((String[]) jsonValue.toArray(new String[jsonValue.size()]));
-        }
+    private void handleUserCacheInvalidationMessage(JSONArray jsonValue) throws ParseException {
+        ServiceReferenceHolder.getInstance().getCacheInvalidationService()
+                .invalidateCachedUsernames((String[]) jsonValue.toArray(new String[0]));
     }
 
-    private void handleKeyCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
-
-        if (map.containsKey("value")) {
-            String value = (String) map.get("value");
-            JSONParser jsonParser = new JSONParser();
-            JSONArray jsonValue = (JSONArray) jsonParser.parse(value);
-
-            ServiceReferenceHolder.getInstance().getCacheInvalidationService()
-                    .invalidateCachedTokens((String[]) jsonValue.toArray(new String[jsonValue.size()]));
-        }
+    private void handleKeyCacheInvalidationMessage(JSONArray jsonValue) throws ParseException {
+        ServiceReferenceHolder.getInstance().getCacheInvalidationService()
+                .invalidateCachedTokens((String[]) jsonValue.toArray(new String[0]));
     }
 
-    private void handleResourceCacheInvalidationMessage(Map<String, Object> map) throws ParseException {
-
-        if (map.containsKey("value")) {
-            String value = (String) map.get("value");
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonValue = (JSONObject) jsonParser.parse(value);
+    private void handleResourceCacheInvalidationMessage(JSONObject jsonValue) throws ParseException {
             String apiContext = (String) jsonValue.get("apiContext");
             String apiVersion = (String) jsonValue.get("apiVersion");
             JSONArray resources = (JSONArray) jsonValue.get("resources");
@@ -133,10 +107,7 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
                 resourceCacheInvalidationDtoList.add(uriTemplateDto);
             }
             ServiceReferenceHolder.getInstance().getCacheInvalidationService().invalidateResourceCache(apiContext,
-                    apiVersion,
-                    resourceCacheInvalidationDtoList
-                            .toArray(new ResourceCacheInvalidationDto[resourceCacheInvalidationDtoList.size()]));
-        }
+                    apiVersion, resourceCacheInvalidationDtoList.toArray(new ResourceCacheInvalidationDto[0]));
 
     }
 

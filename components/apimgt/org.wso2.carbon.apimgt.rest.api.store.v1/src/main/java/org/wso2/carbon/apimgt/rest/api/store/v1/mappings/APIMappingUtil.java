@@ -113,7 +113,11 @@ public class APIMappingUtil {
         String apiSwaggerDefinition = null;
 
         if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
-            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+            if (model.getSwaggerDefinition() != null) {
+                apiSwaggerDefinition = model.getSwaggerDefinition();
+            } else {
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+            }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
 
@@ -277,7 +281,11 @@ public class APIMappingUtil {
         String apiSwaggerDefinition = null;
 
         if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
-            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+            if (model.getDefinition() != null) {
+                apiSwaggerDefinition = model.getDefinition();
+            } else {
+                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+            }
         }
         dto.setApiDefinition(apiSwaggerDefinition);
 
@@ -679,9 +687,9 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         int free = 0, commercial = 0;
         for (Tier tier : throttlingPolicies) {
-            if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.FREE)) {
+            if (RestApiConstants.FREE.equalsIgnoreCase(tier.getTierPlan())) {
                 free = free + 1;
-            } else if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.COMMERCIAL)) {
+            } else if (RestApiConstants.COMMERCIAL.equalsIgnoreCase(tier.getTierPlan())) {
                 commercial = commercial + 1;
             }
         }
@@ -1023,7 +1031,7 @@ public class APIMappingUtil {
     public static AdvertiseInfoDTO extractAdvertiseInfo(API api) {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
-        advertiseInfoDTO.setOriginalStoreUrl(api.getRedirectURL());
+        advertiseInfoDTO.setOriginalDevPortalUrl(api.getRedirectURL());
         advertiseInfoDTO.setApiOwner(api.getApiOwner());
         return advertiseInfoDTO;
     }

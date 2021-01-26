@@ -31,6 +31,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
@@ -122,6 +123,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_RATINGS = "/ratings";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
+    public static final String RESOURCE_PATH_API_MEDIATION = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/mediation-policies";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM + "/documents";
     public static final String RESOURCE_PATH_THUMBNAIL_API_PRODUCT = RESOURCE_PATH_API_PRODUCTS + "/"
@@ -137,22 +139,24 @@ public final class RestApiConstants {
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
     public static final String RESOURCE_PATH_CATEGORY_THUMBNAIL = RESOURCE_PATH_API_CATEGORIES + "/" + APICATEGORYID_PARAM + "/thumbnail";
-    public static final String REST_API_STORE_VERSION_1 ="v1";
+    public static final String REST_API_DEVELOPER_PORTAL_VERSION ="v2";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
+    public static final String REST_API_DEVELOPER_PORTAL_CONTEXT = "api/am/devportal";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
-    public static final String REST_API_STORE_CONTEXT_FULL_1 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_1;
+    public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT +
+            REST_API_DEVELOPER_PORTAL_VERSION;
     public static final String REST_API_PUBLISHER_VERSION_0 ="v0.16";
-    public static final String REST_API_PUBLISHER_VERSION_1 = "v1";
+    public static final String REST_API_PUBLISHER_VERSION = "v2";
     public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
     public static final String REST_API_PUBLISHER_CONTEXT_FULL_0 =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_0;
-    public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
-            REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
+    public static final String REST_API_PUBLISHER_CONTEXT_FULL =
+            REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
     public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
-    public static final String REST_API_ADMIN_VERSION_1 = "v1";
+    public static final String REST_API_ADMIN_VERSION = "v2";
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
-    public static final String REST_API_ADMIN_CONTEXT_FULL_1 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_1;
+    public static final String REST_API_ADMIN_CONTEXT_FULL = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";

@@ -3093,7 +3093,7 @@ public class SQLConstants {
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
-                "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT " +
+                "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT, API.API_UUID " +
             "FROM AM_API_URL_MAPPING API_UM " +
             "INNER JOIN AM_API API " +
                 "ON API.API_ID = API_UM.API_ID " +
@@ -3617,7 +3617,12 @@ public class SQLConstants {
         public static final String DELETE_TENANT_THEME = "DELETE FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
         public static final String GET_TENANT_THEME = "SELECT * FROM AM_TENANT_THEMES WHERE TENANT_ID = ?";
     }
-    
+
+    public static final String GET_API_VERSIONS =
+            "SELECT API.API_VERSION FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
+    public static final String GET_API_VERSIONS_UUID =
+            "SELECT API.API_UUID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? ";
+
     /**
      * Static class to hold database queries related to AM_SERVICE_CATALOG table
      */
