@@ -43,7 +43,7 @@ public class ServiceCatalogDAO {
     /**
      * Method to get the instance of the ServiceCatalogDAO.
      *
-     * @return {@link ApiMgtDAO} instance
+     * @return {@link ServiceCatalogDAO} instance
      */
     public static ServiceCatalogDAO getInstance() {
         if (INSTANCE == null) {
