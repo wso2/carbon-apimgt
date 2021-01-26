@@ -1136,7 +1136,7 @@ export default function Environments() {
                                 />
                             </b>
                             <span className={classes.labelSpace}>
-                                {'REVISION '}
+                                {'Revision '}
                                 {parseInt(lastRevisionCount, 0) + 1}
                             </span>
                         </Typography>
@@ -1504,7 +1504,7 @@ export default function Environments() {
                                 />
                             </b>
                             <span className={classes.labelSpace}>
-                                {'REVISION '}
+                                {'Revision '}
                                 {parseInt(lastRevisionCount, 0) + 1}
                             </span>
                         </Typography>
