@@ -295,7 +295,7 @@ public interface APIPersistence {
      * @param org   Organization the documentation is owned by
      * @param apiId API ID
      * @param docId Documentation ID
-     * @param content  Content of the Documentation
+     * @param Documentation Content
      * @return Documentation Content
      * @throws DocumentationPersistenceException
      */
