@@ -65,7 +65,8 @@ public class ServiceCatalogDAO {
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceCatalog(ServiceEntry serviceEntry, int tenantID, String uuid, String userName) throws APIManagementException {
+    public String addServiceCatalog(ServiceEntry serviceEntry, int tenantID, String uuid, String userName)
+            throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -118,7 +119,8 @@ public class ServiceCatalogDAO {
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID, String userName) throws APIManagementException {
+    public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID, String userName)
+            throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -342,7 +344,8 @@ public class ServiceCatalogDAO {
         return null;
     }
 
-    public ServiceEntry getCatalogResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException {
+    public ServiceEntry getCatalogResourcesByNameAndVersion(String name, String version, int tenantId)
+            throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

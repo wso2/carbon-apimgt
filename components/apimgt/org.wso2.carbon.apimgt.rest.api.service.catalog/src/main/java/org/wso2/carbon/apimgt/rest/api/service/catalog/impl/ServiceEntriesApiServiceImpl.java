@@ -57,7 +57,8 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     private static final Log log = LogFactory.getLog(ServiceEntriesApiServiceImpl.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
-    public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
+    public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream,
+                                  Attachment definitionFileDetail, MessageContext messageContext) {
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
@@ -95,7 +96,8 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
             if (serviceEntry != null) {
                 FileBasedServicesImportExportManager importExportManager =
                         new FileBasedServicesImportExportManager(pathToExportDir);
-                exportArchive = importExportManager.createArchiveFromExportedServices(ServiceEntryMappingUtil.generateServiceFiles(serviceEntry),
+                exportArchive = importExportManager.createArchiveFromExportedServices(
+                        ServiceEntryMappingUtil.generateServiceFiles(serviceEntry),
                         pathToExportDir, archiveName);
                 exportedServiceArchiveFile = new File(exportArchive.getArchiveName());
                 exportedFileName = exportedServiceArchiveFile.getName();
@@ -107,7 +109,8 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
         }
 
         Response.ResponseBuilder responseBuilder =
-                Response.status(Response.Status.OK).entity(exportedServiceArchiveFile).type(MediaType.APPLICATION_OCTET_STREAM);
+                Response.status(Response.Status.OK).entity(exportedServiceArchiveFile)
+                        .type(MediaType.APPLICATION_OCTET_STREAM);
         responseBuilder.header("Content-Disposition", "attachment; filename=\"" + exportedFileName + "\"");
         return responseBuilder.build();
     }
@@ -131,7 +134,8 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     }
 
     @Override
-    public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, String verifier, MessageContext messageContext) throws APIManagementException {
+    public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite,
+                                  String verifier, MessageContext messageContext) throws APIManagementException {
         if (overwrite == null || !overwrite) {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
@@ -173,14 +177,17 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
                 }
             }
             serviceStatusList = ServiceEntryMappingUtil.fromServiceCatalogInfoToDTOList(serviceEntries);
-            return Response.ok().entity(ServiceEntryMappingUtil.fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
+            return Response.ok().entity(ServiceEntryMappingUtil
+                    .fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
         } else {
             return Response.status(Response.Status.CONFLICT).build();
         }
     }
 
     @Override
-    public Response searchServices(String name, String version, String definitionType, String displayName, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException {
+    public Response searchServices(String name, String version, String definitionType, String displayName,
+                                   String key, Boolean shrink, String sortBy, String sortOrder, Integer limit,
+                                   Integer offset, MessageContext messageContext) throws APIManagementException {
         if (shrink && StringUtils.isBlank(key)) {
             RestApiUtil.handleBadRequest("Service key can not be an empty String with shrink=true", log);
         } else if (shrink && !StringUtils.isBlank(key)) {
@@ -205,7 +212,8 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
         return Response.status(status).entity(errorObject).build();
     }
 
-    public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) {
+    public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream,
+                                  Attachment definitionFileDetail, MessageContext messageContext) {
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());

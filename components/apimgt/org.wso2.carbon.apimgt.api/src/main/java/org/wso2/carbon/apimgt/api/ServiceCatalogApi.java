@@ -130,5 +130,6 @@ public interface ServiceCatalogApi {
      * @return ServiceEntry Endpoint resources
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId) throws APIManagementException;
+    ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId)
+            throws APIManagementException;
 }

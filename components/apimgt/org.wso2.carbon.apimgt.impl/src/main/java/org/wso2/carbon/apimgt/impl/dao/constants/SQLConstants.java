@@ -3624,8 +3624,10 @@ public class SQLConstants {
     public static class ServiceCatalogConstants {
 
         public static final String ADD_SERVICE = "INSERT INTO AM_SERVICE_CATALOG " +
-                "(UUID, SERVICE_KEY, MD5, ENTRY_NAME, DISPLAY_NAME, ENTRY_VERSION, TENANT_ID, SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
-                "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, ENDPOINT_DEFINITION, METADATA) " +
+                "(UUID, SERVICE_KEY, MD5, ENTRY_NAME, DISPLAY_NAME, ENTRY_VERSION, TENANT_ID, SERVICE_URL, " +
+                "DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
+                "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, " +
+                "ENDPOINT_DEFINITION, METADATA) " +
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         public static final String UPDATE_SERVICE_BY_KEY = "UPDATE AM_SERVICE_CATALOG SET " +
                 "MD5 = ?," +
@@ -3645,7 +3647,8 @@ public class SQLConstants {
                 "METADATA = ? " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String DELETE_SERVICE = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ?";
-        public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT * FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
+        public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT * FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? " +
+                "AND TENANT_ID = ?";
         public static final String GET_SERVICE_BY_NAME_AND_VERSION = "SELECT * FROM AM_SERVICE_CATALOG " +
                 "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ?";
         public static final String GET_SERVICE = "SELECT * FROM AM_SERVICE_CATALOG " +
@@ -3655,8 +3658,10 @@ public class SQLConstants {
         public static final String GET_SERVICE_MD5_BY_SERVICE_KEY = "SELECT MD5 FROM AM_SERVICE_CATALOG " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
 
-        public static final String ADD_ENDPOINT_RESOURCES = "INSERT INTO AM_SERVICE_CATALOG (UUID, ENDPOINT_DEFINITION, METADATA) VALUES (?,?,?)";
-        public static final String UPDATE_ENDPOINT_RESOURCES = "UPDATE AM_SERVICE_CATALOG SET ENDPOINT_DEFINITION = ?, METADATA = ? WHERE UUID = ?";
+        public static final String ADD_ENDPOINT_RESOURCES = "INSERT INTO AM_SERVICE_CATALOG (UUID, ENDPOINT_DEFINITION," +
+                " METADATA) VALUES (?,?,?)";
+        public static final String UPDATE_ENDPOINT_RESOURCES = "UPDATE AM_SERVICE_CATALOG SET ENDPOINT_DEFINITION = ?, " +
+                "METADATA = ? WHERE UUID = ?";
         public static final String GET_ENDPOINT_RESOURCES_BY_KEY = "SELECT * FROM AM_SERVICE_CATALOG " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION = "SELECT * FROM AM_SERVICE_CATALOG " +

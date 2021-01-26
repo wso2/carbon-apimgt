@@ -159,7 +159,8 @@ public class ServiceEntryMappingUtil {
     public static List<ServiceInfoDTO> fromServiceCatalogInfoToDTOList(HashMap<String, ServiceEntry> catalogEntries) {
         List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
         for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
-            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(catalogEntries.get(entry.getKey())));
+            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceCatalogInfoToServiceInfoDTO(
+                    catalogEntries.get(entry.getKey())));
         }
         return serviceStatusList;
     }
@@ -205,8 +206,10 @@ public class ServiceEntryMappingUtil {
      */
     public static String generateServiceFiles(ServiceEntry serviceEntry) {
         String pathToCreateFiles = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
-        fromInputStreamToFile(serviceEntry.getMetadata(), pathToCreateFiles + File.separator + APIConstants.METADATA_FILE);
-        fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator + APIConstants.DEFINITION_FILE);
+        fromInputStreamToFile(serviceEntry.getMetadata(), pathToCreateFiles + File.separator +
+                APIConstants.METADATA_FILE);
+        fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator +
+                APIConstants.DEFINITION_FILE);
 
         return pathToCreateFiles;
     }

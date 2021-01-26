@@ -336,7 +336,8 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime);
+    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType,
+            mutualSSLEnabled, usage, createdTime, lastUpdatedTime);
   }
 
   @Override
