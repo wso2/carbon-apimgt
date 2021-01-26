@@ -7154,17 +7154,22 @@ public class ApiMgtDAO {
 
     public void updateAPI(API api) throws APIManagementException {
 
-        updateAPI(api, null);
+        updateAPI(api, null, null);
     }
 
-    public void updateAPI(API api, String username) throws APIManagementException {
+    public void updateAPI(API api, String username, String organizationId) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
         String previousDefaultVersion = getDefaultVersion(api.getId());
-
-        String query = SQLConstants.UPDATE_API_SQL;
+        String query;
+        if (organizationId != null) {
+            query = SQLConstants.UPDATE_API_SQL;
+        } else {
+            query = SQLConstants.UPDATE_API_SQL_WITH_ORGANIZATION;
+        }
+        query = SQLConstants.UPDATE_API_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
@@ -7188,13 +7193,10 @@ public class ApiMgtDAO {
             prepStmt.setString(7, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             prepStmt.setString(8, api.getId().getApiName());
             prepStmt.setString(9, api.getId().getVersion());
-            if (api.getOrganizationId() != null) {
-                prepStmt.setString(10, api.getOrganizationId());
-            } else {
-                prepStmt.setNull(10, Types.VARCHAR);
+            if (organizationId != null) {
+                prepStmt.setString(10, organizationId);
             }
             prepStmt.execute();
-            //}
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
                 // happen

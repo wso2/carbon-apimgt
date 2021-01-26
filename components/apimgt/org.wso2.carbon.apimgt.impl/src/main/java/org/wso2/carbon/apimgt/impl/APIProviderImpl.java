@@ -1572,7 +1572,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
             List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-            updateAPI(api, tenantId, userNameWithoutChange);
+            updateAPI(api, tenantId, userNameWithoutChange, null);
             updateProductResourceMappings(api, productResources);
 
             if (log.isDebugEnabled()) {
@@ -1751,7 +1751,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
+    public API updateAPI(API api, API existingAPI, String organizationId) throws APIManagementException, FaultGatewaysException {
         validateKeyManagers(api);
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<>();
         API oldApi = existingAPI;
@@ -1801,7 +1801,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
             List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-            updateAPI(api, tenantId, userNameWithoutChange);
+            updateAPI(api, tenantId, userNameWithoutChange, organizationId);
             updateProductResourceMappings(api, productResources);
 
             if (log.isDebugEnabled()) {
@@ -1888,12 +1888,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             try {
-                Organization org = null;
-                if (existingAPI.getOrganizationId() != null) {
-                    org = new Organization(existingAPI.getOrganizationId());
-                } else {
-                    org = new Organization(tenantDomain);
-                }
+                Organization org = new Organization(organizationId);
                 api.setCreatedTime(oldApi.getCreatedTime());
                 apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
@@ -2136,9 +2131,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param username Username of the user who is updating
      * @throws APIManagementException If fails to update API.
      */
-    private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
+    private void updateAPI(API api, int tenantId, String username, String organizationId) throws APIManagementException {
 
-        apiMgtDAO.updateAPI(api, username);
+        apiMgtDAO.updateAPI(api, username, organizationId);
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }

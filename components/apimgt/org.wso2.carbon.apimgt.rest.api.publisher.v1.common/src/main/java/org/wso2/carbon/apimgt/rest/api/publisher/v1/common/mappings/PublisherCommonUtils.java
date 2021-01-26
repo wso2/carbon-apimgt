@@ -102,8 +102,9 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
-                                String orgId) throws ParseException, CryptoException, APIManagementException,
+                                String organizationId) throws ParseException, CryptoException, APIManagementException,
             FaultGatewaysException {
+        String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
         if (tokenScopes == null) {
@@ -364,8 +365,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        apiToUpdate.setOrganizationId(orgId);
-        apiProvider.updateAPI(apiToUpdate, originalAPI);
+        apiProvider.updateAPI(apiToUpdate, originalAPI, organizationId);
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
         
@@ -969,14 +969,15 @@ public class PublisherCommonUtils {
      * update swagger definition of the given api
      *
      * @param apiId    API Id
-     * @param orgId  Organization WHich the API belongs to
+     * @param organizationId  UUID of the Organization  Which the API belongs to
      * @param response response of a swagger definition validation call
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, String orgId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, String organizationId, APIDefinitionValidationResponse response)
             throws APIManagementException, FaultGatewaysException {
+        String orgId = PublisherCommonUtils.getOrgId(organizationId);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
@@ -1029,7 +1030,7 @@ public class PublisherCommonUtils {
             existingAPI.setOrganizationId(orgId);
         }
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI);
+        apiProvider.updateAPI(existingAPI, unModifiedAPI, organizationId);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, orgId);
          // TODO see why we need to get it instead of passing same

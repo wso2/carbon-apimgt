@@ -492,7 +492,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
             originalAPI.setOrganizationId(orgId);
-            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, orgId);
+            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, organizationId);
             //TODO - PASS apiprovider and remove tenanr flow
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
@@ -1850,7 +1850,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (isAPIModified(api, mediation)) {
                     API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, organizationDTO);
                     oldAPI.setOrganizationId(orgId);// TODO do a deep copy
-                    apiProvider.updateAPI(oldAPI, api);
+                    apiProvider.updateAPI(oldAPI, api, orgId);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
@@ -2558,9 +2558,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!validationResponse.isValid()) {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
-                updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, orgId, validationResponse);
+                updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, organizationId, validationResponse);
             } else {
-                updatedSwagger = updateSwagger(apiId, orgId, apiDefinition);
+                updatedSwagger = updateSwagger(apiId, organizationId, apiDefinition);
             }
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
@@ -2593,7 +2593,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    private String updateSwagger(String apiId, String organizationId,String apiDefinition)
+    private String updateSwagger(String apiId, String organizationId, String apiDefinition)
             throws APIManagementException, FaultGatewaysException {
         APIDefinitionValidationResponse response = OASParserUtil
                 .validateAPIDefinition(apiDefinition, true);

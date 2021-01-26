@@ -2375,7 +2375,7 @@ public class APIProviderImplTest {
         Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
         PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_PUBLISH)).thenReturn(true);
         PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_CREATE)).thenReturn(true);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, null);
     }
 
     @Test
@@ -2521,14 +2521,14 @@ public class APIProviderImplTest {
         
         Mockito.when(gatewayManager.isAPIPublished(api, "carbon.super")).thenReturn(false);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, null);
         Assert.assertEquals(0, api.getEnvironments().size());
 
         tiers.remove("Gold", tier);
         tier = new Tier("Unlimited");
         tiers.put("Unlimited", tier);
         try {
-            apiProvider.updateAPI(api, oldApi);
+            apiProvider.updateAPI(api, oldApi, null);
         } catch (APIManagementException ex) {
             Assert.assertTrue(ex.getMessage().contains("Invalid x-throttling tier Gold found in api definition for " +
                     "resource POST /add"));
@@ -2698,13 +2698,13 @@ public class APIProviderImplTest {
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         PowerMockito.when(apiPersistenceInstance.getPublisherAPI(any(Organization.class), any(String.class)))
                 .thenReturn(publisherAPI);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, null);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
 
         //Previous updateAPI() call enabled API security. Therefore need to set it as false for the second test
         api.setEndpointSecured(false);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, null);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
 
@@ -2713,7 +2713,7 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.isValidWSDLURL(WSDL_URL, true)).thenReturn(true);
         PowerMockito.when(APIUtil.createWSDL(apiProvider.registry, api)).thenReturn("wsdl_path");
 
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, null);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
         Assert.assertEquals("Additional properties that are set are not retrieved new_test", "new_test",
@@ -2968,7 +2968,7 @@ public class APIProviderImplTest {
                 .getAPIManagerConfiguration();
         GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
-        apiProvider.updateAPI(api, oldApi);
+        apiProvider.updateAPI(api, oldApi, null);
     }
 
     @Test

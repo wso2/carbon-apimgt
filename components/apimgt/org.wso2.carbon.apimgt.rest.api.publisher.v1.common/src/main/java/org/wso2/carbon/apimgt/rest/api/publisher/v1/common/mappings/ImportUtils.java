@@ -123,18 +123,19 @@ public class ImportUtils {
     /**
      * This method imports an API.
      *
-     * @param extractedFolderPath Location of the extracted folder of the API
-     * @param importedApiDTO      API DTO of the importing API
-     *                            (This will not be null when importing dependent APIs with API Products)
-     * @param preserveProvider    Decision to keep or replace the provider
-     * @param overwrite           Whether to update the API or not
-     * @param tokenScopes         Scopes of the token
-     * @param orgId        Scopes of the token
+     * @param extractedFolderPath   Location of the extracted folder of the API
+     * @param importedApiDTO        API DTO of the importing API
+     *                              (This will not be null when importing dependent APIs with API Products)
+     * @param preserveProvider      Decision to keep or replace the provider
+     * @param overwrite             Whether to update the API or not
+     * @param tokenScopes           Scopes of the token
+     * @param organizationId        UUID of the organization
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-            Boolean overwrite, String[] tokenScopes, String orgId) throws APIManagementException {
+            Boolean overwrite, String[] tokenScopes, String organizationId) throws APIManagementException {
+        String orgId = PublisherCommonUtils.getOrgId(organizationId);
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -199,7 +200,7 @@ public class ImportUtils {
                     setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
                 }
                 importedApi = PublisherCommonUtils.updateApi(targetApi, importedApiDTO,
-                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes, orgId);
+                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes, organizationId);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -220,7 +221,7 @@ public class ImportUtils {
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), currentTenantDomain,
+                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), null,
                         swaggerDefinitionValidationResponse);
             }
             // Add the GraphQL schema

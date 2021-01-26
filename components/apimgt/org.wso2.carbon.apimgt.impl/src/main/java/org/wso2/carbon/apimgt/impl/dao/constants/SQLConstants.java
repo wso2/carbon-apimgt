@@ -2060,7 +2060,7 @@ public class SQLConstants {
                     "   AND AUM.API_ID = API.API_ID " +
                     " ORDER BY URL_MAPPING_ID";
 
-    public static final String UPDATE_API_SQL =
+    public static final String UPDATE_API_SQL_WITH_ORGANIZATION =
             "UPDATE AM_API " +
             "SET " +
             "   CONTEXT = ?, " +
@@ -2073,7 +2073,21 @@ public class SQLConstants {
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
             "   AND API_VERSION = ? " +
-            "   AND ORGANIZATION_ID = ? ";
+            "   AND ORGANIZATION_ID = ? " ;
+
+    public static final String UPDATE_API_SQL =
+            "UPDATE AM_API " +
+                    "SET " +
+                    "   CONTEXT = ?, " +
+                    "   CONTEXT_TEMPLATE = ?, " +
+                    "   UPDATED_BY = ?," +
+                    "   UPDATED_TIME = ?, " +
+                    "   API_TIER = ?, " +
+                    "   API_TYPE = ? " +
+                    " WHERE " +
+                    "   API_PROVIDER = ? " +
+                    "   AND API_NAME = ? " +
+                    "   AND API_VERSION = ? ";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +
