@@ -1808,4 +1808,12 @@ public interface APIProvider extends APIManager {
      */
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
+
+    /**
+     * Get Service Info from Service Catalog using ID of the service
+     * @param serviceId
+     * @return
+     * @throws APIManagementException
+     */
+    ServiceEntry retrieveServiceByID(String serviceId, int tenantId) throws APIManagementException;
 }

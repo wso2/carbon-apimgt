@@ -180,6 +180,34 @@ public class SQLConstants {
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
+    public static final String GET_SERVICE_INFO_BY_SERVICE_UUID = "SELECT " +
+            "   UUID," +
+            "   SERVICE_KEY," +
+            "   MD5," +
+            "   ENTRY_NAME," +
+            "   DISPLAY_NAME," +
+            "   ENTRY_VERSION," +
+            "   SERVICE_URL," +
+            "   DEFINITION_TYPE," +
+            "   DEFINITION_URL," +
+            "   DESCRIPTION," +
+            "   SECURITY_TYPE," +
+            "   MUTUAL_SSL_ENABLED," +
+            "   CREATED_TIME," +
+            "   LAST_UPDATED_TIME," +
+            "   CREATED_BY," +
+            "   UPDATED_BY," +
+            "   ENDPOINT_DEFINITION," +
+            "   METADATA " +
+            "   FROM AM_SERVICE_CATALOG WHERE " +
+            "   UUID = ? AND TENANT_ID = ?";
+
+    public static final String ADD_API_SERVICE_MAPPING_SQL = "INSERT INTO AM_API_SERVICE_MAPPING (API_UUID, SERVICE_ID, " +
+            "MD5) VALUES (?,?,?)";
+
+    public static final String DELETE_API_SERVICE_MAPPING_SQL = "DELETE FROM AM_API_SERVICE_MAPPING WHERE API_UUID = ? " +
+            "AND SERVICE_ID = ?";
+
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
             "   SB.USER_ID, " +

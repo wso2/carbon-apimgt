@@ -25,8 +25,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -139,6 +141,7 @@ public class API implements Serializable {
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
+    private JSONObject serviceInfo = new JSONObject();
     /**
      * Used to set the workflow status in lifecycle state change workflow
      */
@@ -206,6 +209,17 @@ public class API implements Serializable {
      */
     private int revisionId;
 
+    enum ENDPOINT_TYPE { DEFAULT, SERVICE_ENDPOINT }
+    private ENDPOINT_TYPE endpointType = ENDPOINT_TYPE.DEFAULT;
+
+    public void setEndpointType(String endpointType) {
+        this.endpointType = ENDPOINT_TYPE.valueOf(endpointType.toUpperCase());
+    }
+
+    public ENDPOINT_TYPE getEndpointType() {
+        return this.endpointType;
+    }
+
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }
@@ -232,6 +246,13 @@ public class API implements Serializable {
         this.additionalProperties = properties;
     }
 
+    public JSONObject getServiceInfoObject() { return serviceInfo; }
+
+    public void setServiceInfo(JSONObject serviceInfo) { this.serviceInfo = serviceInfo; }
+
+    public String getServiceInfo(String key) {
+        return serviceInfo.get(key).toString();
+    }
     /**
      * This method is used to get the properties related to monetization
      *
