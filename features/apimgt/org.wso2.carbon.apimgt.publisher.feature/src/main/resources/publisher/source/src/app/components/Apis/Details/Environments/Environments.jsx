@@ -129,7 +129,7 @@ const useStyles = makeStyles((theme) => ({
     },
     textShape2: {
         marginTop: 8,
-        marginLeft: 100,
+        marginLeft: 115,
         fontFamily: 'sans-serif',
     },
     textDelete: {
