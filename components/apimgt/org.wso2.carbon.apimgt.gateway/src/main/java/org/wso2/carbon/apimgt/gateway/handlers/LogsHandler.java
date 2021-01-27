@@ -87,8 +87,8 @@ public class LogsHandler extends AbstractSynapseHandler {
                 return true;
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -126,8 +126,8 @@ public class LogsHandler extends AbstractSynapseHandler {
                 return true;
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -137,7 +137,7 @@ public class LogsHandler extends AbstractSynapseHandler {
             // default API would have the property LoggedResponse as true.
             String defaultAPI = (String) messageContext.getProperty("DefaultAPI");
             if ("true".equals(defaultAPI)) {
-                return true;
+                log.debug("Default API is invoked");
             } else {
                 try {
                     long responseTime = getResponseTime(messageContext);
@@ -161,9 +161,9 @@ public class LogsHandler extends AbstractSynapseHandler {
                     return true;
                 } catch (Exception e) {
                     log.error(RESPONSE_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
+                    return false;
                 }
             }
-            return false;
         }
         return true;
     }
