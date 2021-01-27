@@ -2069,7 +2069,7 @@ public class SQLConstants {
             "   UPDATED_TIME = ?, " +
             "   API_TIER = ?, " +
             "   API_TYPE = ?, " +
-                    "   API_UUID = ? " +
+            "   API_UUID = ? " +
             " WHERE " +
             "   API_PROVIDER = ? " +
             "   AND API_NAME = ? " +
@@ -2084,11 +2084,12 @@ public class SQLConstants {
                     "   UPDATED_BY = ?," +
                     "   UPDATED_TIME = ?, " +
                     "   API_TIER = ?, " +
-                    "   API_TYPE = ? " +
+                    "   API_TYPE = ?, " +
+                    "   API_UUID = ? " +
                     " WHERE " +
                     "   API_PROVIDER = ? " +
                     "   AND API_NAME = ? " +
-                    "   AND API_VERSION = ? ";
+                    "   AND" + " API_VERSION = ? ";
 
     public static final String FIX_NULL_THROTTLING_TIERS =
             "UPDATE AM_API_URL_MAPPING SET THROTTLING_TIER = 'Unlimited' WHERE " +

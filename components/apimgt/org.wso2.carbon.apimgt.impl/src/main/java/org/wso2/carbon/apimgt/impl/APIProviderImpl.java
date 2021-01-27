@@ -59,7 +59,12 @@ import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.dto.*;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -1589,7 +1594,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
             List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-            updateAPI(api, tenantId, userNameWithoutChange, null);
+            updateAPI(api, tenantId, userNameWithoutChange);
             updateProductResourceMappings(api, productResources);
 
             if (log.isDebugEnabled()) {
@@ -1702,7 +1707,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    public API updateAPI(API api, API existingAPI, String organizationId) throws APIManagementException, FaultGatewaysException {
+    public API updateAPI(API api, API existingAPI) throws APIManagementException, FaultGatewaysException {
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         
@@ -1759,7 +1764,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //get product resource mappings on API before updating the API. Update uri templates on api will remove all
             //product mappings as well.
             List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-            updateAPI(api, tenantId, userNameWithoutChange, organizationId);
+            updateAPI(api, tenantId, userNameWithoutChange);
             updateProductResourceMappings(api, productResources);
 
             if (log.isDebugEnabled()) {
@@ -1794,7 +1799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             try {
                 Organization org;
-                if (organizationId != null) {
+                if (api.getOrganizationId() != null) {
                     org = new Organization(api.getOrganizationId());
                 } else {
                     org = new Organization(tenantDomain);
@@ -2042,9 +2047,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param username Username of the user who is updating
      * @throws APIManagementException If fails to update API.
      */
-    private void updateAPI(API api, int tenantId, String username, String organizationId) throws APIManagementException {
+    private void updateAPI(API api, int tenantId, String username) throws APIManagementException {
 
-        apiMgtDAO.updateAPI(api, username, organizationId);
+        apiMgtDAO.updateAPI(api, username, api.getOrganizationId());
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
@@ -2555,8 +2560,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         return failedGateways;
     }
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus, API api)
-            throws APIManagementException {
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus, API api,
+                                                                   String orgId) throws APIManagementException {
         Map<String, String> failedGateways = new HashMap<String, String>();
         String provider = identifier.getProviderName();
         String providerTenantMode = identifier.getProviderName();
@@ -2585,7 +2590,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.setAsPublishedDefaultVersion(api.getId().getVersion()
                             .equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
-                    loadMediationPoliciesToAPI(api, tenantDomain);
+                    loadMediationPoliciesToAPI(api, orgId);
 
                 }
             } else {
@@ -7116,7 +7121,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // push the state change to gateway
             Map<String, String> failedGateways = propergateAPIStatusChangeToGateways(api.getId(),
-                    newStatus, api);
+                    newStatus, api, orgId);
             
             if (APIConstants.PUBLISHED.equals(newStatus) || !oldStatus.equals(newStatus)) { //TODO has registry access
                 //if the API is websocket and if default version is selected, update the other versions

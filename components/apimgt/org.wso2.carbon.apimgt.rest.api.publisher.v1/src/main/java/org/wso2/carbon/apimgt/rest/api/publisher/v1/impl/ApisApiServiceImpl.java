@@ -483,7 +483,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "API with apiID :" + apiId + " is not found in the organization : " + organizationId;
                 RestApiUtil.handleInternalServerError(errorMessage, log);
             }
-            originalAPI.setOrganizationId(orgId);
+            originalAPI.setOrganizationId(organizationId);
             originalAPI = PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
             APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
             return Response.ok().entity(modifiedAPI.getOperations()).build();
@@ -955,7 +955,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
-                    api.setOrganizationId(orgId);
+                    api.setOrganizationId(organizationId);
                     apiProvider.updateAPI(api);
                 }
                 if (log.isDebugEnabled()) {
@@ -1059,7 +1059,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
-                    api.setOrganizationId(orgId);
+                    api.setOrganizationId(organizationId);
                     apiProvider.updateAPI(api);
                 }
                 ClientCertMetadataDTO clientCertMetadataDTO = new ClientCertMetadataDTO();
@@ -1188,7 +1188,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIProduct apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
                     apiProvider.updateAPIProduct(apiProduct);
                 } else {
-                    api.setOrganizationId(orgId);
+                    api.setOrganizationId(organizationId);
                     apiProvider.updateAPI(api);
                 }
                 ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
@@ -1936,7 +1936,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String organizationId,
                                                                       String ifMatch, MessageContext messageContext) {
-        APIIdentifier apiIdentifier;
         try {
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
             APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -1954,8 +1953,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
                     API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, organizationDTO);
-                    oldAPI.setOrganizationId(orgId);// TODO do a deep copy
-                    apiProvider.updateAPI(oldAPI, api, orgId);
+                    if (organizationId != null) {
+                        oldAPI.setOrganizationId(organizationId);
+                    }
+                    apiProvider.updateAPI(oldAPI, api);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);

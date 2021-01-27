@@ -365,10 +365,12 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        apiProvider.updateAPI(apiToUpdate, originalAPI, organizationId);
+        if (organizationId != null) {
+            apiToUpdate.setOrganizationId(organizationId);
+        }
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
-        
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(), organizationDTO);// TODO use returend api
     }
 
@@ -1026,11 +1028,11 @@ public class PublisherCommonUtils {
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, orgId);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organizationDTO);
-        if (orgId != null) {
-            existingAPI.setOrganizationId(orgId);
+        if (organizationId != null) {
+            existingAPI.setOrganizationId(organizationId);
         }
         existingAPI.setStatus(unModifiedAPI.getStatus());
-        apiProvider.updateAPI(existingAPI, unModifiedAPI, organizationId);
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
         String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, orgId);
          // TODO see why we need to get it instead of passing same

@@ -7171,11 +7171,11 @@ public class ApiMgtDAO {
         String previousDefaultVersion = getDefaultVersion(api.getId());
         String query;
         if (organizationId != null) {
-            query = SQLConstants.UPDATE_API_SQL;
-        } else {
             query = SQLConstants.UPDATE_API_SQL_WITH_ORGANIZATION;
+        } else {
+            query = SQLConstants.UPDATE_API_SQL;
         }
-        query = SQLConstants.UPDATE_API_SQL;
+
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
