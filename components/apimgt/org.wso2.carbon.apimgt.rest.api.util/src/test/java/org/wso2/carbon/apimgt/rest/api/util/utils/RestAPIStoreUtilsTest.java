@@ -75,7 +75,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserOwnerOfApplicationMatchUsername() {
+    public void testIsUserOwnerOfApplicationMatchUsername() {
 
         String username = "Jacob";
 
@@ -90,7 +90,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserOwnerOfApplicationDifferentUsername() {
+    public void testIsUserOwnerOfApplicationDifferentUsername() {
 
         String username = "Jacob";
         String anotherUsername = "Willam Black";
@@ -106,7 +106,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserOwnerOfApplicationlowerCase() {
+    public void testIsUserOwnerOfApplicationlowerCase() {
 
         String username = "William Black";
         String lowerCaseUsername = "william black";
@@ -130,7 +130,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForAPIByUUID() throws APIManagementException {
+    public void testIsUserAccessAllowedForAPIByUUID() throws APIManagementException {
 
         String username = "Chandler";
         String apiUUID = "API_2345678";
@@ -145,7 +145,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForAPIByUUIDUnexpectedFailure() throws APIManagementException {
+    public void testIsUserAccessAllowedForAPIByUUIDUnexpectedFailure() throws APIManagementException {
 
         String username = "Chandler";
         String errorMessage = "";
@@ -167,7 +167,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForAPIByUUIDAuthorizationFailure() throws APIManagementException {
+    public void testIsUserAccessAllowedForAPIByUUIDAuthorizationFailure() throws APIManagementException {
 
         String username = "Chandler";
         String apiUUID = "API_2345678";
@@ -193,7 +193,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForApplication() throws Exception {
+    public void testIsUserAccessAllowedForApplication() throws Exception {
 
         String groupID = "Group_0001";
 
@@ -207,7 +207,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForApplicationCheckSharedApps() throws Exception {
+    public void testIsUserAccessAllowedForApplicationCheckSharedApps() throws Exception {
 
         String groupID = "Group_0001,Group_0004,Group_0003,Group_0005";
         String userGroupID = "Group_0000,Group_0002,Group_0003,Group_0007";
@@ -224,7 +224,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForApplicationCheckNOSharedApps() throws Exception {
+    public void testIsUserAccessAllowedForApplicationCheckNOSharedApps() throws Exception {
 
         String groupID = "Group_0001,Group_0004,Group_0003,Group_0005";
         String userGroupID = "Group_0000,Group_0002,Group_0008,Group_0007";
@@ -241,14 +241,14 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void isUserAccessAllowedForApplicationNull() {
+    public void testIsUserAccessAllowedForApplicationNull() {
 
         Application application = null;
         Assert.assertEquals(false, RestAPIStoreUtils.isUserAccessAllowedForApplication(application));
     }
 
     @Test
-    public void checkSubscriptionAllowed() throws APIManagementException {
+    public void testCheckSubscriptionAllowed() throws APIManagementException {
 
         String username = "Clark Kent";
         String userTenantDomain = "Oscorp.com";
@@ -297,7 +297,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void checkSubscriptionAllowedWhenTierDenied() throws APIManagementException {
+    public void testCheckSubscriptionAllowedWhenTierDenied() throws APIManagementException {
 
         String username = "Clark Kent";
         String userTenantDomain = "Oscorp.com";
@@ -352,7 +352,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void checkSubscriptionAllowedNot() throws APIManagementException {
+    public void testCheckSubscriptionAllowedNot() throws APIManagementException {
 
         String username = "Clark Kent";
         String userTenantDomain = "Oscorp.com";
@@ -407,7 +407,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void checkSubscriptionAllowedWhenTenantDoesntMatch() throws APIManagementException {
+    public void testCheckSubscriptionAllowedWhenTenantDoesntMatch() throws APIManagementException {
 
         String username = "Clark Kent";
         String userTenantDomain = "Oscorp.com";
@@ -456,7 +456,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void checkSubscriptionAllowedWithSpecificTenants() throws APIManagementException {
+    public void testCheckSubscriptionAllowedWithSpecificTenants() throws APIManagementException {
 
         String username = "Clark Kent";
         String userTenantDomain = "Oscorp.com";
@@ -505,7 +505,7 @@ public class RestAPIStoreUtilsTest {
     }
 
     @Test
-    public void checkSubscriptionAllowedWhenSubscriptionNotAllowed() throws APIManagementException {
+    public void testCheckSubscriptionAllowedWhenSubscriptionNotAllowed() throws APIManagementException {
 
         String username = "Clark Kent";
         String userTenantDomain = "Oscorp.com";
