@@ -643,7 +643,7 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
             int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
             if (apiId == -1) {
@@ -1787,7 +1787,10 @@ public final class APIUtil {
      */
     public static String getWsdlArchivePath(APIIdentifier identifier) {
 
-        return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION +
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                replaceEmailDomain(identifier.getProviderName()) + RegistryConstants.PATH_SEPARATOR +
+                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_WSDL_ARCHIVE_LOCATION +
                 identifier.getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + identifier.getApiName() +
                 identifier.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
     }
@@ -1816,6 +1819,13 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getRevisionPath(String apiUUID, int revisionId) {
+        return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId +
+                RegistryConstants.PATH_SEPARATOR;
+    }
+
     public static String getGraphqlDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
@@ -1829,8 +1839,10 @@ public final class APIUtil {
     }
 
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
-
-        return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                replaceEmailDomain(apiProvider) + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR +
+                apiVersion + RegistryConstants.PATH_SEPARATOR + apiProvider + "--" + apiName + apiVersion + ".wsdl";
     }
 
     /**
@@ -1946,6 +1958,21 @@ public final class APIUtil {
                 id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 id.getName() + RegistryConstants.PATH_SEPARATOR +
                 id.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Utility method to get documentation path of the revision
+     *
+     * @param apiUUID  API UUID
+     * @param revisionId revision id
+     * @return Doc path
+     */
+    public static String getAPIOrAPIProductRevisionDocPath(String apiUUID, int revisionId) {
+        return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId +
+                RegistryConstants.PATH_SEPARATOR +
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
@@ -2131,8 +2158,12 @@ public final class APIUtil {
     public static String createWSDL(Registry registry, API api) throws RegistryException, APIManagementException {
 
         try {
+            APIIdentifier apiId = api.getId();
+            String apiPath = APIUtil.getAPIPath(apiId);
+            int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+            String apiSourcePath = apiPath.substring(0, prependIndex );
             String wsdlResourcePath =
-                    APIConstants.API_WSDL_RESOURCE_LOCATION + createWsdlFileName(api.getId().getProviderName(),
+                    apiSourcePath + RegistryConstants.PATH_SEPARATOR + createWsdlFileName(api.getId().getProviderName(),
                             api.getId().getApiName(), api.getId().getVersion());
 
             String absoluteWSDLResourcePath = RegistryUtils
@@ -2227,11 +2258,15 @@ public final class APIUtil {
         ResourceFile wsdlResource = api.getWsdlResource();
         String wsdlResourcePath;
         boolean isZip = false;
+        APIIdentifier apiId = api.getId();
+        String apiPath = APIUtil.getAPIPath(apiId);
+        int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+        String apiSourcePath = apiPath.substring(0, prependIndex );
         String wsdlResourcePathArchive =
-                APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
+                apiSourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
                         .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
                         api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
-        String wsdlResourcePathFile = APIConstants.API_WSDL_RESOURCE_LOCATION +
+        String wsdlResourcePathFile = apiSourcePath + RegistryConstants.PATH_SEPARATOR +
                 createWsdlFileName(api.getId().getProviderName(), api.getId().getApiName(), api.getId().getVersion());
 
         if (wsdlResource.getContentType().equals(APIConstants.APPLICATION_ZIP)) {
@@ -6119,7 +6154,7 @@ public final class APIUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+            api = new API(new APIIdentifier(providerName, apiName, apiVersion, artifact.getId()));
             //set uuid
             api.setUUID(artifact.getId());
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));

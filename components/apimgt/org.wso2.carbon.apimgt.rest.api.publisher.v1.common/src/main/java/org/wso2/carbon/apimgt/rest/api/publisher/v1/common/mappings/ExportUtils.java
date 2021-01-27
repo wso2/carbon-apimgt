@@ -937,7 +937,7 @@ public class ExportUtils {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromTenantDomain(apiProductRequesterDomain);
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), organizationDTO);
-            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
+            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,
                     isStatusPreserved, preserveDocs);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);

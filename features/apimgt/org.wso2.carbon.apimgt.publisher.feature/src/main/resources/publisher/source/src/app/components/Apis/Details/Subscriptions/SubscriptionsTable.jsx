@@ -309,6 +309,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.all'
@@ -321,6 +322,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.unblockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='unblock'
@@ -338,6 +340,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockProductionOnly(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.production.only'
@@ -363,6 +366,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.unblockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='unblock'
@@ -380,6 +384,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockProductionOnly(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.production.only'
@@ -392,6 +397,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.all'

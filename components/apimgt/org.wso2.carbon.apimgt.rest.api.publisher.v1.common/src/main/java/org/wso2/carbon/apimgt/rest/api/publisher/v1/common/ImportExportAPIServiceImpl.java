@@ -71,7 +71,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
             api = apiProvider.getAPI(apiIdentifier);
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
+            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             OrganizationDTO organizationDTO = new OrganizationDTO(tenantDomain);

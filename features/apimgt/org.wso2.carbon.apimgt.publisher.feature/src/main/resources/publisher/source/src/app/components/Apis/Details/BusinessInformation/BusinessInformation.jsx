@@ -336,7 +336,7 @@ class BusinessInformation extends React.Component {
                                                 onClick={() => this.handleSubmit(updateAPI)}
                                                 disabled={
                                                     isRestricted(['apim:api_create', 'apim:api_publish'], api)
-                                                    || !this.isValid()
+                                                    || !this.isValid() || api.isRevision
                                                 }
                                             >
                                                 <FormattedMessage id='save' defaultMessage='Save' />

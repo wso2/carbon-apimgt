@@ -183,6 +183,20 @@ public class API implements Serializable {
 
     private String organizationId;
 
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private boolean isRevision = false;
+
+    /**
+     * Property to hold api id of a revision.
+     */
+    private String revisionedApiId;
+
+    /**
+     * Property to hold revision id
+     */
+    private int revisionId;
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -1125,7 +1139,6 @@ public class API implements Serializable {
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
     }
-
     
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;
@@ -1149,6 +1162,30 @@ public class API implements Serializable {
 
     public void setFaultSequenceMediation(Mediation faultSequenceMediation) {
         this.faultSequenceMediation = faultSequenceMediation;
+    }
+
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setRevision(boolean revision) {
+        isRevision = revision;
+    }
+
+    public String getRevisionedApiId() {
+        return revisionedApiId;
+    }
+
+    public void setRevisionedApiId(String revisionedApiId) {
+        this.revisionedApiId = revisionedApiId;
+    }
+
+    public int getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(int revisionId) {
+        this.revisionId = revisionId;
     }
 
     @Override

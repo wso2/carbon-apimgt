@@ -563,7 +563,7 @@ public interface APIManager {
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end,
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
                                            boolean limitAttributes) throws APIManagementException;
 
     /**
