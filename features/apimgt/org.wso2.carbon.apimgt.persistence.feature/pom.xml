@@ -39,10 +39,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.apimgt</groupId>-->
-            <!--<artifactId>org.wso2.carbon.apimgt.persistence.mongodb</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.core</artifactId>
@@ -98,18 +94,6 @@
                                 <bundleDef>
                                     org.wso2.orbit.org.mapstruct:mapstruct:${org.wso2.orbit.org.mapstruct.version}
                                 </bundleDef>
-                                <!--<bundleDef>-->
-                                    <!--org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.persistence.mongodb:${carbon.apimgt.version}-->
-                                <!--</bundleDef>-->
-                                <!--<bundleDef>-->
-                                    <!--org.mongodb:mongodb-driver-sync:${mongodb.driver.version}-->
-                                <!--</bundleDef>-->
-                                <!--<bundleDef>-->
-                                    <!--org.mongodb:mongodb-driver-core:${mongodb.driver.version}-->
-                                <!--</bundleDef>-->
-                                <!--<bundleDef>-->
-                                    <!--org.mongodb:bson:${mongodb.driver.version}-->
-                                <!--</bundleDef>-->
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>

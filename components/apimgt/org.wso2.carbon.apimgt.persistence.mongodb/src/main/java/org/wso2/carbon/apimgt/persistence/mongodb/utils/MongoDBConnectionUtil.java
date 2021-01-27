@@ -21,8 +21,6 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import net.consensys.cava.toml.Toml;
-import net.consensys.cava.toml.TomlParseResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -36,12 +34,6 @@ import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -50,7 +42,6 @@ public class MongoDBConnectionUtil {
 
     private static final Log log = LogFactory.getLog(MongoDBConnectionUtil.class);
     private static MongoClient mongoClient = null;
-    private static TomlParseResult tomlParseResult = null;
     private static String database = null;
     private static final String DEFAULT_DATABASE = "APIM_DB";
 

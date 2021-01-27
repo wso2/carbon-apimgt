@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.persistence.mongodb.dto;
  */
 
 
-import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;

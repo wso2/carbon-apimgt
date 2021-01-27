@@ -1306,4 +1306,14 @@
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
      <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
+
+     <RegistryConfigs>
+      <Type>{{apim.registry.type}}</Type>
+      <ConnectionString>{{apim.atlas.connectionString}}</ConnectionString>
+      <APIUri>{{apim.atlas.apiUri}}</APIUri>
+       <GroupId>{{apim.atlas.groupId}}</GroupId>
+       <ClusterName>{{apim.atlas.clusterName}}</ClusterName>
+       <PublicKey>{{apim.atlas.publicKey}}</PublicKey>
+       <PrivateKey>{{apim.atlas.privateKey}}</PrivateKey>
+     </RegistryConfigs>
 </APIManager>
