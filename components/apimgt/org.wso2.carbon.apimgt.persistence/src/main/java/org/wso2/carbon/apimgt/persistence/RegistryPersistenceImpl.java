@@ -297,7 +297,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            GenericArtifact artifact = getAPIArtifact(apiArtifactId, registry);
 
             boolean isSecured = Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));

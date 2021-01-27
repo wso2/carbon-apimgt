@@ -15,11 +15,14 @@
  */
 package org.wso2.carbon.apimgt.persistence;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.namespace.QName;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,14 +31,20 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.PersistenceHelper;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -44,7 +53,9 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -475,5 +486,150 @@ public class RegistryPersistenceImplTestCase {
         String def = apiPersistenceInstance.getOASDefinition(org, apiUUID);
         Assert.assertEquals("API oas definition does not match", definition, def);
         
+    }
+    
+    @Test
+    public void testAddAPI() throws RegistryException, APIPersistenceException, APIManagementException {
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
+        PublisherAPI publisherAPI = new PublisherAPI();
+        publisherAPI.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+        publisherAPI.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+        publisherAPI.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+        
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[0];
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+
+        PowerMockito.when(RegistryPersistenceUtil.createAPIArtifactContent(any(GenericArtifact.class), any(API.class)))
+                .thenReturn(artifact);
+        
+        GenericArtifact newArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(manager.newGovernanceArtifact(new QName(api.getId().getApiName()))).thenReturn(newArtifact );
+        
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        apiPersistenceInstance.addAPI(org, publisherAPI);
+    }
+    @Test
+    public void testUpdateAPI() throws APIPersistenceException, RegistryException, APIManagementException {
+        
+        PublisherAPI publisherAPI = new PublisherAPI();
+        publisherAPI.setDescription("Modified description");
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[0];
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        GenericArtifact existArtifact = PersistenceHelper.getSampleAPIArtifact();
+        String apiUUID = existArtifact.getId();
+
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(existArtifact);
+        Mockito.doNothing().when(manager).updateGenericArtifact(existArtifact);
+        
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        
+        GenericArtifact updatedArtifact = PersistenceHelper.getSampleAPIArtifact();
+        updatedArtifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
+        PowerMockito.when(RegistryPersistenceUtil.createAPIArtifactContent(any(GenericArtifact.class), any(API.class)))
+                .thenReturn(updatedArtifact);
+       
+        
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, existArtifact);
+        
+        PublisherAPI updatedAPI = apiPersistenceInstance.updateAPI(org, publisherAPI);
+        Assert.assertEquals("Updated API description does not match", "Modified description",
+                updatedAPI.getDescription());
+    }
+    
+    @Test
+    public void testAddAPIProduct() throws RegistryException, APIPersistenceException, APIManagementException {
+        GenericArtifact artifact = PersistenceHelper.getSampleAPIProductArtifact();
+        PublisherAPIProduct publisherAPI = new PublisherAPIProduct();
+        publisherAPI.setApiProductName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
+        publisherAPI.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
+        publisherAPI.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+        
+        APIProduct api = APIProductMapper.INSTANCE.toApiProduct(publisherAPI);
+        
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[0];
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+
+        PowerMockito.when(RegistryPersistenceUtil.createAPIProductArtifactContent(any(GenericArtifact.class),
+                any(APIProduct.class))).thenReturn(artifact);
+        
+        GenericArtifact newArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(manager.newGovernanceArtifact(new QName(publisherAPI.getApiProductName())))
+                .thenReturn(newArtifact);
+        
+        Mockito.when(manager.getGenericArtifact(any(String.class))).thenReturn(newArtifact);
+        Mockito.doNothing().when(newArtifact).invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+        
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
+        apiPersistenceInstance.addAPIProduct(org, publisherAPI);
+    }
+    
+    @Test
+    public void testUpdateAPIProduct() throws APIPersistenceException, RegistryException, APIManagementException {
+        
+        PublisherAPIProduct publisherAPI = new PublisherAPIProduct();
+        publisherAPI.setDescription("Modified description");
+        APIProduct api = APIProductMapper.INSTANCE.toApiProduct(publisherAPI);
+        
+        Registry registry = Mockito.mock(UserRegistry.class);
+        Resource resource = new ResourceImpl();
+        Mockito.when(registry.get(anyString())).thenReturn(resource);
+        Tag[] tags = new Tag[0];
+        Mockito.when(registry.getTags(anyString())).thenReturn(tags);
+        GenericArtifact existArtifact = PersistenceHelper.getSampleAPIProductArtifact();
+        String apiUUID = existArtifact.getId();
+
+        PowerMockito.mockStatic(RegistryPersistenceUtil.class);
+        GenericArtifactManager manager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        Mockito.when(manager.getGenericArtifact(apiUUID)).thenReturn(existArtifact);
+        Mockito.doNothing().when(manager).updateGenericArtifact(existArtifact);
+        
+        PowerMockito.when(RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY))
+                .thenReturn(manager);
+        
+        GenericArtifact updatedArtifact = PersistenceHelper.getSampleAPIProductArtifact();
+        updatedArtifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
+        PowerMockito.when(RegistryPersistenceUtil.createAPIProductArtifactContent(any(GenericArtifact.class),
+                any(APIProduct.class))).thenReturn(updatedArtifact);
+       
+        
+        Organization org = new Organization(SUPER_TENANT_DOMAIN);
+        APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, existArtifact);
+        
+        PublisherAPIProduct updatedAPI = apiPersistenceInstance.updateAPIProduct(org, publisherAPI);
+        Assert.assertEquals("Updated API description does not match", "Modified description",
+                updatedAPI.getDescription());
     }
 }

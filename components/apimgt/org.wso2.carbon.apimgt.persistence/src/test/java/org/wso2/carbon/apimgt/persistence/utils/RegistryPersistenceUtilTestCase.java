@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
@@ -50,14 +51,18 @@ import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
+import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -231,5 +236,17 @@ public class RegistryPersistenceUtilTestCase {
                 .getTenantDomain(new APIIdentifier("test", "test", "1.0"));
         //Assert.assertEquals("Super tenant domain does not match", SUPER_TENANT_DOMAIN, domain);
         
+    }
+    
+    @Test
+    public void testGetArtifactManager() throws RegistryException, APIPersistenceException {
+        Registry registry = Mockito.mock(UserRegistry.class);
+        GovernanceArtifactConfiguration conf = Mockito.mock(GovernanceArtifactConfiguration.class);
+        PowerMockito.when(GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry))
+                .thenReturn(conf);
+        Association[] assosiations = new Association[0];
+        Mockito.when(conf.getRelationshipDefinitions()).thenReturn(assosiations );
+        GenericArtifactManager manager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
+        Assert.assertNotNull("Manager is null", manager);
     }
 }
