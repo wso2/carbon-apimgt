@@ -113,11 +113,18 @@ class SampleAPI extends Component {
                         const revisionId = api1.body.id;
                         const envList = settings.environment.map((env) => env.name);
                         const body1 = [];
-                        if (envList.length > 0) {
-                            body1.push({
-                                name: envList[0],
-                                displayOnDevportal: true,
-                            });
+                        if (envList && envList.length > 0) {
+                            if (envList.includes('Default')) {
+                                body1.push({
+                                    name: 'Default',
+                                    displayOnDevportal: true,
+                                });
+                            } else {
+                                body1.push({
+                                    name: envList[0],
+                                    displayOnDevportal: true,
+                                });
+                            }
                         }
                         restApi.deployRevision(sampleAPI.id, revisionId, body1)
                             .then(() => {
