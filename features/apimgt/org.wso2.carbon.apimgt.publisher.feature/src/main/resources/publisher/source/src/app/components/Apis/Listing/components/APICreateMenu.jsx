@@ -117,6 +117,44 @@ const APICreateMenu = (props) => {
             </ListItem>
             <Divider />
             <ListItem>
+                <Link to='/apis/create/streamingapi' className={classes.links}>
+                    <ListItemText
+                        primary={(
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.primary.streamingapi'
+                                defaultMessage='Design a new Streaming API'
+                            />
+                        )}
+                        secondary={(
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.secondary.streamingapi'
+                                defaultMessage='Design and prototype a new Streaming API'
+                            />
+                        )}
+                    />
+                </Link>
+            </ListItem>
+            <Divider />
+            <ListItem>
+                <Link to='/apis/create/asyncapi' className={classes.links}>
+                    <ListItemText
+                        primary={(
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.primary.asyncapi'
+                                defaultMessage='I Have a Streaming API Definition'
+                            />
+                        )}
+                        secondary={(
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.secondary.asyncapi'
+                                defaultMessage='Upload the definition or provide the URL'
+                            />
+                        )}
+                    />
+                </Link>
+            </ListItem>
+            <Divider />
+            <ListItem>
                 <Link to='/apis/create/ws' className={classes.links}>
                     <ListItemText
                         primary={(

@@ -28,6 +28,7 @@ import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import ApiCreateGraphQL from './GraphQL/ApiCreateGraphQL';
 import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
+import APICreateStreamingAPI from './StreamingAPI/APICreateStreamingAPI';
 
 const styles = {
     content: {
@@ -54,6 +55,7 @@ function APICreateRoutes(props) {
                 <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
                 <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
+                <Route path='/apis/create/streamingapi' component={APICreateStreamingAPI} />
                 <Route component={ResourceNotFound} />
             </Switch>
         </main>

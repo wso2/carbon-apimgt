@@ -115,7 +115,7 @@ function checkContext(value, result) {
  */
 export default function DefaultAPIForm(props) {
     const {
-        onChange, onValidate, api, isAPIProduct, isWebSocket,
+        onChange, onValidate, api, isAPIProduct, isWebSocket, children, appendChildrenBeforeEndpoint, hideEndpoint,
     } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
@@ -405,7 +405,8 @@ export default function DefaultAPIForm(props) {
                         </>
                     )}
                 </Grid>
-                {!isAPIProduct && (
+                {appendChildrenBeforeEndpoint && !!children && children}
+                {!isAPIProduct && !hideEndpoint && (
                     <TextField
                         fullWidth
                         id='itest-id-apiendpoint-input'
@@ -466,6 +467,8 @@ export default function DefaultAPIForm(props) {
                         }}
                     />
                 )}
+
+                {!appendChildrenBeforeEndpoint && !!children && children}
 
                 <SelectPolicies
                     policies={api.policies}

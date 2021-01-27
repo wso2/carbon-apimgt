@@ -6648,7 +6648,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL
+            WS, SOAPTOREST, GRAPHQL, WEBSUB
           example: HTTP
           default: HTTP
           enum:
@@ -6657,6 +6657,7 @@ components:
           - SOAPTOREST
           - SOAP
           - GRAPHQL
+          - WEBSUB
         transport:
           type: array
           description: |
@@ -7333,6 +7334,39 @@ components:
             $ref: '#/components/schemas/ResourcePath'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    Topic:
+      title: Topic
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: OrderbookUpdates
+        description:
+          type: string
+          example: Dolor sit amet
+        mode:
+          type: string
+          example: subscribe
+        payloadType:
+          type: string
+        payloadProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicProperty'
+    TopicProperty:
+      title: TopicProperty
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+        advanced:
+          type: string
+        description:
+          type: string
     APIProductOutdatedStatus:
       title: APIProduct is outdated status
       type: object

@@ -55,6 +55,7 @@ import LastUpdatedTime from 'AppComponents/Apis/Details/components/LastUpdatedTi
 import Overview from './NewOverview/Overview';
 import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
+import Topics from './Configuration/Topics';
 import RuntimeConfigurationWebSocket from './Configuration/RuntimeConfigurationWebSocket';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
@@ -373,6 +374,19 @@ class Details extends Component {
                 );
             case 'WS':
                 return '';
+            case 'WEBSUB':
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.topics',
+                                defaultMessage: 'Topics',
+                            })}
+                            to={pathPrefix + 'topics'}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </>
+                );
             default:
                 return (
                     <>
@@ -559,7 +573,7 @@ class Details extends Component {
                             />
                         )}
                         {this.getLeftMenuItemForResourcesByType(api.type)}
-                        {!isAPIProduct && (
+                        {!isAPIProduct && api.type !== 'WEBSUB' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.endpoints',
@@ -707,6 +721,10 @@ class Details extends Component {
                                     component={() => <RuntimeConfigurationWebSocket api={api} />}
                                 />
                                 <Route
+                                    path={Details.subPaths.TOPICS}
+                                    component={() => <Topics api={api} />}
+                                />
+                                <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
                                     component={() => <DesignConfigurations api={api} />}
                                 />
@@ -834,6 +852,7 @@ Details.subPaths = {
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
     TRYOUT: '/apis/:api_uuid/test-console',
     QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
+    TOPICS: '/apis/:api_uuid/topics',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum
