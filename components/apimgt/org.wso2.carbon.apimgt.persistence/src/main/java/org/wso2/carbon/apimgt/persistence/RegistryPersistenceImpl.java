@@ -657,10 +657,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (apiArtifact != null) {
 
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
-                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
-                        + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
-                        + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+                int prependIndex = apiPath.indexOf("/api");
+                String apiSourcePath = apiPath.substring(0, prependIndex );
+                String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
 
                 if (registry.resourceExists(definitionPath)) {
@@ -690,56 +690,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
-
-    @Override
-    public PublisherAPI getPublisherRevisionAPI(Organization org, String revisionUUID, String apiUUID, int revisionId)
-            throws APIPersistenceException {
-
-        boolean tenantFlowStarted = false;
-        try {
-            RegistryHolder holder = getRegistry(org.getName());
-            tenantFlowStarted  = holder.isTenantFlowStarted();
-            Registry registry = holder.getRegistry();
-
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(revisionUUID);
-            if (apiArtifact != null) {
-
-                API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
-                String definitionPath = RegistryPersistenceUtil.getRevisionPath(apiUUID, revisionId)
-                        + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-
-                if (registry.resourceExists(definitionPath)) {
-                    Resource apiDocResource = registry.get(definitionPath);
-                    String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                    api.setSwaggerDefinition(apiDocContent);
-                }
-
-                PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ;
-                if (log.isDebugEnabled()) {
-                    log.debug("Revision for id " + revisionUUID + " : " + pubApi.toString());
-                }
-                return pubApi;
-            } else {
-                String msg = "Failed to get Revision API. API artifact corresponding to artifactId " + revisionUUID
-                        + " does not exist";
-                throw new APIMgtResourceNotFoundException(msg);
-            }
-        } catch (RegistryException e) {
-            String msg = "Failed to get API";
-            throw new APIPersistenceException(msg, e);
-        } catch (APIManagementException e) {
-            String msg = "Failed to get API";
-            throw new APIPersistenceException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                RegistryPersistenceUtil.endTenantFlow();
-            }
-        }
-    }
-
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
         boolean tenantFlowStarted = false;
@@ -1955,7 +1905,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            String apiSourcePath = RegistryPersistenceUtil.getAPIBasePath(apiProviderName, apiName, apiVersion);
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.indexOf("/api");
+            String apiSourcePath = apiPath.substring(0, prependIndex );
             String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                     + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
             String wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION
@@ -2002,61 +1954,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
-
-    @Override
-    public ResourceFile getRevisionWSDL(Organization org, String revisionUUID, String apiUUID, int revisionId)
-            throws WSDLPersistenceException {
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-
-            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(revisionUUID);
-            if (apiArtifact == null) {
-                return null;
-            }
-            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-            apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
-            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-
-            String apiSourcePath = RegistryPersistenceUtil.getRevisionPath(apiUUID, revisionId);
-            String wsdlResourcePath = apiSourcePath
-                    + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
-            String resourceFileName = apiProviderName + "-" + apiName + "-" + apiVersion;
-            if (registry.resourceExists(wsdlResourcePath)) {
-                Resource resource = registry.get(wsdlResourcePath);
-                ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
-                returnResource.setName(resourceFileName);
-                return returnResource;
-            } else {
-                wsdlResourcePath = apiSourcePath + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiProviderName
-                        + APIConstants.WSDL_PROVIDER_SEPERATOR + apiName + apiVersion + APIConstants.ZIP_FILE_EXTENSION;
-                if (registry.resourceExists(wsdlResourcePath)) {
-                    Resource resource = registry.get(wsdlResourcePath);
-                    ResourceFile returnResource = new ResourceFile(resource.getContentStream(), resource.getMediaType());
-                    returnResource.setName(resourceFileName);
-                    return returnResource;
-                } else {
-                    throw new WSDLPersistenceException("No WSDL found for the API Revision: " + revisionUUID,
-                            ExceptionCodes.from(ExceptionCodes.NO_WSDL_AVAILABLE_FOR_API, apiName, apiVersion));
-                }
-            }
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Error while getting wsdl file from the registry for API Revision: " + revisionUUID;
-            throw new WSDLPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-    }
-
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
 
@@ -2131,10 +2028,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-                
-                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
-                        + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+                String apiPath = GovernanceUtils.getArtifactPath(registryType, apiId);
+                int prependIndex = apiPath.indexOf("/api");
+                String apiSourcePath = apiPath.substring(0, prependIndex );
+                String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
 
                 if (registryType.resourceExists(definitionPath)) {
@@ -2154,36 +2051,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return definition;
     }
-
-    @Override
-    public String getRevisionOASDefinition(Organization org, String revisionUUID, String apiUUID, int revisionId)
-            throws OASPersistenceException {
-        String apiTenantDomain = org.getName();
-        String definition = null;
-        boolean tenantFlowStarted = false;
-        try {
-            RegistryHolder holder = getRegistry(apiTenantDomain);
-            Registry registryType = holder.getRegistry();
-            tenantFlowStarted = holder.isTenantFlowStarted;
-            String definitionPath = RegistryPersistenceUtil.getRevisionPath(apiUUID, revisionId)
-                    + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-
-            if (registryType.resourceExists(definitionPath)) {
-                Resource apiDocResource = registryType.get(definitionPath);
-                definition = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                return definition;
-            }
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Failed to get swagger documentation of API Revision : " + revisionUUID;
-            throw new OASPersistenceException(msg, e);
-        } finally {
-            if (tenantFlowStarted) {
-                RegistryPersistenceUtil.endTenantFlow();
-            }
-        }
-        return definition;
-    }
-
     @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {
@@ -2246,14 +2113,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (api == null) {
                 throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
-            String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
-                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR + api.apiVersion
-                    + RegistryConstants.PATH_SEPARATOR;
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.indexOf("/api");
+            String apiSourcePath = apiPath.substring(0, prependIndex );
             String schemaName = api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + api.apiName
                     + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            String schemaResourePath = path + schemaName;
-            if (registry.resourceExists(schemaResourePath)) {
-                Resource schemaResource = registry.get(schemaResourePath);
+            String schemaResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR + schemaName;
+            if (registry.resourceExists(schemaResourcePath)) {
+                Resource schemaResource = registry.get(schemaResourcePath);
                 schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
                         RegistryConstants.DEFAULT_CHARSET_ENCODING);
             }
@@ -2266,40 +2133,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return schemaDoc;
     }
-
-    @Override
-    public String getRevisionGraphQLSchema(Organization org, String revisionUUID, String apiUUID, int revisionId)
-            throws GraphQLPersistenceException {
-        boolean tenantFlowStarted = false;
-        String schemaDoc = null;
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            tenantFlowStarted = holder.isTenantFlowStarted();
-            BasicAPI api = getbasicAPIInfo(revisionUUID, registry);
-            if (api == null) {
-                throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
-            }
-            String path = RegistryPersistenceUtil.getRevisionPath(apiUUID, revisionId);
-            String schemaName = api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + api.apiName
-                    + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            String schemaResourePath = path + schemaName;
-            if (registry.resourceExists(schemaResourePath)) {
-                Resource schemaResource = registry.get(schemaResourePath);
-                schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
-                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
-            }
-        } catch (APIPersistenceException | RegistryException | IOException e) {
-            throw new GraphQLPersistenceException("Error while accessing graphql schema definition ", e);
-        } finally {
-            if (tenantFlowStarted) {
-                RegistryPersistenceUtil.endTenantFlow();
-            }
-        }
-        return schemaDoc;
-    }
-
     @Override
     public Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
@@ -2656,8 +2489,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
-            String apiOrAPIProductDocPath = RegistryPersistenceDocUtil.getDocumentPath(apiProviderName, apiName,
-                    apiVersion);
+            String apiPath = GovernanceUtils.getArtifactPath(registryType, apiId);
+            int prependIndex = apiPath.indexOf("/api");
+            String apiSourcePath = apiPath.substring(0, prependIndex );
+            String apiOrAPIProductDocPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR +
+                    APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
+
             String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
             String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
 
@@ -2694,75 +2531,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         } catch (RegistryException | APIPersistenceException e) {
             String msg = "Failed to get documentations for api/product " + apiId;
-            throw new DocumentationPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public DocumentSearchResult searchRevisionDocumentation(Organization org, String revisionUUID, int start, int offset,
-                                                            String searchQuery, UserContext ctx, String apiUUID, int revisionId)
-            throws DocumentationPersistenceException {
-
-        DocumentSearchResult result = null;
-        Registry registryType;
-        String requestedTenantDomain = org.getName();
-        boolean isTenantFlowStarted = false;
-        try {
-
-            RegistryHolder holder = getRegistry(requestedTenantDomain);
-            registryType = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-
-            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(revisionUUID);
-            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-            String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
-            String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-
-            String apiOrAPIProductDocPath = RegistryPersistenceDocUtil.getRevisionDocumentPath(apiUUID, revisionId);
-            String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
-            String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
-
-            if (registryType.resourceExists(apiOrAPIProductDocPath)) {
-                List<Documentation> documentationList = new ArrayList<Documentation>();
-                Resource resource = registryType.get(apiOrAPIProductDocPath);
-                if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
-                    for (String docPath : docsPaths) {
-                        if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
-                            Resource docResource = registryType.get(docPath);
-                            GenericArtifactManager artifactManager = RegistryPersistenceDocUtil
-                                    .getDocumentArtifactManager(registryType);
-                            GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
-                            Documentation doc = RegistryPersistenceDocUtil.getDocumentation(docArtifact);
-                            if (searchQuery != null) {
-                                if (searchQuery.toLowerCase().startsWith("name:")) {
-                                    String requestedDocName = searchQuery.split(":")[1];
-                                    if (doc.getName().equalsIgnoreCase(requestedDocName)) {
-                                        documentationList.add(doc);
-                                    }
-                                } else {
-                                    log.warn("Document search not implemented for the query " + searchQuery);
-                                }
-                            } else {
-                                documentationList.add(doc);
-                            }
-
-                        }
-                    }
-                }
-                result = new DocumentSearchResult();
-                result.setDocumentationList(documentationList);
-            }
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Failed to get documentations for api/product revision for revision " + revisionUUID;
             throw new DocumentationPersistenceException(msg, e);
         } finally {
             if (isTenantFlowStarted) {
@@ -2891,9 +2659,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (api == null) {
                 throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
-            String apiResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
-                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR
-                    + api.apiVersion;
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.indexOf("/api");
+            String apiResourcePath = apiPath.substring(0, prependIndex );
             String policyPath = GovernanceUtils.getArtifactPath(registry, mediationPolicyId);
             if (!policyPath.startsWith(apiResourcePath)) {
                 throw new MediationPolicyPersistenceException("Policy not foud ", ExceptionCodes.POLICY_NOT_FOUND);
@@ -2924,55 +2692,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return mediation;
     }
-
-    @Override
-    public Mediation getRevisionMediationPolicy(Organization org, String revisionUUID, String mediationPolicyId,
-                                                String apiUUID, int revisionId) throws MediationPolicyPersistenceException {
-        boolean isTenantFlowStarted = false;
-        Mediation mediation = null;
-
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-            BasicAPI api = getbasicAPIInfo(revisionUUID, registry);
-            if (api == null) {
-                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
-            }
-            String apiResourcePath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
-                    RegistryConstants.PATH_SEPARATOR + revisionId;
-            String policyPath = GovernanceUtils.getArtifactPath(registry, mediationPolicyId);
-            if (!policyPath.startsWith(apiResourcePath)) {
-                throw new MediationPolicyPersistenceException("Policy not foud ", ExceptionCodes.POLICY_NOT_FOUND);
-            }
-            Resource mediationResource = registry.get(policyPath);
-            if (mediationResource != null) {
-                String contentString = IOUtils.toString(mediationResource.getContentStream(),
-                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
-                // Extracting name specified in the mediation config
-                OMElement omElement = AXIOMUtil.stringToOM(contentString);
-                OMAttribute attribute = omElement.getAttribute(new QName("name"));
-                String mediationPolicyName = attribute.getAttributeValue();
-                String[] path = policyPath.split(RegistryConstants.PATH_SEPARATOR);
-                String resourceType = path[(path.length - 2)];
-                mediation = new Mediation();
-                mediation.setConfig(contentString);
-                mediation.setType(resourceType);
-                mediation.setId(mediationResource.getUUID());
-                mediation.setName(mediationPolicyName);
-            }
-        } catch (RegistryException | APIPersistenceException | IOException | XMLStreamException e) {
-            String msg = "Error occurred  while getting Api Specific mediation policies ";
-            throw new MediationPolicyPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return mediation;
-    }
-
     @Override
     public List<MediationInfo> getAllMediationPolicies(Organization org, String apiId)
             throws MediationPolicyPersistenceException {
@@ -2989,9 +2708,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (api == null) {
                 throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
-            String apiResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.apiProvider
-                    + RegistryConstants.PATH_SEPARATOR + api.apiName + RegistryConstants.PATH_SEPARATOR
-                    + api.apiVersion;
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.indexOf("/api");
+            String apiResourcePath = apiPath.substring(0, prependIndex );
 
             // apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
             // Getting API registry resource
@@ -3008,94 +2727,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                     + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT))
                             || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
                                     + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))) {
-                        Resource typeResource = registry.get(type);
-                        // typeResource : in / out / fault
-                        if (typeResource instanceof Collection) {
-                            String[] mediationPolicyArr = ((Collection) typeResource).getChildren();
-                            if (mediationPolicyArr.length > 0) {
-                                for (String mediationPolicy : mediationPolicyArr) {
-                                    Resource policyResource = registry.get(mediationPolicy);
-                                    // policyResource eg: custom_in_message
-
-                                    // Get uuid of the registry resource
-                                    String resourceId = policyResource.getUUID();
-
-                                    // Get mediation policy config
-                                    try {
-                                        String contentString = IOUtils.toString(policyResource.getContentStream(),
-                                                RegistryConstants.DEFAULT_CHARSET_ENCODING);
-                                        // Extract name from the policy config
-                                        OMElement omElement = AXIOMUtil.stringToOM(contentString);
-                                        OMAttribute attribute = omElement.getAttribute(new QName("name"));
-                                        String mediationPolicyName = attribute.getAttributeValue();
-                                        mediation = new MediationInfo();
-                                        mediation.setId(resourceId);
-                                        mediation.setName(mediationPolicyName);
-                                        // Extracting mediation policy type from the registry resource path
-                                        String resourceType = type.substring(type.lastIndexOf("/") + 1);
-                                        mediation.setType(resourceType);
-                                        mediationList.add(mediation);
-                                    } catch (XMLStreamException e) {
-                                        // If exception been caught flow will continue with next mediation policy
-                                        log.error(
-                                                "Error occurred while getting omElement out of" + " mediation content",
-                                                e);
-                                    } catch (IOException e) {
-                                        log.error("Error occurred while converting the content "
-                                                + "stream of mediation " + mediationPolicy + " to string", e);
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Error occurred  while getting Api Specific mediation policies ";
-            throw new MediationPolicyPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return mediationList;
-    }
-
-    @Override
-    public List<MediationInfo> getAllRevisionMediationPolicies(Organization org, String revisionUUID, String apiUUID,
-                                                               int revisionId) throws MediationPolicyPersistenceException {
-        boolean isTenantFlowStarted = false;
-        List<MediationInfo> mediationList = new ArrayList<MediationInfo>();
-        MediationInfo mediation;
-
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            Registry registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-            BasicAPI api = getbasicAPIInfo(revisionUUID, registry);
-            if (api == null) {
-                throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
-            }
-            String apiResourcePath = APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
-                    RegistryConstants.PATH_SEPARATOR + revisionId;
-
-            // apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-            // Getting API registry resource
-            Resource resource = registry.get(apiResourcePath);
-            // resource eg: /_system/governance/apimgt/applicationdata/provider/admin/calculatorAPI/2.0
-            if (resource instanceof Collection) {
-                Collection typeCollection = (Collection) resource;
-                String[] typeArray = typeCollection.getChildren();
-                for (String type : typeArray) {
-                    // Check for mediation policy sequences
-                    if ((type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
-                            + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN))
-                            || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
-                            + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT))
-                            || (type.equalsIgnoreCase(apiResourcePath + RegistryConstants.PATH_SEPARATOR
-                            + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT))) {
                         Resource typeResource = registry.get(type);
                         // typeResource : in / out / fault
                         if (typeResource instanceof Collection) {
@@ -3251,9 +2882,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String artifactOldPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR
                     + apiProviderName + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR
                     + apiVersion;
-            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
-                    + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
-            
+            String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
+            int prependIndex = apiPath.indexOf("/api");
+            String artifactPath = apiPath.substring(0, prependIndex );
             String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
             String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
 
@@ -3274,44 +2905,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return null;
     }
-
-    @Override
-    public ResourceFile getRevisionThumbnail(Organization org, String revisionUUID, String apiUUID, int revisionId)
-            throws ThumbnailPersistenceException {
-
-        Registry registry;
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = org.getName();
-            RegistryHolder holder = getRegistry(tenantDomain);
-            registry = holder.getRegistry();
-            isTenantFlowStarted = holder.isTenantFlowStarted();
-
-            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(revisionUUID);
-            if (apiArtifact == null) {
-                return null;
-            }
-            String artifactPath = RegistryPersistenceUtil.getRevisionPath(apiUUID,revisionId);
-
-            String thumbPath = artifactPath + APIConstants.API_ICON_IMAGE;
-            if (registry.resourceExists(thumbPath)) {
-                Resource res = registry.get(thumbPath);
-                return new ResourceFile(res.getContentStream(), res.getMediaType());
-            }
-        } catch (RegistryException | APIPersistenceException e) {
-            String msg = "Error while loading API icon of API Revision " +  revisionUUID + " from the registry";
-            throw new ThumbnailPersistenceException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return null;
-    }
-
     @Override
     public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
         Registry registry;
@@ -4042,7 +3635,4 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     
     }
-
-
-
 }
