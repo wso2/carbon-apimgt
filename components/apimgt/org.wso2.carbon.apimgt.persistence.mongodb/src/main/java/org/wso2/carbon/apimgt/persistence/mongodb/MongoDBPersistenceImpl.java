@@ -115,6 +115,21 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
     }
 
+    @Override
+    public String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
+        return null;
+    }
+
+    @Override
+    public void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
+
+    }
+
+    @Override
+    public void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
+
+    }
+
     private Boolean isIndexCreated(String organizationName) {
         //Check if index is created flag exists in cache
         Boolean indexCacheCheck = indexCheckCache.get(organizationName);
@@ -172,6 +187,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         }
         PublisherAPI api = MongoAPIMapper.INSTANCE.toPublisherApi(mongoDBAPIDocument);
         return api;
+    }
+
+    @Override
+    public PublisherAPI getPublisherRevisionAPI(Organization org, String revisionUUID, String apiUUID, int revisionId) throws APIPersistenceException {
+        return null;
     }
 
     @Override
@@ -304,6 +324,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public ResourceFile getRevisionWSDL(Organization org, String revisionUUID, String apiUUID, int revisionId) throws WSDLPersistenceException {
+        return null;
+    }
+
+    @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition)
             throws OASPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
@@ -323,6 +348,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public String getRevisionOASDefinition(Organization org, String revisionUUID, String apiUUID, int revisionId) throws OASPersistenceException {
+        return null;
+    }
+
+    @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {
 
@@ -330,6 +360,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException {
+        return null;
+    }
+
+    @Override
+    public String getRevisionGraphQLSchema(Organization org, String revisionUUID, String apiUUID, int revisionId) throws GraphQLPersistenceException {
         return null;
     }
 
@@ -399,6 +434,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         documentSearchResult.setReturnedDocsCount(documentationList.size());
         documentSearchResult.setReturnedDocsCount(5);
         return documentSearchResult;
+    }
+
+    @Override
+    public DocumentSearchResult searchRevisionDocumentation(Organization org, String revisionUUID, int start, int offset, String searchQuery, UserContext ctx, String apiUUID, int revisionId) throws DocumentationPersistenceException {
+        return null;
     }
 
     @Override
@@ -611,8 +651,18 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
+    public Mediation getRevisionMediationPolicy(Organization org, String revisionUUID, String mediationPolicyId, String apiUUID, int revisionId) throws MediationPolicyPersistenceException {
+        return null;
+    }
+
+    @Override
     public List<MediationInfo> getAllMediationPolicies(Organization org, String apiId)
             throws MediationPolicyPersistenceException {
+        return null;
+    }
+
+    @Override
+    public List<MediationInfo> getAllRevisionMediationPolicies(Organization org, String revisionUUID, String apiUUID, int revisionId) throws MediationPolicyPersistenceException {
         return null;
     }
 
@@ -630,6 +680,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
+        return null;
+    }
+
+    @Override
+    public ResourceFile getRevisionThumbnail(Organization org, String revisionUUID, String apiUUID, int revisionId) throws ThumbnailPersistenceException {
         return null;
     }
 
