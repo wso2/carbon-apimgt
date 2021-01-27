@@ -272,6 +272,9 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         } else if (!infoDTO.isAuthorized() && infoDTO.getValidationStatus() == 0) {
             //Scenario where validation failed and message is not set
             infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
+        } else {
+            infoDTO.setAuthorized(false);
+            infoDTO.setValidationStatus(APIConstants.KeyValidationStatus.API_AUTH_RESOURCE_FORBIDDEN);
         }
 
         return infoDTO;
