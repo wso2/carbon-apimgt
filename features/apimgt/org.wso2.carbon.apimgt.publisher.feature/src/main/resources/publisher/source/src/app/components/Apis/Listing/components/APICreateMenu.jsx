@@ -79,10 +79,10 @@ const APICreateMenu = (props) => {
                         <Typography variant='body2'>
                             <FormattedMessage
                                 id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
-                                defaultMessage={`API creation is the process of linking an existing 
-                        backend API backend API implementation to the API Publisher, 
-                        so that you can manage and monitor the API’s lifecycle, documentation, 
-                        security, community, and subscriptions Alternatively, you can provide 
+                                defaultMessage={`API creation is the process of linking an existing
+                        backend API backend API implementation to the API Publisher,
+                        so that you can manage and monitor the API’s lifecycle, documentation,
+                        security, community, and subscriptions Alternatively, you can provide
                         the API implementation in-line in the API Publisher itself.`}
                             />
                         </Typography>
@@ -173,7 +173,7 @@ const APICreateMenu = (props) => {
                                         <Typography variant='body2'>
                                             <FormattedMessage
                                                 id='Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content'
-                                                defaultMessage={`This is a sample API for Pizza Shack 
+                                                defaultMessage={`This is a sample API for Pizza Shack
                                     online pizza delivery store`}
                                             />
                                         </Typography>
