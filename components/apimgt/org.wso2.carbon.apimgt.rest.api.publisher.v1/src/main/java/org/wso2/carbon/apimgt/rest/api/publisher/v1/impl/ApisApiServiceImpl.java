@@ -308,6 +308,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId          apiId
      * @param messageContext message context
+     * @param organizationId  Organization Identifier
      * @return Response with complexity details of the GraphQL API
      */
 
@@ -354,6 +355,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Update complexity details of a given API
      *
      * @param apiId          apiId
+     * @param organizationId  Organization Identifier
      * @param body           GraphQLQueryComplexityInfo DTO as request body
      * @param messageContext message context
      * @return Response
@@ -405,11 +407,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Get GraphQL Schema of given API
      *
-     * @param apiId          apiId
-     * @param accept
-     * @param ifNoneMatch    If--Match header value
-     * @param messageContext message context
-     * @return Response with GraphQL Schema
+     * @param apiId           apiId
+     * @param organizationId  Organization Identifier
+     * @param accept          Accept header string
+     * @param ifNoneMatch     If--Match header value
+     * @param messageContext  message context
+     * @return Response with  GraphQL Schema
      */
     @Override
     public Response getAPIGraphQLSchema(String apiId, String organizationId, String accept, String ifNoneMatch,
@@ -548,6 +551,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Get all types and fields of the GraphQL Schema of a given API
      *
      * @param apiId          apiId
+     * @param organizationId  Organization Identifier
      * @param messageContext message context
      * @return Response with all the types and fields found within the schema definition
      */
@@ -673,6 +677,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Method to retrieve Security Audit Report
      * @param apiId API ID of the API
+     * @param organizationId  Organization Identifier
      * @param accept Accept header string
      * @param messageContext Message Context string
      * @return Response object of Security Audit
@@ -1230,6 +1235,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Delete API
      *
      * @param apiId   API Id
+     * @param organizationId  Organization Identifier
      * @param ifMatch If-Match header value
      * @return Status of API Deletion
      */
@@ -1310,6 +1316,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId       API identifier
      * @param documentId  document identifier
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @return Content of the document/ either inline/file or source url as a redirection
      */
@@ -1370,6 +1377,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId         API identifier
      * @param documentId    document identifier
+     * @param organizationId  Organization Identifier
      * @param inputStream   file input stream
      * @param fileDetail    file details as Attachment
      * @param inlineContent inline content for the document
@@ -1456,6 +1464,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId      API identifier
      * @param documentId document identifier
+     * @param organizationId  Organization Identifier
      * @param ifMatch    If-match header value
      * @return 200 response if deleted successfully
      */
@@ -1533,6 +1542,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId      API identifier
      * @param documentId document identifier
      * @param body       updated document DTO
+     * @param organizationId  Organization Identifier
      * @param ifMatch    If-match header value
      * @return updated document DTO as response
      */
@@ -1601,6 +1611,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Returns all the documents of the given API identifier that matches to the search condition
      *
      * @param apiId       API identifier
+     * @param organizationId  Organization Identifier
      * @param limit       max number of records returned
      * @param offset      starting index
      * @param ifNoneMatch If-None-Match header value
@@ -1647,6 +1658,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId api identifier
      * @param body  Documentation DTO as request body
+     * @param organizationId  Organization Identifier
      * @return created document DTO as response
      */
     @Override
@@ -1689,6 +1701,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Get external store list which the given API is already published to.
      * @param apiId API Identifier
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @param messageContext CXF Message Context
      * @return External Store list of published API
@@ -1721,6 +1734,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Gets generated scripts
      *
      * @param apiId  API Id
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @param messageContext message context
      * @return list of policies of generated sample payload
@@ -1747,6 +1761,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves the WSDL meta information of the given API. The API must be a SOAP API.
      *
      * @param apiId Id of the API
+     * @param organizationId  Organization Identifier
      * @param messageContext CXF Message Context
      * @return WSDL meta information of the API
      * @throws APIManagementException when error occurred while retrieving API WSDL meta info.
@@ -1774,6 +1789,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves API Lifecycle history information
      *
      * @param apiId API Id
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle history information
      */
@@ -1811,6 +1827,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves API Lifecycle state information
      *
      * @param apiId API Id
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
      */
@@ -1994,6 +2011,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Returns a specific mediation policy by identifier that is belong to the given API identifier
      *
      * @param apiId             API uuid
+     * @param organizationId  Organization Identifier
      * @param mediationPolicyId mediation policy uuid
      * @param ifNoneMatch       If-None-Match header value
      * @return returns the matched mediation
@@ -2041,6 +2059,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileInputStream   input stream of mediation policy
      * @param fileDetail      mediation policy file
      * @param inlineContent   mediation policy content
+     * @param organizationId  Organization Identifier
      * @param ifMatch           If-match header value
      * @return updated mediation DTO as response
      */
@@ -2131,6 +2150,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId             API identifier
      * @param mediationPolicyId uuid of mediation policy
      * @param ifNoneMatch       If-None-Match header value
+     * @param organizationId  Organization Identifier
      * @return updated mediation DTO as response
      */
     @Override
@@ -2179,6 +2199,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileDetail      mediation policy file
      * @param inlineContent   mediation policy content
      * @param ifMatch         If-match header value
+     * @param organizationId  Organization Identifier
      * @return updated mediation DTO as response
      */
     @Override
@@ -2282,6 +2303,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId API ID
      * @param messageContext message context
+     * @param organizationId  Organization Identifier
      * @return API monetization status and monetized tier to billing plan mapping
      */
     @Override
@@ -2324,6 +2346,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId API ID
      * @param body request body
+     * @param organizationId  Organization Identifier
      * @param messageContext message context
      * @return monetizationDTO
      */
@@ -2404,6 +2427,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId API Id
      * @param externalStoreIds  External Store Ids
+     * @param organizationId  Organization Identifier
      * @param ifMatch   If-match header value
      * @param messageContext CXF Message Context
      * @return Response of published external store list
@@ -2449,6 +2473,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId           API ID
      * @param sequenceType    sequence type('in' or 'out')
+     * @param organizationId  Organization Identifier
      * @param resourcePath    api resource path
      * @param verb            http verb
      * @param ifNoneMatch     If-None-Match header value
@@ -2517,6 +2542,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param apiId           API ID
      * @param resourcePolicyId      resource policy id
      * @param ifNoneMatch     If-None-Match header value
+     * @param organizationId  Organization Identifier
      * @return json response of the resource policy for the resource id given
      */
     @Override
@@ -2552,6 +2578,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId  API ID
      * @param resourcePolicyId resource policy id
+     * @param organizationId  Organization Identifier
      * @param body resource policy content
      * @param ifMatch If-Match header value
      * @return json response of the updated sequence content
@@ -2641,6 +2668,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves the swagger document of an API
      *
      * @param apiId           API identifier
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch     If-None-Match header value
      * @return Swagger document of the API
      */
@@ -2675,6 +2703,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Updates the swagger definition of an existing API
      *
      * @param apiId             API identifier
+     * @param organizationId  Organization Identifier
      * @param apiDefinition     Swagger definition
      * @param url               Swagger definition URL
      * @param fileInputStream   Swagger definition input file content
@@ -2737,7 +2766,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param apiId API Id
      * @param apiDefinition swagger definition
-     * @param organizationId Organization UUID
+     * @param organizationId  Organization Identifier
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
@@ -2756,6 +2785,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves the thumbnail image of an API specified by API identifier
      *
      * @param apiId           API Id
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch     If-None-Match header value
      * @param messageContext If-Modified-Since header value
      * @return Thumbnail image of the API
@@ -2792,6 +2822,17 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Updates the thumbnail image of an API specified by API identifier
+     *
+     * @param apiId           API Id
+     * @param organizationId  Organization Identifier
+     * @param fileInputStream InputStream for the provided file
+     * @param fileDetail File meta-data
+     * @param ifMatch         If-None-Match header value
+     * @param messageContext  If-Modified-Since header value
+     * @return Thumbnail image of the API
+     */
     @Override
     public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
                                        String organizationId, String ifMatch, MessageContext messageContext) {
@@ -3007,6 +3048,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     /**
      * Importing an OpenAPI definition and create an API
      *
+     * @param organizationId  Organization Identifier
      * @param fileInputStream InputStream for the provided file
      * @param fileDetail File meta-data
      * @param url URL of the OpenAPI definition
@@ -3191,6 +3233,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Import a WSDL file/url or an archive and create an API. The API can be a SOAP or REST depending on the
      * provided implementationType.
      *
+     * @param organizationId  Organization Identifier
      * @param fileInputStream file input stream
      * @param fileDetail file details
      * @param url WSDL url
@@ -3394,6 +3437,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieve the WSDL of an API
      *
      * @param apiId UUID of the API
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @return the WSDL of the API (can be a file or zip archive)
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
@@ -3428,6 +3472,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Update the WSDL of an API
      *
      * @param apiId UUID of the API
+     * @param organizationId  Organization Identifier
      * @param fileInputStream file data as input stream
      * @param fileDetail file details
      * @param url URL of the WSDL
@@ -3608,6 +3653,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Import a GraphQL Schema
+     *
      * @param organizationId Identifier of an organization
      * @param type APIType
      * @param fileInputStream input file
@@ -3680,6 +3726,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param fileInputStream  Input stream from the REST request
      * @param fileDetail       File details as Attachment
+     * @param organizationId  Organization Identifier
      * @param preserveProvider User choice to keep or replace the API provider
      * @param overwrite        Whether to update the API or not. This is used when updating already existing APIs.
      * @return API import response
@@ -3730,6 +3777,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * of a swagger
      *
      * @param apiId API Id
+     * @param organizationId  Organization Identifier
      * @param ifNoneMatch If-None-Match header value
      * @param messageContext message context
      * @return apiDefinition
@@ -3781,6 +3829,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * @param apiId API Id
+     * @param organizationId  Organization Identifier
      * Retrieve deployment status of APIs in cloud clusters
      * @return Deployment status response
      */
