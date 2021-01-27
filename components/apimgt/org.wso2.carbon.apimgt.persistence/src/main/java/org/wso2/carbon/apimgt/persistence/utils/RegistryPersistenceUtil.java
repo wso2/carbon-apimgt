@@ -1587,17 +1587,12 @@ public class RegistryPersistenceUtil {
 
         APIProduct apiProduct;
         try {
-            //String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
                     productVersion);
-            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + RegistryPersistenceUtil.replaceEmailDomain(apiProductIdentifier.getProviderName())
-                    + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
-                    + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion()
-                    + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
             apiProduct = new APIProduct(apiProductIdentifier);
             setResourceProperties(apiProduct, registry, artifactPath);
 

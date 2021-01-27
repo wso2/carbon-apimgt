@@ -52,6 +52,7 @@ import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.Tag;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -84,6 +85,8 @@ public class RegistryPersistenceImplTestCase {
         PowerMockito.mockStatic(CarbonContext.class);
         CarbonContext context = Mockito.mock(CarbonContext.class);
         PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(context);
+        
+        PowerMockito.mockStatic(GovernanceUtils.class);
     }
 
     @Test
@@ -276,7 +279,7 @@ public class RegistryPersistenceImplTestCase {
     @Test
     public void testGetPublisherAPI() throws Exception {
 
-        Registry registry = Mockito.mock(Registry.class);
+        Registry registry = Mockito.mock(UserRegistry.class);
         Resource resource = new ResourceImpl();
         Mockito.when(registry.get(anyString())).thenReturn(resource);
         Tag[] tags = new Tag[1];
@@ -297,7 +300,7 @@ public class RegistryPersistenceImplTestCase {
     @Test
     public void testGetDevPortalAPI() throws Exception {
 
-        Registry registry = Mockito.mock(Registry.class);
+        Registry registry = Mockito.mock(UserRegistry.class);
         Resource resource = new ResourceImpl();
         Mockito.when(registry.get(anyString())).thenReturn(resource);
         Tag[] tags = new Tag[1];
@@ -318,7 +321,7 @@ public class RegistryPersistenceImplTestCase {
     @Test
     public void testGetPublisherAPIProduct() throws Exception {
 
-        Registry registry = Mockito.mock(Registry.class);
+        Registry registry = Mockito.mock(UserRegistry.class);
         Resource resource = new ResourceImpl();
         Mockito.when(registry.get(anyString())).thenReturn(resource);
         Tag[] tags = new Tag[1];
