@@ -200,8 +200,11 @@ public class APIMappingUtil {
         model.setScopes(scopes);
 
         //URI Templates
-        Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
-        model.setUriTemplates(uriTemplates);
+        // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
+        if (model.getType() != "WEBSUB") {
+            Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
+            model.setUriTemplates(uriTemplates);
+        }
 
         if (dto.getTags() != null) {
             Set<String> apiTags = new HashSet<>(dto.getTags());

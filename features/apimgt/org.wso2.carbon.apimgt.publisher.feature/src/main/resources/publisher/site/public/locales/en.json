@@ -13,6 +13,7 @@
   "Apis.Create.Components.DefaultAPIForm.api.product.context": "Context",
   "Apis.Create.Components.DefaultAPIForm.callbackUrl": "Callback URL",
   "Apis.Create.Components.DefaultAPIForm.description": "Description",
+  "Apis.Create.Components.DefaultAPIForm.lease": "Lease Duration",
   "Apis.Create.Components.DefaultAPIForm.name": "Topic Name",
   "Apis.Create.Components.DefaultAPIForm.opscope": "Operation Scope",
   "Apis.Create.Components.DefaultAPIForm.secret": "Secret",
