@@ -2818,6 +2818,8 @@ public final class APIUtil {
         OrganizationDTO organizationDTO = new OrganizationDTO(orgId);
         if (requestedTenantDomain != null) {
             organizationDTO.setRequestedTenantDomain(requestedTenantDomain);
+        } else {
+            organizationDTO.setRequestedTenantDomain(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         }
         return  organizationDTO;
     }
