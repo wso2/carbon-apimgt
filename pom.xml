@@ -547,6 +547,12 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.gateway.extension.listener</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
@@ -1134,6 +1140,13 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.persistence.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.gateway.extension.listener.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>

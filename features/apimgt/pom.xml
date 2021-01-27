@@ -53,6 +53,7 @@
         <module>org.wso2.carbon.apimgt.cache.invalidation.feature</module>
         <module>org.wso2.carbon.apimgt.throttle.policy.deployer.feature</module>
         <module>org.wso2.carbon.apimgt.persistence.feature</module>
+        <module>org.wso2.carbon.apimgt.gateway.extension.listener.feature</module>
     </modules>
     <build>
         <plugins>

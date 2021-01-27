@@ -86,6 +86,10 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.gateway.extension.listener</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
         </dependency>
         <dependency>
@@ -454,6 +458,7 @@
                             org.apache.servicemix.bundles.jedis.*; version="${servicemix.bundles.jedis.version}",
                             com.nimbusds.jwt.*,
                             org.apache.commons.codec.*,
+                            org.wso2.carbon.apimgt.gateway.extension.listener.*;
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
