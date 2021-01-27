@@ -1479,7 +1479,7 @@ public class OASParserUtil {
      * This method returns extension of disable security related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return boolean
      * @throws APIManagementException throws if an error occurred
      */
     public static boolean getDisableSecurity(Map<String, Object> extensions) throws APIManagementException {
