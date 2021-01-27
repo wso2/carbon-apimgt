@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,11 +40,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Mapping class for Service Catalog services
@@ -56,7 +53,7 @@ public class ServiceEntryMappingUtil {
      * Converts a single metadata file content into a model object
      *
      * @param file Metadata file
-     * @return Converted ServiceCatalogInfo model object
+     * @return Converted ServiceMetadataDTO model object
      * @throws IOException
      */
     public static ServiceMetadataDTO fromMetadataFileToServiceDTO(File file) throws IOException {
@@ -73,11 +70,10 @@ public class ServiceEntryMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static ServiceEntry fromFileToServiceInfo(File file) throws IOException {
+    public static void fromFileToServiceInfo(File file, ServiceEntry serviceEntry) throws IOException {
 
         ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
 
-        ServiceEntry serviceEntry = new ServiceEntry();
         serviceEntry.setKey(serviceMetadataDTO.getKey());
         serviceEntry.setName(serviceMetadataDTO.getName());
         serviceEntry.setVersion(serviceMetadataDTO.getVersion());
@@ -87,7 +83,6 @@ public class ServiceEntryMappingUtil {
         serviceEntry.setDescription(serviceMetadataDTO.getDescription());
         serviceEntry.setSecurityType(serviceMetadataDTO.getSecurityType().value());
         serviceEntry.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
-        return serviceEntry;
     }
 
     /**
@@ -108,7 +103,7 @@ public class ServiceEntryMappingUtil {
                 try {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            serviceInfo = fromFileToServiceInfo(aFile);
+                            fromFileToServiceInfo(aFile, serviceInfo);
                             if (!StringUtils.isBlank(serviceInfo.getKey())) {
                                 key = serviceInfo.getKey();
                             } else {
