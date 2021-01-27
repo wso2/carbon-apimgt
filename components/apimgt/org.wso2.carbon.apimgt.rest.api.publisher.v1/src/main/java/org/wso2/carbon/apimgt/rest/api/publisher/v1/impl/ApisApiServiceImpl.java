@@ -3985,11 +3985,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API Revision for API : " + apIRevisionDTO.getApiInfo().getId();
+            String errorMessage = "Error while adding new API Revision for API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision API location for API : "
-                    + apIRevisionDTO.getApiInfo().getId();
+                    + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
