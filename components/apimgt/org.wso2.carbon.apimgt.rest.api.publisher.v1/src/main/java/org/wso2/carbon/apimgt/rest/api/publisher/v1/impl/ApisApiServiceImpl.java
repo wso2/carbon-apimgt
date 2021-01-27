@@ -2645,18 +2645,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Swagger document of the API
      */
     @Override
-    public Response getAPISwagger(String apiId,  String organizationId, String ifNoneMatch,
-                                        MessageContext messageContext) {
+    public Response getAPISwagger(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String orgId = PublisherCommonUtils.getOrgId(organizationId);
-            //this will fail if user does not have access to the API or the API does not exist
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String orgId = PublisherCommonUtils.getOrgId(organizationId);
             OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+            //this will fail if user does not have access to the API or the API does not exist
             API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
-            if (organizationId != null) {
-                api.setOrganizationId(organizationId);
-            }
             String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();
@@ -2666,8 +2662,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : "
-                                        + apiId, e, log);
+                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : " + apiId,
+                                e, log);
             } else {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -3019,13 +3015,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API Import using OpenAPI definition response
      */
     @Override
-    public Response importOpenAPIDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail,
-                                            String url, String additionalProperties, MessageContext messageContext) {
+    public Response importOpenAPIDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url,
+                                            String additionalProperties, MessageContext messageContext) {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
         }
+        String orgId = PublisherCommonUtils.getOrgId(organizationId);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
@@ -3090,16 +3089,18 @@ public class ApisApiServiceImpl implements ApisApiService {
                 definitionToAdd = apiDefinition
                         .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
-            String orgId = PublisherCommonUtils.getOrgId(organizationId);
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            apiToAdd.setOrganizationId(orgId);
+            if (organizationId != null) {
+                apiToAdd.setOrganizationId(organizationId);
+            }
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
-            //API addedAPI = apiProvider.getAPI(apiToAdd.getId());
+            // this would provide the updated templates
+            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organizationDTO);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
             // This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3435,21 +3436,21 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to retrieve the WSDL
      */
     @Override
-    public Response updateWSDLOfAPI(String apiId, String organizationId, String ifMatch, InputStream fileInputStream,
-                    Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException {
+    public Response updateWSDLOfAPI(String apiId, String organizationId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
+                                    String url, MessageContext messageContext) throws APIManagementException {
 
         validateWSDLAndReset(fileInputStream, fileDetail, url);
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String orgId = PublisherCommonUtils.getOrgId(organizationId);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
-        API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                     apiId));
         }
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
+        API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
         if (api == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
         }
@@ -3463,6 +3464,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return Response.ok().build();
     }
+
 
     @Override
     public Response changeAPILifecycle(String action, String apiId, String organizationId, String lifecycleChecklist,
@@ -3528,8 +3530,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response createNewAPIVersion(String newVersion, String apiId,  String organizationId, Boolean defaultVersion,
-                                    MessageContext messageContext) {
+    public Response createNewAPIVersion(String newVersion, String apiId, String organizationId, Boolean defaultVersion,
+                                        MessageContext messageContext) {
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
         try {
@@ -3541,22 +3543,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiId));
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, tenantDomain);
-            API api = apiProvider.getAPIbyUUID(apiId, organizationDTO);
-            APIIdentifier apiIdentifier = api.getId();
-            api.setAsDefaultVersion(true);
+            API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, orgId);
 
-            //creates the new version
-            apiProvider.createNewAPIVersion(api, newVersion);
-
-            //get newly created API to return as response
-            APIIdentifier apiNewVersionedIdentifier =
-                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
-            newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+            newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
-                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + versionedAPI.getUuid());
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException | DuplicateAPIException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
@@ -3566,8 +3558,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " +
-                        apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
             } else {
                 String errorMessage = "Error while copying API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -3594,7 +3585,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response exportAPI(String apiId, String name, String version, String providerName,
-                                            String format, Boolean preserveStatus, MessageContext messageContext) {
+                    String format, Boolean preserveStatus, MessageContext messageContext) {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -3617,6 +3608,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Import a GraphQL Schema
+     * @param organizationId Identifier of an organization
      * @param type APIType
      * @param fileInputStream input file
      * @param fileDetail file Detail
@@ -3627,13 +3619,12 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response importGraphQLSchema(String organizationId, String ifMatch, String type, InputStream fileInputStream,
-                                    Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
+                                        Attachment fileDetail, String additionalProperties, MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;
         String schema = "";
 
         try {
             String orgId = PublisherCommonUtils.getOrgId(organizationId);
-
             if (fileInputStream == null || StringUtils.isBlank(additionalProperties)) {
                 String errorMessage = "GraphQL schema and api details cannot be empty.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
@@ -3647,29 +3638,21 @@ public class ApisApiServiceImpl implements ApisApiService {
                             + "importing schema: " + schema);
                 }
             }
-
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername(), organizationId);
-
-            apiToAdd.setOrganizationId(orgId);
-            //adding the api
-            apiProvider.addAPI(apiToAdd);
+                    RestApiCommonUtil.getLoggedInUsername(), orgId);
 
             //Save swagger definition of graphQL
             APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition, orgId);
+            apiToAdd.setSwaggerDefinition(apiDefinition);
 
-            APIIdentifier createdApiId = apiToAdd.getId();
-            apiProvider.saveGraphqlSchemaDefinition(apiToAdd, schema);
-
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
-
+            //adding the api
+            API createdApi = apiProvider.addAPI(apiToAdd);
+            apiProvider.saveGraphqlSchemaDefinition(createdApi, schema);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
             //This URI used to set the location header of the POST response
@@ -3677,7 +3660,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
-                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
+                    additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-"
