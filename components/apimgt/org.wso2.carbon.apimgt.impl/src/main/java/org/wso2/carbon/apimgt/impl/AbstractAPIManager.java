@@ -2964,8 +2964,8 @@ public abstract class AbstractAPIManager implements APIManager {
                         String apiArtifactId = apiResource.getUUID();
                         if (apiArtifactId != null) {
                             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
-                                    equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                            if (APIConstants.API_PRODUCT.equals(
+                                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
                                 associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
                             } else {
                                 associatedAPI = APIUtil.getAPI(apiArtifact, registry);
@@ -2987,8 +2987,8 @@ public abstract class AbstractAPIManager implements APIManager {
                     APIProduct apiProduct;
                     if (apiArtifactId != null) {
                         GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                        if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
-                                equals(APIConstants.API_PRODUCT)) {
+                        if (APIConstants.API_PRODUCT.
+                                equals(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE))) {
                             apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
                             apiProductSet.add(apiProduct);
                         } else {
