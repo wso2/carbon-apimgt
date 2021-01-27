@@ -49,10 +49,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
             " And " +
             "    NAME like ?" +
-            " limit ? , ? "+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
-
+            " )x left join AM_BLOCK_CONDITIONS bl on " +
+            "( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -77,9 +76,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " )x left join AM_BLOCK_CONDITIONS bl on " +
+            "( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -110,9 +109,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " )" +
                     " And " +
                     "    NAME like ?" +
-                    " limit ? , ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 " ;
+                    " )x left join AM_BLOCK_CONDITIONS bl on " +
+                    "( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -143,9 +142,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " )" +
                     " And "+
                     "    NAME like ?"+
-                    " limit ? , ? "+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 " ;
+                    " )x left join AM_BLOCK_CONDITIONS bl on " +
+                    "( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+                    " ORDER BY $1 $2 limit ? , ?";
 
 
 
@@ -172,9 +171,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "    SUB.USER_ID = ? "+
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-             " ORDER BY $1 $2 " ;
+            " )x left join AM_BLOCK_CONDITIONS bl on  " +
+            "( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
@@ -199,9 +198,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   LOWER (SUB.USER_ID) =LOWER (?)" +
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " )x left join AM_BLOCK_CONDITIONS bl on  " +
+            "( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
+            " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
