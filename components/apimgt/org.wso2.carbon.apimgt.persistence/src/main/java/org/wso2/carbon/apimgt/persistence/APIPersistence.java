@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -67,6 +68,37 @@ public interface APIPersistence {
     PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
 
     /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiUUID API UUID
+     * @param revisionId API Revision ID
+     * @return ID of Added API
+     * @throws APIPersistenceException
+     */
+    String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiUUID API UUID
+     * @param revisionId API Revision ID
+     * @throws APIPersistenceException
+     */
+    void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiUUID API UUID
+     * @param revisionId API Revision ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+
+    /**
      * Update API in the persistence layer
      *
      * @param org          Organization the API is owned by
@@ -84,6 +116,16 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException;
+
+    /**
+     * Get the API Revision information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org   Organization the API is owned by
+     * @param revisionUUID API ID
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPI getPublisherRevisionAPI(Organization org, String revisionUUID, String apiUUID, int revisionId) throws APIPersistenceException;
 
     /**
      * Get the API information stored in persistence layer, that is used for DevPortal operations
@@ -190,6 +232,17 @@ public interface APIPersistence {
      */
     ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException;
 
+    /**
+     * Get the WSDL schema definition of a Revision
+     *
+     * @param org   Organization the WSDL is owned by
+     * @param revisionUUID API Revision UUID
+     * @return WSDL schema definition
+     * @throws WSDLPersistenceException
+     */
+    ResourceFile getRevisionWSDL(Organization org, String revisionUUID, String apiUUID, int revisionId)
+            throws WSDLPersistenceException;
+
 
     /* ==== OAS API Schema Definition ====
      ================================== */
@@ -203,7 +256,6 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException;
-
     /**
      * Get OAS Schema definition of the API
      *
@@ -213,6 +265,17 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     String getOASDefinition(Organization org, String apiId) throws OASPersistenceException;
+
+    /**
+     * Get OAS Schema definition of the API Revision
+     *
+     * @param org   Organization the OAS definition is owned by
+     * @param revisionUUID API Revision UUID
+     * @param revisionId Revision ID
+     * @return OAS Schema definition
+     * @throws OASPersistenceException
+     */
+    String getRevisionOASDefinition(Organization org, String revisionUUID, String apiUUID, int revisionId) throws OASPersistenceException;
 
 
     /* ==== GraphQL API Schema Definition ==========
@@ -238,6 +301,18 @@ public interface APIPersistence {
      * @throws GraphQLPersistenceException
      */
     String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException;
+
+    /**
+     * Get GraphQL schema definition
+     *
+     * @param org   Organization the GraphQL definition is owned by
+     * @param revisionUUID REVISION UUID
+     * @param apiUUID API UUID
+     * @param revisionId REVISION ID
+     * @return GraphQL schema definition
+     * @throws GraphQLPersistenceException
+     */
+    String getRevisionGraphQLSchema(Organization org, String revisionUUID, String apiUUID, int revisionId) throws GraphQLPersistenceException;
 
 
     /* ======= Documentation  =======
@@ -314,6 +389,17 @@ public interface APIPersistence {
                                     UserContext ctx) throws DocumentationPersistenceException;
 
     /**
+     * Search documentation of the given API Revision
+     *
+     * @param org   Organization the documentations are owned by
+     * @param revisionUUID API Revision UUID
+     * @return Documentation search result
+     * @throws DocumentationPersistenceException
+     */
+    DocumentSearchResult searchRevisionDocumentation(Organization org, String revisionUUID, int start, int offset, String searchQuery,
+                                             UserContext ctx, String apiUUID, int revisionId) throws DocumentationPersistenceException;
+
+    /**
      * Delete API documentation
      *
      * @param org   Organization the documentation is owned by
@@ -361,6 +447,18 @@ public interface APIPersistence {
                                     throws MediationPolicyPersistenceException;
 
     /**
+     * Get mediation policy of API Revision
+     *
+     * @param org               Organization the mediation policy is owned by
+     * @param revisionUUID             API Revision UUID
+     * @param mediationPolicyId Mediation policy ID
+     * @return Mediation Policy of API
+     * @throws MediationPolicyPersistenceException
+     */
+    Mediation getRevisionMediationPolicy(Organization org, String revisionUUID, String mediationPolicyId, String apiUUID, int revisionId)
+            throws MediationPolicyPersistenceException;
+
+    /**
      * Get a list of all the mediation policies of the API
      *
      * @param org   Organization the mediation policies are owned by
@@ -369,6 +467,17 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     List<MediationInfo> getAllMediationPolicies(Organization org, String apiId) throws MediationPolicyPersistenceException;
+
+    /**
+     * Get a list of all the mediation policies of the API
+     *
+     * @param org   Organization the mediation policies are owned by
+     * @param revisionUUID API Revision UUID
+     * @return list of all the mediation policies of the API
+     * @throws MediationPolicyPersistenceException
+     */
+    List<MediationInfo> getAllRevisionMediationPolicies(Organization org, String revisionUUID, String apiUUID,
+                                                        int revisionId) throws MediationPolicyPersistenceException;
 
     /**
      * Delete a mediation policy of the API
@@ -403,6 +512,17 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
+
+    /**
+     * Get thumbnail icon of the API Revision
+     *
+     * @param org   Organization the thumbnail icon is owned by
+     * @param revisionUUID API Revision UUID
+     * @return Thumbnail icon resource file
+     * @throws ThumbnailPersistenceException
+     */
+    ResourceFile getRevisionThumbnail(Organization org, String revisionUUID, String apiUUID, int revisionId)
+            throws ThumbnailPersistenceException;
 
     /**
      * Delete thumbnail icon of the API

@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.8.146-SNAPSHOT</version>
+    <version>6.8.161-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -739,6 +739,12 @@
                 <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>war</type>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -1139,6 +1145,13 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.persistence.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
@@ -1150,7 +1163,7 @@
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.ws.commons.axiom.wso2</groupId>
                 <artifactId>axiom</artifactId>
@@ -1803,6 +1816,11 @@
                 <artifactId>javax.cache.wso2</artifactId>
                 <version>${carbon.kernel.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.am.analytics.publisher</groupId>
+                <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+                <version>${analytics.event.publisher.client.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1814,7 +1832,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.8.146-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.8.161-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.2.27</carbon.analytics.common.version>
@@ -1825,7 +1843,7 @@
 
         <carbon.commons.version>4.7.35</carbon.commons.version>
         <carbon.registry.version>4.7.37</carbon.registry.version>
-        <carbon.mediation.version>4.7.68</carbon.mediation.version>
+        <carbon.mediation.version>4.7.69</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
@@ -1909,7 +1927,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v195</synapse.version>
+	    <synapse.version>2.1.7-wso2v196</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -2065,5 +2083,6 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
+        <analytics.event.publisher.client.version>0.1.0</analytics.event.publisher.client.version>
     </properties>
 </project>

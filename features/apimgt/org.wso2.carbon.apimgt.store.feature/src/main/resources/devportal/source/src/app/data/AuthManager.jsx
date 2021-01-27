@@ -236,7 +236,7 @@ class AuthManager {
      */
     logout() {
         const authHeader = 'Bearer ' + AuthManager.getUser().getPartialToken();
-        // TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
+        // TODO Will have to change the logout end point url to contain the app context(i.e. publisher/devportal, etc.)
         const url = Utils.getAppLogoutURL();
         const headers = {
             Accept: 'application/json',

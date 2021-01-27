@@ -142,6 +142,8 @@ public final class APIConstants {
     public static final String API_APPLICATION_DATA_LOCATION = APIMGT_REGISTRY_LOCATION + "/applicationdata";
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
+    public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
+
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
 
     //registry location for consumer

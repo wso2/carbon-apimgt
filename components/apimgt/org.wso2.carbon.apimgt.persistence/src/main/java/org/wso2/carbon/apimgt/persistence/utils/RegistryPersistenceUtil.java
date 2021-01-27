@@ -314,58 +314,21 @@ public class RegistryPersistenceUtil {
      */
     public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
                                     throws APIManagementException {
-
-        //get all labels in the tenant
-        List<Label> gatewayLabelList = RegistryPersistenceUtil.getAllLabels(tenantDomain);
-        //validation is performed here to cover all actions related to API artifact updates
-        if (gatewayLabelList != null && !gatewayLabelList.isEmpty()) {
-            //put available gateway labels to a list for validation purpose
-            List<String> availableGatewayLabelListNames = new ArrayList<>();
-            for (Label x : gatewayLabelList) {
-                availableGatewayLabelListNames.add(x.getName());
-            }
-            try {
-                //clear all the existing labels first
-                artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
-                //if there are labels attached to the API object, add them to the artifact
-                if (api.getGatewayLabels() != null) {
-                    //validate and add each label to the artifact
-                    List<Label> candidateLabelsList = api.getGatewayLabels();
-                    for (Label label : candidateLabelsList) {
-                        String candidateLabel = label.getName();
-                        //validation step, add the label only if it exists in the available gateway labels
-                        if (availableGatewayLabelListNames.contains(candidateLabel)) {
-                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, candidateLabel);
-                        } else {
-                            log.warn("Label name : " + candidateLabel + " does not exist in the tenant : "
-                                                            + tenantDomain + ", hence skipping it.");
-                        }
-                    }
+        try {
+            //clear all the existing labels first
+            artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
+            //if there are labels attached to the API object, add them to the artifact
+            if (api.getGatewayLabels() != null) {
+                List<Label> labelList = api.getGatewayLabels();
+                for (Label label : labelList) {
+                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
                 }
-            } catch (GovernanceException e) {
-                String msg = "Failed to add labels for API : " + api.getId().getApiName();
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
             }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
-            }
+        } catch (GovernanceException e) {
+            String msg = "Failed to add labels for API : " + api.getId().getApiName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
-    }
-
-    /**
-     * This method is used to get the labels in a given tenant space
-     *
-     * @param tenantDomain tenant domain name
-     * @return micro gateway labels in a given tenant space
-     * @throws APIManagementException if failed to fetch micro gateway labels
-     */
-    public static List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
-
-        //        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        //        return apiMgtDAO.getAllLabels(tenantDomain);
-        return null; //
     }
 
     /**
@@ -674,17 +637,17 @@ public class RegistryPersistenceUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
 
             api = new API(apiIdentifier);
             //set uuid
             api.setUuid(artifact.getId());
             // set rating
-            //String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
-                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+//            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+//                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+//                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+//                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
             Resource apiResource = registry.get(artifactPath);
             api = setResourceProperties(api, apiResource, artifactPath);
             //set description
@@ -1241,23 +1204,6 @@ public class RegistryPersistenceUtil {
         return (state != null) ? state.toUpperCase() : null;
     }
 
-
-    /**
-     * This method is used to get the actual endpoint password of an API from the hidden property
-     * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
-     *
-     * @param api      The API
-     * @param registry The registry object
-     * @return The actual password of the endpoint if exists
-     * @throws RegistryException Throws if the api resource doesn't exist
-     */
-    private static String getActualEpPswdFromHiddenProperty(API api, Registry registry) throws RegistryException {
-
-        String apiPath = getAPIPath(api.getId());
-        Resource apiResource = registry.get(apiPath);
-        return apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
-    }
-
     /**
      * This method returns the categories attached to the API
      *
@@ -1586,6 +1532,11 @@ public class RegistryPersistenceUtil {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(apiProvider)
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + APIConstants.API_RESOURCE_NAME;
+    }
+
+    public static String getRevisionPath(String apiUUID, int revisionId) {
+        return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId + RegistryConstants.PATH_SEPARATOR;
     }
 
     public static String[] getAuthorizedRoles(String apiPath, String tenantDomain) throws UserStoreException {

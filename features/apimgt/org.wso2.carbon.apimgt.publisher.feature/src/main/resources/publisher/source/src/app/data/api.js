@@ -18,6 +18,7 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
+import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -2028,6 +2029,149 @@ class API extends Resource {
             return client.apis['Unified Search'].search(params, Resource._requestMetaData());
         });
     }
+
+    /**
+     * Get list of revisions.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisions(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions( {
+                    apiId: apiId,
+                },
+            );
+        });
+    }
+
+    /**
+     * Get list of revisions with environments.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisionsWithEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions( 
+                    {
+                        apiId: apiId,
+                        query: 'deployed:true',
+                    },
+            );
+        });
+    }
+
+    getRevisionsEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisionDeployments( {
+                    apiId: apiId,
+                },
+            );
+        });
+    }
+
+    /**
+     * Add revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    createRevision(apiId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].createAPIRevision(
+                    {apiId: apiId},
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+    /**
+     * Delete revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deleteRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deleteAPIRevision(
+                    {   
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+    /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    undeployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].undeployAPIRevision(
+                    {   
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+     /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deployAPIRevision(
+                    {   
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+    /**
+     * Restore revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    restoreRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].restoreAPIRevision(
+                    {   
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
 
     /**
      * Get details of a given API

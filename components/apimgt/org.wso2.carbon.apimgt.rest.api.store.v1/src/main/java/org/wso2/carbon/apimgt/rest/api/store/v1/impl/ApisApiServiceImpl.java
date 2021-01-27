@@ -154,7 +154,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -186,7 +186,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -726,7 +726,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             //this will fail if user does not have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
             ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, requestedTenantDomain);
 
             if (thumbnailResource != null) {

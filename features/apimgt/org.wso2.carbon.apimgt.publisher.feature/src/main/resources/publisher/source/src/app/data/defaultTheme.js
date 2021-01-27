@@ -79,6 +79,7 @@ export default {
         secondary: {
             light: '#0066ff',
             main: '#a2ecf5',
+            highlight: '#e8fafd',
             // dark: will be calculated from palette.secondary.main,
             contrastText: '#ffcc00',
         },

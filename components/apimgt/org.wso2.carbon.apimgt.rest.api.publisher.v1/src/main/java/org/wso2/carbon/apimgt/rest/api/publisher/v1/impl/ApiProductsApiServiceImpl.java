@@ -243,8 +243,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             //this will fail if user does not have access to the API Product or the API Product does not exist
-            //APIProductIdentifier productIdentifier = APIMappingUtil
-            //        .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
+            APIProductIdentifier productIdentifier = APIMappingUtil
+                    .getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             documentation = apiProvider.getDocumentation(apiProductId, documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil
@@ -275,7 +275,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            documentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            documentation = apiProvider.getDocumentation(apiProductId, documentId, tenantDomain);
             APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
@@ -306,7 +306,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String sourceUrl = body.getSourceUrl();
-            Documentation oldDocument = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            Documentation oldDocument = apiProvider.getDocumentation(apiProductId, documentId, tenantDomain);
 
             //validation checks for existence of the document
             if (oldDocument == null) {
@@ -334,10 +334,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
-            apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
+            apiProvider.updateDocumentation(apiProductId, newDocumentation);
 
             //retrieve the updated documentation
-            newDocumentation = apiProvider.getProductDocumentation(documentId, tenantDomain);
+            newDocumentation = apiProvider.getDocumentation(apiProductId, documentId, tenantDomain);
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource

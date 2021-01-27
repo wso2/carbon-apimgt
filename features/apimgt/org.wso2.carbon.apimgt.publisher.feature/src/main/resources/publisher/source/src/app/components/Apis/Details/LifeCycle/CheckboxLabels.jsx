@@ -183,7 +183,7 @@ export default function CheckboxLabels(props) {
                                     defaultMessage='Gateway Environment(s) selected'
                                 />
                             </Typography>
-                            <Link to={'/apis/' + api.id + '/environments'}>
+                            <Link to={'/apis/' + api.id + '/deployments'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
@@ -227,7 +227,7 @@ export default function CheckboxLabels(props) {
                                             defaultMessage='Gateway Environment(s) selected'
                                         />
                                     </Typography>
-                                    <Link to={'/apis/' + api.id + '/environments'}>
+                                    <Link to={'/apis/' + api.id + '/deployments'}>
                                         <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                                     </Link>
                                 </Grid>

@@ -78,6 +78,10 @@ public class DocumentIndexer extends RXTIndexer {
                 .getGovernanceSystemRegistry(IndexingManager.getInstance().getRegistry(fileData.tenantId));
         String documentResourcePath = fileData.path.substring(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH.length());
 
+        if (documentResourcePath.contains("/apimgt/applicationdata/apis/")) {
+            return null;
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Executing document indexer for resource at " + documentResourcePath);
         }

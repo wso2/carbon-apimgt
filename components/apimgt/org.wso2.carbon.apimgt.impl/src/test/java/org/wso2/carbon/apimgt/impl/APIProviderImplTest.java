@@ -46,6 +46,8 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -1305,7 +1307,6 @@ public class APIProviderImplTest {
                     + apiId.getVersion(), e.getMessage());
         }
     }*/
-
     /* NOT USED
     @Test(expected = APIManagementException.class)
     public void testUpdateAPIStatus_WithFaultyGateways() throws Exception {
@@ -1313,6 +1314,9 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
         api.setUUID("1223332");
+
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
         Set<String> environments = new HashSet<String>();
         environments.add("Production");
@@ -1434,6 +1438,7 @@ public class APIProviderImplTest {
         apiProvider.updateAPIStatus(api.getId(), newStatusValue, true, false, true);
     }
     */
+
     @Test
     public void testGetAPIUsageByAPIId() throws APIManagementException, RegistryException, UserStoreException {
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
@@ -1555,6 +1560,7 @@ public class APIProviderImplTest {
         Assert.assertFalse(status);
     }
 
+    /* Impl Changed to elsewhere
     @Test
     public void testPropergateAPIStatusChangeToGateways() throws RegistryException, UserStoreException,
             APIManagementException, APIPersistenceException {
@@ -1601,7 +1607,7 @@ public class APIProviderImplTest {
         Mockito.when(rs.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(srh.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
                 .thenReturn(publisherAPI);
@@ -1680,6 +1686,7 @@ public class APIProviderImplTest {
         Assert.assertEquals(1, failedGatewaysReturned.size());
         Assert.assertEquals(APIConstants.RETIRED, api.getStatus());
     }
+     */
 
     @Test
     public void testEmailSentWhenPropergateAPIStatusChangeToGateways() throws Exception {
@@ -1687,6 +1694,8 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIConstants.CREATED);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
 
         TestUtils.mockRegistryAndUserRealm(-1);
         Resource resource = PowerMockito.mock(Resource.class);
@@ -2826,6 +2835,7 @@ public class APIProviderImplTest {
         apiProvider.updateAPI(api, oldApi);
     }*/
 
+    /* Impl Changed to elsewhere
     @Test(expected = FaultGatewaysException.class)
     public void testUpdateAPI_WithFailedGWs() throws Exception {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
@@ -2890,7 +2900,7 @@ public class APIProviderImplTest {
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        
+
 
         PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
         PowerMockito.when(apiPersistenceInstance.addAPI(any(Organization.class), any(PublisherAPI.class)))
@@ -2964,7 +2974,7 @@ public class APIProviderImplTest {
         GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         apiProvider.updateAPI(api, oldApi);
-    }
+    }*/
 
     @Test
     public void testDeleteAPI() throws RegistryException, UserStoreException, APIManagementException,
@@ -3744,10 +3754,6 @@ public class APIProviderImplTest {
         Assert.assertNotNull(foundApiList9);
         Assert.assertEquals(2, foundApiList9.size());
 
-        //Search by Subcontext
-        List<API> foundApiList10 = apiProvider.searchAPIs("add", "Subcontext", null);
-        Assert.assertNotNull(foundApiList10);
-        Assert.assertEquals(1, foundApiList10.size());
     }
 
     @Test
@@ -4709,5 +4715,538 @@ public class APIProviderImplTest {
         JSONObject jsonObject2 = apiProvider.getSecurityAuditAttributesFromConfig("admin");
         Assert.assertEquals(jsonObject2.get(APIConstants.SECURITY_AUDIT_API_TOKEN), apiToken);
         Assert.assertEquals(jsonObject2.get(APIConstants.SECURITY_AUDIT_COLLECTION_ID), collectionId);
+    }
+
+    /**
+     * This method tests adding a new API Revision
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testAddAPIRevision() throws APIManagementException, APIPersistenceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
+                null, null);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        try {
+            apiProvider.addAPIRevision(apiRevision);
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * This method tests adding a new API Revision and then retrieving API Revision by Revision UUID
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetAPIRevision() throws APIManagementException, APIPersistenceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
+                null, null);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        try {
+            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.getAPIRevision("b55e0fc3-9829-4432-b99e-02056dc91838");
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * This method tests adding a new API Revision and then retrieving API Revisions by API UUID
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testGetAPIRevisions() throws APIManagementException, APIPersistenceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
+                null, null);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        try {
+            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.getAPIRevisions("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+//    /**
+//     * This method tests deploying a new API Revision to a gateway environment
+//     *
+//     * @throws APIManagementException
+//     */
+//    @Test
+//    public void testAddAPIRevisionDeployment() throws APIManagementException, RegistryException, APIPersistenceException {
+//        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
+//                null, null);
+//        apiProvider.tenantDomain = "carbon.super";
+//        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        API api = new API(apiId);
+//        api.setContext("/test");
+//        api.setStatus(APIConstants.CREATED);
+//        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+//        String revisionPath = "/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/";
+//
+//        APIRevision apiRevision = new APIRevision();
+//        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        apiRevision.setDescription("test description revision 1");
+//        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+//        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+//        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+//                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        try {
+//            apiProvider.addAPIRevision(apiRevision);
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//
+//        List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+//        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+//        apiRevisionDeployment.setDeployment("Production and Sandbox");
+//        apiRevisionDeployment.setDisplayOnDevportal(true);
+//        apiRevisionDeployments.add(apiRevisionDeployment);
+//        apiRevision.setRevisionUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        apiRevision.setId(1);
+//        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+//        APIIdentifier apiRevisionId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "b55e0fc3-9829-4432-b99e-02056dc91838");
+//        API revisionApi = new API(apiRevisionId);
+//        AbstractAPIManager abstractAPIManager = Mockito.mock(AbstractAPIManager.class);
+//        Mockito.when(abstractAPIManager.getLightweightAPIByUUID(Mockito.anyString(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        GenericArtifact genericArtifact = new GenericArtifactImpl("b55e0fc3-9829-4432-b99e-02056dc91838", new QName("sample"), "");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "admin");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_NAME, "PizzaShackAPI");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, "1.0.0");
+//        Mockito.when(artifactManager.getGenericArtifact("b55e0fc3-9829-4432-b99e-02056dc91838")).thenReturn(genericArtifact);
+//        Mockito.when(abstractAPIManager.getApiInformation(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        PowerMockito.when(APIUtil.getAPIInformation(Mockito.any(), Mockito.any())).thenReturn(revisionApi);
+//        Mockito.when(abstractAPIManager.getAPIbyUUID(Mockito.anyString(),
+//                Mockito.anyString())).thenReturn(revisionApi);
+//        PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
+//        PowerMockito.when(apiPersistenceInstance.getPublisherRevisionAPI(any(Organization.class), Mockito.anyString(),
+//                Mockito.anyString(), Mockito.anyInt())).thenReturn(publisherAPI);
+//        Mockito.when(apiPersistenceInstance.getPublisherRevisionAPI(any(Organization.class), "63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+//                "b55e0fc3-9829-4432-b99e-02056dc91838", 1)).thenReturn(publisherAPI);
+//
+//        try {
+//            apiProvider.addAPIRevisionDeployment("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+//                    "b55e0fc3-9829-4432-b99e-02056dc91838", apiRevisionDeployments);
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//    }
+
+//    /**
+//     * This method tests deploying a new API Revision to a gateway environment and retrieve the deployment info by
+//     * deployment Name
+//     *
+//     * @throws APIManagementException
+//     */
+//    @Test
+//    public void testGetAPIRevisionDeploymentByName() throws APIManagementException, RegistryException, UserStoreException {
+//        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO, null, null);
+//        apiProvider.tenantDomain = "carbon.super";
+//        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        API api = new API(apiId);
+//        api.setContext("/test");
+//        api.setStatus(APIConstants.CREATED);
+//        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+//        String revisionPath = "/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/";
+//
+//        APIRevision apiRevision = new APIRevision();
+//        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        apiRevision.setDescription("test description revision 1");
+//        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+//        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+//
+//        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+//        RegistryService registryService = Mockito.mock(RegistryService.class);
+//        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+//        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+//        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
+//        Mockito.when(apiProvider.registry.resourceExists(Mockito.anyString())).thenReturn(false);
+//        Resource resource = new ResourceImpl();
+//        resource.setUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        Mockito.when(apiProvider.registry.get(Mockito.anyString())).thenReturn(resource);
+//
+//        try {
+//            apiProvider.addAPIRevision(apiRevision);
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//
+//        List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+//        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+//        apiRevisionDeployment.setDeployment("Production and Sandbox");
+//        apiRevisionDeployment.setDisplayOnDevportal(true);
+//        apiRevisionDeployments.add(apiRevisionDeployment);
+//        apiRevision.setRevisionUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        apiRevision.setId(1);
+//        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+//        APIIdentifier apiRevisionId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "b55e0fc3-9829-4432-b99e-02056dc91838");
+//        API revisionApi = new API(apiRevisionId);
+//        AbstractAPIManager abstractAPIManager = Mockito.mock(AbstractAPIManager.class);
+//        Mockito.when(abstractAPIManager.getLightweightAPIByUUID(Mockito.anyString(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        GenericArtifact genericArtifact = new GenericArtifactImpl("b55e0fc3-9829-4432-b99e-02056dc91838", new QName("sample"), "");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "admin");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_NAME, "PizzaShackAPI");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, "1.0.0");
+//        Mockito.when(artifactManager.getGenericArtifact("b55e0fc3-9829-4432-b99e-02056dc91838")).thenReturn(genericArtifact);
+//        Mockito.when(abstractAPIManager.getApiInformation(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        PowerMockito.when(APIUtil.getAPIInformation(Mockito.any(), Mockito.any())).thenReturn(revisionApi);
+//
+//        Mockito.when(abstractAPIManager.getRevisionAPI(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        RealmService realmService = Mockito.mock(RealmService.class);
+//        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+//        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+//        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+//        PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
+//
+//        abstractAPIManager = new AbstractAPIManagerWrapper(artifactManager, registryService,
+//                registry, tenantManager);
+//        abstractAPIManager.tenantDomain = "carbon.super";
+//        PowerMockito.when(APIUtil.getRevisionPath("63e1e37e-a5b8-4be6-86a5-d6ae0749f131", 1)).thenReturn(revisionPath);
+//        Resource resourceNew = new ResourceImpl();
+//        resourceNew.setUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        Mockito.when(abstractAPIManager.registry.get("/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/api")).thenReturn(resourceNew);
+//        PowerMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
+//                .thenReturn(revisionApi);
+//        PowerMockito.mockStatic(OASParserUtil.class);
+//        Mockito.when(OASParserUtil.getAPIDefinition(apiRevisionId, abstractAPIManager.registry)).thenReturn(
+//                "{\"info\": {\"swagger\":\"data\"}}");
+//        try {
+//            apiProvider.addAPIRevisionDeployment("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+//                    "b55e0fc3-9829-4432-b99e-02056dc91838",apiRevisionDeployments);
+//            apiProvider.getAPIRevisionDeployment("Production and Sandbox");
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//    }
+//
+//    /**
+//     * This method tests deploying a new API Revision to a gateway environment and retrieve the deployment info by
+//     * Revision UUID
+//     *
+//     * @throws APIManagementException
+//     */
+//    @Test
+//    public void testGetAPIRevisionDeploymentByRevisionUUID() throws APIManagementException, RegistryException, UserStoreException {
+//        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO, null, null);
+//        apiProvider.tenantDomain = "carbon.super";
+//        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        API api = new API(apiId);
+//        api.setContext("/test");
+//        api.setStatus(APIConstants.CREATED);
+//        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+//        String revisionPath = "/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/";
+//
+//        APIRevision apiRevision = new APIRevision();
+//        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        apiRevision.setDescription("test description revision 1");
+//        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+//        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+//
+//        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+//        RegistryService registryService = Mockito.mock(RegistryService.class);
+//        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+//        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+//        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
+//        Mockito.when(apiProvider.registry.resourceExists(Mockito.anyString())).thenReturn(false);
+//        Resource resource = new ResourceImpl();
+//        resource.setUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        Mockito.when(apiProvider.registry.get(Mockito.anyString())).thenReturn(resource);
+//
+//        try {
+//            apiProvider.addAPIRevision(apiRevision);
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//
+//        List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+//        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+//        apiRevisionDeployment.setDeployment("Production and Sandbox");
+//        apiRevisionDeployment.setDisplayOnDevportal(true);
+//        apiRevisionDeployments.add(apiRevisionDeployment);
+//        apiRevision.setRevisionUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        apiRevision.setId(1);
+//        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+//        APIIdentifier apiRevisionId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "b55e0fc3-9829-4432-b99e-02056dc91838");
+//        API revisionApi = new API(apiRevisionId);
+//        AbstractAPIManager abstractAPIManager = Mockito.mock(AbstractAPIManager.class);
+//        Mockito.when(abstractAPIManager.getLightweightAPIByUUID(Mockito.anyString(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        GenericArtifact genericArtifact = new GenericArtifactImpl("b55e0fc3-9829-4432-b99e-02056dc91838", new QName("sample"), "");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "admin");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_NAME, "PizzaShackAPI");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, "1.0.0");
+//        Mockito.when(artifactManager.getGenericArtifact("b55e0fc3-9829-4432-b99e-02056dc91838")).thenReturn(genericArtifact);
+//        Mockito.when(abstractAPIManager.getApiInformation(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        PowerMockito.when(APIUtil.getAPIInformation(Mockito.any(), Mockito.any())).thenReturn(revisionApi);
+//
+//        Mockito.when(abstractAPIManager.getRevisionAPI(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        RealmService realmService = Mockito.mock(RealmService.class);
+//        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+//        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+//        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+//        PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
+//
+//        abstractAPIManager = new AbstractAPIManagerWrapper(artifactManager, registryService,
+//                registry, tenantManager);
+//        abstractAPIManager.tenantDomain = "carbon.super";
+//        PowerMockito.when(APIUtil.getRevisionPath("63e1e37e-a5b8-4be6-86a5-d6ae0749f131", 1)).thenReturn(revisionPath);
+//        Resource resourceNew = new ResourceImpl();
+//        resourceNew.setUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        Mockito.when(abstractAPIManager.registry.get("/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/api")).thenReturn(resourceNew);
+//        PowerMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
+//                .thenReturn(revisionApi);
+//        PowerMockito.mockStatic(OASParserUtil.class);
+//        Mockito.when(OASParserUtil.getAPIDefinition(apiRevisionId, abstractAPIManager.registry)).thenReturn(
+//                "{\"info\": {\"swagger\":\"data\"}}");
+//        try {
+//            apiProvider.addAPIRevisionDeployment("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+//                    "b55e0fc3-9829-4432-b99e-02056dc91838",apiRevisionDeployments);
+//            apiProvider.getAPIRevisionDeploymentList("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//    }
+//
+//    /**
+//     * This method tests deploying a new API Revision to a gateway environment
+//     *
+//     * @throws APIManagementException
+//     */
+//    @Test
+//    public void testUndeployAPIRevisionDeployment() throws APIManagementException, RegistryException, UserStoreException {
+//        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, scopesDAO, null, null);
+//        apiProvider.tenantDomain = "carbon.super";
+//        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        API api = new API(apiId);
+//        api.setContext("/test");
+//        api.setStatus(APIConstants.CREATED);
+//        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+//        String revisionPath = "/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/";
+//
+//        APIRevision apiRevision = new APIRevision();
+//        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+//        apiRevision.setDescription("test description revision 1");
+//        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+//        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+//        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+//
+//        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+//        RegistryService registryService = Mockito.mock(RegistryService.class);
+//        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+//        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+//        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry);
+//        Mockito.when(apiProvider.registry.resourceExists(Mockito.anyString())).thenReturn(false);
+//        Resource resource = new ResourceImpl();
+//        resource.setUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        Mockito.when(apiProvider.registry.get(Mockito.anyString())).thenReturn(resource);
+//
+//        try {
+//            apiProvider.addAPIRevision(apiRevision);
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//
+//        List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+//        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+//        apiRevisionDeployment.setDeployment("Production and Sandbox");
+//        apiRevisionDeployment.setDisplayOnDevportal(true);
+//        apiRevisionDeployments.add(apiRevisionDeployment);
+//        apiRevision.setRevisionUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        apiRevision.setId(1);
+//        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+//        APIIdentifier apiRevisionId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+//                "b55e0fc3-9829-4432-b99e-02056dc91838");
+//        API revisionApi = new API(apiRevisionId);
+//        AbstractAPIManager abstractAPIManager = Mockito.mock(AbstractAPIManager.class);
+//        Mockito.when(abstractAPIManager.getLightweightAPIByUUID(Mockito.anyString(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        GenericArtifact genericArtifact = new GenericArtifactImpl("b55e0fc3-9829-4432-b99e-02056dc91838", new QName("sample"), "");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, "admin");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_NAME, "PizzaShackAPI");
+//        genericArtifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, "1.0.0");
+//        Mockito.when(artifactManager.getGenericArtifact("b55e0fc3-9829-4432-b99e-02056dc91838")).thenReturn(genericArtifact);
+//        Mockito.when(abstractAPIManager.getApiInformation(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        PowerMockito.when(APIUtil.getAPIInformation(Mockito.any(), Mockito.any())).thenReturn(revisionApi);
+//
+//        Mockito.when(abstractAPIManager.getRevisionAPI(Mockito.any(),
+//                Mockito.any())).thenReturn(revisionApi);
+//        RealmService realmService = Mockito.mock(RealmService.class);
+//        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+//        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+//        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+//        PowerMockito.when(tenantManager.getTenantId(Matchers.anyString())).thenReturn(-1234);
+//
+//        abstractAPIManager = new AbstractAPIManagerWrapper(artifactManager, registryService,
+//                registry, tenantManager);
+//        abstractAPIManager.tenantDomain = "carbon.super";
+//        PowerMockito.when(APIUtil.getRevisionPath("63e1e37e-a5b8-4be6-86a5-d6ae0749f131", 1)).thenReturn(revisionPath);
+//        Resource resourceNew = new ResourceImpl();
+//        resourceNew.setUUID("b55e0fc3-9829-4432-b99e-02056dc91838");
+//        Mockito.when(abstractAPIManager.registry.get("/apimgt/applicationdata/apis/b55e0fc3-9829-4432-b99e-02056dc91838/1/api")).thenReturn(resourceNew);
+//        PowerMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
+//                .thenReturn(revisionApi);
+//        PowerMockito.mockStatic(OASParserUtil.class);
+//        Mockito.when(OASParserUtil.getAPIDefinition(apiRevisionId, abstractAPIManager.registry)).thenReturn(
+//                "{\"info\": {\"swagger\":\"data\"}}");
+//        try {
+//            apiProvider.undeployAPIRevisionDeployment("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+//                    "b55e0fc3-9829-4432-b99e-02056dc91838",apiRevisionDeployments);
+//        } catch (Exception e) {
+//            Assert.fail(e.getMessage());
+//        }
+//    }
+
+    /**
+     * This method tests restoring an API Revision to Working Copy
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testRestoreAPIRevision() throws APIManagementException, APIPersistenceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
+                null, null);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        try {
+            apiProvider.addAPIRevision(apiRevision);
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+        PowerMockito.doNothing().when(apiPersistenceInstance).restoreAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt());
+        try {
+            apiProvider.restoreAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131","b55e0fc3-9829-4432-b99e-02056dc91838");
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * This method tests deleting an API Revision
+     *
+     * @throws APIManagementException
+     */
+    @Test
+    public void testDeleteAPIRevision() throws APIManagementException, APIPersistenceException {
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO, null, null);
+        APIIdentifier apiId = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0",
+                "63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIConstants.CREATED);
+        String apiPath = "/apimgt/applicationdata/provider/admin/PizzaShackAPI/1.0.0/api";
+
+        APIRevision apiRevision = new APIRevision();
+        apiRevision.setApiUUID("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
+        apiRevision.setDescription("test description revision 1");
+        Mockito.when(apimgtDAO.getRevisionCountByAPI(Mockito.anyString())).thenReturn(0);
+        Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
+        Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
+        Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
+                .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
+        try {
+            apiProvider.addAPIRevision(apiRevision);
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+        Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
+        PowerMockito.doNothing().when(apiPersistenceInstance).deleteAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt());
+        try {
+            apiProvider.deleteAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131","b55e0fc3-9829-4432-b99e-02056dc91838");
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
     }
 }
