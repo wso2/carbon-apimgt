@@ -40,7 +40,9 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.extension.listener.dto.ExtensionResponseDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.ExtensionDataPublisher;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
@@ -309,6 +311,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
         TracingSpan keySpan = null;
+        ExtensionDataPublisher extensionHandler = new ExtensionDataPublisher();
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
@@ -336,8 +339,22 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (authenticators.isEmpty()) {
                 initializeAuthenticators();
             }
+            try {
+                extensionHandler.preProcessRequest(messageContext, "Authentication");
+            } catch (APIManagementException e) {
+                //TODO: error handle
+                e.printStackTrace();
+            }
+
             if (isAuthenticate(messageContext)) {
                 setAPIParametersToMessageContext(messageContext);
+                try {
+                    ExtensionResponseDTO extensionResponseDTO =
+                            extensionHandler.postProcessRequest(messageContext, "Authentication");
+                } catch (APIManagementException e) {
+                    //TODO: error handle
+                    e.printStackTrace();
+                }
                 return true;
             }
         } catch (APISecurityException e) {
