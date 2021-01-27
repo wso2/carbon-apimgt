@@ -2807,15 +2807,17 @@ public class APIMappingUtil {
         String key = "Revision " + model.getId();
         apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-        Date parsedDate;
-        try {
-            parsedDate = dateFormat.parse(model.getCreatedTime());
-        } catch (java.text.ParseException e) {
-            throw new APIManagementException("Error while parsing the created time", e);
+        if (model.getCreatedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getCreatedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the created time:" + model.getCreatedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            apiRevisionDTO.setCreatedTime(timestamp);
         }
-        Timestamp timestamp = new Timestamp(parsedDate.getTime());
-        apiRevisionDTO.setCreatedTime(timestamp);
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
         apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
@@ -2847,15 +2849,17 @@ public class APIMappingUtil {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-        Date parsedDate;
-        try {
-            parsedDate = dateFormat.parse(model.getDeployedTime());
-        } catch (java.text.ParseException e) {
-            throw new APIManagementException("Error while parsing the created time", e);
+        if (model.getDeployedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getDeployedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the created time:" + model.getDeployedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         }
-        Timestamp timestamp = new Timestamp(parsedDate.getTime());
-        apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         return apiRevisionDeploymentDTO;
     }
 
