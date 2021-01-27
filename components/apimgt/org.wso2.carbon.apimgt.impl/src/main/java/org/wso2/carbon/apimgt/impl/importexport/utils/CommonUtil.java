@@ -381,7 +381,6 @@ public class CommonUtil {
         }
     }
 
-
     /**
      * This method will be used to copy files from source to destination
      *
