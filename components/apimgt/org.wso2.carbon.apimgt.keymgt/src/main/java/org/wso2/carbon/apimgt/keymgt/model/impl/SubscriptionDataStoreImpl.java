@@ -22,12 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -54,8 +52,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.cache.Cache;
 
 public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
@@ -576,6 +572,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     private void clearResourceCache(API api, String tenantDomain) {
 
+        if (isAPIResourceValidationEnabled()) {
+            new CacheInvalidationServiceImpl().invalidateResourceCache(api.getContext(), api.getApiVersion(),
+                    tenantDomain, api.getResources());
+        }
     }
 
     public boolean isAPIResourceValidationEnabled() {

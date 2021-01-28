@@ -21,6 +21,9 @@
 package org.wso2.carbon.apimgt.impl.caching;
 
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+
+import java.util.List;
 
 public interface CacheInvalidationService {
 
@@ -28,11 +31,9 @@ public interface CacheInvalidationService {
 
     void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext, String httpVerb);
 
-    void invalidateKey(String accessToken);
-
-    void invalidateCachedUsername(String username);
-
     void invalidateCachedUsernames(String[] usernameList);
 
     void invalidateCachedTokens(String[] accessTokens);
+    public void invalidateResourceCache(String context, String version, String organization,
+                                        List<URLMapping> urlMappings);
 }
