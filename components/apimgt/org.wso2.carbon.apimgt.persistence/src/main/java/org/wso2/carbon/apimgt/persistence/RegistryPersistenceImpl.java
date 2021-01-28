@@ -658,7 +658,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-                int prependIndex = apiPath.indexOf("/api");
+                int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex );
                 String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
@@ -1906,7 +1906,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-            int prependIndex = apiPath.indexOf("/api");
+            int prependIndex = apiPath.lastIndexOf("/api");
             String apiSourcePath = apiPath.substring(0, prependIndex );
             String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                     + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
@@ -2029,7 +2029,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String apiPath = GovernanceUtils.getArtifactPath(registryType, apiId);
-                int prependIndex = apiPath.indexOf("/api");
+                int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex );
                 String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
@@ -2114,7 +2114,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new GraphQLPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-            int prependIndex = apiPath.indexOf("/api");
+            int prependIndex = apiPath.lastIndexOf("/api");
             String apiSourcePath = apiPath.substring(0, prependIndex );
             String schemaName = api.apiProvider + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + api.apiName
                     + api.apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
@@ -2490,7 +2490,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
 
             String apiPath = GovernanceUtils.getArtifactPath(registryType, apiId);
-            int prependIndex = apiPath.indexOf("/api");
+            int prependIndex = apiPath.lastIndexOf("/api");
             String apiSourcePath = apiPath.substring(0, prependIndex );
             String apiOrAPIProductDocPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR +
                     APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
@@ -2660,7 +2660,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-            int prependIndex = apiPath.indexOf("/api");
+            int prependIndex = apiPath.lastIndexOf("/api");
             String apiResourcePath = apiPath.substring(0, prependIndex );
             String policyPath = GovernanceUtils.getArtifactPath(registry, mediationPolicyId);
             if (!policyPath.startsWith(apiResourcePath)) {
@@ -2709,7 +2709,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 throw new MediationPolicyPersistenceException("API not foud ", ExceptionCodes.API_NOT_FOUND);
             }
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-            int prependIndex = apiPath.indexOf("/api");
+            int prependIndex = apiPath.lastIndexOf("/api");
             String apiResourcePath = apiPath.substring(0, prependIndex );
 
             // apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
@@ -2883,7 +2883,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     + apiProviderName + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR
                     + apiVersion;
             String apiPath = GovernanceUtils.getArtifactPath(registry, apiId);
-            int prependIndex = apiPath.indexOf("/api");
+            int prependIndex = apiPath.lastIndexOf("/api");
             String artifactPath = apiPath.substring(0, prependIndex );
             String oldThumbPath = artifactOldPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
             String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
