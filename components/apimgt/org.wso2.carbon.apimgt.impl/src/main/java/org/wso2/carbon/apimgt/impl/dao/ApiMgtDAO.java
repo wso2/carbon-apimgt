@@ -15846,9 +15846,30 @@ public class ApiMgtDAO {
                     }
                 }
 
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(), urlMappingNew);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
-                for (URITemplate urlMapping : urlMappingList) {
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, apiId);
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
@@ -15866,8 +15887,8 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
-                for (URITemplate urlMapping : urlMappingList) {
-                    if (urlMapping.getScope() != null) {
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    if (urlMapping.getScopes() != null) {
                         getRevisionedURLMappingsStatement.setInt(1, apiId);
                         getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
                         getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
@@ -15876,10 +15897,12 @@ public class ApiMgtDAO {
                         getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
                         try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
                             while (rs.next()) {
-                                insertScopeResourceMappingStatement.setString(1, urlMapping.getScope().getKey());
-                                insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
-                                insertScopeResourceMappingStatement.setInt(3, tenantId);
-                                insertScopeResourceMappingStatement.addBatch();
+                                for (Scope scope: urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
                             }
                         }
                     }

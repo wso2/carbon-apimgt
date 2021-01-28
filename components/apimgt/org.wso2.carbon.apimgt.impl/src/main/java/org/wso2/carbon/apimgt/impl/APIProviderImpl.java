@@ -2616,14 +2616,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiUUID = api.getUuid();
             // get all policies
             try {
-                APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiUUID);
-                List<MediationInfo> localPolicies;
-                if (apiRevision.getApiUUID() != null) {
-                    localPolicies = apiPersistenceInstance.getAllRevisionMediationPolicies(org, apiUUID,
-                            apiRevision.getApiUUID(), apiRevision.getId());
-                } else {
-                    localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
-                }
+                List<MediationInfo> localPolicies = apiPersistenceInstance.getAllMediationPolicies(org, apiUUID);
                 List<Mediation> globalPolicies = null;
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     boolean found = false;
@@ -2631,15 +2624,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         for (MediationInfo mediationInfo : localPolicies) {
                             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
                                     && api.getInSequence().equals(mediationInfo.getName())) {
-                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy;
-                                if (apiRevision.getApiUUID() != null) {
-                                    mediationPolicy = apiPersistenceInstance
-                                            .getRevisionMediationPolicy(org, apiUUID, mediationInfo.getId(),
-                                                    apiRevision.getApiUUID(), apiRevision.getId());
-                                } else {
-                                    mediationPolicy = apiPersistenceInstance
-                                            .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                                }
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                                 Mediation mediation = new Mediation();
                                 mediation.setConfig(mediationPolicy.getConfig());
                                 mediation.setName(mediationPolicy.getName());
@@ -2674,15 +2660,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         for (MediationInfo mediationInfo : localPolicies) {
                             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
                                     && api.getOutSequence().equals(mediationInfo.getName())) {
-                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy;
-                                if (apiRevision.getApiUUID() != null) {
-                                    mediationPolicy = apiPersistenceInstance
-                                            .getRevisionMediationPolicy(org, apiUUID, mediationInfo.getId(),
-                                                    apiRevision.getApiUUID(), apiRevision.getId());
-                                } else {
-                                    mediationPolicy = apiPersistenceInstance
-                                            .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                                }
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                                 Mediation mediation = new Mediation();
                                 mediation.setConfig(mediationPolicy.getConfig());
                                 mediation.setName(mediationPolicy.getName());
@@ -2717,15 +2696,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         for (MediationInfo mediationInfo : localPolicies) {
                             if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
                                     && api.getFaultSequence().equals(mediationInfo.getName())) {
-                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy;
-                                if (apiRevision.getApiUUID() != null) {
-                                    mediationPolicy = apiPersistenceInstance
-                                            .getRevisionMediationPolicy(org, apiUUID, mediationInfo.getId(),
-                                                    apiRevision.getApiUUID(), apiRevision.getId());
-                                } else {
-                                    mediationPolicy = apiPersistenceInstance
-                                            .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                                }
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                                 Mediation mediation = new Mediation();
                                 mediation.setConfig(mediationPolicy.getConfig());
                                 mediation.setName(mediationPolicy.getName());
@@ -10268,13 +10240,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Organization org = new Organization(organizationDTO.getOrgId());
         String requestedTenantDomain = organizationDTO.getRequestedTenantDomain();
         try {
-            PublisherAPI publisherAPI;
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(uuid);
-            if (apiRevision.getApiUUID() != null) {
-                publisherAPI = apiPersistenceInstance.getPublisherRevisionAPI(org, uuid, apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-            }
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
+
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 APIIdentifier apiIdentifier = api.getId();
@@ -10337,8 +10304,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return organization;
     }
 
-
-
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
             throws APIManagementException {
@@ -10390,13 +10355,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public API getLightweightAPIByUUID(String uuid, OrganizationDTO organizationDTO) throws APIManagementException {
         try {
             Organization org = new Organization(organizationDTO.getOrgId());
-            PublisherAPI publisherAPI;
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(uuid);
-            if (apiRevision.getApiUUID() != null) {
-                publisherAPI = apiPersistenceInstance.getPublisherRevisionAPI(org, uuid, apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
-            }
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
@@ -10610,14 +10569,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         try {
             APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
-            org.wso2.carbon.apimgt.persistence.dto.Mediation policy;
             Organization org = new Organization(orgId);
-            if (apiRevision.getApiUUID() != null) {
-                policy = apiPersistenceInstance.getRevisionMediationPolicy(org, apiId, policyId,
-                        apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                policy = apiPersistenceInstance.getMediationPolicy(org, apiId, policyId);
-            }
+            org.wso2.carbon.apimgt.persistence.dto.Mediation policy = apiPersistenceInstance.getMediationPolicy(org,
+                    apiId, policyId);
+
             if (policy != null) {
                 Mediation mediation = new Mediation();
                 mediation.setName(policy.getName());

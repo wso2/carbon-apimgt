@@ -1153,15 +1153,8 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public ResourceFile getWSDL(String apiId, String orgId) throws APIManagementException {
         try {
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource;
             Organization org = new Organization(orgId);
-            if (apiRevision.getApiUUID() != null) {
-                resource = apiPersistenceInstance.getRevisionWSDL(org, apiId,
-                        apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                resource = apiPersistenceInstance.getWSDL(org, apiId);
-            }
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getWSDL(org, apiId);
             if (resource != null) {
                 return new ResourceFile(resource.getContent(), resource.getContentType());
             } else {
@@ -1243,12 +1236,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String definition;
         try {
             Organization org = new Organization(orgId);
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
-            if (apiRevision.getApiUUID() != null) {
-                definition = apiPersistenceInstance.getRevisionGraphQLSchema(org, apiId, apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                definition = apiPersistenceInstance.getGraphQLSchema(org, apiId);
-            }
+            definition = apiPersistenceInstance.getGraphQLSchema(org, apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
                     e);
@@ -1278,12 +1266,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 orgId = apiTenantDomain;
             }
             Organization org = new Organization(orgId);
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(id);
-            if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                definition = apiPersistenceInstance.getRevisionOASDefinition(org, id, apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                definition = apiPersistenceInstance.getOASDefinition(org, id);
-            }
+            definition = apiPersistenceInstance.getOASDefinition(org, id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1296,12 +1279,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
             Organization org = new Organization(orgId);
-            if (apiRevision.getApiUUID() != null) {
-                definition = apiPersistenceInstance.getRevisionOASDefinition(org, apiId, apiRevision.getApiUUID(),
-                        apiRevision.getId());
-            } else {
-                definition = apiPersistenceInstance.getOASDefinition(org, apiId);
-            }
+            definition = apiPersistenceInstance.getOASDefinition(org, apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1363,15 +1341,7 @@ public abstract class AbstractAPIManager implements APIManager {
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(uuid);
-            DocumentSearchResult list;
-            if (apiRevision.getApiUUID() != null) {
-                list = apiPersistenceInstance.searchRevisionDocumentation(org, uuid, 0, 0, null, ctx,
-                        apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                list = apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
-            }
-
+            DocumentSearchResult list = apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
             if (list != null) {
                 convertedList = new ArrayList<Documentation>();
                 List<org.wso2.carbon.apimgt.persistence.dto.Documentation> docList = list.getDocumentationList();
@@ -3854,14 +3824,9 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getSwaggerDefinition() != null) {
             resourceConfigsString = api.getSwaggerDefinition();
         } else {
-            if (apiRevision.getApiUUID() != null) {
-                resourceConfigsString = apiPersistenceInstance.getRevisionOASDefinition(org, uuid,
-                        apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
-            }
-            api.setSwaggerDefinition(resourceConfigsString);
+            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
         }
+        api.setSwaggerDefinition(resourceConfigsString);
 
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, requestedTenantDomain));
@@ -4063,15 +4028,9 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public ResourceFile getIcon(String apiId, String orgId) throws APIManagementException {
         try {
-            APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiId);
             Organization org = new Organization(orgId);
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource;
-            if (apiRevision.getApiUUID() != null) {
-                resource = apiPersistenceInstance.getRevisionThumbnail(org, apiId,
-                        apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                resource = apiPersistenceInstance.getThumbnail(org, apiId);
-            }
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getThumbnail(org,
+                    apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;
