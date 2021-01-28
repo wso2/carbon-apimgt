@@ -25,13 +25,11 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
@@ -435,7 +433,7 @@ public class TemplateBuilderUtil {
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
         if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
             return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
-                    extractedFolderPath, apidto);
+                    extractedFolderPath, apidto,clientCertificatesDTOList);
         }
         return null;
     }
@@ -502,13 +500,14 @@ public class TemplateBuilderUtil {
                 TemplateBuilderUtil.getAPITemplateBuilder(apiProduct, tenantDomain, clientCertificatesDTOList,
                         convertAPIIdToDto(associatedAPIsMap.values()));
         return createAPIGatewayDTOtoPublishAPI(environment, apiProduct, apiTemplateBuilder, tenantDomain,
-                apidtoMap);
+                apidtoMap,clientCertificatesDTOList);
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
                                                                  APITemplateBuilder builder,
                                                                  String tenantDomain,
-                                                                 Map<String, APIDTO> associatedAPIsMap)
+                                                                 Map<String, APIDTO> associatedAPIsMap,
+                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
             throws CertificateManagementException, APITemplateException, XMLStreamException, APIManagementException {
 
         APIProductIdentifier id = apiProduct.getId();
@@ -531,7 +530,7 @@ public class TemplateBuilderUtil {
         productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                 productAPIDto.getLocalEntriesToBeAdd()));
         APIIdentifier apiId = new APIIdentifier(id.getProviderName(), id.getName(), PRODUCT_VERSION);
-        setClientCertificatesToBeAdded(apiId, tenantDomain, productAPIDto);
+        setClientCertificatesToBeAdded(tenantDomain, productAPIDto,clientCertificatesDTOList);
         productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
         for (Map.Entry<String, APIDTO> apidtoEntry : associatedAPIsMap.entrySet()) {
             String apiExtractedPath = apidtoEntry.getKey();
@@ -542,7 +541,6 @@ public class TemplateBuilderUtil {
             addEndpoints(api, apiTemplateBuilder, productAPIDto);
             setCustomSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
-            setClientCertificatesToBeAdded(api, tenantDomain, productAPIDto);
         }
 
         return productAPIDto;
@@ -551,8 +549,9 @@ public class TemplateBuilderUtil {
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
                                                                  APITemplateBuilder builder,
                                                                  String tenantDomain, String extractedPath,
-                                                                 APIDTO apidto)
-            throws APIManagementException, CertificateManagementException, APITemplateException, XMLStreamException {
+                                                                 APIDTO apidto,
+                                                                 List<ClientCertificateDTO> clientCertificatesDTOList)
+            throws APIManagementException, APITemplateException, XMLStreamException {
 
         GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
         gatewayAPIDTO.setName(api.getId().getName());
@@ -615,7 +614,7 @@ public class TemplateBuilderUtil {
         GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
         setAPIFaultSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
         setCustomSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
-        setClientCertificatesToBeAdded(api, tenantDomain, gatewayAPIDTO);
+        setClientCertificatesToBeAdded(tenantDomain, gatewayAPIDTO, clientCertificatesDTOList);
 
         //Add the API
         if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
@@ -707,18 +706,16 @@ public class TemplateBuilderUtil {
     /**
      * To deploy client certificate in given API environment.
      *
-     * @param api          Relevant API.
      * @param tenantDomain Tenant domain.
-     * @throws CertificateManagementException Certificate Management Exception.
+     * @param clientCertificatesDTOList
      */
-    private static void setClientCertificatesToBeAdded(API api, String tenantDomain, GatewayAPIDTO gatewayAPIDTO)
-            throws CertificateManagementException {
+    private static void setClientCertificatesToBeAdded(String tenantDomain, GatewayAPIDTO gatewayAPIDTO,
+                                                       List<ClientCertificateDTO> clientCertificatesDTOList) {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                .getClientCertificates(tenantId, null, api.getId());
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
+
+        if (clientCertificatesDTOList != null) {
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificatesDTOList) {
                 GatewayContentDTO clientCertificate = new GatewayContentDTO();
                 clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
                 clientCertificate.setContent(clientCertificateDTO.getCertificate());
