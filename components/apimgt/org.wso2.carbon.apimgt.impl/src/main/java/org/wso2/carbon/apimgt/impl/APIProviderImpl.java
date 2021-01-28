@@ -128,6 +128,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
@@ -275,13 +276,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
-    private ArtifactSaver artifactSaver;
+    protected  ArtifactSaver artifactSaver;
+    protected ImportExportAPI importExportAPI;
+    protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
         this.userNameWithoutChange = username;
         certificateManager = CertificateManagerImpl.getInstance();
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
+        this.importExportAPI = ServiceReferenceHolder.getInstance().getImportExportService();
+        this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
     }
 
     protected String getUserNameWithoutChange() {
@@ -10013,11 +10018,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         idList.add(revisionId);
         revisionIDList.put(apiRevision.getApiUUID(),idList);
         try {
-            File artifact = ServiceReferenceHolder.getInstance().getImportExportService()
+            File artifact = importExportAPI
                     .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
-            GatewayArtifactsMgtDAO.getInstance()
+            gatewayArtifactsMgtDAO
                     .addGatewayPublishedAPIDetails(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                            tenantDomain,APIConstants.HTTP_PROTOCOL);
+                            tenantDomain, APIConstants.HTTP_PROTOCOL);
             artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
                     apiRevision.getRevisionUUID(),tenantDomain, artifact);
         } catch (APIImportExportException|ArtifactSynchronizerException e) {
