@@ -753,8 +753,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            //this will fail if user does not have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
             ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, orgId);
 
             if (thumbnailResource != null) {
