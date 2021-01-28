@@ -44,6 +44,7 @@ import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
+import AddIcon from '@material-ui/icons/Add';
 import CardContent from '@material-ui/core/CardContent';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -108,12 +109,16 @@ const useStyles = makeStyles((theme) => ({
     },
     shapeDottedStart: {
         backgroundColor: '#1CB1BF',
-        border: '2px dashed #ffffff',
+        border: '2px solid #ffffff',
         width: 47,
         height: 47,
         marginTop: 6,
         marginLeft: 6,
         placeSelf: 'middle',
+    },
+    plusIconStyle: {
+        marginTop: 8,
+        marginLeft: 8,
     },
     shapeDottedStart1: {
         backgroundColor: '#1CB1BF',
@@ -137,9 +142,6 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: 120,
         fontFamily: 'sans-serif',
         fontSize: 'small',
-    },
-    textShapeMiddle: {
-        marginTop: 18,
     },
     textShape3: {
         color: '#38536c',
@@ -367,6 +369,12 @@ export default function Environments() {
         setExtraRevisionToDelete(null);
     };
 
+    /**
+     * Handles creating and deploying a new revision
+     * @param {Object} list the environment list
+     * @param {Object} revisionName the name of the revision
+     * @returns {Object} the revision number
+     */
     function checkIfDeletingLastRevision(list, revisionName) {
         const splitList = revisionName.split(' ');
         let splitList1;
@@ -786,7 +794,13 @@ export default function Environments() {
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
-                <Grid className={clsx(classes.shapeDottedStart, classes.shapeCircle)} />
+                <Grid
+                    onClick={handleClickOpen}
+                    className={clsx(classes.shapeDottedStart, classes.shapeCircle)}
+                    style={{ cursor: 'pointer' }}
+                >
+                    <AddIcon style={{ fontSize: 30 }} className={classes.plusIconStyle} />
+                </Grid>
             </Grid>
             <Grid item className={classes.shapeRecBack} />
         </Grid>
@@ -798,7 +812,13 @@ export default function Environments() {
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
-                <Grid className={clsx(classes.shapeDottedStart, classes.shapeCircle)} />
+                <Grid
+                    onClick={handleClickOpen}
+                    className={clsx(classes.shapeDottedStart, classes.shapeCircle)}
+                    style={{ cursor: 'pointer' }}
+                >
+                    <AddIcon style={{ fontSize: 30 }} className={classes.plusIconStyle} />
+                </Grid>
             </Grid>
         </Grid>
     );
@@ -975,21 +995,7 @@ export default function Environments() {
             if (allRevisions.length !== revisionCount) {
                 items.push(
                     <Grid item>
-                        <Grid className={classes.textShape5}>
-                            <Button
-                                type='submit'
-                                size='small'
-                                onClick={handleClickOpen}
-                                className={classes.textShape6}
-                                variant='outlined'
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.Deployments.create.new.revision'
-                                    defaultMessage='Create a new revision'
-                                />
-                            </Button>
-                        </Grid>
-                        <Grid className={classes.textShapeMiddle}>
+                        <Grid className={classes.textShape4}>
                             {item4}
                         </Grid>
                     </Grid>,
@@ -998,21 +1004,7 @@ export default function Environments() {
             if (allRevisions.length === revisionCount) {
                 items.push(
                     <Grid item>
-                        <Grid className={classes.textShape5}>
-                            <Button
-                                type='submit'
-                                size='small'
-                                onClick={handleClickOpen}
-                                className={classes.textShape6}
-                                variant='outlined'
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.Deployments.create.last.revision'
-                                    defaultMessage='Create a new revision'
-                                />
-                            </Button>
-                        </Grid>
-                        <Grid className={classes.textShapeMiddle}>
+                        <Grid className={classes.textShape4}>
                             {item5}
                         </Grid>
                     </Grid>,
@@ -1046,21 +1038,7 @@ export default function Environments() {
             );
             items.push(
                 <Grid item>
-                    <Grid className={classes.textShape5}>
-                        <Button
-                            type='submit'
-                            size='small'
-                            onClick={handleClickOpen}
-                            className={classes.textShape6}
-                            variant='outlined'
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Environments.Environments.Deployments.create.first.revision'
-                                defaultMessage='Create a new revision'
-                            />
-                        </Button>
-                    </Grid>
-                    <Grid className={classes.textShapeMiddle}>
+                    <Grid className={classes.textShape4}>
                         {item4}
                     </Grid>
                 </Grid>,
