@@ -22,22 +22,26 @@ public class TransportConfigContext extends ConfigContextDecorator {
     private APIProduct apiProduct;
 
     public TransportConfigContext(ConfigContext context, API api) {
+
         super(context);
         this.api = api;
     }
 
     public TransportConfigContext(ConfigContext context, APIProduct apiProduct) {
+
         super(context);
         this.apiProduct = apiProduct;
     }
 
     @Override
     public void validate() throws APITemplateException, APIManagementException {
+
         super.validate();
     }
 
     @Override
     public VelocityContext getContext() {
+
         VelocityContext context = super.getContext();
 
         String transportsString = "";
@@ -55,9 +59,16 @@ public class TransportConfigContext extends ConfigContextDecorator {
 
     private void setTransportInVelocityContext(VelocityContext context, String transportsString) {
 
-        if (StringUtils.isNotEmpty(api.getApiSecurity()) &&
-                (api.getApiSecurity().contains(APIConstants.API_SECURITY_MUTUAL_SSL) ||
-                        api.getApiSecurity().contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY))) {
+        String apiSecurity = null;
+
+        if (api != null) {
+            apiSecurity = api.getApiSecurity();
+        } else if (apiProduct != null) {
+            apiSecurity = apiProduct.getApiSecurity();
+        }
+        if (StringUtils.isNotEmpty(apiSecurity) &&
+                (apiSecurity.contains(APIConstants.API_SECURITY_MUTUAL_SSL) ||
+                        apiSecurity.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY))) {
             context.put("transport", "https");
             return;
         }
