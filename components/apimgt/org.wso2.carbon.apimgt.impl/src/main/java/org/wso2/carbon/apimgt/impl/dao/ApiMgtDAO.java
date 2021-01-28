@@ -183,7 +183,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         List<String> versionList = new ArrayList<String>();
         ResultSet resultSet = null;
-        String sqlQuery = sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
+        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_SQL;
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
@@ -203,25 +203,30 @@ public class ApiMgtDAO {
 
     public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
             throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        List<String> versionList = new ArrayList<String>();
-        ResultSet resultSet = null;
-        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL;
 
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, apiName);
-            ps.setString(2, organizationId);
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                versionList.add(resultSet.getString("API_VERSION"));
+        List<String> versionList = new ArrayList<String>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet resultSet = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiName);
+                ps.setString(2, organizationId);
+                resultSet = ps.executeQuery();
+                while (resultSet.next()) {
+                    versionList.add(resultSet.getString("API_VERSION"));
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to rollback in getting API versions", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to get API versions matches API name" + apiName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return versionList;
     }
@@ -232,30 +237,31 @@ public class ApiMgtDAO {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public List<API> getAPIsOfOrganization(String organizationID) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
         List<API> apis = new ArrayList<>();
-
-        try {
-            String sqlQuery = SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_ID;
-            connection = APIMgtDBUtil.getConnection();
-
-            ps = connection.prepareStatement(sqlQuery);
-            ps.setString(1, organizationID);
-            result = ps.executeQuery();
-
-            while (result.next()) {
-                APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
-                        result.getString("API_NAME"),
-                        result.getString("API_VERSION"));
-                API api = new API(apiId);
-                apis.add(api);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_API_CONTEXT_BY_ORGANIZATION_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, organizationID);
+                result = ps.executeQuery();
+                while (result.next()) {
+                    APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"),
+                            result.getString("API_NAME"),
+                            result.getString("API_VERSION"));
+                    API api = new API(apiId);
+                    apis.add(api);
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to rollback in getting APIs", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Error occurred while fetching APIS", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
         return apis;
     }
@@ -266,26 +272,28 @@ public class ApiMgtDAO {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public String getOrganizationIDByAPIUUID(String apiId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
         String organizationId = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_ORGANIZATION_ID_BY_API_ID)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet result = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiId);
+                result = ps.executeQuery();
 
-        try {
-            String sqlQuery = SQLConstants.GET_ORGANIZATION_ID_BY_API_ID;
-            connection = APIMgtDBUtil.getConnection();
-
-            ps = connection.prepareStatement(sqlQuery);
-            ps.setString(1, apiId);
-            result = ps.executeQuery();
-
-            while (result.next()) {
-                organizationId = result.getString("ORGANIZATION_ID");
+                while (result.next()) {
+                    organizationId = result.getString("ORGANIZATION_ID");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to rollback in getting APIs", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Error occurred while fetching organization ID from database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+            handleException("Error occurred while fetching organization ID", e);
         }
         return organizationId;
     }
@@ -8167,7 +8175,7 @@ public class ApiMgtDAO {
 
         String uuid = null;
 
-        String sql  = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
         try(Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -9985,34 +9993,36 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean isApiNameExistInOrganization(String apiName, String organizationId) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
+
         ResultSet resultSet = null;
         String contextParam = "/t/";
-
-        String query = SQLConstants.GET_API_NAME_MATCHING_ORGANIZATION;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiName);
-            prepStmt.setString(2, organizationId);
-            resultSet = prepStmt.executeQuery();
-
-            int apiCount = 0;
-            if (resultSet != null) {
-                while (resultSet.next()) {
-                    apiCount = resultSet.getInt("API_COUNT");
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_API_NAME_MATCHING_ORGANIZATION)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, apiName);
+                ps.setString(2, organizationId);
+                resultSet = ps.executeQuery();
+                int apiCount = 0;
+                if (resultSet != null) {
+                    while (resultSet.next()) {
+                        apiCount = resultSet.getInt("API_COUNT");
+                    }
                 }
-            }
-            if (apiCount > 0) {
-                return true;
+                if (apiCount > 0) {
+                    return true;
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to in checking api Name availability", e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to check api Name availability : " + apiName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return false;
     }
