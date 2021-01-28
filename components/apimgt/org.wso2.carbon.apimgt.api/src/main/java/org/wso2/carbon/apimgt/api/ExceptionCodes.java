@@ -416,7 +416,11 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
             "Error while reading meta information from the api_params.yaml file"),
     NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
-            "No Api artifacts found for given criteria");
+            "No Api artifacts found for given criteria"),
+
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status");
 
     private final long errorCode;
     private final String errorMessage;
