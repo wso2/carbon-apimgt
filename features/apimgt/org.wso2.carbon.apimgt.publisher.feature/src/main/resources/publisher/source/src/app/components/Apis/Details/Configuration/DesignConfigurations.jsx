@@ -230,6 +230,7 @@ export default function DesignConfigurations() {
         if (descriptionType === 'description') {
             configDispatcher({ action: 'description', value: content });
         } else if (descriptionType === '_overview') {
+            configDispatcher({ action: 'description', value: null });
             setOverview(content);
         }
     };
