@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
@@ -57,6 +58,8 @@ public interface ApisApiService {
       public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response addAPIMediationPolicy(String apiId, String type, String ifMatch, InputStream mediationPolicyFileInputStream, Attachment mediationPolicyFileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response addAPIMonetization(String apiId, APIMonetizationInfoDTO apIMonetizationInfoDTO, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdAsyncapiGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createAPI(APIDTO APIDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext) throws APIManagementException;
@@ -99,6 +102,7 @@ public interface ApisApiService {
       public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
+      public Response importAsyncAPISpecification(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importGraphQLSchema(String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
@@ -114,6 +118,7 @@ public interface ApisApiService {
       public Response updateGraphQLPolicyComplexityOfAPI(String apiId, GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String url, MessageContext messageContext) throws APIManagementException;
       public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response validateAsyncAPISpecification(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response validateGraphQLSchema(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;

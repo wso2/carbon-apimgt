@@ -417,6 +417,22 @@
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.stream.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-data-models</artifactId>
+            <version>1.1.5</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

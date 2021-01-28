@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
@@ -157,6 +158,43 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response addAPIMonetization(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Monetization data object" ,required=true) APIMonetizationInfoDTO apIMonetizationInfoDTO) throws APIManagementException{
         return delegate.addAPIMonetization(apiId, apIMonetizationInfoDTO, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/asyncapi")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get AsyncAPI definition", notes = "This operation can be used to retrieve the AsyncAPI definition of an API. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested AsyncAPI definition of the API is returned ", response = String.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response apisApiIdAsyncapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.apisApiIdAsyncapiGet(apiId, ifNoneMatch, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/asyncapi")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update AsyncAPI definition", notes = "This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'. ", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated AsyncAPI definition ", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+    public Response apisApiIdAsyncapiPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
+        return delegate.apisApiIdAsyncapiPut(apiId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
     }
 
     @POST
@@ -920,6 +958,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
+    @Path("/import-asyncapi")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "import an AsyncAPI Specification", notes = "This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file' to specify the definition. Specify additionalProperties with **at least** API's name, version, context and endpointConfig.", response = APIDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.", response = APIDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response importAsyncAPISpecification( @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "url", required = false)  String url, @Multipart(value = "additionalProperties", required = false)  String additionalProperties) throws APIManagementException{
+        return delegate.importAsyncAPISpecification(fileInputStream, fileDetail, url, additionalProperties, securityContext);
+    }
+
+    @POST
     @Path("/import-graphql-schema")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -1192,6 +1247,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response validateAPI( @NotNull @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"name:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Supported attribute modifiers are [** version, context, name **]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ",required=true)  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.validateAPI(query, ifNoneMatch, securityContext);
+    }
+
+    @POST
+    @Path("/validate-asyncapi")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Validate an AsyncAPI Specification", notes = "This operation can be used to validate and AsyncAPI Specification and retrieve a summary. Provide either 'url' or 'file' to specify the definition.", response = AsyncAPISpecificationValidationResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "Validation",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API definition validation information is returned", response = AsyncAPISpecificationValidationResponseDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response validateAsyncAPISpecification( @ApiParam(value = "Specify whether to return the full content of the AsyncAPI specification in the response. This is only applicable when using url based validation", defaultValue="false") @DefaultValue("false") @QueryParam("returnContent") Boolean returnContent, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
+        return delegate.validateAsyncAPISpecification(returnContent, url, fileInputStream, fileDetail, securityContext);
     }
 
     @POST
