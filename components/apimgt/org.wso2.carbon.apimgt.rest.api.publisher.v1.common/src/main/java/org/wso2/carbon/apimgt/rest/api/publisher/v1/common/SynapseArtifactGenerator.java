@@ -7,6 +7,7 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -59,7 +60,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 if (environment != null) {
                     try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
                         String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(artifact);
-                        if (APIConstants.ApiTypes.PRODUCT_API.name().equals(runTimeArtifact.getType())) {
+                        List<ClientCertificateDTO> clientCertificatesDTOList =
+                                ImportUtils.retrieveClientCertificates(extractedFolderPath);
+                        if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
                             APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(extractedFolderPath);
                             APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
                                     apiProductDTO.getProvider());
