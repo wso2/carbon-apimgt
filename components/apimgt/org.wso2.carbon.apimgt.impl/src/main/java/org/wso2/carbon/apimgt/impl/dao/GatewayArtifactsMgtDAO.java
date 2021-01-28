@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
@@ -307,7 +308,7 @@ public class GatewayArtifactsMgtDAO {
         }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
-                                                   Set<String> gatewayLabelsToRemove)
+                                                   Set<APIRevisionDeployment> gatewayLabelsToRemove)
             throws APIManagementException {
 
         String addQuery = SQLConstants.ADD_GW_PUBLISHED_LABELS;
@@ -316,10 +317,10 @@ public class GatewayArtifactsMgtDAO {
             try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
                 connection.setAutoCommit(false);
                 try (PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
-                    for (String gateway : gatewayLabelsToRemove) {
+                    for (APIRevisionDeployment apiRevisionDeployment : gatewayLabelsToRemove) {
                         statement.setString(1, apiId);
-                        statement.setString(2, revision);
-                        statement.setString(3, gateway);
+                        statement.setString(2, apiRevisionDeployment.getRevisionUUID());
+                        statement.setString(3, apiRevisionDeployment.getDeployment());
                         statement.addBatch();
                     }
                     statement.executeBatch();

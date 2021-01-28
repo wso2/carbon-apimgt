@@ -233,10 +233,12 @@ public class APIGatewayManager {
                     .exportAPIProduct(apiId, null, null, null, ExportFormat.JSON, true, false, true);
             GatewayArtifactsMgtDAO.getInstance()
                     .addGatewayPublishedAPIDetails(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(),
-                            tenantDomain, APIConstants.API_IDENTIFIER_TYPE);
+                            tenantDomain, APIConstants.API_PRODUCT);
             artifactSaver
                     .saveArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), "Current", tenantDomain,
                             artifact);
+            GatewayArtifactsMgtDAO.getInstance()
+                    .addAndRemovePublishedGatewayLabels(apiId, "Current", gateways, Collections.EMPTY_SET);
 
         } catch (APIManagementException | APIImportExportException | ArtifactSynchronizerException e) {
             throw new APIManagementException("API " + api.getId() + "couldn't get deployed", e);
@@ -262,14 +264,15 @@ public class APIGatewayManager {
         sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove);
     }
 
-    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain,Set<API> associatedAPIs) throws APIManagementException {
+    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs)
+            throws APIManagementException {
 
         String apiProductUuid = apiProduct.getUuid();
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         try {
             artifactSaver.removeArtifact(apiProductUuid, apiProductIdentifier.getName(),
                     apiProductIdentifier.getVersion(), "Current", tenantDomain);
-
+            GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductUuid, "Current");
         } catch (ArtifactSynchronizerException e) {
             throw new APIManagementException("API " + apiProductIdentifier + "couldn't get unDeployed", e);
         }
