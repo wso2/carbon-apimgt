@@ -13,11 +13,10 @@ public class DeployAPIInGatewayEvent extends Event {
     private Set<String> gatewayLabels;
     private Set<APIEvent> associatedApis;
     private String context;
-    private String version;
 
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, String apiId,
                                    Set<String> gatewayLabels, String name, String version, String provider,
-                                   String apiType,Set<APIEvent> associatedApis) {
+                                   String apiType, String context, Set<APIEvent> associatedApis) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -28,7 +27,7 @@ public class DeployAPIInGatewayEvent extends Event {
         this.provider = provider;
         this.gatewayLabels = gatewayLabels;
         this.name = name;
-        this.version = version;
+        this.context = context;
         this.provider = provider;
         this.apiType = apiType;
         this.associatedApis = associatedApis;
@@ -36,7 +35,7 @@ public class DeployAPIInGatewayEvent extends Event {
 
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, String apiId,
                                    Set<String> gatewayLabels, String name, String version, String provider,
-                                   String apiType) {
+                                   String apiType, String context) {
 
         this.eventId = eventId;
         this.timeStamp = timestamp;
@@ -51,21 +50,8 @@ public class DeployAPIInGatewayEvent extends Event {
         this.version = version;
         this.provider = provider;
         this.apiType = apiType;
-        this.associatedApis = new HashSet<>();
-    }
-
-    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenanrDomain, String apiId,
-                                   Set<String> gatewayLabels, String context, String version) {
-        this.eventId = eventId;
-        this.timeStamp = timestamp;
-        this.type = type;
-        this.tenantDomain = tenanrDomain;
-
-        this.apiId = apiId;
-        this.gatewayLabels = gatewayLabels;
         this.context = context;
-        this.version = version;
-
+        this.associatedApis = new HashSet<>();
     }
 
     public Set<String> getGatewayLabels() {
@@ -98,15 +84,6 @@ public class DeployAPIInGatewayEvent extends Event {
         this.name = name;
     }
 
-    public String getVersion() {
-
-        return version;
-    }
-
-    public void setVersion(String version) {
-
-        this.version = version;
-    }
 
     public String getProvider() {
 

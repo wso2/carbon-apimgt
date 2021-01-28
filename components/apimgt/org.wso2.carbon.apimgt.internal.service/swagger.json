@@ -224,9 +224,9 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "revisionUUID",
+          "name" : "gatewayLabel",
           "in" : "query",
-          "description" : "**Search condition**.\n revision uuid of the api\n",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
           "required" : false,
           "type" : "string"
         }, {

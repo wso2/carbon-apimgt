@@ -37,26 +37,16 @@ public interface ArtifactSaver {
     /**
      * This method is used to save deployable artifact of an API to the storage
      *
-     * @param gatewayRuntimeArtifacts - A String contains all the information about the API and gateway artifacts
-     * @throws ArtifactSynchronizerException if there are any errors in the process
-     */
-    void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
-            throws ArtifactSynchronizerException;
-
-    /**
-     * This method is used to save deployable artifact of an API to the storage
-     *
      * @param apiId
      * @param name
      * @param version
      * @param revision
      * @param tenantDomain
      * @param artifact
-     * @param gatewayLabels
      * @throws ArtifactSynchronizerException
      */
-    void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain, File artifact,
-                      String[] gatewayLabels,String type) throws ArtifactSynchronizerException;
+    void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain, File artifact)
+            throws ArtifactSynchronizerException;
 
 
     /**
@@ -66,15 +56,6 @@ public interface ArtifactSaver {
      */
     void removeArtifact(String apiId, String name, String version, String revision, String tenantDomain)
             throws ArtifactSynchronizerException;
-
-
-    /**
-     * This method will return true if the API is published in any of the Gateways
-     *
-     * @param apiId - UUID of the API
-     * @return True if API is published in any of the Gateways. False if published in none
-     */
-    boolean isAPIPublished(String apiId,String revision) throws ArtifactSynchronizerException;
 
     /**
      * Will be called after all saving is done, or when init fails

@@ -471,58 +471,6 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    public API getRevisionAPI(APIIdentifier identifier, APIRevision apiRevision) throws APIManagementException {
-        String apiPath = APIUtil.getRevisionPath(apiRevision.getApiUUID(),apiRevision.getId()) + APIConstants.API_KEY;
-        Registry registry;
-        try {
-            String apiTenantDomain = getTenantDomain(identifier);
-            int apiTenantId = getTenantManager()
-                    .getTenantId(apiTenantDomain);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                APIUtil.loadTenantRegistry(apiTenantId);
-            }
-
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = getRegistryService().getGovernanceUserRegistry(
-                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
-            } else {
-                registry = this.registry;
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-
-            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
-            APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier));
-            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
-                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
-            }
-            //check for API visibility
-            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
-                return api;
-            }
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                throw new APIManagementException("User " + username + " does not have permission to view API : "
-                        + api.getId().getApiName());
-            }
-
-            return api;
-
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
-    }
-
     protected String getTenantAwareUsername(String username) {
         return MultitenantUtils.getTenantAwareUsername(username);
     }

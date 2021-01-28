@@ -74,10 +74,26 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
+            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         }
-        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, userName, format, preserveStatus,
+        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs);
+    }
+
+    @Override
+    public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
+                          boolean preserveDocs, boolean preserveCredentials)
+            throws APIManagementException, APIImportExportException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+        API api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+        APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
+        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
+                preserveDocs);
+
     }
 
     @Override

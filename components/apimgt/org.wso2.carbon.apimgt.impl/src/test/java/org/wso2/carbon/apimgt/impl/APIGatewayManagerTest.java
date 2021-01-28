@@ -259,68 +259,9 @@ public class APIGatewayManagerTest {
         Assert.assertEquals(failedEnvironmentsMap.get(prodEnvironmentName), errorMessage);
     }
 
-    @Test public void testAPIIsPublished() throws AxisFault {
-        //Test already published API's availability
-        API api = new API(apiIdentifier);
-        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        try {
-            boolean isPublished = gatewayManager.isAPIPublished(api, tenantDomain);
-            Assert.assertTrue(isPublished);
-        } catch (APIManagementException e) {
-            Assert.fail("Unexpected APIManagementException occurred while checking, whether the API is published");
-        }
 
-        //Test non existing API's availability in gateway
-        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
-        try {
-            boolean isPublished = gatewayManager.isAPIPublished(api, tenantDomain);
-            Assert.assertFalse(isPublished);
-        } catch (APIManagementException e) {
-            Assert.fail("Unexpected APIManagementException occurred while checking, whether the API is published");
-        }
-    }
 
-    @Test public void testFailureWhileCheckingAPIIsPublished() throws AxisFault {
-        API api = new API(apiIdentifier);
-        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier))
-                .thenThrow(new AxisFault("Error while " + "checking whether the API is published"));
-        try {
-            boolean isPublished = gatewayManager.isAPIPublished(api, tenantDomain);
-            Assert.assertFalse(isPublished);
-        } catch (APIManagementException e) {
-            Assert.fail("Unexpected APIManagementException occurred while checking, whether the API is published");
-        }
-    }
 
-    @Test public void testRetrievingDigestAuthAPIEndpointSecurityType() throws AxisFault {
-        API api = new API(apiIdentifier);
-        ResourceData resourceData = new ResourceData();
-        resourceData.setInSeqXml("<sequence><DigestAuthMediator/></sequence>");
-        ResourceData[] resources = { null, new ResourceData(), resourceData };
-        Mockito.when(apiData.getResources()).thenReturn(resources);
-        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
-        try {
-            //When 'DigestAuthMediator' is present in In sequence configuration, 'DigestAuth' should be retrieved as
-            //the endpoint security type
-            String endpointSecurityType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
-            Assert.assertEquals(endpointSecurityType, "DigestAuth");
-        } catch (APIManagementException e) {
-            Assert.fail("Unexpected APIManagementException occurred while retrieving endpoint security type");
-        }
-    }
 
-    @Test public void testFailureWhileRetrievingEndpointSecurityType() throws AxisFault {
-        API api = new API(apiIdentifier);
-        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier))
-                .thenThrow(new AxisFault("Error while " + "retrieving endpoint security type"));
-        try {
-            //When 'DigestAuthMediator' is present in In sequence configuration, 'DigestAuth' should be retrieved as
-            //the endpoint security type
-            String endpointSecurityType = gatewayManager.getAPIEndpointSecurityType(api, tenantDomain);
-            Assert.assertEquals(endpointSecurityType, "BasicAuth");
-        } catch (APIManagementException e) {
-            Assert.fail("Unexpected APIManagementException occurred while retrieving endpoint security type");
-        }
-    }
 
 }

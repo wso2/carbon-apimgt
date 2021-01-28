@@ -120,11 +120,6 @@ public class GatewayJMSMessageListener implements MessageListener {
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
             DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
-        } else if ((APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
-                || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType))
-                && gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-            DeployAPIInGatewayEvent gatewayEvent =
-                    new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
             gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             String tenantDomain = gatewayEvent.getTenantDomain();
             boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
