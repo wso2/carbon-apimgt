@@ -51,12 +51,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.jms.*;
 
@@ -67,8 +62,6 @@ public class GatewayJMSMessageListener implements MessageListener {
     private InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
-    private final ScheduledExecutorService artifactRetrievalScheduler = Executors.newScheduledThreadPool( 10,
-            new ArtifactsRetrieverThreadFactory());
 
     public void onMessage(Message message) {
 

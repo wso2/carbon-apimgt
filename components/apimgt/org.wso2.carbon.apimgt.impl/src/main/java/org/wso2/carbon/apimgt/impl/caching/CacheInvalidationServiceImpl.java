@@ -18,14 +18,13 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.service;
+package org.wso2.carbon.apimgt.impl.caching;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
-import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -34,6 +33,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,22 +94,6 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
                 endTenantFlow();
             }
         }
-    }
-
-    @Override
-    public void invalidateKey(String accessToken) {
-
-        invalidateCachedTokens(new String[]{accessToken});
-    }
-
-    @Override
-    public void invalidateCachedUsername(String username) {
-
-        if (username == null) {
-            log.debug("No username received to invalidate Gateway Username Cache.");
-            return;
-        }
-        invalidateCachedUsernames(new String[]{username});
     }
 
     @Override
@@ -251,6 +235,33 @@ public class CacheInvalidationServiceImpl implements CacheInvalidationService {
             }
         }
 
+    }
+
+    public void invalidateResourceCache(String context, String version, String organization,
+                                        List<URLMapping> urlMappings) {
+
+        boolean isTenantFlowStarted = false;
+        try {
+            isTenantFlowStarted = startTenantFlow(organization);
+            Cache cache = CacheProvider.getResourceCache();
+            String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(context, version);
+            if (cache.containsKey(apiCacheKey)) {
+                cache.remove(apiCacheKey);
+            }
+            for (URLMapping uriTemplate : urlMappings) {
+                String resourceVerbCacheKey =
+                        APIUtil.getResourceInfoDTOCacheKey(context, version, uriTemplate.getUrlPattern(),
+                                uriTemplate.getHttpMethod());
+                if (cache.containsKey(resourceVerbCacheKey)) {
+                    cache.remove(resourceVerbCacheKey);
+                }
+            }
+
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
     }
 
     protected void endTenantFlow() {
