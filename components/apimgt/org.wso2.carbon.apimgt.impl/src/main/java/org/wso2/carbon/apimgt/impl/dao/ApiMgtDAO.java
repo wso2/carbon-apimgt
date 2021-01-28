@@ -265,7 +265,7 @@ public class ApiMgtDAO {
      * @return organization of the API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public String getOrganizationIDbyAPIUUID(String apiId) throws APIManagementException {
+    public String getOrganizationIDByAPIUUID(String apiId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;

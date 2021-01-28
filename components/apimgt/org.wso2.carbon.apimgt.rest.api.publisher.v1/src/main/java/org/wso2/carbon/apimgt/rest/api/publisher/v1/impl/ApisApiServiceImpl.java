@@ -2247,7 +2247,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     Mediation mediationPolicy = new Mediation();
                     mediationPolicy.setConfig(content);
-                    mediationPolicy.setName(localName);
+                    mediationPolicy.setName(fileName);
                     mediationPolicy.setType(type);
                     //Adding api specific mediation policy
                     returnedPolicy  = apiProvider.addApiSpecificMediationPolicy(apiId, mediationPolicy, orgId);

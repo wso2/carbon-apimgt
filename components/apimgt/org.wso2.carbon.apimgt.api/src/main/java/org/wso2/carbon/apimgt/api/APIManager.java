@@ -905,8 +905,7 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start,
-                                            int end)
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
     
     /**

@@ -38,4 +38,5 @@ public class Organization {
     public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
+
 }

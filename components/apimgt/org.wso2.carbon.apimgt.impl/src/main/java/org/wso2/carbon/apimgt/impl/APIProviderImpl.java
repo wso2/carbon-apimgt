@@ -10322,12 +10322,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String getOrganizationIDbyAPIUUID(String apiUUID) throws APIManagementException {
-        return ApiMgtDAO.getInstance().getOrganizationIDbyAPIUUID(apiUUID);
+    public String getOrganizationIdByAPIUUID(String apiUUID) throws APIManagementException {
+        return ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiUUID);
     }
 
     public Organization getOrganizationForRegistry(String apiId) throws APIManagementException {
-        String organizationId = getOrganizationIDbyAPIUUID(apiId);
+        String organizationId = getOrganizationIdByAPIUUID(apiId);
         Organization organization;
         if (organizationId != null) {
             organization = new Organization(organizationId);
