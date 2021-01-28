@@ -617,4 +617,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkPublishPermission();
         super.deleteWorkflowTask(apiIdentifier);
     }
+
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getAsyncAPIDefinition(apiId);
+    }
 }

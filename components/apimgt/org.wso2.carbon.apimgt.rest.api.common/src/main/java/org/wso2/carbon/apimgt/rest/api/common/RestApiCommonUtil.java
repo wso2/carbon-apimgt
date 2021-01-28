@@ -403,4 +403,14 @@ public class RestApiCommonUtil {
         return matcher.matches();
 
     }
+
+    /**
+     * This method retrieves the AsyncAPI Definition for an API to be displayed
+     * @param api API
+     * @return String
+     * */
+    public static String retrieveAsyncAPIDefinition(API api, APIProvider apiProvider)
+            throws APIManagementException {
+        return apiProvider.getAsyncAPIDefinition(api.getId());
+    }
 }

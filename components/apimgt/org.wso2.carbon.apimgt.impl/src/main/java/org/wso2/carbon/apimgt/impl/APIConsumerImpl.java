@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -5838,5 +5839,186 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 throw new APIManagementException(genericErrorMessage);
             }
         }
+    }
+
+    @Override
+    public String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName) throws APIManagementException {
+        return getAsyncAPIDefinitionForDeployment(apiId, environmentName, null);
+    }
+
+    @Override
+    public String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
+        List<Label> gatewayLabels;
+        String updatedDefinition = null;
+        Map<String,String> hostsWithSchemes;
+        String definition = super.getOpenAPIDefinition(apiId);
+        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        if (apiId instanceof APIIdentifier) {
+            API api = getLightweightAPI((APIIdentifier) apiId);
+            gatewayLabels = api.getGatewayLabels();
+            hostsWithSchemes = getHostWithSchemeMappingForLabelWS(gatewayLabels, labelName);
+            updatedDefinition = asyncApiParser.getAsyncApiDefinitionForStore(api, definition, hostsWithSchemes);
+        }
+        return updatedDefinition;
+    }
+
+    @Override
+    public String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName) throws APIManagementException {
+        return getAsyncAPIDefinitionForDeployment(apiId, null, clusterName);
+    }
+
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+        return super.getAsyncAPIDefinition(apiId);
+    }
+
+    /**
+     * Get server URL updated AsyncAPI definition for given deployment (synapse gateway or container managed cluster)
+     * @param apiId Id of the API
+     * @param synapseEnvName Name of the synapse gateway environment
+     * @param clusterName Name of the container managed cluster
+     * @return Updated AsyncAPI definition
+     * @throws APIManagementException
+     */
+    private String getAsyncAPIDefinitionForDeployment(Identifier apiId, String synapseEnvName, String clusterName)
+            throws APIManagementException {
+        String apiTenantDomain;
+        String updatedDefinition = null;
+        Map<String,String> hostsWithSchemes;
+        String definition = super.getAsyncAPIDefinition(apiId);
+        AsyncApiParser asyncAPIParser = new AsyncApiParser();
+        if (apiId instanceof APIIdentifier) {
+            API api = getLightweightAPI((APIIdentifier) apiId);
+            apiTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            if (!StringUtils.isEmpty(synapseEnvName)) {
+                hostsWithSchemes = getHostWithSchemeMappingForEnvironmentWS(apiTenantDomain, synapseEnvName);
+            } else {
+                hostsWithSchemes = getHostWithSchemeMappingForClusterNameWs(clusterName);
+            }
+            updatedDefinition = asyncAPIParser.getAsyncApiDefinitionForStore(api, definition, hostsWithSchemes);
+        }
+        return updatedDefinition;
+    }
+
+    /**
+     * Get host names with transport scheme mapping from Gateway Environments in api-manager.xml or from the tenant
+     * custom url config in registry. (For WebSockets)
+     *
+     * @param apiTenantDomain Tenant domain
+     * @param environmentName Environment name
+     * @return Host name to transport scheme mapping
+     * @throws APIManagementException if an error occurs when getting host names with schemes
+     */
+    private Map<String, String> getHostWithSchemeMappingForEnvironmentWS(String apiTenantDomain, String environmentName)
+            throws APIManagementException {
+
+        Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+        Map<String, String> hostsWithSchemes = new HashMap<>();
+        if (!domains.isEmpty()) {
+            String customUrl = domains.get(APIConstants.CUSTOM_URL);
+            if (customUrl.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.WS_PROTOCOL, customUrl);
+            } else {
+                hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, customUrl);
+            }
+        } else {
+            Map<String, Environment> allEnvironments = APIUtil.getEnvironments();
+            Environment environment = allEnvironments.get(environmentName);
+
+            if (environment == null) {
+                handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
+            }
+
+            assert environment != null;
+            String[] hostsWithScheme = environment.getWebsocketGatewayEndpoint().split(",");
+            for (String url : hostsWithScheme) {
+                if (url.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX)) {
+                    hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, url);
+                }
+                if (url.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
+                    hostsWithSchemes.put(APIConstants.WS_PROTOCOL, url);
+                }
+            }
+        }
+        return hostsWithSchemes;
+    }
+
+    /**
+     * Get host names with transport scheme mapping from Container Manged Clusters in api-manager.xml or from the tenant
+     * custom url config in registry. (For WebSockets)
+     *
+     * @param clusterName Name of the container manged cluster
+     * @return Host name to transport scheme mapping
+     * @throws APIManagementException if an error occurs when getting host names with schemes
+     */
+    private Map<String, String> getHostWithSchemeMappingForClusterNameWs(@NotNull String clusterName)
+            throws APIManagementException {
+        //hostsWithSchemes
+        Map<String, String> hostsWithSchemes = new HashMap<>();
+
+        //get ingress URL from tenant configs
+        JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
+        for (Object clusterConfig : clusterConfigs) {
+            JSONArray containerMgtInfoArray = (JSONArray) (((JSONObject) clusterConfig)
+                    .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
+            for (Object containerMgtInfoObj : containerMgtInfoArray) {
+                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
+                if (clusterName.equals(containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME))) {
+                    String ingressURL = (String) ((JSONObject)containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
+                            .get(ContainerBasedConstants.ACCESS_URL);
+                    ingressURL = ingressURL.replaceAll("/$", "");
+                    if (ingressURL.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX)) {
+                        hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, ingressURL);
+                    }
+                    if (ingressURL.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
+                        hostsWithSchemes.put(APIConstants.WS_PROTOCOL, ingressURL);
+                    }
+                    return hostsWithSchemes;
+                }
+            }
+        }
+
+        //cluster name not found
+        handleResourceNotFoundException(
+                "Container managed cluster with cluster name '" + clusterName + "' does not exist");
+        return null;
+    }
+
+    /**
+     * Get gateway host names with transport scheme mapping.
+     *
+     * @param gatewayLabels gateway label list
+     * @param labelName     Label name
+     * @return Hostname with transport schemes
+     * @throws APIManagementException If an error occurs when getting gateway host names.
+     */
+    private Map<String, String> getHostWithSchemeMappingForLabelWS(List<Label> gatewayLabels, String labelName)
+            throws APIManagementException {
+
+        Map<String, String> hostsWithSchemes = new HashMap<>();
+        Label labelObj = null;
+        for (Label label : gatewayLabels) {
+            if (label.getName().equals(labelName)) {
+                labelObj = label;
+                break;
+            }
+        }
+        if (labelObj == null) {
+            handleException(
+                    "Could not find provided label '" + labelName + "'");
+            return null;
+        }
+
+        List<String> accessUrls = labelObj.getAccessUrls();
+        for (String url : accessUrls) {
+            if (url.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, url);
+            }
+            if (url.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
+                hostsWithSchemes.put(APIConstants.WS_PROTOCOL, url);
+            }
+        }
+        return hostsWithSchemes;
     }
 }

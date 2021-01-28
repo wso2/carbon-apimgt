@@ -49,10 +49,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
@@ -697,6 +694,13 @@ public class PublisherCommonUtils {
             }
         }
 
+        if (isWSAPI) {
+            ArrayList<String> websocketTransports = new ArrayList<>();
+            websocketTransports.add(APIConstants.WS_PROTOCOL);
+            websocketTransports.add(APIConstants.WSS_PROTOCOL);
+            apiDto.setTransport(websocketTransports);
+        }
+
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
         validateScopes(apiToAdd);
         //validate API categories
@@ -721,6 +725,13 @@ public class PublisherCommonUtils {
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
         }
+
+        if (isWSAPI) {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
+        }
+
         return apiToAdd;
     }
 

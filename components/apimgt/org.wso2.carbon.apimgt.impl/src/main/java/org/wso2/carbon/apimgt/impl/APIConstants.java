@@ -208,6 +208,7 @@ public final class APIConstants {
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
+    public static final String API_ASYNCAPI_DEFINITION_RESOURCE_NAME = "asyncapi.json";
 
     public static final String API_ICON_IMAGE = "icon";
 
@@ -1584,6 +1585,11 @@ public final class APIConstants {
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
 
+    public static final String WS_PROTOCOL = "ws";
+    public static final String WS_PROTOCOL_URL_PREFIX = "ws://";
+    public static final String WSS_PROTOCOL = "wss";
+    public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
+
     public static final String EMAIL_TRANSPORT = "mailto";
 
     public static final long MAX_FILE_SIZE = 1024L;
@@ -1629,6 +1635,8 @@ public final class APIConstants {
     public static final String SWAGGER_CODEGEN_DIRECTORY = "swaggerCodegen";
     public static final String JSON_FILE_EXTENSION = ".json";
     public static final String ZIP_FILE_EXTENSION = ".zip";
+    public static final String YAML_FILE_EXTENSION = ".yaml";
+    public static final String YML_FILE_EXTENSION = ".yml";
 
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";

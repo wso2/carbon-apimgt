@@ -1814,6 +1814,12 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getAsyncAPIDefinitionFilePath(String apiName, String apipVersion, String apiProvider) {
+
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apipVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
     public static String getGraphqlDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
