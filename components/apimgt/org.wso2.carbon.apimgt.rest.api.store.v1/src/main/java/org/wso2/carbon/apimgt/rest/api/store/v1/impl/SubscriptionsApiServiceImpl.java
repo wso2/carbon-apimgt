@@ -162,9 +162,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username, e,
                         log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -258,9 +255,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         "Error while adding the subscription API:" + body.getApiId() + ", application:" + body
                                 .getApplicationId() + ", tier:" + body.getThrottlingPolicy(), e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -368,9 +362,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                         "Error while adding the subscription API:" + body.getApiId() + ", application:" + body
                                 .getApplicationId() + ", tier:" + body.getThrottlingPolicy(), e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -481,9 +472,6 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

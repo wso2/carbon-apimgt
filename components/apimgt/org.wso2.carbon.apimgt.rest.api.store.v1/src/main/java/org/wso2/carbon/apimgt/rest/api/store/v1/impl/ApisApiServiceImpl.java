@@ -124,9 +124,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving APIs";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -145,9 +142,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
             return Response.ok().entity(getAPIByAPIId(apiId, orgId, xWSO2Tenant)).build();
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (APIManagementException e) {
             String errorMessage = "Provided tenant domain '" + xWSO2Tenant + "' is invalid";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -180,7 +174,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
             }
-        } catch (APIManagementException | UserStoreException e) {
+        } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -216,7 +210,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
             }
-        } catch (APIManagementException | UserStoreException e) {
+        } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -251,9 +245,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -292,9 +283,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comment content location for API " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking the user store.";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -326,9 +314,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comments content location for API " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -380,9 +365,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comment content location : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -407,9 +389,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while deleting comment " + commentId + "for API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -457,9 +436,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving source URI location of " + documentId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -490,9 +466,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -531,13 +504,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } /*catch (UnsupportedEncodingException e) {
-            String errorMessage = "Error while Decoding apiId" + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }*/
+        }
         return null;
     }
 
@@ -588,9 +555,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while retrieving ratings for API " + id, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -633,10 +597,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIClientGenerationException e) {
             String message = "Error generating client sdk for api: " + apiId + " for language: " + language;
             RestApiUtil.handleInternalServerError(message, e, log);
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (APIManagementException e) {
+        }  catch (APIManagementException e) {
             String errorMessage = "Provided tenant domain '" + xWSO2Tenant + "' is invalid";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -740,9 +701,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -771,9 +729,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -848,9 +803,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil
                         .handleInternalServerError("Error while adding/updating user rating for API " + id, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -888,9 +840,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while retrieving user rating for API " + id, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -926,9 +875,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while deleting user rating for API " + apiId, e, log);
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " +xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -937,44 +883,38 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getWSDLOfAPI(String apiId, String organizationId, String labelName, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
 
-        try {
-            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
-            OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, organizationDTO);
-            APIIdentifier apiIdentifier = api.getId();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        String orgId = RestApiCommonUtil.getOrgIdMatchesTenantDomain(organizationId, xWSO2Tenant);
+        OrganizationDTO organizationDTO = APIUtil.getOrganizationDTOFromOrgID(orgId, xWSO2Tenant);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organizationDTO);
+        APIIdentifier apiIdentifier = api.getId();
 
-            List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
-            if (environments != null && environments.size() > 0) {
-                if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
-                    environmentName = api.getEnvironments().iterator().next();
-                }
-
-                Environment selectedEnvironment = null;
-                for (Environment environment: environments) {
-                    if (environment.getName().equals(environmentName)) {
-                        selectedEnvironment = environment;
-                        break;
-                    }
-                }
-
-                if (selectedEnvironment == null) {
-                    throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
-                            environmentName));
-                }
-                ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
-                        orgId);
-
-                return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
-            } else {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.NO_GATEWAY_ENVIRONMENTS_ADDED,
-                        apiIdentifier.toString()));
+        List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
+        if (environments != null && environments.size() > 0) {
+            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+                environmentName = api.getEnvironments().iterator().next();
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " +xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+
+            Environment selectedEnvironment = null;
+            for (Environment environment: environments) {
+                if (environment.getName().equals(environmentName)) {
+                    selectedEnvironment = environment;
+                    break;
+                }
+            }
+
+            if (selectedEnvironment == null) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                        environmentName));
+            }
+            ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
+                    orgId);
+
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.NO_GATEWAY_ENVIRONMENTS_ADDED,
+                    apiIdentifier.toString()));
         }
-        return null;
     }
 
     @Override
@@ -1001,9 +941,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return Response.ok().entity(apiThrottlingPolicies).build();
                 }
             }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " +xWSO2Tenant;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (APIManagementException e) {
             String errorMessage = "Provided tenant domain '" + xWSO2Tenant + "' is invalid";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

@@ -5,11 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -403,19 +399,24 @@ public class RestApiCommonUtil {
      * @return tenantDomain or OrganizationUUID
      */
     public static String getOrgIdMatchesTenantDomain(String organizationId, String tenantDomain)
-            throws UserStoreException, APIManagementException {
-        if (organizationId != null) {
-            return organizationId;
-        } else {
-            if (tenantDomain != null) {
-                if (!APIUtil.isTenantAvailable(tenantDomain)) {
-                    String errorMessage = "Provided tenant domain '" + tenantDomain + "' is invalid";
-                    throw new APIManagementException(errorMessage);
-                }
-                return tenantDomain;
+            throws APIManagementException {
+        try {
+            if (organizationId != null) {
+                return organizationId;
             } else {
-                return RestApiCommonUtil.getLoggedInUserTenantDomain();
+                if (tenantDomain != null) {
+                    if (!APIUtil.isTenantAvailable(tenantDomain)) {
+                        String errorMessage = "Provided tenant domain '" + tenantDomain + "' is invalid";
+                        throw new APIManagementException(errorMessage);
+                    }
+                    return tenantDomain;
+                } else {
+                    return RestApiCommonUtil.getLoggedInUserTenantDomain();
+                }
             }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error in checking the availability of the tenant.",
+                    ExceptionCodes.from(ExceptionCodes.ERROR_WHILE_CHECKING_TENANT_AVAILABILITY, tenantDomain));
         }
     }
 

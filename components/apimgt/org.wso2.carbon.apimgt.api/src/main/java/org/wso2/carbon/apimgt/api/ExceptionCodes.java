@@ -350,6 +350,7 @@ ExceptionCodes implements ErrorHandler {
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    ERROR_WHILE_CHECKING_TENANT_AVAILABILITY(901301,"Error while checking availability of the tenant", 400, "Error in checking the tenant Availability"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
