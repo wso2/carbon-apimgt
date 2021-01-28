@@ -35,6 +35,29 @@ public class API implements CacheableEntity<String> {
     private String policy = null;
     private String apiType = null;
     private Boolean isDefaultVersion = false;
+    private String environment;
+    private String revision;
+
+    public String getRevision() {
+
+        return revision;
+    }
+
+    public void setRevision(String revision) {
+
+        this.revision = revision;
+    }
+
+    public String getEnvironment() {
+
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+
+        this.environment = environment;
+    }
+
 
     private Map<String, URLMapping> resources = new HashMap<>();
 

@@ -85,7 +85,6 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
@@ -116,7 +115,6 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import sun.security.krb5.internal.APRep;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -159,7 +157,6 @@ public class ApiMgtDAO {
 
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
-    private static boolean initialAutoCommit = false;
 
     private final Object scopeMutex = new Object();
 
@@ -13734,7 +13731,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
 
                 statement.setString(1, uuid);
@@ -13749,8 +13745,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add label: " + uuid, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add label: " + uuid, e);
@@ -13790,7 +13784,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, labelUUID);
                 statement.executeUpdate();
@@ -13798,8 +13791,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to delete label : " + labelUUID, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to delete label : " + labelUUID, e);
@@ -13832,7 +13823,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, label.getName());
                 statement.setString(2, label.getDescription());
@@ -13845,8 +13835,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to update label : ", e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to update label : ", e);
@@ -15682,7 +15670,6 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 // Adding to AM_REVISION table
                 PreparedStatement statement = connection
@@ -15865,8 +15852,6 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to add API Revision entry of API UUID "
                         + apiRevision.getApiUUID(), e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add API Revision entry of API UUID "
@@ -16001,7 +15986,6 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 // Adding to AM_DEPLOYMENT_REVISION_MAPPING table
                 PreparedStatement statement = connection
@@ -16018,8 +16002,6 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID "
                         + apiRevisionId, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID " + apiRevisionId, e);
@@ -16123,7 +16105,6 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
                 PreparedStatement statement = connection
@@ -16139,14 +16120,46 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
                         + apiRevisionId, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
                     + apiRevisionId, e);
         }
     }
+
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeAPIRevisionDeployment(String apiRevisionId, Set<String> deployments)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
+                for (String deployment : deployments) {
+                    statement.setString(1, deployment);
+                    statement.setString(2, apiRevisionId);
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                        + apiRevisionId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                    + apiRevisionId, e);
+        }
+    }
+
 
     /**
      * Restore API revision database records as the working copy of an API
@@ -16158,7 +16171,6 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 // Retrieve API ID
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
@@ -16324,8 +16336,6 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to restore API Revision entry of API UUID "
                         + apiRevision.getApiUUID(), e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to restore API Revision entry of API UUID "
@@ -16343,7 +16353,6 @@ public class ApiMgtDAO {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 // Retrieve API ID
                 APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
@@ -16383,8 +16392,6 @@ public class ApiMgtDAO {
                 connection.rollback();
                 handleException("Failed to delete API Revision entry of API UUID "
                         + apiRevision.getApiUUID(), e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to delete API Revision entry of API UUID "

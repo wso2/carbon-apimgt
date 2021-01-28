@@ -64,28 +64,6 @@ public class SubscriptionValidationDAO {
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
 
     /*
-     * This method can be used to retrieve all the APIs in the database
-     *
-     * @return {@link List<API> List of APIs}
-     * */
-    public List<API> getAllApis() {
-
-        List<API> apiList = new ArrayList<>();
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APIS_SQL);
-                ResultSet resultSet = ps.executeQuery();
-        ) {
-            populateAPIList(resultSet, apiList);
-
-        } catch (SQLException e) {
-            log.error("Error in loading Apis : ", e);
-        }
-
-        return apiList;
-    }
-
-    /*
      * This method can be used to retrieve all the Subscriptions in the database
      *
      * @return {@link List<Subscription>}
@@ -171,7 +149,8 @@ public class SubscriptionValidationDAO {
 
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
+                PreparedStatement ps = conn
+                        .prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -208,6 +187,7 @@ public class SubscriptionValidationDAO {
 
     private List<SubscriptionPolicy> populateSubscriptionPolicyList(ResultSet resultSet)
             throws SQLException {
+
         List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
 
         if (resultSet != null) {
@@ -285,6 +265,7 @@ public class SubscriptionValidationDAO {
     }
 
     public List<GlobalPolicy> getAllGlobalPolicies() {
+
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
@@ -348,7 +329,8 @@ public class SubscriptionValidationDAO {
                     globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                     globalPolicyDTO.setTenantDomain(tenantDomain);
                     globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
-                    InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                    InputStream siddhiQueryBlob =
+                            resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
                     String siddhiQuery = null;
                     if (siddhiQueryBlob != null) {
                         siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
@@ -365,7 +347,6 @@ public class SubscriptionValidationDAO {
 
         return null;
     }
-
 
     private List<GlobalPolicy> populateGlobalPolicyList(ResultSet resultSet) throws SQLException {
 
@@ -397,201 +378,63 @@ public class SubscriptionValidationDAO {
      * @param tenantId : unique identifier of tenant
      * @return {@link List<API>}
      * */
-    public List<API> getAllApis(String tenantDomain) {
-        String query;
-        String contextSearchString;
+    public List<API> getAllApis(String organization) {
 
-        if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-            query = SubscriptionValidationSQLConstants.GET_ST_APIS_SQL;
-            contextSearchString = APIConstants.TENANT_PREFIX + "%";
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
-            query = SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL;
-            contextSearchString = APIConstants.TENANT_PREFIX + tenantDomain + "%";
+            sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
 
         List<API> apiList = new ArrayList<>();
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setString(1, contextSearchString);
-            ps.setString(2, contextSearchString);
-
-            try (ResultSet resultSet = ps.executeQuery()) {
-                populateAPIList(resultSet, apiList);
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, organization);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        String version = resultSet.getString("API_VERSION");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                            apiList.add(api);
+                        } else {
+                            if (StringUtils.isNotEmpty(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                api.setEnvironment(deploymentName);
+                                api.setRevision(revision);
+                                apiList.add(api);
+                            }
+                        }
+                    }
+                }
             }
 
         } catch (SQLException e) {
-            log.error("Error in loading Apis for tenantId : " + tenantDomain, e);
+            log.error("Error in loading APIs for organization : " + organization, e);
         }
-
         return apiList;
     }
 
-    /*
-     * This method can be used to retrieve an API in the database
-     *
-     * @param apiId : unique identifier of an API
-     * @return {@link API}
-     * */
-    public API getApi(String version, String context, String revisionUUID) {
-
-        API api = null;
-        if (StringUtils.isEmpty(revisionUUID)) {
-            try (Connection conn = APIMgtDBUtil.getConnection();
-                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
-                         + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
-                ps.setString(1, version);
-                ps.setString(2, context);
-                ps.setString(3, version);
-                ps.setString(4, context);
-
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    Map<Integer, API> temp = new ConcurrentHashMap<>();
-                    while (resultSet.next()) {
-                        int apiId = resultSet.getInt("API_ID");
-                        api = temp.get(apiId);
-                        if (api == null) {
-                            api = new API();
-                            api.setApiId(apiId);
-                            api.setApiUUID(resultSet.getString("API_UUID"));
-                        api.setProvider(resultSet.getString("API_PROVIDER"));
-                        api.setName(resultSet.getString("API_NAME"));
-                        api.setPolicy(resultSet.getString("API_TIER"));
-                        String apiVersionFromDB = resultSet.getString("API_VERSION");
-                        api.setVersion(apiVersionFromDB);
-                        api.setContext(resultSet.getString("CONTEXT"));
-                        String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (apiVersionFromDB != null) {
-                            api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
-                        }
-                        temp.put(apiId, api);
-                    }
-                    String urlPattern = resultSet.getString("URL_PATTERN");
-                    String httpMethod = resultSet.getString("HTTP_METHOD");
-                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
-                    if (urlMapping == null) {
-                        urlMapping = new URLMapping();
-                        urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                        urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                        urlMapping.setHttpMethod(httpMethod);
-                        urlMapping.setUrlPattern(urlPattern);
-                        api.addResource(urlMapping);
-                    }
-                    String scopeName = resultSet.getString("SCOPE_NAME");
-                    if (StringUtils.isNotEmpty(scopeName)) {
-                        urlMapping.addScope(scopeName);
-                    }
-                }
-            }} catch (SQLException e) {
-                log.error("Error in loading API for api : " + context + " : " + version, e);
-            }
-        } else {
-            try (Connection conn = APIMgtDBUtil.getConnection();
-                 PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_REVISION_SQL + " UNION "
-                         + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
-                ps.setString(1, version);
-                ps.setString(2, context);
-                ps.setString(3, revisionUUID);
-                ps.setString(4, version);
-                ps.setString(5, context);
-
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    Map<Integer, API> temp = new ConcurrentHashMap<>();
-                    while (resultSet.next()) {
-                        int apiId = resultSet.getInt("API_ID");
-                        api = temp.get(apiId);
-                        if (api == null) {
-                            api = new API();
-                            api.setApiId(apiId);
-                            api.setProvider(resultSet.getString("API_PROVIDER"));
-                            api.setName(resultSet.getString("API_NAME"));
-                            api.setPolicy(resultSet.getString("API_TIER"));
-                            String apiVersionFromDB = resultSet.getString("API_VERSION");
-                            api.setVersion(apiVersionFromDB);
-                            api.setContext(resultSet.getString("CONTEXT"));
-                            String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                            if (apiVersionFromDB != null) {
-                                api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
-                            }
-                            temp.put(apiId, api);
-                        }
-                        String urlPattern = resultSet.getString("URL_PATTERN");
-                        String httpMethod = resultSet.getString("HTTP_METHOD");
-                        URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
-                        if (urlMapping == null) {
-                            urlMapping = new URLMapping();
-                            urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                            urlMapping.setHttpMethod(httpMethod);
-                            urlMapping.setUrlPattern(urlPattern);
-                            api.addResource(urlMapping);
-                        }
-                        String scopeName = resultSet.getString("SCOPE_NAME");
-                        if (StringUtils.isNotEmpty(scopeName)) {
-                            urlMapping.addScope(scopeName);
-                        }
-                    }
-                }
-
-            } catch (SQLException e) {
-                log.error("Error in loading API for api : " + context + " : " + version, e);
-            }
-        }
-
-        return api;
-    }
-
-    private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
-
-        Map<Integer, API> temp = new ConcurrentHashMap<>();
-        Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
-        while (resultSet.next()) {
-            int apiId = resultSet.getInt("API_ID");
-            String apiType = resultSet.getString("API_TYPE");
-            API api = temp.get(apiId);
-            if (api == null) {
-                api = new API();
-                api.setApiUUID(resultSet.getString("API_UUID"));
-                api.setApiId(apiId);
-                api.setProvider(resultSet.getString("API_PROVIDER"));
-                api.setName(resultSet.getString("API_NAME"));
-                api.setPolicy(resultSet.getString("API_TIER"));
-                String apiVersionFromDB = resultSet.getString("API_VERSION");
-                api.setVersion(apiVersionFromDB);
-                api.setContext(resultSet.getString("CONTEXT"));
-                String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                if (apiVersionFromDB != null) {
-                    api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
-                }
-                api.setApiType(apiType);
-                temp.put(apiId, api);
-                tempUrls = new ConcurrentHashMap<>();
-                apiList.add(api);
-            }
-            createURLMapping(resultSet, tempUrls, api);
-        }
-    }
-
-    private void createURLMapping(ResultSet resultSet, Map<Integer, URLMapping> tempUrls, API api) throws SQLException {
-
-        int urlId = resultSet.getInt("URL_MAPPING_ID");
-        URLMapping urlMapping;
-        urlMapping = tempUrls.get(urlId);
-        if (urlMapping == null) {
-            urlMapping = new URLMapping();
-            urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-            urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-
-            urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
-            tempUrls.put(urlId, urlMapping);
-            api.addResource(urlMapping);
-        }
-        String scopeName = resultSet.getString("SCOPE_NAME");
-        if (StringUtils.isNotEmpty(scopeName)) {
-            urlMapping.addScope(scopeName);
-        }
-
-    }
     /*
      * This method can be used to retrieve all the APIs of a given tesanat in the database
      *
@@ -751,7 +594,7 @@ public class SubscriptionValidationDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -774,13 +617,15 @@ public class SubscriptionValidationDAO {
 
     private List<ApplicationPolicy> populateApplicationPolicyList(ResultSet resultSet)
             throws SQLException {
+
         List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         if (resultSet != null) {
             while (resultSet.next()) {
                 ApplicationPolicy applicationPolicyDTO = new ApplicationPolicy();
                 applicationPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                 applicationPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                applicationPolicyDTO.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                applicationPolicyDTO
+                        .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 applicationPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                 String tenantDomain = APIUtil.getTenantDomainFromTenantId(applicationPolicyDTO.getTenantId());
                 applicationPolicyDTO.setTenantDomain(tenantDomain);
@@ -833,7 +678,8 @@ public class SubscriptionValidationDAO {
                     apiPolicy = new APIPolicy();
                     apiPolicy.setId(policyId);
                     apiPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                    apiPolicy.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
+                    apiPolicy.setQuotaType(
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
                     apiPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                     String tenantDomain = APIUtil.getTenantDomainFromTenantId(apiPolicy.getTenantId());
                     apiPolicy.setTenantDomain(tenantDomain);
@@ -844,7 +690,8 @@ public class SubscriptionValidationDAO {
                 APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
                 int conditionGroup = resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONDITION_ID);
                 apiPolicyConditionGroup.setConditionGroupId(conditionGroup);
-                apiPolicyConditionGroup.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                apiPolicyConditionGroup
+                        .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 apiPolicyConditionGroup.setPolicyId(policyId);
                 ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                 ConditionGroupDTO conditionGroupDTO = null;
@@ -925,7 +772,7 @@ public class SubscriptionValidationDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL)) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -942,7 +789,8 @@ public class SubscriptionValidationDAO {
 
                     applicationPolicy.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
                     applicationPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
-                    applicationPolicy.setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                    applicationPolicy
+                            .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                     applicationPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
                     applicationPolicy.setTenantDomain(tenantDomain);
                     setCommonProperties(applicationPolicy, resultSet);
@@ -963,10 +811,11 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationPolicy}
      * */
     public APIPolicy getApiPolicyByNameForTenant(String policyName, String tenantDomain) {
+
         APIPolicy policy = null;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL)) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -1046,6 +895,7 @@ public class SubscriptionValidationDAO {
     }
 
     private void setCommonProperties(Policy policy, ResultSet resultSet) throws SQLException {
+
         QuotaPolicy quotaPolicy = new QuotaPolicy();
         String prefix = "";
 
@@ -1075,6 +925,7 @@ public class SubscriptionValidationDAO {
 
     private void setCommonProperties(APIPolicyConditionGroup apiPolicyConditionGroup, ResultSet resultSet)
             throws SQLException {
+
         QuotaPolicy quotaPolicy = new QuotaPolicy();
         quotaPolicy.setType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
         if (quotaPolicy.getType() != null) {
@@ -1125,64 +976,249 @@ public class SubscriptionValidationDAO {
         return null;
     }
 
-    /*
-     * This method can be used to retrieve an API in the database
-     *
-     * @param apiId : unique identifier of an API
-     * @return {@link API}
-     * */
-    public API getApiByUUID(String apiUUID) {
+    public List<API> getAllApis(String organization, String deployment) {
 
-        API api = null;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_BY_UUID_SQL + " " +
-                     "UNION "
-                     + SubscriptionValidationSQLConstants.GET_API_PRODUCT_BY_UUID_SQL)) {
-            ps.setString(1, apiUUID);
-            ps.setString(2, apiUUID);
-            try (ResultSet resultSet = ps.executeQuery()) {
-                Map<Integer, API> temp = new ConcurrentHashMap<>();
-                while (resultSet.next()) {
-                    int apiId = resultSet.getInt("API_ID");
-                    api = temp.get(apiId);
-                    if (api == null) {
-                        api = new API();
-                        api.setApiId(apiId);
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
+        } else {
+            sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
+        }
+        List<API> apiList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        String version = resultSet.getString("API_VERSION");
                         api.setApiUUID(resultSet.getString("API_UUID"));
-                        api.setProvider(resultSet.getString("API_PROVIDER"));
-                        api.setName(resultSet.getString("API_NAME"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
                         api.setPolicy(resultSet.getString("API_TIER"));
-                        String apiVersionFromDB = resultSet.getString("API_VERSION");
-                        api.setVersion(apiVersionFromDB);
                         api.setContext(resultSet.getString("CONTEXT"));
-                        String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (apiVersionFromDB != null) {
-                            api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                        } else {
+                            if (deployment.equals(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                apiList.add(api);
+                            }
                         }
-                        temp.put(apiId, api);
-                    }
-                    String urlPattern = resultSet.getString("URL_PATTERN");
-                    String httpMethod = resultSet.getString("HTTP_METHOD");
-                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
-                    if (urlMapping == null) {
-                        urlMapping = new URLMapping();
-                        urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                        urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                        urlMapping.setHttpMethod(httpMethod);
-                        urlMapping.setUrlPattern(urlPattern);
-                        api.addResource(urlMapping);
-                    }
-                    String scopeName = resultSet.getString("SCOPE_NAME");
-                    if (StringUtils.isNotEmpty(scopeName)) {
-                        urlMapping.addScope(scopeName);
                     }
                 }
             }
-
         } catch (SQLException e) {
-            log.error("Error in loading API for api : " + apiUUID, e);
+            log.error("Error in loading APIs for api : " + deployment, e);
         }
-        return api;
+        return apiList;
     }
 
+    private void attachURlMappingDetailsOfApiProduct(Connection connection, API api) throws SQLException {
+
+        String sql = "SELECT AM_API_URL_MAPPING.URL_MAPPING_ID,AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING" +
+                ".AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
+                "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN " +
+                "AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING.URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING" +
+                ".URL_MAPPING_ID " +
+                "WHERE AM_API_URL_MAPPING.URL_MAPPING_ID IN (SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE " +
+                "API_ID= ? )";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, api.getApiId());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    String authScheme = resultSet.getString("AUTH_SCHEME");
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String throttlingTier = resultSet.getString("THROTTLING_TIER");
+                    String scopeName = resultSet.getString("SCOPE_NAME");
+                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                    if (urlMapping == null) {
+                        urlMapping = new URLMapping();
+                        urlMapping.setAuthScheme(authScheme);
+                        urlMapping.setHttpMethod(httpMethod);
+                        urlMapping.setThrottlingPolicy(throttlingTier);
+                        urlMapping.setUrlPattern(urlPattern);
+                    }
+                    if (StringUtils.isNotEmpty(scopeName)) {
+                        urlMapping.addScope(scopeName);
+                    }
+                    api.addResource(urlMapping);
+                }
+            }
+        }
+    }
+
+    public API getAPIByContextAndVersion(String context, String version, String deployment) {
+
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.CONTEXT = ? " +
+                "AND AM_API.API_VERSION= ?";
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, context);
+                preparedStatement.setString(2, version);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                            return api;
+                        } else {
+                            if (deployment.equals(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                return api;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading API for api : " + context + " : " + version, e);
+        }
+        return null;
+    }
+
+    private void attachURLMappingDetails(Connection connection, String revisionId, API api) throws SQLException {
+
+        String sql =
+                "SELECT AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING" +
+                        ".AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
+                        "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN " +
+                        "AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING" +
+                        ".URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING.URL_MAPPING_ID WHERE AM_API_URL_MAPPING" +
+                        ".API_ID=? AND AM_API_URL_MAPPING.REVISION_UUID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, api.getApiId());
+            preparedStatement.setString(2, revisionId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    String authScheme = resultSet.getString("AUTH_SCHEME");
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String throttlingTier = resultSet.getString("THROTTLING_TIER");
+                    String scopeName = resultSet.getString("SCOPE_NAME");
+                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                    if (urlMapping == null) {
+                        urlMapping = new URLMapping();
+                        urlMapping.setAuthScheme(authScheme);
+                        urlMapping.setHttpMethod(httpMethod);
+                        urlMapping.setThrottlingPolicy(throttlingTier);
+                        urlMapping.setUrlPattern(urlPattern);
+                    }
+                    if (StringUtils.isNotEmpty(scopeName)) {
+                        urlMapping.addScope(scopeName);
+                    }
+                    api.addResource(urlMapping);
+                }
+            }
+        }
+    }
+
+    private boolean isAPIDefaultVersion(Connection connection, String provider, String name, String version)
+            throws SQLException {
+
+        String sql = "SELECT PUBLISHED_DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND " +
+                "API_PROVIDER = ? AND PUBLISHED_DEFAULT_API_VERSION = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, provider);
+            preparedStatement.setString(3, version);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    public API getApiByUUID(String apiId, String deployment, String organization) {
+
+
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.API_UUID = ? ";
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            sql = sql.concat("AND AM_API.CONTEXT NOT LIKE /t/%");
+        } else {
+            sql = sql.concat("AND AM_API.CONTEXT LIKE /t/" + organization + "%");
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, apiId);
+                preparedStatement.setString(2, deployment);
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+                    preparedStatement.setString(3, "");
+                } else {
+                    preparedStatement.setString(3, "/t/" + organization);
+                }
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        String version = resultSet.getString("API_VERSION");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                            return api;
+                        } else {
+                            if (deployment.equals(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                return api;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading API for api : " + apiId + " : " + deployment, e);
+        }
+        return null;
+    }
 }

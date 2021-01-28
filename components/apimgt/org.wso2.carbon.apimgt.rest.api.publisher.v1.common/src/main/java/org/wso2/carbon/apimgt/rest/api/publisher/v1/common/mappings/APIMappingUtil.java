@@ -848,8 +848,6 @@ public class APIMappingUtil {
         } else {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
-        String uuid = "uuid";
-        String path = "path";
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());

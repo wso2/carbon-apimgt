@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -40,33 +39,11 @@ public class DBSaver implements ArtifactSaver {
         //not required
     }
 
-    /**
-     * This method is used to save deployable artifact of an API to the storage in publisher profile. From Publisher
-     * profile we can access DB.Thus we don't need an HTTP request to internal service like DB retriever
-     *
-     */
-    @Override
-    public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
-            throws ArtifactSynchronizerException {
-
-    }
-
     @Override
     public void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain,
-                             File artifact, String[] gatewayLabels,String type) throws ArtifactSynchronizerException {
-
+                             File artifact) throws ArtifactSynchronizerException {
         try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
-            if (!gatewayArtifactsMgtDAO.isAPIDetailsExists(apiId)) {
-                gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiId, name, version, tenantDomain, type);
-            }
-
-            if (gatewayArtifactsMgtDAO.isAPIArtifactExists(apiId, revision)) {
-                gatewayArtifactsMgtDAO
-                        .updateGatewayPublishedAPIArtifacts(apiId, revision, fileInputStream);
-            } else {
-                gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiId, revision, fileInputStream);
-            }
-            gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(apiId, revision, gatewayLabels);
+            gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiId, revision, fileInputStream);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully saved Artifacts of " + name);
             }
@@ -80,37 +57,10 @@ public class DBSaver implements ArtifactSaver {
             throws ArtifactSynchronizerException {
 
         try {
-            if (gatewayArtifactsMgtDAO.isAPIDetailsExists(apiId)) {
-                if (StringUtils.isNotEmpty(apiId)) {
-                    if (StringUtils.isNotEmpty(revision)) {
-                        // Delete Specific revision.
-                        gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiId, revision);
-                    } else {
-                        // Delete API.
-                        gatewayArtifactsMgtDAO.deleteGatewayArtifacts(apiId);
-                    }
-                }
-            }
+            gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiId, revision);
         } catch (APIManagementException e) {
             throw new ArtifactSynchronizerException("Error removing Artifacts from db", e);
         }
-
-    }
-
-    @Override
-    public boolean isAPIPublished(String apiId, String revision) throws ArtifactSynchronizerException{
-
-        return false;
-    }
-
-    public boolean isAPIPublished(String apiId) {
-
-        try {
-            return gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiId);
-        } catch (APIManagementException e) {
-            log.error("Error checking API with ID " + apiId + " is published in any gateway", e);
-        }
-        return false;
     }
 
     @Override

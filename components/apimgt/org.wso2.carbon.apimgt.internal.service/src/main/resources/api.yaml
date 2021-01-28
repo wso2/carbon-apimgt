@@ -194,11 +194,11 @@ paths:
             **Search condition**.
              versio  of the api
           type: string
-        - name: revisionUUID
+        - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
-             revision uuid of the api
+             label associated with the APIs
           type: string
         - $ref: "#/parameters/Accept"
       tags:
