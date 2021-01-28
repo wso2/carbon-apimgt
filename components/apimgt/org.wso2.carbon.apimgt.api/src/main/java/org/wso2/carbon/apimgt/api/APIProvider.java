@@ -1789,4 +1789,12 @@ public interface APIProvider extends APIManager {
      */
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
+    /**
+     * This method updates the AsyncApi definition in registry
+     *
+     * @param api   API
+     * @param jsonText    AsyncApi definition
+     * @throws APIManagementException
+     */
+    void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException;
 }

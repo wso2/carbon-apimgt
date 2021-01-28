@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -3656,6 +3657,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDocContent;
 
     }
+<<<<<<< HEAD
     
     public String extractQuery(String searchQuery) {
         String[] searchQueries = searchQuery.split("&");
@@ -3970,5 +3972,48 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException("Error while accessing thumbnail resource ", e);
         }
         return null;
+=======
+
+    /**
+     * Returns the AsyncAPI definition of the given API
+     *
+     * @param apiId id of the APIIdentifier
+     * @return A String containing the AsyncAPI definition
+     * @throws APIManagementException
+     */
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException{
+        String apiTenantDomain = getTenantDomain(apiId);
+        String asyncApiDoc = null;
+        boolean tenantFlowStarted = false;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                if (apiTenantDomain != null) {
+                    startTenantFlow(apiTenantDomain);
+                    tenantFlowStarted = true;
+                }
+                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
+                registryType = getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId
+                );
+            } else {
+                registryType = registry;
+            }
+            asyncApiDoc = AsyncApiParserUtil.getAPIDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted){
+                endTenantFlow();
+            }
+        }
+        return asyncApiDoc;
+>>>>>>> 72a42d21c36... Backend implementation for AsyncAPI import and validate
     }
 }

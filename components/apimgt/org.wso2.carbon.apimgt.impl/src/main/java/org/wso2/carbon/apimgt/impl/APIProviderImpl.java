@@ -115,6 +115,7 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -294,7 +295,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
+     * Returns a list of agit ll #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Providers
@@ -9027,6 +9028,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Set<DeploymentEnvironments> deploymentEnvironments = existingAPI.getDeploymentEnvironments();
         List<DeploymentStatus> deploymentStatusList = new ArrayList<DeploymentStatus>();
         return deploymentStatusList;
+    }
+
+    @Override
+    public void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            AsyncApiParserUtil.saveAPIDefinition(api, jsonText, registry);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     /**
