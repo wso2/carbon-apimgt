@@ -234,12 +234,12 @@ export default function DesignConfigurations() {
         }
     };
     const loadContentForDoc = (documentId) => {
-        const restApi = new API();
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
         const docPromise = restApi.getInlineContentOfDocument(api.id, documentId);
         docPromise
             .then((doc) => {
                 let { text } = doc;
-
                 Object.keys(api).forEach((fieldName) => {
                     const regex = new RegExp('___' + fieldName + '___', 'g');
                     text = text.replace(regex, api[fieldName]);
@@ -254,8 +254,8 @@ export default function DesignConfigurations() {
     };
     const addDocument = async () => {
         const { apiType } = api.apiType;
-        const restAPI = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
-        const a = await restAPI.addDocument(api.id, {
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
+        const docPromise = await restApi.addDocument(api.id, {
             name: 'overview',
             type: 'OTHER',
             summary: 'overview',
@@ -271,11 +271,12 @@ export default function DesignConfigurations() {
                 console.log(error);
             }
         });
-        return a;
+        return docPromise;
     };
 
     const addDocumentContent = (document) => {
-        const restApi = new API();
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
         const docPromise = restApi.addInlineContentToDocument(api.id, document.documentId, 'MARKDOWN', overview);
         docPromise
             .catch((error) => {
@@ -290,7 +291,8 @@ export default function DesignConfigurations() {
     };
 
     const deleteOverviewDocument = () => {
-        const restApi = new API();
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
         const docPromise = restApi.deleteDocument(api.id, overviewDocument.documentId);
         docPromise
             .catch((error) => {
@@ -301,7 +303,8 @@ export default function DesignConfigurations() {
     };
 
     useEffect(() => {
-        const restApi = new API();
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
         const promisedApi = restApi.getDocuments(api.id);
         promisedApi
             .then((response) => {
