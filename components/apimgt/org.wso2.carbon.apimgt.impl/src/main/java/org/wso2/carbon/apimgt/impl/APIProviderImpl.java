@@ -8252,6 +8252,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
+            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifacts(apiProduct.getUuid());
 
         } catch (APIPersistenceException e) {
             handleException("Failed to remove the API product", e);

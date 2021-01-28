@@ -311,7 +311,6 @@ public class GatewayArtifactsMgtDAO {
                                                    Set<APIRevisionDeployment> gatewayLabelsToRemove)
             throws APIManagementException {
 
-        String addQuery = SQLConstants.ADD_GW_PUBLISHED_LABELS;
         String deleteQuery = SQLConstants.DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT;
         if (gatewayLabelsToDeploy.size() > 0 || gatewayLabelsToRemove.size() > 0) {
             try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
@@ -327,15 +326,7 @@ public class GatewayArtifactsMgtDAO {
                 }
                 try {
                     if (gatewayLabelsToDeploy.size() > 0) {
-                        try (PreparedStatement preparedStatement = connection.prepareStatement(addQuery)) {
-                            for (String gatewayLabel : gatewayLabelsToDeploy) {
-                                preparedStatement.setString(1, apiId);
-                                preparedStatement.setString(2, revision);
-                                preparedStatement.setString(3, gatewayLabel);
-                                preparedStatement.addBatch();
-                            }
-                            preparedStatement.executeBatch();
-                        }
+                        addPublishedGatewayLabels(connection, apiId, revision, gatewayLabelsToDeploy);
                     }
                     connection.commit();
                 } catch (SQLException e) {
@@ -345,6 +336,22 @@ public class GatewayArtifactsMgtDAO {
             } catch (SQLException e) {
                 handleException("Failed to attach labels" + apiId, e);
             }
+        }
+    }
+
+    private void addPublishedGatewayLabels(Connection connection, String apiUUID, String revisionId,
+                                           Set<String> gateways)
+            throws SQLException {
+
+        String addQuery = SQLConstants.ADD_GW_PUBLISHED_LABELS;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(addQuery)) {
+            for (String gatewayLabel : gateways) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2, revisionId);
+                preparedStatement.setString(3, gatewayLabel);
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
         }
     }
 
@@ -514,6 +521,24 @@ public class GatewayArtifactsMgtDAO {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, revision);
             preparedStatement.executeUpdate();
+        }
+    }
+
+    public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gateways)
+            throws APIManagementException {
+
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                removePublishedGatewayLabels(connection, apiId, revision);
+                addPublishedGatewayLabels(connection, apiId, revision, gateways);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete and add  Gateway environments ", e);
         }
     }
 }
