@@ -542,14 +542,6 @@ public interface APIProvider extends APIManager {
     List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException;
 
     /**
-     * Delete an API
-     *
-     * @param identifier APIIdentifier
-     * @throws APIManagementException if failed to remove the API
-     */
-    void deleteAPI(APIIdentifier identifier, String apiId) throws APIManagementException;
-
-    /**
      * Search API
      *
      * @param searchTerm  Search Term

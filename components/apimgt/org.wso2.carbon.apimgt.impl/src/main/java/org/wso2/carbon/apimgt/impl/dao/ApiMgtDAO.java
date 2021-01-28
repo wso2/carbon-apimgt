@@ -16134,29 +16134,29 @@ public class ApiMgtDAO {
      * @param apiRevisionDeployments content of the revision deployment mapping objects
      * @throws APIManagementException if an error occurs when adding a new API revision
      */
-    public void removeAPIRevisionDeployment(String apiRevisionId, Set<String> deployments)
+    public void removeAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
             throws APIManagementException {
+
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
-                for (String deployment : deployments) {
-                    statement.setString(1, deployment);
-                    statement.setString(2, apiRevisionId);
+                for (APIRevisionDeployment deployment : deployments) {
+                    statement.setString(1, deployment.getDeployment());
+                    statement.setString(2, deployment.getRevisionUUID());
                     statement.addBatch();
                 }
                 statement.executeBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
-                        + apiRevisionId, e);
+                throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
-                    + apiRevisionId, e);
+            handleException("Failed to remove API Revision Deployment Mapping entry for API UUID "
+                    + apiUUID, e);
         }
     }
 

@@ -204,7 +204,6 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
-import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -3235,34 +3234,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void removeFromGateway(API api, Set<String> gatewaysToRemove) {
+    private void removeFromGateway(API api, Set<APIRevisionDeployment> gatewaysToRemove,
+                                   Set<String> environmentsToAdd) {
+        Set<String> environmentsToAddSet = new HashSet<>(environmentsToAdd);
+        Set<String> environmentsToRemove = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
+            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
+        }
+        environmentsToRemove.removeAll(environmentsToAdd);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        gatewayManager.unDeployFromGateway(api, tenantDomain, gatewaysToRemove);
+        gatewayManager.unDeployFromGateway(api, tenantDomain, environmentsToRemove);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " deleted from gateway";
             log.debug(logMessage);
         }
-    }
-
-    private Map<String, String> removeFromGateway(APIProduct apiProduct) throws APIManagementException {
-
-        String tenantDomain = null;
-
-        if (apiProduct.getId().getProviderName().contains("AT")) {
-            String provider = apiProduct.getId().getProviderName().replace("-AT-", "@");
-            tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        } else {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-        removeFromGateway(apiProduct, tenantDomain);
-        if (log.isDebugEnabled()) {
-            String logMessage =
-                    "API Name: " + apiProduct.getId().getName() + ", API Version " + apiProduct.getId().getVersion()
-                            + " deleted from gateway";
-            log.debug(logMessage);
-        }
-        return Collections.emptyMap();
     }
 
     public Map<String, String> removeDefaultAPIFromGateway(API api) {
@@ -4294,240 +4280,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 subscribedAPI.getSubscriptionId(), apiId,
                 subscribedAPI.getApplication().getId(), subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-    }
-
-    public void deleteAPI(APIIdentifier identifier, String apiUuid) throws APIManagementException {
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-
-        String apiArtifactPath = APIUtil.getAPIPath(identifier);
-
-        try {
-            int apiId = apiMgtDAO.getAPIID(identifier, null);
-            long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
-            if (subsCount > 0) {
-                //Logging as a WARN since this isn't an error scenario.
-                String message = "Cannot remove the API as active subscriptions exist.";
-                log.warn(message);
-                throw new APIManagementException(message);
-            }
-
-            GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Failed to retrieve artifact manager when deleting API " + apiId;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            Resource apiResource = registry.get(path);
-            String artifactId = apiResource.getUUID();
-
-            Resource apiArtifactResource = registry.get(apiArtifactPath);
-            String apiArtifactResourceId = apiArtifactResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + path);
-            }
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactResourceId);
-            String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
-            String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
-            String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
-            String containerMngDeployments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
-            String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-            String implementation = apiArtifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION);
-            //Delete the dependencies associated  with the api artifact
-            GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
-
-            if (dependenciesArray.length > 0) {
-                for (GovernanceArtifact artifact : dependenciesArray) {
-                    registry.delete(artifact.getPath());
-                }
-            }
-            String isDefaultVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION);
-            artifactManager.removeGenericArtifact(apiArtifact);
-            artifactManager.removeGenericArtifact(artifactId);
-
-
-            String thumbPath = APIUtil.getIconPath(identifier);
-            if (registry.resourceExists(thumbPath)) {
-                registry.delete(thumbPath);
-            }
-
-            String wsdlArchivePath = APIUtil.getWsdlArchivePath(identifier);
-            if (registry.resourceExists(wsdlArchivePath)) {
-                registry.delete(wsdlArchivePath);
-            }
-
-            /*Remove API Definition Resource - swagger*/
-            String apiDefinitionFilePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getApiName() + '-' + identifier.getVersion() + '-' + identifier.getProviderName();
-            if (registry.resourceExists(apiDefinitionFilePath)) {
-                registry.delete(apiDefinitionFilePath);
-            }
-
-            APIManagerConfiguration config = getAPIManagerConfiguration();
-            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
-            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-
-            API api = new API(identifier);
-            api.setUUID(apiUuid);
-            api.setAsDefaultVersion(Boolean.parseBoolean(isDefaultVersion));
-            api.setAsPublishedDefaultVersion(api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
-            api.setType(type);
-            api.setContext(context_val);
-            api.setImplementation(implementation);
-            // gatewayType check is required when API Management is deployed on
-            // other servers to avoid synapse
-            if (gatewayExists && "Synapse".equals(gatewayType)) {
-
-                api.setInSequence(inSequence); // need to remove the custom sequences
-                api.setOutSequence(outSequence);
-
-                api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-                api.setDeploymentEnvironments(APIUtil.extractDeploymentsForAPI(containerMngDeployments));
-                api.setGatewayLabels(APIUtil.getLabelsFromAPIGovernanceArtifact(apiArtifact,
-                        api.getId().getProviderName()));
-                api.setEndpointConfig(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
-                Set<String> gatewaysToRemove = new HashSet<>();
-                gatewaysToRemove.addAll(api.getEnvironments());
-                for (Label gatewayLabel : api.getGatewayLabels()) {
-                    gatewaysToRemove.add(gatewayLabel.getName());
-                }
-                removeFromGateway(api, gatewaysToRemove);
-                if (api.isDefaultVersion()) {
-                    removeDefaultAPIFromGateway(api);
-                }
-
-            } else {
-                log.debug("Gateway does not exist for the current API Provider");
-            }
-            //Check if there are already published external APIStores.If yes,removing APIs from them.
-            Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
-            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-            if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
-                for (APIStore store : apiStoreSet) {
-                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
-                }
-            }
-
-            //if manageAPIs == true
-            if (APIUtil.isAPIManagementEnabled()) {
-                Cache contextCache = APIUtil.getAPIContextCache();
-                String context = apiMgtDAO.getAPIContext(identifier);
-                contextCache.remove(context);
-                contextCache.put(context, Boolean.FALSE);
-            }
-            deleteAPIFromDB(api);
-            /**
-             * Delete the API in Kubernetes
-             */
-            JSONArray containerMgt = APIUtil.getAllClustersFromConfig();
-            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
-            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-                for (DeploymentEnvironments deploymentEnvironment : deploymentEnvironments) {
-                    if (deploymentEnvironment.getType().equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
-                        if (!containerMgt.isEmpty() && deploymentEnvironment.getClusterNames().size() != 0) {
-
-                            for (Object containerMgtObj : containerMgt) {
-                                JSONObject containerMgtDetails = (JSONObject) containerMgtObj;
-                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString()
-                                        .equalsIgnoreCase(ContainerBasedConstants.DEPLOYMENT_ENV)) {
-                                    for (String clusterId : deploymentEnvironment.getClusterNames()) {
-                                        JSONArray containerMgtInfo = (JSONArray) containerMgtDetails
-                                                .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
-                                        for (Object containerMgtInfoObj : containerMgtInfo) {
-                                            JSONObject containerMgtInfoDetails = (JSONObject) containerMgtInfoObj;
-                                            if (clusterId.equalsIgnoreCase(containerMgtInfoDetails
-                                                    .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
-                                                ContainerManager containerManager =
-                                                        getContainerManagerInstance(containerMgtDetails
-                                                                .get(ContainerBasedConstants.CLASS_NAME).toString());
-                                                    containerManager.deleteAPI(identifier, containerMgtInfoDetails);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                        }
-                    }
-                }
-            }
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
-                                + " successfully removed from the database.";
-                log.debug(logMessage);
-            }
-
-            JSONObject apiLogObject = new JSONObject();
-            apiLogObject.put(APIConstants.AuditLogConstants.NAME, identifier.getApiName());
-            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, identifier.getVersion());
-            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
-
-            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
-                    APIConstants.AuditLogConstants.DELETED, this.username);
-
-            /*remove empty directories*/
-            String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
-            if (registry.resourceExists(apiCollectionPath)) {
-                Resource apiCollection = registry.get(apiCollectionPath);
-                CollectionImpl collection = (CollectionImpl) apiCollection;
-                //if there is no other versions of apis delete the directory of the api
-                if (collection.getChildCount() == 0) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No more versions of the API found, removing API collection from registry");
-                    }
-                    registry.delete(apiCollectionPath);
-                }
-            }
-
-            String apiProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName();
-
-            if (registry.resourceExists(apiProviderPath)) {
-                Resource providerCollection = registry.get(apiProviderPath);
-                CollectionImpl collection = (CollectionImpl) providerCollection;
-                //if there is no api for given provider delete the provider directory
-                if (collection.getChildCount() == 0) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No more APIs from the provider " + identifier.getProviderName() + " found. " +
-                                "Removing provider collection from registry");
-                    }
-                    registry.delete(apiProviderPath);
-                }
-            }
-
-            cleanUpPendingAPIStateChangeTask(apiId);
-
-            if (identifier.toString() != null) {
-                Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
-                for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
-                    KeyManager keyManager = keyManagerDtoEntry.getValue().getKeyManager();
-                    if (keyManager != null) {
-                        try {
-                            keyManager.deleteRegisteredResourceByAPIId(identifier.toString());
-                        } catch (APIManagementException e) {
-                            log.error("Error while deleting Resource Registration for API " + identifier.toString() +
-                                    " in Key Manager " + keyManagerDtoEntry.getKey(), e);
-                        }
-                    }
-                }
-            }
-
-            APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                    APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                    api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
-                    api.getStatus());
-            APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-
-        } catch (RegistryException e) {
-            handleException("Failed to remove the API from : " + path, e);
-        } catch (WorkflowException e) {
-            handleException("Failed to execute workflow cleanup task ", e);
-        }
     }
 
     public void deleteAPI(API api) throws APIManagementException {
@@ -8475,7 +8227,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             if (gatewayExists && "Synapse".equals(gatewayType)) {
-                removeFromGateway(apiProduct);
+                removeFromGateway(apiProduct, tenantDomain);
 
             } else {
                 log.debug("Gateway is not existed for the current API Provider");
@@ -10085,19 +9837,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         API api = getAPIbyUUID(apiId, apiRevision);
         Set<String> environmentsToAdd = new HashSet<>();
-        Set<String> environmentsToRemove = new HashSet<>();
+        Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
                 if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
                         apiRevisionDeployment.getDeployment())) {
-                    environmentsToRemove.add(apiRevisionDeployment.getDeployment());
+                    environmentsToRemove.add(currentapiRevisionDeployment);
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
         }
         if (environmentsToRemove.size() > 0) {
-            apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, environmentsToRemove);
-            removeFromGateway(api, environmentsToRemove);
+            apiMgtDAO.removeAPIRevisionDeployment(apiId,environmentsToRemove);
+            removeFromGateway(api, environmentsToRemove, environmentsToAdd);
         }
         GatewayArtifactsMgtDAO.getInstance()
                 .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
@@ -10152,11 +9904,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         API api = getAPIbyUUID(apiId, apiRevision);
-        Set<String> environmentsToRemove = new HashSet<>();
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
-        }
-        removeFromGateway(api, environmentsToRemove);
+        removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
     }

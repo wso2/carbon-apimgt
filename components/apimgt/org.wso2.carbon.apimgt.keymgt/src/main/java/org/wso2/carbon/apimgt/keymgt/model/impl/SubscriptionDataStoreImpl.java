@@ -558,7 +558,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         try {
             API api = apiMap.get(event.getContext() + ":" + event.getVersion());
-            clearResourceCache(api, event.getTenantDomain());
+            if (api != null) {
+                clearResourceCache(api, event.getTenantDomain());
+            }
             if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
                 apiMap.remove(event.getContext() + ":" + event.getVersion());
             } else {
