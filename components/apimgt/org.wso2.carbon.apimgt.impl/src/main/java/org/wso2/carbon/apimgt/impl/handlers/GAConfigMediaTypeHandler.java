@@ -60,7 +60,7 @@ public class GAConfigMediaTypeHandler extends Handler {
 
         GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
                 new GoogleAnalyticsConfigEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                        APIConstants.EventType.GACONFIG_UPDATE.toString(), tenantId, tenantDomain);
+                        APIConstants.EventType.GA_CONFIG_UPDATE.toString(), tenantId, tenantDomain);
         APIUtil.sendNotification(googleAnalyticsConfigEvent, APIConstants.NotifierType.GA_CONFIG.name());
     }
 

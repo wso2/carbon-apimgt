@@ -149,7 +149,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 try {
                     deployAPIsInSyncMode(tenantDomain);
                 } catch (ArtifactSynchronizerException e) {
-                    log.error("Error in Deploying APIs togateway");
+                    log.error("Error in Deploying APIs to gateway", e);
                 }
             } else {
                 deployAPIsInAsyncMode(tenantDomain);

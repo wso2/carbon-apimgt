@@ -526,7 +526,7 @@ public class APIManagerConfiguration {
                 setRuntimeArtifactsSyncGatewayConfig(element);
             } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName))
                 setContainerMgtConfigurations(element);
-            else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)){
+            else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
                 setSkipListConfigurations(element);
             }
             readChildElements(element, nameStack);
