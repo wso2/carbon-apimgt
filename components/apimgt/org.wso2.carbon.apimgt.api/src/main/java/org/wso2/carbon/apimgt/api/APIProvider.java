@@ -434,7 +434,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion)
             throws DuplicateAPIException, APIManagementException;
 
     /**
@@ -445,7 +445,7 @@ public interface APIProvider extends APIManager {
      * @param docName name of the document
      * @throws APIManagementException if failed to remove documentation
      */
-    void removeDocumentation(APIIdentifier apiId, String docType, String docName, String orgId) throws APIManagementException;
+    void removeDocumentation(APIIdentifier apiId, String docType, String docName) throws APIManagementException;
 
     /**
      * Removes a given documentation

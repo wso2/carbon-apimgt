@@ -4332,15 +4332,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    @Override
-    public API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId) throws DuplicateAPIException, APIManagementException {
-        return null;
-    }
-
-    @Override
-    public void removeDocumentation(APIIdentifier apiId, String docType, String docName, String orgId) throws APIManagementException {
-
-    }
 
     private void copySequencesToNewVersion(API api, String newVersion, String pathFlow) throws Exception {
         String seqFilePath = APIUtil.getSequencePath(api.getId(), pathFlow);
