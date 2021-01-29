@@ -257,10 +257,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
+
+    public void removeDocumentation(APIIdentifier apiId, String docName, String docType, String orgId) throws APIManagementException {
         checkCreatePermission();
         checkAccessControlPermission(apiId);
-        super.removeDocumentation(apiId, docName, docType);
+        super.removeDocumentation(apiId, docName, docType, orgId);
     }
 
     @Override

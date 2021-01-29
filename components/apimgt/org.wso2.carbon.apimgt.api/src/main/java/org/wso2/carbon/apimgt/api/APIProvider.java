@@ -428,7 +428,6 @@ public interface APIProvider extends APIManager {
      * @param apiId      The id of the API to be copied
      * @param newVersion The version of the new API
      * @param defaultVersion whether this version is default or not
-     * @param orgId  Identifier of an organization
      * @return api created api
      * @throws DuplicateAPIException  If the API trying to be created already exists
      * @throws APIManagementException If an error occurs while trying to create
@@ -445,7 +444,7 @@ public interface APIProvider extends APIManager {
      * @param docName name of the document
      * @throws APIManagementException if failed to remove documentation
      */
-    void removeDocumentation(APIIdentifier apiId, String docType, String docName) throws APIManagementException;
+    void removeDocumentation(APIIdentifier apiId, String docType, String docName, String orgId) throws APIManagementException;
 
     /**
      * Removes a given documentation

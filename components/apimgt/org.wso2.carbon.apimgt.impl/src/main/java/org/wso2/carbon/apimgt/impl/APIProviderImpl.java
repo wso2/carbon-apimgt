@@ -4367,7 +4367,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param docName name of the document
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
+    public void removeDocumentation(APIIdentifier apiId, String docName, String docType, String orgId) throws APIManagementException {
         String docPath = APIUtil.getAPIDocPath(apiId) + docName;
 
         try {
@@ -4401,15 +4401,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param docId UUID of the doc
      * @throws APIManagementException if failed to remove documentation
      */
-    public void removeDocumentation(Identifier id, String docId, String orgId)
-            throws APIManagementException {
+    public void removeDocumentation(Identifier id, String docId, String orgId)  throws APIManagementException {
         String uuid;
         if (id.getUUID() == null) {
             uuid = id.getUUID();
         } else {
             uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion());
         }
-        removeDocumentation(uuid, docId, orgId);
+        removeDocumentation(orgId, uuid, docId);
     }
 
 
