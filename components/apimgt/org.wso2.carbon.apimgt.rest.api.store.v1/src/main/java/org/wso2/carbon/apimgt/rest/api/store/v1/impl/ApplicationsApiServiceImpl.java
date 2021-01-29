@@ -265,7 +265,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
                 return Response.created(location).status(207).entity(skippedAPIListDTO).build();
             }
-        } catch (URISyntaxException | APIImportExportException e) {
+        } catch (URISyntaxException | UserStoreException | APIImportExportException e) {
             throw new APIManagementException("Error while importing Application", e);
         } catch (UnsupportedEncodingException e) {
             throw new APIManagementException("Error while Decoding apiId", e);
