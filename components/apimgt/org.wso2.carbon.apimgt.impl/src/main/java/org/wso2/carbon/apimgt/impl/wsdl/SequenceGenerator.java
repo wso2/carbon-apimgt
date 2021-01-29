@@ -46,6 +46,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.template.RESTToSOAPMsgTemplate;
@@ -73,6 +75,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -98,12 +101,12 @@ public class SequenceGenerator {
      * @param apiIdentifier api identifier object
      * @throws APIManagementException
      */
-    public static void generateSequencesFromSwagger(String swaggerStr, APIIdentifier apiIdentifier)
+    public static List<SOAPToRestSequence> generateSequencesFromSwagger(String swaggerStr, APIIdentifier apiIdentifier)
             throws APIManagementException {
 
         Swagger swagger = new SwaggerParser().parse(swaggerStr);
         Map<String, Model> definitions = swagger.getDefinitions();
-
+        List<SOAPToRestSequence> sequences = new ArrayList<SOAPToRestSequence>();
         // Configure serializers
         SimpleModule simpleModule = new SimpleModule().addSerializer(new JsonNodeExampleSerializer());
         Json.mapper().registerModule(simpleModule);
@@ -198,14 +201,19 @@ public class SequenceGenerator {
                             namespace, soapNamespace, arraySequenceElements);
                     String outSequence = template.getMappingOutSequence();
                     if (isResourceFromWSDL) {
-                        saveApiSequences(apiIdentifier, inSequence, outSequence, httpMethod.toString().toLowerCase(),
-                                pathName);
+                        SOAPToRestSequence inSeq = new SOAPToRestSequence(httpMethod.toString().toLowerCase(), pathName,
+                                inSequence, Direction.IN);
+                        sequences.add(inSeq);
+                        SOAPToRestSequence outSeq = new SOAPToRestSequence(httpMethod.toString().toLowerCase(),
+                                pathName, outSequence, Direction.OUT);
+                        sequences.add(outSeq);
                     }
                 } catch (APIManagementException e) {
                     handleException("Error when generating sequence property and arg elements for soap operation: " + operationId, e);
                 }
             }
         }
+        return sequences;
     }
 
     private static void populateParametersFromOperation(Operation operation, Map<String, Model> definitions,

@@ -294,24 +294,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new TemplateUtilContext(configcontext);
 
         if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()) || !StringUtils.isEmpty(api.getWsdlUrl())) {
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
-                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
-            String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
-                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
-            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-            configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceInPath,
-                    SOAPToRESTConstants.Template.IN_SEQUENCES, configcontext);
-            configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceOutPath,
-                    SOAPToRESTConstants.Template.OUT_SEQUENCES, configcontext);
+            configcontext = SequenceUtils.getSequenceTemplateConfigContext(api,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, configcontext);
+            configcontext = SequenceUtils.getSequenceTemplateConfigContext(api,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, configcontext);
         }
 
         return configcontext;

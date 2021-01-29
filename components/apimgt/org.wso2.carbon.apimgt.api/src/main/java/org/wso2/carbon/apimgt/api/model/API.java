@@ -173,6 +173,16 @@ public class API implements Serializable {
     private boolean enableSchemaValidation = false;
 
     private List<APICategory> apiCategories;
+    
+    private List<SOAPToRestSequence> soapToRestSequences;
+
+    public List<SOAPToRestSequence> getSoapToRestSequences() {
+        return soapToRestSequences;
+    }
+
+    public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
+        this.soapToRestSequences = soapToRestSequences;
+    }
 
     /**
      * Property to hold enable/disable status of the store visibility.

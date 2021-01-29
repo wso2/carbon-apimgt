@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -86,7 +87,16 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String thumbnail;
     private String createdTime;
     private String lastUpdated;
+    private List<SOAPToRestSequence> soapToRestSequences;
 
+    public List<SOAPToRestSequence> getSoapToRestSequences() {
+        return soapToRestSequences;
+    }
+
+    public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
+        this.soapToRestSequences = soapToRestSequences;
+    }
+    
     public String getSwaggerDefinition() {
         return swaggerDefinition;
     }

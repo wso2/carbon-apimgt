@@ -28,6 +28,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
@@ -46,6 +50,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -128,6 +133,13 @@ public class SequenceUtilsTestCase {
         String apiName = "test-api";
         String version = "1.0.0";
         String seqType = "in";
+        API api = new API(new APIIdentifier(provider, apiName, version));
+        List<SOAPToRestSequence> soapToRestSequences = new ArrayList<SOAPToRestSequence>();
+        SOAPToRestSequence seq = new SOAPToRestSequence("post", "test", "<>", Direction.IN);
+        soapToRestSequences.add(seq);
+        SOAPToRestSequence seq2 = new SOAPToRestSequence("post", "test", "<>", Direction.OUT);
+        soapToRestSequences.add(seq2);
+        api.setSoapToRestSequences(soapToRestSequences );
         String resourceName = "test_get.xml";
         Resource resource = Mockito.mock(Resource.class);
         ResourceImpl resourceImpl = Mockito.mock(ResourceImpl.class);
@@ -144,7 +156,7 @@ public class SequenceUtilsTestCase {
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1);
 
         try {
-            SequenceUtils.getRestToSoapConvertedSequence(apiName, version, provider, seqType);
+            SequenceUtils.getRestToSoapConvertedSequence(api, seqType);
         } catch (APIManagementException e) {
             Assert.fail("Failed to get the sequences from the registry");
         }
@@ -165,8 +177,13 @@ public class SequenceUtilsTestCase {
         Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES + "checkPhoneNumber_post.xml")).thenReturn(resource);
         PowerMockito.when(RegistryUtils.decodeBytes(Mockito.any(byte[].class))).thenReturn(content);
         try {
+            API api = new API(new APIIdentifier("admin", "testapi", "1.0"));
+            List<SOAPToRestSequence> soapToRestSequences = new ArrayList<SOAPToRestSequence>();
+            SOAPToRestSequence seq = new SOAPToRestSequence("post", "checkPhoneNumber", content, Direction.IN);
+            soapToRestSequences.add(seq);
+            api.setSoapToRestSequences(soapToRestSequences);
             ConfigContext context = SequenceUtils
-                    .getSequenceTemplateConfigContext(userRegistry, INSEQUENCE_RESOURCES, seqType, configContext);
+                    .getSequenceTemplateConfigContext(api, seqType, configContext);
             Assert.assertNotNull(context);
         } catch (RegistryException e) {
             Assert.fail("Failed to get the sequences from the registry");
