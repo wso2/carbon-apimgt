@@ -261,6 +261,9 @@ public final class APIImportUtil {
                 //Add API in CREATED state
                 API addedAPI = apiProvider.addAPI(importedApi);
                 uuid = addedAPI.getUuid();
+                APIIdentifier apiIdentifier = importedApi.getId();
+                apiIdentifier.setUuid(uuid);
+                importedApi.setId(apiIdentifier);
             }
 
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.

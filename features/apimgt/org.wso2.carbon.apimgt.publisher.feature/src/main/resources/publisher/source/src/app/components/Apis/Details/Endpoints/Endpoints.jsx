@@ -421,7 +421,7 @@ function Endpoints(props) {
                             >
                                 <Grid item>
                                     <Button
-                                        disabled={isUpdating || !endpointValidity.isValid
+                                        disabled={isUpdating || api.isRevision || !endpointValidity.isValid
                                     || isRestricted(['apim:api_create'], api)}
                                         type='submit'
                                         variant='contained'

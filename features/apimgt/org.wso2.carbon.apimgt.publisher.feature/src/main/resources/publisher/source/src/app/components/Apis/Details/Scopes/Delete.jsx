@@ -103,7 +103,7 @@ function Delete(props) {
 
     return (
         <div>
-            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create'], api)}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create'], api) || api.isRevision}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Delete.document.delete'
