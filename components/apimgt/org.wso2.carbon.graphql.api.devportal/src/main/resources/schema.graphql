@@ -132,11 +132,18 @@ type Pagination{
     next:String
     previous:String
 }
+type ApiListing{
+    count:Int
+    getAllapis:[Api]
+    pagination:Pagination
+}
 
 type Query{
+    #getExtraDetails(start:Int,offset:Int):ExtraDetails
+    getApiListing(start:Int,offset:Int):ApiListing
     getApi(id:String):Api
     getApis(start:Int,offset:Int):[Api]
     getTags:[Tag]
-    getApisCount:Int
-    getPagination:Pagination
+    getApisCount(start:Int,offset:Int):Int
+    getPagination(offset:Int,limit:Int):Pagination
 }

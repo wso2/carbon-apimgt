@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.Api;
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.graphql.api.devportal.modules.BusinessInformationDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -58,7 +59,6 @@ public class ApiDetails {
 
             Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
-            String monetizationLabel = "";//monetizationLabelData.getMonetizationLabelData(definedTiers,tiers,name);
             boolean isDefault = devPortalAPI.getIsDefaultVersion();
 
             String authorizationHeader = devPortalAPI.getAuthorizationHeader();
@@ -75,15 +75,16 @@ public class ApiDetails {
 
             String allkeyManagers = devPortalAPI.getKeyManagers().toString();
 
-            Api api1 = new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
-            apiDTOList.add(api1);
 
-
-
+            Api api = new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+            apiDTOList.add(api);
 
 
         }
+
      return apiDTOList;
+
+
     }
     public String getKeymanagers(List<String> keyManagersList){
 
@@ -193,7 +194,6 @@ public class ApiDetails {
 
         Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
-        String monetizationLabel = "";//monetizationLabelData.getMonetizationLabelData(definedTiers,tiers,name);
         boolean isDefault =devPortalAPI.getIsDefaultVersion();
 
         String authorizationHeader = devPortalAPI.getAuthorizationHeader();
@@ -211,7 +211,8 @@ public class ApiDetails {
         List<String> allkeymangersList = devPortalAPI.getKeyManagers();
         String allkeyManagers = getKeymanagers(allkeymangersList);
 
-        return new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,monetizationLabel,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+
+        return new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
     }
 
 

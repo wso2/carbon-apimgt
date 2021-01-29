@@ -7,7 +7,7 @@ import graphql.schema.DataFetcher;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ApiService {
+public class ApiService{
 
     ApiDetails apiDetails = new ApiDetails();
     BusinessInformationData dummyBusinessInformation = new BusinessInformationData();
@@ -31,13 +31,18 @@ public class ApiService {
     ArtifactData artifactData = new ArtifactData();
 
 
-    public DataFetcher getApiType(){
-        return env->{
-            Api api = env.getSource();
-            return apidtoData.getApiType(api.getId());
 
+    ApiListingData apiListingData = new ApiListingData();
+
+
+    public DataFetcher getApiListing(){
+        return env-> {
+            int start = env.getArgument("start");
+            int offset = env.getArgument("offset");
+            return apiListingData.getApiListing(start,offset);
         };
     }
+
     public DataFetcher getApiCreatedTime(){
         return env->{
             Api api = env.getSource();
@@ -61,18 +66,6 @@ public class ApiService {
         };
     }
 
-    public DataFetcher getApisFromArtifact(){
-
-
-        return env->{
-            int start = env.getArgument("start");
-            int offset = env.getArgument("offset");
-            return apiDetails.getAllApis(start,offset);
-        };
-
-    }
-
-
     public DataFetcher getApiFromArtifact(){
         return env->{
             String Id = env.getArgument("id");
@@ -80,9 +73,7 @@ public class ApiService {
 
         };
     }
-    public DataFetcher getApiCount(){
-        return env-> artifactData.apiCount();
-    }
+
 
     public DataFetcher  getApiRating(){
         return env->{
@@ -178,9 +169,6 @@ public class ApiService {
 
     }
 
-    public DataFetcher getPagination(){
-        return env->paginationData.getPaginationData();
-    }
 
     public DataFetcher getDeploymentEnvironmentName(){
         return env->{
@@ -194,6 +182,10 @@ public class ApiService {
             return ingressUrlsData.getDeploymentClusterData(api.getId());
         };
     }
+
+
+
+
 
 
 

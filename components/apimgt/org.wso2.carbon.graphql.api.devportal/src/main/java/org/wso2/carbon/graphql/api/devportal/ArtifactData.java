@@ -22,6 +22,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.graphql.api.devportal.modules.Api;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -36,7 +37,6 @@ public class ArtifactData {
     protected Registry registry;
     protected String username;
     protected String tenantDomain;
-    //private final String userNameWithoutChange;
     APIPersistence apiPersistenceInstance;
 
 
@@ -53,8 +53,6 @@ public class ArtifactData {
         UserContext userCtx = new UserContext("wso2.anonymous.user", org, properties,  roles);
 
         String searchQuery = "";
-        String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, userCtx);
-
 
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
         DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
@@ -75,8 +73,8 @@ public class ArtifactData {
         return devPortalApi;
     }
 
-    public int apiCount() throws APIPersistenceException{
-        List<DevPortalAPI> list = getDevportalAPIS(0,4);
+    public int apiCount(int start,int offset) throws APIPersistenceException{
+        List<DevPortalAPI> list = getDevportalAPIS(start,offset);
         return list.size();
     }
 

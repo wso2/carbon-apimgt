@@ -15,7 +15,6 @@ public class Api {
     private String wsdUrl;
     private String status;
     private boolean isSubscriptionAvailable;
-    private String monetizationLabel;
     private boolean isDefault;
     private String authorizationHeader;
     private String apiSecurity;
@@ -25,7 +24,7 @@ public class Api {
     private String categories;
     private String keyManagers;
 
-    public Api(String id,String name,String description,String context,String version,String provider,String type,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,String monetizationLabel,boolean isDefault,String authorizationHeader,String apiSecurity,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
+    public Api(String id,String name,String description,String context,String version,String provider,String type,String transport,boolean hasthumbnail,String environments,String wsdUrl,String status,boolean isSubscriptionAvailable,boolean isDefault,String authorizationHeader,String apiSecurity,boolean isMonetizationEnabled ,String throttlingPolicies,String thumbnailUrl,String categories,String keyManagers) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -39,7 +38,6 @@ public class Api {
         this.wsdUrl = wsdUrl;
         this.status = status;
         this.isSubscriptionAvailable = isSubscriptionAvailable;
-        this.monetizationLabel = monetizationLabel;
         this.isDefault = isDefault;
         this.authorizationHeader = authorizationHeader;
         this.apiSecurity = apiSecurity;
@@ -55,4 +53,6 @@ public class Api {
     public String getId() {
         return id;
     }
+
+
 }

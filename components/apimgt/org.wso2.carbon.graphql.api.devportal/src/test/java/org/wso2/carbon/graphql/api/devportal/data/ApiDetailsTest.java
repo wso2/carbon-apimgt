@@ -9,6 +9,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -16,21 +18,35 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ApiDetails.class, RestApiUtil.class,ArtifactData.class})
+@PrepareForTest({ApiDetails.class, RestApiUtil.class,ArtifactData.class,ApiMgtDAO.class})
 class ApiDetailsTest {
 
+    //public static ApiMgtDAO apiMgtDAO;
     @Test
-    void getApiCount() throws UserStoreException, RegistryException , APIManagementException {
-//        ApiDetails apiDetails = new ApiDetails();
-//
-//        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-//
-//        PowerMockito.mockStatic(ApiMgtDAO.class);
-//
-//        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-//
-//        Float rating  = apiDetails.getApiRating("b9cb1f47-f450-4ff6-bba9-3b51ba28433c");
+    void getApiCount() throws  APIManagementException {
+        ApiDetails apiDetails = new ApiDetails();
 
-        Assert.assertEquals(2,2);
+        //ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+
+        //PowerMockito.mockStatic(ApiMgtDAO.class);
+
+       // Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+//        apiMgtDAO = ApiMgtDAO.getInstance();
+//        Float rating = apiMgtDAO.getAverageRating(1);
+//
+
+
     }
+
+    @Test
+    void getApi() throws APIPersistenceException {
+
+
+
+    }
+
+
+
+
 }

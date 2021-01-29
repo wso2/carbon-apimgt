@@ -102,6 +102,13 @@
 			<version>15.0</version>
 
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>com.graphql-java-kickstart</groupId>-->
+<!--			<artifactId>graphql-java-tools</artifactId>-->
+<!--			<version>5.3.4</version>-->
+<!--		</dependency>-->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>

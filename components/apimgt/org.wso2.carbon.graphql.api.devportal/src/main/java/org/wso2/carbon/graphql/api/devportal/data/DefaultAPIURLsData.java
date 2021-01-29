@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class DefaultAPIURLsData {
 
-    public DefaultAPIURLsDTO getDefaultAPIURLsData(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
+    public DefaultAPIURLsDTO getDefaultAPIURLsData(String Id) throws APIPersistenceException {
 
 
         ArtifactData artifactData = new ArtifactData();

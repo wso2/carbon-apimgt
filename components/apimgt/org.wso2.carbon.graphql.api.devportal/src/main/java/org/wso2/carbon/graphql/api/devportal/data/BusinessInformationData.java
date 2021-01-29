@@ -15,17 +15,17 @@ import org.wso2.carbon.user.api.UserStoreException;
 public class BusinessInformationData {
 
 
-    public BusinessInformationDTO getBusinessInformations(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
+    public BusinessInformationDTO getBusinessInformations(String Id) throws  APIPersistenceException {
 
 
         ArtifactData artifactData = new ArtifactData();
 
         DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
-        String businessOwner = devPortalAPI.getBusinessOwner();//apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER);
-        String businessOwnerEmail = devPortalAPI.getBusinessOwnerEmail();//apiArtifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL);
-        String technicalOwner = devPortalAPI.getTechnicalOwner();//apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER);
-        String technicalOwnerEmail = devPortalAPI.getTechnicalOwnerEmail();//apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL);
+        String businessOwner = devPortalAPI.getBusinessOwner();
+        String businessOwnerEmail = devPortalAPI.getBusinessOwnerEmail();
+        String technicalOwner = devPortalAPI.getTechnicalOwner();
+        String technicalOwnerEmail = devPortalAPI.getTechnicalOwnerEmail();
         
         return new BusinessInformationDTO(businessOwner,businessOwnerEmail,technicalOwner,technicalOwnerEmail);
 

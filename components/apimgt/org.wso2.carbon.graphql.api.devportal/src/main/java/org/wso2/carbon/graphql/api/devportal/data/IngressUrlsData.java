@@ -24,11 +24,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.extractDeploymentsForAPI;
+
 
 public class IngressUrlsData {
 
-    public List<IngressUrlDTO>  getIngressUrlData(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
+    public List<IngressUrlDTO>  getIngressUrlData(String Id) throws APIManagementException, APIPersistenceException {
 
         ArtifactData artifactData = new ArtifactData();
         List<IngressUrlDTO> apiDeployedIngressURLs = new ArrayList<>();

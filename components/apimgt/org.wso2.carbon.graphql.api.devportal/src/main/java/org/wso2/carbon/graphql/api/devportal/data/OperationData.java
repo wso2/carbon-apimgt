@@ -18,7 +18,7 @@ import java.util.Set;
 public class OperationData {
 
 
-    public List<OperationDTO> getOperationData(String Id) throws GovernanceException, APIManagementException {
+    public List<OperationDTO> getOperationData(String Id) throws  APIManagementException {
 
 
 
