@@ -289,7 +289,6 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
-    @Ignore
     public void testGetPublisherAPI() throws Exception {
 
         Registry registry = Mockito.mock(UserRegistry.class);
@@ -302,7 +301,15 @@ public class RegistryPersistenceImplTestCase {
         Mockito.when(registry.getTags(anyString())).thenReturn(tags);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
         String apiUUID = artifact.getId();
-        
+        String apiProviderName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(apiProviderName);
+        String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        PowerMockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);
 
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
@@ -353,7 +360,6 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
-    @Ignore
     public void testThumbnailTasks() throws Exception {
 
         Registry registry = Mockito.mock(Registry.class);
@@ -370,7 +376,12 @@ public class RegistryPersistenceImplTestCase {
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
         String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
+        
+        String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
 
+        PowerMockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
         Mockito.when(registry.resourceExists(thumbPath)).thenReturn(true);
         Resource imageResource = Mockito.mock(Resource.class);
         Mockito.when(registry.get(thumbPath)).thenReturn(imageResource);
@@ -384,7 +395,6 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
-    @Ignore
     public void testGetWSDL() throws Exception {
         
         Registry registry = Mockito.mock(Registry.class);
@@ -401,6 +411,11 @@ public class RegistryPersistenceImplTestCase {
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion;
         
+        String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        PowerMockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
         String wsdlResourcePath = artifactPath + RegistryConstants.PATH_SEPARATOR
                 + RegistryPersistenceUtil.createWsdlFileName(apiProviderName, apiName, apiVersion);
 
@@ -428,7 +443,6 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
-    @Ignore
     public void testGetGraphQLSchema() throws GraphQLPersistenceException, RegistryException {
         Registry registry = Mockito.mock(Registry.class);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
@@ -445,6 +459,12 @@ public class RegistryPersistenceImplTestCase {
         String schemaName = apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + apiName
                 + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
         String schemaResourePath = path + schemaName;
+        
+        String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        PowerMockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
         
         String schema = "{\n" + 
                         "  hero {\n" + 
@@ -466,7 +486,6 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
-    @Ignore
     public void testGetOASDefinition() throws OASPersistenceException, RegistryException {
         Registry registry = Mockito.mock(Registry.class);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
@@ -481,6 +500,11 @@ public class RegistryPersistenceImplTestCase {
                 + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
                 + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
         
+        String apiPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProviderName
+                + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
+                + RegistryConstants.PATH_SEPARATOR + "api";
+
+        PowerMockito.when(GovernanceUtils.getArtifactPath(registry, apiUUID)).thenReturn(apiPath);
         String definition = "{\"swagger\":\"2.0\",\"info\":{\"description\":\"This is a sample server Petstore server\"}}";
         Organization org = new Organization(SUPER_TENANT_DOMAIN);
         APIPersistence apiPersistenceInstance = new RegistryPersistenceImplWrapper(registry, artifact);

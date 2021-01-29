@@ -694,13 +694,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
-    protected GenericArtifact getAPIArtifact(String apiId, Registry registry)
-            throws APIPersistenceException, GovernanceException {
-        GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                                        APIConstants.API_KEY);
-        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
-        return apiArtifact;
-    }
   
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
@@ -3629,5 +3622,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     
+    }
+    protected GenericArtifact getAPIArtifact(String apiId, Registry registry)
+            throws APIPersistenceException, GovernanceException {
+        GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                                        APIConstants.API_KEY);
+        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+        return apiArtifact;
     }
 }
