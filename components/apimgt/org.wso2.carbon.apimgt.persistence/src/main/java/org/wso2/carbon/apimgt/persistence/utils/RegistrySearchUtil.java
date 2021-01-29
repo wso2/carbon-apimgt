@@ -394,14 +394,13 @@ public class RegistrySearchUtil {
         return null;
     }
     
-    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx) throws APIPersistenceException {
+    public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery) &&
                 !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(modifiedQuery)) {
-            boolean displayAPIsWithMultipleStatus = false; //APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
-
+            
             String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
-            if (displayAPIsWithMultipleStatus) {
+            if (displayMultipleStatus) {
                 statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
                         APIConstants.DEPRECATED };
             }
@@ -416,27 +415,6 @@ public class RegistrySearchUtil {
             modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery), ctx);
-       /* if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
-            boolean displayAPIsWithMultipleStatus = false; // APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
-                                                          // this
-            String[] statusList = { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
-                    "null" };
-            if (displayAPIsWithMultipleStatus) {
-                statusList = new String[] { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
-                        APIConstants.DEPRECATED.toLowerCase(), "null" };
-            }
-            if ("".equals(searchQuery)) { // normal listing
-                String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
-            }
-            String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY
-                    + RegistrySearchUtil.getORBasedSearchCriteria(statusList);
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
-        } else {
-            String searchString = APIConstants.API_STATUS + "=";
-            modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
-                    APIConstants.LCSTATE_SEARCH_TYPE_KEY);
-        }*/
         return modifiedQuery;
     }
 
@@ -477,16 +455,14 @@ public class RegistrySearchUtil {
     }
 
     
-    public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx)
-            throws APIPersistenceException {
+    public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx,
+            boolean displayMultipleStatus) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
 
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
-            boolean displayAPIsWithMultipleStatus = true; // APIUtil.isAllowDisplayAPIsWithMultipleStatus(); TODO check
-                                                          // this
             String[] statusList = { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
                     "null" };
-            if (displayAPIsWithMultipleStatus) {
+            if (displayMultipleStatus) {
                 statusList = new String[] { APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
                         APIConstants.DEPRECATED.toLowerCase(), "null" };
             }

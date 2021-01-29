@@ -126,6 +126,13 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 public class RegistryPersistenceImpl implements APIPersistence {
 
     private static final Log log = LogFactory.getLog(RegistryPersistenceImpl.class);
+    private Properties properties;
+    
+    public RegistryPersistenceImpl() {}
+    
+    public RegistryPersistenceImpl(Properties properties) {
+        this.properties =  properties;
+    }
 
     protected String getTenantAwareUsername(String username) {
         return MultitenantUtils.getTenantAwareUsername(username);
@@ -978,7 +985,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             int tenantIDLocal = holder.getTenantId();
             isTenantFlowStarted = holder.isTenantFlowStarted();
             log.debug("Requested query for devportal search: " + searchQuery);
-            String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx);
+            String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
+                    isAllowDisplayAPIsWithMultipleStatus());
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
             String userNameLocal = getTenantAwareUsername(ctx.getUserame());
@@ -1475,7 +1483,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
     }
 
     private boolean isAllowDisplayAPIsWithMultipleStatus() {
-        // TODO Auto-generated method stub
+        if (properties != null) {
+            return (boolean) properties.get(APIConstants.ALLOW_MULTIPLE_STATUS);
+        }
         return false;
     }
 
@@ -1635,7 +1645,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
     public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
             int offset, UserContext ctx) throws APIPersistenceException {
         log.debug("Requested query for devportal content search: " + searchQuery);
-        Map<String, String> attributes = RegistrySearchUtil.getDevPortalSearchAttributes(searchQuery, ctx);
+        Map<String, String> attributes = RegistrySearchUtil.getDevPortalSearchAttributes(searchQuery, ctx,
+                isAllowDisplayAPIsWithMultipleStatus());
 
         if(log.isDebugEnabled()) {
             log.debug("Search attributes : " + attributes );

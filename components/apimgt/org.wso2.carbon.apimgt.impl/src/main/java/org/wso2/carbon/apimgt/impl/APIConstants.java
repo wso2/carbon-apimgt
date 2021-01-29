@@ -2493,4 +2493,6 @@ public final class APIConstants {
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
+    
+    public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 }
