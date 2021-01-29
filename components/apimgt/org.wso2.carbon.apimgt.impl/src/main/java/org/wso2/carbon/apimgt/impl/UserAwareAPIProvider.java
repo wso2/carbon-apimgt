@@ -276,14 +276,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
         if (!checkCreateOrPublishPermission()) {
             throw new APIManagementException("User '" + username + "' has neither '" +
                     APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
                     "' permission to update API documentation");
         }
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation);
+        return super.updateDocumentation(apiId, documentation, orgId);
     }
 
     @Override
