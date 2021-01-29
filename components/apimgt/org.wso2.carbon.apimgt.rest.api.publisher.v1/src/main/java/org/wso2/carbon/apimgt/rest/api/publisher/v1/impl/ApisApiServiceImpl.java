@@ -2495,6 +2495,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api = apiProvider.getLightweightAPI(apiId, tenantDomain);
             if (apiIdentifier == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
@@ -2513,7 +2515,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     SequenceUtils
                             .updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId, body.getContent());
                     String updatedPolicyContent = SequenceUtils
-                            .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId);
+                            .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
                             .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
                     return Response.ok().entity(resourcePolicyInfoDTO).build();
