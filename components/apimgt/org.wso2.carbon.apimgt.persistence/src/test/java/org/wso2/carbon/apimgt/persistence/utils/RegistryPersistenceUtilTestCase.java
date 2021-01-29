@@ -230,11 +230,9 @@ public class RegistryPersistenceUtilTestCase {
       
         String domain = RegistryPersistenceUtil
                 .getTenantDomain(new APIIdentifier("test@" + TENANT_DOMAIN, "test", "1.0"));
-        //Assert.assertEquals("Tenant domain does not match", TENANT_DOMAIN, domain);
         
         domain = RegistryPersistenceUtil
                 .getTenantDomain(new APIIdentifier("test", "test", "1.0"));
-        //Assert.assertEquals("Super tenant domain does not match", SUPER_TENANT_DOMAIN, domain);
         
     }
     
