@@ -4415,8 +4415,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void removeDocumentation(String apiId, String docId, String orgId) throws APIManagementException {
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
-            apiPersistenceInstance.deleteDocumentation(new Organization(requestedTenantDomain), apiId, docId);
+            apiPersistenceInstance.deleteDocumentation(new Organization(orgId), apiId, docId);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while deleting the document " + docId);
         }
@@ -10327,9 +10326,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         DocumentContent mappedContent = null;
         try {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
-            String requestedTenantDomain = validateOrgId(orgId);
-            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(
-                    new Organization(requestedTenantDomain), uuid, docId, mappedContent);
+            DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(orgId), uuid, docId, mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
         }

@@ -60,6 +60,7 @@ import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -513,12 +514,14 @@ public class APIAndAPIProductCommonUtil {
         Identifier identifier = apiTypeWrapper.getId();
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
+        String provider = apiTypeWrapper.getApi().getId().getProviderName();
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         try {
             //remove all documents associated with the API before update
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId(), null);
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
                 }
             }
             //load document file if exists
