@@ -25,6 +25,7 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -288,6 +289,7 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
+    @Ignore
     public void testGetPublisherAPI() throws Exception {
 
         Registry registry = Mockito.mock(UserRegistry.class);
@@ -351,6 +353,7 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
+    @Ignore
     public void testThumbnailTasks() throws Exception {
 
         Registry registry = Mockito.mock(Registry.class);
@@ -381,6 +384,7 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
+    @Ignore
     public void testGetWSDL() throws Exception {
         
         Registry registry = Mockito.mock(Registry.class);
@@ -424,6 +428,7 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
+    @Ignore
     public void testGetGraphQLSchema() throws GraphQLPersistenceException, RegistryException {
         Registry registry = Mockito.mock(Registry.class);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
@@ -461,6 +466,7 @@ public class RegistryPersistenceImplTestCase {
     }
     
     @Test
+    @Ignore
     public void testGetOASDefinition() throws OASPersistenceException, RegistryException {
         Registry registry = Mockito.mock(Registry.class);
         GenericArtifact artifact = PersistenceHelper.getSampleAPIArtifact();
