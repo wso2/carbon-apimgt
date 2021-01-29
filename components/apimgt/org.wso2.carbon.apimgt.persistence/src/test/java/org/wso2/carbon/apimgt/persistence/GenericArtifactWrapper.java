@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.wso2.carbon.apimgt.persistence;
 
-import java.util.Properties;
+import javax.xml.namespace.QName;
 
-public class PersistenceManager {
-    
-    private static APIPersistence persistence = null;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 
-    public static APIPersistence getPersistenceInstance(Properties properties) {
-        if (persistence == null) {
-            persistence = new RegistryPersistenceImpl(properties);
-        }
-        return persistence;
+public class GenericArtifactWrapper extends GenericArtifactImpl {
+
+    public GenericArtifactWrapper(QName qName, String mediaType) {
+        super(qName, mediaType);
     }
+    @Override
+    public String getLifecycleState() throws GovernanceException {
+        return null;
+    }
+
 }
