@@ -126,6 +126,47 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.wso2.maven</groupId>
+                <artifactId>carbon-p2-plugin</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <id>p2-feature-generation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>p2-feature-gen</goal>
+                        </goals>
+                        <configuration>
+                            <id>org.wso2.carbon.apimgt.rest.api.admin</id>
+                            <propertiesFile>../feature.properties</propertiesFile>
+                            <adviceFile>
+                                <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server
+                                    </propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
+                                    </propertyDef>
+                                </properties>
+                            </adviceFile>
+                            <bundles>
+                                <bundleDef>
+                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.common:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
+                            </bundles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
