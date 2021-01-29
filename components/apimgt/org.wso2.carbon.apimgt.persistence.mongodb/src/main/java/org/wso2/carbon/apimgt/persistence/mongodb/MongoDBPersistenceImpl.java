@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.persistence.mongodb;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -28,6 +29,7 @@ import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.InsertOneResult;
+import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
@@ -115,21 +117,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
     }
 
-    @Override
-    public String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
-        return null;
-    }
-
-    @Override
-    public void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
-
-    }
-
-    @Override
-    public void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
-
-    }
-
     private Boolean isIndexCreated(String organizationName) {
         //Check if index is created flag exists in cache
         Boolean indexCacheCheck = indexCheckCache.get(organizationName);
@@ -148,6 +135,37 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         Boolean searchIndexes = MongoDBAtlasAPIConnector.getInstance().createSearchIndexes(organizationName);
         indexCheckCache.put(organizationName, searchIndexes);
         return true;
+    }
+
+    @Override
+    public String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
+        MongoCollection<Document> genericCollection = getGenericCollection(org.getName());
+
+        FindIterable<Document> api = genericCollection.find(eq("_id", new ObjectId(apiUUID)));
+        MongoCursor<Document> cursor = api.cursor();
+        String createdId = null;
+        while (cursor.hasNext()) {
+            Document mongoDBAPIDocument = cursor.next();
+            ObjectId newUuid = new ObjectId();
+            mongoDBAPIDocument.put("_id", newUuid);
+            mongoDBAPIDocument.put("revision", revisionId);
+            genericCollection.insertOne(mongoDBAPIDocument);
+            createdId = newUuid.toHexString();
+        }
+        return createdId;
+    }
+
+    @Override
+    public void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId) throws
+            APIPersistenceException {
+
+    }
+
+    @Override
+    public void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
+        MongoCollection<Document> genericCollection = getGenericCollection(org.getName());
+        genericCollection.deleteOne(eq("_id", new ObjectId(apiUUID)));
+        log.info("successfully deleted revision " + apiUUID + " from mongodb");
     }
 
     @Override
@@ -189,10 +207,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return api;
     }
 
-    @Override
-    public PublisherAPI getPublisherRevisionAPI(Organization org, String revisionUUID, String apiUUID, int revisionId) throws APIPersistenceException {
-        return null;
-    }
 
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
@@ -221,7 +235,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int limit = offset;
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
-        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery, skip, limit))
+        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getPublisherSearchAggregate(searchQuery, skip, limit))
                 .cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
@@ -248,7 +262,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return "*" + searchQuery + "*";
     }
 
-    private List<Document> getSearchAggregate(String query, int skip, int limit) {
+    private List<Document> getPublisherSearchAggregate(String query, int skip, int limit) {
         String searchQuery = getSearchQuery(query);
         List<String> paths = new ArrayList<>();
         paths.add("apiName");
@@ -281,6 +295,54 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return list;
     }
 
+    private List<Document> getDevportalSearchAggregate(String query, int skip, int limit) {
+        String searchQuery = getSearchQuery(query);
+        List<String> paths = new ArrayList<>();
+        paths.add("apiName");
+        paths.add("providerName");
+        paths.add("version");
+        paths.add("context");
+//        paths.add("status");
+//        paths.add("description");
+//        paths.add("tags");
+//        paths.add("gatewayLabels");
+//        paths.add("additionalProperties");
+
+        Document search = new Document();
+        Document wildCard = new Document();
+        Document wildCardBody = new Document();
+        Document skipDoc = new Document();
+        Document limitDoc = new Document();
+        wildCardBody.put("path", "apiName");
+        wildCardBody.put("query", "*");
+        wildCardBody.put("allowAnalyzedField", true);
+        wildCard.put("wildcard", wildCardBody);
+        search.put("$search", wildCard);
+        skipDoc.put("$skip", skip);
+        limitDoc.put("$limit", limit);
+
+        Document matchDoc = new Document();
+        Document orDoc = new Document();
+        Document matchPublished = new Document();
+        Document patchPrototyped = new Document();
+
+        List<Document> matchList = new ArrayList();
+
+        matchPublished.put("status", "PUBLISHED");
+        patchPrototyped.put("status", "PUBLISHED");
+        matchList.add(matchPublished);
+        matchList.add(patchPrototyped);
+        orDoc.put("$or", matchList);
+        matchDoc.put("$match", orDoc);
+
+        List<Document> list = new ArrayList<>();
+        list.add(matchDoc);
+        list.add(search);
+        list.add(skipDoc);
+        list.add(limitDoc);
+        return list;
+    }
+
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
@@ -290,7 +352,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         searchQuery = "";
         MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
-        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getSearchAggregate(searchQuery, skip, limit))
+        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getDevportalSearchAggregate(searchQuery, skip, limit))
                 .cursor();
         DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
         List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
@@ -324,11 +386,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public ResourceFile getRevisionWSDL(Organization org, String revisionUUID, String apiUUID, int revisionId) throws WSDLPersistenceException {
-        return null;
-    }
-
-    @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition)
             throws OASPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
@@ -348,11 +405,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public String getRevisionOASDefinition(Organization org, String revisionUUID, String apiUUID, int revisionId) throws OASPersistenceException {
-        return null;
-    }
-
-    @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {
 
@@ -360,11 +412,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException {
-        return null;
-    }
-
-    @Override
-    public String getRevisionGraphQLSchema(Organization org, String revisionUUID, String apiUUID, int revisionId) throws GraphQLPersistenceException {
         return null;
     }
 
@@ -434,11 +481,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         documentSearchResult.setReturnedDocsCount(documentationList.size());
         documentSearchResult.setReturnedDocsCount(5);
         return documentSearchResult;
-    }
-
-    @Override
-    public DocumentSearchResult searchRevisionDocumentation(Organization org, String revisionUUID, int start, int offset, String searchQuery, UserContext ctx, String apiUUID, int revisionId) throws DocumentationPersistenceException {
-        return null;
     }
 
     @Override
@@ -651,18 +693,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Mediation getRevisionMediationPolicy(Organization org, String revisionUUID, String mediationPolicyId, String apiUUID, int revisionId) throws MediationPolicyPersistenceException {
-        return null;
-    }
-
-    @Override
     public List<MediationInfo> getAllMediationPolicies(Organization org, String apiId)
             throws MediationPolicyPersistenceException {
-        return null;
-    }
-
-    @Override
-    public List<MediationInfo> getAllRevisionMediationPolicies(Organization org, String revisionUUID, String apiUUID, int revisionId) throws MediationPolicyPersistenceException {
         return null;
     }
 
@@ -680,11 +712,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-        return null;
-    }
-
-    @Override
-    public ResourceFile getRevisionThumbnail(Organization org, String revisionUUID, String apiUUID, int revisionId) throws ThumbnailPersistenceException {
         return null;
     }
 
@@ -726,6 +753,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
         return database.getCollection(orgName, MongoDBDevPortalAPI.class);
+    }
+
+    private MongoCollection<Document> getGenericCollection(String orgName) {
+        MongoDatabase database = MongoDBConnectionUtil.getDatabase();
+        return database.getCollection(orgName, Document.class);
     }
 
     @Override
