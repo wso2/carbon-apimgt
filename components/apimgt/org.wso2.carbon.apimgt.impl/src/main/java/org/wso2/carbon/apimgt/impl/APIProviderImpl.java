@@ -4515,10 +4515,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
-        return null;
-    }
 
     /**
      * Updates a visibility of the documentation
@@ -4588,16 +4584,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    public Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
 
         if (documentation != null) {
+            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
-                        .updateDocumentation(
-                                new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()), apiId,
-                                mappedDoc);
+                        .updateDocumentation(new Organization(requestedTenantDomain), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }
@@ -7353,15 +7348,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return lcData;
     }
 
-    @Override
-    public Map<String, Object> getAPILifeCycleData(String apiId, String orgId) throws APIManagementException {
-        return null;
-    }
-
-    public Map<String, Object> getAPILifeCycleData(String uuid) throws APIManagementException {
+    public Map<String, Object> getAPILifeCycleData(String uuid, String orgId) throws APIManagementException {
 
         Map<String, Object> lcData = new HashMap<String, Object>();
-        API api = getAPIbyUUID(uuid, CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        API api = getAPIbyUUID(uuid, orgId);
 
         List<String> actionsList;
         try {
