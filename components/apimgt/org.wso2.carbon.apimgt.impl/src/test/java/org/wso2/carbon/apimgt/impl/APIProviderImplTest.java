@@ -1093,7 +1093,7 @@ public class APIProviderImplTest {
         Association[] associations = new Association[]{association};
         Mockito.when(apiProvider.registry.getAssociations("testPathtestDoc", APIConstants.DOCUMENTATION_KEY)).
                 thenReturn(associations);
-        apiProvider.removeDocumentation(apiId, "testDoc", "testType");
+        apiProvider.removeDocumentation(apiId, "testDoc", "testType", null);
         Mockito.verify(apiProvider.registry);
     }
 
