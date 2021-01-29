@@ -5494,7 +5494,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String definition = super.getOpenAPIDefinition(apiId, null);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId);
+            API api = getLightweightAPI((APIIdentifier) apiId, tenantDomain);
             //todo: use get api by id, so no need to set scopes or uri templates
             api.setScopes(oasParser.getScopes(definition));
             api.setUriTemplates(oasParser.getURITemplates(definition));

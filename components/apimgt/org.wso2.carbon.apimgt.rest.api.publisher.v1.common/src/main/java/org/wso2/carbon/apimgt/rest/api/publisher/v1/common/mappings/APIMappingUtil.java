@@ -2631,7 +2631,7 @@ public class APIMappingUtil {
         if (RestApiCommonUtil.isUUID(apiId)) {
             apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), requestedTenantDomain).getId();
         }
         return apiIdentifier;
     }
