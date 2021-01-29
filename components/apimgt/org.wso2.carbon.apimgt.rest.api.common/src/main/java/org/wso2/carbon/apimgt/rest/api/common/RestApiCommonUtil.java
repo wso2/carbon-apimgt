@@ -370,7 +370,7 @@ public class RestApiCommonUtil {
         if (api.getUuid() != null) {
             apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), providerTenantDomain);
         } else {
-            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), providerTenantDomain);
         }
          
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);

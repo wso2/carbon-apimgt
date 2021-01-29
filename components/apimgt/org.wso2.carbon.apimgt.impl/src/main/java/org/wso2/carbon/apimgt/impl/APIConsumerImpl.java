@@ -5424,8 +5424,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId);
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, orgId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
     
@@ -5491,7 +5491,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiTenantDomain;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId);
+        String definition = super.getOpenAPIDefinition(apiId, null);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
@@ -6104,11 +6104,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
  
-    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
+    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
 
         String uuid = null;
         try {
-            Organization org = new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+            if (orgId == null) {
+                orgId = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            }
+            Organization org = new Organization(orgId);
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
             } else {

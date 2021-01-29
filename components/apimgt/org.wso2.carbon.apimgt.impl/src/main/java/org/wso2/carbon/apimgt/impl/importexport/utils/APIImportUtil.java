@@ -313,7 +313,7 @@ public final class APIImportUtil {
                 // (Adding missing attributes to swagger)
                 SwaggerData swaggerData = new SwaggerData(importedApi);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, swaggerContent);
-                apiProvider.saveSwaggerDefinition(importedApi, newDefinition);
+                apiProvider.saveSwaggerDefinition(importedApi, newDefinition, null);
             }
             // This is required to make url templates and scopes get effected
             apiProvider.updateAPI(importedApi);
@@ -345,7 +345,7 @@ public final class APIImportUtil {
                             checklistMap.put(APIImportExportConstants.REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC, true);
                 }
                 
-                apiProvider.changeLifeCycleStatus(uuid, lifecycleAction, checklistMap);
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, uuid, lifecycleAction, checklistMap);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
             }
@@ -538,7 +538,7 @@ public final class APIImportUtil {
             throws APIImportExportException {
 
         try {
-            apiProvider.saveSwagger20Definition(apiId, swaggerContent);
+            apiProvider.saveSwagger20Definition(apiId, swaggerContent, null);
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();

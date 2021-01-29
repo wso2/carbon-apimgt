@@ -447,7 +447,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier));
+            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, null));
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             }
@@ -499,7 +499,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier));
+            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, null));
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             }
@@ -1248,7 +1248,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
         String id;
@@ -1257,12 +1257,22 @@ public abstract class AbstractAPIManager implements APIManager {
         } else {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
         }
+        if (orgId == null) {
+            orgId = tenantDomain;
+        }
         try {
-                definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
+                definition = apiPersistenceInstance.getOASDefinition(new Organization(orgId), id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
         return definition;
+    }
+
+    public String validateOrgId (String orgId) {
+        if (orgId != null) {
+            return orgId;
+        }
+        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     }
     
     @Override

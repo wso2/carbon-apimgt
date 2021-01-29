@@ -201,7 +201,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 DocumentationContent content = new DocumentationContent();
                 content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
                 content.setTextContent(inlineContent);
-                apiProvider.addDocumentationContent(apiProductId, documentId, content);
+                apiProvider.addDocumentationContent(apiProductId, documentId, tenantDomain, content);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
@@ -250,7 +250,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil
                         .handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(apiProductId, documentId);
+            apiProvider.removeDocumentation(apiProductId, documentId, tenantDomain);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource
@@ -334,7 +334,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
-            apiProvider.updateDocumentation(apiProductId, newDocumentation);
+            apiProvider.updateDocumentation(apiProductId, newDocumentation, tenantDomain);
 
             //retrieve the updated documentation
             newDocumentation = apiProvider.getDocumentation(apiProductId, documentId, tenantDomain);
@@ -409,11 +409,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
-            if (apiProvider.isDocumentationExist(apiProductId, documentName)) {
+            if (apiProvider.isDocumentationExist(apiProductId, documentName, tenantDomain)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
             }
-            documentation = apiProvider.addDocumentation(apiProductId, documentation);
+            documentation = apiProvider.addDocumentation(apiProductId, documentation, tenantDomain);
 
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID
@@ -570,7 +570,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
-            apiProvider.setThumbnailToAPI(apiProductId, apiImage);
+            apiProvider.setThumbnailToAPI(apiProductId, apiImage, tenantDomain);
             /*
             String thumbPath = APIUtil.getProductIconPath(apiProduct.getId());
             String thumbnailUrl = apiProvider.addProductResourceFile(apiProduct.getId(), thumbPath, apiImage);

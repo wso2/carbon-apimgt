@@ -518,7 +518,7 @@ public class APIAndAPIProductCommonUtil {
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId());
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), null);
                 }
             }
             //load document file if exists

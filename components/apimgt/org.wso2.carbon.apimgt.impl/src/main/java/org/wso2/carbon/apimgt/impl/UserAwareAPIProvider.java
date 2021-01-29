@@ -251,9 +251,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getOpenAPIDefinition(apiId);
+        return super.getOpenAPIDefinition(apiId, orgId);
     }
 
     @Override
@@ -264,9 +264,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void removeDocumentation(Identifier id, String docId) throws APIManagementException {
+    public void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException {
         checkAccessControlPermission(id);
-        super.removeDocumentation(id, docId);
+        super.removeDocumentation(id, docId, orgId);
     }
 
     @Override
@@ -427,9 +427,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        super.saveSwagger20Definition(apiId, jsonText);
+        super.saveSwagger20Definition(apiId, jsonText, orgId);
     }
 
     @Override

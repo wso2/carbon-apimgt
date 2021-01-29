@@ -824,7 +824,7 @@ public class ImportUtils {
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId());
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), null);
                 }
             }
 
@@ -900,9 +900,11 @@ public class ImportUtils {
                             documentation.setFilePath(
                                     apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
                             if (!apiTypeWrapper.isAPIProduct()) {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation,
+                                        null);
                             } else {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation);
+                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation,
+                                        null);
                             }
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API

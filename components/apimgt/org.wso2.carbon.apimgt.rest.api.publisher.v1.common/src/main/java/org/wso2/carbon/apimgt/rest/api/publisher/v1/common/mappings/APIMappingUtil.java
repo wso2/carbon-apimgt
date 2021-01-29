@@ -1015,6 +1015,8 @@ public class APIMappingUtil {
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
+                .getProviderName()));
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
@@ -1024,7 +1026,7 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
             }
             
             apiOperationsDTO = getOperationsFromAPI(model);
@@ -2069,7 +2071,9 @@ public class APIMappingUtil {
             }
         }
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId());
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId()
+                .getProviderName()));
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(), tenantDomain);
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 
