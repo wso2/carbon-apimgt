@@ -158,7 +158,17 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId) throws
             APIPersistenceException {
-
+        MongoCollection<Document> genericCollection = getGenericCollection(org.getName());
+        FindIterable<Document> revision = genericCollection.find(eq("_id", new ObjectId(revisionUUID)));
+        MongoCursor<Document> cursor = revision.cursor();
+        while (cursor.hasNext()) {
+            Document mongoDBAPIDocument = cursor.next();
+            mongoDBAPIDocument.put("_id", new ObjectId(apiUUID));
+            FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
+            options.returnDocument(ReturnDocument.AFTER);
+            genericCollection.findOneAndReplace(eq("_id", new ObjectId(apiUUID)), mongoDBAPIDocument, options);
+            log.info("successfully restored the revision " + revisionUUID + " in mongodb");
+        }
     }
 
     @Override
