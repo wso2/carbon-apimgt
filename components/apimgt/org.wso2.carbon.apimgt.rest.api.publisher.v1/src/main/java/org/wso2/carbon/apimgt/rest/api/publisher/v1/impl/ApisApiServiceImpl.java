@@ -1074,10 +1074,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                RestApiUtil.handleBadRequest(
-                        "The client certificate based authentication is not configured for this " + "server", log);
-            }
             int totalCount = apiProvider.getClientCertificateCount(tenantId);
             if (totalCount > 0) {
                 APIIdentifier apiIdentifier = null;
@@ -1123,10 +1119,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isBlank(fileName)) {
                 RestApiUtil.handleBadRequest(
                         "Certificate addition failed. Proper Certificate file should be provided", log);
-            }
-            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                RestApiUtil.handleBadRequest(
-                        "The client certificate based authentication is not configured for this " + "server", log);
             }
             API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
             String userName = RestApiCommonUtil.getLoggedInUsername();

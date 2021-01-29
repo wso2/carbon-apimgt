@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.persistence.utils;
 
 import javax.xml.namespace.QName;
 
+import org.wso2.carbon.apimgt.persistence.GenericArtifactWrapper;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
@@ -25,7 +26,7 @@ public class PersistenceHelper {
     
     public static GenericArtifact getSampleAPIArtifact() throws GovernanceException {
 
-        GenericArtifact artifact = new GenericArtifactImpl(new QName("", "PizzaShackAPI", ""),
+        GenericArtifact artifact = new GenericArtifactWrapper(new QName("", "PizzaShackAPI", ""),
                 "application/vnd.wso2-api+xml");
         artifact.setAttribute("overview_endpointSecured","false");
         artifact.setAttribute("overview_transports","http,https");
@@ -109,10 +110,12 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_enableStore","true");
         artifact.setAttribute("overview_enableSchemaValidation","true");
         artifact.setAttribute("overview_endpointUsername",null);
+        artifact.setAttribute("overview_status", "PUBLISHED");
+        artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
         
         return artifact;
     }
-    public static GenericArtifact getSampleAPIArtifactForTenantf() throws GovernanceException {
+    public static GenericArtifact getSampleAPIArtifactForTenant() throws GovernanceException {
 
         GenericArtifact artifact = new GenericArtifactImpl(new QName("", "PizzaShackAPI", ""),
                 "application/vnd.wso2-api+xml");
@@ -198,7 +201,52 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_enableStore","true");
         artifact.setAttribute("overview_enableSchemaValidation","true");
         artifact.setAttribute("overview_endpointUsername",null);
-        
+        artifact.setAttribute("overview_status", "PUBLISHED");
+        artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
         return artifact;
     }
+    
+    public static GenericArtifact getSampleAPIProductArtifact() throws GovernanceException {
+        GenericArtifact artifact = new GenericArtifactImpl(new QName("", "APIProductTest", ""),
+                "application/vnd.wso2-api+xml");
+        artifact.setAttribute("overview_transports","http,https");
+        artifact.setAttribute("monetizationProperties","{}");
+        artifact.setAttribute("overview_authorizationHeader","Authorization");
+        artifact.setAttribute("overview_visibleTenants",null);
+        artifact.setAttribute("overview_name","APIProductTest");
+        artifact.setAttribute("overview_apiSecurity","oauth2,oauth_basic_auth_api_key_mandatory,basic_auth,api_key");
+        artifact.setAttribute("overview_environments","Production and Sandbox");
+        artifact.setAttribute("overview_subscriptionAvailability","all_tenants");
+        artifact.setAttribute("overview_context","/prodcontext");
+        artifact.setAttribute("overview_visibility","restricted");
+        artifact.setAttribute("overview_cacheTimeout","300");
+        artifact.setAttribute("overview_provider","admin");
+        artifact.setAttribute("overview_visibleRoles","admin");
+        artifact.setAttribute("apiCategories_categoryName","testcategory");
+        artifact.setAttribute("overview_contextTemplate","/prodcontext/{version}");
+        artifact.setAttribute("overview_thumbnail",null);
+        artifact.setAttribute("overview_description","sample product");
+        artifact.setAttribute("overview_technicalOwner",null);
+        artifact.setAttribute("overview_type","APIProduct");
+        artifact.setAttribute("overview_technicalOwnerEmail",null);
+        artifact.setAttribute("overview_corsConfiguration","{\"corsConfigurationEnabled\":false,"
+                + "\"accessControlAllowOrigins\":[\"*\"],\"accessControlAllowCredentials\":false,"
+                + "\"accessControlAllowHeaders\":[\"authorization\",\"Access-Control-Allow-Origin\",\"Content-Type\","
+                + "\"SOAPAction\",\"apikey\",\"testKey\"],\"accessControlAllowMethods\":[\"GET\",\"PUT\",\"POST\","
+                + "\"DELETE\",\"PATCH\",\"OPTIONS\"]}");
+        artifact.setAttribute("overview_versionType","context");
+        artifact.setAttribute("overview_status","PUBLISHED");
+        artifact.setAttribute("overview_businessOwner","productOwner");
+        artifact.setAttribute("overview_version","1.0.0");
+        artifact.setAttribute("overview_tenants",null);
+        artifact.setAttribute("overview_responseCaching","Disabled");
+        artifact.setAttribute("overview_tier","Bronze||Gold");
+        artifact.setAttribute("overview_businessOwnerEmail","owner@test.com");
+        artifact.setAttribute("isMonetizationEnabled","false");
+        artifact.setAttribute("overview_enableStore","true");
+        artifact.setAttribute("overview_enableSchemaValidation","false");
+        artifact.setId("88e758b7-6924-4e9f-8882-431070b6492b");
+        return artifact;
+    }
+    
 }

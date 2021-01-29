@@ -481,7 +481,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 log.error(errorMessage);
                 throw new APIPersistenceException(errorMessage);
             }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            GenericArtifact artifact = getAPIArtifact(apiArtifactId, registry);
 
             boolean isSecured = Boolean.parseBoolean(
                     artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED));
@@ -657,10 +657,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             tenantFlowStarted  = holder.isTenantFlowStarted();
             Registry registry = holder.getRegistry();
 
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                                            APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
 
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
@@ -697,6 +694,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     }
+  
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
         boolean tenantFlowStarted = false;
@@ -707,10 +705,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             tenantFlowStarted = holder.isTenantFlowStarted();
             //String username = holder.getRegistryUser();
 
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
 
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
@@ -1904,10 +1899,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
 
-            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact == null) {
                 return null;
             }
@@ -2031,10 +2023,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             Registry registryType = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted;
 
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registryType);
             if (apiArtifact != null) {
                 String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
                 String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
@@ -2878,10 +2867,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
 
-            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact == null) {
                 return null;
             }
@@ -2926,10 +2912,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
 
-            GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact == null) {
                 throw new ThumbnailPersistenceException("API not found for id " + apiId, ExceptionCodes.API_NOT_FOUND);
             }
@@ -3212,10 +3195,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
     private BasicAPI getbasicAPIInfo(String uuid, Registry registry)
             throws APIPersistenceException, GovernanceException {
         BasicAPI api = new BasicAPI();
-        GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-
-        GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(uuid);
+        GenericArtifact apiArtifact = getAPIArtifact(uuid, registry);
         if (apiArtifact == null) {
             return null;
         }
@@ -3348,10 +3328,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             tenantFlowStarted  = holder.isTenantFlowStarted();
             Registry registry = holder.getRegistry();
 
-            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
-                                            APIConstants.API_KEY);
-
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiProductId);
+            GenericArtifact apiArtifact = getAPIArtifact(apiProductId, registry);
             if (apiArtifact != null) {
                 APIProduct apiProduct = RegistryPersistenceUtil.getAPIProduct(apiArtifact, registry);
                 String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
@@ -3645,5 +3622,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
             }
         }
     
+    }
+    protected GenericArtifact getAPIArtifact(String apiId, Registry registry)
+            throws APIPersistenceException, GovernanceException {
+        GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
+                                        APIConstants.API_KEY);
+        GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+        return apiArtifact;
     }
 }

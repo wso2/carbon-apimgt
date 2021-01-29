@@ -271,11 +271,6 @@ public class PublisherCommonUtils {
 
         // Validate API Security
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
-                .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-            throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                    ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-        }
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
         String originalStatus = originalAPI.getStatus();
@@ -771,14 +766,6 @@ public class PublisherCommonUtils {
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
 
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
-            for (String apiSecurityScheme : apiSecuritySchemes) {
-                if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                            ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-                }
-            }
-        }
         if (body.getAccessControlRoles() != null) {
             String errorMessage = PublisherCommonUtils.validateUserRoles(body.getAccessControlRoles());
 

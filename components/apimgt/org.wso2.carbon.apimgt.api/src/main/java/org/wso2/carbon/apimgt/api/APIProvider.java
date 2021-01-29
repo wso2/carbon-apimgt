@@ -42,21 +42,6 @@ import java.util.Set;
 public interface APIProvider extends APIManager {
 
     /**
-     * Method to create a Local Entry by adding the swagger content.
-     *
-     * @param api    API
-     * @param jsonText json text to be saved in the registry
-     */
-    void addSwaggerToLocalEntry(API api, String jsonText);
-
-    /**
-     * Method to remove the Local Entry from the synapse local entries.
-     *
-     * @param api    API
-     */
-    void deleteSwaggerLocalEntry(API api);
-
-    /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
@@ -556,14 +541,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to copy docs
      */
     List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException;
-
-    /**
-     * Delete an API
-     *
-     * @param identifier APIIdentifier
-     * @throws APIManagementException if failed to remove the API
-     */
-    void deleteAPI(APIIdentifier identifier, String apiId) throws APIManagementException;
 
     /**
      * Search API
@@ -1233,11 +1210,6 @@ public interface APIProvider extends APIManager {
      */
     boolean isConfigured();
 
-    /**
-     * Method to check whether mutual ssl based client verification is configured.
-     * @return : TRUE if client certificate related configurations are configured, FALSE otherwise.
-     */
-    boolean isClientCertificateBasedAuthenticationConfigured();
 
     /**
      * Method to retrieve all the certificates uploaded for the tenant represent by the user.
@@ -1423,16 +1395,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     Map<API, List<APIProductResource>> updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Update API Products local entry. This is to be called whenever the swagger definition of an dependent API gets
-     * updated
-     *
-     * @param product
-     * @throws APIManagementException
-     * @throws FaultGatewaysException
-     */
-    void updateLocalEntry(APIProduct product) throws FaultGatewaysException;
 
     List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException;
 

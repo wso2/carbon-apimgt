@@ -129,17 +129,6 @@ public interface SubscriptionDataLoader {
     public API getApi(String context, String version) throws DataLoadingException;
 
     /**
-     * Retrieve {@link API} object.
-     *
-     * @param context context of the API
-     * @param version Version of the API
-     * @param revisionUUID Revision UUID of the API
-     * @return An {@link API}
-     * @throws DataLoadingException If any error
-     */
-    public API getApi(String context, String version, String revisionUUID) throws DataLoadingException;
-
-    /**
      * Retrieve Subscription Throttling Policy.
      *
      * @return A {@link SubscriptionPolicy}.

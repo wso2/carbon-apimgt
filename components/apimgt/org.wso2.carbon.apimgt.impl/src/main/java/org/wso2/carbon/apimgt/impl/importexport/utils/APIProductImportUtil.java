@@ -237,12 +237,10 @@ public class APIProductImportUtil {
             APIAndAPIProductCommonUtil.addAPIOrAPIProductImage(pathToArchive, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
             APIAndAPIProductCommonUtil.addAPIOrAPIProductDocuments(pathToArchive, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
 
-            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
                 }
                 APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
-            }
         } catch (IOException e) {
             // Error is logged and APIImportExportException is thrown because adding API Product and swagger are mandatory steps
             String errorMessage = "Error while reading API Product meta information from path: " + pathToArchive;
