@@ -6515,6 +6515,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException {
         try {
+            if (orgId != null) {
+                orgId = tenantDomain;
+            }
             apiPersistenceInstance.saveOASDefinition(new Organization(orgId), apiId, jsonText);
 
         } catch (OASPersistenceException e) {
