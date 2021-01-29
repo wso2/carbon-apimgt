@@ -2412,7 +2412,7 @@ public final class APIConstants {
         SCOPE_DELETE,
         ENDPOINT_CERTIFICATE_ADD,
         ENDPOINT_CERTIFICATE_REMOVE,
-        GACONFIG_UPDATE
+        GA_CONFIG_UPDATE
     }
 
     public static class GatewayArtifactSynchronizer {

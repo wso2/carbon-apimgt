@@ -71,7 +71,9 @@ public class CertificateReLoaderUtil {
         }
         return 2L;
     }
-    public static void setCertificate(TrustStoreDTO trustStoreDTO){
+
+    public static void setCertificate(TrustStoreDTO trustStoreDTO) {
+
         CertificateReLoaderUtil.trustStore = trustStoreDTO;
     }
 

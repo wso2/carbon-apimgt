@@ -53,7 +53,11 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Iterator;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
 
 public class GatewayJMSMessageListener implements MessageListener {
 
@@ -118,10 +122,8 @@ public class GatewayJMSMessageListener implements MessageListener {
             boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
             if (tenantLoaded) {
                 if (!gatewayEvent.getGatewayLabels().isEmpty()) {
-                    Iterator<String> gateways = gatewayEvent.getGatewayLabels().iterator();
-                    while (gateways.hasNext()){
-                        String gatewayLabel = gateways.next();
-                        if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
+                    for (String gatewayLabel : gatewayEvent.getGatewayLabels()) {
+                        if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
 
                             boolean tenantFlowStarted = false;
                             try {
@@ -267,7 +269,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                     }
                 }
             }
-        } else if (EventType.GACONFIG_UPDATE.toString().equals(eventType)) {
+        } else if (EventType.GA_CONFIG_UPDATE.toString().equals(eventType)) {
             GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
                     new Gson().fromJson(eventJson, GoogleAnalyticsConfigEvent.class);
             try {
