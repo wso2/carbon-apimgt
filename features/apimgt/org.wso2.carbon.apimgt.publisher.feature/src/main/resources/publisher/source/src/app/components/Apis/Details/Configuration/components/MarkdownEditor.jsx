@@ -31,6 +31,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { isRestricted } from 'AppData/AuthManager';
+import CONSTS from 'AppData/Constants';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "MDMonacoEditor" */));
@@ -86,9 +87,9 @@ export default function MarkdownEditor(props) {
 
     const toggleOpen = () => {
         if (!open) {
-            if (descriptionType === 'description') {
+            if (descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
                 setDescription(api.description);
-            } else if (descriptionType === '_overview') {
+            } else if (descriptionType === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
                 setDescription(overview);
             }
         }

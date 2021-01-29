@@ -37,6 +37,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import CONSTS from 'AppData/Constants';
 import Alert from 'AppComponents/Shared/Alert';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
@@ -215,11 +216,11 @@ export default function DesignConfigurations() {
     });
     const handleChange = (event) => {
         const type = event.target.value;
-        if (type === 'description') {
+        if (type === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
             if (apiConfig.description === null) {
-                configDispatcher({ action: 'description', value: overview });
+                configDispatcher({ action: CONSTS.DESCRIPTION_TYPES.DESCRIPTION, value: overview });
             }
-        } else if (type === '_overview') {
+        } else if (type === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
             if (overviewDocument === null) {
                 setOverview(apiConfig.description);
             }
@@ -227,10 +228,10 @@ export default function DesignConfigurations() {
         setDescriptionType(type);
     };
     const updateContent = (content) => {
-        if (descriptionType === 'description') {
-            configDispatcher({ action: 'description', value: content });
-        } else if (descriptionType === '_overview') {
-            configDispatcher({ action: 'description', value: null });
+        if (descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
+            configDispatcher({ action: CONSTS.DESCRIPTION_TYPES.DESCRIPTION, value: content });
+        } else if (descriptionType === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
+            configDispatcher({ action: CONSTS.DESCRIPTION_TYPES.DESCRIPTION, value: null });
             setOverview(content);
         }
     };
@@ -263,7 +264,7 @@ export default function DesignConfigurations() {
             sourceType: 'MARKDOWN',
             visibility: 'API_LEVEL',
             sourceUrl: '',
-            otherTypeName: '_overview',
+            otherTypeName: CONSTS.DESCRIPTION_TYPES.OVERVIEW,
             inlineContent: '',
         }).then((response) => {
             return response.body;
@@ -314,9 +315,9 @@ export default function DesignConfigurations() {
                     const doc = overviewDoc[0];
                     setOverviewDocument(doc);
                     loadContentForDoc(doc.documentId);
-                    setDescriptionType('_overview'); // Only one doc we can render
+                    setDescriptionType(CONSTS.DESCRIPTION_TYPES.OVERVIEW); // Only one doc we can render
                 } else {
-                    setDescriptionType('description');
+                    setDescriptionType(CONSTS.DESCRIPTION_TYPES.DESCRIPTION);
                 }
             })
             .catch((error) => {
@@ -342,13 +343,13 @@ export default function DesignConfigurations() {
                     Alert.error(error.response.body.description);
                 }
             });
-        if (descriptionType === 'description') {
+        if (descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
             if (overviewDocument) {
                 deleteOverviewDocument();
             }
         }
 
-        if (descriptionType === '_overview') {
+        if (descriptionType === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
             let document = overviewDocument;
             if (document === null) {
                 document = await addDocument();
@@ -412,12 +413,12 @@ export default function DesignConfigurations() {
                                                         onChange={handleChange}
                                                     >
                                                         <FormControlLabel
-                                                            value='description'
+                                                            value={CONSTS.DESCRIPTION_TYPES.DESCRIPTION}
                                                             control={<Radio />}
                                                             label='Description'
                                                         />
                                                         <FormControlLabel
-                                                            value='_overview'
+                                                            value={CONSTS.DESCRIPTION_TYPES.OVERVIEW}
                                                             control={<Radio />}
                                                             label='Overview'
                                                         />
@@ -427,7 +428,7 @@ export default function DesignConfigurations() {
                                                     api={apiConfig}
                                                     updateContent={updateContent}
                                                     descriptionType={descriptionType}
-                                                    overview={overview || undefined}
+                                                    overview={overview}
                                                 />
                                             </Grid>
                                         </Grid>
