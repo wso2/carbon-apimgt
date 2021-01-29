@@ -8775,6 +8775,38 @@ public class ApiMgtDAO {
         return apiKeyList;
     }
 
+    public APIKey getKeyMappingsFromApplicationIdKeyManagerAndKeyType(int applicationId, String keyManager,
+            String keyType) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement preparedStatement = connection
+                        .prepareStatement(SQLConstants.GET_KEY_MAPPING_INFO_FROM_APP_ID_KEY_MANAGER_KEY_TYPE)) {
+            preparedStatement.setInt(1, applicationId);
+            preparedStatement.setString(2, keyManager);
+            preparedStatement.setString(3, keyType);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setMappingId(resultSet.getString("UUID"));
+                    apiKey.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                    apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    apiKey.setType(resultSet.getString("KEY_TYPE"));
+                    apiKey.setState(resultSet.getString("STATE"));
+                    try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
+                        if (appInfo != null) {
+                            apiKey.setAppMetaData(IOUtils.toString(appInfo));
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while retrieving metadata", e);
+                    }
+                    return apiKey;
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while Retrieving Key Mappings ", e);
+        }
+        return null;
+    }
+
     public APIKey getKeyMappingFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException {
 

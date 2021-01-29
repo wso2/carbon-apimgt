@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -4763,8 +4764,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
             // set application attributes
             oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
+
+            // Get the stored OAuth Application Info
+            APIKey apiKey = apiMgtDAO
+                    .getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId(), keyManagerID, tokenType);
+            OAuthApplicationInfo storedOAuthApplicationInfo = null;
+            if (apiKey != null) {
+                String appMetaData = apiKey.getAppMetaData();
+                if (StringUtils.isNotEmpty(appMetaData)) {
+                    storedOAuthApplicationInfo = new Gson().fromJson(appMetaData, OAuthApplicationInfo.class);
+                }
+            }
+
             //call update method.
             OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
+            if (storedOAuthApplicationInfo != null) {
+                // modify updatedAppInfo by merging the stored OAuth Application Info
+                updatedAppInfo = mergeStoredAppInfoWithUpdatedAppInfo(storedOAuthApplicationInfo, updatedAppInfo);
+            }
             apiMgtDAO.updateApplicationKeyTypeMetaData(application.getId(), tokenType, keyManagerName, updatedAppInfo);
             JSONObject appLogObject = new JSONObject();
             appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, updatedAppInfo.getClientName());
@@ -4780,6 +4797,42 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
+    }
+
+    /**
+     * Merge storedOAuthApplicationInfo into OAuthApplicationInfo
+     *
+     * @param storedOAuthApplicationInfo OAuthApplicationInfo object to merge from
+     * @param updatedAppInfo             OAuthApplicationInfo object to which the merge is done
+     * @return storedOAuthApplicationInfo Merged result  after merging storedOAuthApplicationInfo into
+     * OAuthApplicationInfo
+     */
+    private OAuthApplicationInfo mergeStoredAppInfoWithUpdatedAppInfo(OAuthApplicationInfo storedOAuthApplicationInfo,
+            OAuthApplicationInfo updatedAppInfo) {
+        if (updatedAppInfo == null) {
+            updatedAppInfo = storedOAuthApplicationInfo;
+        } else {
+            if (StringUtils.isEmpty(updatedAppInfo.getClientSecret()) && StringUtils
+                    .isNotEmpty(storedOAuthApplicationInfo.getClientSecret())) {
+                updatedAppInfo.setClientSecret(storedOAuthApplicationInfo.getClientSecret());
+            }
+            if (StringUtils.isEmpty(updatedAppInfo.getCallBackURL()) && StringUtils
+                    .isNotEmpty(storedOAuthApplicationInfo.getCallBackURL())) {
+                updatedAppInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
+            }
+            if (updatedAppInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null
+                    && storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
+                if (storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) instanceof String) {
+                    updatedAppInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                            ((String) storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES))
+                                    .replace(",", " "));
+                } else {
+                    updatedAppInfo.addParameter(APIConstants.JSON_GRANT_TYPES,
+                            storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES));
+                }
+            }
+        }
+        return updatedAppInfo;
     }
 
     @Override
