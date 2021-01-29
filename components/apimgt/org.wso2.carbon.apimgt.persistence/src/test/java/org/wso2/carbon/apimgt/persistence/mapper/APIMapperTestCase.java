@@ -156,15 +156,11 @@ public class APIMapperTestCase {
     public void testAPIProductToPublisherAPIProductAndBack() throws GovernanceException, APIManagementException {
 
         PublisherAPIProduct pubAPI = APIProductMapper.INSTANCE.toPublisherApiProduct(product);
-        // Need to fix this. atm this is populated from the apiprovider impl layer
-        //Assert.assertEquals("API product name does not match", product.getId().getName(), pubAPI.getApiProductName());
         Assert.assertEquals("API product uuid does not match", product.getUuid(), pubAPI.getId());
         Assert.assertEquals("API product type does not match", product.getType(),
                 pubAPI.getType());
 
         APIProduct mappedProduct = APIProductMapper.INSTANCE.toApiProduct(pubAPI);
-        //Assert.assertEquals("Mapped api name does not match", mappedProduct.getId().getName(),
-        //        product.getId().getName());
         Assert.assertEquals("Mapped product uuid does not match", mappedProduct.getUuid(), product.getUuid());
     }
 }
