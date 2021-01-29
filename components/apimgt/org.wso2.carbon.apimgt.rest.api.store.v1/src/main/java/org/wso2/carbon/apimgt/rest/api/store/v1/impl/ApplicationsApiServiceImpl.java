@@ -170,13 +170,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Import an Application which has been exported to a zip file
      *
-     * @param appOwner            target owner of the application
-     * @param preserveOwner       if true, preserve the original owner of the application
-     * @param skipSubscriptions   if true, skip subscriptions of the application
-     * @param fileInputStream     content stream of the zip file which contains exported Application
-     * @param fileDetail          meta information of the zip file
+     * @param fileInputStream     Content stream of the zip file which contains exported Application
+     * @param fileDetail          Meta information of the zip file
+     * @param preserveOwner       If true, preserve the original owner of the application
+     * @param skipSubscriptions   If true, skip subscriptions of the application
+     * @param appOwner            Target owner of the application
      * @param skipApplicationKeys Skip application keys while importing
-     * @param update              update if existing application found or import
+     * @param update              Update if existing application found or import
+     * @param messageContext      Message Context
      * @return imported Application
      */
     @Override public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail,
@@ -264,7 +265,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 APIInfoListDTO skippedAPIListDTO = APIInfoMappingUtil.fromAPIInfoListToDTO(skippedAPIs);
                 return Response.created(location).status(207).entity(skippedAPIListDTO).build();
             }
-        } catch (URISyntaxException | UserStoreException | APIImportExportException e) {
+        } catch (URISyntaxException | APIImportExportException e) {
             throw new APIManagementException("Error while importing Application", e);
         } catch (UnsupportedEncodingException e) {
             throw new APIManagementException("Error while Decoding apiId", e);
@@ -485,9 +486,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Export an existing Application
      *
-     * @param appName  Search query
-     * @param appOwner Owner of the Application
-     * @param withKeys Export keys with application
+     * @param appName        Search query
+     * @param appOwner       Owner of the Application
+     * @param withKeys       Export keys with application
+     * @param format         Export format
+     * @param messageContext Message Context
      * @return Zip file containing exported Application
      */
     @Override
