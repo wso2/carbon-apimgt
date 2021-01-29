@@ -4408,7 +4408,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion());
         }
-        removeDocumentation(orgId, uuid, docId);
+        removeDocumentation(uuid, docId, orgId);
     }
 
 
@@ -4811,12 +4811,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Documentation addDocumentation(String uuid, Documentation documentation, String orgId) throws APIManagementException {
         if (documentation != null) {
-            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation addedDoc = apiPersistenceInstance.addDocumentation(
-                        new Organization(requestedTenantDomain), uuid,
+                        new Organization(orgId), uuid,
                         mappedDoc);
                 if (addedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(addedDoc);
@@ -4833,9 +4832,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean exist = false;
         UserContext ctx = null;
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
             DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(
-                    new Organization(requestedTenantDomain), uuid, 0, 0, "name:" + docName, ctx);
+                    new Organization(orgId), uuid, 0, 0, "name:" + docName, ctx);
             if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
                 String returnDocName = result.getDocumentationList().get(0).getName();
                 if (returnDocName != null && returnDocName.equals(docName)) {
@@ -6508,7 +6506,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
         }
-        saveSwaggerDefinition(apiId, jsonText, tenantDomain);
+        saveSwaggerDefinition(apiId, jsonText, orgId);
     }
 
     @Override
@@ -10342,7 +10340,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             mappedContent = DocumentMapper.INSTANCE.toDocumentContent(content);
             String requestedTenantDomain = validateOrgId(orgId);
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(
-                    new Organization(orgId), uuid, docId, mappedContent);
+                    new Organization(requestedTenantDomain), uuid, docId, mappedContent);
         } catch (DocumentationPersistenceException e) {
             throw new APIManagementException("Error while adding content to doc " + docId);
         }
@@ -10366,10 +10364,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile wsdlResourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(
                     wsdlContent, null);
             try {
-                String requestedTenantDomain = validateOrgId(orgId);
                 apiPersistenceInstance.saveWSDL(
-                        new Organization(requestedTenantDomain), apiId,
-                        wsdlResourceFile);
+                        new Organization(orgId), apiId, wsdlResourceFile);
             } catch (WSDLPersistenceException e) {
                 throw new APIManagementException("Error while adding WSDL to api " + apiId, e);
             }
@@ -10469,10 +10465,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void setThumbnailToAPI(String apiId, ResourceFile resource, String orgId) throws APIManagementException {
 
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.ResourceFile iconResourceFile = new
                     org.wso2.carbon.apimgt.persistence.dto.ResourceFile(resource.getContent(), resource.getContentType());
-            apiPersistenceInstance.saveThumbnail(new Organization(requestedTenantDomain), apiId, iconResourceFile);
+            apiPersistenceInstance.saveThumbnail(new Organization(orgId), apiId, iconResourceFile);
         } catch (ThumbnailPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
@@ -10486,9 +10481,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<Mediation> getAllApiSpecificMediationPolicies(String apiId, String orgId) throws APIManagementException {
         List<Mediation> mappedList = new ArrayList<Mediation>();
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
-            List<MediationInfo> list = apiPersistenceInstance.getAllMediationPolicies(
-                    new Organization(requestedTenantDomain), apiId);
+            List<MediationInfo> list = apiPersistenceInstance.getAllMediationPolicies(new Organization(orgId), apiId);
             if (list != null) {
                 for (MediationInfo mediationInfo : list) {
                     Mediation mediation = new Mediation();
@@ -10512,9 +10505,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Mediation getApiSpecificMediationPolicyByPolicyId(String apiId, String policyId, String orgId)
             throws APIManagementException {
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Mediation policy = apiPersistenceInstance.getMediationPolicy(
-                        new Organization(requestedTenantDomain), apiId, policyId);
+                        new Organization(orgId), apiId, policyId);
             if (policy != null) {
                 Mediation mediation = new Mediation();
                 mediation.setName(policy.getName());
@@ -10541,14 +10533,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     APIConstants.MAX_LENGTH_MEDIATION_POLICY_NAME + ""));
         }
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Mediation mappedPolicy = 
                     new org.wso2.carbon.apimgt.persistence.dto.Mediation();
             mappedPolicy.setConfig(mediationPolicy.getConfig());
             mappedPolicy.setName(mediationPolicy.getName());
             mappedPolicy.setType(mediationPolicy.getType());
             org.wso2.carbon.apimgt.persistence.dto.Mediation returnedMappedPolicy = apiPersistenceInstance
-                    .addMediationPolicy(new Organization(requestedTenantDomain), apiId, mappedPolicy);
+                    .addMediationPolicy(new Organization(orgId), apiId, mappedPolicy);
             if (returnedMappedPolicy != null) {
                 mediationPolicy.setUuid(returnedMappedPolicy.getId());
                 return mediationPolicy;
@@ -10570,7 +10561,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
 
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Mediation mappedPolicy = 
                     new org.wso2.carbon.apimgt.persistence.dto.Mediation();
             mappedPolicy.setConfig(mediationPolicy.getConfig());
@@ -10578,7 +10568,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             mappedPolicy.setType(mediationPolicy.getType());
             mappedPolicy.setId(mediationPolicy.getUuid());
             org.wso2.carbon.apimgt.persistence.dto.Mediation returnedMappedPolicy = apiPersistenceInstance
-                    .updateMediationPolicy(new Organization(requestedTenantDomain), apiId, mappedPolicy);
+                    .updateMediationPolicy(new Organization(orgId), apiId, mappedPolicy);
             if (returnedMappedPolicy != null) {
                 return mediationPolicy;
             }
@@ -10595,9 +10585,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void deleteApiSpecificMediationPolicy(String apiId, String mediationPolicyId, String orgId) throws APIManagementException {
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
-            apiPersistenceInstance.deleteMediationPolicy(
-                    new Organization(requestedTenantDomain), apiId, mediationPolicyId);
+            apiPersistenceInstance.deleteMediationPolicy(new Organization(orgId), apiId, mediationPolicyId);
         } catch (MediationPolicyPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {
                 throw new APIMgtResourceNotFoundException(e);
@@ -10650,9 +10638,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void saveGraphqlSchemaDefinition(String apiId, String definition, String orgId) throws APIManagementException {
 
         try {
-            String requestedTenantDomain = validateOrgId(orgId);
-            apiPersistenceInstance.saveGraphQLSchemaDefinition(
-                    new Organization(requestedTenantDomain), apiId, definition);
+            apiPersistenceInstance.saveGraphQLSchemaDefinition(new Organization(orgId), apiId, definition);
 
         } catch (GraphQLPersistenceException e) {
             if (e.getErrorHandler() == ExceptionCodes.API_NOT_FOUND) {

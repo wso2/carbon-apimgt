@@ -1268,7 +1268,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return definition;
     }
 
-    public String validateOrgId (String orgId) {
+    public String validateOrgId(String orgId) {
         if (orgId != null) {
             return orgId;
         }
