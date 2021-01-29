@@ -4634,29 +4634,6 @@ definitions:
         type: integer
         format: int64
         example: 60000
-      timeUnit:
-        type: string
-        example: min
-        readonly : true
-      rateLimitCount:
-        type: integer
-        default: 0
-        description: Burst control request count
-        example: 10
-        readonly : true
-      rateLimitTimeUnit:
-        type: string
-        description: Burst control time unit
-        example: min
-        readonly : true
-      quotaPolicyType:
-        type: string
-        description: Default quota limit type
-        enum:
-          - REQUESTCOUNT
-          - BANDWIDTHVOLUME
-        example: REQUESTCOUNT
-        readonly : true
       tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
