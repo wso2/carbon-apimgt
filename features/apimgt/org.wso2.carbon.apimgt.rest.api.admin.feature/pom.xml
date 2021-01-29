@@ -36,11 +36,6 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.admin.v1</artifactId>
             <type>war</type>
         </dependency>
@@ -72,14 +67,6 @@
                         </goals>
                         <configuration>
                             <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
-                                    <overWrite>true</overWrite>
-                                    <type>war</type>
-                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#admin#v0.17.war</destFileName>
-                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
                                     <artifactId>org.wso2.carbon.apimgt.rest.api.admin.v1</artifactId>
@@ -137,98 +124,7 @@
                             </resources>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy-specific-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/documentation
-                                    </directory>
-                                    <includes>
-                                        <include>*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.wso2.maven</groupId>
-                <artifactId>carbon-p2-plugin</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <id>p2-feature-generation</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>p2-feature-gen</goal>
-                        </goals>
-                        <configuration>
-                            <id>org.wso2.carbon.apimgt.rest.api.admin</id>
-                            <propertiesFile>../feature.properties</propertiesFile>
-                            <adviceFile>
-                                <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server
-                                    </propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
-                                    </propertyDef>
-                                </properties>
-                            </adviceFile>
-                            <bundles>
-                                <bundleDef>
-                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.common:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
-                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
-                                <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
-                            </bundles>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml
-                            </inputSpec>
-                            <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                            </templateDirectory>
-                            <output>src/main/resources/api-docs</output>
-                        </configuration>
-                    </execution>
-                </executions>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.wso2.carbon.apimgt</groupId>
-                        <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
-                        <version>${carbon.apimgt.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
