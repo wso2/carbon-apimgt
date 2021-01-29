@@ -1112,7 +1112,7 @@ public class APIProviderImplTest {
         Association[] associations = new Association[]{association};
         Mockito.when(apiProvider.registry.getAssociations("docPath", APIConstants.DOCUMENTATION_KEY)).
                 thenReturn(associations);
-        apiProvider.removeDocumentation(apiId, "testId", null);
+        apiProvider.removeDocumentation(apiId, "testId", "carbon.super");
         Mockito.verify(apiProvider.registry);
     }
 
@@ -4435,7 +4435,7 @@ public class APIProviderImplTest {
         ResourceFile resourceFile = new ResourceFile(inputStream, contentType);
         content.setResourceFile(resourceFile);
 
-        apiProvider.addDocumentationContent(apiUUID, docUUID, null, content);
+        apiProvider.addDocumentationContent(apiUUID, docUUID, "carbon.super", content);
     }
 
     /**

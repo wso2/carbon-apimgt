@@ -4587,12 +4587,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
 
         if (documentation != null) {
-            String requestedTenantDomain = validateOrgId(orgId);
             org.wso2.carbon.apimgt.persistence.dto.Documentation mappedDoc = DocumentMapper.INSTANCE
                     .toDocumentation(documentation);
             try {
                 org.wso2.carbon.apimgt.persistence.dto.Documentation updatedDoc = apiPersistenceInstance
-                        .updateDocumentation(new Organization(requestedTenantDomain), apiId, mappedDoc);
+                        .updateDocumentation(new Organization(orgId), apiId, mappedDoc);
                 if (updatedDoc != null) {
                     return DocumentMapper.INSTANCE.toDocumentation(updatedDoc);
                 }

@@ -818,13 +818,15 @@ public class ImportUtils {
 
         File documentsFolder = new File(docDirectoryPath);
         File[] fileArray = documentsFolder.listFiles();
+        String provider = apiTypeWrapper.getApi().getId().getProviderName();
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
         try {
             // Remove all documents associated with the API before update
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId(), null);
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
                 }
             }
 
@@ -901,10 +903,10 @@ public class ImportUtils {
                                     apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
                             if (!apiTypeWrapper.isAPIProduct()) {
                                 apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation,
-                                        null);
+                                        tenantDomain);
                             } else {
                                 apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation,
-                                        null);
+                                        tenantDomain);
                             }
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
