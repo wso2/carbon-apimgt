@@ -4766,7 +4766,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             oauthAppRequest.getOAuthApplicationInfo().putAllAppAttributes(application.getApplicationAttributes());
 
             // Get the stored OAuth Application Info
-            APIKey apiKey = apiMgtDAO.getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId() ,keyManagerID, tokenType);
+            APIKey apiKey = apiMgtDAO
+                    .getKeyMappingsFromApplicationIdKeyManagerAndKeyType(application.getId(), keyManagerID, tokenType);
             OAuthApplicationInfo storedOAuthApplicationInfo = null;
             if (apiKey != null) {
                 String appMetaData = apiKey.getAppMetaData();
@@ -4799,13 +4800,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * +     * Merge storedOAuthApplicationInfo into OAuthApplicationInfo
-     * +     *
-     * +     * @param storedOAuthApplicationInfo OAuthApplicationInfo object to merge from
-     * +     * @param updatedAppInfo             OAuthApplicationInfo object to which the merge is done
-     * +     * @return storedOAuthApplicationInfo Merged result  after merging storedOAuthApplicationInfo into
-     * +     * OAuthApplicationInfo
-     * +
+     * Merge storedOAuthApplicationInfo into OAuthApplicationInfo
+     *
+     * @param storedOAuthApplicationInfo OAuthApplicationInfo object to merge from
+     * @param updatedAppInfo             OAuthApplicationInfo object to which the merge is done
+     * @return storedOAuthApplicationInfo Merged result  after merging storedOAuthApplicationInfo into
+     * OAuthApplicationInfo
      */
     private OAuthApplicationInfo mergeStoredAppInfoWithUpdatedAppInfo(OAuthApplicationInfo storedOAuthApplicationInfo,
             OAuthApplicationInfo updatedAppInfo) {
