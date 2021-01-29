@@ -503,7 +503,7 @@ public class ExportUtils {
                                     ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
                 } else {
                     individualSequenceExportPath =
-                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX
+                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX
                                     + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
                                     + ImportExportConstants.CUSTOM_TYPE;
                 }

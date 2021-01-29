@@ -60,8 +60,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                 if (environment != null) {
                     try (InputStream artifact = (InputStream) runTimeArtifact.getArtifact()) {
                         String extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(artifact);
-                        List<ClientCertificateDTO> clientCertificatesDTOList =
-                                ImportUtils.retrieveClientCertificates(extractedFolderPath);
                         if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
                             APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(extractedFolderPath);
                             APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
@@ -72,8 +70,6 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                             gatewayAPIDTO = TemplateBuilderUtil
                                     .retrieveGatewayAPIDto(apiProduct, environment, tenantDomain, extractedFolderPath,
                                             apiDefinitionValidationResponse);
-                            String content = new Gson().toJson(gatewayAPIDTO);
-                            synapseArtifacts.add(content);
                         } else {
                             APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
                             API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
