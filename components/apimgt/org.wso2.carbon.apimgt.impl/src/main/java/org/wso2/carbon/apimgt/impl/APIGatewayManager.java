@@ -471,8 +471,10 @@ public class APIGatewayManager {
                             productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
                     gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
                             gatewayAPIDTO.getCredentialsToBeAdd()));
-                    log.debug("SecureVault alias " +  secureVaultAlias + "--production" + " is created for " +
-                            api.getId().getApiName());
+                    if (debugEnabled) {
+                        log.debug("SecureVault alias " +  secureVaultAlias + "--production" + " is created for " +
+                                api.getId().getApiName());
+                    }
                 }
                 // for sandbox endpoints
                 if (isSandboxEndpointSecured) {
@@ -483,8 +485,10 @@ public class APIGatewayManager {
                             sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
                     gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
                             gatewayAPIDTO.getCredentialsToBeAdd()));
-                    log.debug("SecureVault alias " +  secureVaultAlias + "--sandbox" + " is created for " +
-                            api.getId().getApiName());
+                    if (debugEnabled) {
+                        log.debug("SecureVault alias " +  secureVaultAlias + "--sandbox" + " is created for " +
+                                api.getId().getApiName());
+                    }
                 }
             }
         }
