@@ -609,7 +609,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @param providerName   Provider name of the API Product that needs to be exported
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveStatus Preserve API Product status on export
+     * @param messageContext Message Context
      * @return Zipped file containing exported API Product
+     * @throws APIManagementException
      */
     @Override
     public Response exportAPIProduct(String name, String version, String providerName, String format,
@@ -684,13 +686,15 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * Import an API Product by uploading an archive file. All relevant API Product data will be included upon the creation of
      * the API Product. Depending on the choice of the user, provider of the imported API Product will be preserved or modified.
      *
-     * @param fileInputStream       UploadedInputStream input stream from the REST request
-     * @param fileDetail            File details as Attachment
-     * @param preserveProvider      User choice to keep or replace the API Product provider
-     * @param importAPIs            Whether to import the dependent APIs or not.
-     * @param overwriteAPIProduct   Whether to update the API Product or not. This is used when updating already existing API Products.
-     * @param overwriteAPIs         Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @param fileInputStream     UploadedInputStream input stream from the REST request
+     * @param fileDetail          File details as Attachment
+     * @param preserveProvider    User choice to keep or replace the API Product provider
+     * @param importAPIs          Whether to import the dependent APIs or not.
+     * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already existing API Products.
+     * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @param messageContext      Message Context
      * @return API Product import response
+     * @throws APIManagementException
      */
     @Override public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs,

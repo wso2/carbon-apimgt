@@ -460,6 +460,8 @@ public class CommonUtil {
      * @param exportFormat Format to be exported
      * @param type         Type of the file to be written
      * @param dtoObject    DTO object
+     * @throws APIImportExportException if an error occurs while writing the file to YAML or JSON
+     * @throws IOException              if an error occurs while converting the file from JSON to YAML
      */
     public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, Object dtoObject)
             throws APIImportExportException, IOException {
@@ -475,6 +477,7 @@ public class CommonUtil {
      * Extract the imported archive to a temporary folder and return the folder path of it
      *
      * @param uploadedInputStream Input stream from the REST request
+     * @param uploadFileName      Uploaded file name
      * @return Path to the extracted directory
      * @throws APIImportExportException If an error occurs while creating the directory, transferring files or
      *                                  extracting the content
