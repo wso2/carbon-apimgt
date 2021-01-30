@@ -111,6 +111,7 @@ public class APIManagerConfiguration {
     private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
+    private static Map<String, String> analyticsProperties;
     private static String tokenRevocationClassName;
 
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
@@ -309,6 +310,17 @@ public class APIManagerConfiguration {
                     }
                 }
                 persistentNotifierProperties = properties;
+            } else if ("Analytics".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> analyticsProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    analyticsProps.put(name, value);
+                }
+                analyticsProperties = analyticsProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
                 OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
@@ -1798,5 +1810,9 @@ public class APIManagerConfiguration {
         if (!containerMgt.isEmpty()) {
             containerMgtAttributes.add(containerMgt);
         }
+    }
+
+    public static Map<String, String> getAnalyticsProperties() {
+        return analyticsProperties;
     }
 }
