@@ -46,6 +46,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTopic'
+import API from 'AppData/api';
 
 const styles = (theme) => ({
     root: {
@@ -180,22 +181,44 @@ function Topics(props) {
 
     const { classes } = props;
     const { api, updateAPI } = useContext(APIContext);
-    const [topics, setTopics] = useState([]);
+
+    function loadTopics() {
+        let initialTopics = [];
+        if (api && api.operations) {
+            api.operations.map(op => {
+                initialTopics.push({
+                    name: op.target,
+                    modes: [op.verb],
+                    description: '',
+                    operation: {
+                        scope: [],
+                    },
+                    payload: {
+                        type: 'object',
+                        properties: [],
+                    },
+                });
+            });
+        }
+        return initialTopics;
+    }
+
+    const [topics, setTopics] = useState(loadTopics());
     const [showAddTopic, setShowAddTopic] = useState(false);
     const [currentTopics, inputsDispatcher] = useReducer(configReducer, topics);
 
     function handleAddTopic(topic) {
-        const types = [];
+        const modes = [];
         if (topic.isPublish) {
-            types.push('publish');
+            modes.push('publish');
         }
         if (topic.isSubscribe) {
-            types.push('subscribe');
+            modes.push('subscribe');
         }
         let newTopics = [...topics];
         newTopics.push({
             name: topic.name,
-            types,
+            modes,
             description: '',
             operation: {
                 scope: [],
@@ -204,17 +227,9 @@ function Topics(props) {
                 type: 'object',
                 properties: [],
             },
-            secret: generateSecret()
         });
         setTopics(newTopics);
         setShowAddTopic(false);
-    }
-
-    function generateSecret() {
-        return 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/[x]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-          });
     }
 
     function handleDeleteTopic(topicIndex) {
@@ -272,8 +287,19 @@ function Topics(props) {
     }
 
     function handleSaveTopics() {
-        console.log('// ------ SAVE TOPICS ------ //');
-        console.log(topics);
+        let newTopics = [];
+        topics.forEach(topic => {
+            topic.modes.forEach(mode => {
+                newTopics.push({
+                    "name": topic.name,
+                    "mode": mode,
+                    "description": ''
+                });
+            });
+        });
+        API.updateTopics(api.id, {
+            "list": newTopics,
+        });
     }
 
     function buildCallbackURL(topic) {
@@ -282,23 +308,16 @@ function Topics(props) {
             + topic.name.toLowerCase();
     }
 
-    function getScopes() {
-        let scopes = [];
-        for (let i = 1; i < 5; i++) {
-            scopes.push({
-                id: 'scope' + i,
-                displayText: 'Scope ' + i,
-            });
-        }
-        return scopes;
-    }
-
-    function getPayloadTypes() {
-        return [{
-            id: 'object',
-            displayText: 'Object',
-        }];
-    }
+    // function getScopes() {
+    //     let scopes = [];
+    //     for (let i = 1; i < 5; i++) {
+    //         scopes.push({
+    //             id: 'scope' + i,
+    //             displayText: 'Scope ' + i,
+    //         });
+    //     }
+    //     return scopes;
+    // }
 
     function renderProperty(property, topicIndex, propertyIndex) {
         return (
@@ -531,7 +550,7 @@ function Topics(props) {
                                         <Grid container align-items='flex-start' spacing={2}>
                                             <Grid item>
                                                 {
-                                                    topic.types.map((t) => {
+                                                    topic.modes.map((t) => {
                                                         return (
                                                             <Chip
                                                                 label={t.toUpperCase()}
@@ -585,27 +604,6 @@ function Topics(props) {
                                         <TextField
                                             autoFocus
                                             fullWidth
-                                            disabled
-                                            id='topic-description'
-                                            label={(
-                                                <>
-                                                    <FormattedMessage
-                                                        id='Apis.Create.Components.DefaultAPIForm.secret'
-                                                        defaultMessage='Secret'
-                                                    />
-                                                </>
-                                            )}
-                                            value={topic.secret}
-                                            helperText='Use the above secret key when register at the provider'
-                                            name='description'
-                                            margin='normal'
-                                            variant='outlined'
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <TextField
-                                            autoFocus
-                                            fullWidth
                                             id='topic-description'
                                             label={(
                                                 <>
@@ -635,7 +633,7 @@ function Topics(props) {
                                             variant='outlined'
                                         />
                                     </Grid>
-                                    <Grid item>
+                                    {/* <Grid item>
                                         <Typography variant='h6' component='h6'>
                                             Operation Governance
                                         </Typography>
@@ -688,68 +686,19 @@ function Topics(props) {
                                                 })
                                             }
                                         </TextField>
-                                    </Grid>
+                                    </Grid> */}
                                     <Grid item>
-                                        <Typography variant='h6' component='h6'>
+                                        <Typography variant='h6' component='h6' style={{ marginBottom: 10 }}>
                                             Payload
                                         </Typography>
                                     </Grid>
-                                    <Grid item>
-                                        <TextField
-                                            autoFocus
-                                            fullWidth
-                                            select
-                                            id='topic-type'
-                                            label={(
-                                                <>
-                                                    <FormattedMessage
-                                                        id='Apis.Create.Components.DefaultAPIForm.type'
-                                                        defaultMessage='Type'
-                                                    />
-                                                </>
-                                            )}
-                                            value={topic.payload.type}
-                                            helperText='Select type of the payload'
-                                            name='type'
-                                            InputProps={{
-                                                id: 'itest-id-apitopic-createtopic-operationscope',
-                                                onBlur: ({ target: { value } }) => {
-                                                    // TODO: validate
-                                                },
-                                            }}
-                                            margin='normal'
-                                            variant='outlined'
-                                            onChange={({ target: { value } }) => {
-                                                topics[topicIndex].payload.type = value;
-                                                setTopics(topics);
-                                            }}
-                                        >
-                                            <MenuItem dense>
-                                                Select Payload Type
-                                            </MenuItem>
-                                            {
-                                                getPayloadTypes().map((type) => {
-                                                    return (
-                                                        <MenuItem
-                                                            dense
-                                                            id={type.id}
-                                                            key={type.id}
-                                                            value={type.id}
-                                                        >
-                                                            {type.displayText}
-                                                        </MenuItem>
-                                                    );
-                                                })
-                                            }
-                                        </TextField>
-                                    </Grid>
-                                    <Grid item style={{ paddingLeft: 30 }}>
+                                    <Grid item style={{ paddingLeft: 0 }}>
                                         <Grid container direction='column'>
-                                            <Grid item>
+                                            {/* <Grid item>
                                                 <Typography variant='h6' component='h6'>
                                                     Properties
                                                 </Typography>
-                                            </Grid>
+                                            </Grid> */}
                                             <Grid container direction='row'>
                                                 <Grid item xs={2}>
                                                     <Typography style={{ fontWeight: 'bold' }}>

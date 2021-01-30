@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicPropertyDTO;
 import javax.validation.constraints.*;
 
 
@@ -23,27 +20,26 @@ import javax.validation.Valid;
 
 public class TopicDTO   {
   
-    private Integer id = null;
+    private String id = null;
     private String name = null;
-    private String description = null;
     private String mode = null;
-    private String payloadType = null;
-    private List<TopicPropertyDTO> payloadProperties = new ArrayList<TopicPropertyDTO>();
+    private String description = null;
 
   /**
+   * id
    **/
-  public TopicDTO id(Integer id) {
+  public TopicDTO id(String id) {
     this.id = id;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "")
+  @ApiModelProperty(example = "1222344", value = "id")
   @JsonProperty("id")
-  public Integer getId() {
+  public String getId() {
     return id;
   }
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 
@@ -55,30 +51,14 @@ public class TopicDTO   {
   }
 
   
-  @ApiModelProperty(example = "OrderbookUpdates", value = "")
+  @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
-  public String getName() {
+  @NotNull
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)") @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   **/
-  public TopicDTO description(String description) {
-    this.description = description;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "Dolor sit amet", value = "")
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
-  }
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   /**
@@ -89,9 +69,10 @@ public class TopicDTO   {
   }
 
   
-  @ApiModelProperty(example = "subscribe", value = "")
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store.", required = true, value = "")
   @JsonProperty("mode")
-  public String getMode() {
+  @NotNull
+ @Size(max=32766)  public String getMode() {
     return mode;
   }
   public void setMode(String mode) {
@@ -100,37 +81,20 @@ public class TopicDTO   {
 
   /**
    **/
-  public TopicDTO payloadType(String payloadType) {
-    this.payloadType = payloadType;
+  public TopicDTO description(String description) {
+    this.description = description;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("payloadType")
-  public String getPayloadType() {
-    return payloadType;
+  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store.", required = true, value = "")
+  @JsonProperty("description")
+  @NotNull
+ @Size(max=32766)  public String getDescription() {
+    return description;
   }
-  public void setPayloadType(String payloadType) {
-    this.payloadType = payloadType;
-  }
-
-  /**
-   **/
-  public TopicDTO payloadProperties(List<TopicPropertyDTO> payloadProperties) {
-    this.payloadProperties = payloadProperties;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("payloadProperties")
-  public List<TopicPropertyDTO> getPayloadProperties() {
-    return payloadProperties;
-  }
-  public void setPayloadProperties(List<TopicPropertyDTO> payloadProperties) {
-    this.payloadProperties = payloadProperties;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
 
@@ -145,15 +109,13 @@ public class TopicDTO   {
     TopicDTO topic = (TopicDTO) o;
     return Objects.equals(id, topic.id) &&
         Objects.equals(name, topic.name) &&
-        Objects.equals(description, topic.description) &&
         Objects.equals(mode, topic.mode) &&
-        Objects.equals(payloadType, topic.payloadType) &&
-        Objects.equals(payloadProperties, topic.payloadProperties);
+        Objects.equals(description, topic.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, mode, payloadType, payloadProperties);
+    return Objects.hash(id, name, mode, description);
   }
 
   @Override
@@ -163,10 +125,8 @@ public class TopicDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
-    sb.append("    payloadType: ").append(toIndentedString(payloadType)).append("\n");
-    sb.append("    payloadProperties: ").append(toIndentedString(payloadProperties)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("}");
     return sb.toString();
   }
