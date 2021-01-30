@@ -117,13 +117,13 @@ export default function MarkdownEditor(props) {
                 >
                     {api.description || overview ? (
                         <FormattedMessage
-                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.description.button'
-                            defaultMessage='Edit Description'
+                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.content.button'
+                            defaultMessage='Edit Content'
                         />
                     ) : (
                         <FormattedMessage
-                            id='Apis.Details.Configuration.components.MarkdownEditor.add.description.button'
-                            defaultMessage='Add Description'
+                            id='Apis.Details.Configuration.components.MarkdownEditor.add.content.button'
+                            defaultMessage='Add Content'
                         />
                     )}
                 </Button>
@@ -134,10 +134,19 @@ export default function MarkdownEditor(props) {
                         <Icon>close</Icon>
                     </IconButton>
                     <Typography variant='h4' className={classes.description}>
+                        {descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION}
+                        ? (
                         <FormattedMessage
-                            id='Apis.Details.Documents.MarkdownEditor.edit.content.of'
+                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.description.of'
                             defaultMessage='Edit Description of '
                         />
+                        )
+                        : (
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of'
+                            defaultMessage='Edit Overview of '
+                        />
+                        )
                         {api.name}
                     </Typography>
                     <Button
@@ -148,14 +157,14 @@ export default function MarkdownEditor(props) {
                         onClick={updateDescription}
                     >
                         <FormattedMessage
-                            id='Apis.Details.Documents.MarkdownEditor.update.content.button'
-                            defaultMessage='Update Description'
+                            id='Apis.Details.Configuration.components.MarkdownEditor.update.content.button'
+                            defaultMessage='Update Content'
                         />
                         {isUpdating && <CircularProgress size={24} />}
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
                         <FormattedMessage
-                            id='Apis.Details.Documents.MarkdownEditor.cancel.button'
+                            id='Apis.Details.Configuration.components.MarkdownEditor.cancel.button'
                             defaultMessage='Cancel'
                         />
                     </Button>
@@ -194,4 +203,5 @@ MarkdownEditor.propTypes = {
     api: PropTypes.shape({}).isRequired,
     updateContent: PropTypes.func.isRequired,
     descriptionType: PropTypes.string.isRequired,
+    overview: PropTypes.string.isRequired,
 };
