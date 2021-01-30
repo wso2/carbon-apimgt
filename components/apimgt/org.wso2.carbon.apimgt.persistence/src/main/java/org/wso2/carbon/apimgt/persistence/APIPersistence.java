@@ -88,7 +88,8 @@ public interface APIPersistence {
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
-    void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+    void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId) throws
+            APIPersistenceException;
 
     /**
      * Add API Revision to the persistence layer
