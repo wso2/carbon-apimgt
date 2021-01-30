@@ -339,6 +339,13 @@ public class APIMappingUtil {
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, model, provider);
+        if (dto.getKeyManagers() instanceof List) {
+            model.setKeyManagers((List<String>) dto.getKeyManagers());
+        } else if (dto.getKeyManagers() == null) {
+            model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        } else {
+            throw new APIManagementException("KeyManagers value need to be an array");
+        }
 
         return model;
     }
@@ -841,8 +848,6 @@ public class APIMappingUtil {
         } else {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
-        String uuid = "uuid";
-        String path = "path";
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
@@ -1123,7 +1128,7 @@ public class APIMappingUtil {
             dto.setWsdlInfo(wsdlInfoDTO);
         }
         dto.setWsdlUrl(model.getWsdlUrl());
-        setEndpointSecurityFromModelToApiDTO(model, dto);
+        setEndpointSecurityFromModelToApiDTO(model, dto, preserveCredentials);
         setMaxTpsFromModelToApiDTO(model, dto);
 
         //setting micro-gateway labels if there are any
@@ -1230,7 +1235,7 @@ public class APIMappingUtil {
 
     }
 
-    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto)
+    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto, boolean preserveCredentials)
             throws APIManagementException {
 
         if (api.isEndpointSecured()) {
@@ -1239,7 +1244,7 @@ public class APIMappingUtil {
             securityDTO.setUsername(api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
-            if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+            if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
                 securityDTO.setPassword(api.getEndpointUTPassword());
             } else {
                 securityDTO.setPassword(""); //Do not expose password
@@ -2807,15 +2812,17 @@ public class APIMappingUtil {
         String key = "Revision " + model.getId();
         apiRevisionDTO.setDisplayName(key);
         apiRevisionDTO.setDescription(model.getDescription());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-        Date parsedDate;
-        try {
-            parsedDate = dateFormat.parse(model.getCreatedTime());
-        } catch (java.text.ParseException e) {
-            throw new APIManagementException("Error while parsing the created time", e);
+        if (model.getCreatedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getCreatedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the created time:" + model.getCreatedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            apiRevisionDTO.setCreatedTime(timestamp);
         }
-        Timestamp timestamp = new Timestamp(parsedDate.getTime());
-        apiRevisionDTO.setCreatedTime(timestamp);
         APIRevisionAPIInfoDTO apiRevisionAPIInfoDTO = new APIRevisionAPIInfoDTO();
         apiRevisionAPIInfoDTO.setId(model.getApiUUID());
         apiRevisionDTO.setApiInfo(apiRevisionAPIInfoDTO);
@@ -2847,15 +2854,17 @@ public class APIMappingUtil {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }
         apiRevisionDeploymentDTO.setDisplayOnDevportal(model.isDisplayOnDevportal());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-        Date parsedDate;
-        try {
-            parsedDate = dateFormat.parse(model.getDeployedTime());
-        } catch (java.text.ParseException e) {
-            throw new APIManagementException("Error while parsing the created time", e);
+        if (model.getDeployedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date parsedDate;
+            try {
+                parsedDate = dateFormat.parse(model.getDeployedTime());
+            } catch (java.text.ParseException e) {
+                throw new APIManagementException("Error while parsing the created time:" + model.getDeployedTime(), e);
+            }
+            Timestamp timestamp = new Timestamp(parsedDate.getTime());
+            apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         }
-        Timestamp timestamp = new Timestamp(parsedDate.getTime());
-        apiRevisionDeploymentDTO.setDeployedTime(timestamp);
         return apiRevisionDeploymentDTO;
     }
 

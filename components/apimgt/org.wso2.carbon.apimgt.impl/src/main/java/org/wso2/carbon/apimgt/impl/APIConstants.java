@@ -595,6 +595,8 @@ public final class APIConstants {
     public static final String DELEM_COMMA = ",";
     public static final String DELEM_UNDERSCORE = "_";
     public static final String CHAR_ASTERIX = "*";
+    public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
+    public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
 
     public static class TokenStatus {
 
@@ -1753,7 +1755,7 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP"};
-
+    public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -2383,7 +2385,9 @@ public final class APIConstants {
         APPLICATION_REGISTRATION,
         POLICY,
         SUBSCRIPTIONS,
-        SCOPE
+        SCOPE,
+        CERTIFICATE,
+        GA_CONFIG
     }
 
     // Supported Event Types
@@ -2407,7 +2411,10 @@ public final class APIConstants {
         REMOVE_APPLICATION_KEYMAPPING,
         SCOPE_CREATE,
         SCOPE_UPDATE,
-        SCOPE_DELETE
+        SCOPE_DELETE,
+        ENDPOINT_CERTIFICATE_ADD,
+        ENDPOINT_CERTIFICATE_REMOVE,
+        GA_CONFIG_UPDATE
     }
 
     public static class GatewayArtifactSynchronizer {
@@ -2429,7 +2436,7 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
         public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
-        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
+        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE= "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
@@ -2483,6 +2490,19 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
 
+    public class SkipListConstants {
+
+        public static final String SKIP_LIST_CONFIG = "SkipList";
+        public static final String SKIPPED_APIS = "APIS";
+        public static final String SKIPPED_API = "API";
+        public static final String SKIPPED_ENDPOINTS = "Endpoints";
+        public static final String SKIPPED_ENDPOINT = "Endpoint";
+        public static final String SKIPPED_SEQUENCE = "Sequence";
+        public static final String SKIPPED_SEQUENCES = "Sequences";
+        public static final String SKIPPED_LOCAL_ENTRIES = "LocalEntries";
+        public static final String SKIPPED_LOCAL_ENTRY = "LocalEntry";
+    }
+
     public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
 
@@ -2495,4 +2515,6 @@ public final class APIConstants {
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
+    
+    public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 }

@@ -409,53 +409,6 @@ public class SequenceUtils {
     }
 
     /**
-     * Gets the velocity template config context with sequence data populated
-     *
-     * @param registry      user registry reference
-     * @param resourcePath  registry resource path
-     * @param seqType       sequence type whether in or out sequence
-     * @param configContext velocity template config context
-     * @return {@link ConfigContext} sequences populated velocity template config context
-     * @throws org.wso2.carbon.registry.api.RegistryException throws when getting registry resource content
-     */
-    public static ConfigContext getSequenceTemplateConfigContext(UserRegistry registry, String resourcePath,
-            String seqType, ConfigContext configContext) throws org.wso2.carbon.registry.api.RegistryException {
-        Resource regResource;
-        if (registry.resourceExists(resourcePath)) {
-            regResource = registry.get(resourcePath);
-            String[] resources = ((Collection) regResource).getChildren();
-            JSONObject pathObj = new JSONObject();
-            if (resources != null) {
-                for (String path : resources) {
-                    Resource resource = registry.get(path);
-                    String method = resource.getProperty(SOAPToRESTConstants.METHOD);
-                    String registryResourceProp = resource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH);
-                    String resourceName;
-                    if (registryResourceProp != null) {
-                        resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + registryResourceProp;
-                    } else {
-                        resourceName  = ((ResourceImpl) resource).getName();
-                        resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
-                                SOAPToRESTConstants.EMPTY_STRING);
-                        resourceName = resourceName
-                                .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method,
-                                        SOAPToRESTConstants.EMPTY_STRING);
-                        resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourceName;
-                    }
-                    String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
-                    JSONObject contentObj = new JSONObject();
-                    contentObj.put(method, content);
-                    pathObj.put(resourceName, contentObj);
-                }
-            } else {
-                log.error("No sequences were found on the resource path: " + resourcePath);
-            }
-            configContext = new SOAPToRESTAPIConfigContext(configContext, pathObj, seqType);
-        }
-        return configContext;
-    }
-
-    /**
      * Gets parameter definitions from swagger
      *
      * @param swaggerObj swagger json

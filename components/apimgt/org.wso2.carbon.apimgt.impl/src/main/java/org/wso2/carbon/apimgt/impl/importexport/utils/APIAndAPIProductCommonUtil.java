@@ -652,7 +652,6 @@ public class APIAndAPIProductCommonUtil {
      * Get the subscription level policy names of an API/API Product
      *
      * @param apiTypeWrapper API or API Product to be exported
-     * @throws APIImportExportException
      */
     public static Set<String> getAvailableTierNames(ApiTypeWrapper apiTypeWrapper) {
         Set<String> tiers = new LinkedHashSet<String>();
@@ -673,7 +672,7 @@ public class APIAndAPIProductCommonUtil {
      *
      * @param apiJsonContent JSON content of API or API Product to be imported
      * @param apiProvider    API Provider
-     * @throws APIImportExportException
+     * @throws APIManagementException
      */
     public static void setSubscriptionTiers(JsonObject apiJsonContent, APIProvider apiProvider)
             throws APIManagementException {

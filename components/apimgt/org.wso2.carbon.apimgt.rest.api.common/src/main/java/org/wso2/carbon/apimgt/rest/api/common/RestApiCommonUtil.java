@@ -359,9 +359,11 @@ public class RestApiCommonUtil {
 
     /**
      * This method retrieves the Swagger Definition for an API to be displayed
-     * @param api API
-     * @return String
-     * */
+     *
+     * @param api         API
+     * @param apiProvider API Provider
+     * @return String with the swagger definition
+     */
     public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
         String apiSwagger = null;

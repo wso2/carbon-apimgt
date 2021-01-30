@@ -1074,10 +1074,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                RestApiUtil.handleBadRequest(
-                        "The client certificate based authentication is not configured for this " + "server", log);
-            }
             int totalCount = apiProvider.getClientCertificateCount(tenantId);
             if (totalCount > 0) {
                 APIIdentifier apiIdentifier = null;
@@ -1123,10 +1119,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (StringUtils.isBlank(fileName)) {
                 RestApiUtil.handleBadRequest(
                         "Certificate addition failed. Proper Certificate file should be provided", log);
-            }
-            if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                RestApiUtil.handleBadRequest(
-                        "The client certificate based authentication is not configured for this " + "server", log);
             }
             API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -3985,11 +3977,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API Revision for API : " + apIRevisionDTO.getApiInfo().getId();
+            String errorMessage = "Error while adding new API Revision for API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision API location for API : "
-                    + apIRevisionDTO.getApiInfo().getId();
+                    + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
