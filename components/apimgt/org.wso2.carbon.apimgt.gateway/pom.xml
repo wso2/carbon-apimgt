@@ -315,10 +315,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.am.analytics.publisher</groupId>
-            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

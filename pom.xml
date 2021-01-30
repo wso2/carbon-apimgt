@@ -25,13 +25,13 @@
     </scm>
 
     <modules>
-        <module>service-stubs/apimgt</module>
-        <module>service-stubs/oidc-authenticator</module>
+<!--        <module>service-stubs/apimgt</module>-->
+<!--        <module>service-stubs/oidc-authenticator</module>-->
         <module>components/apimgt</module>
-        <module>components/forum</module>
-        <module>features/apimgt</module>
-        <module>features/forum</module>
-        <module>features/categories</module>
+<!--        <module>components/forum</module>-->
+<!--        <module>features/apimgt</module>-->
+<!--        <module>features/forum</module>-->
+<!--        <module>features/categories</module>-->
     </modules>
 
     <build>
