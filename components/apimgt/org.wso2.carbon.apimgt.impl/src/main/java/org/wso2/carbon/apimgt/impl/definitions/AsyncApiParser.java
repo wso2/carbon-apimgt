@@ -1559,7 +1559,10 @@ public class AsyncApiParser extends APIDefinition {
             aaiDocument.addServer("production", server);
         }
         aaiDocument.channels = new HashMap<String, AaiChannelItem>();
-        if (api.getType() != "WEBSUB") {
+        if (api.getType() == "WEBSUB") {
+            Aai20ChannelItem channelItem = aaiDocument.createChannelItem("*");
+            aaiDocument.addChannelItem(channelItem);
+        } else {
             Aai20ChannelItem channelItem = aaiDocument.createChannelItem(api.getContext());
             aaiDocument.addChannelItem(channelItem);
         }

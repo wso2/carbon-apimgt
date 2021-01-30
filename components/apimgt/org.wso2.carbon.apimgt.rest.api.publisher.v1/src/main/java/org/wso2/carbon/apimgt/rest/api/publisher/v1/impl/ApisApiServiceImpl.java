@@ -371,8 +371,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             uriTemplate.setUriTemplate(topicDTO.getName());
             uriTemplate.setHTTPVerb(topicDTO.getMode().toUpperCase());
             // TODO: Get these from proper locations
-            uriTemplate.setAuthType("Application & Application User");
-            uriTemplate.setThrottlingTier("Unlimited");
+            uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
             uriTemplates.add(uriTemplate);
         }
         existingAPI.setUriTemplates(uriTemplates);
