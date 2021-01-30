@@ -247,24 +247,25 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         Map<String, String> configMap = new HashMap<>();
-        APIManagerConfiguration apiManagerConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfigurationService apiManagerConfigurationService = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService();
 
-        configMap.put("RegistryConfigs.Type", apiManagerConfig.getFirstProperty("RegistryConfigs.Type"));
-        configMap.put("RegistryConfigs.ConnectionString",
-                apiManagerConfig.getFirstProperty("RegistryConfigs.ConnectionString"));
-        configMap.put("RegistryConfigs.APIUri", apiManagerConfig.getFirstProperty("RegistryConfigs.APIUri"));
-        configMap.put("RegistryConfigs.GroupId", apiManagerConfig.getFirstProperty("RegistryConfigs.GroupId"));
-        configMap.put("RegistryConfigs.ClusterName",
-                apiManagerConfig.getFirstProperty("RegistryConfigs.ClusterName"));
-        configMap.put("RegistryConfigs.PublicKey", apiManagerConfig.getFirstProperty("RegistryConfigs.PublicKey"));
-        configMap.put("RegistryConfigs.PrivateKey",
-                apiManagerConfig.getFirstProperty("RegistryConfigs.PrivateKey"));
+        if (apiManagerConfigurationService != null) {
+            APIManagerConfiguration apiManagerConfig = apiManagerConfigurationService.getAPIManagerConfiguration();
+            configMap.put("RegistryConfigs.Type", apiManagerConfig.getFirstProperty("RegistryConfigs.Type"));
+            configMap.put("RegistryConfigs.ConnectionString",
+                    apiManagerConfig.getFirstProperty("RegistryConfigs.ConnectionString"));
+            configMap.put("RegistryConfigs.APIUri", apiManagerConfig.getFirstProperty("RegistryConfigs.APIUri"));
+            configMap.put("RegistryConfigs.GroupId", apiManagerConfig.getFirstProperty("RegistryConfigs.GroupId"));
+            configMap.put("RegistryConfigs.ClusterName",
+                    apiManagerConfig.getFirstProperty("RegistryConfigs.ClusterName"));
+            configMap.put("RegistryConfigs.PublicKey", apiManagerConfig.getFirstProperty("RegistryConfigs.PublicKey"));
+            configMap.put("RegistryConfigs.PrivateKey",
+                    apiManagerConfig.getFirstProperty("RegistryConfigs.PrivateKey"));
+        }
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
-
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username, configMap, properties);
-
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(configMap, properties);
     }
 
     /**
