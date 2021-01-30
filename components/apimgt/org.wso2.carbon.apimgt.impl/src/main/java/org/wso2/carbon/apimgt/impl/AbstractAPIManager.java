@@ -450,7 +450,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, null));
+            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             }
@@ -1207,9 +1207,6 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiId.getUUID();
         } else {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
-        }
-        if (orgId == null) {
-            orgId = tenantDomain;
         }
         try {
                 definition = apiPersistenceInstance.getOASDefinition(new Organization(orgId), id);

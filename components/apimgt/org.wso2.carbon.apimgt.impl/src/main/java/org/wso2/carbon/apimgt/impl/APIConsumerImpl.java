@@ -5491,7 +5491,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiTenantDomain;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId, null);
+        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId, tenantDomain);
@@ -6108,9 +6108,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         String uuid = null;
         try {
-            if (orgId == null) {
-                orgId = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            }
             Organization org = new Organization(orgId);
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
