@@ -164,6 +164,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         while (cursor.hasNext()) {
             Document mongoDBAPIDocument = cursor.next();
             mongoDBAPIDocument.put("_id", new ObjectId(apiUUID));
+            mongoDBAPIDocument.remove("revision");
             FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
             options.returnDocument(ReturnDocument.AFTER);
             genericCollection.findOneAndReplace(eq("_id", new ObjectId(apiUUID)), mongoDBAPIDocument, options);
@@ -216,7 +217,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         PublisherAPI api = MongoAPIMapper.INSTANCE.toPublisherApi(mongoDBAPIDocument);
         return api;
     }
-
 
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
@@ -298,8 +298,23 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         skipDoc.put("$skip", skip);
         limitDoc.put("$limit", limit);
 
+        Document matchDoc = new Document();
+        List<Document> orMatchList = new ArrayList();
+        Document orDoc = new Document();
+
+        Document matchRevisions = new Document();
+        Document matchExists = new Document();
+        matchExists.put("$exists", false);
+        matchRevisions.put("revision", matchExists);
+
+        orMatchList.add(matchRevisions);
+        orDoc.put("$or", orMatchList);
+        matchDoc.put("$match", orDoc);
+
+
         List<Document> list = new ArrayList<>();
         list.add(search);
+        list.add(matchDoc);
         list.add(skipDoc);
         list.add(limitDoc);
         return list;
@@ -333,21 +348,33 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
         Document matchDoc = new Document();
         Document orDoc = new Document();
+        Document andDoc = new Document();
         Document matchPublished = new Document();
-        Document patchPrototyped = new Document();
+        Document matchPrototyped = new Document();
+        Document matchRevisions = new Document();
+        Document matchExists = new Document();
 
-        List<Document> matchList = new ArrayList();
+        List<Document> orMatchList = new ArrayList();
+        List<Document> andMatchList = new ArrayList();
 
         matchPublished.put("status", "PUBLISHED");
-        patchPrototyped.put("status", "PUBLISHED");
-        matchList.add(matchPublished);
-        matchList.add(patchPrototyped);
-        orDoc.put("$or", matchList);
-        matchDoc.put("$match", orDoc);
+        matchPrototyped.put("status", "PROTOTYPED");
+        orMatchList.add(matchPublished);
+        orMatchList.add(matchPrototyped);
+        orDoc.put("$or", orMatchList);
+
+        matchExists.put("$exists", false);
+        matchRevisions.put("revision", matchExists);
+
+        andMatchList.add(orDoc);
+        andMatchList.add(matchRevisions);
+
+        andDoc.put("$and", andMatchList);
+        matchDoc.put("$match", andDoc);
 
         List<Document> list = new ArrayList<>();
-        list.add(matchDoc);
         list.add(search);
+        list.add(matchDoc);
         list.add(skipDoc);
         list.add(limitDoc);
         return list;
