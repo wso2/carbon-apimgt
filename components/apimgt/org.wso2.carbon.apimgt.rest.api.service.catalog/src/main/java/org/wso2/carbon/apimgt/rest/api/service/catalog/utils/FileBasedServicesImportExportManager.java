@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 
 import java.io.*;
@@ -45,7 +47,6 @@ public class FileBasedServicesImportExportManager {
     private static final Log log = LogFactory.getLog(FileBasedServicesImportExportManager.class);
     private static final String IMPORTED_SERVICES = "imported-services";
     private String path;
-    private APIConsumer apiConsumer;
 
     public FileBasedServicesImportExportManager(String path) {
         this.path = path;
@@ -62,9 +63,8 @@ public class FileBasedServicesImportExportManager {
                 APIConstants.ZIP_FILE_EXTENSION;
         try {
             extractUploadedArchiveService(uploadedAppArchiveInputStream,
-                    IMPORTED_SERVICES,
                     appArchiveLocation, path);
-        } catch (IOException e) {
+        } catch (IOException | APIImportExportException e) {
             String errorMsg = "Error occurred while importing service archive" + appArchiveLocation;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
@@ -75,22 +75,20 @@ public class FileBasedServicesImportExportManager {
      * Extracts the service to the file system by reading the incoming {@link InputStream} object
      * uploadedServiceArchiveInputStream
      *
-     * @param uploadedServiceArchiveInputStream Incoming {@link InputStream}
-     * @param importedDirectoryName             directory to extract the archive
-     * @param appArchiveLocation                full path of the archive location
-     * @param extractLocation                   full path to the location to which the archive will be written
-     * @throws IOException if an error occurs while extracting the archive
+     * @param uploadedServiceArchiveInputStream         Incoming {@link InputStream}
+     * @param appArchiveLocation                        full path of the archive location
+     * @param extractLocation                           full path to the location to which the archive will be written
+     * @throws IOException, APIImportExportException    if an error occurs while extracting the archive
      */
     private void extractUploadedArchiveService(InputStream uploadedServiceArchiveInputStream,
-                                               String importedDirectoryName,
                                                String appArchiveLocation, String extractLocation)
-            throws IOException, APIManagementException {
+            throws IOException, APIImportExportException {
         // create import directory structure
         Files.createDirectories(Paths.get(extractLocation));
         // create archive
         createArchiveFromInputStream(uploadedServiceArchiveInputStream, appArchiveLocation);
         // extract the archive
-        extractArchive(appArchiveLocation, extractLocation);
+        CommonUtil.extractArchive(new File(appArchiveLocation), extractLocation);
     }
 
     /**
@@ -212,56 +210,6 @@ public class FileBasedServicesImportExportManager {
             throws IOException {
         FileOutputStream outFileStream = new FileOutputStream(new File(archivePath));
         IOUtils.copy(inputStream, outFileStream);
-    }
-
-    /**
-     * Extracts a given zip archive
-     *
-     * @param archiveFilePath path of the zip archive
-     * @param destination     extract location
-     * @return name of the extracted zip archive
-     * @throws IOException if an error occurs while extracting the archive
-     */
-    private String extractArchive(String archiveFilePath, String destination)
-            throws IOException, APIManagementException {
-        String archiveName = null;
-
-        try (ZipFile zip = new ZipFile(new File(archiveFilePath))) {
-            Enumeration zipFileEntries = zip.entries();
-            // Process each entry
-            while (zipFileEntries.hasMoreElements()) {
-                // grab a zip file entry
-                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
-                String currentEntry = entry.getName();
-
-                archiveName = zip.getName();
-
-                File destinationFile = new File(destination, currentEntry);
-                File destinationParent = destinationFile.getParentFile();
-                String canonicalizedDestinationFilePath = destinationFile.getCanonicalPath();
-                String canonicalizedDestinationFolderPath = new File(destination).getCanonicalPath();
-                if (!canonicalizedDestinationFilePath.startsWith(canonicalizedDestinationFolderPath)) {
-                    String errorMessage = "Attempt to upload invalid zip archive with file at " + currentEntry +
-                            ". File path is outside target directory.";
-                    log.error(errorMessage);
-                    throw new APIManagementException(errorMessage);
-                }
-
-                // create the parent directory structure
-                if (destinationParent.mkdirs()) {
-                    log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());
-                }
-                if (!entry.isDirectory()) {
-                    try (InputStream zipInputStream = zip.getInputStream(entry);
-                         BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
-                         // write the current file to the destination
-                         FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
-                        IOUtils.copy(inputStream, outputStream);
-                    }
-                }
-            }
-            return archiveName;
-        }
     }
 
     /**
