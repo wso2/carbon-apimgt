@@ -1270,14 +1270,6 @@ class API extends Resource {
         }
     }
 
-    updateTopics(apiId, topics) {
-        alert('update topics');
-
-        console.log('//------ update topics --------');
-        console.log(topics);
-        console.log('-------- update topics ------//');
-    }
-
     updateDocument(api_id, docId, body) {
         const promised_updateDocument = this.client.then(client => {
             const payload = {
@@ -2660,6 +2652,20 @@ class API extends Resource {
             return client.apis["Key Managers (Collection)"].getAllKeyManagers(
                 this._requestMetaData(),
             );
+        });
+    }
+
+    static updateTopics(apiId, topics) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            const payload = {
+                'Content-Type': 'application/json',
+                apiId
+            };
+            const requestBody = {
+                'requestBody': topics,
+            };
+            return client.apis["APIs"].updateTopics(payload, requestBody, this._requestMetaData());
         });
     }
 }

@@ -356,6 +356,37 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response updateTopics(String apiId, TopicListDTO topicListDTO, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+
+        Set<URITemplate> uriTemplates = existingAPI.getUriTemplates();
+        uriTemplates.clear();
+
+        for (TopicDTO topicDTO : topicListDTO.getList()) {
+            URITemplate uriTemplate = new URITemplate();
+            uriTemplate.setUriTemplate(topicDTO.getName());
+            uriTemplate.setHTTPVerb(topicDTO.getMode().toUpperCase());
+            // TODO: Get these from proper locations
+            uriTemplate.setAuthType("Application & Application User");
+            uriTemplate.setThrottlingTier("Unlimited");
+            uriTemplates.add(uriTemplate);
+        }
+        existingAPI.setUriTemplates(uriTemplates);
+
+        // TODO: Add scopes
+
+        try {
+            apiProvider.updateAPI(existingAPI);
+        } catch (FaultGatewaysException e) {
+            e.printStackTrace();
+        }
+        return Response.ok().build();
+    }
+
     /**
      * Get GraphQL Schema of given API
      *

@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.xml.sax.InputSource;
@@ -671,6 +672,7 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
         boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
+        boolean isAsyncAPI = isWSAPI || apiDto.getType().value() == "WEBSUB";
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -714,7 +716,7 @@ public class PublisherCommonUtils {
         //adding the api
         apiProvider.addAPI(apiToAdd);
 
-        if (!isWSAPI) {
+        if (!isAsyncAPI) {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                 oasParser = new OAS2Parser();
@@ -726,7 +728,7 @@ public class PublisherCommonUtils {
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
         }
 
-        if (isWSAPI) {
+        if (isAsyncAPI) {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
