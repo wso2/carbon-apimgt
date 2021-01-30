@@ -20,11 +20,10 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 public class APIMgtCommonExecutionPublisher extends AbstractMediator {
     protected boolean enabled;
@@ -46,32 +45,10 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
 
     protected void initializeDataPublisher() {
         enabled = APIUtil.isAnalyticsEnabled();
-        skipEventReceiverConnection = getApiManagerAnalyticsConfiguration().isSkipEventReceiverConnection();
-        if (!enabled) {
-            return;
-        }
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = getApiManagerAnalyticsConfiguration().getPublisherClass();
-                    try {
-                        log.debug("Instantiating Data Publisher");
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        APIMgtUsageDataPublisher tempPublisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName
-                                (publisherClass).newInstance();
-                        tempPublisher.init();
-                        publisher = tempPublisher;
-                    } catch (ClassNotFoundException e) {
-                        log.error("Class not found " + publisherClass, e);
-                    } catch (InstantiationException e) {
-                        log.error("Error instantiating " + publisherClass, e);
-                    } catch (IllegalAccessException e) {
-                        log.error("Illegal access to " + publisherClass, e);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
+                    publisher = new APIMgtUsageDataBridgeDataPublisher();
                 }
             }
         }

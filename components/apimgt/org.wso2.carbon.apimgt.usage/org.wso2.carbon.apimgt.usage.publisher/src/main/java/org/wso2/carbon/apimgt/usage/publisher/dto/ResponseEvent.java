@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics.dto;
 /**
  * Response event data DTO
  */
-public class ResponseEvent {
+public class ResponseEvent extends AnalyticsEvent {
     private String correlationId;
     private String keyType;
     private String apiId;
