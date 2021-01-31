@@ -206,7 +206,6 @@ public class RestApiAdminUtils {
         InputStream themeContent = null;
         File tenantThemeDirectory;
         File backupDirectory = null;
-
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         try {
@@ -233,18 +232,15 @@ public class RestApiAdminUtils {
                 String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
                 backupDirectory = new File(tempPath);
                 FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
-
                 //remove existing files inside the directory
                 FileUtils.cleanDirectory(tenantThemeDirectory);
             }
-
             //get the zip file content
             zipInputStream = new ZipInputStream(themeContent);
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
 
             while (zipEntry != null) {
-
                 String fileName = zipEntry.getName();
                 APIUtil.validateFileName(fileName);
                 File newFile = new File(outputFolder + File.separator + fileName);
@@ -255,7 +251,6 @@ public class RestApiAdminUtils {
                             "Attempt to upload invalid zip archive with file at " + fileName + ". File path is " +
                                     "outside target directory");
                 }
-
                 if (zipEntry.isDirectory()) {
                     if (!newFile.exists()) {
                         boolean status = newFile.mkdir();
@@ -270,12 +265,10 @@ public class RestApiAdminUtils {
                         //else you will hit FileNotFoundException for compressed folder
                         new File(newFile.getParent()).mkdirs();
                         FileOutputStream fileOutputStream = new FileOutputStream(newFile);
-
                         int len;
                         while ((len = zipInputStream.read(buffer)) > 0) {
                             fileOutputStream.write(buffer, 0, len);
                         }
-
                         fileOutputStream.close();
                     } else {
                         APIUtil.handleException(
