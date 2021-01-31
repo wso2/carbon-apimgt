@@ -170,7 +170,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     /**
      * Retrieve a list of bot detection alert subscriptions
      *
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return list of bot detection alert subscriptions
      * @throws APIManagementException if an error occurs when retrieving bot detection alert subscriptions
      */
@@ -188,7 +188,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * Subscribe for bot detection alerts
      *
      * @param body           email to be registered for the subscription
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return alert subscription DTO containing the uuid of the subscription and the registered email
      * @throws APIManagementException if an error occurs when subscribing for bot detection alerts
      */
@@ -221,7 +221,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * Unsubscribe from bot detection alerts
      *
      * @param uuid           uuid of the subscription
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return 200 OK response if the subscription is deleted successfully
      * @throws APIManagementException if an error occurs when un-subscribing from bot detection alerts
      */

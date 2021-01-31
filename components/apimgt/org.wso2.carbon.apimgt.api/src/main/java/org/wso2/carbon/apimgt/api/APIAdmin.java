@@ -166,7 +166,7 @@ public interface APIAdmin  {
      * Retrieve all bot detected data
      *
      * @return list of bot detected data
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when retrieving bot detection data
      */
     List<BotDetectionData> retrieveBotDetectionData() throws APIManagementException;
 
