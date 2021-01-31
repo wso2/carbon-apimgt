@@ -1310,6 +1310,60 @@
         {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
         <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
+        <SkipList>
+        <APIS>
+        <API>_AuthenticationEPAPI_.xml</API>
+        <API>_AuthorizeAPI_.xml</API>
+        <API>_CommonAuthAPI_.xml</API>
+        <API>_LoginContextAPI_.xml</API>
+        <API>_OIDCAPI_.xml</API>
+        <API>_OpenIDConfigAPI_.xml</API>
+        <API>_OpenService_.xml</API>
+        <API>_RevokeAPI_.xml</API>
+        <API>_TokenAPI_.xml</API>
+        <API>_UserInfoAPI_.xml</API>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.apis is defined %}
+            {%- for api in apim.sync_runtime_artifacts.gateway.skip_list.apis -%}
+            <API>{{api}}</API>
+            {% endfor %}
+        {% endif %}
+        </APIS>
+        <Endpoints>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.endpoints is defined %}
+            {%- for endpoint in apim.sync_runtime_artifacts.gateway.skip_list.endpoints -%}
+            <Endpoint>{{endpoint}}</Endpoint>
+            {% endfor %}
+         {% endif %}
+        </Endpoints>
+        <Sequences>
+            <Sequence>_auth_failure_handler_.xml</Sequence>
+            <Sequence>_build_.xml</Sequence>
+            <Sequence>_cors_request_handler_.xml</Sequence>
+            <Sequence>dispatchSeq.xml</Sequence>
+            <Sequence>fault.xml</Sequence>
+            <Sequence>_graphql_failure_handler_.xml</Sequence>
+            <Sequence>main.xml</Sequence>
+            <Sequence>outDispatchSeq.xml</Sequence>
+            <Sequence>_production_key_error_.xml</Sequence>
+            <Sequence>_resource_mismatch_handler_.xml</Sequence>
+            <Sequence>_sandbox_key_error_.xml</Sequence>
+            <Sequence>_threat_fault_.xml</Sequence>
+            <Sequence>_throttle_out_handler_.xml</Sequence>
+            <Sequence>_token_fault_.xml</Sequence>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
+            {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
+            <Sequence>{{sequence}}</Sequence>
+            {% endfor %}
+         {% endif %}
+        </Sequences>
+        <LocalEntries>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.local_entries is defined %}
+            {%- for local_entry in apim.sync_runtime_artifacts.gateway.skip_list.local_entries -%}
+            <LocalEntry>{{local_entry}}</LocalEntry>
+            {% endfor %}
+         {% endif %}
+        </LocalEntries>
+        </SkipList>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 

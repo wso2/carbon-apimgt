@@ -201,7 +201,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 DocumentationContent content = new DocumentationContent();
                 content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
                 content.setTextContent(inlineContent);
-                apiProvider.addDocumentationContent(apiProductId, documentId, content);
+                apiProvider.addDocumentationContent(apiProductId, documentId, tenantDomain, content);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
@@ -250,7 +250,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil
                         .handleResourceNotFoundError(RestApiConstants.RESOURCE_PRODUCT_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(apiProductId, documentId);
+            apiProvider.removeDocumentation(apiProductId, documentId, tenantDomain);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing API Products. Sends 404, since we don't need to expose the existence of the resource
@@ -334,7 +334,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
-            apiProvider.updateDocumentation(apiProductId, newDocumentation);
+            apiProvider.updateDocumentation(apiProductId, newDocumentation, tenantDomain);
 
             //retrieve the updated documentation
             newDocumentation = apiProvider.getDocumentation(apiProductId, documentId, tenantDomain);
@@ -409,11 +409,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API Product or the API Product does not exist
             APIProductIdentifier productIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
-            if (apiProvider.isDocumentationExist(apiProductId, documentName)) {
+            if (apiProvider.isDocumentationExist(apiProductId, documentName, tenantDomain)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
             }
-            documentation = apiProvider.addDocumentation(apiProductId, documentation);
+            documentation = apiProvider.addDocumentation(apiProductId, documentation, tenantDomain);
 
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID
@@ -570,7 +570,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProduct apiProduct = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
             ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
-            apiProvider.setThumbnailToAPI(apiProductId, apiImage);
+            apiProvider.setThumbnailToAPI(apiProductId, apiImage, tenantDomain);
             /*
             String thumbPath = APIUtil.getProductIconPath(apiProduct.getId());
             String thumbnailUrl = apiProvider.addProductResourceFile(apiProduct.getId(), thumbPath, apiImage);
@@ -609,7 +609,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @param providerName   Provider name of the API Product that needs to be exported
      * @param format         Format of output documents. Can be YAML or JSON
      * @param preserveStatus Preserve API Product status on export
+     * @param messageContext Message Context
      * @return Zipped file containing exported API Product
+     * @throws APIManagementException
      */
     @Override
     public Response exportAPIProduct(String name, String version, String providerName, String format,
@@ -684,13 +686,15 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * Import an API Product by uploading an archive file. All relevant API Product data will be included upon the creation of
      * the API Product. Depending on the choice of the user, provider of the imported API Product will be preserved or modified.
      *
-     * @param fileInputStream       UploadedInputStream input stream from the REST request
-     * @param fileDetail            File details as Attachment
-     * @param preserveProvider      User choice to keep or replace the API Product provider
-     * @param importAPIs            Whether to import the dependent APIs or not.
-     * @param overwriteAPIProduct   Whether to update the API Product or not. This is used when updating already existing API Products.
-     * @param overwriteAPIs         Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @param fileInputStream     UploadedInputStream input stream from the REST request
+     * @param fileDetail          File details as Attachment
+     * @param preserveProvider    User choice to keep or replace the API Product provider
+     * @param importAPIs          Whether to import the dependent APIs or not.
+     * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already existing API Products.
+     * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
+     * @param messageContext      Message Context
      * @return API Product import response
+     * @throws APIManagementException
      */
     @Override public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs,

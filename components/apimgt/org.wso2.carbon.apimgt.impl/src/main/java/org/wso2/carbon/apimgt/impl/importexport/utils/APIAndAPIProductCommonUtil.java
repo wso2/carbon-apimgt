@@ -60,6 +60,7 @@ import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -513,12 +514,14 @@ public class APIAndAPIProductCommonUtil {
         Identifier identifier = apiTypeWrapper.getId();
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
+        String provider = apiTypeWrapper.getApi().getId().getProviderName();
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         try {
             //remove all documents associated with the API before update
             List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId());
+                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
                 }
             }
             //load document file if exists
@@ -652,7 +655,6 @@ public class APIAndAPIProductCommonUtil {
      * Get the subscription level policy names of an API/API Product
      *
      * @param apiTypeWrapper API or API Product to be exported
-     * @throws APIImportExportException
      */
     public static Set<String> getAvailableTierNames(ApiTypeWrapper apiTypeWrapper) {
         Set<String> tiers = new LinkedHashSet<String>();
@@ -673,7 +675,7 @@ public class APIAndAPIProductCommonUtil {
      *
      * @param apiJsonContent JSON content of API or API Product to be imported
      * @param apiProvider    API Provider
-     * @throws APIImportExportException
+     * @throws APIManagementException
      */
     public static void setSubscriptionTiers(JsonObject apiJsonContent, APIProvider apiProvider)
             throws APIManagementException {

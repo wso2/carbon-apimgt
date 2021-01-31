@@ -422,25 +422,33 @@ public class OAS3Parser extends APIDefinition {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
                     }
-                    Map<String, Object> extensios = operation.getExtensions();
-                    if (extensios != null) {
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
-                            String scopeKey = (String) extensios.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                    Map<String, Object> extensions = operation.getExtensions();
+                    if (extensions != null) {
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
+                            String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             template.setAuthType(scopeKey);
                             template.setAuthTypes(scopeKey);
                         } else {
                             template.setAuthType("Any");
                             template.setAuthTypes("Any");
                         }
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
-                            String throttlingTier = (String) extensios.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
+                            String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                             template.setThrottlingTier(throttlingTier);
                             template.setThrottlingTiers(throttlingTier);
                         }
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                            String mediationScript = (String) extensios.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                            String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
                             template.setMediationScript(mediationScript);
                             template.setMediationScripts(template.getHTTPVerb(), mediationScript);
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            template.setAmznResourceName((String)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                            template.setAmznResourceTimeout(((Long)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                         }
                     }
                     urlTemplates.add(template);

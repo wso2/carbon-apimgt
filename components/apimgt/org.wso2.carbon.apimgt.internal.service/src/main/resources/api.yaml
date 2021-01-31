@@ -176,6 +176,12 @@ paths:
         This will provide access to apis in database.
       parameters:
         - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
         - name: context
           in: query
           description: |
@@ -188,11 +194,11 @@ paths:
             **Search condition**.
              versio  of the api
           type: string
-        - name: revisionUUID
+        - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
-             revision uuid of the api
+             label associated with the APIs
           type: string
         - $ref: "#/parameters/Accept"
       tags:
@@ -411,6 +417,7 @@ paths:
       description: |
         This will provide access to runtime artifacts in database.
       parameters:
+        - $ref: '#/parameters/requestedTenant'
         - name: apiId
           in: query
           description: |
@@ -434,6 +441,50 @@ paths:
       responses:
         200:
           description: List of runtime Artifacts
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /endpoint-certificates:
+    get:
+      summary: Get all the endpoint certificates for given alias.
+      description: |
+        This will provide access to
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: alias
+          in: query
+          description: |
+            **Search condition**.
+              Alias
+          type: string
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: List of endpoint certificates
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /ga-config:
+    get:
+      summary: Get Google analytics config related to tenant.
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: google analytics configuration
         default:
           description: Unexpected error
           schema:
@@ -712,6 +763,9 @@ definitions:
   #-----------------------------------------------------
   API:
     properties:
+      uuid:
+        type: string
+        description: UUID of API
       apiId:
         type: integer
       provider:

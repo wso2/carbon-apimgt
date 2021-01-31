@@ -157,6 +157,7 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_ALL_APIS_SQL =
             "SELECT " +
+                    "   APIS.API_UUID," +
                     "      APIS.API_ID," +
                     "      APIS.API_PROVIDER," +
                     "      APIS.API_NAME," +
@@ -174,6 +175,7 @@ public class SubscriptionValidationSQLConstants {
                     " FROM " +
                     "  (" +
                     "    SELECT " +
+                    "      API.API_UUID," +
                     "      API.API_ID," +
                     "      API.API_PROVIDER," +
                     "      API.API_NAME," +
@@ -196,6 +198,7 @@ public class SubscriptionValidationSQLConstants {
                     "      API.API_ID = URL.API_ID" +
                     "    UNION " +
                     "    SELECT " +
+                    "      API.API_UUID," +
                     "      API.API_ID," +
                     "      API.API_PROVIDER," +
                     "      API.API_NAME," +
@@ -442,6 +445,7 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_TENANT_APIS_SQL =
             "SELECT" +
+                    "   APIS.API_UUID," +
                     "   APIS.API_ID," +
                     "   APIS.API_PROVIDER," +
                     "   APIS.API_NAME," +
@@ -459,6 +463,7 @@ public class SubscriptionValidationSQLConstants {
                     "FROM" +
                     "   (" +
                     "      SELECT" +
+                    "         API.API_UUID," +
                     "         API.API_ID," +
                     "         API.API_PROVIDER," +
                     "         API.API_NAME," +
@@ -483,6 +488,7 @@ public class SubscriptionValidationSQLConstants {
                     "         AND CONTEXT LIKE ? " +
                     "      UNION ALL" +
                     "      SELECT" +
+                    "         API.API_UUID," +
                     "         API.API_ID," +
                     "         API.API_PROVIDER," +
                     "         API.API_NAME," +
@@ -517,6 +523,7 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_ST_APIS_SQL =
             "SELECT" +
+                    "   APIS.API_UUID," +
                     "   APIS.API_ID," +
                     "   APIS.API_PROVIDER," +
                     "   APIS.API_NAME," +
@@ -534,6 +541,7 @@ public class SubscriptionValidationSQLConstants {
                     "FROM" +
                     "   (" +
                     "      SELECT" +
+                    "         API.API_UUID," +
                     "         API.API_ID," +
                     "         API.API_PROVIDER," +
                     "         API.API_NAME," +
@@ -558,6 +566,7 @@ public class SubscriptionValidationSQLConstants {
                     "         AND CONTEXT NOT LIKE ? " +
                     "      UNION" +
                     "      SELECT" +
+                    "         API.API_UUID," +
                     "         API.API_ID," +
                     "         API.API_PROVIDER," +
                     "         API.API_NAME," +
@@ -592,6 +601,7 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_API_SQL =
             "SELECT " +
+                    "   APIS.API_UUID," +
                     "   APIS.API_ID," +
                     "   APIS.API_PROVIDER," +
                     "   APIS.API_NAME," +
@@ -609,6 +619,7 @@ public class SubscriptionValidationSQLConstants {
                     "FROM " +
                     "   (" +
                     "      SELECT " +
+                    "         API.API_UUID," +
                     "         API.API_ID," +
                     "         API.API_PROVIDER," +
                     "         API.API_NAME," +
@@ -694,6 +705,7 @@ public class SubscriptionValidationSQLConstants {
     //todo merge with above DET_API
     public static final String GET_API_PRODUCT_SQL =
             "SELECT " +
+                    "   APIS.API_UUID," +
                     "   APIS.API_ID," +
                     "   APIS.API_PROVIDER," +
                     "   APIS.API_NAME," +
@@ -711,6 +723,7 @@ public class SubscriptionValidationSQLConstants {
                     "FROM " +
                     "   (" +
                     "      SELECT " +
+                    "         API.API_UUID," +
                     "         API.API_ID," +
                     "         API.API_PROVIDER," +
                     "         API.API_NAME," +
@@ -799,40 +812,6 @@ public class SubscriptionValidationSQLConstants {
                     "   URL.API_ID = API.API_ID AND " +
                     "   API.CONTEXT NOT LIKE ? ";
 
-    public static final String GET_API_URL_MAPPING_SQL =
-            "SELECT " +
-                    "   URL_MAPPING_ID," +
-                    "   API_ID," +
-                    "   HTTP_METHOD," +
-                    "   AUTH_SCHEME," +
-                    "   URL_PATTERN," +
-                    "   THROTTLING_TIER AS POLICY" +
-                    " FROM " +
-                    "   AM_API_URL_MAPPING" +
-                    " WHERE " +
-                    "   URL_MAPPING_ID = ?";
-
-    public static final String GET_API_PRODUCT_URL_MAPPING_SQL =
-            "SELECT " +
-                    "   URL.URL_MAPPING_ID," +
-                    "   URL.AUTH_SCHEME," +
-                    "   URL.URL_PATTERN," +
-                    "   URL.HTTP_METHOD," +
-                    "   URL.THROTTLING_TIER AS RES_TIER," +
-                    "   SCOPE.SCOPE_NAME" +
-                    " FROM " +
-                    "   AM_API API," +
-                    "   AM_API_PRODUCT_MAPPING PROD," +
-                    "   AM_API_URL_MAPPING URL" +
-                    " LEFT JOIN " +
-                    "   AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
-                    " ON " +
-                    "   URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
-                    " WHERE " +
-                    "   URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID AND " +
-                    "   API.API_ID = PROD.API_ID AND" +
-                    "   API.API_ID = ?";
-
     public static final String GET_ALL_GLOBAL_POLICIES_SQL =
             " SELECT " +
                     "   POLICY_ID," +
@@ -867,4 +846,110 @@ public class SubscriptionValidationSQLConstants {
                     " WHERE " +
                     "   NAME = ? AND" +
                     "   TENANT_ID = ? ";
+
+    public static final String GET_API_BY_UUID_SQL =
+            "SELECT " +
+                    "   APIS.API_UUID," +
+                    "   APIS.API_ID," +
+                    "   APIS.API_PROVIDER," +
+                    "   APIS.API_NAME," +
+                    "   APIS.API_TIER," +
+                    "   APIS.API_VERSION," +
+                    "   APIS.CONTEXT," +
+                    "   APIS.API_TYPE," +
+                    "   APIS.URL_MAPPING_ID," +
+                    "   APIS.HTTP_METHOD," +
+                    "   APIS.AUTH_SCHEME," +
+                    "   APIS.URL_PATTERN," +
+                    "   APIS.RES_TIER," +
+                    "   APIS.SCOPE_NAME," +
+                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
+                    "FROM " +
+                    "   (" +
+                    "      SELECT " +
+                    "         API.API_UUID," +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME" +
+                    "      FROM " +
+                    "         AM_API API," +
+                    "         AM_API_URL_MAPPING URL" +
+                    "         LEFT JOIN" +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
+                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
+                    "      WHERE" +
+                    "         API.API_ID = URL.API_ID" +
+                    "         AND API.API_UUID = ?" +
+                    "   )" +
+                    "   APIS " +
+                    "   LEFT JOIN " +
+                    "      AM_API_DEFAULT_VERSION DEF" +
+                    "      ON APIS.API_NAME = DEF.API_NAME" +
+                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
+                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
+
+    //todo merge with above DET_API
+    public static final String GET_API_PRODUCT_BY_UUID_SQL =
+            "SELECT " +
+                    "   APIS.API_UUID," +
+                    "   APIS.API_ID," +
+                    "   APIS.API_PROVIDER," +
+                    "   APIS.API_NAME," +
+                    "   APIS.API_TIER," +
+                    "   APIS.API_VERSION," +
+                    "   APIS.CONTEXT," +
+                    "   APIS.API_TYPE," +
+                    "   APIS.URL_MAPPING_ID," +
+                    "   APIS.HTTP_METHOD," +
+                    "   APIS.AUTH_SCHEME," +
+                    "   APIS.URL_PATTERN," +
+                    "   APIS.RES_TIER," +
+                    "   APIS.SCOPE_NAME," +
+                    "   DEF.PUBLISHED_DEFAULT_API_VERSION " +
+                    "FROM " +
+                    "   (" +
+                    "      SELECT " +
+                    "         API.API_UUID," +
+                    "         API.API_ID," +
+                    "         API.API_PROVIDER," +
+                    "         API.API_NAME," +
+                    "         API.API_TIER," +
+                    "         API.API_VERSION," +
+                    "         API.CONTEXT," +
+                    "         API.API_TYPE," +
+                    "         URL.URL_MAPPING_ID," +
+                    "         URL.HTTP_METHOD," +
+                    "         URL.AUTH_SCHEME," +
+                    "         URL.URL_PATTERN," +
+                    "         URL.THROTTLING_TIER AS RES_TIER," +
+                    "         SCOPE.SCOPE_NAME" +
+                    "      FROM " +
+                    "         AM_API API," +
+                    "         AM_API_PRODUCT_MAPPING PROD," +
+                    "         AM_API_URL_MAPPING URL" +
+                    "         LEFT JOIN " +
+                    "            AM_API_RESOURCE_SCOPE_MAPPING SCOPE" +
+                    "            ON URL.URL_MAPPING_ID = SCOPE.URL_MAPPING_ID" +
+                    "      WHERE " +
+                    "         URL.URL_MAPPING_ID = PROD.URL_MAPPING_ID" +
+                    "         AND API.API_ID = PROD.API_ID" +
+                    "         AND API.API_UUID = ?" +
+                    "   )" +
+                    "   APIS " +
+                    "   LEFT JOIN " +
+                    "      AM_API_DEFAULT_VERSION DEF " +
+                    "      ON APIS.API_NAME = DEF.API_NAME" +
+                    "      AND APIS.API_PROVIDER = DEF.API_PROVIDER" +
+                    "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
+
 }

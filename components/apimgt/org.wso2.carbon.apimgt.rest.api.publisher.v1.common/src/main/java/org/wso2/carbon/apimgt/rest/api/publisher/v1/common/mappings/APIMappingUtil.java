@@ -339,6 +339,13 @@ public class APIMappingUtil {
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, model, provider);
+        if (dto.getKeyManagers() instanceof List) {
+            model.setKeyManagers((List<String>) dto.getKeyManagers());
+        } else if (dto.getKeyManagers() == null) {
+            model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+        } else {
+            throw new APIManagementException("KeyManagers value need to be an array");
+        }
 
         return model;
     }
@@ -841,8 +848,6 @@ public class APIMappingUtil {
         } else {
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         }
-        String uuid = "uuid";
-        String path = "path";
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
@@ -1015,6 +1020,8 @@ public class APIMappingUtil {
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
+                .getProviderName()));
 
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
@@ -1024,7 +1031,7 @@ public class APIMappingUtil {
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
+                apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
             }
             
             apiOperationsDTO = getOperationsFromAPI(model);
@@ -1123,7 +1130,7 @@ public class APIMappingUtil {
             dto.setWsdlInfo(wsdlInfoDTO);
         }
         dto.setWsdlUrl(model.getWsdlUrl());
-        setEndpointSecurityFromModelToApiDTO(model, dto);
+        setEndpointSecurityFromModelToApiDTO(model, dto, preserveCredentials);
         setMaxTpsFromModelToApiDTO(model, dto);
 
         //setting micro-gateway labels if there are any
@@ -1230,7 +1237,7 @@ public class APIMappingUtil {
 
     }
 
-    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto)
+    private static void setEndpointSecurityFromModelToApiDTO(API api, APIDTO dto, boolean preserveCredentials)
             throws APIManagementException {
 
         if (api.isEndpointSecured()) {
@@ -1239,7 +1246,7 @@ public class APIMappingUtil {
             securityDTO.setUsername(api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
-            if (checkEndpointSecurityPasswordEnabled(tenantDomain)) {
+            if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
                 securityDTO.setPassword(api.getEndpointUTPassword());
             } else {
                 securityDTO.setPassword(""); //Do not expose password
@@ -2069,7 +2076,9 @@ public class APIMappingUtil {
             }
         }
         productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
-        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId());
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId()
+                .getProviderName()));
+        String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(product.getId(), tenantDomain);
         List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
         productDto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS));
 
@@ -2627,7 +2636,7 @@ public class APIMappingUtil {
         if (RestApiCommonUtil.isUUID(apiId)) {
             apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), requestedTenantDomain).getId();
         }
         return apiIdentifier;
     }

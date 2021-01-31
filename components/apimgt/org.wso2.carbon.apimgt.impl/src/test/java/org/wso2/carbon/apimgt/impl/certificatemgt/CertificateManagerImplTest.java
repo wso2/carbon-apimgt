@@ -24,7 +24,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -38,13 +37,17 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExi
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
+import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 
@@ -53,7 +56,7 @@ import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CertificateMgtUtils.class, CertificateMgtDAO.class, CarbonContext.class})
+@PrepareForTest({CertificateMgtUtils.class, CertificateMgtDAO.class, CarbonContext.class,PrivilegedCarbonContext.class})
 public class CertificateManagerImplTest {
 
     private static CertificateManagerImpl certificateManager;
@@ -83,11 +86,13 @@ public class CertificateManagerImplTest {
     static CertificateMgtDAO certificateMgtDAO;
 
     @BeforeClass
-    public static void init() {
+    public static void init() throws XMLStreamException {
 
         PowerMockito.mockStatic(CertificateMgtDAO.class);
         certificateMgtDAO = Mockito.mock(CertificateMgtDAO.class);
         PowerMockito.when(CertificateMgtDAO.getInstance()).thenReturn(certificateMgtDAO);
+        System.setProperty("javax.net.ssl.trustStore",CertificateManagerImplTest.class.getClassLoader().getResource
+                ("security/client-truststore.jks").getPath());
         System.setProperty(JAVAX_NET_SSL_TRUST_STORE_PASSWORD_PROPERTY, JAVAX_SSL_TRUST_STORE_PASSWORD);
         TestUtils.initConfigurationContextService(true);
         certificateManager = CertificateManagerImpl.getInstance();
@@ -96,6 +101,7 @@ public class CertificateManagerImplTest {
         CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
         PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
         Mockito.when(carbonContext.getTenantDomain()).thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(MultitenantConstants.SUPER_TENANT_ID);
     }
 
     @Test
@@ -104,7 +110,8 @@ public class CertificateManagerImplTest {
         Mockito.when(certificateMgtDAO.addCertificate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyInt()))
                 .thenReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,
+                String.class))
                 .toReturn(ResponseCode.SUCCESS);
         ResponseCode result =
                 certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID);
@@ -115,7 +122,8 @@ public class CertificateManagerImplTest {
     public void testAddToPublisherWithInternalServerError() {
 
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,
+                String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
@@ -127,7 +135,8 @@ public class CertificateManagerImplTest {
             throws CertificateAliasExistsException, CertificateManagementException {
         Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,
+                String.class))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
@@ -139,7 +148,8 @@ public class CertificateManagerImplTest {
             throws CertificateAliasExistsException, CertificateManagementException {
         Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito
+                .method(CertificateMgtUtils.class, "addCertificateToTrustStore", String.class, String.class))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
@@ -169,9 +179,15 @@ public class CertificateManagerImplTest {
     @Test
     public void testRemoveFromPublisher() throws CertificateManagementException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore",String.class))
                 .toReturn(ResponseCode.SUCCESS);
         Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS, END_POINT, TENANT_ID)).thenReturn(true);
+        List<CertificateMetadataDTO> certificateMetadataDTOList = new ArrayList<>();
+        CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+        certificateMetadataDTO.setAlias(ALIAS);
+        certificateMetadataDTO.setEndpoint(END_POINT);
+        certificateMetadataDTOList.add(certificateMetadataDTO);
+        Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID)).thenReturn(certificateMetadataDTOList);
         ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.SUCCESS, responseCode);
     }
@@ -179,9 +195,15 @@ public class CertificateManagerImplTest {
     @Test
     public void testRemoveFromPublisherInternalServerError() throws CertificateManagementException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore",String.class))
                 .toReturn(ResponseCode.SUCCESS);
         Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS, END_POINT, TENANT_ID)).thenReturn(false);
+        List<CertificateMetadataDTO> certificateMetadataDTOList = new ArrayList<>();
+        CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+        certificateMetadataDTO.setAlias(ALIAS);
+        certificateMetadataDTO.setEndpoint(END_POINT);
+        certificateMetadataDTOList.add(certificateMetadataDTO);
+        Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID)).thenReturn(certificateMetadataDTOList);
         ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
@@ -189,7 +211,7 @@ public class CertificateManagerImplTest {
     @Test
     public void testRemoveFromPublisherCertificateNotFound() {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore",String.class))
                 .toReturn(ResponseCode.CERTIFICATE_NOT_FOUND);
         try {
             Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS, END_POINT, TENANT_ID)).thenReturn(true);
@@ -204,7 +226,7 @@ public class CertificateManagerImplTest {
     @Test
     public void testRemoveFromPublisherCertificateManagementException() {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore",String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
         try {
             Mockito.when(certificateMgtDAO.deleteCertificate("testRemoveFromPublisherCertificateManagementException",
@@ -217,9 +239,11 @@ public class CertificateManagerImplTest {
             certificateMetadataDTO.setEndpoint("testRemoveFromPublisherCertificateManagementException");
             certificateMetadataDTO.setCertificate(BASE64_ENCODED_CERT);
             certificateMetadataDTO.setAlias("testRemoveFromPublisherCertificateManagementException");
-            Mockito.when(certificateMgtDAO.getCertificate("testRemoveFromPublisherCertificateManagementException",
-                    "testRemoveFromPublisherCertificateManagementException", TENANT_ID))
-                    .thenReturn(certificateMetadataDTO);
+            List<CertificateMetadataDTO> certificateMetadataDTOList = new ArrayList<>();
+            certificateMetadataDTOList.add(certificateMetadataDTO);
+            Mockito.when(certificateMgtDAO
+                    .getCertificates("testRemoveFromPublisherCertificateManagementException", null, TENANT_ID))
+                    .thenReturn(certificateMetadataDTOList);
         } catch (CertificateManagementException | CertificateAliasExistsException e) {
             e.printStackTrace();
         }
@@ -232,7 +256,7 @@ public class CertificateManagerImplTest {
     @Test
     public void testRemoveFromPublisherWithInternalServerErrorWhenDeleting() {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore",String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
         try {
             Mockito.when(certificateMgtDAO
@@ -245,9 +269,9 @@ public class CertificateManagerImplTest {
             certificateMetadataDTO.setEndpoint("testRemoveFromPublisherWithInternalServerErrorWhenDeleting");
             certificateMetadataDTO.setCertificate(BASE64_ENCODED_CERT);
             certificateMetadataDTO.setAlias("testRemoveFromPublisherWithInternalServerErrorWhenDeleting");
-            Mockito.when(certificateMgtDAO.getCertificate("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
-                    "testRemoveFromPublisherWithInternalServerErrorWhenDeleting", TENANT_ID))
-                    .thenReturn(certificateMetadataDTO);
+            Mockito.when(certificateMgtDAO.getCertificates("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
+                    null, TENANT_ID)).thenReturn(Arrays.asList(certificateMetadataDTO));
+
         } catch (CertificateManagementException | CertificateAliasExistsException e) {
             e.printStackTrace();
         }
@@ -260,11 +284,8 @@ public class CertificateManagerImplTest {
     @Test
     public void testAddToGateway() throws IllegalAccessException, NoSuchFieldException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,String.class))
                 .toReturn(ResponseCode.SUCCESS);
-        Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
-        field.setAccessible(true);
-        field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertTrue(result);
     }
@@ -272,11 +293,8 @@ public class CertificateManagerImplTest {
     @Test
     public void testAddToGatewayCertificateExistsInTrustStore() throws NoSuchFieldException, IllegalAccessException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,String.class))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
-        Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
-        field.setAccessible(true);
-        field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertTrue(result);
     }
@@ -284,11 +302,9 @@ public class CertificateManagerImplTest {
     @Test
     public void testAddToGatewayInternalServerError() throws NoSuchFieldException, IllegalAccessException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito
+                .method(CertificateMgtUtils.class, "addCertificateToSenderTrustStore", String.class, String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
-        Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
-        field.setAccessible(true);
-        field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertFalse(result);
     }
@@ -301,26 +317,18 @@ public class CertificateManagerImplTest {
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode(), responseCode.getResponseCode());
     }
 
-    @Test
-    public void testAddToGatewayWithTouchConfigFileFailed() throws NoSuchFieldException, IllegalAccessException {
-
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
-                .toReturn(ResponseCode.SUCCESS);
-        Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
-        field.setAccessible(true);
-        field.set(certificateManager, TEST_PATH_NOT_EXISTS);
-        boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
-        Assert.assertFalse(result);
-    }
 
     @Test
     public void testRemoveFromGateway() throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException {
-
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        System.setProperty(CarbonBaseConstants.CARBON_HOME, "");
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        Mockito.when(privilegedCarbonContext.getTenantDomain())
+                .thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(TENANT_ID);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore",String.class))
                 .toReturn(ResponseCode.SUCCESS);
-        Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
-        field.setAccessible(true);
-        field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.deleteCertificateFromGateway(ALIAS);
         Assert.assertTrue(result);
     }
@@ -328,11 +336,8 @@ public class CertificateManagerImplTest {
     @Test
     public void testRemoveFromGatewayIntenalServerError() throws NoSuchFieldException, IllegalAccessException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "removeCertificateFromSenderTrustStore",String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
-        Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
-        field.setAccessible(true);
-        field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.deleteCertificateFromGateway(ALIAS);
         Assert.assertFalse(result);
     }
@@ -495,7 +500,7 @@ public class CertificateManagerImplTest {
         PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,String.class))
                 .toReturn(ResponseCode.SUCCESS);
         Field field = CertificateManagerImpl.class.getDeclaredField("listenerProfileFilePath");
         field.setAccessible(true);
