@@ -282,7 +282,7 @@ public final class APIImportUtil {
                 //preProcess swagger definition
                 swaggerContent = OASParserUtil.preProcess(swaggerContent);
 
-                addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
+                addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider, currentTenantDomain);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
 
                 //If graphQL API, import graphQL schema definition to registry
@@ -313,7 +313,7 @@ public final class APIImportUtil {
                 // (Adding missing attributes to swagger)
                 SwaggerData swaggerData = new SwaggerData(importedApi);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, swaggerContent);
-                apiProvider.saveSwaggerDefinition(importedApi, newDefinition);
+                apiProvider.saveSwaggerDefinition(importedApi, newDefinition, null);
             }
             // This is required to make url templates and scopes get effected
             apiProvider.updateAPI(importedApi);
@@ -343,7 +343,7 @@ public final class APIImportUtil {
                             checklistMap.put(APIImportExportConstants.REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC, true);
                 }
                 
-                apiProvider.changeLifeCycleStatus(uuid, lifecycleAction, checklistMap);
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, uuid, lifecycleAction, checklistMap);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
             }
@@ -532,11 +532,12 @@ public final class APIImportUtil {
      * @param swaggerContent Content of Swagger file
      * @throws APIImportExportException if there is an error occurs when adding Swagger definition
      */
-    private static void addSwaggerDefinition(APIIdentifier apiId, String swaggerContent, APIProvider apiProvider)
-            throws APIImportExportException {
+    private static void addSwaggerDefinition(APIIdentifier apiId, String swaggerContent, APIProvider apiProvider,
+                                             String tenantDomain) throws APIImportExportException {
 
         try {
-            apiProvider.saveSwagger20Definition(apiId, swaggerContent);
+
+            apiProvider.saveSwagger20Definition(apiId, swaggerContent, tenantDomain);
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();
