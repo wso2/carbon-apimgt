@@ -105,7 +105,6 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             APICategory apiCategoryOriginal = apiAdmin.getAPICategoryByID(apiCategoryId);
             if (apiCategoryOriginal == null) {
                 String errorMsg = "No API category with the given category ID exists: " + apiCategoryId;
-                log.error(errorMsg);
                 throw new APIManagementException(errorMsg);
             }
 
@@ -119,7 +118,6 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             String updatedName = apiCategoryToUpdate.getName();
             if (!oldName.equals(updatedName) && apiAdmin.isCategoryNameExists(updatedName, apiCategoryId, tenantID)) {
                 String errorMsg = "An API category already exists by the new API category name :" + updatedName;
-                log.error(errorMsg);
                 throw new APIManagementException(errorMsg);
             }
 
