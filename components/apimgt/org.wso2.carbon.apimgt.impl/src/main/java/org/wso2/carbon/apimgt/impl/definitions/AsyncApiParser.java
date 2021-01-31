@@ -1432,6 +1432,7 @@ public class AsyncApiParser extends APIDefinition {
 
         boolean validationSuccess = false;
         List<String> validationErrorMessages = null;
+        boolean isWebSocket = false;
 
         JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
 
@@ -1455,7 +1456,27 @@ public class AsyncApiParser extends APIDefinition {
                 validationSuccess = true;
                 validationErrorMessages = null;
             }*/
-            validationSuccess = true;
+
+            //Checking whether it is a websocket
+            AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            validationErrorMessages = new ArrayList<>();
+            if (asyncApiDocument.getServers().size() == 1) {
+                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                    isWebSocket = true;
+                }
+            }
+
+            //validating channel count for websockets
+            if (isWebSocket) {
+                if (asyncApiDocument.getChannels().size() > 1) {
+                    validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
+                }
+            }
+
+            if (validationErrorMessages.size() == 0) {
+                validationSuccess = true;
+                validationErrorMessages = null;
+            }
 
         } catch (ValidationException e){
             //validation error messages
@@ -1465,7 +1486,7 @@ public class AsyncApiParser extends APIDefinition {
         if (validationSuccess) {
             AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
-            for (AaiServer x : asyncApiDocument.getServers()){
+            /*for (AaiServer x : asyncApiDocument.getServers()){
                 endpoints.add(x.url);
             }
             AsyncApiParserUtil.updateValidationResponseAsSuccess(
@@ -1477,7 +1498,35 @@ public class AsyncApiParser extends APIDefinition {
                     null,                           //asyncApiDocument.getChannels().get(0)._name,
                     asyncApiDocument.info.description,
                     endpoints
-            );
+            );*/
+
+            if (isWebSocket) {
+                for (AaiServer x : asyncApiDocument.getServers()){
+                    endpoints.add(x.url);
+                }
+                AsyncApiParserUtil.updateValidationResponseAsSuccess(
+                        validationResponse,
+                        apiDefinition,
+                        asyncApiDocument.asyncapi,
+                        asyncApiDocument.info.title,
+                        asyncApiDocument.info.version,
+                        asyncApiDocument.getChannels().get(0)._name,            //make this null
+                        asyncApiDocument.info.description,
+                        endpoints
+                );
+            } else {
+                AsyncApiParserUtil.updateValidationResponseAsSuccess(
+                        validationResponse,
+                        apiDefinition,
+                        asyncApiDocument.asyncapi,
+                        asyncApiDocument.info.title,
+                        asyncApiDocument.info.version,
+                        null,
+                        asyncApiDocument.info.description,
+                        null
+                );
+            }
+
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 validationResponse.setJsonContent(apiDefinition);

@@ -174,6 +174,7 @@ export default function DefaultAPIForm(props) {
                 } else {
                     updateValidity({ ...validity, name: nameValidity });
                 }
+                console.log(isWebSocket);
                 break;
             }
             case 'context': {
@@ -406,7 +407,7 @@ export default function DefaultAPIForm(props) {
                     )}
                 </Grid>
                 {appendChildrenBeforeEndpoint && !!children && children}
-                {!isAPIProduct && !hideEndpoint && (
+                {!isAPIProduct && !hideEndpoint && !isWebSocket && (
                     <TextField
                         fullWidth
                         id='itest-id-apiendpoint-input'

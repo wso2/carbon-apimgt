@@ -286,7 +286,17 @@ class APIThumb extends Component {
 
                             <div className={classes.thumbRight}>
                                 <Typography variant='caption' gutterBottom align='right' className={classes.context}>
-                                    <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                                    {api.type === 'WS' ? (
+                                        <FormattedMessage
+                                            defaultMessage='Channel'
+                                            id='Apis.Listing.ApiThumb.channel'
+                                        />
+                                    ) : (
+                                        <FormattedMessage
+                                            defaultMessage='Context'
+                                            id='Apis.Listing.ApiThumb.context'
+                                        />
+                                    )}
                                 </Typography>
                             </div>
                         </div>
@@ -302,6 +312,20 @@ class APIThumb extends Component {
                             className={classes.thumbRightBy}
                             label={api.transportType === undefined
                                 ? api.type : api.transportType}
+                            color='primary'
+                        />
+                    )}
+                    {(api.type === 'WS') && (
+                        <Chip
+                            className={classes.thumbRightBy}
+                            label='WEBSOCKET'
+                            color='primary'
+                        />
+                    )}
+                    {(api.type === 'WEBSUB') && (
+                        <Chip
+                            className={classes.thumbRightBy}
+                            label='WEBSUB'
                             color='primary'
                         />
                     )}

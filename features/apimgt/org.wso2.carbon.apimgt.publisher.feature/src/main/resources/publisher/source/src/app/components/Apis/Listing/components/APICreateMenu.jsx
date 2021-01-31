@@ -141,7 +141,7 @@ const APICreateMenu = (props) => {
                         primary={(
                             <FormattedMessage
                                 id='Apis.Listing.components.APICreateMenu.primary.asyncapi'
-                                defaultMessage='I Have a Streaming API Definition'
+                                defaultMessage='I Have an AsyncAPI Definition'
                             />
                         )}
                         secondary={(

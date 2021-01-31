@@ -3885,19 +3885,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         //validate websocket url and change type of the API in APIDTO
-        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
+        /*if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
             apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDTOFromProperties.setTransport(websocketTransports);
-        }
+        }*/
 
         //Only WS type APIs should be allowed
-        if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
+        /*if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
             throw RestApiUtil.buildBadRequestException("The API's type should only be WebSocket when "+
                     "importing an AsyncAPI specification");
-        }
+        }*/
 
         //Import the API and Definition
         try {

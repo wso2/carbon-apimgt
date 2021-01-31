@@ -961,7 +961,7 @@ public class APIMappingUtil {
         }
 
         //Get Swagger definition which has URL templates, scopes and resource details
-        if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+        if (!APIDTO.TypeEnum.WS.toString().equals(model.getType()) && !APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())) {
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
             apiOperationsDTO = getOperationsFromAPI(model);
