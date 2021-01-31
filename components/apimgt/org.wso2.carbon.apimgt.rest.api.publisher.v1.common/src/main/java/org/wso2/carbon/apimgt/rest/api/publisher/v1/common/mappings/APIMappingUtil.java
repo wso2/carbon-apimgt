@@ -1021,9 +1021,13 @@ public class APIMappingUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
                 .getProviderName()));
 
+        boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
+                    || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType());
+
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
-        if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+        if (!isAsyncAPI) {
+            // Get from swagger definition
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition;
             if (model.getSwaggerDefinition() != null) {
@@ -1036,6 +1040,11 @@ public class APIMappingUtil {
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+        } else {
+            // Get from asyncapi definition
+            List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
+            dto.setOperations(apiOperationsDTO);
+            // TODO: get scopes
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -2002,7 +2011,7 @@ public class APIMappingUtil {
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
-                operationsDTO.setTarget("*");
+                operationsDTO.setTarget("/*");
             } else {
                 operationsDTO.setTarget("/*");
             }

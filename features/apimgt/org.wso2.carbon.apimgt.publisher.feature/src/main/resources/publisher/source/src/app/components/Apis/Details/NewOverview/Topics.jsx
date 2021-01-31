@@ -107,29 +107,29 @@ class Topics extends React.Component {
         });
         this.setState({ topics });
 
-        const promisedAPI = this.restApi.getSwagger(id);
-        promisedAPI
-            .then((response) => {
-                if (response.obj.paths !== undefined) {
-                    this.setState({ paths: response.obj.paths });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    doRedirectToLogin();
-                }
-            });
+        // const promisedAPI = this.restApi.getSwagger(id);
+        // promisedAPI
+        //     .then((response) => {
+        //         if (response.obj.paths !== undefined) {
+        //             this.setState({ paths: response.obj.paths });
+        //         }
+        //     })
+        //     .catch((error) => {
+        //         if (process.env.NODE_ENV !== 'production') console.log(error);
+        //         const { status } = error;
+        //         if (status === 404) {
+        //             this.setState({ notFound: true });
+        //         } else if (status === 401) {
+        //             doRedirectToLogin();
+        //         }
+        //     });
     }
 
     /**
      *
      */
     render() {
-        const { paths } = this.state;
+        // const { paths } = this.state;
         if (this.state.notFound) {
             return (
                 <div>
@@ -140,16 +140,16 @@ class Topics extends React.Component {
                 </div>
             );
         }
-        if (!paths) {
-            return (
-                <div>
-                    <FormattedMessage
-                        id='Apis.Details.NewOverview.Resources.loading'
-                        defaultMessage='loading...'
-                    />
-                </div>
-            );
-        }
+        // if (!paths) {
+        //     return (
+        //         <div>
+        //             <FormattedMessage
+        //                 id='Apis.Details.NewOverview.Resources.loading'
+        //                 defaultMessage='loading...1'
+        //             />
+        //         </div>
+        //     );
+        // }
         const { classes, parentClasses, api } = this.props;
         return (
             <>
