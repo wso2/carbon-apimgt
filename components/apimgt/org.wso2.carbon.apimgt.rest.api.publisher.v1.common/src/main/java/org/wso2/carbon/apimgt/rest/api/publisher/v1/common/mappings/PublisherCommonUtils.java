@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -334,7 +335,7 @@ public class PublisherCommonUtils {
 
         //attach micro-geteway labels
         assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
-        String tenantDomain = MultitenantUtils.getTenantDomain(apiToUpdate.getId().getProviderName());
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
