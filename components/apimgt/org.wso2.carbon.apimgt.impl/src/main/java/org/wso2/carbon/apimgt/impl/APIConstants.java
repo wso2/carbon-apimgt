@@ -2515,4 +2515,23 @@ public final class APIConstants {
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
     
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+
+    public static class ServiceCatalogConstants {
+        public static final String SERVICE_UUID = "UUID";
+        public static final String SERVICE_NAME = "ENTRY_NAME";
+        public static final String SERVICE_KEY = "SERVICE_KEY";
+        public static final String MD5 = "MD5";
+        public static final String SERVICE_VERSION = "ENTRY_VERSION";
+        public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
+        public static final String SERVICE_URL = "SERVICE_URL";
+        public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
+        public static final String DEFINITION_URL = "DEFINITION_URL";
+        public static final String DESCRIPTION = "DESCRIPTION";
+        public static final String SECURITY_TYPE = "SECURITY_TYPE";
+        public static final String MUTUAL_SSL_ENABLED = "MUTUAL_SSL_ENABLED";
+        public static final String CREATED_TIME = "CREATED_TIME";
+        public static final String LAST_UPDATED_TIME = "LAST_UPDATED_TIME";
+        public static final String CREATED_BY = "CREATED_BY";
+        public static final String UPDATED_BY = "UPDATED_BY";
+    }
 }
