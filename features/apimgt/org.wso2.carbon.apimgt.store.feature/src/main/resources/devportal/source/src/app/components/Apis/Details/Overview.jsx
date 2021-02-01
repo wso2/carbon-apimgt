@@ -300,7 +300,7 @@ function Overview(props) {
                                 {!api.advertiseInfo.advertised && (
                                     <>
                                         <Divider />
-                                        <Link to={'/apis/' + api.id + '/test'} className={classes.linkToTest}>
+                                        <Link to={'/apis/' + api.id + '/test'} className={classes.button}>
                                             <Button
                                                 id='test'
                                                 size='small'
@@ -426,6 +426,18 @@ function Overview(props) {
                                                         + ' tokens and be authenticated to invoke this API.'
                                                     }
                                                 />
+                                            </Typography>
+                                            <Typography variant='body2'>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Overview' +
+                                                        '.subscribe.available'}
+                                                    defaultMessage='Subscription tiers available '
+                                                />
+                                                {api.tiers.map((tier, index) => (<>
+                                                    {tier.tierName}{index !== (api.tiers.length - 1)
+                                                        ? (', ') : ' '
+                                                    }
+                                                </>))}
                                             </Typography>
                                             <Box display='block' mt={2}>
                                                 <Grid item xs={12}>
