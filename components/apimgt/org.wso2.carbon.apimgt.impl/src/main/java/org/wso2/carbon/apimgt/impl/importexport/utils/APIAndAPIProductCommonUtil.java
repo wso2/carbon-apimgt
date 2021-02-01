@@ -434,8 +434,10 @@ public class APIAndAPIProductCommonUtil {
      *
      * @param pathToArchive Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper   The imported API object
+     * @param orgId 
      */
-    public static void addAPIOrAPIProductImage(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    public static void addAPIOrAPIProductImage(String pathToArchive, ApiTypeWrapper apiTypeWrapper,
+            APIProvider apiProvider, String orgId) {
 
         //Adding image icon to the API if there is any
         File imageFolder = new File(pathToArchive + APIImportExportConstants.IMAGE_FILE_LOCATION);
@@ -444,7 +446,7 @@ public class APIAndAPIProductCommonUtil {
             //This loop locates the icon of the API
             for (File imageFile : fileArray) {
                 if (imageFile != null && imageFile.getName().contains(APIConstants.API_ICON_IMAGE)) {
-                    updateAPIOrAPIProductWithThumbnail(imageFile, apiTypeWrapper, apiProvider);
+                    updateAPIOrAPIProductWithThumbnail(imageFile, apiTypeWrapper, apiProvider, orgId);
                     //the loop is terminated after successfully locating the icon
                     break;
                 }
@@ -458,8 +460,9 @@ public class APIAndAPIProductCommonUtil {
      * @param imageFile             Image file
      * @param apiTypeWrapper        API or API Product to update
      * @param apiProvider           API Provider
+     * @param orgId 
      */
-    private static void updateAPIOrAPIProductWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    private static void updateAPIOrAPIProductWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider, String orgId) {
 
         Identifier identifier = apiTypeWrapper.getId();
         String fileName = imageFile.getName();
@@ -486,7 +489,7 @@ public class APIAndAPIProductCommonUtil {
             } else {
                 apiId = apiTypeWrapper.getApi().getUuid();
             }
-            apiProvider.setThumbnailToAPI(apiId, apiImage);
+            apiProvider.setThumbnailToAPI(apiId, apiImage, orgId);
         } catch (APIManagementException e) {
             log.error("Failed to add icon to the API/API Product: " + identifier.getName(), e);
         } catch (FileNotFoundException e) {
@@ -501,10 +504,10 @@ public class APIAndAPIProductCommonUtil {
      *
      * @param pathToArchive     Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper    Imported API or API Product
-     * @param currentTenantDomain 
+     * @param orgId 
      */
     public static void addAPIOrAPIProductDocuments(String pathToArchive, ApiTypeWrapper apiTypeWrapper,
-            APIProvider apiProvider, String currentTenantDomain) {
+            APIProvider apiProvider, String orgId) {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_DOCUMENT_FILE_LOCATION;
@@ -517,10 +520,10 @@ public class APIAndAPIProductCommonUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         try {
             //remove all documents associated with the API before update
-            List<Documentation> documents = apiProvider.getAllDocumentation(apiUUID, currentTenantDomain);
+            List<Documentation> documents = apiProvider.getAllDocumentation(apiUUID, orgId);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(apiUUID, documentation.getId());
+                    apiProvider.removeDocumentation(apiUUID, documentation.getId(), orgId);
                 }
             }
             //load document file if exists
@@ -549,7 +552,7 @@ public class APIAndAPIProductCommonUtil {
             //For each type of document separate action is performed
             for (Documentation doc : documentations) {
                 //Add documentation accordingly.
-                Documentation addedDoc = apiProvider.addDocumentation(apiUUID, doc);
+                Documentation addedDoc = apiProvider.addDocumentation(apiUUID, doc, orgId);
                 DocumentationContent content = null;
                 String docSourceType = doc.getSourceType().toString();
                 boolean docContentExists = Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(docSourceType)
@@ -564,7 +567,7 @@ public class APIAndAPIProductCommonUtil {
                         content = new DocumentationContent();
                         content.setSourceType(ContentSourceType.valueOf(docSourceType));
                         content.setTextContent(inlineContent);
-                        apiProvider.addDocumentationContent(apiUUID, addedDoc.getId(), content);
+                        apiProvider.addDocumentationContent(apiUUID, addedDoc.getId(), orgId, content);
                     }
                 } else if (APIImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                     String filePath = doc.getFilePath();
@@ -577,7 +580,7 @@ public class APIAndAPIProductCommonUtil {
                         resourceFile.setName(filePath);
                         content.setResourceFile(resourceFile);
                         content.setSourceType(ContentSourceType.FILE);
-                        apiProvider.addDocumentationContent(apiUUID, addedDoc.getId(), content);
+                        apiProvider.addDocumentationContent(apiUUID, addedDoc.getId(), orgId, content);
                     } catch (FileNotFoundException e) {
                         //this error is logged and ignored because documents are optional in an API
                         log.error("Failed to locate the document files of the API/API Product: " + apiTypeWrapper.getId().getName(), e);
