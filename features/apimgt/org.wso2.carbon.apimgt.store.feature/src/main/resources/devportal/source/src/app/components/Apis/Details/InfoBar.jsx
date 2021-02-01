@@ -412,13 +412,15 @@ class InfoBar extends React.Component {
             })
         }
         // Truncating the description
-        const limit = 40;
         let descriptionIsBig = false;
         let smallDescription = '';
-        if(api.description.split(' ').length > limit){
-            let newContent = api.description.split(' ').slice(0, limit);
-            smallDescription = newContent.join(' ') + '...';
-            descriptionIsBig = true;
+        if(api.description){
+            const limit = 40;
+            if(api.description.split(' ').length > limit){
+                let newContent = api.description.split(' ').slice(0, limit);
+                smallDescription = newContent.join(' ') + '...';
+                descriptionIsBig = true;
+            }
         }
 
 
@@ -572,14 +574,14 @@ class InfoBar extends React.Component {
                                     </Box>
                                 </Grid>
 
-                                <Grid item xs={12} className={classes.infoWrapper}>
+                                {api.description &&(<Grid item xs={12} className={classes.infoWrapper}>
                                     <Typography variant='body2' gutterBottom align='left'>
                                         {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
                                         {descriptionIsBig && (<a onClick={this.collapseAllDescription} href='#'>
                                             {descriptionHidden ? 'more' : 'less'}
                                             </a>)}
                                     </Typography>
-                                </Grid>
+                                </Grid>)}
                             </Grid>
                         </Box>
                     </Box>
