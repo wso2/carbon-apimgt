@@ -192,8 +192,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             try {
                 mongoDBPublisherAPI.setSwaggerDefinition(getOASDefinition(org, apiId));
             } catch (OASPersistenceException e) {
-                log.error("Error when getting swagger ", e);
-                throw new APIPersistenceException("Error when updating api");
+                throw new APIPersistenceException("Error when updating OAS definition of API " + publisherAPI.getId() , e);
             }
         }
         FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
