@@ -755,7 +755,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
-        String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
         if (uuid == null) {
             return false;
         } else {
@@ -764,7 +764,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException {
-        String uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
         if (uuid == null) {
             return false;
         } else {
