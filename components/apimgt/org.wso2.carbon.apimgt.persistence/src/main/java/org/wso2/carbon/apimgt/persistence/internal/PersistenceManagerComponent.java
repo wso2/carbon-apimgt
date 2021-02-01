@@ -144,14 +144,13 @@ import java.util.Map;
             service = APIPersistence.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeRegistryImpl")
-    protected void registryImpl(APIPersistence apiPersistence) {
+            unbind = "unsetPersistenceService")
+    protected void setPersistenceService(APIPersistence apiPersistence) {
         ServiceReferenceHolder.getInstance().setApiPersistence(apiPersistence);
     }
 
-    protected void removeRegistryImpl(APIPersistence apiPersistence) {
+    protected void unsetPersistenceService(APIPersistence apiPersistence) {
         ServiceReferenceHolder.getInstance().setApiPersistence(apiPersistence);
     }
 
 }
-
