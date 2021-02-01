@@ -3297,11 +3297,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
             List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(updatedSwagger,
                     apiToAdd.getId());
-            createdApi.setSwaggerDefinition(updatedSwagger);
-            createdApi.setSoapToRestSequences(list);
-            API existingAPI = apiProvider.getAPIbyUUID(createdApi.getUuid(), tenantDomain);
-            apiProvider.updateAPI(createdApi, existingAPI);
-            return createdApi;
+            API updatedAPI = apiProvider.getAPIbyUUID(createdApi.getUuid(), tenantDomain);
+            updatedAPI.setSoapToRestSequences(list);
+            apiProvider.updateAPI(updatedAPI, createdApi);
+            return updatedAPI;
         } catch (FaultGatewaysException | IOException e) {
             throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }

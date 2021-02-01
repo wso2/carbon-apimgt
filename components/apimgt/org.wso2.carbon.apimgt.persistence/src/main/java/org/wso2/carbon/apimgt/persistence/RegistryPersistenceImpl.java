@@ -3665,11 +3665,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                 String resourceName;
                 if (resource.getProperty("resourcePath") != null) {
-                    resourceName = resource.getProperty("resourcePath") + "_" + resource.getProperty("method");
+                    resourceName = resource.getProperty("resourcePath");
                 } else {
                     resourceName = ((ResourceImpl) resource).getName();
                 }
                 resourceName = resourceName.replaceAll("\\.xml", "");
+                resourceName = resourceName.split("_")[0];
                 String httpMethod = resource.getProperty("method");
 
                 SOAPToRestSequence seq = new SOAPToRestSequence(httpMethod, resourceName, content, direction);
