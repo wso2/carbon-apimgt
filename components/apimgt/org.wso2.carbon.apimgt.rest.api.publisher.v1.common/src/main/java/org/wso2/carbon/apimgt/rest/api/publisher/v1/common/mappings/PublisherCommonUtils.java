@@ -110,6 +110,8 @@ public class PublisherCommonUtils {
                 .equals(originalAPI.getType());
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
+        boolean isAsyncAPI = isWSAPI || (originalAPI.getType() != null && APIConstants.APITransportType.WEBSUB.toString()
+                .equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -339,7 +341,7 @@ public class PublisherCommonUtils {
         //preserve monetization status in the update flow
         apiProvider.configureMonetizationInAPIArtifact(originalAPI);
 
-        if (!isWSAPI) {
+        if (!isAsyncAPI) {
             String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
