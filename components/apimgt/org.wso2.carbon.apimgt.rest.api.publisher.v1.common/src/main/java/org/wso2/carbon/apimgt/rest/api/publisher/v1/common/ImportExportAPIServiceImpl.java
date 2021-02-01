@@ -131,18 +131,21 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite,
-            String[] tokenScopes) throws APIManagementException {
+            String[] tokenScopes, String organizationId) throws APIManagementException {
         String extractedFolderPath;
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
-        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
+        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes,
+                organizationId);
     }
 
-    @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
-            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+    @Override
+    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
+            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
+                                       String organizationId)
             throws APIManagementException {
         String extractedFolderPath;
         try {
@@ -151,6 +154,6 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, overwriteAPIProduct, overwriteAPIs,
-                importAPIs, tokenScopes);
+                importAPIs, tokenScopes, organizationId);
     }
 }

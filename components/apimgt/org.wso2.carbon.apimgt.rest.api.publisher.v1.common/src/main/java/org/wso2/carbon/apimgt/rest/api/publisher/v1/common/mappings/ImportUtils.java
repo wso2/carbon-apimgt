@@ -136,7 +136,7 @@ public class ImportUtils {
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-            Boolean overwrite, String[] tokenScopes) throws APIManagementException {
+            Boolean overwrite, String[] tokenScopes, String organizationId) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -200,8 +200,9 @@ public class ImportUtils {
                 if (importedApiDTO.getOperations().isEmpty()) {
                     setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
                 }
-                importedApi = PublisherCommonUtils
-                        .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
+                targetApi.setOrganizationId(organizationId);
+                importedApi = PublisherCommonUtils.updateApi(targetApi, importedApiDTO,
+                        RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
             } else {
                 if (targetApi == null && Boolean.TRUE.equals(overwrite)) {
                     log.info("Cannot find : " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
@@ -210,9 +211,8 @@ public class ImportUtils {
                 // Initialize to CREATED when import
                 currentStatus = APIStatus.CREATED.toString();
                 importedApiDTO.setLifeCycleStatus(currentStatus);
-                importedApi = PublisherCommonUtils
-                        .addAPIWithGeneratedSwaggerDefinition(importedApiDTO, ImportExportConstants.OAS_VERSION_3,
-                                importedApiDTO.getProvider());
+                importedApi = PublisherCommonUtils.addAPIWithGeneratedSwaggerDefinition(importedApiDTO,
+                        ImportExportConstants.OAS_VERSION_3, importedApiDTO.getProvider(), organizationId);
             }
 
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
@@ -222,7 +222,8 @@ public class ImportUtils {
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), swaggerDefinitionValidationResponse);
+                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), swaggerDefinitionValidationResponse,
+                        organizationId);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -236,7 +237,7 @@ public class ImportUtils {
             // Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organizationId);
             addAPISequences(extractedFolderPath, importedApi, registry);
             addAPISpecificSequences(extractedFolderPath, registry, importedApi.getId());
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider, registry);
@@ -832,7 +833,8 @@ public class ImportUtils {
      * @param pathToArchive  Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper Imported API or API Product
      */
-    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    private static void addDocumentation(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider,
+                                         String organizationId) {
 
         String jsonContent = null;
         Identifier identifier = apiTypeWrapper.getId();
@@ -884,8 +886,10 @@ public class ImportUtils {
                     // Add the documentation DTO
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
-                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid()) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID());
+                                    .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid(),
+                                            organizationId) :
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID(),
+                                    organizationId);
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
@@ -1534,7 +1538,8 @@ public class ImportUtils {
      * @throws APIImportExportException If there is an error in importing an API
      */
     public static APIProduct importApiProduct(String extractedFolderPath, Boolean preserveProvider,
-            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes,
+                                              String organizationId)
             throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -1584,7 +1589,7 @@ public class ImportUtils {
             // Since Image, documents and client certificates are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApiProduct = new ApiTypeWrapper(importedApiProduct);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApiProduct, apiProvider, organizationId);
 
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Importing client certificates.");
@@ -1744,12 +1749,12 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes);
+                                    Boolean.TRUE, tokenScopes, null);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes);
+                                Boolean.FALSE, tokenScopes, null);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -1764,13 +1769,13 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes);
+                                Boolean.FALSE, tokenScopes, null);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes);
+                                    Boolean.TRUE, tokenScopes, null);
                         }
                     }
                 }

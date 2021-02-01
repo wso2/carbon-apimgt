@@ -418,7 +418,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion)
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
             throws DuplicateAPIException, APIManagementException;
 
     /**

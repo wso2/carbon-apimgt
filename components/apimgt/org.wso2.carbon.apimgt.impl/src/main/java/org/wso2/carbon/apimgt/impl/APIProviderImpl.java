@@ -924,7 +924,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(tenantDomain),
+            PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganizationId()),
                     APIMapper.INSTANCE.toPublisherApi(api));
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
@@ -1599,6 +1599,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateKeyManagers(api);
         API oldApi = existingAPI;
         Gson gson = new Gson();
+        String organizationId = api.getOrganizationId();
         Map<String, String> oldMonetizationProperties = gson.fromJson(oldApi.getMonetizationProperties().toString(),
                 HashMap.class);
         if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
@@ -1663,7 +1664,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             loadMediationPoliciesToAPI(api, tenantDomain);
             try {
                 api.setCreatedTime(oldApi.getCreatedTime());
-                apiPersistenceInstance.updateAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
+                apiPersistenceInstance.updateAPI(new Organization(organizationId), APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
@@ -1675,7 +1676,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             validateAndSetAPISecurity(api);
             try {
                 api.setCreatedTime(oldApi.getCreatedTime());
-                apiPersistenceInstance.updateAPI(new Organization(tenantDomain), APIMapper.INSTANCE.toPublisherApi(api));
+                apiPersistenceInstance.updateAPI(new Organization(organizationId), APIMapper.INSTANCE.toPublisherApi(api));
             } catch (APIPersistenceException e) {
                 throw new APIManagementException("Error while updating API details", e);
             }
@@ -2371,10 +2372,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
-    private void loadMediationPoliciesToAPI(API api, String tenantDomain) throws APIManagementException {
+    private void loadMediationPoliciesToAPI(API api, String organizationId) throws APIManagementException {
         if (APIUtil.isSequenceDefined(api.getInSequence()) || APIUtil.isSequenceDefined(api.getOutSequence())
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
-            Organization org = new Organization(tenantDomain);
+            Organization org = new Organization(organizationId);
             String apiUUID = api.getUuid();
             // get all policies
             try {
@@ -2669,7 +2670,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //updateApiArtifactNew(api, false, false);
                     PublisherAPI publisherAPI =  APIMapper.INSTANCE.toPublisherApi(api);
                     try {
-                        apiPersistenceInstance.updateAPI(new Organization(tenantDomain), publisherAPI);
+                        apiPersistenceInstance.updateAPI(new Organization(api.getOrganizationId()), publisherAPI);
                     } catch (APIPersistenceException e) {
                         handleException("Error while persisting the updated API ", e);
                     }
@@ -3270,8 +3271,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value) throws APIManagementException {
         try {
             String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
-            Organization org = new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
-
+            String organizationId = apiMgtDAO.getOrganizationIDByAPIUUID(apiId);
+            Organization org = new Organization(organizationId);
             PublisherAPI api = apiPersistenceInstance.getPublisherAPI(org , apiId);
             api.setDefaultVersion(value);
             apiPersistenceInstance.updateAPI(org, api);
@@ -3319,8 +3320,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion)
-            throws DuplicateAPIException, APIManagementException {
+    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
+                                   String organizationId) throws DuplicateAPIException, APIManagementException {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
@@ -3408,7 +3409,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.updateAPI(new Organization(tenantDomain),
+            apiPersistenceInstance.updateAPI(new Organization(organizationId),
                     APIMapper.INSTANCE.toPublisherApi(existingAPI));
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
@@ -5904,7 +5905,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIStateChangeResponse changeLifeCycleStatus(String orgId,String uuid, String action,
+    public APIStateChangeResponse changeLifeCycleStatus(String organizationId, String uuid, String action,
                             Map<String, Boolean> checklist) throws APIManagementException, FaultGatewaysException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
@@ -5986,7 +5987,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     //apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     //targetStatus = apiArtifact.getLifecycleState();
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
-                    apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
+                    apiPersistenceInstance.changeAPILifeCycle(new Organization(organizationId), uuid, targetStatus);
+                    api.setOrganizationId(organizationId);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
 
                     //Sending Notifications to existing subscribers
@@ -6104,8 +6106,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return response;
     }
 
-    private void changeLifeCycle(API api,
-            String currentState, String targetState, Map<String, Boolean> checklist)
+    private void changeLifeCycle(API api, String currentState, String targetState, Map<String, Boolean> checklist)
             throws APIManagementException, FaultGatewaysException {
 
         String oldStatus = currentState.toUpperCase();
@@ -8483,6 +8484,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
             publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
             publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
+            //TODO-ORG
             addedAPIProduct = apiPersistenceInstance.updateAPIProduct(
                     new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
                     publisherAPIProduct);
@@ -9183,8 +9185,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        Organization org = new Organization(requestedTenantDomain);
+    public API getAPIbyUUID(String uuid, String organizationId) throws APIManagementException {
+        Organization org = new Organization(organizationId);
         try {
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
@@ -9194,8 +9196,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.setId(apiIdentifier);
                 checkAccessControlPermission(userNameWithoutChange, api.getAccessControl(), api.getAccessControlRoles());
                 /////////////////// Do processing on the data object//////////
-                populateAPIInformation(uuid, requestedTenantDomain, org, api);
-                loadMediationPoliciesToAPI(api, requestedTenantDomain);
+                populateAPIInformation(uuid, APIConstants.SUPER_TENANT_DOMAIN, org, api);
+                loadMediationPoliciesToAPI(api, organizationId);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -9282,9 +9284,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String organizationId) throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organizationId);
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, uuid);
             if (publisherAPI != null) {
                 API api = APIMapper.INSTANCE.toApi(publisherAPI);

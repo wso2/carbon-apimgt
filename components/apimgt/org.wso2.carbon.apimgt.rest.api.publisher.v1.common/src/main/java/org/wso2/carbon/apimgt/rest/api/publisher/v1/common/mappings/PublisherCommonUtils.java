@@ -359,7 +359,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-
+        apiToUpdate.setOrganizationId(originalAPI.getOrganizationId());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
@@ -666,12 +666,13 @@ public class PublisherCommonUtils {
      * @param apiDto     API DTO of the API
      * @param oasVersion Open API Definition version
      * @param username   Username
+     * @param organizationId  Organization Identifier
      * @return Created API object
      * @throws APIManagementException Error while creating the API
      * @throws CryptoException        Error while encrypting
      */
-    public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
-            throws APIManagementException, CryptoException {
+    public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
+                       String organizationId) throws APIManagementException, CryptoException {
         boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
@@ -696,7 +697,7 @@ public class PublisherCommonUtils {
             }
         }
 
-        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
+        API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username, organizationId);
         validateScopes(apiToAdd);
         //validate API categories
         List<APICategory> apiCategories = apiToAdd.getApiCategories();
@@ -719,6 +720,7 @@ public class PublisherCommonUtils {
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
         }
+        apiToAdd.setOrganizationId(organizationId);
         //adding the api
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
@@ -759,7 +761,7 @@ public class PublisherCommonUtils {
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
-    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username)
+    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username, String organizationId)
             throws APIManagementException {
         List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
         String context = body.getContext();
@@ -902,16 +904,15 @@ public class PublisherCommonUtils {
      *
      * @param apiId    API Id
      * @param response response of a swagger definition validation call
+     * @param organizationId Identifier of an Organization
      * @return updated swagger definition
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, String organizationId)
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        //this will fail if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, organizationId);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
         apiDefinition = OASParserUtil.preProcess(apiDefinition);
@@ -952,13 +953,14 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organizationId);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, organizationId);
         existingAPI.setStatus(unModifiedAPI.getStatus());
+        existingAPI.setOrganizationId(organizationId);
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, organizationId); // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -1077,12 +1079,11 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs when retrieving API Identifier,
      *                                when checking whether the documentation exists and when adding the documentation
      */
-    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId)
+    public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId, String organizationId)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (documentDto.getType() == null) {
             throw new APIManagementException("Documentation type cannot be empty",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
@@ -1100,11 +1101,11 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
 
-        if (apiProvider.isDocumentationExist(apiId, documentName, tenantDomain)) {
+        if (apiProvider.isDocumentationExist(apiId, documentName, organizationId)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
+        documentation = apiProvider.addDocumentation(apiId, documentation, organizationId);
 
         return documentation;
     }
