@@ -21,80 +21,14 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
  * Response event data DTO
  */
 public class ResponseEvent extends AnalyticsEvent {
-    private String correlationId;
-    private String keyType;
-    private String apiId;
-    private String apiName;
-    private String apiVersion;
-    private String apiCreator;
     private String apiMethod;
-    private String apiCreatorTenantDomain;
     private String apiResourceTemplate;
     private String destination;
-    private String applicationId;
-    private String applicationName;
-    private String applicationOwner;
-    private String regionId;
-    private String gatewayType;
-    private String userAgent;
-    private String proxyResponseCode;
-    private String targetResponseCode;
     private String responseCacheHit;
     private String responseLatency;
     private String backendLatency;
     private String requestMediationLatency;
     private String responseMediationLatency;
-    private String deploymentId;
-    private String eventType;
-    private String requestTimeStamp;
-
-    public String getCorrelationId() {
-        return correlationId;
-    }
-
-    public void setCorrelationId(String correlationId) {
-        this.correlationId = correlationId;
-    }
-
-    public String getKeyType() {
-        return keyType;
-    }
-
-    public void setKeyType(String keyType) {
-        this.keyType = keyType;
-    }
-
-    public String getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(String apiId) {
-        this.apiId = apiId;
-    }
-
-    public String getApiName() {
-        return apiName;
-    }
-
-    public void setApiName(String apiName) {
-        this.apiName = apiName;
-    }
-
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
-    }
-
-    public String getApiCreator() {
-        return apiCreator;
-    }
-
-    public void setApiCreator(String apiCreator) {
-        this.apiCreator = apiCreator;
-    }
 
     public String getApiMethod() {
         return apiMethod;
@@ -102,14 +36,6 @@ public class ResponseEvent extends AnalyticsEvent {
 
     public void setApiMethod(String apiMethod) {
         this.apiMethod = apiMethod;
-    }
-
-    public String getApiCreatorTenantDomain() {
-        return apiCreatorTenantDomain;
-    }
-
-    public void setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
-        this.apiCreatorTenantDomain = apiCreatorTenantDomain;
     }
 
     public String getApiResourceTemplate() {
@@ -126,62 +52,6 @@ public class ResponseEvent extends AnalyticsEvent {
 
     public void setDestination(String destination) {
         this.destination = destination;
-    }
-
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
-    }
-
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getApplicationOwner() {
-        return applicationOwner;
-    }
-
-    public void setApplicationOwner(String applicationOwner) {
-        this.applicationOwner = applicationOwner;
-    }
-
-    public String getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(String regionId) {
-        this.regionId = regionId;
-    }
-
-    public String getGatewayType() {
-        return gatewayType;
-    }
-
-    public void setGatewayType(String gatewayType) {
-        this.gatewayType = gatewayType;
-    }
-
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
-    public String getProxyResponseCode() {
-        return proxyResponseCode;
-    }
-
-    public void setProxyResponseCode(String proxyResponseCode) {
-        this.proxyResponseCode = proxyResponseCode;
     }
 
     public String getResponseCacheHit() {
@@ -222,37 +92,5 @@ public class ResponseEvent extends AnalyticsEvent {
 
     public void setResponseMediationLatency(String responseMediationLatency) {
         this.responseMediationLatency = responseMediationLatency;
-    }
-
-    public String getDeploymentId() {
-        return deploymentId;
-    }
-
-    public void setDeploymentId(String deploymentId) {
-        this.deploymentId = deploymentId;
-    }
-
-    public String getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public String getTargetResponseCode() {
-        return targetResponseCode;
-    }
-
-    public void setTargetResponseCode(String targetResponseCode) {
-        this.targetResponseCode = targetResponseCode;
-    }
-
-    public String getRequestTimeStamp() {
-        return requestTimeStamp;
-    }
-
-    public void setRequestTimeStamp(String requestTimeStamp) {
-        this.requestTimeStamp = requestTimeStamp;
     }
 }

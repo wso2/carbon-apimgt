@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.usage.publisher;
  */
 public class Constants {
 
-    public static final String RESPONSE_METRIC_NAME = "apim.response";
-    public static final String FAULTY_METRIC_NAME = "apim.faulty";
+    public static final String RESPONSE_METRIC_NAME = "apim:response";
+    public static final String FAULTY_METRIC_NAME = "apim:faulty";
 
 }

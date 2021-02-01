@@ -34,4 +34,17 @@ public class Constants {
     public static final String FAULTY_EVENT_TYPE = "fault";
     public static final String UNKNOWN_VALUE = "UNKNOWN";
 
+    public static final class ERROR_CODE_RANGES {
+        public static final int AUTH_FAILURE_START = 900900;
+        public static final int AUTH_FAILURE__END = 901000;
+
+        public static final int THROTTLED_FAILURE_START = 900800;
+        public static final int THROTTLED_FAILURE__END = 900900;
+
+        public static final int TARGET_FAILURE_START = 101500;
+        public static final int TARGET_FAILURE__END = 101600;
+    }
+
+    public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
+    public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
 }

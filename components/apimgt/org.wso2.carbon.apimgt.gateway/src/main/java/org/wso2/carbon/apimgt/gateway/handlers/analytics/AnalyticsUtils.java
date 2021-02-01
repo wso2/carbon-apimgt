@@ -50,15 +50,18 @@ public class AnalyticsUtils {
     }
 
     public static boolean isAuthFaultRequest(int errorCode) {
-        return errorCode >= 900900 && errorCode < 901000;
+        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
     }
 
     public static boolean isThrottledFaultRequest(int errorCode) {
-        return errorCode >= 900800 && errorCode < 900900;
+        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
     }
 
     public static boolean isTargetFaultRequest(int errorCode) {
-        return errorCode >= 101500 && errorCode < 101600;
+        return errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END;
     }
 
     public static FAULT_EVENT_TYPE getFaultyType(MessageContext messageContext) {
@@ -86,7 +89,8 @@ public class AnalyticsUtils {
     public static boolean isResourceNotFound(MessageContext messageContext) {
         if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
             int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API) && errorCode == 404;
+            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
+                    && errorCode == Constants.RESOURCE_NOT_FOUND_ERROR_CODE;
         }
         return false;
     }
@@ -94,7 +98,8 @@ public class AnalyticsUtils {
     public static boolean isMethodNotAllowed(MessageContext messageContext) {
         if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
             int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API) && errorCode == 405;
+            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
+                    && errorCode == Constants.METHOD_NOT_ALLOWED_ERROR_CODE;
         }
         return false;
     }
