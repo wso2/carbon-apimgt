@@ -446,22 +446,22 @@ public class APIGatewayManager {
         boolean isSecureVaultEnabled =
                 Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                         getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
-       JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
 
-        if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
-            JSONObject endpoints = (JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-            JSONObject productionEndpointSecurity = (JSONObject)
-                    endpoints.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-            JSONObject sandboxEndpointSecurity = (JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+        if (isSecureVaultEnabled) {
+            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
 
-            boolean isProductionEndpointSecured = (boolean)
-                    productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-            boolean isSandboxEndpointSecured = (boolean)
-                    sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-            String secureVaultAlias = api.getId().getProviderName() + "--" + api.getId().getApiName() +
-                    api.getId().getVersion();
-            if (isSecureVaultEnabled) {
+            if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
+                JSONObject endpoints = (JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                JSONObject productionEndpointSecurity = (JSONObject)
+                        endpoints.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                JSONObject sandboxEndpointSecurity = (JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
 
+                boolean isProductionEndpointSecured = (boolean)
+                        productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
+                boolean isSandboxEndpointSecured = (boolean)
+                        sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
+                String secureVaultAlias = api.getId().getProviderName() + "--" + api.getId().getApiName() +
+                        api.getId().getVersion();
                 //for production endpoints
                 if (isProductionEndpointSecured) {
                     CredentialDto credentialDto = new CredentialDto();
