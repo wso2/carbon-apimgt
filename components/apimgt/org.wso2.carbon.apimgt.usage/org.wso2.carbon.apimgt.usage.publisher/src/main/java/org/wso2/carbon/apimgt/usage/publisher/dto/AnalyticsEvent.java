@@ -38,6 +38,7 @@ public class AnalyticsEvent {
     private String targetResponseCode;
     private String deploymentId;
     private String eventType;
+    private String userAgent;
 
     public String getRequestTimestamp() {
         return requestTimestamp;
@@ -173,5 +174,13 @@ public class AnalyticsEvent {
 
     public void setEventType(String eventType) {
         this.eventType = eventType;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }

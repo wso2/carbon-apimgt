@@ -57,7 +57,7 @@ public class AnalyticsUtils {
         } else if (isThrottledFaultRequest(errorCode)) {
             return FAULT_EVENT_TYPE.THROTTLED;
         } else if (isTargetFaultRequest(errorCode)) {
-            return FAULT_EVENT_TYPE.TARGET;
+            return FAULT_EVENT_TYPE.TARGET_CONNECTIVITY;
         } else {
             return FAULT_EVENT_TYPE.OTHER;
         }

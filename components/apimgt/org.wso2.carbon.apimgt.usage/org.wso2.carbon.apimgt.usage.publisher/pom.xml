@@ -87,7 +87,7 @@
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
-                            org.wso2.am.analytics.publisher.*;version="${analytics.event.publisher.client.version}",
+                            org.wso2.am.analytics.publisher.*;version="${analytics.event.publisher.client.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

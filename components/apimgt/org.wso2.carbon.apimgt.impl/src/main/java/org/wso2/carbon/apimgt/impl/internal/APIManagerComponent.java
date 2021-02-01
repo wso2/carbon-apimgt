@@ -266,6 +266,11 @@ public class APIManagerComponent {
             // Initialize PasswordResolver
             PasswordResolverFactory.initializePasswordResolver();
 
+            boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
+            if (analyticsEnabled) {
+                ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
+            }
+
             APIUtil.init();
 
             // Activating UserPostSelfRegistration handler componeAPITemplateBuilderImplnt

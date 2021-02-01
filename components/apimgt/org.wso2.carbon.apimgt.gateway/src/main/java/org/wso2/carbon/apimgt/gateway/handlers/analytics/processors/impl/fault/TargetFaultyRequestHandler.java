@@ -40,7 +40,7 @@ public class TargetFaultyRequestHandler extends AbstractFaultHandler {
     }
 
     public TargetFaultyRequestHandler(RequestDataPublisher processor) {
-        super(FAULT_EVENT_TYPE.TARGET, processor);
+        super(FAULT_EVENT_TYPE.TARGET_CONNECTIVITY, processor);
     }
 
     @Override

@@ -23,9 +23,6 @@ package org.wso2.carbon.apimgt.usage.publisher.dto.enums;
 public enum EVENT_TYPE {
     SUCCESS,
     FAULTY,
-    RESOURCE_NOT_FOUND,
-    API_NOT_FOUND,
-    METHOD_NOT_ALLOWED,
     PROXY_API_INVOCATION,
     OTHER
 }

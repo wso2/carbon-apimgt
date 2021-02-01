@@ -129,7 +129,7 @@ public class SuccessRequestHandler implements RequestHandler {
         responseEvent.setEventType(Constants.SUCCESS_EVENT_TYPE);
 
         OffsetDateTime time = OffsetDateTime.now(Clock.systemUTC());
-        responseEvent.setRequestTimeStamp(time.toString());
+        responseEvent.setRequestTimestamp(time.toString());
 
         this.processor.publish(responseEvent);
     }
