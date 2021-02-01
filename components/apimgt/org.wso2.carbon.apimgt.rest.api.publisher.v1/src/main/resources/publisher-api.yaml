@@ -423,6 +423,55 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v1/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: deleteAPI
 
+  /apis/{apiId}/topics:
+    put:
+      tags:
+      - APIs
+      summary: Update Topics
+      description: This operation can be used to update topics of an existing API.
+      operationId: updateTopics
+      parameters:
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: API object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+
   /apis/{apiId}/swagger:
     get:
       tags:
@@ -6796,6 +6845,49 @@ components:
           type: array
           items:
             type: string
+
+    Topic:
+      title: Topic object
+      required:
+      - name
+      - mode
+      - description
+      type: object
+      properties:
+        id:
+          type: string
+          description: id
+          readOnly: true
+          example: 1222344
+        name:
+          maxLength: 50
+          minLength: 1
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
+          type: string
+          example: PizzaShackAPI
+        mode:
+          maxLength: 32766
+          type: string
+          example: This is a simple API for Pizza Shack online pizza delivery store.
+        description:
+          maxLength: 32766
+          type: string
+          example: This is a simple API for Pizza Shack online pizza delivery store.
+    TopicList:
+      title: Topic List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Topics returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     API:
       title: API object
       required:
@@ -7564,39 +7656,6 @@ components:
             $ref: '#/components/schemas/ResourcePath'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    Topic:
-      title: Topic
-      properties:
-        id:
-          type: integer
-          example: 1
-        name:
-          type: string
-          example: OrderbookUpdates
-        description:
-          type: string
-          example: Dolor sit amet
-        mode:
-          type: string
-          example: subscribe
-        payloadType:
-          type: string
-        payloadProperties:
-          type: array
-          items:
-            $ref: '#/components/schemas/TopicProperty'
-    TopicProperty:
-      title: TopicProperty
-      type: object
-      properties:
-        name:
-          type: string
-        dataType:
-          type: string
-        advanced:
-          type: string
-        description:
-          type: string
     APIProductOutdatedStatus:
       title: APIProduct is outdated status
       type: object

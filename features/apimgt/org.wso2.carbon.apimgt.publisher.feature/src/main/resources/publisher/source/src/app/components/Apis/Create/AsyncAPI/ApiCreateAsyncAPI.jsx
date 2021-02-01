@@ -238,7 +238,7 @@ export default function ApiCreateAsyncAPI(props) {
                             onChange={handleOnChange}
                             api={apiInputs}
                             isAPIProduct={false}
-                            hideEndpoint = {true}
+                            hideEndpoint = {false}
                             endpointPlaceholderText='Streaming Provider'
                             appendChildrenBeforeEndpoint
                         >

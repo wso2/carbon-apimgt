@@ -407,7 +407,7 @@ export default function DefaultAPIForm(props) {
                     )}
                 </Grid>
                 {appendChildrenBeforeEndpoint && !!children && children}
-                {!isAPIProduct && !hideEndpoint && !isWebSocket && (
+                {!isAPIProduct && !hideEndpoint && (
                     <TextField
                         fullWidth
                         id='itest-id-apiendpoint-input'

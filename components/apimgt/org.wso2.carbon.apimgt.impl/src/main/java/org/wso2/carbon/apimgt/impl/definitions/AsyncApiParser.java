@@ -5,7 +5,9 @@ import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import io.apicurio.datamodels.asyncapi.models.AaiServer;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Components;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Message;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Server;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1597,15 +1599,22 @@ public class AsyncApiParser extends APIDefinition {
         aaiDocument.info = aaiDocument.createInfo();
         aaiDocument.info.title = api.getId().getName();
         aaiDocument.info.version = api.getId().getVersion();
-        aaiDocument.servers = new HashMap<String, AaiServer>();
-        Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
-        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-        server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
-        server.protocol = api.getType().toLowerCase();
-        aaiDocument.addServer("production", server);
+        if (api.getType() != "WEBSUB") {
+            aaiDocument.servers = new HashMap<String, AaiServer>();
+            Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
+            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+            server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
+            server.protocol = api.getType().toLowerCase();
+            aaiDocument.addServer("production", server);
+        }
         aaiDocument.channels = new HashMap<String, AaiChannelItem>();
-        Aai20ChannelItem channelItem = aaiDocument.createChannelItem(api.getContext());
-        aaiDocument.addChannelItem(channelItem);
+        if (api.getType() == "WEBSUB") {
+            Aai20ChannelItem channelItem = aaiDocument.createChannelItem("*");
+            aaiDocument.addChannelItem(channelItem);
+        } else {
+            Aai20ChannelItem channelItem = aaiDocument.createChannelItem(api.getContext());
+            aaiDocument.addChannelItem(channelItem);
+        }
         return Library.writeDocumentToJSONString(aaiDocument);
     }
 

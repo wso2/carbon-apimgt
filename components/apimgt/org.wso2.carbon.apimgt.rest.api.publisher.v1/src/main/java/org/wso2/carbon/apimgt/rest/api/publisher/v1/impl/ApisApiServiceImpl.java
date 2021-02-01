@@ -356,6 +356,37 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response updateTopics(String apiId, TopicListDTO topicListDTO, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+
+        Set<URITemplate> uriTemplates = existingAPI.getUriTemplates();
+        uriTemplates.clear();
+
+        for (TopicDTO topicDTO : topicListDTO.getList()) {
+            URITemplate uriTemplate = new URITemplate();
+            uriTemplate.setUriTemplate(topicDTO.getName());
+            uriTemplate.setHTTPVerb(topicDTO.getMode().toUpperCase());
+            // TODO: Get these from proper locations
+            uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
+            uriTemplates.add(uriTemplate);
+        }
+        existingAPI.setUriTemplates(uriTemplates);
+
+        // TODO: Add scopes
+
+        try {
+            apiProvider.updateAPI(existingAPI);
+        } catch (FaultGatewaysException e) {
+            e.printStackTrace();
+        }
+        return Response.ok().build();
+    }
+
     /**
      * Get GraphQL Schema of given API
      *
@@ -3907,6 +3938,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             String definitionToAdd = validationResponse.getJsonContent();
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
+
+            //load topics from AsyncAPI
+            if (APIDTO.TypeEnum.WEBSUB.equals(apiDTOFromProperties.getType())){
+                try {
+                    apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
+                } catch (FaultGatewaysException e) {
+                    e.printStackTrace();
+                }
+            }
 
             APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());

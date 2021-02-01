@@ -200,6 +200,7 @@ public class APIMappingUtil {
         model.setScopes(scopes);
 
         //URI Templates
+        // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
         model.setUriTemplates(uriTemplates);
 
@@ -1363,7 +1364,8 @@ public class APIMappingUtil {
             }
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
-                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) ||
+                    (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -1390,6 +1392,9 @@ public class APIMappingUtil {
                 if(APIConstants.GRAPHQL_API.equals(model.getType())){
                     handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
                             + "' is invalid");
+                } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
+                    handleException("The WEBSUB operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
                 } else {
                     handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
                             + "' is invalid");
@@ -1399,6 +1404,9 @@ public class APIMappingUtil {
             if (!isHttpVerbDefined) {
                 if(APIConstants.GRAPHQL_API.equals(model.getType())) {
                     handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
+                    handleException("Topic '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
                     handleException("Resource '" + uriTempVal + "' has global parameters without " +
@@ -1918,13 +1926,19 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
         } else if (apiType.equals(APIConstants.API_TYPE_SOAP)) {
             supportedMethods = APIConstants.SOAP_DEFAULT_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_WEBSUB)) {
+            supportedMethods = APIConstants.WEBSUB_SUPPORTED_METHODS;
         } else {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
 
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setTarget("/*");
+            if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
+                operationsDTO.setTarget("*");
+            } else {
+                operationsDTO.setTarget("/*");
+            }
             operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);

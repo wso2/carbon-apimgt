@@ -1228,6 +1228,9 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList(new String[]{"QUERY", "MUTATION", "SUBSCRIPTION", "head", "options"})));
 
+    public static final Set<String> WEBSUB_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
@@ -1932,14 +1935,17 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL
+        HTTP, WS, GRAPHQL, WEBSUB
     }
+
+    public static final String API_TYPE_WEBSUB = "WEBSUB";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
 
     public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
     public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+    public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
