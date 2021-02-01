@@ -53,6 +53,8 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -106,6 +108,7 @@ import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -623,6 +626,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
             }
 
+            setSoapToRestSequences(publisherAPI, registry);
             registry.commitTransaction();
             transactionCommitted = true;
             return APIMapper.INSTANCE.toPublisherApi(api);
@@ -671,6 +675,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     Resource apiDocResource = registry.get(definitionPath);
                     String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                     api.setSwaggerDefinition(apiDocContent);
+                }
+                
+                if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
+                    List<SOAPToRestSequence> list = getSoapToRestSequences(registry, api, Direction.IN);
+                    list.addAll(getSoapToRestSequences(registry, api, Direction.OUT));
+                    api.setSoapToRestSequences(list);
                 }
 
                 PublisherAPI pubApi = APIMapper.INSTANCE.toPublisherApi(api) ; 
@@ -3629,5 +3639,88 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                         APIConstants.API_KEY);
         GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
         return apiArtifact;
+    }
+    
+    protected List<SOAPToRestSequence> getSoapToRestSequences(Registry registry, API api, Direction direction)
+            throws RegistryException, APIPersistenceException {
+        String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+                + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+                + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + "soap_to_rest"
+                + RegistryConstants.PATH_SEPARATOR;
+        if (direction == Direction.IN) {
+            resourcePath = resourcePath + "in";
+        } else if (direction == Direction.OUT) {
+            resourcePath = resourcePath + "out";
+        } else {
+            throw new APIPersistenceException("Invalid sequence type");
+        }
+
+        List<SOAPToRestSequence> sequences = new ArrayList<SOAPToRestSequence>();
+        if (registry.resourceExists(resourcePath)) {
+            Collection collection = (Collection) registry.get(resourcePath);
+            String[] resources = collection.getChildren();
+            for (String path : resources) {
+                Resource resource = registry.get(path);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                String resourceName;
+                if (resource.getProperty("resourcePath") != null) {
+                    resourceName = resource.getProperty("resourcePath") + "_" + resource.getProperty("method");
+                } else {
+                    resourceName = ((ResourceImpl) resource).getName();
+                }
+                resourceName = resourceName.replaceAll("\\.xml", "");
+                String httpMethod = resource.getProperty("method");
+
+                SOAPToRestSequence seq = new SOAPToRestSequence(httpMethod, resourceName, content, direction);
+                seq.setUuid(resource.getUUID());
+                sequences.add(seq);
+            }
+        }
+        return sequences;
+    }
+    
+    protected void setSoapToRestSequences(PublisherAPI publisherAPI, Registry registry) throws RegistryException {
+        if (publisherAPI.getSoapToRestSequences() != null && !publisherAPI.getSoapToRestSequences().isEmpty()) {
+            List<SOAPToRestSequence> sequence = publisherAPI.getSoapToRestSequences();
+            for (SOAPToRestSequence soapToRestSequence : sequence) {
+
+                String apiResourceName = soapToRestSequence.getPath();
+                if (apiResourceName.startsWith("/")) {
+                    apiResourceName = apiResourceName.substring(1);
+                }
+                String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil.replaceEmailDomain(publisherAPI.getProviderName())
+                        + RegistryConstants.PATH_SEPARATOR + publisherAPI.getApiName()
+                        + RegistryConstants.PATH_SEPARATOR + publisherAPI.getVersion()
+                        + RegistryConstants.PATH_SEPARATOR;
+                if (soapToRestSequence.getDirection() == Direction.OUT) {
+                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "out"
+                            + RegistryConstants.PATH_SEPARATOR;
+                } else {
+                    resourcePath = resourcePath + "soap_to_rest" + RegistryConstants.PATH_SEPARATOR + "in"
+                            + RegistryConstants.PATH_SEPARATOR;
+                }
+
+                resourcePath = resourcePath + apiResourceName + "_" + soapToRestSequence.getMethod() + ".xml";
+
+                Resource regResource;
+                if (!registry.resourceExists(resourcePath)) {
+                    regResource = registry.newResource();
+                } else {
+                    regResource = registry.get(resourcePath);
+                }
+                regResource.setContent(soapToRestSequence.getContent());
+                regResource.addProperty("method", soapToRestSequence.getMethod());
+                if (regResource.getProperty("resourcePath") != null) {
+                    regResource.removeProperty("resourcePath");
+                }
+                regResource.addProperty("resourcePath", apiResourceName);
+                regResource.setMediaType("text/xml");
+                registry.put(resourcePath, regResource);
+            }
+
+        }
+
     }
 }
