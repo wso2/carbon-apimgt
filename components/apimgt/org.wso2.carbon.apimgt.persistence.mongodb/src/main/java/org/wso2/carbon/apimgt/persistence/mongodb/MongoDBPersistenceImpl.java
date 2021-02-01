@@ -693,9 +693,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                     )
             );
         } catch (IOException | PersistenceException e) {
-            log.error("Error when extracting text content from file ", e);
-            throw new DocumentationPersistenceException("Failed to documentation content for " + docId +
-                    " in mongodb, for api " + apiId);
+            throw new DocumentationPersistenceException("Failed to extract documentation content for " + docId +
+                    " in mongodb, for api " + apiId, e);
         }
     }
 
