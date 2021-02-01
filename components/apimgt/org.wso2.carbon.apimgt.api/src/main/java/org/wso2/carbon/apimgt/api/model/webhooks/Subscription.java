@@ -25,7 +25,6 @@ import java.util.Date;
  * This class represents the model for webhook subscriptions
  */
 public class Subscription implements Serializable {
-
     private String apiKey;
     private String tenantDomain;
     private String apiUuid;
@@ -37,14 +36,6 @@ public class Subscription implements Serializable {
     private long expiryTime;
     private Date lastDelivery;
     private int lastDeliveryState;
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
 
     public String getAppID() {
         return appID;
@@ -130,5 +121,15 @@ public class Subscription implements Serializable {
 
     public void setApiUuid(String apiUuid) {
         this.apiUuid = apiUuid;
+    }
+
+    public String getApiKey() {
+
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+
+        this.apiKey = apiKey;
     }
 }

@@ -32,8 +32,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class is responsible for Mapping Webhook API topic related entities to
+ * REST API topic related DTOs.
+ */
 public class TopicMappingUtil {
 
+    /**
+     * Converts Set of Topic objects to DTO.
+     *
+     * @param topics set of Topic objects
+     * @return TopicListDTO containing TopicDTOs
+     */
     public static TopicListDTO fromTopicListToDTO(Set<Topic> topics) {
 
         TopicListDTO topicListDTO = new TopicListDTO();
@@ -50,14 +60,25 @@ public class TopicMappingUtil {
         return topicListDTO;
     }
 
+    /**
+     * Converts Topic object to DTO.
+     *
+     * @param topic Topic object
+     * @return TopicDTO
+     */
     public static TopicDTO fromTopicToDTO(Topic topic) {
         TopicDTO topicDTO = new TopicDTO();
         topicDTO.setApiId(topic.getApiId());
         topicDTO.setName(topic.getName());
-        topicDTO.setSubscribeURL(topic.getSubscribeURL());
         return topicDTO;
     }
 
+    /**
+     * Converts Set of Subscription objects to SubscriptionListDTO.
+     *
+     * @param subscriptions Set of Subscription objects
+     * @return SubscriptionListDTO containing SubscriptionDTOs
+     */
     public static TopicSubscriptionListDTO fromSubscriptionListToDTO(Set<Subscription> subscriptions) {
         TopicSubscriptionListDTO topicSubscriptionListDTO = new TopicSubscriptionListDTO();
         List<TopicSubscriptionDTO> subscriptionDTOs = topicSubscriptionListDTO.getList();
@@ -74,9 +95,16 @@ public class TopicMappingUtil {
         return topicSubscriptionListDTO;
     }
 
+    /**
+     * Converts a Subscription object to DTO.
+     *
+     * @param subscription Subscription object
+     * @return SubscriptionDTO object
+     */
     public static TopicSubscriptionDTO fromSubscriptionToDTO(Subscription subscription) {
 
         TopicSubscriptionDTO topicSubscriptionDTO = new TopicSubscriptionDTO();
+        topicSubscriptionDTO.setTopic(subscription.getTopic());
         topicSubscriptionDTO.setApiId(subscription.getApiUuid());
         topicSubscriptionDTO.setAppId(subscription.getAppID());
         topicSubscriptionDTO.setCallBackUrl(subscription.getCallback());
@@ -85,8 +113,15 @@ public class TopicMappingUtil {
         return topicSubscriptionDTO;
     }
 
+    /**
+     * Converts Java Date to standard String.
+     *
+     * @param date Standard java date object
+     * @return String representation of the date
+     */
     private static String getDateAsString(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        // do not change this format. It is binding to the format specified in the dev portal.
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         return dateFormat.format(date);
     }
 }

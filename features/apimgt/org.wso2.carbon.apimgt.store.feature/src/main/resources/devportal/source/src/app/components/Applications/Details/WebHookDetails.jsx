@@ -35,6 +35,13 @@ import Button from '@material-ui/core/Button';
 import Api from 'AppData/api';
 import _ from 'lodash'
 import moment from 'moment'
+import Box from '@material-ui/core/Box';
+import CopyToClipboard from 'react-copy-to-clipboard'
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+import TextField from '@material-ui/core/TextField';
+import CancelIcon from '@material-ui/icons/Cancel';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
 const useStyles = makeStyles((theme) => (
     {
@@ -74,21 +81,48 @@ const useStyles = makeStyles((theme) => (
             },
         },
         listWrapper: {
-            width: '40%'
+            width: '50%'
         },
         subscriptionRow: {
             paddingLeft: '16px',
         },
-        subscriptionUrl: {
-            fontSize: '14px',
+        callbackurl: {
+            fontSize: '12px',
         },
         subscriptionTimestamp: {
             float: 'right'
         },
         SubscriptionHeader: {
-            paddingBottom: '0px'
-        }
-
+            paddingBottom: '0px',
+            paddingLeft: '0px',
+            paddingTop: '0px',
+        },
+        topicRow: {
+            paddingTop: '0px',
+            paddingBottom: '0px',
+            paddingLeft: '0px',
+            paddingRight: '0px'
+        },
+        bootstrapRoot: {
+            padding: 0,
+            'label + &': {
+                marginTop: theme.spacing(3),
+            },
+        },
+        bootstrapInput: {
+            borderRadius: 4,
+            backgroundColor: theme.palette.common.white,
+            border: '1px solid #ced4da',
+            padding: '5px 12px',
+            marginTop: '11px',
+            width: 240,
+            transition: theme.transitions.create(['border-color', 'box-shadow']),
+            '&:focus': {
+                borderColor: '#80bdff',
+                boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+            },
+            fontSize: 12,
+        },
     }
 ));
 
@@ -105,20 +139,20 @@ export default function WebHookDetails(props) {
 
     const [allTopics, setAllTopics] = useState('');
     const [subscribedTopics, setSubscribedTopics] = useState('');
+    const [api, setApi] = useState('');
     const [value, setValue] = React.useState('existing');
 
     const handleChange = (event) => {
         setValue(event.target.value);
     };
 
-    function handleURLCopy(url) {
-        const textElement = document.createElement('textarea');
-        document.body.appendChild(textElement);
-        textElement.value = url;
-        textElement.select();
-        document.execCommand("copy");
-        document.body.removeChild(textElement);
-        Alert.info(url + ' was copied to clipboard');
+    function generateGenericWHSubscriptionUrl(topicName) {
+        const apiEndpointUrl = api.endpointURLs[0].URLs.https;
+        return `${apiEndpointUrl}?hub.topic=${topicName}&hub.callback=https://placeholder.com&hub.mode=subscribe&hub.secret=some_secret&hub.lease_seconds=50000000`;
+    }
+
+    function onCopy(message) {
+        Alert.info(message);
     }
 
     function getRelativeTIme(standardTime) {
@@ -126,58 +160,33 @@ export default function WebHookDetails(props) {
     }
 
     useEffect(() => {
-        const api = new Api();
-        const promisedTopics = api.getAllTopics(apiId);
-        // TODO: get all topics available for an web-sub API
+        const apiClient = new Api();
+
+        const promisedApi = apiClient.getAPIById(apiId);
+        promisedApi.then((response) => {
+            setApi(response.obj);
+        }).catch((error) => {
+            console.log(error);
+            Alert.error('Error while retrieving api data');
+        });
+
+        const promisedTopics = apiClient.getAllTopics(apiId);
         promisedTopics.then((response) => {
-
+            console.log(response);
+            setAllTopics(response.obj);
         }).catch((error) => {
-
+            console.log(error);
+            Alert.error('Error while retrieving api data');
         });
 
-        const response_all_topics = {
-            count: 2,
-            list: [
-                {name: 'order_books', apiId: 'api-id-123', subscribeURL: 'www.host.com'},
-                {name: 'order_dvds', apiId: 'api-id-123', subscribeURL: 'www.xyz.com'}
-            ]
-        };
-        setAllTopics(response_all_topics);
-
-
-        // TODO: get all topics an particular application has subscribed of an API
-        const promisedSubscriptions = api.getTopicSubscriptions(apiId, applicationId);
+        const promisedSubscriptions = apiClient.getTopicSubscriptions(apiId, applicationId);
         promisedSubscriptions.then((response) => {
-
+           const sortedSubscriptions = _.groupBy(response.obj.list, 'topic');
+           setSubscribedTopics(sortedSubscriptions);
         }).catch((error) => {
-
+            console.log(error);
+            Alert.error('Error while retrieving api data');
         });
-        const subscriptions = {
-            count: 3,
-            list: [
-                {
-                    name: 'orderbooks',
-                    callBackUrl: 'www.google.com',
-                    deliveryTime: '2016-03-07 15:13:49',
-                    deliveryStatus: 1
-                },
-                {
-                    name: 'orderbooks',
-                    callBackUrl: 'www.msn.com',
-                    deliveryTime: '2018-03-07 15:13:49',
-                    deliveryStatus: 1
-                },
-                {
-                    name: 'orderSomethingElse',
-                    callBackUrl: 'www.myspace.com',
-                    deliveryTime: '2019-03-07 15:13:49',
-                    deliveryStatus: 1
-                },
-            ]
-        };
-        const sortedSubscriptions = _.groupBy(subscriptions.list, 'name');
-        // Object.entries(sortedSubscriptions).forEach(([key, value])=> {console.log(key); value.map((topic, index) => {console.log(topic.callback)})});
-        setSubscribedTopics(sortedSubscriptions);
     }, []);
 
     return (
@@ -203,25 +212,45 @@ export default function WebHookDetails(props) {
                             <ListItem className={classes.SubscriptionHeader}>
                                 <ListItemText primary={key}/>
                             </ListItem>
-                            {subscribedTopics[key].map((topic, index) => (
-                                <Grid container className={classes.subscriptionRow} direction="row">
+                            {subscribedTopics[key].map((subscription, index) => (
+                                <Grid container direction="row">
                                     <Grid item xs={1}>
-                                        <CheckCircleIcon style={{color: 'green', fontSize: '14px', paddingTop: '5px'}}/>
+                                        {subscription.deliveryStatus && subscription.deliveryStatus === 1 &&
+                                        <CheckCircleIcon style={{color: 'green', fontSize: '14px', paddingTop: '3px'}}/>
+                                        }
+                                        {subscription.deliveryStatus && (subscription.deliveryStatus === 2) &&
+                                        <CancelIcon style={{color: 'red', fontSize: '14px', paddingTop: '3px'}}/>
+                                        }
+                                        {!subscription.deliveryStatus &&
+                                        <RemoveCircleIcon style={{color: 'black', fontSize: '14px', paddingTop: '3px'}}/>
+                                        }
                                     </Grid>
-                                    <Grid item xs={8} className={classes.subscriptionUrl}>
+                                    <Grid item xs={8}>
                                         <Typography
                                             color="textPrimary"
                                             display="block"
-                                        >{topic.callBackUrl}</Typography>
+                                            className={classes.callbackurl}>
+                                            {subscription.callBackUrl}
+                                        </Typography>
                                     </Grid>
                                     <Grid item xs={3}>
-                                        <Typography
-                                            color="textSecondary"
-                                            display="block"
-                                            variant="caption"
-                                            className={classes.subscriptionTimestamp}>
-                                            {getRelativeTIme(topic.deliveryTime)}
-                                        </Typography>
+                                        {subscription.deliveryTime ? (
+                                            <Typography
+                                                color="textSecondary"
+                                                display="block"
+                                                variant="caption"
+                                                className={classes.subscriptionTimestamp}>
+                                                {getRelativeTIme(subscription.deliveryTime)}
+                                            </Typography>
+                                        ): (
+                                            <Typography
+                                                color="textSecondary"
+                                                display="block"
+                                                variant="caption"
+                                                className={classes.subscriptionTimestamp}>
+                                                Delivery data not available
+                                            </Typography>
+                                        )}
                                     </Grid>
                                     <Divider component="li"/>
                                 </Grid>
@@ -230,22 +259,6 @@ export default function WebHookDetails(props) {
                         </>
                     ))
                 }
-                {/*{subscribedTopics.topics.map((topic, index) => (*/}
-                {/*<>*/}
-                {/*<ListItem>*/}
-                {/*<ListItemIcon>*/}
-                {/*<CheckCircleIcon style={{ color: 'green' }} />*/}
-                {/*</ListItemIcon>*/}
-                {/*<ListItemText primary={topic.topic_name} secondary={topic.call_back}/>*/}
-                {/*<Typography*/}
-                {/*color="textSecondary"*/}
-                {/*display="block"*/}
-                {/*variant="caption"*/}
-                {/*>Few seconds ago</Typography>*/}
-                {/*</ListItem>*/}
-                {/*<Divider component="li"/>*/}
-                {/*</>*/}
-                {/*))}*/}
             </List>
             }
             {allTopics && value === 'all' &&
@@ -253,19 +266,38 @@ export default function WebHookDetails(props) {
                 <Divider/>
                 {allTopics.list.map((topic, index) => (
                     <>
-                        <ListItem>
-                            <ListItemText primary={topic.name}/>
-                            <Button
-                                size="small"
-                                variant='outlined'
-                                className={classes.buttonElm}
-                                onClick={() => handleURLCopy(topic.subscribeURL)}
-                            >
-                                <FormattedMessage
-                                    id={'Applications.Details.Subscriptions.api.webhooks.subscribe'}
-                                    defaultMessage='Subscribe to topic'
-                                />
-                            </Button>
+                        <ListItem className={classes.topicRow}>
+                            <Grid container direction='row'>
+                                <Grid item xs={6}> <ListItemText primary={topic.name} style={{marginTop: '11px'}}/> </Grid>
+                                <Grid item xs={6}>
+                                    <div style={{float:'right'}}>
+                                    <TextField
+                                        defaultValue={generateGenericWHSubscriptionUrl(topic.name)}
+                                        id='bootstrap-input'
+                                        InputProps={{
+                                            disableUnderline: true,
+                                            readOnly: true,
+                                            classes: {
+                                                root: classes.bootstrapRoot,
+                                                input: classes.bootstrapInput,
+                                            },
+                                        }}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                            className: classes.bootstrapFormLabel,
+                                        }}
+                                    />
+                                    <CopyToClipboard
+                                        text={generateGenericWHSubscriptionUrl(topic.name)}
+                                        onCopy={() => onCopy('Subscription url copied for ' + api.endpointURLs[0].environmentName)}
+                                    >
+                                        <IconButton aria-label='Copy to clipboard'>
+                                            <Icon color='secondary'>file_copy</Icon>
+                                        </IconButton>
+                                    </CopyToClipboard>
+                                    </div>
+                                </Grid>
+                            </Grid>
                         </ListItem>
                         <Divider component="li"/>
                     </>

@@ -2806,7 +2806,7 @@ paths:
             "https://localhost:9443/api/am/devportal/v2/sdk-gen/languages"
 
   ######################################################
-  # The Web hook API topic List
+  # The Web hook API topic details
   ######################################################
   /topics/{apiId}:
     get:
@@ -2851,9 +2851,9 @@ paths:
         tags:
         - Topics
         summary: |
-          Get available subscriptions for a given application.
+          Get available web hook subscriptions for a given application.
         description: |
-          This operation will provide a list of topic subscriptions for a given application. If the api id is provided
+          This operation will provide a list of web hook topic subscriptions for a given application. If the api id is provided
           results will be filtered by the api Id.
         parameters:
         - $ref: '#/components/parameters/applicationId-Q'
@@ -4143,6 +4143,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Topic'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     Topic:
       title: Topic
       type: object
@@ -4153,9 +4155,6 @@ components:
         name:
           type: string
           example: orderBooks
-        subscribeURL:
-          type: string
-          example: http://localhost:8280/demo/1.0.0?hub.topic=gitHubAll&hub.callback=https%3A%2F%2Fwebhook.site%2F28165209-edd2-43d9-b3c6-519e7551b813&hub.mode=subscribe&hub.secret=dfdffsgfsgfgfhhh&hub.lease_seconds=50000000
     TopicSubscriptionList:
       title: Subscribed Topic List
       type: object
@@ -4169,6 +4168,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TopicSubscription'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     TopicSubscription:
       title: Topic Subscription
       type: object
@@ -4179,10 +4180,7 @@ components:
         appId:
           type: string
           example: faae5fcc-cbae-40c4-bf43-89931630d313
-        apiKey:
-          type: string
-          example: faae5fcc-cbae-40c4-bf43-89931630d313
-        name:
+        topic:
           type: string
           example: orderBooks
         callBackUrl:

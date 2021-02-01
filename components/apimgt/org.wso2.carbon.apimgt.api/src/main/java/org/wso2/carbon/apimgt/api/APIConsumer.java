@@ -990,10 +990,18 @@ public interface APIConsumer extends APIManager {
      *
      * @param apiId API UUID
      * @return Set of Topics defined in a specified Async API
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while retrieving data
      */
     Set<Topic> getTopics(String apiId) throws APIManagementException;
 
+    /**
+     * Retrieves webhook subscriptions for a webhook API
+     *
+     * @param applicationId Application UUID
+     * @param apiId         API UUID
+     * @return Set of Subscriptions of application to a API
+     * @throws APIManagementException if an error occurs while retrieving data
+     */
     Set<Subscription> getTopicSubscriptions(String applicationId, String apiId) throws APIManagementException;
 
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)

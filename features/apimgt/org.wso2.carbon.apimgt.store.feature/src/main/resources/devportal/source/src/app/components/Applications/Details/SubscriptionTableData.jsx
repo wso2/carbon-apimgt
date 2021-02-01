@@ -230,11 +230,10 @@ class SubscriptionTableData extends React.Component {
                 apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy, applicationId
             },
         } = this.props;
-        //console.log(this.props);
         const {openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier} = this.state;
         let link = <Link to={'/apis/' + apiId} external>{apiInfo.name + ' - ' + apiInfo.version + ' '}
             <MDIcon path={mdiOpenInNew} size='12px'/></Link>;
-        if (true) {
+        if (apiInfo.type === 'WEBSUB') {
             link = <Link
                 to={'/applications/' + applicationId + '/webhooks/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
         }
