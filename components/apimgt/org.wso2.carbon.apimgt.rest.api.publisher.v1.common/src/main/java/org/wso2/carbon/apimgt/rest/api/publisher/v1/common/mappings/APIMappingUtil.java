@@ -1032,8 +1032,8 @@ public class APIMappingUtil {
                 .getProviderName()));
 
         //Get Swagger definition which has URL templates, scopes and resource details
-        model.getId().setUuid(model.getUuid());
-        if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+         model.getId().setUuid(model.getUuid());
+        if (!APIUtil.isStreamingApi(model)) {
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition;
             if (model.getSwaggerDefinition() != null) {
@@ -1041,7 +1041,7 @@ public class APIMappingUtil {
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId(), tenantDomain);
             }
-            
+
             apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
@@ -1968,6 +1968,12 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
         } else if (apiType.equals(APIConstants.API_TYPE_SOAP)) {
             supportedMethods = APIConstants.SOAP_DEFAULT_METHODS;
+        } else if (apiType.equals(APIConstants.APITransportType.WS.toString())) {
+            supportedMethods = APIConstants.WS_DEFAULT_METHODS;
+        } else if (apiType.equals(APIConstants.APITransportType.SSE.toString())) {
+            supportedMethods = APIConstants.SSE_DEFAULT_METHODS;
+        } else if (apiType.equals(APIConstants.APITransportType.WEBSUB.toString())) {
+            supportedMethods = APIConstants.WEBSUB_DEFAULT_METHODS;
         } else {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }

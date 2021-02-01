@@ -498,9 +498,9 @@ public class APIExportUtil {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-            //If a web socket API is exported, it does not contain a swagger file.
+            //If a streaming API is exported, it does not contain a swagger file.
             //Therefore swagger export is only required for REST, Graphql or SOAP based APIs
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiToReturn.getType())) {
+            if (!APIUtil.isStreamingApi(apiToReturn)) {
                 //For Graphql APIs, the graphql schema definition, swagger and the serialized api object are exported.
                 //For Graphql APIs, the URI templates and scopes are not cleared from the API object. Because we cannot
                 //get graphql operation info from the swagger.

@@ -2056,10 +2056,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // wsdls for each update.
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
-                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
                 String wsdlURL;
-                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
-                        ("production_endpoints")) {
+                if (!APIUtil.isStreamingApi(api) && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString())
+                        && response1.has("production_endpoints")) {
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
 
                     if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
@@ -2398,7 +2397,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -2432,7 +2431,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -2466,7 +2465,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -3380,7 +3379,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // copy wsdl 
+        // copy wsdl
         if (existingAPI.getWsdlUrl() != null) {
             ResourceFile wsdl = getWSDL(existingApiId, tenantDomain);
             if (wsdl != null) {

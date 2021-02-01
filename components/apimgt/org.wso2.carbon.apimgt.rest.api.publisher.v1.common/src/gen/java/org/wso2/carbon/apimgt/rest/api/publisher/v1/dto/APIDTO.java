@@ -67,7 +67,10 @@ public class APIDTO   {
         WS("WS"),
         SOAPTOREST("SOAPTOREST"),
         SOAP("SOAP"),
-        GRAPHQL("GRAPHQL");
+        GRAPHQL("GRAPHQL"),
+        SSE("SSE"),
+        WEBSUB("WEBSUB");
+
         private String value;
 
         TypeEnum (String v) {

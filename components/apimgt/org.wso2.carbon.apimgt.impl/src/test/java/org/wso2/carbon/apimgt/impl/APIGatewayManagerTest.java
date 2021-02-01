@@ -259,6 +259,269 @@ public class APIGatewayManagerTest {
         Assert.assertEquals(failedEnvironmentsMap.get(prodEnvironmentName), errorMessage);
     }
 
+//    /* Streaming API */
+//
+//    // WebSocket [BEGIN]
+//
+//    @Test public void testPublishingNewWebSocketAPIToGateway()
+//            throws Exception {
+//
+//        API api = new API(apiIdentifier);
+//        api.setType("WS");
+//        api.setAsPublishedDefaultVersion(true);
+//        api.setAsDefaultVersion(true);
+//        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+//        Set<String> environments = new HashSet<String>();
+//        environments.add(prodEnvironmentName);
+//        environments.add(null);
+//        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
+//
+//        // Test when environments are not defined for API
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        // Test adding LocalEntry
+//        api.setEnvironments(environments);
+//        api.setEndpointConfig(sandBoxEndpointConfig);
+//        api.setUUID(apiUUId);
+//
+//        // Test when API's environment endpoint configuration is not available
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        // Test deploying 'INLINE' type API to gateway
+//        api.setImplementation("INLINE");
+//        api.setEndpointConfig(prodEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        // Test deploying 'ENDPOINT' type API to gateway
+//        api.setImplementation("ENDPOINT");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        // Test deploying default version of the API and updating the existing default API
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        // Test deploying API, if secure vault is enabled
+//        api.setEndpointSecured(true);
+//        Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//    }
+//
+//    @Test public void testPublishingExistingWebSocketAPIToGateway()
+//            throws AxisFault, APIManagementException, XMLStreamException, RegistryException {
+//
+//        API api = new API(apiIdentifier);
+//        api.setType("WS");
+//        api.setAsPublishedDefaultVersion(true);
+//        api.setAsDefaultVersion(true);
+//        api.setUUID(apiUUId);
+//        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+//        Set<String> environments = new HashSet<String>();
+//        environments.add(prodEnvironmentName);
+//        environments.add(null);
+//        api.setEnvironments(environments);
+//        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//
+//        // Test deleting existing API from production environment, if matching production endpoint configuration is
+//        // not found in API's endpoint config
+//        api.setEndpointConfig(sandBoxEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating 'INLINE' type WebSocket API to gateway
+//        api.setImplementation("INLINE");
+//        api.setEndpointConfig(prodEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating 'ENDPOINT' type WebSocket API to gateway
+//        api.setImplementation("ENDPOINT");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating default version of the API
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying API, if secure vault is enabled
+//        api.setEndpointSecured(true);
+//        Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//    }
+//
+//    // WebSocket [END]
+//
+//    // Server Sent Events [BEGIN]
+//
+//    @Test public void testPublishingNewSSEAPIToGateway()
+//            throws Exception {
+//
+//        API api = new API(apiIdentifier);
+//        api.setType("SSE");
+//        api.setAsPublishedDefaultVersion(true);
+//        api.setAsDefaultVersion(true);
+//        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+//        Set<String> environments = new HashSet<String>();
+//        environments.add(prodEnvironmentName);
+//        environments.add(null);
+//        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
+//
+//        //Test when environments are not defined for API
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test adding LocalEntry
+//        api.setEnvironments(environments);
+//        api.setEndpointConfig(sandBoxEndpointConfig);
+//        api.setUUID(apiUUId);
+//
+//        //Test when API's environment endpoint configuration is not available
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying 'INLINE' type API to gateway
+//        api.setImplementation("INLINE");
+//        api.setEndpointConfig(prodEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying 'ENDPOINT' type API to gateway
+//        api.setImplementation("ENDPOINT");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying default version of the API and updating the existing default API
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying API, if secure vault is enabled
+//        api.setEndpointSecured(true);
+//        Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//    }
+//
+//    @Test public void testPublishingExistingSSEAPIToGateway()
+//            throws AxisFault, APIManagementException, XMLStreamException, RegistryException {
+//
+//        API api = new API(apiIdentifier);
+//        api.setType("SSE");
+//        api.setAsPublishedDefaultVersion(true);
+//        api.setAsDefaultVersion(true);
+//        api.setUUID(apiUUId);
+//        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+//        Set<String> environments = new HashSet<String>();
+//        environments.add(prodEnvironmentName);
+//        environments.add(null);
+//        api.setEnvironments(environments);
+//        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//
+//        //Test deleting existing API from production environment, if matching production endpoint configuration is
+//        // not found in API's endpoint config
+//        api.setEndpointConfig(sandBoxEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating 'INLINE' type WebSocket API to gateway
+//        api.setImplementation("INLINE");
+//        api.setEndpointConfig(prodEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating 'ENDPOINT' type WebSocket API to gateway
+//        api.setImplementation("ENDPOINT");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating default version of the API
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying API, if secure vault is enabled
+//        api.setEndpointSecured(true);
+//        Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//    }
+//
+//    // Server Sent Events [END]
+//
+//    // WebSub [BEGIN]
+//
+//    @Test public void testPublishingNewWebSubAPIToGateway()
+//            throws Exception {
+//
+//        API api = new API(apiIdentifier);
+//        api.setType("WEBSUB");
+//        api.setAsPublishedDefaultVersion(true);
+//        api.setAsDefaultVersion(true);
+//        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+//        Set<String> environments = new HashSet<String>();
+//        environments.add(prodEnvironmentName);
+//        environments.add(null);
+//        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(null);
+//
+//        //Test when environments are not defined for API
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test adding LocalEntry
+//        api.setEnvironments(environments);
+//        api.setEndpointConfig(sandBoxEndpointConfig);
+//        api.setUUID(apiUUId);
+//
+//        //Test when API's environment endpoint configuration is not available
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying 'INLINE' type API to gateway
+//        api.setImplementation("INLINE");
+//        api.setEndpointConfig(prodEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying 'ENDPOINT' type API to gateway
+//        api.setImplementation("ENDPOINT");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying default version of the API and updating the existing default API
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying API, if secure vault is enabled
+//        api.setEndpointSecured(true);
+//        Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//    }
+//
+//    @Test public void testPublishingExistingWebSubAPIToGateway()
+//            throws AxisFault, APIManagementException, XMLStreamException, RegistryException {
+//
+//        API api = new API(apiIdentifier);
+//        api.setType("WEBSUB");
+//        api.setAsPublishedDefaultVersion(true);
+//        api.setAsDefaultVersion(true);
+//        api.setUUID(apiUUId);
+//        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+//        Set<String> environments = new HashSet<String>();
+//        environments.add(prodEnvironmentName);
+//        environments.add(null);
+//        api.setEnvironments(environments);
+//        Mockito.when(apiGatewayAdminClient.getApi(tenantDomain, apiIdentifier)).thenReturn(apiData);
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//
+//        //Test deleting existing API from production environment, if matching production endpoint configuration is
+//        // not found in API's endpoint config
+//        api.setEndpointConfig(sandBoxEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating 'INLINE' type WebSocket API to gateway
+//        api.setImplementation("INLINE");
+//        api.setEndpointConfig(prodEndpointConfig);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating 'ENDPOINT' type WebSocket API to gateway
+//        api.setImplementation("ENDPOINT");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test updating default version of the API
+//        Mockito.when(apiGatewayAdminClient.getDefaultApi(tenantDomain, apiIdentifier)).thenReturn(defaultAPIdata);
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//
+//        //Test deploying API, if secure vault is enabled
+//        api.setEndpointSecured(true);
+//        Mockito.when(config.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
+//        Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
+//    }
+//
+//    // WebSub [END]
+
 
 
 

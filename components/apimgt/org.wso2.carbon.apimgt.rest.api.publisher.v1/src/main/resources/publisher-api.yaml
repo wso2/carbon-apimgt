@@ -6990,6 +6990,8 @@ components:
           - SOAPTOREST
           - SOAP
           - GRAPHQL
+          - SSE
+          - WEBSUB
         transport:
           type: array
           description: |

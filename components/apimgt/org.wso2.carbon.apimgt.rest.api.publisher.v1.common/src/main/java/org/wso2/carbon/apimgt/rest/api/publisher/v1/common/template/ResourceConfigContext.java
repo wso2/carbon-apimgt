@@ -67,6 +67,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
         if (api != null) {
             context.put("resources", api.getUriTemplates());
             context.put("apiStatus", api.getStatus());
+            context.put("apiType", api.getType());
             context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
         } else if (apiProduct != null) {
             //Here we aggregate duplicate resourceURIs of an API and populate httpVerbs set in the uri template
@@ -92,6 +93,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
             }
 
             context.put("apiStatus", apiProduct.getState());
+            context.put("apiType", apiProduct.getType());
             context.put("aggregates", aggregateResources);
         }
 

@@ -274,8 +274,8 @@ public final class APIImportUtil {
                 importedApi.setUuid(uuid);
             }
 
-            //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
+            //Swagger definition will only be available of API type HTTP. Streaming APIs do not have it.
+            if (!APIUtil.isStreamingApi(importedApi)) {
                 String swaggerContent = APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive);
 
                 // Check whether any of the resources should be removed from the API when updating,
