@@ -142,6 +142,7 @@
   "Apis.Details.Overview.sdk.generation.show.subscriptions": "Subscriptions",
   "Apis.Details.Overview.sdk.generation.title": "Software Development Kits",
   "Apis.Details.Overview.signin.subscribe.btn.link": "Sign in to Subscribe",
+  "Apis.Details.Overview.subscribe.available": "Subscription tiers available ",
   "Apis.Details.Overview.subscribe.count.plural": "Applications subscribed.",
   "Apis.Details.Overview.subscribe.count.singular": "Application subscribed.",
   "Apis.Details.Overview.subscribe.count.zero": "No application subscriptions.",
