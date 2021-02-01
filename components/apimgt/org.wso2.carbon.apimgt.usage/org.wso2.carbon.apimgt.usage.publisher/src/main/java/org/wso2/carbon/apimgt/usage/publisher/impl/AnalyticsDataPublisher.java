@@ -45,10 +45,14 @@ public class AnalyticsDataPublisher {
 
     }
 
-    public static synchronized AnalyticsDataPublisher getInstance() {
+    public static AnalyticsDataPublisher getInstance() {
         if (instance == null) {
-            instance = new AnalyticsDataPublisher();
-            instance.init();
+            synchronized (AnalyticsDataPublisher.class) {
+                if (instance == null) {
+                    instance = new AnalyticsDataPublisher();
+                    instance.init();
+                }
+            }
         }
         return instance;
     }

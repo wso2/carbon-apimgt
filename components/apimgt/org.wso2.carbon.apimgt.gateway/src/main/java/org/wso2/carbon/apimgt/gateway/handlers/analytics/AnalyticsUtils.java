@@ -22,7 +22,6 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.usage.publisher.dto.enums.EVENT_TYPE;
 import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,19 +34,6 @@ import java.util.Map;
 public class AnalyticsUtils {
     private static final String ANALYTICS_REQUEST_TYPE = "analytics_request_type";
     private static final String THROTTLED_OUT_REQUEST = "throttled_out_request";
-
-    public static void markedAsThrottled(MessageContext messageContext) {
-        messageContext.setProperty(ANALYTICS_REQUEST_TYPE, THROTTLED_OUT_REQUEST);
-    }
-
-    public static boolean isRequestThrottledOut(MessageContext messageContext) {
-        if (messageContext.getPropertyKeySet().contains(ANALYTICS_REQUEST_TYPE)) {
-            String type = (String) messageContext.getProperty(ANALYTICS_REQUEST_TYPE);
-            return THROTTLED_OUT_REQUEST.equals(type);
-        } else {
-            return false;
-        }
-    }
 
     public static boolean isAuthFaultRequest(int errorCode) {
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
@@ -110,24 +96,6 @@ public class AnalyticsUtils {
 
     public static boolean isProxyAPI(MessageContext messageContext) {
         return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API);
-    }
-
-    public static EVENT_TYPE getEventType(MessageContext messageContext) {
-        if (isSuccessRequest(messageContext)) {
-            return EVENT_TYPE.SUCCESS;
-        } else if (isFaultRequest(messageContext)) {
-            return EVENT_TYPE.FAULTY;
-        } else if (isResourceNotFound(messageContext)) {
-            return EVENT_TYPE.RESOURCE_NOT_FOUND;
-        } else if (isMethodNotAllowed(messageContext)) {
-            return EVENT_TYPE.METHOD_NOT_ALLOWED;
-        } else if (isAPINotFound(messageContext)) {
-            return EVENT_TYPE.API_NOT_FOUND;
-        } else if (isProxyAPI(messageContext)) {
-            return EVENT_TYPE.PROXY_API_INVOCATION;
-        }
-
-        return EVENT_TYPE.OTHER;
     }
 
     public static String getUserAgent(MessageContext messageContext) {
