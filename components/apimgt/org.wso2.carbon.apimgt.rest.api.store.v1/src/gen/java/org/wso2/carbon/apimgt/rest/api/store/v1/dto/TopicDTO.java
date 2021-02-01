@@ -22,7 +22,6 @@ public class TopicDTO   {
   
     private String apiId = null;
     private String name = null;
-    private String subscribeURL = null;
 
   /**
    **/
@@ -58,23 +57,6 @@ public class TopicDTO   {
     this.name = name;
   }
 
-  /**
-   **/
-  public TopicDTO subscribeURL(String subscribeURL) {
-    this.subscribeURL = subscribeURL;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "http://localhost:8280/demo/1.0.0?hub.topic=gitHubAll&hub.callback=https%3A%2F%2Fwebhook.site%2F28165209-edd2-43d9-b3c6-519e7551b813&hub.mode=subscribe&hub.secret=dfdffsgfsgfgfhhh&hub.lease_seconds=50000000", value = "")
-  @JsonProperty("subscribeURL")
-  public String getSubscribeURL() {
-    return subscribeURL;
-  }
-  public void setSubscribeURL(String subscribeURL) {
-    this.subscribeURL = subscribeURL;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -86,13 +68,12 @@ public class TopicDTO   {
     }
     TopicDTO topic = (TopicDTO) o;
     return Objects.equals(apiId, topic.apiId) &&
-        Objects.equals(name, topic.name) &&
-        Objects.equals(subscribeURL, topic.subscribeURL);
+        Objects.equals(name, topic.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, name, subscribeURL);
+    return Objects.hash(apiId, name);
   }
 
   @Override
@@ -102,7 +83,6 @@ public class TopicDTO   {
     
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    subscribeURL: ").append(toIndentedString(subscribeURL)).append("\n");
     sb.append("}");
     return sb.toString();
   }

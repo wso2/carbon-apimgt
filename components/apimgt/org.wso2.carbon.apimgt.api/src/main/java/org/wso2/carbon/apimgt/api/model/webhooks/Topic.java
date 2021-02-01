@@ -20,10 +20,14 @@ package org.wso2.carbon.apimgt.api.model.webhooks;
 
 import java.io.Serializable;
 
+/**
+ * This class is the entity for keeping webhook topic related
+ * information
+ */
 public class Topic implements Serializable {
+
     private String name;
     private String apiId;
-    private String subscribeURL;
 
     public String getName() {
 
@@ -43,15 +47,5 @@ public class Topic implements Serializable {
     public void setApiId(String apiId) {
 
         this.apiId = apiId;
-    }
-
-    public String getSubscribeURL() {
-
-        return subscribeURL;
-    }
-
-    public void setSubscribeURL(String subscribeURL) {
-
-        this.subscribeURL = subscribeURL;
     }
 }

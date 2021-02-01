@@ -58,7 +58,7 @@ TopicsApiService delegate = new TopicsApiServiceImpl();
     @Path("/subscriptions")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get available subscriptions for a given application. ", notes = "This operation will provide a list of topic subscriptions for a given application. If the api id is provided results will be filtered by the api Id. ", response = TopicSubscriptionListDTO.class, authorizations = {
+    @ApiOperation(value = "Get available web hook subscriptions for a given application. ", notes = "This operation will provide a list of web hook topic subscriptions for a given application. If the api id is provided results will be filtered by the api Id. ", response = TopicSubscriptionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })

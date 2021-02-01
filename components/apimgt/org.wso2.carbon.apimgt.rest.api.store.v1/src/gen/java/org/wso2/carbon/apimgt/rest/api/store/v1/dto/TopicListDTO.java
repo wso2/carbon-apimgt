@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicDTO;
 import javax.validation.constraints.*;
 
@@ -25,6 +26,7 @@ public class TopicListDTO   {
   
     private Integer count = null;
     private List<TopicDTO> list = new ArrayList<TopicDTO>();
+    private PaginationDTO pagination = null;
 
   /**
    * Number of Topics returned. 
@@ -62,6 +64,24 @@ public class TopicListDTO   {
     this.list = list;
   }
 
+  /**
+   **/
+  public TopicListDTO pagination(PaginationDTO pagination) {
+    this.pagination = pagination;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("pagination")
+  public PaginationDTO getPagination() {
+    return pagination;
+  }
+  public void setPagination(PaginationDTO pagination) {
+    this.pagination = pagination;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -73,12 +93,13 @@ public class TopicListDTO   {
     }
     TopicListDTO topicList = (TopicListDTO) o;
     return Objects.equals(count, topicList.count) &&
-        Objects.equals(list, topicList.list);
+        Objects.equals(list, topicList.list) &&
+        Objects.equals(pagination, topicList.pagination);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, list);
+    return Objects.hash(count, list, pagination);
   }
 
   @Override
@@ -88,6 +109,7 @@ public class TopicListDTO   {
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
     return sb.toString();
   }

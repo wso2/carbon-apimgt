@@ -22,8 +22,7 @@ public class TopicSubscriptionDTO   {
   
     private String apiId = null;
     private String appId = null;
-    private String apiKey = null;
-    private String name = null;
+    private String topic = null;
     private String callBackUrl = null;
     private String deliveryTime = null;
     private Integer deliveryStatus = null;
@@ -64,36 +63,19 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO apiKey(String apiKey) {
-    this.apiKey = apiKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "faae5fcc-cbae-40c4-bf43-89931630d313", value = "")
-  @JsonProperty("apiKey")
-  public String getApiKey() {
-    return apiKey;
-  }
-  public void setApiKey(String apiKey) {
-    this.apiKey = apiKey;
-  }
-
-  /**
-   **/
-  public TopicSubscriptionDTO name(String name) {
-    this.name = name;
+  public TopicSubscriptionDTO topic(String topic) {
+    this.topic = topic;
     return this;
   }
 
   
   @ApiModelProperty(example = "orderBooks", value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
+  @JsonProperty("topic")
+  public String getTopic() {
+    return topic;
   }
-  public void setName(String name) {
-    this.name = name;
+  public void setTopic(String topic) {
+    this.topic = topic;
   }
 
   /**
@@ -159,8 +141,7 @@ public class TopicSubscriptionDTO   {
     TopicSubscriptionDTO topicSubscription = (TopicSubscriptionDTO) o;
     return Objects.equals(apiId, topicSubscription.apiId) &&
         Objects.equals(appId, topicSubscription.appId) &&
-        Objects.equals(apiKey, topicSubscription.apiKey) &&
-        Objects.equals(name, topicSubscription.name) &&
+        Objects.equals(topic, topicSubscription.topic) &&
         Objects.equals(callBackUrl, topicSubscription.callBackUrl) &&
         Objects.equals(deliveryTime, topicSubscription.deliveryTime) &&
         Objects.equals(deliveryStatus, topicSubscription.deliveryStatus);
@@ -168,7 +149,7 @@ public class TopicSubscriptionDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, appId, apiKey, name, callBackUrl, deliveryTime, deliveryStatus);
+    return Objects.hash(apiId, appId, topic, callBackUrl, deliveryTime, deliveryStatus);
   }
 
   @Override
@@ -178,8 +159,7 @@ public class TopicSubscriptionDTO   {
     
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
-    sb.append("    apiKey: ").append(toIndentedString(apiKey)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    topic: ").append(toIndentedString(topic)).append("\n");
     sb.append("    callBackUrl: ").append(toIndentedString(callBackUrl)).append("\n");
     sb.append("    deliveryTime: ").append(toIndentedString(deliveryTime)).append("\n");
     sb.append("    deliveryStatus: ").append(toIndentedString(deliveryStatus)).append("\n");
