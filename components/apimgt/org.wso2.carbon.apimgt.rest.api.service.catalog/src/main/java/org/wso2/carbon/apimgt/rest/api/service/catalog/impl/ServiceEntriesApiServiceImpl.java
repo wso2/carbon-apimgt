@@ -26,6 +26,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -159,7 +160,7 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
         newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
         catalogEntries = ServiceEntryMappingUtil.fromDirToServiceInfoMap(tempDirPath);
 
-        HashMap<String, ServiceEntry> serviceEntries = new HashMap<>();
+        HashMap<String, ServiceEntryResponse> serviceEntries = new HashMap<>();
         for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
             String key = entry.getKey();
             catalogEntries.get(key).setMd5(newResourcesHash.get(key));
@@ -173,10 +174,10 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
                 } else {
                     serviceCatalog.addService(catalogEntries.get(key), tenantId, userName);
                 }
-                ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(key, tenantId);
+                ServiceEntryResponse serviceEntry = serviceCatalog.getServiceBasicInfoByKey(key, tenantId);
                 serviceEntries.put(key, serviceEntry);
             } catch (APIManagementException e) {
-                // client will only be informed by the list of successfully added services
+                // client will be informed only by the list of successfully added services
                 log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
             }
         }
@@ -189,6 +190,10 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     public Response searchServices(String name, String version, String definitionType, String displayName,
                                    String key, Boolean shrink, String sortBy, String sortOrder, Integer limit,
                                    Integer offset, MessageContext messageContext) throws APIManagementException {
+
+        // This service currently supports for checking the existence of a service by key when shrink is true.
+        // Uses custom response and it needed discussion to finalize( Current DTO object needs to be added in def)
+
         if (shrink && StringUtils.isBlank(key)) {
             RestApiUtil.handleBadRequest("Service key can not be an empty String with shrink=true", log);
         } else if (shrink && !StringUtils.isBlank(key)) {
@@ -198,9 +203,9 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
 
             String keys[] = key.trim().split("\\s*,\\s*");
             for (String serviceKey : keys) {
-                ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+                ServiceEntryResponse serviceEntry = serviceCatalog.getServiceBasicInfoByKey(serviceKey, tenantId);
                 if (serviceEntry != null) {
-                    servicesList.add(ServiceEntryMappingUtil.fromServiceEntryToServiceInfoDTO(serviceEntry));
+                    servicesList.add(ServiceEntryMappingUtil.fromServiceEntryResponseToServiceInfoDTO(serviceEntry));
                 }
             }
             return Response.ok().entity(ServiceEntryMappingUtil.getServicesResponsePayloadBuilder(servicesList)).build();

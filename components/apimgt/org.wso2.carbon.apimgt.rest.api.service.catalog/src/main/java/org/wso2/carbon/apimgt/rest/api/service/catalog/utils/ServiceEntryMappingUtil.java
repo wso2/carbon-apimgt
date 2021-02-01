@@ -22,11 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
@@ -54,7 +54,7 @@ public class ServiceEntryMappingUtil {
      *
      * @param file Metadata file
      * @return Converted ServiceMetadataDTO model object
-     * @throws IOException
+     * @throws IOException If error happens
      */
     public static ServiceMetadataDTO fromMetadataFileToServiceDTO(File file) throws IOException {
 
@@ -67,8 +67,7 @@ public class ServiceEntryMappingUtil {
      * Converts a single metadata file content into a model object
      *
      * @param file Metadata file
-     * @return Converted ServiceCatalogInfo model object
-     * @throws IOException
+     * @throws IOException If error happens
      */
     public static void fromFileToServiceInfo(File file, ServiceEntry serviceEntry) throws IOException {
 
@@ -151,10 +150,10 @@ public class ServiceEntryMappingUtil {
      * @param catalogEntries Hash Map of services provided in zip
      * @return build the List<ServiceInfoDTO> list
      */
-    public static List<ServiceInfoDTO> fromServiceEntryToDTOList(HashMap<String, ServiceEntry> catalogEntries) {
+    public static List<ServiceInfoDTO> fromServiceEntryToDTOList(HashMap<String, ServiceEntryResponse> catalogEntries) {
         List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
-        for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
-            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceEntryToServiceInfoDTO(
+        for (Map.Entry<String, ServiceEntryResponse> entry : catalogEntries.entrySet()) {
+            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceEntryResponseToServiceInfoDTO(
                     catalogEntries.get(entry.getKey())));
         }
         return serviceStatusList;
@@ -166,10 +165,10 @@ public class ServiceEntryMappingUtil {
      * @param serviceEntry ServiceEntry model object
      * @return Converted ServiceInfoDTO object
      */
-    public static ServiceInfoDTO fromServiceEntryToServiceInfoDTO(ServiceEntry serviceEntry) {
+    public static ServiceInfoDTO fromServiceEntryResponseToServiceInfoDTO(ServiceEntryResponse serviceEntry) {
         ServiceInfoDTO serviceInfoDTO = new ServiceInfoDTO();
 
-        serviceInfoDTO.setId(serviceEntry.getUuid());
+        serviceInfoDTO.setId(serviceEntry.getId());
         serviceInfoDTO.setName(serviceEntry.getName());
         serviceInfoDTO.setKey(serviceEntry.getKey());
         serviceInfoDTO.setVersion(serviceEntry.getVersion());
@@ -214,7 +213,6 @@ public class ServiceEntryMappingUtil {
      *
      * @param inputStream inputStream of files
      * @param outputFile  output file name
-     * @return location to the files
      */
     private static void fromInputStreamToFile(InputStream inputStream, String outputFile) {
         File file = new File(outputFile);

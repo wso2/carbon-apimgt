@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -358,6 +359,55 @@ public class ServiceCatalogDAO {
                 serviceEntry.setUpdatedBy(rs.getString("UPDATED_BY"));
                 serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
                 serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+
+                return serviceEntry;
+            }
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    handleException("Failed to rollback getting service by service key", ex);
+                }
+            }
+            handleException("Error while executing SQL for getting service information : SQL " + sqlQuery, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
+    }
+
+    /**
+     * Get service information by service key
+     *
+     * @param key          Service key of service
+     * @param tenantId     ID of the owner's tenant
+     * @return ServiceEntry
+     * throws APIManagementException if failed to retrieve
+     */
+    public ServiceEntryResponse getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_STATUS_INFO;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, key);
+            ps.setInt(2, tenantId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                ServiceEntryResponse serviceEntry = new ServiceEntryResponse();
+
+                serviceEntry.setId(rs.getString("UUID"));
+                serviceEntry.setKey(rs.getString("SERVICE_KEY"));
+                serviceEntry.setMd5(rs.getString("MD5"));
+                serviceEntry.setName(rs.getString("ENTRY_NAME"));
+                serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
+                serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
+                serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
 
                 return serviceEntry;
             }

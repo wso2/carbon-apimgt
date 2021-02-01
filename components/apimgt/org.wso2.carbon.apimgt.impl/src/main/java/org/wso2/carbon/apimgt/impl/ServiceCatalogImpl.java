@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ServiceCatalog;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
 import java.util.List;
@@ -78,6 +79,11 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     @Override
     public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
         return ServiceCatalogDAO.getInstance().getServiceByKey(key, tenantId);
+    }
+
+    @Override
+    public ServiceEntryResponse getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
+        return ServiceCatalogDAO.getInstance().getServiceBasicInfoByKey(key, tenantId);
     }
 
     @Override

@@ -3759,6 +3759,9 @@ public class SQLConstants {
                 "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ?";
         public static final String GET_SERVICE = "SELECT * FROM AM_SERVICE_CATALOG " +
                 "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ? AND DEFINITION_TYPE = ? AND DISPLAY_NAME = ?";
+        public static final String GET_SERVICE_STATUS_INFO = "SELECT UUID, ENTRY_NAME, ENTRY_VERSION, " +
+                "SERVICE_URL, CREATED_TIME, LAST_UPDATED_TIME, SERVICE_KEY, MD5 FROM AM_SERVICE_CATALOG " +
+                "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String GET_SERVICE_MD5_BY_NAME_AND_VERSION = "SELECT MD5 FROM AM_SERVICE_CATALOG " +
                 "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ? AND TENANT_ID = ?";
         public static final String GET_SERVICE_MD5_BY_SERVICE_KEY = "SELECT MD5 FROM AM_SERVICE_CATALOG " +
