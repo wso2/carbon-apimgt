@@ -92,6 +92,7 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
@@ -1223,6 +1224,17 @@ public abstract class AbstractAPIManager implements APIManager {
                 definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
+        }
+        return definition;
+    }
+
+    @Override
+    public String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+        String definition = null;
+        try {
+            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(tenantDomain), apiId);
+        } catch (AsyncSpecPersistenceException e) {
+            throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
         }
         return definition;
     }

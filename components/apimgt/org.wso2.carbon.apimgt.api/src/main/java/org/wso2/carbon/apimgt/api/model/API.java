@@ -1194,4 +1194,11 @@ public class API implements Serializable {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public boolean isAsync() {
+        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
+            return true;
+        }
+        return false;
+    }
 }

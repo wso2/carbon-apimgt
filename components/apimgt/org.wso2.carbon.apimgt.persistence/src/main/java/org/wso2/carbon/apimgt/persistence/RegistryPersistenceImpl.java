@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
@@ -2051,6 +2052,47 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
         return definition;
     }
+    @Override
+    public String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException {
+        String apiTenantDomain = org.getName();
+        String definition = null;
+        boolean tenantFlowStarted = false;
+        try {
+            RegistryHolder holder = getRegistry(apiTenantDomain);
+            Registry registryType = holder.getRegistry();
+            tenantFlowStarted = holder.isTenantFlowStarted;
+
+            GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registryType,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
+            if (apiArtifact != null) {
+                String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+                String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+                String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
+
+                String definitionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + RegistryPersistenceUtil.replaceEmailDomain(apiProviderName) + RegistryConstants.PATH_SEPARATOR
+                        + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
+
+                if (registryType.resourceExists(definitionPath)) {
+                    Resource apiDocResource = registryType.get(definitionPath);
+                    definition = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                    return definition;
+                }
+            }
+        } catch (RegistryException | APIPersistenceException e) {
+            String msg = "Failed to get specification of API : " + apiId;
+            throw new AsyncSpecPersistenceException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                RegistryPersistenceUtil.endTenantFlow();
+            }
+        }
+        return definition;
+    }
+
     @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
             throws GraphQLPersistenceException {

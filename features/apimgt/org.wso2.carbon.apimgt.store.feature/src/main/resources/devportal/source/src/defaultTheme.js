@@ -252,6 +252,7 @@ const DefaultConfigurations = {
             showTryout: true,
             showDocuments: true,
             showSdks: true,
+            showAsyncSpecification: true,
             onlyShowSdks: [], // You can put an array of strings to enable only a given set of sdks. Leave empty to show all. ex: ['java','javascript']
             sdkBackground: '#ffffff',
             swaggerUIBackground: '#efefef',
