@@ -57,7 +57,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @DELETE
-    @Path("/{serviceKey}")
+    @Path("/{serviceId}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a service", notes = "Delete a service by providing the service id ", response = Void.class, authorizations = {
@@ -90,7 +90,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @GET
-    @Path("/{serviceKey}")
+    @Path("/{serviceId}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a service", notes = "Get details of a service using the id of the service. ", response = ServiceDTO.class, authorizations = {
@@ -102,8 +102,8 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
         @ApiResponse(code = 200, message = "Requested service in the service catalog is returned. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested service does not exist in the service catalog. ", response = ErrorDTO.class) })
-    public Response getServiceById(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
-        return delegate.getServiceById(serviceKey, securityContext);
+    public Response getServiceById(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
+        return delegate.getServiceById(serviceId, securityContext);
     }
 
     @GET
@@ -156,7 +156,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @PUT
-    @Path("/{serviceKey}")
+    @Path("/{serviceId}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a service", notes = "Update a service's details and definition ", response = ServiceDTO.class, authorizations = {
