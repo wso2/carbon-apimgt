@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl.fault;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,27 +32,27 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 /**
  * Throttled faulty request data collector
  */
-public class ThrottledFaultyRequestHandler extends AbstractFaultHandler {
-    private static final Log log = LogFactory.getLog(TargetFaultyRequestHandler.class);
+public class ThrottledFaultDataCollector extends AbstractFaultDataCollector {
+    private static final Log log = LogFactory.getLog(TargetFaultDataCollector.class);
 
-    public ThrottledFaultyRequestHandler() {
+    public ThrottledFaultDataCollector() {
         this(new FaultyRequestDataPublisher());
     }
 
-    public ThrottledFaultyRequestHandler(RequestDataPublisher processor) {
+    public ThrottledFaultDataCollector(RequestDataPublisher processor) {
         super(FAULT_EVENT_TYPE.THROTTLED, processor);
     }
 
     @Override
-    public void handleFault(MessageContext messageContext, FaultyEvent faultyEvent) {
+    public void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent) {
         log.debug("handling throttled failure analytics events");
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authContext != null) {
             if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
-                authContext.setApplicationName(Constants.UNKNOWN_VALUE);
-                authContext.setApplicationId(Constants.UNKNOWN_VALUE);
-                authContext.setSubscriber(Constants.UNKNOWN_VALUE);
-                authContext.setKeyType(Constants.UNKNOWN_VALUE);
+                authContext.setApplicationName(Constants.ANONYMOUS_VALUE);
+                authContext.setApplicationId(Constants.ANONYMOUS_VALUE);
+                authContext.setSubscriber(Constants.ANONYMOUS_VALUE);
+                authContext.setKeyType(Constants.ANONYMOUS_VALUE);
             }
         } else {
             log.warn("Ignore API request without authentication context.");

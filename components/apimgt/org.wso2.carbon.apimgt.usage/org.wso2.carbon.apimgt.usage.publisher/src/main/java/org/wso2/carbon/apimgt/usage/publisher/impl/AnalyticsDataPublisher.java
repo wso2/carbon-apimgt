@@ -69,7 +69,7 @@ public class AnalyticsDataPublisher {
                 metricReporter = MetricReporterFactory.getInstance()
                         .createMetricReporter(configuration.getReporterClass(), configs);
             } else {
-                metricReporter = MetricReporterFactory.getInstance().createMetricReporter(null, configs);
+                metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
             }
             this.successMetricReporter = metricReporter
                     .createCounterMetric(Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);

@@ -15,23 +15,20 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.RequestHandler;
-import org.wso2.carbon.apimgt.usage.publisher.impl.AbstractRequestDataPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.impl.SuccessRequestDataPublisher;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
 
 /**
  * Unclassified request data collector
  */
-public class UnclassifiedRequestHandler implements RequestHandler {
-    private static final Log log = LogFactory.getLog(UnclassifiedRequestHandler.class);
-    private final AbstractRequestDataPublisher processor = new SuccessRequestDataPublisher();
+public class UnclassifiedRequestDataCollector implements RequestDataCollector {
+    private static final Log log = LogFactory.getLog(UnclassifiedRequestDataCollector.class);
 
-    public void handleRequest(MessageContext messageContext) {
+    public void collectData(MessageContext messageContext) {
         log.debug("Skipping Unclassified analytics types");
     }
 

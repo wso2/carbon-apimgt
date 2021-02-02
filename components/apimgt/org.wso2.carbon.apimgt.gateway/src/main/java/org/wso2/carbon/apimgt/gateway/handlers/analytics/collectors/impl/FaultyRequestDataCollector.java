@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,11 +27,11 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.FaultHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.RequestHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl.fault.AuthFaultyRequestHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl.fault.TargetFaultyRequestHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl.fault.ThrottledFaultyRequestHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.FaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.AuthFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.TargetFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.ThrottledFaultDataCollector;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -42,24 +42,24 @@ import java.util.UUID;
 /**
  * Faulty request data collector
  */
-public class FaultyRequestHandler implements RequestHandler {
-    private static final Log log = LogFactory.getLog(FaultyRequestHandler.class);
-    private FaultHandler authFaultyHandler;
-    private FaultHandler throttledFaultyHandler;
-    private FaultHandler targetFaultyHandler;
+public class FaultyRequestDataCollector implements RequestDataCollector {
+    private static final Log log = LogFactory.getLog(FaultyRequestDataCollector.class);
+    private FaultDataCollector authDataCollector;
+    private FaultDataCollector throttledDataCollector;
+    private FaultDataCollector targetDataCollector;
 
-    public FaultyRequestHandler() {
-        this(new AuthFaultyRequestHandler(), new ThrottledFaultyRequestHandler(), new TargetFaultyRequestHandler());
+    public FaultyRequestDataCollector() {
+        this(new AuthFaultDataCollector(), new ThrottledFaultDataCollector(), new TargetFaultDataCollector());
     }
 
-    public FaultyRequestHandler(FaultHandler authFaultyHandler, FaultHandler throttledFaultyHandler,
-            FaultHandler targetFaultyHandler) {
-        this.authFaultyHandler = authFaultyHandler;
-        this.throttledFaultyHandler = throttledFaultyHandler;
-        this.targetFaultyHandler = targetFaultyHandler;
+    public FaultyRequestDataCollector(FaultDataCollector authDataCollector, FaultDataCollector throttledDataCollector,
+            FaultDataCollector targetDataCollector) {
+        this.authDataCollector = authDataCollector;
+        this.throttledDataCollector = throttledDataCollector;
+        this.targetDataCollector = targetDataCollector;
     }
 
-    public void handleRequest(MessageContext messageContext) {
+    public void collectData(MessageContext messageContext) {
         log.debug("Handling faulty analytics types");
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
         FaultyEvent faultyEvent = getFaultyEvent(messageContext);
@@ -76,15 +76,15 @@ public class FaultyRequestHandler implements RequestHandler {
     }
 
     private void handleAuthFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
-        authFaultyHandler.handleFault(messageContext, faultyEvent);
+        authDataCollector.collectFaultData(messageContext, faultyEvent);
     }
 
     private void handleThrottledFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
-        throttledFaultyHandler.handleFault(messageContext, faultyEvent);
+        throttledDataCollector.collectFaultData(messageContext, faultyEvent);
     }
 
     private void handleTargetFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
-        targetFaultyHandler.handleFault(messageContext, faultyEvent);
+        targetDataCollector.collectFaultData(messageContext, faultyEvent);
     }
 
     private void handleOtherFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {

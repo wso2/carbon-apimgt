@@ -33,6 +33,7 @@ public class Constants {
     public static final String SUCCESS_EVENT_TYPE = "response";
     public static final String FAULTY_EVENT_TYPE = "fault";
     public static final String UNKNOWN_VALUE = "UNKNOWN";
+    public static final String ANONYMOUS_VALUE = "anonymous";
 
     public static final class ERROR_CODE_RANGES {
         public static final int AUTH_FAILURE_START = 900900;

@@ -15,21 +15,21 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl.fault;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.FaultHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.FaultDataCollector;
 import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 
 /**
  * Abstract faulty request data collector
  */
-public abstract class AbstractFaultHandler implements FaultHandler {
+public abstract class AbstractFaultDataCollector implements FaultDataCollector {
     private FAULT_EVENT_TYPE subType;
     private RequestDataPublisher processor;
 
-    public AbstractFaultHandler(FAULT_EVENT_TYPE subType, RequestDataPublisher processor) {
+    public AbstractFaultDataCollector(FAULT_EVENT_TYPE subType, RequestDataPublisher processor) {
         this.subType = subType;
         this.processor = processor;
     }

@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors;
 
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
@@ -23,6 +23,6 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 /**
  * Interface to faulty handlers
  */
-public interface FaultHandler {
-    void handleFault(MessageContext messageContext, FaultyEvent faultyEvent);
+public interface FaultDataCollector {
+    void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent);
 }

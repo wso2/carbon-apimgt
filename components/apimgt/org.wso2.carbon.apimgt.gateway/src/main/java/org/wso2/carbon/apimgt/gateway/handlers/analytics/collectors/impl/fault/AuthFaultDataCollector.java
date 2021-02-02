@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl.fault;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,19 +29,19 @@ import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 /**
  * Auth faulty request data collector
  */
-public class AuthFaultyRequestHandler extends AbstractFaultHandler {
-    private static final Log log = LogFactory.getLog(AuthFaultyRequestHandler.class);
+public class AuthFaultDataCollector extends AbstractFaultDataCollector {
+    private static final Log log = LogFactory.getLog(AuthFaultDataCollector.class);
 
-    public AuthFaultyRequestHandler() {
+    public AuthFaultDataCollector() {
         this(new FaultyRequestDataPublisher());
     }
 
-    public AuthFaultyRequestHandler(RequestDataPublisher processor) {
+    public AuthFaultDataCollector(RequestDataPublisher processor) {
         super(FAULT_EVENT_TYPE.AUTH, processor);
     }
 
     @Override
-    public void handleFault(MessageContext messageContext, FaultyEvent faultyEvent) {
+    public void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent) {
         log.debug("handling auth failure analytics events");
 
         faultyEvent.setApplicationId(Constants.UNKNOWN_VALUE);

@@ -15,13 +15,13 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors;
 
 import org.apache.synapse.MessageContext;
 
 /**
  * interface to request handlers
  */
-public interface RequestHandler {
-    void handleRequest(MessageContext messageContext);
+public interface RequestDataCollector {
+    void collectData(MessageContext messageContext);
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  *
  */
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.impl;
+package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponseEvent;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.RequestHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.impl.SuccessRequestDataPublisher;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -41,19 +41,19 @@ import java.util.UUID;
 /**
  * Success request data collector
  */
-public class SuccessRequestHandler implements RequestHandler {
-    private static final Log log = LogFactory.getLog(SuccessRequestHandler.class);
+public class SuccessRequestDataCollector implements RequestDataCollector {
+    private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);
     private RequestDataPublisher processor;
 
-    public SuccessRequestHandler() {
+    public SuccessRequestDataCollector() {
         this(new SuccessRequestDataPublisher());
     }
 
-    public SuccessRequestHandler(RequestDataPublisher processor) {
+    public SuccessRequestDataCollector(RequestDataPublisher processor) {
         this.processor = processor;
     }
 
-    public void handleRequest(MessageContext messageContext) {
+    public void collectData(MessageContext messageContext) {
         log.debug("Handling success analytics types");
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -70,10 +70,10 @@ public class SuccessRequestHandler implements RequestHandler {
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authContext != null) {
             if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
-                authContext.setApplicationName(Constants.UNKNOWN_VALUE);
-                authContext.setApplicationId(Constants.UNKNOWN_VALUE);
-                authContext.setSubscriber(Constants.UNKNOWN_VALUE);
-                authContext.setKeyType(Constants.UNKNOWN_VALUE);
+                authContext.setApplicationName(Constants.ANONYMOUS_VALUE);
+                authContext.setApplicationId(Constants.ANONYMOUS_VALUE);
+                authContext.setSubscriber(Constants.ANONYMOUS_VALUE);
+                authContext.setKeyType(Constants.ANONYMOUS_VALUE);
             }
         } else {
             log.warn("Ignore API request without authentication context.");

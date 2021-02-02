@@ -23,14 +23,15 @@ import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.processors.GenericRequestHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
 
 /**
  * Global synapse handler to publish analytics data to analytics cloud.
  */
 public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     private static final Log log = LogFactory.getLog(AnalyticsMetricsHandler.class);
-    private final GenericRequestHandler requestHandler = new GenericRequestHandler();
+    private final RequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean handleError(MessageContext messageContext) {
@@ -65,7 +66,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        requestHandler.handleRequest(messageContext);
+        dataCollector.collectData(messageContext);
         return true;
     }
 
