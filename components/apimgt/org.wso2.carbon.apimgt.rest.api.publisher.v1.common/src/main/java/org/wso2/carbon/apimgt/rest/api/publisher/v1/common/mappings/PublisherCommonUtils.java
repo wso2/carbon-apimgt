@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -271,11 +272,6 @@ public class PublisherCommonUtils {
 
         // Validate API Security
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
-                .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-            throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                    ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-        }
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
         String originalStatus = originalAPI.getStatus();
@@ -338,16 +334,17 @@ public class PublisherCommonUtils {
 
         //attach micro-geteway labels
         assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
+        String tenantDomain = MultitenantUtils.getTenantDomain(apiToUpdate.getId().getProviderName());
 
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, tenantDomain);
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
@@ -769,14 +766,6 @@ public class PublisherCommonUtils {
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
 
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
-            for (String apiSecurityScheme : apiSecuritySchemes) {
-                if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                            ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-                }
-            }
-        }
         if (body.getAccessControlRoles() != null) {
             String errorMessage = PublisherCommonUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -963,7 +952,7 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
         API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
         existingAPI.setStatus(unModifiedAPI.getStatus());
@@ -1111,11 +1100,11 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
 
-        if (apiProvider.isDocumentationExist(apiId, documentName)) {
+        if (apiProvider.isDocumentationExist(apiId, documentName, tenantDomain)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        documentation = apiProvider.addDocumentation(apiId, documentation);
+        documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
 
         return documentation;
     }

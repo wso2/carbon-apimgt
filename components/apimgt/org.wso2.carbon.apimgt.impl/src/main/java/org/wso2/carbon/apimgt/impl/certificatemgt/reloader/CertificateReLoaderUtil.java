@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.certificatemgt.reloader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.concurrent.Executors;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class CertificateReLoaderUtil {
 
     private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    private static TrustStoreDTO trustStore;
 
     private CertificateReLoaderUtil() {
 
@@ -68,5 +70,15 @@ public class CertificateReLoaderUtil {
             return Long.parseLong(certificateReloaderPeriod);
         }
         return 2L;
+    }
+
+    public static void setCertificate(TrustStoreDTO trustStoreDTO) {
+
+        CertificateReLoaderUtil.trustStore = trustStoreDTO;
+    }
+
+    public static TrustStoreDTO getTrustStore() {
+
+        return trustStore;
     }
 }

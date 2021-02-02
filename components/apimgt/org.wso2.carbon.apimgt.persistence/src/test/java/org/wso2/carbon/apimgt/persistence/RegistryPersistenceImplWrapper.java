@@ -17,6 +17,8 @@ package org.wso2.carbon.apimgt.persistence;
 
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -26,6 +28,7 @@ public class RegistryPersistenceImplWrapper extends RegistryPersistenceImpl {
     TenantManager tenantManager;
     RegistryService registryService;
     Registry registry;
+    GenericArtifact artifact;
 
     public RegistryPersistenceImplWrapper(TenantManager tenantManager, RegistryService registryService) {
         this.tenantManager = tenantManager;
@@ -34,6 +37,11 @@ public class RegistryPersistenceImplWrapper extends RegistryPersistenceImpl {
 
     public RegistryPersistenceImplWrapper(Registry registry) {
         this.registry = registry;
+    }
+
+    public RegistryPersistenceImplWrapper(Registry registry, GenericArtifact artifact) {
+        this.registry = registry;
+        this.artifact = artifact;
     }
 
     protected TenantManager getTenantManager() {
@@ -57,6 +65,17 @@ public class RegistryPersistenceImplWrapper extends RegistryPersistenceImpl {
             return holder;
         } else {
             return super.getRegistry(requestedTenantDomain);
+        }
+
+    }
+    
+    @Override
+    protected GenericArtifact getAPIArtifact(String apiId, Registry registry)
+            throws APIPersistenceException, GovernanceException {
+        if (artifact != null) {
+            return artifact;
+        } else {
+            return super.getAPIArtifact(apiId, registry);
         }
 
     }

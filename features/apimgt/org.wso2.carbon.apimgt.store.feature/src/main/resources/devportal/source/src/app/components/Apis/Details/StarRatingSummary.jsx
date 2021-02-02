@@ -34,7 +34,7 @@ const styles = (theme) => {
         starRate: {
             color: starColor,
             '&.material-icons': {
-                fontSize: 40,
+                fontSize: 30,
             },
         },
         userRating: {

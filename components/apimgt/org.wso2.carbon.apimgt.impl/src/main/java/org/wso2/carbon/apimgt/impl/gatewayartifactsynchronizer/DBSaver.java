@@ -20,14 +20,14 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 
-import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class DBSaver implements ArtifactSaver {
 
@@ -39,56 +39,28 @@ public class DBSaver implements ArtifactSaver {
         //not required
     }
 
-    /**
-     * This method is used to save deployable artifact of an API to the storage in publisher profile. From Publisher
-     * profile we can access DB.Thus we don't need an HTTP request to internal service like DB retriever
-     *
-     */
     @Override
-    public void saveArtifact(String gatewayRuntimeArtifacts, String gatewayLabel, String gatewayInstruction)
-            throws ArtifactSynchronizerException {
-
-        try {
-            JSONObject artifactObject = new JSONObject(gatewayRuntimeArtifacts);
-            String apiId = (String) artifactObject.get("apiId");
-            String apiName = (String) artifactObject.get("name");
-            String version = (String) artifactObject.get("version");
-            String tenantDomain = (String) artifactObject.get("tenantDomain");
-
-            byte[] gatewayRuntimeArtifactsAsBytes = gatewayRuntimeArtifacts.getBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(gatewayRuntimeArtifactsAsBytes);
-            if (!gatewayArtifactsMgtDAO.isAPIDetailsExists(apiId)) {
-                gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiId, apiName,
-                        version, tenantDomain);
-            }
-
-            String dbQuery;
-            if (gatewayArtifactsMgtDAO.isAPIArtifactExists(apiId, gatewayLabel)) {
-                dbQuery = SQLConstants.UPDATE_API_ARTIFACT;
-            } else {
-                dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
-            }
-            gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiId, gatewayLabel,
-                    byteArrayInputStream, gatewayRuntimeArtifactsAsBytes.length, gatewayInstruction, dbQuery);
-
+    public void saveArtifact(String apiId, String name, String version, String revision, String tenantDomain,
+                             File artifact) throws ArtifactSynchronizerException {
+        try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
+            gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiId, revision, fileInputStream);
             if (log.isDebugEnabled()) {
-                log.debug("Successfully saved Artifacts of " + apiName);
+                log.debug("Successfully saved Artifacts of " + name);
             }
-        } catch (APIManagementException e) {
-            throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", e);
+        } catch (IOException | APIManagementException ex) {
+            throw new ArtifactSynchronizerException("Error saving Artifacts to the DB", ex);
         }
-
     }
 
     @Override
-    public boolean isAPIPublished(String apiId) {
+    public void removeArtifact(String apiId, String name, String version, String revision, String tenantDomain)
+            throws ArtifactSynchronizerException {
 
         try {
-            return gatewayArtifactsMgtDAO.isAPIPublishedInAnyGateway(apiId);
+            gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiId, revision);
         } catch (APIManagementException e) {
-            log.error("Error checking API with ID " + apiId + " is published in any gateway", e);
+            throw new ArtifactSynchronizerException("Error removing Artifacts from db", e);
         }
-        return false;
     }
 
     @Override

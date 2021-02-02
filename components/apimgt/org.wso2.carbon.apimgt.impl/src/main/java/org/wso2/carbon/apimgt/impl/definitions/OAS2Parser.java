@@ -380,6 +380,14 @@ public class OAS2Parser extends APIDefinition {
                         template.setMediationScript(mediationScript);
                         template.setMediationScripts(template.getHTTPVerb(), mediationScript);
                     }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                        template.setAmznResourceName((String)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                    }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                        template.setAmznResourceTimeout(((Long)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                    }
                 }
                 urlTemplates.add(template);
             }
@@ -1594,7 +1602,6 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(throttleTier)) {
             api.setApiLevelPolicy(throttleTier);
         }
-
         return api;
     }
 
@@ -1631,9 +1638,11 @@ public class OAS2Parser extends APIDefinition {
                     if (extensionsAreEmpty) {
                         operation.setVendorExtensions(resourceExtensions);
                     }
-                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+                } else if (resourceExtensions != null && resourceExtensions
+                        .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
                     //Check Disable Security is enabled in resource level
-                    boolean resourceLevelDisableSecurity = Boolean.parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+                    boolean resourceLevelDisableSecurity = Boolean
+                            .parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
                     if (resourceLevelDisableSecurity) {
                         resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
                     }

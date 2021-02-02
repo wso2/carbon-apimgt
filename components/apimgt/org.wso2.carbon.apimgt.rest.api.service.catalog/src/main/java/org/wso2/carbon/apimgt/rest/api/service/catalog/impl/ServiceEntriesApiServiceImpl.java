@@ -26,6 +26,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceListDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.model.ExportArchive;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.FileBasedServicesImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.utils.Md5HashGenerator;
@@ -189,28 +191,26 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     public Response searchServices(String name, String version, String definitionType, String displayName,
                                    String key, Boolean shrink, String sortBy, String sortOrder, Integer limit,
                                    Integer offset, MessageContext messageContext) throws APIManagementException {
-        if (shrink && StringUtils.isBlank(key)) {
-            RestApiUtil.handleBadRequest("Service key can not be an empty String with shrink=true", log);
-        } else if (shrink && !StringUtils.isBlank(key)) {
-            String userName = RestApiCommonUtil.getLoggedInUsername();
-            int tenantId = APIUtil.getTenantId(userName);
-            List<ServiceInfoDTO> servicesList = new ArrayList<>();
-
-            String keys[] = key.trim().split("\\s*,\\s*");
-            for (String serviceKey : keys) {
-                ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-                if (serviceEntry != null) {
-                    servicesList.add(ServiceEntryMappingUtil.fromServiceEntryToServiceInfoDTO(serviceEntry));
-                }
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        try {
+            List<ServiceDTO> serviceDTOList = new ArrayList<>();
+            ServiceFilterParams filterParams = ServiceEntryMappingUtil.getServiceFilterParams(name, version, definitionType,
+                    displayName, key, sortBy, sortOrder, limit, offset);
+            List<ServiceEntry> services = serviceCatalog.getServices(filterParams, tenantId, shrink);
+            for (ServiceEntry service : services) {
+                serviceDTOList.add(ServiceEntryMappingUtil.fromServiceToDTO(service, shrink));
             }
-            return Response.ok().entity(ServiceEntryMappingUtil.getServicesResponsePayloadBuilder(servicesList)).build();
+            ServiceListDTO serviceListDTO = new ServiceListDTO();
+            serviceListDTO.setList(serviceDTOList);
+            ServiceEntryMappingUtil.setPaginationParams(serviceListDTO, filterParams.getOffset(), filterParams.getLimit(),
+                    serviceDTOList.size(), filterParams);
+            return Response.ok().entity(serviceListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving Services";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented for this purpose");
-        return Response.status(status).entity(errorObject).build();
+        return null;
     }
 
     public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream,

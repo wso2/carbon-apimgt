@@ -22,7 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -31,6 +34,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represent the ServiceCatalogDAO.
@@ -447,5 +452,64 @@ public class ServiceCatalogDAO {
         } catch (SQLException e) {
             handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);
         }
+    }
+
+    /**
+     * Get services
+     * @param filterParams Service Filter parameters
+     * @param tenantId Tenant ID of the logged in user
+     * @param shrink Whether to shrink the response or not
+     * @return List of Services
+     * @throws APIManagementException
+     */
+    public List<ServiceEntry> getServices(ServiceFilterParams filterParams, int tenantId, boolean shrink)
+            throws APIManagementException {
+        List<ServiceEntry> serviceEntryList = new ArrayList<>();
+        String query = SQLConstantManagerFactory.getSQlString("GET_ALL_SERVICES_BY_TENANT_ID");
+        query = query.replace("$1", filterParams.getSortBy());
+        query = query.replace("$2", filterParams.getSortOrder());
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, tenantId);
+            ps.setString(2, "%" + filterParams.getName() + "%");
+            ps.setString(3, "%" + filterParams.getVersion() + "%");
+            ps.setString(4, "%" + filterParams.getDefinitionType() + "%");
+            ps.setString(5, "%" + filterParams.getDisplayName() + "%");
+            ps.setString(6, "%" + filterParams.getKey() + "%");
+            ps.setInt(7, filterParams.getOffset());
+            ps.setInt(8, filterParams.getLimit());
+            try(ResultSet resultSet = ps.executeQuery()) {
+                while(resultSet.next()) {
+                    ServiceEntry service = new ServiceEntry();
+                    service.setUuid(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_UUID));
+                    service.setName(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_NAME));
+                    service.setKey(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    service.setMd5(resultSet.getString(APIConstants.ServiceCatalogConstants.MD5));
+                    service.setVersion(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_VERSION));
+                    if (!shrink) {
+                        service.setDisplayName(resultSet.getString(APIConstants.ServiceCatalogConstants
+                                .SERVICE_DISPLAY_NAME));
+                        service.setServiceUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_URL));
+                        service.setDefType(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_TYPE));
+                        service.setDefUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_URL));
+                        service.setDescription(resultSet.getString(APIConstants.ServiceCatalogConstants.DESCRIPTION));
+                        service.setSecurityType(resultSet.getString(APIConstants.ServiceCatalogConstants
+                                .SECURITY_TYPE));
+                        service.setMutualSSLEnabled(resultSet.getBoolean(APIConstants.ServiceCatalogConstants
+                                .MUTUAL_SSL_ENABLED));
+                        service.setCreatedTime(resultSet.getTimestamp(APIConstants.ServiceCatalogConstants
+                                .CREATED_TIME));
+                        service.setLastUpdatedTime(resultSet.getTimestamp(APIConstants.ServiceCatalogConstants
+                                .LAST_UPDATED_TIME));
+                        service.setCreatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.CREATED_BY));
+                        service.setUpdatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.UPDATED_BY));
+                    }
+                    serviceEntryList.add(service);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Services", e);
+        }
+        return serviceEntryList;
     }
 }
