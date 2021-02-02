@@ -4277,7 +4277,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
+                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
                         APIUtil.sendNotification(applicationRegistrationEvent,
                                 APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
@@ -4285,7 +4285,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
+                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
                     APIUtil.sendNotification(applicationRegistrationEvent,
                             APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                 }
@@ -4300,7 +4300,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                                 UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
+                                application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
                         APIUtil.sendNotification(applicationRegistrationEvent,
                                 APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                     }
@@ -4308,7 +4308,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     ApplicationRegistrationEvent applicationRegistrationEvent = new ApplicationRegistrationEvent(
                             UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), tenantId, tenantDomain,
-                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerId);
+                            application.getId(), applicationInfo.getClientId(), tokenType, keyManagerName);
                     APIUtil.sendNotification(applicationRegistrationEvent,
                             APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
                 }

@@ -907,11 +907,22 @@ public class SubscriptionValidationDAO {
 
             try (ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
+                    String keyManagerName = resultSet.getString("KEY_MANAGER");
+                    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                    try {
+                        KeyManagerConfigurationDTO keyManager = apiMgtDAO.
+                                getKeyManagerConfigurationByUUID(keyManagerName);
+                        if (keyManager != null) {
+                            keyManagerName = keyManager.getName();
+                        }
+                    } catch (APIManagementException e) {
+                        log.error("Error in fetching Key manager: " + keyManagerName);
+                    }
                     ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                     keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                     keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                     keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                    keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    keyMapping.setKeyManager(keyManagerName);
                     return keyMapping;
                 }
             }

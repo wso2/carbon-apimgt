@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -1712,7 +1713,15 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         defaultApp.setUUID(UUID.randomUUID().toString());
         defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
-        apiMgtDAO.addApplication(defaultApp, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName());
+
+        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
+                tenantDomain, applicationId, defaultApp.getUUID(), defaultApp.getName(),
+                defaultApp.getTokenType(),
+                defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
+                subscriber.getName());
+        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     public void updateSubscriber(Subscriber subscriber)
