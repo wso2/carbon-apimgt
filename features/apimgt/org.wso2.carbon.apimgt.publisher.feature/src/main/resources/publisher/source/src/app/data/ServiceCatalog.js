@@ -108,11 +108,9 @@ class ServiceCatalog {
     static searchServices() {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
-        const promisedServices = serviceCatalog.then(client => {
-            // return client.apis['Services'].searchServices();
-            return MockResponses.searchServices();
+        return serviceCatalog.then(client => {
+            return client.apis.Services.searchServices();
         });
-        return promisedServices;
     }
 
     /**
@@ -161,16 +159,10 @@ class ServiceCatalog {
     static deleteService(id) {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
-        const promisedService = serviceCatalog.then(client => {
-            // return client.apis['Services'].deleteService(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.deleteService();
-        });
-        return promisedService.then(response => response.body);
+        return serviceCatalog.then(client => {
+            debugger;
+            return client.apis.Services.deleteService({ serviceKey: id });
+        }).then(response => response.body);
     }
 
     /**

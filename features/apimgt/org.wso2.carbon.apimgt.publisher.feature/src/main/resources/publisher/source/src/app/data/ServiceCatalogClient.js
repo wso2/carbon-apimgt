@@ -36,13 +36,22 @@ class ServiceCatalogClient {
      */
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
-        const argsv = Object.assign(args, {
-            url: Utils.getServiceCatalogSwaggerURL(),
-            requestInterceptor: this._getRequestInterceptor(),
-            responseInterceptor: this._getResponseInterceptor(),
+
+        if (!ServiceCatalogClient.spec) {
+            SwaggerClient.http.withCredentials = true;
+            ServiceCatalogClient.spec = SwaggerClient.resolve({
+                url: Utils.getServiceCatalogSwaggerURL(),
+            });
+        }
+        this._client = ServiceCatalogClient.spec.then((resolved) => {
+            const argsv = Object.assign(args, {
+                spec: this._fixSpec(resolved.spec),
+                requestInterceptor: this._getRequestInterceptor(),
+                responseInterceptor: this._getResponseInterceptor(),
+            });
+            SwaggerClient.http.withCredentials = true;
+            return new SwaggerClient(argsv);
         });
-        SwaggerClient.http.withCredentials = true;
-        this._client = new SwaggerClient(argsv);
         this._client.catch(AuthManager.unauthorizedErrorHandler);
         this.mutex = new Mutex();
     }
@@ -103,7 +112,7 @@ class ServiceCatalogClient {
      */
     _fixSpec(spec) {
         const updatedSpec = spec;
-        updatedSpec.host = this.environment.host;
+        updatedSpec.servers = [{ url: window.origin + "/api/am/service-catalog" }];
         return updatedSpec;
     }
 
@@ -166,7 +175,7 @@ class ServiceCatalogClient {
                         AuthManager.refresh(env).then((res) => res.json())
                             .then(() => {
                                 request.headers.authorization = 'Bearer '
-                                + AuthManager.getUser(env.label).getPartialToken();
+                                    + AuthManager.getUser(env.label).getPartialToken();
                                 release();
                                 resolve(request);
                             }).catch((error) => {
