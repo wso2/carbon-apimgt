@@ -18,9 +18,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import MUIDataTable from 'mui-datatables';
@@ -32,7 +30,8 @@ import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
 import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
-import Edit from 'AppComponents/ServiceCatalog/Listing/Edit';
+import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
+import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -66,9 +65,6 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: theme.spacing(1),
         marginRight: theme.spacing(2),
     },
-    textStyle: {
-        fontSize: 11,
-    },
     content: {
         display: 'flex',
         flex: 1,
@@ -85,9 +81,6 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(3),
         borderTop: '0px',
         width: '100%',
-    },
-    serviceNameStyle: {
-        color: theme.palette.primary.main,
     },
     tableStyle: {
         marginTop: theme.spacing(4),
@@ -111,14 +104,16 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Listing for service catalog entries
  *
- * @class Listing
+ * @function Listing
+ * @returns {any} Listing Page for Services
  */
-function Listing() {
+function Listing(props) {
     const [serviceList, setServiceList] = useState([]);
     const [notFound, setNotFound] = useState(true);
     const [loading, setLoading] = useState(true);
     const intl = useIntl();
     const classes = useStyles();
+    const { history } = props;
 
     // Get Services
     const getData = () => {
@@ -128,9 +123,9 @@ function Listing() {
             const { list } = body;
             setServiceList(list);
             setNotFound(false);
-        }).catch(() => {
+        }).catch((error) => {
             Alert.error(intl.formatMessage({
-                defaultMessage: 'Error While Loading Services',
+                defaultMessage: 'Error while loading services',
                 id: 'ServiceCatalog.Listing.Listing.error.loading',
             }));
         }).finally(() => {
@@ -139,46 +134,48 @@ function Listing() {
     };
 
     useEffect(() => {
-        setServiceList(getData());
+        getData();
     }, []);
 
     const onDelete = (serviceId) => {
         const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
         deleteServicePromise.then(() => {
+            debugger;
             Alert.info(intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Listing.service.deleted.successfully',
                 defaultMessage: 'Service deleted successfully!',
             }));
             // Reload the services list
             getData();
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while deleting service',
-                id: 'ServiceCatalog.Listing.Listing.error.delete',
-            }));
+        }).catch((errorResponse) => {
+            if (errorResponse.response.body.description !== null) {
+                Alert.error(errorResponse.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error while deleting service',
+                    id: 'ServiceCatalog.Listing.Listing.error.delete',
+                }));
+            }
         });
     };
 
-    /**
-     * Function for updating a given service entry
-     * @param {string} serviceId ID of the service
-     * @param {object} body service payload
-     */
-    const onEdit = (serviceId, body) => {
-        const updateServicePromise = ServiceCatalog.updateService(serviceId, body);
-        updateServicePromise.then(() => {
-            Alert.info(intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.service.updated.successfully',
-                defaultMessage: 'Service updated successfully!',
-            }));
-            // Reload the services list
-            getData();
-        }).catch(() => {
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while updating service',
-                id: 'ServiceCatalog.Listing.Listing.error.update',
-            }));
-        });
+    const getDefinitionTypeDisplayName = (definitionType) => {
+        switch (definitionType) {
+            case 'OAS2':
+                return Listing.CONST.OAS2;
+            case 'OAS3':
+                return Listing.CONST.OAS3;
+            case 'WSDL1':
+                return Listing.CONST.WSDL1;
+            case 'WSDL2':
+                return Listing.CONST.WSDL2;
+            case 'GRAPHQL_SDL':
+                return Listing.CONST.GRAPHQL_SDL;
+            case 'ASYNC_API':
+                return Listing.CONST.ASYNC_API;
+            default:
+                return definitionType;
+        }
     };
 
     const columns = [
@@ -199,12 +196,15 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const serviceDisplayName = tableMeta.rowData[1];
+                        const serviceId = dataRow.id;
                         if (dataRow) {
                             return (
-                                <div className={classes.serviceNameStyle}>
-                                    <span>{serviceDisplayName}</span>
-                                </div>
+                                <Link
+                                    className={classes.serviceNameLink}
+                                    to={'/service-catalog/' + serviceId + '/overview'}
+                                >
+                                    <span>{dataRow.displayName}</span>
+                                </Link>
                             );
                         }
                     }
@@ -221,7 +221,29 @@ function Listing() {
                 defaultMessage: 'Service URL',
             }),
             options: {
+                customBodyRender: (value, tableMeta = this) => {
+                    if (tableMeta.rowData) {
+                        const dataRow = serviceList[tableMeta.rowIndex];
+                        const { serviceUrl } = dataRow;
+                        if (dataRow) {
+                            return (
+                                <span style={{
+                                    whiteSpace: 'nowrap',
+                                    textOverflow: 'ellipsis',
+                                    width: '300px',
+                                    display: 'block',
+                                    overflow: 'hidden',
+                                }}
+                                >
+                                    {serviceUrl}
+                                </span>
+                            );
+                        }
+                    }
+                    return <span />;
+                },
                 sort: false,
+                filter: false,
             },
         },
         {
@@ -231,7 +253,20 @@ function Listing() {
                 defaultMessage: 'Schema Type',
             }),
             options: {
+                customBodyRender: (value, tableMeta = this) => {
+                    if (tableMeta.rowData) {
+                        const dataRow = serviceList[tableMeta.rowIndex];
+                        const { definitionType } = dataRow;
+                        if (dataRow) {
+                            return (
+                                <span>{getDefinitionTypeDisplayName(definitionType)}</span>
+                            );
+                        }
+                    }
+                    return <span />;
+                },
                 sort: false,
+                filter: false,
             },
         },
         {
@@ -257,7 +292,13 @@ function Listing() {
                         const { createdTime } = dataRow;
                         if (dataRow) {
                             return (
-                                <span>{moment(createdTime).fromNow()}</span>
+                                <Tooltip
+                                    placement='right'
+                                    title={moment(createdTime).format('lll')}
+                                    aria-label='add'
+                                >
+                                    <span>{moment(createdTime).fromNow()}</span>
+                                </Tooltip>
                             );
                         }
                     }
@@ -271,10 +312,23 @@ function Listing() {
             name: 'usage',
             label: intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Listing.usage',
-                defaultMessage: 'No. Of APIs',
+                defaultMessage: 'Number of Usages',
             }),
             options: {
+                customBodyRender: (value, tableMeta = this) => {
+                    if (tableMeta.rowData) {
+                        const dataRow = serviceList[tableMeta.rowIndex];
+                        const { usage, id, displayName } = dataRow;
+                        if (dataRow) {
+                            return (
+                                <Usages usageNumber={usage} serviceDisplayName={displayName} serviceId={id} />
+                            );
+                        }
+                    }
+                    return <span />;
+                },
                 sort: false,
+                filter: false,
             },
         },
         {
@@ -282,25 +336,23 @@ function Listing() {
                 customBodyRender: (value, tableMeta = this) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
+                        const { id, displayName, definitionType } = dataRow;
                         return (
-                            <Box display='flex' flexDirection='row'>
-                                <Link>
-                                    <Button color='primary' variant='outlined' className={classes.buttonStyle}>
-                                        <Typography className={classes.textStyle}>
-                                            <FormattedMessage
-                                                id='ServiceCatalog.Listing.Listing.create.api'
-                                                defaultMessage='Create API'
-                                            />
-                                        </Typography>
-                                    </Button>
-                                </Link>
-                                <Edit dataRow={dataRow} onEdit={onEdit} />
-                                <Delete
-                                    serviceDisplayName={dataRow.displayName}
-                                    serviceId={dataRow.id}
-                                    onDelete={onDelete}
-                                />
-                            </Box>
+                            <>
+                                <Box display='flex' flexDirection='row'>
+                                    <CreateApi
+                                        history={history}
+                                        serviceId={id}
+                                        serviceDisplayName={displayName}
+                                        definitionType={definitionType}
+                                    />
+                                    <Delete
+                                        serviceDisplayName={displayName}
+                                        serviceId={id}
+                                        onDelete={onDelete}
+                                    />
+                                </Box>
+                            </>
                         );
                     }
                     return false;
@@ -375,12 +427,18 @@ function Listing() {
     );
 }
 
-export default Listing;
+Listing.CONST = {
+    OAS2: 'Swagger',
+    OAS3: 'Open API V3',
+    WSDL1: 'WSDL 1',
+    WSDL2: 'WSDL 2',
+    GRAPHQL_SDL: 'GraphQL SDL',
+    ASYNC_API: 'AsyncAPI',
+    BASIC: 'Basic',
+    DIGEST: 'Digest',
+    OAUTH2: 'OAuth2',
+    NONE: 'None',
 
-Listing.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
-    theme: PropTypes.shape({
-        custom: PropTypes.string,
-    }).isRequired,
 };
+
+export default Listing;

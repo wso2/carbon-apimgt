@@ -81,11 +81,9 @@ function Delete(props) {
     );
 }
 Delete.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
     serviceDisplayName: PropTypes.string.isRequired,
     serviceId: PropTypes.string.isRequired,
     onDelete: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
 };
 
 export default Delete;
