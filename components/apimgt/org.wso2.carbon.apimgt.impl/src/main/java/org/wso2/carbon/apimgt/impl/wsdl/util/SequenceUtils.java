@@ -26,7 +26,9 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.template.SOAPToRESTAPIConfigContext;
@@ -243,78 +245,39 @@ public class SequenceUtils {
     /**
      * Gets resource policy resource for the given resource id from the registry.
      *
-     * @param identifier API identifier
+     * @param API  api
      * @param resourceId Resource identifier
      * @return resource policy string for the given resource id
      * @throws APIManagementException
      */
-    public static String getResourcePolicyFromRegistryResourceId(APIIdentifier identifier, String resourceId)
+    public static String getResourcePolicyFromRegistryResourceId(API api, String resourceId)
             throws APIManagementException {
-
-        boolean isTenantFlowStarted = false;
         String response = null;
-        try {
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-            APIUtil.loadTenantRegistry(tenantId);
-            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-            String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName()
-                    + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
-                    + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
-            Collection collection = (Collection) registry.get(resourcePath);
-            String[] resources = collection.getChildren();
+        List<SOAPToRestSequence> sequences = api.getSoapToRestSequences();
+        if (sequences == null) {
+            handleException("Cannot find any resource policies for the api " + api.getUuid());
+        }
+        boolean found = false;
+        for (SOAPToRestSequence soapToRestSequence : sequences) {
+            if (soapToRestSequence.getUuid().equals(resourceId)) {
+                JSONObject resultJson = new JSONObject();
 
-            if (resources == null) {
-                handleException("Cannot find any resource policies at the path: " + resourcePath);
+                String content = soapToRestSequence.getContent();
+                String resourceName = soapToRestSequence.getPath();
+                String httpMethod = soapToRestSequence.getMethod();
+                Map<String, String> resourceMap = new HashMap<>();
+                resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, soapToRestSequence.getUuid());
+                resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
+                resourceMap.put(SOAPToRESTConstants.CONTENT, content);
+                resultJson.put(resourceName, resourceMap);
+                response = resultJson.toJSONString();
+                found = true;
+                break;
+
             }
-            for (String path : resources) {
-                Collection resourcePolicyCollection = (Collection) registry.get(path);
-                String[] resourcePolicies = resourcePolicyCollection.getChildren();
-                if (resourcePolicies == null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Cannot find resource policies under path: " + path);
-                    }
-                    continue;
-                }
-                for (String resourcePolicyPath : resourcePolicies) {
-                    Resource resource = registry.get(resourcePolicyPath);
-                    if (StringUtils.isNotEmpty(resourceId) && resourceId.equals(((ResourceImpl) resource).getUUID())) {
-                        JSONObject resultJson = new JSONObject();
-                        Resource resourcePolicyResource = registry.get(resourcePolicyPath);
-                        String content = new String((byte[]) resourcePolicyResource.getContent(),
-                                Charset.defaultCharset());
-                        String resourceName = ((ResourceImpl) resource).getName();
-                        resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
-                                SOAPToRESTConstants.EMPTY_STRING);
-                        String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
-                        Map<String, String> resourceMap = new HashMap<>();
-                        resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, ((ResourceImpl) resource).getUUID());
-                        resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
-                        resourceMap.put(SOAPToRESTConstants.CONTENT, content);
-                        resultJson.put(resourceName, resourceMap);
-                        response = resultJson.toJSONString();
-                    }
-                }
-            }
-        } catch (UserStoreException e) {
-            handleException("Error while reading tenant information.", e);
-        } catch (RegistryException e) {
-            handleException("Error when create registry instance.", e);
-        } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            handleException("Error while retrieving resource policy resource content from the registry.", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+        }
+        if (!found) {
+            handleException("Cannot find any resource policies with policy id : " + resourceId);
         }
         return response;
     }
@@ -324,86 +287,32 @@ public class SequenceUtils {
      * <p>
      * Note: this method is directly invoked from the jaggery layer
      *
-     * @param name     api name
-     * @param version  api version
-     * @param provider api provider
+     * @param api API
      * @param seqType  to identify the sequence is whether in/out sequence
      * @return converted sequences string for a given operation
      * @throws APIManagementException throws exceptions on unsuccessful retrieval of resources in registry
      */
-    public static String getRestToSoapConvertedSequence(String name, String version, String provider, String seqType)
-            throws APIManagementException {
+    public static String getRestToSoapConvertedSequence(API api, String seqType) throws APIManagementException {
         JSONObject resultJson = new JSONObject();
-
-        provider = (provider != null ? provider.trim() : null);
-        name = (name != null ? name.trim() : null);
-        version = (version != null ? version.trim() : null);
-
-        boolean isTenantFlowStarted = false;
-
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            int tenantId;
-            UserRegistry registry;
-
-            try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(tenantId);
-                registry = registryService.getGovernanceSystemRegistry(tenantId);
-                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
-                        + APIUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR + name
-                        + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
-                        + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE + RegistryConstants.PATH_SEPARATOR + seqType;
-
-                Collection collection = (Collection) registry.get(resourcePath);
-                String[] resources = collection.getChildren();
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Number of REST resources for " + resourcePath + " is: " + resources.length);
-                }
-
-                for (String path : resources) {
-                    Resource resource = registry.get(path);
-                    String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                    String resourceName;
-                    if (resource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH) != null) {
-                        resourceName = resource.getProperty(SOAPToRESTConstants.Template.RESOURCE_PATH) + "_"
-                                + resource.getProperty(SOAPToRESTConstants.METHOD);
-                    } else {
-                        resourceName = ((ResourceImpl) resource).getName();
-                    }
-                    resourceName = resourceName.replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX,
-                            SOAPToRESTConstants.EMPTY_STRING);
-                    String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
-                    Map<String, String> resourceMap = new HashMap<>();
-                    resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, ((ResourceImpl) resource).getUUID());
-                    resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
-                    resourceMap.put(SOAPToRESTConstants.CONTENT, content);
-                    resultJson.put(resourceName, resourceMap);
-                }
-
-            } catch (RegistryException e) {
-                handleException("Error when create registry instance", e);
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information", e);
-            } catch (org.wso2.carbon.registry.api.RegistryException e) {
-                handleException("Error while creating registry resource", e);
-            }
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+        List<SOAPToRestSequence> sequences = api.getSoapToRestSequences();
+        if (sequences == null) {
+            handleException("Cannot find any resource policies for the api " + api.getUuid());
+        }
+        for (SOAPToRestSequence sequence : sequences) {
+            if (sequence.getDirection().toString().equalsIgnoreCase(seqType)) {
+                String content = sequence.getContent();
+                String resourceName = sequence.getPath();
+                String httpMethod = sequence.getMethod();
+                Map<String, String> resourceMap = new HashMap<>();
+                resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, sequence.getUuid());
+                resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
+                resourceMap.put(SOAPToRESTConstants.CONTENT, content);
+                resultJson.put(resourceName, resourceMap);
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("Saved sequence for type " + seqType + " for api:" + provider + "-" + name +
-                    "-" + version + " is: " + resultJson.toJSONString());
+            log.debug("Saved sequence for type " + seqType + " for api:" + api.getId().getProviderName() + "-"
+                    + api.getId().getApiName() + "-" + api.getId().getVersion() + " is: " + resultJson.toJSONString());
         }
         return resultJson.toJSONString();
     }

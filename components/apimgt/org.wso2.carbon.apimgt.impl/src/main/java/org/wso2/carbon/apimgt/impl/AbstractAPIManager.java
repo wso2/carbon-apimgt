@@ -756,26 +756,20 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-        try {
-            return registry.resourceExists(path);
-        } catch (RegistryException e) {
-            String msg = "Failed to check availability of api :" + path;
-            throw new APIManagementException(msg, e);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        if (uuid == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 
     public boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException {
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-        try {
-            return registry.resourceExists(path);
-        } catch (RegistryException e) {
-            String msg = "Failed to check availability of API Product :" + path;
-            throw new APIManagementException(msg, e);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        if (uuid == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 

@@ -665,7 +665,11 @@ public class APIMappingUtil {
                     ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
                     policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
                     policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
-                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    if (keyStr.contains("_")) {
+                        policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    } else {
+                        policyInfoDTO.setResourcePath(keyStr);
+                    }
                     policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
                     policyInfoDTOs.add(policyInfoDTO);
                 }
@@ -695,7 +699,11 @@ public class APIMappingUtil {
                     String keyStr = ((String) key);
                     policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
                     policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
-                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    if (keyStr.contains("_")) {
+                        policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    } else {
+                        policyInfoDTO.setResourcePath(keyStr);
+                    }
                     policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
                 }
             } catch (ParseException e) {
