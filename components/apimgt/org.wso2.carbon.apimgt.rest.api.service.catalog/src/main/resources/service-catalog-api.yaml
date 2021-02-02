@@ -151,7 +151,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /service-entries/{serviceKey}:
+  /service-entries/{serviceId}:
     #-----------------------------------------------------
     # Retrieve a specific service in the service catalog
     #-----------------------------------------------------
@@ -166,7 +166,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceKey'
+        - $ref: '#/components/parameters/serviceId'
       responses:
         "200":
           description: |

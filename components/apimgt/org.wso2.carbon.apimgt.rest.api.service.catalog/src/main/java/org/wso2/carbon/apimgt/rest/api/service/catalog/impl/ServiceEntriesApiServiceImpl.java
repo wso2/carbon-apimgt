@@ -122,12 +122,21 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
     }
 
     public Response getServiceById(String serviceId, MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        try {
+            ServiceEntry service = serviceCatalog.getServiceByUUID(serviceId, tenantId);
+            ServiceDTO serviceDTO = ServiceEntryMappingUtil.fromServiceToDTO(service, false);
+            return Response.ok().entity(serviceDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            } else{
+                RestApiUtil.handleInternalServerError("Error while fetching the Service with ID " + serviceId, e,
+                        log);
+            }
+        }
+        return null;
     }
 
     public Response getServiceDefinition(String serviceId, MessageContext messageContext) {
