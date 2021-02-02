@@ -2383,20 +2383,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<Mediation> globalPolicies = null;
                 if (APIUtil.isSequenceDefined(api.getInSequence())) {
                     boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
-                                && api.getInSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                    if (localPolicies != null) {
+                        for (MediationInfo mediationInfo : localPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
+                                    && api.getInSequence().equals(mediationInfo.getName())) {
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
                                         .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-                            mediation.setGlobal(false);
-                            api.setInSequenceMediation(mediation);
-                            found = true;
-                            break;
+                                Mediation mediation = new Mediation();
+                                mediation.setConfig(mediationPolicy.getConfig());
+                                mediation.setName(mediationPolicy.getName());
+                                mediation.setUuid(mediationPolicy.getId());
+                                mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+                                mediation.setGlobal(false);
+                                api.setInSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
                         }
                     }
                     if (!found) { // global policy 
@@ -2417,20 +2419,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 if (APIUtil.isSequenceDefined(api.getOutSequence())) {
                     boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
-                                && api.getOutSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                    if (localPolicies != null) {
+                        for (MediationInfo mediationInfo : localPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
+                                    && api.getOutSequence().equals(mediationInfo.getName())) {
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
                                         .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-                            mediation.setGlobal(false);
-                            api.setOutSequenceMediation(mediation);
-                            found = true;
-                            break;
+                                Mediation mediation = new Mediation();
+                                mediation.setConfig(mediationPolicy.getConfig());
+                                mediation.setName(mediationPolicy.getName());
+                                mediation.setUuid(mediationPolicy.getId());
+                                mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+                                mediation.setGlobal(false);
+                                api.setOutSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
                         }
                     }
                     if (!found) { // global policy 
@@ -2451,20 +2455,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
                     boolean found = false;
-                    for (MediationInfo mediationInfo : localPolicies) {
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
-                                && api.getFaultSequence().equals(mediationInfo.getName())) {
-                            org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
+                    if (localPolicies != null) {
+                        for (MediationInfo mediationInfo : localPolicies) {
+                            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
+                                    && api.getFaultSequence().equals(mediationInfo.getName())) {
+                                org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
                                         .getMediationPolicy(org, apiUUID, mediationInfo.getId());
-                            Mediation mediation = new Mediation();
-                            mediation.setConfig(mediationPolicy.getConfig());
-                            mediation.setName(mediationPolicy.getName());
-                            mediation.setUuid(mediationPolicy.getId());
-                            mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-                            mediation.setGlobal(false);
-                            api.setFaultSequenceMediation(mediation);
-                            found = true;
-                            break;
+                                Mediation mediation = new Mediation();
+                                mediation.setConfig(mediationPolicy.getConfig());
+                                mediation.setName(mediationPolicy.getName());
+                                mediation.setUuid(mediationPolicy.getId());
+                                mediation.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+                                mediation.setGlobal(false);
+                                api.setFaultSequenceMediation(mediation);
+                                found = true;
+                                break;
+                            }
                         }
                     }
                     if (!found) { // global policy 
