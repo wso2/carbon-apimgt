@@ -189,6 +189,8 @@ public class APIProviderImplTest {
     private CertificateManagerImpl certificateManager;
     private APIManagerConfiguration config;
     private APIPersistence apiPersistenceInstance;
+    private String superTenantDomain;
+
     @Before
     public void init() throws Exception {
         System.setProperty("carbon.home", APIProviderImplTest.class.getResource("/").getFile());
@@ -245,6 +247,7 @@ public class APIProviderImplTest {
         TestUtils.mockAPICacheClearence();
         TestUtils.mockAPIMConfiguration();
         mockDocumentationCreation();
+        superTenantDomain = "carbon.super";
 
         config = Mockito.mock(APIManagerConfiguration.class);
         APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
@@ -1795,7 +1798,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.getPublisherAPI(any(Organization.class), any(String.class)))
         .thenReturn(publisherAPI);
         //apiProvider.createNewAPIVersion(api, newVersion);
-        apiProvider.createNewAPIVersion(apiSourceUUID, newVersion, true);
+        apiProvider.createNewAPIVersion(apiSourceUUID, newVersion, true, superTenantDomain);
         Assert.assertEquals(newVersion, apiProvider.getAPI(newApi.getId()).getId().getVersion());
     }
 
@@ -4006,7 +4009,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
-            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.addAPIRevision(apiRevision, superTenantDomain);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
@@ -4042,7 +4045,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
-            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.addAPIRevision(apiRevision, superTenantDomain);
             apiProvider.getAPIRevision("b55e0fc3-9829-4432-b99e-02056dc91838");
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -4079,7 +4082,7 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
-            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.addAPIRevision(apiRevision, superTenantDomain);
             apiProvider.getAPIRevisions("63e1e37e-a5b8-4be6-86a5-d6ae0749f131");
         } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -4117,14 +4120,15 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
-            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.addAPIRevision(apiRevision, superTenantDomain);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
         PowerMockito.doNothing().when(apiPersistenceInstance).restoreAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt());
         try {
-            apiProvider.restoreAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131","b55e0fc3-9829-4432-b99e-02056dc91838");
+            apiProvider.restoreAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+                    "b55e0fc3-9829-4432-b99e-02056dc91838", superTenantDomain);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
@@ -4159,14 +4163,15 @@ public class APIProviderImplTest {
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
-            apiProvider.addAPIRevision(apiRevision);
+            apiProvider.addAPIRevision(apiRevision, superTenantDomain);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         Mockito.when(apimgtDAO.getRevisionByRevisionUUID(Mockito.anyString())).thenReturn(apiRevision);
         PowerMockito.doNothing().when(apiPersistenceInstance).deleteAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt());
         try {
-            apiProvider.deleteAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131","b55e0fc3-9829-4432-b99e-02056dc91838");
+            apiProvider.deleteAPIRevision("63e1e37e-a5b8-4be6-86a5-d6ae0749f131",
+                    "b55e0fc3-9829-4432-b99e-02056dc91838", superTenantDomain);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }

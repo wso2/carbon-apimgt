@@ -3331,6 +3331,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                    String organizationId) throws DuplicateAPIException, APIManagementException {
 
         API existingAPI = getAPIbyUUID(existingApiId, organizationId);
+        existingAPI.setOrganizationId(organizationId);
         if (existingAPI == null) {
             throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
         }
@@ -3354,7 +3355,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String existingAPIContextTemplate = existingAPI.getContextTemplate();
         existingAPI.setContext(existingAPIContextTemplate.replace("{version}", newVersion));
 
-        existingAPI.setOrganizationId(organizationId);
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
 
@@ -3416,12 +3416,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
-            apiPersistenceInstance.updateAPI(new Organization(organizationId),
-                    APIMapper.INSTANCE.toPublisherApi(existingAPI));
+            apiPersistenceInstance.updateAPI(new Organization(organizationId), APIMapper.INSTANCE
+                    .toPublisherApi(existingAPI));
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while updating API details", e);
         }
-
         return newAPI;
     }
 
