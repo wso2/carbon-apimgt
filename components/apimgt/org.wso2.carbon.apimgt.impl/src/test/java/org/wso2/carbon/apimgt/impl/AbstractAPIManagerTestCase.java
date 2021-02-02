@@ -487,38 +487,26 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test
-    public void testIsAPIAvailable() throws RegistryException, APIManagementException {
+    public void testIsAPIAvailable() throws APIManagementException {
         APIIdentifier apiIdentifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
         String path =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getApiName()
                         + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
-        Mockito.when(registry.resourceExists(path)).thenThrow(RegistryException.class).thenReturn(true);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        try {
-            abstractAPIManager.isAPIAvailable(apiIdentifier);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to check availability of api"));
-        }
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiIdentifier)).thenReturn("xxxxx");
         Assert.assertTrue(abstractAPIManager.isAPIAvailable(apiIdentifier));
     }
 
     @Test
-    public void testIsAPIProductAvailable() throws RegistryException, APIManagementException {
+    public void testIsAPIProductAvailable() throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = getAPIProductIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
         String path =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getName()
                         + RegistryConstants.PATH_SEPARATOR + apiProductIdentifier.getVersion();
-        Mockito.when(registry.resourceExists(path)).thenThrow(RegistryException.class).thenReturn(true);
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
-        try {
-            abstractAPIManager.isAPIProductAvailable(apiProductIdentifier);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to check availability of API Product"));
-        }
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(apiProductIdentifier)).thenReturn("xxxxx");
         Assert.assertTrue(abstractAPIManager.isAPIProductAvailable(apiProductIdentifier));
     }
 

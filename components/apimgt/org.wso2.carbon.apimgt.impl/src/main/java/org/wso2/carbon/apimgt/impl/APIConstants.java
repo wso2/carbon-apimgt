@@ -210,6 +210,7 @@ public final class APIConstants {
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
+    public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.yml";
 
     public static final String API_ICON_IMAGE = "icon";
 
@@ -913,6 +914,8 @@ public final class APIConstants {
 
     public static final String API_ANALYTICS = "Analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
+    public static final String API_ANALYTICS_REPORTER_CLASS = API_ANALYTICS + "ReporterClass";
+    public static final String API_ANALYTICS_PROPERTIES = API_ANALYTICS + "Properties";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
     public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
@@ -1930,7 +1933,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL
+        HTTP, WS, GRAPHQL, WEBSUB, SSE
     }
 
     public static final String API_TYPE_SOAP = "SOAP";

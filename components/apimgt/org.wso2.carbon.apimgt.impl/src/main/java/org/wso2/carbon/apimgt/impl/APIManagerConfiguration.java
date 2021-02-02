@@ -112,6 +112,7 @@ public class APIManagerConfiguration {
     private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
+    private static Map<String, String> analyticsProperties;
     private static String tokenRevocationClassName;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
@@ -310,6 +311,17 @@ public class APIManagerConfiguration {
                     }
                 }
                 persistentNotifierProperties = properties;
+            } else if ("Analytics".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> analyticsProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    analyticsProps.put(name, value);
+                }
+                analyticsProperties = analyticsProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
                 OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
@@ -524,9 +536,9 @@ public class APIManagerConfiguration {
                 setRuntimeArtifactsSyncPublisherConfig(element);
             } else if (APIConstants.GatewayArtifactSynchronizer.SYNC_RUNTIME_ARTIFACTS_GATEWAY_CONFIG.equals(localName)) {
                 setRuntimeArtifactsSyncGatewayConfig(element);
-            } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName))
+            } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName)) {
                 setContainerMgtConfigurations(element);
-            else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
+            } else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
                 setSkipListConfigurations(element);
             }
             readChildElements(element, nameStack);
@@ -1858,5 +1870,9 @@ public class APIManagerConfiguration {
     public GatewayCleanupSkipList getGatewayCleanupSkipList() {
 
         return gatewayCleanupSkipList;
+    }
+
+    public static Map<String, String> getAnalyticsProperties() {
+        return analyticsProperties;
     }
 }

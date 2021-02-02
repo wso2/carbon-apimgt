@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -78,6 +79,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.core.util.CryptoException;
@@ -108,6 +110,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,6 +147,7 @@ public class ImportUtils {
         String currentStatus;
         String targetStatus;
         String lifecycleAction;
+        GraphqlComplexityInfo graphqlComplexityInfo = null;
         int tenantId = 0;
 
         try {
@@ -228,6 +232,10 @@ public class ImportUtils {
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 PublisherCommonUtils.addGraphQLSchema(importedApi, graphQLSchema, apiProvider);
+                graphqlComplexityInfo = retrieveGraphqlComplexityInfoFromArchive(extractedFolderPath, graphQLSchema);
+                if (graphqlComplexityInfo != null && graphqlComplexityInfo.getList().size() != 0) {
+                    apiProvider.addOrUpdateComplexityDetails(importedApi.getId(), graphqlComplexityInfo);
+                }
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
@@ -437,7 +445,8 @@ public class ImportUtils {
     private static JsonObject retrievedAPIDtoJson(String pathToArchive) throws IOException {
 
         // Get API Definition as JSON
-        String jsonContent = getAPIDefinitionAsJson(pathToArchive);
+        String jsonContent =
+                getFileContentAsJson(pathToArchive + ImportExportConstants.API_FILE_LOCATION);
         String apiVersion;
         if (jsonContent == null) {
             throw new IOException("Cannot find API definition. api.json or api.yaml should present");
@@ -594,10 +603,10 @@ public class ImportUtils {
      * @param pathToArchive Path to API or API Product archive
      * @throws IOException If an error occurs while reading the file
      */
-    public static String getAPIDefinitionAsJson(String pathToArchive) throws IOException {
+    public static String getFileContentAsJson(String pathToArchive) throws IOException {
         String jsonContent = null;
-        String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_API_FILE_LOCATION;
-        String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_API_FILE_LOCATION;
+        String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_EXTENSION;
+        String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_EXTENSION;
 
         // Load yaml representation first if it is present
         if (CommonUtil.checkFileExistence(pathToYamlFile)) {
@@ -642,6 +651,34 @@ public class ImportUtils {
     }
 
     /**
+     * Retrieve graphql complexity information from the file and validate it with the schema
+     *
+     * @param pathToArchive Path to API archive
+     * @param schema        GraphQL schema
+     * @return GraphQL complexity info validated with the schema
+     * @throws APIManagementException If an error occurs while reading the file
+     */
+    private static GraphqlComplexityInfo retrieveGraphqlComplexityInfoFromArchive(String pathToArchive, String schema)
+            throws APIManagementException {
+        try {
+            String jsonContent =
+                    getFileContentAsJson(pathToArchive + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION);
+            if (jsonContent == null) {
+                return null;
+            }
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            GraphQLQueryComplexityInfoDTO complexityDTO = new Gson().fromJson(String.valueOf(configElement),
+                    GraphQLQueryComplexityInfoDTO.class);
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(complexityDTO, schema);
+            return graphqlComplexityInfo;
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading graphql complexity info from path: " + pathToArchive,
+                    e, ExceptionCodes.ERROR_READING_META_DATA);
+        }
+    }
+
+    /**
      * Validate WSDL definition from the archive directory and return it.
      *
      * @param pathToArchive Path to API archive
@@ -680,6 +717,26 @@ public class ImportUtils {
                     new File(pathToArchive, ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION));
         }
         throw new IOException("Missing graphQL schema definition file. schema.graphql should be present.");
+    }
+
+    /**
+     * Load the graphQL complexity info from archive.
+     *
+     * @param pathToArchive Path to archive
+     * @return Schema definition content
+     * @throws IOException When SDL file not found
+     */
+    private static String loadGraphqlComplexityInfoFile(String pathToArchive) throws IOException {
+
+        if (CommonUtil.checkFileExistence(pathToArchive + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found graphQL complexity info file " + pathToArchive
+                        + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION);
+            }
+            return FileUtils.readFileToString(
+                    new File(pathToArchive, ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION));
+        }
+        return null;
     }
 
     /**
