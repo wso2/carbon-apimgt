@@ -470,8 +470,6 @@ components:
         password:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
-            service_catalog:view: view service catalog
-            service_catalog:write: update service catalog
             service_catalog:entry_view: view service catalog entry
             service_catalog:entry_write: write service catalog entry
 
