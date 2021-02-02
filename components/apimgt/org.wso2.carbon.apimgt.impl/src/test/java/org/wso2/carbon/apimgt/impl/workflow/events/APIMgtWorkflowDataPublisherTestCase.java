@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.impl.workflow.events;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -33,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
+@Ignore("Ignore since event publishing is removed.")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, APIUtil.class, APIMgtWorkflowDataPublisher.class})
 public class APIMgtWorkflowDataPublisherTestCase {
@@ -59,30 +61,6 @@ public class APIMgtWorkflowDataPublisherTestCase {
         WorkflowDTO workflowDTO = new WorkflowDTO();
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         Assert.assertTrue(apiMgtWorkflowDataPublisher.publishEvent(workflowDTO));
-    }
-
-    @Test(expected = DataPublisherAlreadyExistsException.class) public void testAddPublisherToMapDomainExists()
-            throws Exception {
-        APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher = new APIMgtWorkflowDataPublisher();
-        DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
-        APIMgtWorkflowDataPublisher.addDataPublisher("foo.com", dataPublisher);
-        APIMgtWorkflowDataPublisher.addDataPublisher("foo.com", dataPublisher);
-    }
-
-    @Test public void testGetPublisherFromMapDomainExists() throws Exception {
-        DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
-        new APIMgtWorkflowDataPublisher();
-        APIMgtWorkflowDataPublisher.addDataPublisher("foo.com", dataPublisher);
-        DataPublisher dataPublisherFromMap = APIMgtWorkflowDataPublisher.getDataPublisher("foo.com");
-        Assert.assertNotNull(dataPublisherFromMap);
-    }
-
-    @Test public void testGetPublisherFromMapDomainNotExists() throws Exception {
-        DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
-        new APIMgtWorkflowDataPublisher();
-        APIMgtWorkflowDataPublisher.addDataPublisher("bar.com", dataPublisher);
-        DataPublisher dataPublisherFromMap = APIMgtWorkflowDataPublisher.getDataPublisher("foo.com");
-        Assert.assertNull(dataPublisherFromMap);
     }
 
     @Test public void testWhenAnalyticsDisabled() {

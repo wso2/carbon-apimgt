@@ -26,15 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.databridge.agent.DataPublisher;
-import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
-import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
-import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationException;
-import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
-import org.wso2.carbon.databridge.commons.exception.TransportException;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /*
 * This class will act as data-publisher for workflow events.Reason for not re-using the usage
@@ -44,8 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class APIMgtWorkflowDataPublisher {
 
     private static final Log log = LogFactory.getLog(APIMgtWorkflowDataPublisher.class);
-    private DataPublisher dataPublisher;
-    private static Map<String, DataPublisher> dataPublisherMap;
     static APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
             getAPIManagerConfigurationService().
             getAPIManagerConfiguration();
@@ -56,7 +46,6 @@ public class APIMgtWorkflowDataPublisher {
     boolean skipEventReceiverConnection = analyticsConfig.isSkipEventReceiverConnection();
     private static String wfStreamName;
     private static String wfStreamVersion;
-    private static DataPublisher dataPublisherStatics;
 
     public APIMgtWorkflowDataPublisher() {
         if (!enabled || skipEventReceiverConnection || analyticsConfig.isSkipWorkFlowEventReceiverConnection()) {
@@ -72,48 +61,10 @@ public class APIMgtWorkflowDataPublisher {
             log.error("Workflow stream name or version is null. Check api-manager.xml");
         }
 
-        dataPublisherMap = new ConcurrentHashMap<String, DataPublisher>();
-        this.dataPublisher = getDataPublisher();
-    }
-
-    private static DataPublisher getDataPublisher() {
-
-        String serverURL = analyticsConfig.getDasReceiverUrlGroups();
-        String serverAuthURL = analyticsConfig.getDasReceiverAuthUrlGroups();
-        String serverUser = analyticsConfig.getDasReceiverServerUser();
-        String serverPassword = analyticsConfig.getDasReceiverServerPassword();
-
-        try {
-            dataPublisherStatics = new DataPublisher(null, serverURL, serverAuthURL, serverUser, serverPassword);
-        } catch (DataEndpointConfigurationException e) {
-            log.error("Error while creating data publisher", e);
-        } catch (DataEndpointException e) {
-            log.error("Error while creating data publisher", e);
-        } catch (DataEndpointAgentConfigurationException e) {
-            log.error("Error while creating data publisher", e);
-        } catch (TransportException e) {
-            log.error("Error while creating data publisher", e);
-        } catch (DataEndpointAuthenticationException e) {
-            log.error("Error while creating data publisher", e);
-        }
-
-        return dataPublisherStatics;
     }
 
     public boolean publishEvent(WorkflowDTO workflowDTO) {
-
-        if (!enabled || skipEventReceiverConnection || analyticsConfig.isSkipWorkFlowEventReceiverConnection()) {
-            return true;
-        }
-
-        if (workflowDTO != null) {
-            try {
-                dataPublisher.publish(getStreamID(), System.currentTimeMillis(), new Object[] { "external" }, null,
-                        (Object[]) createPayload(workflowDTO));
-            } catch (Exception e) {
-                log.error("Error while publishing workflow event" + workflowDTO.getWorkflowReference(), e);
-            }
-        }
+        // ignore data publishing
         return true;
     }
 
@@ -134,39 +85,6 @@ public class APIMgtWorkflowDataPublisher {
 
     public static String getWFStreamVersion() {
         return wfStreamVersion;
-    }
-
-    /**
-     * Fetch the data publisher which has been registered under the tenant domain.
-     *
-     * @param tenantDomain - The tenant domain under which the data publisher is registered
-     * @return - Instance of the DataPublisher which was registered. Null if not registered.
-     */
-    public static DataPublisher getDataPublisher(String tenantDomain) {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            return dataPublisherMap.get(tenantDomain);
-        }
-        return null;
-    }
-
-    /**
-     * Adds a DataPublisher to the data publisher map.
-     *
-     * @param tenantDomain  - The tenant domain under which the data publisher will be registered.
-     * @param dataPublisher - Instance of the DataPublisher
-     * @throws org.wso2.carbon.apimgt.impl.workflow.events.DataPublisherAlreadyExistsException
-     *          - If a data publisher has already been registered under the
-     *          tenant domain
-     */
-    public static void addDataPublisher(String tenantDomain,
-                                        DataPublisher dataPublisher)
-            throws DataPublisherAlreadyExistsException {
-        if (dataPublisherMap.containsKey(tenantDomain)) {
-            throw new DataPublisherAlreadyExistsException("A DataPublisher has already been created for the tenant " +
-                                                          tenantDomain);
-        }
-
-        dataPublisherMap.put(tenantDomain, dataPublisher);
     }
 
 }
