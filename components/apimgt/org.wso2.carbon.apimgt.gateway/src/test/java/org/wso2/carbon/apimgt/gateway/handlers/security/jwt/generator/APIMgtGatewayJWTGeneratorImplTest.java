@@ -24,11 +24,13 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.common.jwtGenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
+import org.wso2.carbon.apimgt.gateway.common.jwtGenerator.ClaimsRetriever;
+import org.wso2.carbon.apimgt.gateway.common.jwtGenerator.AbstractAPIMgtGatewayJWTGenerator;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
@@ -52,12 +54,16 @@ public class APIMgtGatewayJWTGeneratorImplTest {
 
         // default dialect if not changed
         AbstractAPIMgtGatewayJWTGenerator generator = new APIMgtGatewayJWTGeneratorImpl();
+        // Set jwtConfigurationDto
+        generator.setJWTConfigurationDto(jwtConfigurationDto);
         Assert.assertEquals(generator.getDialectURI(), ClaimsRetriever.DEFAULT_DIALECT_URI);
 
         // Test dialect after changing it through config
         String claimDialect = "http://test.com";
         Mockito.when(jwtConfigurationDto.getConsumerDialectUri()).thenReturn(claimDialect);
         generator = new APIMgtGatewayJWTGeneratorImpl();
+        // Set jwtConfigurationDto
+        generator.setJWTConfigurationDto(jwtConfigurationDto);
         Assert.assertEquals(generator.getDialectURI(), claimDialect);
     }
 }

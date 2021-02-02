@@ -1,27 +1,9 @@
-/*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
+package org.wso2.carbon.apimgt.gateway.common.jwtGenerator;
 
 import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.constants.JWTConstants;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,7 +16,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
     public Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto) {
 
         long currentTime = System.currentTimeMillis();
-        long expireIn = currentTime + getTTL() * 1000;
+        long expireIn = currentTime + super.jwtConfigurationDto.getTTL() * 1000;
         String dialect = getDialectURI();
         Map<String, Object> claims = new HashMap<>();
         claims.put("iss", API_GATEWAY_ID);
@@ -43,7 +25,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         // dialect is either empty or '/' do not append a backslash. otherwise append a backslash '/'
         if (!"".equals(dialect) && !"/".equals(dialect)) {
             dialect = dialect + "/";
-        } 
+        }
         if (StringUtils.isNotEmpty(jwtInfoDto.getSubscriber())) {
             claims.put(dialect + "subscriber", jwtInfoDto.getSubscriber());
         }
@@ -73,7 +55,7 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         } else {
             claims.put(dialect + "keytype", "PRODUCTION");
         }
-        claims.put(dialect + "usertype", APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
+        claims.put(dialect + "usertype", JWTConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN);
         claims.put(dialect + "enduser", jwtInfoDto.getEnduser());
         claims.put(dialect + "enduserTenantId", String.valueOf(jwtInfoDto.getEndusertenantid()));
         claims.put(dialect + "applicationUUId", jwtInfoDto.getApplicationuuid());
@@ -89,8 +71,9 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
 
         String[] restrictedClaims = {"iss", "sub", "aud", "exp", "nbf", "iat", "jti", "application", "tierInfo",
                 "subscribedAPIs"};
-        JWTConfigurationDto jwtConfigurationDto =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+        JWTConfigurationDto jwtConfigurationDto = super.jwtConfigurationDto;
+        /*JWTConfigurationDto jwtConfigurationDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();*/
         Map<String, Object> claims = new HashMap<>();
         Set<String> jwtExcludedClaims = jwtConfigurationDto.getJWTExcludedClaims();
         jwtExcludedClaims.addAll(Arrays.asList(restrictedClaims));
@@ -105,3 +88,4 @@ public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGener
         return claims;
     }
 }
+
