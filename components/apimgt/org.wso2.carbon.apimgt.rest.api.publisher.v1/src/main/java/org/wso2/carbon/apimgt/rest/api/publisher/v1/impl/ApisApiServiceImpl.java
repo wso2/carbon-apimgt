@@ -3277,9 +3277,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
 
-            //APIIdentifier createdApiId = apiToAdd.getId();
-            //Retrieve the newly added API to send in the response payload
-            //API createdApi = apiProvider.getAPI(createdApiId);
             String swaggerStr = "";
             if (StringUtils.isNotBlank(url)) {
                 swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);

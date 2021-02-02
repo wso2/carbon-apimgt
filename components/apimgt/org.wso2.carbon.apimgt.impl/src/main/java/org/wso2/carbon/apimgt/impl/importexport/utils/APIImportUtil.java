@@ -427,7 +427,8 @@ public final class APIImportUtil {
      * @param apiProvider 
      * @throws APIManagementException 
      */
-    private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider, String orgId) throws APIManagementException {
+    private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider,
+            String orgId) throws APIManagementException {
 
         String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
         String inSequenceFileLocation = pathToArchive + APIImportExportConstants.IN_SEQUENCE_LOCATION
@@ -691,11 +692,9 @@ public final class APIImportUtil {
             try {
                 // Import inflow mediation logic
                 Path inFlowDirectory = Paths.get(inFlowFileLocation);
-                //ImportMediationLogic(inFlowDirectory, registry, soapToRestLocationIn);
                 ImportMediationLogicToAPI(inFlowDirectory, importedApi, Direction.IN);
                 // Import outflow mediation logic
                 Path outFlowDirectory = Paths.get(outFlowFileLocation);
-                //ImportMediationLogic(outFlowDirectory, registry, soapToRestLocationOut);
                 ImportMediationLogicToAPI(outFlowDirectory, importedApi, Direction.OUT);
 
             } catch (DirectoryIteratorException e) {
