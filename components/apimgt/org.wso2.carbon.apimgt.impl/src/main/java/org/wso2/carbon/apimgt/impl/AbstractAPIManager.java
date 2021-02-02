@@ -2649,6 +2649,11 @@ public abstract class AbstractAPIManager implements APIManager {
     public List<String> getApiVersionsMatchingApiName(String apiName,String username) throws APIManagementException {
         return apiMgtDAO.getAPIVersionsMatchingApiName(apiName,username);
     }
+
+    @Override
+    public List<String> getApiVersionsMatchingApiNameAndOrganization(String apiName, String organizationId) throws APIManagementException {
+        return apiMgtDAO.getAPIVersionsMatchingApiName(apiName, organizationId);
+    }
     
     public Map<String, Object> searchPaginatedAPIs(Registry registry, int tenantId, String searchQuery, int start,
             int end, boolean limitAttributes) throws APIManagementException {

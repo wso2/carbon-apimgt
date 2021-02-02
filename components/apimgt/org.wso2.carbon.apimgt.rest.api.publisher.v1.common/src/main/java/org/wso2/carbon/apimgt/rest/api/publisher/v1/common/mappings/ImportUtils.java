@@ -190,7 +190,6 @@ public class ImportUtils {
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE);
-
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
@@ -1616,7 +1615,7 @@ public class ImportUtils {
                 // Import dependent APIs only if it is asked (the UUIDs of the dependent APIs will be updated here if a
                 // fresh import happens)
                 importedApiProductDTO = importDependentAPIs(extractedFolderPath, userName, preserveProvider,
-                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes);
+                        apiProvider, overwriteAPIs, importedApiProductDTO, tokenScopes, organizationId);
             } else {
                 // Even we do not import APIs, the UUIDs of the dependent APIs should be updated if the APIs are already in the APIM
                 importedApiProductDTO = updateDependentApiUuids(importedApiProductDTO, apiProvider,
@@ -1777,8 +1776,8 @@ public class ImportUtils {
      *                                  checking the existence of an API
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
-            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes)
-            throws IOException, APIManagementException {
+            APIProvider apiProvider, Boolean overwriteAPIs, APIProductDTO apiProductDto, String[] tokenScopes,
+                                                     String organizationId) throws IOException, APIManagementException {
 
         String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
@@ -1806,12 +1805,12 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes, null);
+                                    Boolean.TRUE, tokenScopes, organizationId);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes, null);
+                                Boolean.FALSE, tokenScopes, organizationId);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -1826,13 +1825,13 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                Boolean.FALSE, tokenScopes, null);
+                                Boolean.FALSE, tokenScopes, organizationId);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    Boolean.TRUE, tokenScopes, null);
+                                    Boolean.TRUE, tokenScopes, organizationId);
                         }
                     }
                 }

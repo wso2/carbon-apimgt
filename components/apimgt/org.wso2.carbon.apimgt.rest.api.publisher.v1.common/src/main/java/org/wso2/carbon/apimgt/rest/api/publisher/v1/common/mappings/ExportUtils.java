@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -779,9 +780,9 @@ public class ExportUtils {
                     }
                 }
                 API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
-                String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
-                String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
-                api.setOrganizationId(providerTenantDomain);
+                //TODO-ORG
+                String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiIdentifier.getUUID());
+                api.setOrganizationId(organizationId);
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
@@ -939,7 +940,6 @@ public class ExportUtils {
         List<ProductAPIDTO> apisList = apiProductDtoToReturn.getApis();
         for (ProductAPIDTO productAPIDTO : apisList) {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            //TODO- ORG
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
