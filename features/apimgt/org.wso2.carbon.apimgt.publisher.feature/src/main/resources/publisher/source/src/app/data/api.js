@@ -1038,7 +1038,6 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(updatedProperties) {
-        alert('update api() invoked!');
         const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then(client => {
             const payload = {

@@ -752,7 +752,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.TOPICS}
-                                    component={() => <Topics api={api} />}
+                                    component={() => <Topics api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
