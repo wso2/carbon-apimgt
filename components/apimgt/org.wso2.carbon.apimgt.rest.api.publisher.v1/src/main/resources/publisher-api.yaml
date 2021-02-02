@@ -1338,6 +1338,7 @@ paths:
       operationId: getAPIRevisions
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/organizationId'
         - name: query
           in: query
           schema:
@@ -1373,6 +1374,7 @@ paths:
       operationId: createAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: API object that needs to be added
         content:
@@ -1419,6 +1421,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId'
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |
@@ -1451,6 +1454,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId'
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |
@@ -1488,6 +1492,7 @@ paths:
       operationId: getAPIRevisionDeployments
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |
@@ -1520,6 +1525,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: Deployment object that needs to be added
         content:
@@ -1566,6 +1572,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: Deployment object that needs to be added
         content:

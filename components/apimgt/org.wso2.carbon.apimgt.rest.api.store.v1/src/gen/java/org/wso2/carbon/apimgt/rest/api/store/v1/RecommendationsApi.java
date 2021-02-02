@@ -48,7 +48,7 @@ RecommendationsApiService delegate = new RecommendationsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested recommendations are returned ", response = RecommendationsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response recommendationsGet() throws APIManagementException{
-        return delegate.recommendationsGet(securityContext);
+    public Response recommendationsGet( @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.recommendationsGet(organizationId, securityContext);
     }
 }

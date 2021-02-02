@@ -282,6 +282,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+
     @Override
     public Response getAPI(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1308,7 +1309,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not FILE", log);
                 }
-                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
+                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail,
+                        organizationId);
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) &&
                         !documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
@@ -2915,12 +2917,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
+            apiToAdd.setOrganizationId(organizationId);
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
             // retrieving the added API for returning as the response
             // this would provide the updated templates
-            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
+            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organizationId);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
             // This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3043,8 +3046,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI,
                     RestApiCommonUtil.getLoggedInUserProvider(), username, organizationId);
+            apiToAdd.setOrganizationId(organizationId);
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
+            apiToAdd.setOrganizationId(organizationId);
             if (isSoapAPI) {
                 createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
             } else if (isSoapToRestConvertedAPI) {
@@ -3123,12 +3128,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
-                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, tenantDomain);
+                apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, apiToAdd.getOrganizationId());
             } else if (fileDetail != null && fileInputStream != null) {
                 ResourceFile wsdlResource = new ResourceFile(fileInputStream,
                         fileDetail.getContentType().toString());
                 apiToAdd.setWsdlResource(wsdlResource);
-                apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null, tenantDomain);
+                apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null, apiToAdd.getOrganizationId());
             }
 
             //add the generated swagger definition to SOAP
@@ -3827,7 +3832,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing list of API revisions
      */
     @Override
-    public Response getAPIRevisions(String apiId, String query, MessageContext messageContext) {
+    public Response getAPIRevisions(String apiId, String organizationId, String query, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevisionListDTO apiRevisionListDTO;
@@ -3860,14 +3865,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing newly created APIRevision object
      */
     @Override
-    public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
+    public Response createAPIRevision(String apiId, String organizationId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
             //adding the api revision
-            String revisionId = apiProvider.addAPIRevision(apiRevision);
+            String revisionId = apiProvider.addAPIRevision(apiRevision, organizationId);
 
             //Retrieve the newly added APIRevision to send in the response payload
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
@@ -3897,7 +3902,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing APIRevision object
      */
     @Override
-    public Response getAPIRevision(String apiId, String revisionId, MessageContext messageContext) {
+    public Response getAPIRevision(String apiId, String revisionId, String organizationId, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -3916,10 +3921,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 204 status code and no content
      */
     @Override
-    public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext)
+    public Response deleteAPIRevision(String apiId, String revisionId,String organizationId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.deleteAPIRevision(apiId, revisionId);
+        apiProvider.deleteAPIRevision(apiId, revisionId, organizationId);
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
         return Response.ok().entity(apiRevisionListDTO).build();
@@ -3934,7 +3939,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response deployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -3963,7 +3968,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response getAPIRevisionDeployments(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
@@ -3982,7 +3987,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response undeployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response undeployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -4015,9 +4020,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response restoreAPIRevision(String apiId, String organizationId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.restoreAPIRevision(apiId, revisionId);
+        apiProvider.restoreAPIRevision(apiId, revisionId, organizationId);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organizationId);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
     }
+
 }

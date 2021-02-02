@@ -42,7 +42,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
 
     private static final Log log = LogFactory.getLog(RecommendationsApiService.class);
 
-    public Response recommendationsGet(MessageContext messageContext) {
+    public Response recommendationsGet(String organizationId, MessageContext messageContext) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();
@@ -56,7 +56,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
             if (apiConsumer.isRecommendationEnabled(requestedTenantDomain) &&
                     !APIConstants.WSO2_ANONYMOUS_USER.equals(userName)) {
                 int maxRecommendations = recommendationEnvironment.getMaxRecommendations();
-                String recommendations = apiConsumer.getApiRecommendations(userName, requestedTenantDomain);
+                String recommendations = apiConsumer.getApiRecommendations(userName, organizationId);
 
                 if (recommendations != null) {
                     JSONObject jsonResponse = new JSONObject(recommendations);
@@ -67,7 +67,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                             JSONObject apiObj = apiList.getJSONObject(i);
                             apiId = apiObj.getString("id");
                             ApiTypeWrapper apiWrapper = apiConsumer
-                                    .getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+                                    .getAPIorAPIProductByUUID(apiId, organizationId);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);

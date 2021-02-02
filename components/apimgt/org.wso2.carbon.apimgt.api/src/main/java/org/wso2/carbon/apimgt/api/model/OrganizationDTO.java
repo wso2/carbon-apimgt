@@ -45,4 +45,5 @@ public class OrganizationDTO {
     public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
+
 }

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -61,7 +62,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIDTO apiDtoToReturn;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiId);
         API api;
 
         // apiId == null means the path from the API Controller
@@ -73,7 +74,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            api = apiProvider.getAPIbyUUID(apiId, organizationId);
             apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         }
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
@@ -87,9 +88,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiId);
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        API api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+        API api = apiProvider.getAPIbyUUID(revisionUUID, organizationId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs);

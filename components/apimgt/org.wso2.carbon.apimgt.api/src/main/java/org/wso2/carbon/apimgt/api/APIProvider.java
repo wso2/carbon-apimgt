@@ -1709,7 +1709,7 @@ public interface APIProvider extends APIManager {
      * @param apiRevision APIRevision
      * @throws APIManagementException if failed to add APIRevision
      */
-    String addAPIRevision(APIRevision apiRevision) throws APIManagementException;
+    String addAPIRevision(APIRevision apiRevision, String organizationId) throws APIManagementException;
 
     /**
      * Get a Revision Object related to provided revision UUID
@@ -1774,7 +1774,7 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionId API Revision UUID
      * @throws APIManagementException if failed to restore APIRevision
      */
-    void restoreAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+    void restoreAPIRevision(String apiId, String apiRevisionId, String organizationId) throws APIManagementException;
 
     /**
      * Delete an API Revision
@@ -1783,6 +1783,6 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionId API Revision UUID
      * @throws APIManagementException if failed to delete APIRevision
      */
-    void deleteAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+    void deleteAPIRevision(String apiId, String apiRevisionId, String organizationId) throws APIManagementException;
 
 }

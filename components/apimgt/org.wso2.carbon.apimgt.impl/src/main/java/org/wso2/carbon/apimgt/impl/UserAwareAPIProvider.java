@@ -227,8 +227,8 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
-        API api = super.getLightweightAPIByUUID(uuid, requestedTenantDomain);
+    public API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException {
+        API api = super.getLightweightAPIByUUID(uuid, orgId);
         if (api != null) {
             checkAccessControlPermission(api.getId());
         }

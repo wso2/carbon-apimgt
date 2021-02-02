@@ -2628,15 +2628,15 @@ public class APIMappingUtil {
      * @param apiId
      * @param requestedTenantDomain
      */
-    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String orgId)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         if (RestApiCommonUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, orgId).getId();
         } else {
-            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId), orgId).getId();
         }
         return apiIdentifier;
     }

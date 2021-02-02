@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RecommendationsApiService {
-      public Response recommendationsGet(MessageContext messageContext) throws APIManagementException;
+      public Response recommendationsGet(String organizationId, MessageContext messageContext) throws APIManagementException;
 }

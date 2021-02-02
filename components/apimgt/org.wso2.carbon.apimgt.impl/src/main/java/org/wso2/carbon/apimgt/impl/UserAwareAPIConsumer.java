@@ -134,17 +134,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
     
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId)
             throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, requestedTenantDomain);
-        Identifier identifier;
-        if (apiTypeWrapper.isAPIProduct()) {
-            identifier = apiTypeWrapper.getApiProduct().getId();
-        } else {
-            identifier = apiTypeWrapper.getApi().getId();
-        }
-        //TO-DO Commented to since need to work for monodb should be move to registry persistent impl
-//        checkAccessControlPermission(identifier);
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, orgId);
         return apiTypeWrapper;
     }
 

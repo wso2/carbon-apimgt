@@ -48,7 +48,7 @@ SdkGenApiService delegate = new SdkGenApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. List of supported languages for generating SDKs. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response sdkGenLanguagesGet() throws APIManagementException{
-        return delegate.sdkGenLanguagesGet(securityContext);
+    public Response sdkGenLanguagesGet( @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.sdkGenLanguagesGet(organizationId, securityContext);
     }
 }
