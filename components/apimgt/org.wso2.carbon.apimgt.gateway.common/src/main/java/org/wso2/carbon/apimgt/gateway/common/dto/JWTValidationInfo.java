@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Holds jwt validation related information.
+ */
 public class JWTValidationInfo implements Serializable {
     private String user;
     private String issuer;

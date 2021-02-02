@@ -1,5 +1,8 @@
 package org.wso2.carbon.apimgt.gateway.common.constants;
 
+/**
+ * Constants related to jwt generation.
+ */
 public class JWTConstants {
     public static final String EXPIRY_TIME = "exp";
     public static final String ISSUED_TIME = "iat";

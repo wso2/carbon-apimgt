@@ -1,9 +1,12 @@
 package org.wso2.carbon.apimgt.gateway.common.dto;
 
-import javax.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import javax.security.cert.Certificate;
 
+/**
+ * Holds data related to token issuers.
+ */
 public class TokenIssuerDto {
     private String issuer;
     private boolean disableDefaultClaimMapping = false;

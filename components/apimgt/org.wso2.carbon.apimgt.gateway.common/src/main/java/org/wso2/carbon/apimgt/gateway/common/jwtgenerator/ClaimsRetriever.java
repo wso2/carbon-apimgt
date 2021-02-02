@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.common.jwtGenerator;
+package org.wso2.carbon.apimgt.gateway.common.jwtgenerator;
 
 import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
 

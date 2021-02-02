@@ -5,6 +5,9 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Data holder for claim mappings.
+ */
 public class ClaimMappingDto implements Serializable {
     @SerializedName("remoteClaim")
     private String remoteClaim;
@@ -44,8 +47,12 @@ public class ClaimMappingDto implements Serializable {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ClaimMappingDto that = (ClaimMappingDto) o;
         return Objects.equals(localClaim, that.localClaim);
     }

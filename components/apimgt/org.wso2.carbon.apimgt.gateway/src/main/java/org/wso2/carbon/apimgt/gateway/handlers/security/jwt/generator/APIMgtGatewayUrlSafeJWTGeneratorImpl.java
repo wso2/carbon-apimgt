@@ -19,9 +19,8 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
 
 import org.apache.commons.codec.binary.Base64;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.gateway.common.jwtGenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 
 public class APIMgtGatewayUrlSafeJWTGeneratorImpl extends APIMgtGatewayJWTGeneratorImpl {
 

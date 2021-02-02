@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.common.jwtGenerator;
+package org.wso2.carbon.apimgt.gateway.common.jwtgenerator;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.gateway.common.constants.JWTConstants;
@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+
+/**
+ * Default implementation of backend jwt generation
+ */
 public class APIMgtGatewayJWTGeneratorImpl extends AbstractAPIMgtGatewayJWTGenerator {
 
     @Override

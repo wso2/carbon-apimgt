@@ -1,5 +1,8 @@
 package org.wso2.carbon.apimgt.gateway.common.exception;
 
+/**
+ * Exception related to jwt generation.
+ */
 public class JWTGeneratorException extends Exception {
     private ErrorHandler errorHandler;
 

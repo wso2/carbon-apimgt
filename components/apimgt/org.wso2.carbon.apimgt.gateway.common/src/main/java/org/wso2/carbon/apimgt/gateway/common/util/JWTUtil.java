@@ -1,12 +1,20 @@
 package org.wso2.carbon.apimgt.gateway.common.util;
 
 import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.gateway.common.jwtGenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.JWTSignatureAlg;
 
 import java.nio.charset.Charset;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 
+/**
+ * Helper class for util related to jwt generation.
+ */
 public final class JWTUtil {
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
@@ -35,7 +43,8 @@ public final class JWTUtil {
      * @param signatureAlgorithm signature algorithm which needs to include in the header
      * @throws JWTGeneratorException
      */
-    public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws JWTGeneratorException {
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws
+            JWTGeneratorException {
 
         try {
             //generate the SHA-1 thumbprint of the certificate
@@ -115,7 +124,8 @@ public final class JWTUtil {
      * @return byte array of the JWT signature
      * @throws JWTGeneratorException
      */
-    public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm) throws JWTGeneratorException {
+    public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm) throws
+            JWTGeneratorException {
 
         try {
             //initialize signature with private key and algorithm

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.common.jwtGenerator;
+package org.wso2.carbon.apimgt.gateway.common.jwtgenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Abstract class for jwt generation.
+ */
 public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private static final Log log = LogFactory.getLog(AbstractAPIMgtGatewayJWTGenerator.class);
     public static final String NONE = "NONE";

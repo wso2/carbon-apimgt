@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * Holds configs related to jwt generation.
+ *
+ */
 public class JWTConfigurationDto {
     private boolean enabled = false;
     private String jwtHeader = "X-JWT-Assertion";

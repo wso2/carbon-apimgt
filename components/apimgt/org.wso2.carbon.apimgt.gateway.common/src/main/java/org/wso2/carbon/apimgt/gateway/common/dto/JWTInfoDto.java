@@ -5,6 +5,10 @@ package org.wso2.carbon.apimgt.gateway.common.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Holds information related to jwt token.
+ *
+ */
 public class JWTInfoDto {
     private String applicationtier;
     private String keytype;
