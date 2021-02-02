@@ -2504,6 +2504,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, organizationId);
+            api.setOrganizationId(organizationId);
             String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"" ).build();

@@ -767,10 +767,13 @@ public class ExportUtils {
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
                 }
+                API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
+                String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
+                String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+                api.setOrganizationId(providerTenantDomain);
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
-                            APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
+                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
                             formattedSwaggerJson);
                 }

@@ -340,7 +340,7 @@ public class PublisherCommonUtils {
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, originalAPI.getOrganizationId());
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
@@ -362,8 +362,7 @@ public class PublisherCommonUtils {
         apiToUpdate.setOrganizationId(originalAPI.getOrganizationId());
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         
-        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
-                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganizationId());// TODO use returend api
     }
 
     /**

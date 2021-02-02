@@ -427,6 +427,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Registry registry;
         try {
             String apiTenantDomain = getTenantDomain(identifier);
+            String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(identifier.getUUID());
             int apiTenantId = getTenantManager()
                     .getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
@@ -450,7 +451,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, organizationId));
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             }
