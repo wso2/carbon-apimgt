@@ -66,6 +66,7 @@ public class GraphqlQueryAnalysisMappingUtil {
      */
     public static GraphqlComplexityInfo fromDTOtoValidatedGraphqlComplexityInfo(
             GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, String schema) {
+
         SchemaParser schemaParser = new SchemaParser();
         Set<String> complexityInfoTypeSet = schemaParser.parse(schema).types().keySet();
 
@@ -73,7 +74,7 @@ public class GraphqlQueryAnalysisMappingUtil {
         List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
         for (GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO : graphQLQueryComplexityInfoDTO.getList()) {
             String complexityType = graphQLCustomComplexityInfoDTO.getType();
-            if (complexityInfoTypeSet.contains(complexityType)){
+            if (complexityInfoTypeSet.contains(complexityType)) {
                 CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
                 customComplexityDetails.setType(complexityType);
                 customComplexityDetails.setField(graphQLCustomComplexityInfoDTO.getField());

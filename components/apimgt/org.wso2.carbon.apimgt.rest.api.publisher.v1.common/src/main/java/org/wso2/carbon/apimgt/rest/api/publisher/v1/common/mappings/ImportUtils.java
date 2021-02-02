@@ -232,7 +232,7 @@ public class ImportUtils {
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 PublisherCommonUtils.addGraphQLSchema(importedApi, graphQLSchema, apiProvider);
                 graphqlComplexityInfo = retrieveGraphqlComplexityInfoFromArchive(extractedFolderPath, graphQLSchema);
-                if (graphqlComplexityInfo != null) {
+                if (graphqlComplexityInfo != null && graphqlComplexityInfo.getList().size() != 0) {
                     apiProvider.addOrUpdateComplexityDetails(importedApi.getId(), graphqlComplexityInfo);
                 }
             }
@@ -654,17 +654,17 @@ public class ImportUtils {
      *
      * @param pathToArchive Path to API archive
      * @param schema        GraphQL schema
-     * @throws APIImportExportException If an error occurs while reading the file
+     * @return GraphQL complexity info validated with the schema
+     * @throws APIManagementException If an error occurs while reading the file
      */
-    private static GraphqlComplexityInfo retrieveGraphqlComplexityInfoFromArchive(String pathToArchive, String schema) {
-
+    private static GraphqlComplexityInfo retrieveGraphqlComplexityInfoFromArchive(String pathToArchive, String schema)
+            throws APIManagementException {
         try {
             String jsonContent =
                     getFileContentAsJson(pathToArchive + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION);
             if (jsonContent == null) {
                 return null;
             }
-
             JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             GraphQLQueryComplexityInfoDTO complexityDTO = new Gson().fromJson(String.valueOf(configElement),
                     GraphQLQueryComplexityInfoDTO.class);
@@ -672,11 +672,10 @@ public class ImportUtils {
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(complexityDTO, schema);
             return graphqlComplexityInfo;
         } catch (IOException e) {
-            log.error("Error reading the GraphQL complexity information from the file.");
+            throw new APIManagementException("Error while reading graphql complexity info from path: " + pathToArchive,
+                    e, ExceptionCodes.ERROR_READING_META_DATA);
         }
-        return null;
     }
-
 
     /**
      * Validate WSDL definition from the archive directory and return it.

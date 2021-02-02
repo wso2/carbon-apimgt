@@ -77,12 +77,6 @@ public final class ImportExportConstants {
 
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
 
-    // Location of the API YAML file
-    public static final String YAML_API_FILE_LOCATION = File.separator + "api.yaml";
-
-    // Location of the API JSON file
-    public static final String JSON_API_FILE_LOCATION = File.separator + "api.json";
-
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger.json";
