@@ -2063,7 +2063,7 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <analytics.event.publisher.client.version>0.1.0</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version>0.2.0</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[0.1.0,1.0.0)</analytics.event.publisher.client.version.range>
     </properties>
 </project>
