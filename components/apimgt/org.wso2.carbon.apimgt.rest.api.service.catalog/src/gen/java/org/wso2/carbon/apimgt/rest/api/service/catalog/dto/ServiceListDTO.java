@@ -24,62 +24,8 @@ import javax.validation.Valid;
 
 public class ServiceListDTO   {
   
-    private Integer limit = null;
-    private Integer offset = null;
-    private Integer total = null;
     private List<ServiceDTO> list = new ArrayList<ServiceDTO>();
     private PaginationDTO pagination = null;
-
-  /**
-   **/
-  public ServiceListDTO limit(Integer limit) {
-    this.limit = limit;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("limit")
-  public Integer getLimit() {
-    return limit;
-  }
-  public void setLimit(Integer limit) {
-    this.limit = limit;
-  }
-
-  /**
-   **/
-  public ServiceListDTO offset(Integer offset) {
-    this.offset = offset;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("offset")
-  public Integer getOffset() {
-    return offset;
-  }
-  public void setOffset(Integer offset) {
-    this.offset = offset;
-  }
-
-  /**
-   **/
-  public ServiceListDTO total(Integer total) {
-    this.total = total;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("total")
-  public Integer getTotal() {
-    return total;
-  }
-  public void setTotal(Integer total) {
-    this.total = total;
-  }
 
   /**
    **/
@@ -127,16 +73,13 @@ public class ServiceListDTO   {
       return false;
     }
     ServiceListDTO serviceList = (ServiceListDTO) o;
-    return Objects.equals(limit, serviceList.limit) &&
-        Objects.equals(offset, serviceList.offset) &&
-        Objects.equals(total, serviceList.total) &&
-        Objects.equals(list, serviceList.list) &&
+    return Objects.equals(list, serviceList.list) &&
         Objects.equals(pagination, serviceList.pagination);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(limit, offset, total, list, pagination);
+    return Objects.hash(list, pagination);
   }
 
   @Override
@@ -144,9 +87,6 @@ public class ServiceListDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ServiceListDTO {\n");
     
-    sb.append("    limit: ").append(toIndentedString(limit)).append("\n");
-    sb.append("    offset: ").append(toIndentedString(offset)).append("\n");
-    sb.append("    total: ").append(toIndentedString(total)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");
