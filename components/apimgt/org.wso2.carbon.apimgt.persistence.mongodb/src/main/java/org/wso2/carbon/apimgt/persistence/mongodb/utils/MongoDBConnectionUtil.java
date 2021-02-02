@@ -26,7 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.wso2.carbon.apimgt.persistence.PersistenceConstants;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.APIDocumentation;
@@ -43,7 +45,6 @@ public class MongoDBConnectionUtil {
     private static final Log log = LogFactory.getLog(MongoDBConnectionUtil.class);
     private static MongoClient mongoClient = null;
     private static String database = null;
-    private static final String DEFAULT_DATABASE = "APIM_DB";
 
     /**
      * Initializes the datasource for mongodb
@@ -59,10 +60,8 @@ public class MongoDBConnectionUtil {
                     log.debug("Initializing mongodb datasource");
                 }
 
-                String parsedConnectionString = ServiceReferenceHolder.getInstance().getPersistenceConfigs().get
-                        ("RegistryConfigs.ConnectionString");
-
-
+                String parsedConnectionString = ServiceReferenceHolder.getInstance().getPersistenceConfigs()
+                        .get(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING);
                 ConnectionString connectionString = new ConnectionString(parsedConnectionString);
                 database = connectionString.getDatabase();
                 ClassModel<MongoDBPublisherAPI> mongoDBAPIDocument = ClassModel.builder(MongoDBPublisherAPI.class)
@@ -90,7 +89,7 @@ public class MongoDBConnectionUtil {
                         .codecRegistry(codecRegistry)
                         .build();
                 mongoClient = MongoClients.create(clientSettings);
-                log.info("mongodb client created ");
+                log.info("mongodb client initialized");
             }
         }
     }
@@ -112,7 +111,7 @@ public class MongoDBConnectionUtil {
         if (database != null) {
             return mongoClient.getDatabase(database);
         } else {
-            return mongoClient.getDatabase(DEFAULT_DATABASE);
+            return mongoClient.getDatabase(MongoDBConstants.MONGODB_DEFAULT_DATABASE);
         }
     }
 }

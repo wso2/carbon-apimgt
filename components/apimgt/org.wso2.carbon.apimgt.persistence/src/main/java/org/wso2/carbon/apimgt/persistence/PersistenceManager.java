@@ -16,9 +16,6 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-import net.consensys.cava.toml.TomlParseResult;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 
 import java.util.Map;
@@ -27,22 +24,21 @@ import java.util.Properties;
 public class PersistenceManager {
 
     private static APIPersistence apiPersistenceInstance;
-    private static TomlParseResult tomlParseResult = null;
-    private static Log log = LogFactory.getLog(PersistenceManager.class);
 
-    public static APIPersistence getPersistenceInstance(Map<String, String> configs ,Properties properties) {
+    public static APIPersistence getPersistenceInstance(Map<String, String> configs, Properties properties) {
 
         synchronized (RegistryPersistenceImpl.class) {
             if (apiPersistenceInstance == null) {
-                String databaseType = configs.get("RegistryConfigs.Type");
+                String databaseType = configs.get(PersistenceConstants.REGISTRY_CONFIG_TYPE);
                 ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
                 serviceReferenceHolder.setPersistenceConfigs(configs);
-                if ("mongodb".equalsIgnoreCase(databaseType)) {
+                if (PersistenceConstants.REGISTRY_CONFIG_TYPE_MONGODB.equalsIgnoreCase(databaseType)) {
                     apiPersistenceInstance = serviceReferenceHolder.getApiPersistence();
                 } else {
                     if (apiPersistenceInstance == null) {
                         apiPersistenceInstance = new RegistryPersistenceImpl(properties);
-                    }                }
+                    }
+                }
             }
             return apiPersistenceInstance;
         }

@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.PersistenceConstants;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
@@ -252,16 +253,20 @@ public abstract class AbstractAPIManager implements APIManager {
 
         if (apiManagerConfigurationService != null) {
             APIManagerConfiguration apiManagerConfig = apiManagerConfigurationService.getAPIManagerConfiguration();
-            configMap.put("RegistryConfigs.Type", apiManagerConfig.getFirstProperty("RegistryConfigs.Type"));
-            configMap.put("RegistryConfigs.ConnectionString",
-                    apiManagerConfig.getFirstProperty("RegistryConfigs.ConnectionString"));
-            configMap.put("RegistryConfigs.APIUri", apiManagerConfig.getFirstProperty("RegistryConfigs.APIUri"));
-            configMap.put("RegistryConfigs.GroupId", apiManagerConfig.getFirstProperty("RegistryConfigs.GroupId"));
-            configMap.put("RegistryConfigs.ClusterName",
-                    apiManagerConfig.getFirstProperty("RegistryConfigs.ClusterName"));
-            configMap.put("RegistryConfigs.PublicKey", apiManagerConfig.getFirstProperty("RegistryConfigs.PublicKey"));
-            configMap.put("RegistryConfigs.PrivateKey",
-                    apiManagerConfig.getFirstProperty("RegistryConfigs.PrivateKey"));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_TYPE,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_TYPE));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_CONNECTION_STRING));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_API_URI,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_API_URI));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY));
         }
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());

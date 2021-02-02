@@ -36,8 +36,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.persistence.PersistenceConstants;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mongodb.utils.MongoDBConnectionUtil;
 
@@ -51,7 +53,6 @@ import java.util.Map;
 public class MongoDBAtlasAPIConnector {
 
     private static String database = null;
-    private static final String DEFAULT_DATABASE = "APIM_DB";
     private static MongoDBAtlasAPIConnector instance = null;
     private static final Log log = LogFactory.getLog(MongoDBAtlasAPIConnector.class);
     private static String apiUri;
@@ -63,11 +64,11 @@ public class MongoDBAtlasAPIConnector {
     public MongoDBAtlasAPIConnector() {
         Map<String, String> persistenceConfigs = ServiceReferenceHolder.getInstance().getPersistenceConfigs();
         database = MongoDBConnectionUtil.getDatabase().getName();
-        apiUri = persistenceConfigs.get("RegistryConfigs.APIUri");
-        groupId = persistenceConfigs.get("RegistryConfigs.GroupId");
-        clusterName = persistenceConfigs.get("RegistryConfigs.ClusterName");
-        publicKey = persistenceConfigs.get("RegistryConfigs.PublicKey");
-        privateKey = persistenceConfigs.get("RegistryConfigs.PrivateKey");
+        apiUri = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_API_URI);
+        groupId = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID);
+        clusterName = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID);
+        publicKey = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME);
+        privateKey = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY);
     }
 
     public static MongoDBAtlasAPIConnector getInstance() {
@@ -89,7 +90,7 @@ public class MongoDBAtlasAPIConnector {
         if (database != null) {
             map.put("database", database);
         } else {
-            map.put("database", DEFAULT_DATABASE);
+            map.put("database", MongoDBConstants.MONGODB_DEFAULT_DATABASE);
         }
         map.put("mappings", mappings);
         map.put("name", "default");
@@ -113,7 +114,6 @@ public class MongoDBAtlasAPIConnector {
                 log.info("Created atlas search index with status " + statusCode);
                 return true;
             } else {
-                // add payload
                 log.error("Failed to create atlas search index with status " + statusCode);
                 return false;
             }
@@ -149,7 +149,15 @@ public class MongoDBAtlasAPIConnector {
 
             InputStream content = execute.getEntity().getContent();
             JSONParser jsonParser = new JSONParser();
-            jsonArray = (JSONArray) jsonParser.parse(new InputStreamReader(content, "UTF-8"));
+            Object result = jsonParser.parse(new InputStreamReader(content, "UTF-8"));
+
+            if (result instanceof JSONArray) {
+                jsonArray = (JSONArray) result;
+            } else {
+                JSONObject json = (JSONObject) result;
+                log.info(json.toJSONString());
+                jsonArray = new JSONArray();
+            }
 
         } catch (IOException | ParseException e) {
             log.error("Error when parsing to json ", e);

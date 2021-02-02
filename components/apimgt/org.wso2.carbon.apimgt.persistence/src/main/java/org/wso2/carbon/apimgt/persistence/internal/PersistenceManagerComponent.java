@@ -140,7 +140,7 @@ import java.util.Map;
      * Initialize the registry impl
      */
     @Reference(
-            name = "registry.impl.service",
+            name = "api.persistence.service",
             service = APIPersistence.class,
             cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
