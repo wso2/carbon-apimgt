@@ -339,7 +339,7 @@ class InfoBar extends React.Component {
 
     collapseAllDescription(e) {
         e.preventDefault();
-        this.setState({descriptionHidden: !this.state.descriptionHidden});
+        this.setState({ descriptionHidden: !this.state.descriptionHidden });
     }
     /**
      *
@@ -412,13 +412,15 @@ class InfoBar extends React.Component {
             })
         }
         // Truncating the description
-        const limit = 40;
         let descriptionIsBig = false;
         let smallDescription = '';
-        if(api.description.split(' ').length > limit){
-            let newContent = api.description.split(' ').slice(0, limit);
-            smallDescription = newContent.join(' ') + '...';
-            descriptionIsBig = true;
+        if (api.description) {
+            const limit = 40;
+            if (api.description.split(' ').length > limit) {
+                let newContent = api.description.split(' ').slice(0, limit);
+                smallDescription = newContent.join(' ') + '...';
+                descriptionIsBig = true;
+            }
         }
 
 
@@ -445,7 +447,7 @@ class InfoBar extends React.Component {
                                 </Link>
                             </Box>
                             {!api.advertiseInfo.advertised && user && showRating && (
-                                <>  
+                                <>
                                     <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
                                     <VerticalDivider height={30} />
                                     <StarRatingBar
@@ -572,14 +574,14 @@ class InfoBar extends React.Component {
                                     </Box>
                                 </Grid>
 
-                                <Grid item xs={12} className={classes.infoWrapper}>
+                                {api.description && (<Grid item xs={12} className={classes.infoWrapper}>
                                     <Typography variant='body2' gutterBottom align='left'>
                                         {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
                                         {descriptionIsBig && (<a onClick={this.collapseAllDescription} href='#'>
                                             {descriptionHidden ? 'more' : 'less'}
-                                            </a>)}
+                                        </a>)}
                                     </Typography>
-                                </Grid>
+                                </Grid>)}
                             </Grid>
                         </Box>
                     </Box>

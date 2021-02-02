@@ -109,17 +109,19 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         }
 
-        //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = null;
-
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+        String apiDefinition = null;
+        if (model.isAsync()) {
+            // for asyncAPI retrieve asyncapi.yml specification
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
+        } else {
+            // retrieve open API definition
             if (model.getSwaggerDefinition() != null) {
-                apiSwaggerDefinition = model.getSwaggerDefinition();
+                apiDefinition = model.getSwaggerDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
-        dto.setApiDefinition(apiSwaggerDefinition);
+        dto.setApiDefinition(apiDefinition);
 
         if (APIConstants.APITransportType.GRAPHQL.toString().equals(model.getType())) {
             List<APIOperationsDTO> operationList = new ArrayList<>();
@@ -277,17 +279,19 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         } */
 
-        //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = null;
-
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+        String apiDefinition = null;
+        if (model.isAsync()) {
+            // for asyncAPI retrieve asyncapi.yml specification
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
+        } else {
+            // retrieve open API definition
             if (model.getDefinition() != null) {
-                apiSwaggerDefinition = model.getDefinition();
+                apiDefinition = model.getDefinition();
             } else {
-                apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
         }
-        dto.setApiDefinition(apiSwaggerDefinition);
+        dto.setApiDefinition(apiDefinition);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1071,5 +1075,4 @@ public class APIMappingUtil {
         }
         return subscriptionAllowed;
     }
-
 }

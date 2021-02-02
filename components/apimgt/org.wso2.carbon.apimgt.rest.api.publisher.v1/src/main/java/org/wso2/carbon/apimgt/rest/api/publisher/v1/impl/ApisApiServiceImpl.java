@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -372,17 +373,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "API ID cannot be empty or null.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            GraphqlComplexityInfo graphqlComplexityInfo =
-                    GraphqlQueryAnalysisMappingUtil.fromDTOtoGraphqlComplexityInfo(body);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifier == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
+
+            GraphqlComplexityInfo graphqlComplexityInfo =
+                    GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 apiProvider.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
                 return Response.ok().build();
@@ -1887,13 +1891,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, tenantDomain);
             if (mediation != null) {
                 if (isAPIModified(api, mediation)) {
-                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain); // TODO do a deep copy 
+                    API oldAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain); // TODO do a deep copy
                     apiProvider.updateAPI(oldAPI, api);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
             }
-            
+
             apiProvider.deleteApiSpecificMediationPolicy(apiId, mediationPolicyId, tenantDomain);
 
         } catch (APIManagementException e) {
@@ -1932,7 +1936,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Getting specified mediation policy
-            Mediation mediation = 
+            Mediation mediation =
                     apiProvider.getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, tenantDomain);
             if (mediation != null) {
                 MediationDTO mediationDTO =
@@ -2011,7 +2015,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     throw new APIManagementException("Sequence is malformed");
                 }
-                
+
                 if (returnedPolicy != null) {
                     String uuid = returnedPolicy.getUuid();
                     String uriString = RestApiConstants.RESOURCE_PATH_API_MEDIATION
@@ -2019,7 +2023,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     URI uri = new URI(uriString);
                     MediationDTO updatedMediationDTO =
                             MediationMappingUtil.fromMediationToDTO(returnedPolicy);
-                    
+
                     return Response.ok(uri).entity(updatedMediationDTO).build();
                 }
 
@@ -2135,7 +2139,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 type = "in";
             }
-            
+
             Mediation returnedPolicy = null;
             if (fileInputStream != null) {
                 fileName = fileDetail.getDataHandler().getName();
@@ -2154,7 +2158,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 OMElement seqElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceBytes));
                 String localName = seqElement.getLocalName();
                 fileName = seqElement.getAttributeValue(new QName("name"));
-                
+
                 if (APIConstants.MEDIATION_SEQUENCE_ELEM.equals(localName)) {
                     Mediation mediationPolicy = new Mediation();
                     mediationPolicy.setConfig(content);
@@ -2386,19 +2390,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             String verb, String ifNoneMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            boolean isSoapToRESTApi = SOAPOperationBindingUtils
-                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
-            if (isSoapToRESTApi) {
+            APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
                         || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
                     String errorMessage = "Sequence type should be either of the values from 'in' or 'out'";
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
-                String resourcePolicy = SequenceUtils
-                        .getRestToSoapConvertedSequence(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                                apiIdentifier.getProviderName(), sequenceType);
+                String resourcePolicy = SequenceUtils.getRestToSoapConvertedSequence(api, sequenceType);
                 if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
                     ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
                             .fromResourcePolicyStrToDTO(resourcePolicy);
@@ -2452,17 +2452,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifNoneMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            boolean isSoapToRESTApi = SOAPOperationBindingUtils
-                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
-            if (isSoapToRESTApi) {
+            APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(resourcePolicyId)) {
                     String errorMessage = "Resource id should not be empty to update a resource policy.";
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
-                String policyContent = SequenceUtils
-                        .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId);
+                String policyContent = SequenceUtils.getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                 ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
                         .fromResourcePolicyStrToInfoDTO(policyContent);
                 return Response.ok().entity(resourcePolicyInfoDTO).build();
@@ -2491,26 +2488,32 @@ public class ApisApiServiceImpl implements ApisApiService {
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
+            API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
+            if (api == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
-            boolean isSoapToRESTApi = SOAPOperationBindingUtils
-                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
-            if (isSoapToRESTApi) {
+
+            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(resourcePolicyId)) {
                     String errorMessage = "Resource id should not be empty to update a resource policy.";
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
                 boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
                 if (isValidSchema) {
-                    SequenceUtils
-                            .updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId, body.getContent());
+                    List<SOAPToRestSequence> sequence = api.getSoapToRestSequences();
+                    for (SOAPToRestSequence soapToRestSequence : sequence) {
+                        if (soapToRestSequence.getUuid().equals(resourcePolicyId)) {
+                            soapToRestSequence.setContent(body.getContent());
+                            break;
+                        }
+                    }
+                    API originalAPI = provider.getAPIbyUUID(apiId, tenantDomain);
+                    provider.updateAPI(api, originalAPI);
                     String updatedPolicyContent = SequenceUtils
-                            .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId);
+                            .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
                             .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
                     return Response.ok().entity(resourcePolicyInfoDTO).build();
@@ -2523,7 +2526,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | FaultGatewaysException e) {
             String errorMessage = "Error while retrieving the API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
@@ -3214,7 +3217,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //adding the api
             apiProvider.addAPI(apiToAdd);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            
+
             if (StringUtils.isNotBlank(url)) {
                 apiToAdd.setWsdlUrl(url);
                 apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, tenantDomain);
@@ -3273,12 +3276,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String wsdlArchiveExtractedPath, API apiToAdd) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //adding the api
-            apiProvider.addAPI(apiToAdd);
+            API createdApi = apiProvider.addAPI(apiToAdd);
 
-            APIIdentifier createdApiId = apiToAdd.getId();
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
             String swaggerStr = "";
             if (StringUtils.isNotBlank(url)) {
                 swaggerStr = SOAPOperationBindingUtils.getSoapOperationMappingForUrl(url);
@@ -3294,8 +3295,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
-            SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
-            return createdApi;
+            List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(updatedSwagger,
+                    apiToAdd.getId());
+            API updatedAPI = apiProvider.getAPIbyUUID(createdApi.getUuid(), tenantDomain);
+            updatedAPI.setSoapToRestSequences(list);
+            apiProvider.updateAPI(updatedAPI, createdApi);
+            return updatedAPI;
         } catch (FaultGatewaysException | IOException e) {
             throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }

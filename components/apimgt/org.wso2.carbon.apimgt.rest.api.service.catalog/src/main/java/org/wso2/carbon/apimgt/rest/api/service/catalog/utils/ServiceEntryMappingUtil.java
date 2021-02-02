@@ -81,21 +81,21 @@ public class ServiceEntryMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static ServiceEntry fromFileToServiceInfo(File file) throws IOException {
-
+    public static ServiceEntry fromFileToServiceInfo(File file, ServiceEntry entry) throws IOException {
+        if (entry == null) {
+            entry = new ServiceEntry();
+        }
         ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
-
-        ServiceEntry serviceEntry = new ServiceEntry();
-        serviceEntry.setKey(serviceMetadataDTO.getKey());
-        serviceEntry.setName(serviceMetadataDTO.getName());
-        serviceEntry.setVersion(serviceMetadataDTO.getVersion());
-        serviceEntry.setDisplayName(serviceMetadataDTO.getDisplayName());
-        serviceEntry.setServiceUrl(serviceMetadataDTO.getServiceUrl());
-        serviceEntry.setDefType(serviceMetadataDTO.getDefinitionType().value());
-        serviceEntry.setDescription(serviceMetadataDTO.getDescription());
-        serviceEntry.setSecurityType(serviceMetadataDTO.getSecurityType().value());
-        serviceEntry.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
-        return serviceEntry;
+        entry.setKey(serviceMetadataDTO.getKey());
+        entry.setName(serviceMetadataDTO.getName());
+        entry.setVersion(serviceMetadataDTO.getVersion());
+        entry.setDisplayName(serviceMetadataDTO.getDisplayName());
+        entry.setServiceUrl(serviceMetadataDTO.getServiceUrl());
+        entry.setDefType(serviceMetadataDTO.getDefinitionType().value());
+        entry.setDescription(serviceMetadataDTO.getDescription());
+        entry.setSecurityType(serviceMetadataDTO.getSecurityType().value());
+        entry.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
+        return entry;
     }
 
     /**
@@ -116,7 +116,7 @@ public class ServiceEntryMappingUtil {
                 try {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            serviceInfo = fromFileToServiceInfo(aFile);
+                            fromFileToServiceInfo(aFile, serviceInfo);
                             if (!StringUtils.isBlank(serviceInfo.getKey())) {
                                 key = serviceInfo.getKey();
                             } else {
@@ -124,7 +124,7 @@ public class ServiceEntryMappingUtil {
                             }
                             serviceInfo.setKey(key);
                             serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
-                        } else {
+                        } else if (aFile.getName().startsWith(APIConstants.DEFINITION_FILE)) {
                             serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
                         }
                     }

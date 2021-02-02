@@ -34,10 +34,12 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
@@ -243,6 +245,19 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     String getOASDefinition(Organization org, String apiId) throws OASPersistenceException;
+
+    /* ==== Async API Definition ==========
+    ============================================= */
+
+    /**
+     * Get Async API definition
+     *
+     * @param org   Organization the definition is owned by
+     * @param apiId API ID
+     * @return Async definition
+     * @throws AsyncSpecPersistenceException
+     */
+    String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException;
 
     /* ==== GraphQL API Schema Definition ==========
     ============================================= */
