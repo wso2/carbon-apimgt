@@ -473,7 +473,7 @@ public class ServiceCatalogDAO {
             ps.setInt(1, tenantId);
             ps.setString(2, "%" + filterParams.getName() + "%");
             ps.setString(3, "%" + filterParams.getVersion() + "%");
-            ps.setString(4, "%" +filterParams.getDefinitionType() + "%");
+            ps.setString(4, "%" + filterParams.getDefinitionType() + "%");
             ps.setString(5, "%" + filterParams.getDisplayName() + "%");
             ps.setString(6, "%" + filterParams.getKey() + "%");
             ps.setInt(7, filterParams.getOffset());
