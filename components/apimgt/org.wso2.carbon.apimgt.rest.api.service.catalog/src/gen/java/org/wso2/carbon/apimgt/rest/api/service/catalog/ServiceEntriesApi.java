@@ -129,7 +129,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a service", notes = "Import  a service by providing an archived service ", response = ServiceInfoListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_create", description = "")
+            @AuthorizationScope(scope = "service_catalog:entry_write", description = "write service catalog entry")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 

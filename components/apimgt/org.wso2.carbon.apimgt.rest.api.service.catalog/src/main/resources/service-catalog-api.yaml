@@ -324,7 +324,7 @@ paths:
         Import  a service by providing an archived service
       security:
         - OAuth2Security:
-            - service_catalog:entry_create
+            - service_catalog:entry_write
       operationId: importService
       tags:
         - Services
@@ -467,8 +467,8 @@ components:
     OAuth2Security:
       type: oauth2
       flows:
-        implicit:
-          authorizationUrl: https://example.com/oauth/authorize
+        password:
+          tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             service_catalog:view: view service catalog
             service_catalog:write: update service catalog
