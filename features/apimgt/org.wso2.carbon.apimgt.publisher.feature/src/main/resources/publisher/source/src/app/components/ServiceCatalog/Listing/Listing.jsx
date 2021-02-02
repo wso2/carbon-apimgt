@@ -124,6 +124,7 @@ function Listing(props) {
             setServiceList(list);
             setNotFound(false);
         }).catch((error) => {
+            console.error(error);
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error while loading services',
                 id: 'ServiceCatalog.Listing.Listing.error.loading',
@@ -140,7 +141,6 @@ function Listing(props) {
     const onDelete = (serviceId) => {
         const deleteServicePromise = ServiceCatalog.deleteService(serviceId);
         deleteServicePromise.then(() => {
-            debugger;
             Alert.info(intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Listing.service.deleted.successfully',
                 defaultMessage: 'Service deleted successfully!',

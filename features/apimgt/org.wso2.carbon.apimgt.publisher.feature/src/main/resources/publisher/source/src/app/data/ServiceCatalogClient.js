@@ -112,7 +112,7 @@ class ServiceCatalogClient {
      */
     _fixSpec(spec) {
         const updatedSpec = spec;
-        updatedSpec.servers = [{ url: window.origin + "/api/am/service-catalog" }];
+        updatedSpec.servers = [{ url: window.origin + '/api/am/service-catalog' }];
         return updatedSpec;
     }
 
