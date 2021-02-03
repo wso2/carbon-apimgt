@@ -50,16 +50,15 @@ public class SubscriptionMappingUtil {
      * @param subscription SubscribedAPI object
      * @return SubscriptionDTO corresponds to SubscribedAPI object
      */
-    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription)
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String organizationId)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
         APIProductIdentifier apiProdId = subscription.getProductId();
         if (apiId != null) {
-            API api = apiConsumer.getLightweightAPI(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPI(apiId, organizationId);
             subscriptionDTO.setApiId(api.getUUID());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
             subscriptionDTO.setApiInfo(apiInfo);
@@ -121,7 +120,7 @@ public class SubscriptionMappingUtil {
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
-            Integer offset) throws APIManagementException {
+                                                                Integer offset, String organizationId) throws APIManagementException {
 
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
@@ -132,7 +131,7 @@ public class SubscriptionMappingUtil {
 
         for (SubscribedAPI subscription : subscriptions) {
             try {
-                subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription, organizationId));
             } catch (APIManagementException e) {
                 log.error("Error while obtaining api metadata", e);
             }

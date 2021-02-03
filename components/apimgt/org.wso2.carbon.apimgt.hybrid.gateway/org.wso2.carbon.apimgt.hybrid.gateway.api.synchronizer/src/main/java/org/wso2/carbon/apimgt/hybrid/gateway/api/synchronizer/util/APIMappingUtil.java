@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto.APICorsConfigurationDTO;
@@ -69,10 +70,12 @@ public class APIMappingUtil {
             //Set admin as the API provider since admin is the only user in this tenant space
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, adminUsername);
             APIIdentifier apiId = apiToAdd.getId();
+            String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiId.getUUID());
+            apiToAdd.setOrganizationId(organizationId);
 
             // Delete the API if it already exists
             if (apiProvider.checkIfAPIExists(apiId)) {
-                apiProvider.deleteAPI(apiId , "");
+                apiProvider.deleteAPI(apiToAdd);
             }
             apiToAdd.setApiOwner(adminUsername);
             String initialState = apiToAdd.getStatus().toString();
@@ -84,7 +87,7 @@ public class APIMappingUtil {
             // Adding the api
             apiProvider.addAPI(apiToAdd);
             if (!isWSApi) {
-                apiProvider.saveSwagger20Definition(apiId, body.getApiDefinition());
+                apiProvider.saveSwagger20Definition(apiId, body.getApiDefinition(), organizationId);
             }
             log.info("Successfully created API " + apiId);
             // Publishing the API

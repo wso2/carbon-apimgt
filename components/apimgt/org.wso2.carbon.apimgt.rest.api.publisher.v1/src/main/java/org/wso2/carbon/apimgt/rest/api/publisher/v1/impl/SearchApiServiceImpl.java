@@ -49,7 +49,7 @@ public class SearchApiServiceImpl implements SearchApiService {
 
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
 
-    public Response search(Integer limit, Integer offset, String query, String ifNoneMatch,
+    public Response search(String organizationId,Integer limit, Integer offset, String query, String ifNoneMatch,
                               MessageContext messageContext) {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
@@ -66,12 +66,11 @@ public class SearchApiServiceImpl implements SearchApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             String username = RestApiCommonUtil.getLoggedInUsername();
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = null;
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
-                result = apiProvider.searchPaginatedContent(query, tenantDomain, offset, limit);
+                result = apiProvider.searchPaginatedContent(query, organizationId, offset, limit);
             } else {
-                result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+                result = apiProvider.searchPaginatedAPIs(query, organizationId, offset, limit);
             }
             ArrayList<Object> apis;
             /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs

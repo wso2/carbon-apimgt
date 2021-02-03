@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -5424,8 +5425,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(apiId, orgId);
+    public String getOpenAPIDefinition(Identifier apiId, String organizationId) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(apiId, organizationId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
     
@@ -5491,10 +5492,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String apiTenantDomain;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
+        String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiId.getUUID());
+        String definition = super.getOpenAPIDefinition(apiId, organizationId);
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId, tenantDomain);
+            API api = getLightweightAPI((APIIdentifier) apiId, organizationId);
             //todo: use get api by id, so no need to set scopes or uri templates
             api.setScopes(oasParser.getScopes(definition));
             api.setUriTemplates(oasParser.getURITemplates(definition));
@@ -5963,10 +5965,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organizationId)
             throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organizationId);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org ,
                     uuid);
             if (devPortalApi != null) {
@@ -5976,13 +5978,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
-                    populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
+                    populateAPIProductInformation(uuid, APIConstants.SUPER_TENANT_DOMAIN, org, apiProduct);
                     
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
-                    api = addTiersToAPI(api, requestedTenantDomain);
+                    populateAPIInformation(uuid, APIConstants.SUPER_TENANT_DOMAIN, org, api);
+                    api = addTiersToAPI(api, APIConstants.SUPER_TENANT_DOMAIN);
                     return new ApiTypeWrapper(api);
                 }
             } else {
@@ -6065,9 +6067,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String organizationId) throws APIManagementException {
         try {
-            Organization org = new Organization(requestedTenantDomain);
+            Organization org = new Organization(organizationId);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
             if (devPortalApi != null) {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
@@ -6104,11 +6106,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
  
-    public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
+    public API getLightweightAPI(APIIdentifier identifier, String organizationId) throws APIManagementException {
 
         String uuid = null;
         try {
-            Organization org = new Organization(orgId);
+            Organization org = new Organization(organizationId);
             if (identifier.getUUID() != null) {
                 uuid = identifier.getUUID();
             } else {
@@ -6141,7 +6143,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
     @Override
-    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String organizationId, int start, int end)
             throws APIManagementException {
 
         ArrayList<Object> compoundResult = new ArrayList<Object>();
@@ -6151,7 +6153,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int totalLength = 0;
         
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organizationId);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
         String[] roles = APIUtil.getFilteredUserRoles(userame);;
         UserContext ctx = new UserContext(userame, org, properties, roles);
@@ -6198,9 +6200,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
     
-    protected void checkAPIVisibilityRestriction(String apiId, String tenantDomain) throws APIManagementException {
+    protected void checkAPIVisibilityRestriction(String apiId, String organizationId) throws APIManagementException {
         try {
-            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(tenantDomain), apiId);
+            DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(organizationId), apiId);
             if (api != null) {
                 checkVisibilityPermission(userNameWithoutChange, api.getVisibility(), api.getVisibleRoles());
             }
@@ -6210,22 +6212,22 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
     
     @Override
-    public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
-        checkAPIVisibilityRestriction(uuid, tenantDomain);
-        return super.getAllDocumentation(uuid, tenantDomain);
+    public List<Documentation> getAllDocumentation(String uuid, String organizationId) throws APIManagementException {
+        checkAPIVisibilityRestriction(uuid, organizationId);
+        return super.getAllDocumentation(uuid, organizationId);
     }
     
     @Override
-    public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
+    public Documentation getDocumentation(String apiId, String docId, String organizationId)
             throws APIManagementException {
-        checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
-        return super.getDocumentation(apiId, docId, requestedTenantDomain);
+        checkAPIVisibilityRestriction(apiId, organizationId);
+        return super.getDocumentation(apiId, docId, organizationId);
     }
     
     @Override
-    public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
+    public DocumentationContent getDocumentationContent(String apiId, String docId, String organizationId)
             throws APIManagementException {
-        checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
-        return super.getDocumentationContent(apiId, docId, requestedTenantDomain);
+        checkAPIVisibilityRestriction(apiId, organizationId);
+        return super.getDocumentationContent(apiId, docId, organizationId);
     }
 }

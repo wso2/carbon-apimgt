@@ -428,7 +428,7 @@ public final class APIImportUtil {
      * @throws APIManagementException 
      */
     private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider,
-            String orgId) throws APIManagementException {
+            String organizationId) throws APIManagementException {
 
         String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
         String inSequenceFileLocation = pathToArchive + APIImportExportConstants.IN_SEQUENCE_LOCATION
@@ -436,7 +436,7 @@ public final class APIImportUtil {
         String apiId = importedApi.getUuid();
         //Adding in-sequence, if any
         if (CommonUtil.checkFileExistence(inSequenceFileLocation)) {
-            addSequenceToAPI(apiProvider, apiId, "in", inSequenceFileName, inSequenceFileLocation, orgId);
+            addSequenceToAPI(apiProvider, apiId, "in", inSequenceFileName, inSequenceFileLocation, organizationId);
         }
 
         String outSequenceFileName = importedApi.getOutSequence() + APIConstants.XML_EXTENSION;
@@ -445,7 +445,7 @@ public final class APIImportUtil {
 
         //Adding out-sequence, if any
         if (CommonUtil.checkFileExistence(outSequenceFileLocation)) {
-            addSequenceToAPI(apiProvider, apiId, "out", outSequenceFileName, outSequenceFileLocation, orgId);
+            addSequenceToAPI(apiProvider, apiId, "out", outSequenceFileName, outSequenceFileLocation, organizationId);
 
         }
 
@@ -455,7 +455,7 @@ public final class APIImportUtil {
 
         //Adding fault-sequence, if any
         if (CommonUtil.checkFileExistence(faultSequenceFileLocation)) {
-            addSequenceToAPI(apiProvider, apiId, "fault", faultSequenceFileName, faultSequenceFileLocation, orgId);
+            addSequenceToAPI(apiProvider, apiId, "fault", faultSequenceFileName, faultSequenceFileLocation, organizationId);
         }
     }
 
@@ -504,7 +504,7 @@ public final class APIImportUtil {
      * @throws APIManagementException 
      */
     private static void addSequenceToAPI(APIProvider provider, String apiId, String type, String fileName,
-            String sequenceFileLocation, String orgId) throws APIManagementException {
+            String sequenceFileLocation, String organizationId) throws APIManagementException {
 
         try {
             if (log.isDebugEnabled()) {
@@ -517,7 +517,7 @@ public final class APIImportUtil {
                 mediation.setGlobal(false);
                 mediation.setName(fileName);
                 mediation.setConfig(IOUtils.toString(seqStream));
-                provider.addApiSpecificMediationPolicy(apiId, mediation, orgId);
+                provider.addApiSpecificMediationPolicy(apiId, mediation, organizationId);
             }
         } catch (IOException e) {
             //this is logged and ignored because sequences are optional
@@ -531,7 +531,7 @@ public final class APIImportUtil {
      * @param pathToArchive location of the extracted folder of the API
      * @param importedApi   the imported API object
      */
-    private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider, String orgId) {
+    private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider, String organizationId) {
 
         String wsdlFileName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
                 + APIConstants.WSDL_FILE_EXTENSION;
@@ -540,7 +540,7 @@ public final class APIImportUtil {
         if (CommonUtil.checkFileExistence(wsdlPath)) {
             try {
                 URL wsdlFileUrl = new File(wsdlPath).toURI().toURL();
-                apiProvider.addWSDLResource(importedApi.getUuid(), null, wsdlFileUrl.toString(), orgId);
+                apiProvider.addWSDLResource(importedApi.getUuid(), null, wsdlFileUrl.toString(), organizationId);
             } catch (MalformedURLException e) {
                 //this exception is logged and ignored since WSDL is optional for an API
                 log.error("Error in getting WSDL URL. ", e);
@@ -577,12 +577,12 @@ public final class APIImportUtil {
      * @param api              API to import
      * @param schemaDefinition Content of schema definition
      * @param apiProvider      API Provider
-     * @param orgId 
+     * @param organizationId 
      * @throws APIManagementException if there is an error occurs when adding schema definition
      */
     private static void addGraphqlSchemaDefinition(API api, String schemaDefinition, APIProvider apiProvider,
-            String orgId) throws APIManagementException {
-        apiProvider.saveGraphqlSchemaDefinition(api.getId().getUUID(), schemaDefinition, orgId);
+            String organizationId) throws APIManagementException {
+        apiProvider.saveGraphqlSchemaDefinition(api.getId().getUUID(), schemaDefinition, organizationId);
     }
 
     /**

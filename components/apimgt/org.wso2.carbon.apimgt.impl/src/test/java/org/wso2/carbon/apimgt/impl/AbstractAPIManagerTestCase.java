@@ -129,7 +129,7 @@ import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 @RunWith (PowerMockRunner.class)
 @PrepareForTest({ APIUtil.class, MultitenantUtils.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class,
         GovernanceUtils.class, PaginationContext.class, IOUtils.class, AXIOMUtil.class, RegistryUtils.class,
-        AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class })
+        AbstractAPIManager.class, OASParserUtil.class, KeyManagerHolder.class , ApiMgtDAO.class})
 public class AbstractAPIManagerTestCase {
 
     public static final String SAMPLE_API_NAME = "test";
@@ -140,6 +140,7 @@ public class AbstractAPIManagerTestCase {
     public static final String SAMPLE_RESOURCE_ID = "xyz";
     public static final String SAMPLE_API_RESOURCE_ID = "xyz";
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
+    public static final String SAMPLE_ORGANIZATION_ID = "testOrg";
     private PrivilegedCarbonContext privilegedCarbonContext;
     private PaginationContext paginationContext;
     private ApiMgtDAO apiMgtDAO;
@@ -276,9 +277,11 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
                 .thenReturn(-1234);
         API sampleAPI = new API(identifier);
+        sampleAPI.setOrganizationId(SAMPLE_ORGANIZATION_ID);
         PowerMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
                 .thenReturn(sampleAPI);
         PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(apiPath);
+        apiMgtDAO = TestUtils.getApiMgtDAO();
         try {
             abstractAPIManager.getAPI(identifier);
             Assert.fail("Exception not thrown for error scenario");

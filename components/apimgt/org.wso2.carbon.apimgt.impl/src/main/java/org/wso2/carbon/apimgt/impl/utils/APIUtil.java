@@ -377,7 +377,6 @@ public final class APIUtil {
      * To initialize the publisherRoleCache configurations, based on configurations.
      */
     public static void init() {
-
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String isPublisherRoleCacheEnabledConfiguration = apiManagerConfiguration

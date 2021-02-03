@@ -42,7 +42,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
 
     private static final Log log = LogFactory.getLog(RecommendationsApiService.class);
 
-    public Response recommendationsGet(MessageContext messageContext) {
+    public Response recommendationsGet(String organizationId, MessageContext messageContext) {
         RecommendationEnvironment recommendationEnvironment = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiRecommendationEnvironment();
         List<JSONObject> recommendedApis = new ArrayList<>();
@@ -67,7 +67,7 @@ public class RecommendationsApiServiceImpl implements RecommendationsApiService 
                             JSONObject apiObj = apiList.getJSONObject(i);
                             apiId = apiObj.getString("id");
                             ApiTypeWrapper apiWrapper = apiConsumer
-                                    .getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+                                    .getAPIorAPIProductByUUID(apiId, organizationId);
                             API api = apiWrapper.getApi();
                             APIIdentifier apiIdentifier = api.getId();
                             boolean isApiSubscribed = apiConsumer.isSubscribed(apiIdentifier, userName);

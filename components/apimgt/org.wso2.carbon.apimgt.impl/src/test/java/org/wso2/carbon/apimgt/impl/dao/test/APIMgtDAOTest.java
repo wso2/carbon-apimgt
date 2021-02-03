@@ -1190,6 +1190,7 @@ public class APIMgtDAOTest {
         //Adding an API with a null THROTTLING_TIER should automatically convert it to Unlimited
         APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi", "testAddAndGetApi", "1.0.0");
         API api = new API(apiIdentifier);
+        String organizationId = "testOrg";
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -1199,6 +1200,7 @@ public class APIMgtDAOTest {
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
         api.setUUID(UUID.randomUUID().toString());
+        api.setOrganizationId(organizationId);
         int apiId = apiMgtDAO.addAPI(api, -1234);
         apiMgtDAO.addURITemplates(apiId, api, -1234);
         HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);
