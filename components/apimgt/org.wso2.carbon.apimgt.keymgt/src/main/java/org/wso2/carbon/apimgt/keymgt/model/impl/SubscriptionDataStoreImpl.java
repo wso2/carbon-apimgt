@@ -402,7 +402,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             if (retrievedSubscription == null) {
                 subscriptionMap.put(subscription.getCacheKey(), subscription);
             } else {
-                if (subscription.getTimeStamp() <= retrievedSubscription.getTimeStamp()) {
+                if (subscription.getTimeStamp() < retrievedSubscription.getTimeStamp()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Drop the Event " + subscription.toString() + " since the event timestamp was old");
                     }
