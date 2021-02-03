@@ -20,14 +20,14 @@ import javax.validation.Valid;
 
 
 
-public class CreateServiceRequestDTO   {
+public class ServiceSchemaDTO   {
   
     private ServiceDTO catalogEntry = null;
     private File definitionFile = null;
 
   /**
    **/
-  public CreateServiceRequestDTO catalogEntry(ServiceDTO catalogEntry) {
+  public ServiceSchemaDTO catalogEntry(ServiceDTO catalogEntry) {
     this.catalogEntry = catalogEntry;
     return this;
   }
@@ -46,7 +46,7 @@ public class CreateServiceRequestDTO   {
 
   /**
    **/
-  public CreateServiceRequestDTO definitionFile(File definitionFile) {
+  public ServiceSchemaDTO definitionFile(File definitionFile) {
     this.definitionFile = definitionFile;
     return this;
   }
@@ -71,9 +71,9 @@ public class CreateServiceRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CreateServiceRequestDTO createServiceRequest = (CreateServiceRequestDTO) o;
-    return Objects.equals(catalogEntry, createServiceRequest.catalogEntry) &&
-        Objects.equals(definitionFile, createServiceRequest.definitionFile);
+    ServiceSchemaDTO serviceSchema = (ServiceSchemaDTO) o;
+    return Objects.equals(catalogEntry, serviceSchema.catalogEntry) &&
+        Objects.equals(definitionFile, serviceSchema.definitionFile);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class CreateServiceRequestDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CreateServiceRequestDTO {\n");
+    sb.append("class ServiceSchemaDTO {\n");
     
     sb.append("    catalogEntry: ").append(toIndentedString(catalogEntry)).append("\n");
     sb.append("    definitionFile: ").append(toIndentedString(definitionFile)).append("\n");

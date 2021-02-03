@@ -157,7 +157,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "A Catalog Entry that exposes a REST endpoint", value = "")
+  @ApiModelProperty(example = "A Service that exposes a REST endpoint", value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
