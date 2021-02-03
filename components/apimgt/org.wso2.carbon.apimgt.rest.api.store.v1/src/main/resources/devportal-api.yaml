@@ -4184,7 +4184,7 @@ components:
     Comment:
       title: Comment
       required:
-      - content
+        - content
       type: object
       properties:
         id:
@@ -4202,8 +4202,23 @@ components:
           type: string
           readOnly: true
           example: admin
+        updatedTime:
+          type: string
+          readOnly: true
+        updatedBy:
+          type: string
+          readOnly: true
+          example: admin
+        category:
+          type: string
+        parentCommentId:
+          type: string
+        entryPoint:
+          type: string
         commenterInfo:
           $ref: '#/components/schemas/CommenterInfo'
+        replies:
+          $ref: '#/components/schemas/CommentList'
     CommentList:
       title: Comments List
       type: object
