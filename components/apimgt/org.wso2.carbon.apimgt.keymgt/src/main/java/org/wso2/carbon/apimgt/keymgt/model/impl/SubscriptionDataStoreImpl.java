@@ -114,21 +114,50 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public Application getApplicationById(int appId) {
-
-        return applicationMap.get(appId);
+        Application application = applicationMap.get(appId);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving Application information with Application Id : " + appId);
+            if (application != null) {
+                log.debug("Retrieved Application :" + application.toString());
+            } else {
+                log.debug("Retrieved Application information with Application Id : " + appId + " is empty");
+            }
+        }
+        return application;
     }
 
     @Override
     public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
 
-        return applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
+        ApplicationKeyMapping applicationKeyMapping =
+                applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager);
+            if (applicationKeyMapping != null) {
+                log.debug("Retrieved Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is " + applicationKeyMapping.toString());
+            } else {
+                log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is empty");
+            }
+        }
+        return applicationKeyMapping;
     }
 
     @Override
     public API getApiByContextAndVersion(String context, String version) {
 
         String key = context + DELEM_PERIOD + version;
-        return apiMap.get(key);
+        API api = apiMap.get(key);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API information with Context " + context + " and Version : " + version);
+            if (api != null) {
+                log.debug("Retrieved API information with Context  : " + context + " and Version : " + version + " is" +
+                        " " + api.toString());
+            } else {
+                log.debug("Retrieved API information with Context  : " + context + " and Version : " + version + " is" +
+                        " empty");
+            }
+        }
+        return api;
     }
 
     @Override
@@ -156,7 +185,19 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public Subscription getSubscriptionById(int appId, int apiId) {
 
-        return subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId));
+        Subscription subscription = subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId,
+                apiId));
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API Subscription with Application " + appId + " and APIId : " + apiId);
+            if (subscription != null) {
+                log.debug("Retrieved API Subscription with Application " + appId + " and APIId : " + apiId + " is " + subscription.toString());
+            } else {
+                log.debug("Retrieved API Subscription with Application " + appId + " and APIId : " + apiId + " is " +
+                        "empty.");
+            }
+        }
+
+        return subscription;
     }
 
     @Override
@@ -402,6 +443,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             if (retrievedSubscription == null) {
                 subscriptionMap.put(subscription.getCacheKey(), subscription);
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Retrieved Subscription from Map :" + retrievedSubscription.toString());
+                }
                 if (subscription.getTimeStamp() < retrievedSubscription.getTimeStamp()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Drop the Event " + subscription.toString() + " since the event timestamp was old");
@@ -410,6 +454,11 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     subscriptionMap.put(subscription.getCacheKey(), subscription);
                 }
             }
+            if (log.isDebugEnabled()) {
+                Subscription updatedSubscription = subscriptionMap.get(subscription.getCacheKey());
+                log.debug("Updated Subscription From map :" + updatedSubscription.toString());
+            }
+
         }
     }
 
