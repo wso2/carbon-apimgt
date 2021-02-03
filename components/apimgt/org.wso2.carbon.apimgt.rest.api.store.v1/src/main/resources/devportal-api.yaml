@@ -5444,6 +5444,13 @@ components:
             moreInfo: ""
             error: []
   parameters:
+    parentCommentID:
+      name: parentCommentID
+      in: query
+      description: |
+        ID of the perent comment.
+      schema:
+        type: string
     requestedTenant:
       name: X-WSO2-Tenant
       in: header
