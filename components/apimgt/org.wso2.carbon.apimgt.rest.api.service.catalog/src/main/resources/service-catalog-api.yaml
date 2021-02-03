@@ -85,7 +85,7 @@ paths:
             If this set to true, a minimal set of fields will be provided for each service including the md5
           schema:
             type: boolean
-            default: true
+            default: false
         - $ref: '#/components/parameters/sortBy'
         - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/limit'
