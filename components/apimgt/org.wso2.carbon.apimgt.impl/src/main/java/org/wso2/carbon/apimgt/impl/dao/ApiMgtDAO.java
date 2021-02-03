@@ -5810,7 +5810,7 @@ public class ApiMgtDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to rollback in getting APIs", e);
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching organizationId", e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
