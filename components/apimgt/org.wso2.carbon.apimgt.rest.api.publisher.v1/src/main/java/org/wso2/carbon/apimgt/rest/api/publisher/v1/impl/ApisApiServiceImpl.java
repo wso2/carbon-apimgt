@@ -3850,7 +3850,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing list of API revisions
      */
     @Override
-    public Response getAPIRevisions(String apiId, String organizationId, String query, MessageContext messageContext) {
+    public Response getAPIRevisions(String apiId, String query, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevisionListDTO apiRevisionListDTO;
@@ -3920,7 +3920,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response containing APIRevision object
      */
     @Override
-    public Response getAPIRevision(String apiId, String revisionId, String organizationId, MessageContext messageContext) {
+    public Response getAPIRevision(String apiId, String revisionId, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -3957,7 +3957,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response deployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -3986,7 +3986,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response getAPIRevisionDeployments(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException {
+    public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
@@ -4005,7 +4005,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response undeployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response undeployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();

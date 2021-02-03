@@ -359,8 +359,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
         @ApiResponse(code = 201, message = "Created. Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body. ", response = APIRevisionDeploymentDTO.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId, @ApiParam(value = "Deployment object that needs to be added" ) List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO) throws APIManagementException{
-        return delegate.deployAPIRevision(apiId, revisionId, organizationId, apIRevisionDeploymentDTO, securityContext);
+    public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("revisionId") String revisionId, @ApiParam(value = "Deployment object that needs to be added" ) List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO) throws APIManagementException{
+        return delegate.deployAPIRevision(apiId, revisionId, apIRevisionDeploymentDTO, securityContext);
     }
 
     @GET
@@ -742,8 +742,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. An API revision is returned. ", response = APIRevisionDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("revisionId") String revisionId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
-        return delegate.getAPIRevision(apiId, revisionId, organizationId, securityContext);
+    public Response getAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Revision ID of an API ",required=true) @PathParam("revisionId") String revisionId) throws APIManagementException{
+        return delegate.getAPIRevision(apiId, revisionId, securityContext);
     }
 
     @GET
@@ -758,8 +758,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of deployed revision deployment details are returned. ", response = APIRevisionDeploymentListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getAPIRevisionDeployments(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
-        return delegate.getAPIRevisionDeployments(apiId, organizationId, securityContext);
+    public Response getAPIRevisionDeployments(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getAPIRevisionDeployments(apiId, securityContext);
     }
 
     @GET
@@ -774,8 +774,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of API revisions are returned. ", response = APIRevisionListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getAPIRevisions(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "")  @QueryParam("query") String query) throws APIManagementException{
-        return delegate.getAPIRevisions(apiId, organizationId, query, securityContext);
+    public Response getAPIRevisions(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "")  @QueryParam("query") String query) throws APIManagementException{
+        return delegate.getAPIRevisions(apiId, query, securityContext);
     }
 
     @GET
@@ -1120,8 +1120,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
         @ApiResponse(code = 201, message = "Created. Successful response with the newly undeployed APIRevisionDeploymentList object as the entity in the body. ", response = APIRevisionDeploymentDTO.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response undeployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("revisionId") String revisionId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId, @ApiParam(value = "Deployment object that needs to be added" ) List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO) throws APIManagementException{
-        return delegate.undeployAPIRevision(apiId, revisionId, organizationId, apIRevisionDeploymentDTO, securityContext);
+    public Response undeployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "Revision ID of an API ",required=true)  @QueryParam("revisionId") String revisionId, @ApiParam(value = "Deployment object that needs to be added" ) List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO) throws APIManagementException{
+        return delegate.undeployAPIRevision(apiId, revisionId, apIRevisionDeploymentDTO, securityContext);
     }
 
     @PUT

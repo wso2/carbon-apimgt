@@ -179,12 +179,12 @@ public class RestAPIStoreUtils {
      * @param apiId API UUID
      * @throws APIManagementException
      */
-    public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String orgId) throws APIManagementException {
+    public static boolean isUserAccessAllowedForAPIByUUID(String apiId, String organizationId) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer consumer = RestApiCommonUtil.getLoggedInUserConsumer();
         //this is just to check whether the user has access to the api or the api exists. 
         try {
-            consumer.getLightweightAPIByUUID(apiId, orgId);
+            consumer.getLightweightAPIByUUID(apiId, organizationId);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =
@@ -322,14 +322,14 @@ public class RestAPIStoreUtils {
      * Retrieves the API Identifier object from given API UUID and tenant domain
      *
      * @param apiId API Identifier UUID
-     * @param orgId tenant which API resides
+     * @param organizationId tenant which API resides
      * @return API Identifier object 
      * @throws APIManagementException if the retrieval fails
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String orgId)
+    public static APIIdentifier getAPIIdentifierFromUUID(String apiId, String organizationId)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, orgId);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, organizationId);
         return  api.getId();
     }
 
