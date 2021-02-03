@@ -40,7 +40,7 @@ public class SdkGenApiServiceImpl implements SdkGenApiService {
      * Rest API implementation to get the supported sdk languages
      */
     @Override
-    public Response sdkGenLanguagesGet(String organizationId, MessageContext messageContext) {
+    public Response sdkGenLanguagesGet(MessageContext messageContext) {
 
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         String supportedLanguages = apiClientGenerationManager.getSupportedSDKLanguages();

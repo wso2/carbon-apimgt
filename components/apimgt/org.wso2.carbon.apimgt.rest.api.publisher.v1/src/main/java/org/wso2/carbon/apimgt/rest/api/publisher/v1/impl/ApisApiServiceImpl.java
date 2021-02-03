@@ -2939,7 +2939,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // adding the API and definition
             apiToAdd.setSwaggerDefinition(definitionToAdd);
-            apiToAdd.setOrganizationId(organizationId);
             API addedAPI = apiProvider.addAPI(apiToAdd);
             //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
 
@@ -3068,7 +3067,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI,
                     RestApiCommonUtil.getLoggedInUserProvider(), username, organizationId);
-            apiToAdd.setOrganizationId(organizationId);
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             if (isSoapAPI) {
@@ -3482,7 +3480,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
-            apiToAdd.setOrganizationId(organizationId);
             //adding the api
             API createdApi = apiProvider.addAPI(apiToAdd);
             apiProvider.saveGraphqlSchemaDefinition(createdApi.getUuid(), schema, organizationId);

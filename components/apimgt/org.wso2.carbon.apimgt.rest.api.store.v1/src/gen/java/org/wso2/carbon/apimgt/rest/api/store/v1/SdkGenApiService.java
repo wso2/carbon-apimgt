@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SdkGenApiService {
-      public Response sdkGenLanguagesGet(String organizationId, MessageContext messageContext) throws APIManagementException;
+      public Response sdkGenLanguagesGet(MessageContext messageContext) throws APIManagementException;
 }
