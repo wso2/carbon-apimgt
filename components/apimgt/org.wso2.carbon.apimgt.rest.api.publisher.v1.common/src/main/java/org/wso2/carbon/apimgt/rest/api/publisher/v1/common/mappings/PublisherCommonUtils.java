@@ -709,7 +709,6 @@ public class PublisherCommonUtils {
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
         }
-        apiToAdd.setOrganizationId(organizationId);
         //adding the api
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
@@ -802,7 +801,7 @@ public class PublisherCommonUtils {
         }
 
         //Get all existing versions of  api been adding
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganizationId(body.getName(),
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),
                 organizationId);
         if (apiVersions.size() > 0) {
             //If any previous version exists
@@ -876,6 +875,7 @@ public class PublisherCommonUtils {
         //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
         //  the owner as a different user
         apiToAdd.setApiOwner(provider);
+        apiToAdd.setOrganizationId(organizationId);
 
         //attach micro-gateway labels
         PublisherCommonUtils.assignLabelsToDTO(body, apiToAdd);

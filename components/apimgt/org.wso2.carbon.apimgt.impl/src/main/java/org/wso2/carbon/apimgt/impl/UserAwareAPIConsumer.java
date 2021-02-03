@@ -134,9 +134,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
     
     @Override
-    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId)
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organizationId)
             throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, orgId);
+        ApiTypeWrapper apiTypeWrapper = super.getAPIorAPIProductByUUID(uuid, organizationId);
         return apiTypeWrapper;
     }
 

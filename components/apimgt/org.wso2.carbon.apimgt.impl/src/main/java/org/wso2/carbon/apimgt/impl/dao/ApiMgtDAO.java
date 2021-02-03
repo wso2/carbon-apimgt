@@ -5743,8 +5743,8 @@ public class ApiMgtDAO {
                 }
                 connection.commit();
             } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to rollback in getting API versions", e);
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback get API versions matches " +
+                        "API name " + apiName, e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
@@ -5778,8 +5778,7 @@ public class ApiMgtDAO {
                 }
                 connection.commit();
             } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to rollback in getting APIs", e);
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback while fetching APIS", e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }

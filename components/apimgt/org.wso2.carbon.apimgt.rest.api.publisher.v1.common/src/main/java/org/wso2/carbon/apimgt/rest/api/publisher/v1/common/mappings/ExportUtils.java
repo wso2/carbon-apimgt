@@ -780,7 +780,6 @@ public class ExportUtils {
                     }
                 }
                 API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
-                //TODO-ORG
                 String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiIdentifier.getUUID());
                 api.setOrganizationId(organizationId);
                 // For GraphQL APIs, swagger export is not needed
