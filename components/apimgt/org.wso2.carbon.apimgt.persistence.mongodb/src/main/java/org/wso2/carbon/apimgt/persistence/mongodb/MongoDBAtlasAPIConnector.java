@@ -94,13 +94,7 @@ public class MongoDBAtlasAPIConnector {
         }
         map.put("mappings", mappings);
         map.put("name", "default");
-        PoolingHttpClientConnectionManager connManager
-                = new PoolingHttpClientConnectionManager();
-        connManager.setDefaultMaxPerRoute(5);
-        connManager.setMaxTotal(5);
-        CloseableHttpClient client = HttpClients.custom()
-                .setConnectionManager(connManager)
-                .build();
+        CloseableHttpClient client = createClient();
         try {
             StringEntity stringEntity = new StringEntity(gson.toJson(map));
             stringEntity.setContentType("application/json");
@@ -132,14 +126,8 @@ public class MongoDBAtlasAPIConnector {
         URI uri = URI.create(apiUri + "/groups/" + groupId + "/clusters/" + clusterName +
                 "/fts/indexes/" + database + "/" + collectionName);
         JSONArray jsonArray = null;
-        PoolingHttpClientConnectionManager connManager
-                = new PoolingHttpClientConnectionManager();
-        connManager.setDefaultMaxPerRoute(5);
-        connManager.setMaxTotal(5);
         HttpGet get = new HttpGet(uri);
-        CloseableHttpClient client = HttpClients.custom()
-                .setConnectionManager(connManager)
-                .build();
+        CloseableHttpClient client = createClient();
 
         try {
             Header authHeader = authenticateAPI(get, client, uri);
@@ -184,5 +172,15 @@ public class MongoDBAtlasAPIConnector {
 
         md5Auth.createCnonce();
         return authHeader;
+    }
+
+    private CloseableHttpClient createClient() {
+        PoolingHttpClientConnectionManager connManager
+                = new PoolingHttpClientConnectionManager();
+        connManager.setDefaultMaxPerRoute(5);
+        connManager.setMaxTotal(5);
+        return HttpClients.custom()
+                .setConnectionManager(connManager)
+                .build();
     }
 }
