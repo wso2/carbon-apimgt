@@ -835,17 +835,17 @@ paths:
   /apis/{apiId}/comments:
     get:
       tags:
-      - Comments
+        - Comments
       summary: Retrieve API Comments
       description: |
         Get a list of Comments that are already added to APIs
       operationId: getAllCommentsOfAPI
       parameters:
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/requestedTenant'
-      - $ref: '#/components/parameters/limit'
-      - $ref: '#/components/parameters/offset'
-      - $ref: '#/components/parameters/includeCommenterInfo'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/includeCommenterInfo'
       responses:
         200:
           description: |
@@ -860,10 +860,10 @@ paths:
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-      - OAuth2Security: []
+        - OAuth2Security: []
       x-code-samples:
-      - lang: Curl
-        source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
+        - lang: Curl
+          source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
       x-examples:
         $ref: docs/examples/apis/comments.yaml#/get
 
