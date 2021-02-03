@@ -60,8 +60,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO commentDTO) throws APIManagementException{
-        return delegate.addCommentToAPI(apiId, commentDTO, securityContext);
+    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO commentDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("parentCommentID") String parentCommentID) throws APIManagementException{
+        return delegate.addCommentToAPI(apiId, commentDTO, parentCommentID, securityContext);
     }
 
     @GET

@@ -874,6 +874,7 @@ paths:
       operationId: addCommentToAPI
       parameters:
       - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/parentCommentID'
       requestBody:
         description: |
           Comment object that should to be added

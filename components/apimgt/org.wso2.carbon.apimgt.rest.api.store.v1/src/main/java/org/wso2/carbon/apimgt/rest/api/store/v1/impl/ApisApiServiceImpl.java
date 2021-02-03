@@ -236,7 +236,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, CommentDTO body, String parentCommentID, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
