@@ -17,41 +17,15 @@
  */
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import { Link as MUILink } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Redirect from 'react-router-dom/Redirect';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { withStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
 import { PropTypes } from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
-import Configurations from 'Config';
+import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AuthManager from 'AppData/AuthManager';
+import APICreateMenu from 'AppComponents/Apis/Listing/components/APICreateMenu';
 import getSampleSwagger from './SamplePetStore.js';
-
-const styles = () => ({
-    buttonProgress: {
-        color: green[500],
-        position: 'relative',
-    },
-    links: {
-        cursor: 'pointer',
-    },
-    root: {
-        '& a': {
-            color: '#34679D',
-        },
-        '& a:visited': {
-            color: '#34679D',
-        },
-    },
-});
-
 /**
  * Show Initial Welcome card if no APIs are available to list
  * Handle deploying a sample API (Create and Publish)
@@ -272,218 +246,7 @@ class SampleAPI extends Component {
              */}
                 <Grid item sm={0} md={3} />
                 <Grid item sm={12} md={6}>
-                    <Grid container spacing={5}>
-                        <Grid item xl={3}>
-                            <Box textAlign='center' mb={2}>
-                                <Typography variant='h6'>
-                                    <FormattedMessage
-                                        id='Apis.Listing.SampleAPI.SampleAPI.create.new'
-                                        defaultMessage='Create an API'
-                                    />
-                                </Typography>
-                            </Box>
-                            <Box textAlign='center'>
-                                <Typography variant='body2'>
-                                    <FormattedMessage
-                                        id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
-                                        defaultMessage={`API creation is the process of linking an existing 
-                                        backend API backend API implementation to the API Publisher, 
-                                        so that you can manage and monitor the API’s lifecycle, documentation, 
-                                        security, community, and subscriptions Alternatively, you can provide 
-                                        the API implementation in-line in the API Publisher itself.`}
-                                    />
-                                </Typography>
-                            </Box>
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                            <Grid container>
-                                <Grid item xs={12} sm={6} md={6} lg={3}>
-                                    <Box textAlign='center' mt={4}>
-                                        <Typography variant='subtitle' component='div'>
-                                            <FormattedMessage
-                                                id='Apis.Listing.SampleAPI.SampleAPI.rest.api'
-                                                defaultMessage='REST API'
-                                            />
-                                        </Typography>
-                                        <img
-                                            src={Configurations.app.context
-                                                + '/site/public/images/landing-icons/restapi.svg'}
-                                            alt='Rest API'
-                                        />
-                                        <Box mt={2}>
-                                            <Link
-                                                id='itest-id-createdefault'
-                                                to='/apis/create/rest'
-                                                className={classes.links}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.title'
-                                                    defaultMessage='Start From Scratch'
-                                                />
-                                            </Link>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.rest.api.scratch.content'
-                                                    defaultMessage='Design and prototype a new REST API'
-                                                />
-                                            </Typography>
-                                        </Box>
-                                        <Box mt={2}>
-                                            <Link
-                                                id='itest-id-createdefault'
-                                                to='/apis/create/openapi'
-                                                className={classes.links}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title'
-                                                    defaultMessage='Import Open API'
-                                                />
-                                            </Link>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content'
-                                                    defaultMessage='Upload definition or provide the url'
-                                                />
-                                            </Typography>
-                                        </Box>
-                                        {!AuthManager.isNotCreator()
-                                            && (
-                                                <Box mt={2}>
-                                                    {!deploying ? (
-                                                        <MUILink
-                                                            id='itest-id-createdefault'
-                                                            onClick={this.handleDeploySample}
-                                                            className={classes.links}
-                                                        >
-                                                            <FormattedMessage
-                                                                id={'Apis.Listing.SampleAPI.SampleAPI.'
-                                                                + 'rest.d.sample.title'}
-                                                                defaultMessage='Deploy Sample API'
-                                                            />
-                                                        </MUILink>
-                                                    )
-                                                        : (
-                                                            <CircularProgress
-                                                                size={24}
-                                                                className={classes.buttonProgress}
-                                                            />
-                                                        )}
-                                                    <Typography variant='body2'>
-                                                        <FormattedMessage
-                                                            id='Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content'
-                                                            defaultMessage={`This is a sample API for Pizza Shack 
-                                                    online pizza delivery store`}
-                                                        />
-                                                    </Typography>
-                                                </Box>
-
-                                            )}
-
-                                    </Box>
-
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={3}>
-                                    <Box textAlign='center' mt={4}>
-                                        <Typography variant='subtitle' component='div'>
-                                            <FormattedMessage
-                                                id='Apis.Listing.SampleAPI.SampleAPI.soap.api'
-                                                defaultMessage='SOAP API'
-                                            />
-                                        </Typography>
-                                        <img
-                                            src={Configurations.app.context
-                                                + '/site/public/images/landing-icons/soapapi.svg'}
-                                            alt='SOAP API'
-                                        />
-                                        <Box mt={2}>
-                                            <Link
-                                                id='itest-id-createdefault'
-                                                to='/apis/create/wsdl'
-                                                className={classes.links}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title'
-                                                    defaultMessage='Import WSDL'
-                                                />
-                                            </Link>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content'
-                                                    defaultMessage='Use an existing WSDL'
-                                                />
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={3}>
-                                    <Box textAlign='center' mt={4}>
-                                        <Typography variant='subtitle' component='div'>
-                                            <FormattedMessage
-                                                id='Apis.Listing.SampleAPI.SampleAPI.graphql.api'
-                                                defaultMessage='GraphQL'
-                                            />
-                                        </Typography>
-                                        <img
-                                            src={Configurations.app.context
-                                                + '/site/public/images/landing-icons/graphqlapi.svg'}
-                                            alt='GraphQL'
-                                        />
-                                        <Box mt={2}>
-                                            <Link
-                                                id='itest-id-createdefault'
-                                                to='/apis/create/graphQL'
-                                                className={classes.links}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title'
-                                                    defaultMessage='Import GraphQL SDL'
-                                                />
-                                            </Link>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.content'
-                                                    defaultMessage='Use an existing definition'
-                                                />
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6} lg={3}>
-                                    <Box textAlign='center' mt={4}>
-                                        <Typography variant='subtitle' component='div'>
-                                            <FormattedMessage
-                                                id='Apis.Listing.SampleAPI.SampleAPI.websocket.api'
-                                                defaultMessage='WebSocket API'
-                                            />
-                                        </Typography>
-                                        <img
-                                            src={Configurations.app.context
-                                                + '/site/public/images/landing-icons/websocketapi.svg'}
-                                            alt='WebSocket API'
-                                        />
-                                        <Box mt={2}>
-                                            <Link
-                                                id='itest-id-createdefault'
-                                                to='/apis/create/ws'
-                                                className={classes.links}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.websocket.design.new.title'
-                                                    defaultMessage='Design New WebSocket API'
-                                                />
-                                            </Link>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Listing.SampleAPI.SampleAPI.websocket.design.new.content'
-                                                    defaultMessage='Design and prototype a new WebSocket API'
-                                                />
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
+                    <APICreateMenu deploying={deploying} handleDeploySample={this.handleDeploySample} />
                 </Grid>
             </Grid>
         );
@@ -495,4 +258,4 @@ SampleAPI.propTypes = {
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(SampleAPI));
+export default injectIntl(SampleAPI);
