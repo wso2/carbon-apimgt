@@ -2,12 +2,17 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
+import io.apicurio.datamodels.asyncapi.models.AaiComponents;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
+import io.apicurio.datamodels.asyncapi.models.AaiMessage;
+import io.apicurio.datamodels.asyncapi.models.AaiOperation;
+import io.apicurio.datamodels.asyncapi.models.AaiOperationBase;
 import io.apicurio.datamodels.asyncapi.models.AaiServer;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Components;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Message;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Operation;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Server;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1550,20 +1555,16 @@ public class AsyncApiParser extends APIDefinition {
         aaiDocument.info = aaiDocument.createInfo();
         aaiDocument.info.title = api.getId().getName();
         aaiDocument.info.version = api.getId().getVersion();
-        if (api.getType() != "WEBSUB") {
-            aaiDocument.servers = new HashMap<String, AaiServer>();
+        if (!APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
             JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
             server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
             server.protocol = api.getType().toLowerCase();
             aaiDocument.addServer("production", server);
         }
-        aaiDocument.channels = new HashMap<String, AaiChannelItem>();
-        if (api.getType() == "WEBSUB") {
-            Aai20ChannelItem channelItem = aaiDocument.createChannelItem("*");
-            aaiDocument.addChannelItem(channelItem);
-        } else {
-            Aai20ChannelItem channelItem = aaiDocument.createChannelItem(api.getContext());
+
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Aai20ChannelItem channelItem = aaiDocument.createChannelItem(uriTemplate.getUriTemplate());
             aaiDocument.addChannelItem(channelItem);
         }
         return Library.writeDocumentToJSONString(aaiDocument);

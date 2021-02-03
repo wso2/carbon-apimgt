@@ -179,14 +179,16 @@ class Topics extends Component {
                 scopes: [],
                 payload: {
                     type: 'object',
-                    properties: [],
+                    properties: this.extractProperties(op.payloadSchema),
                 },
             };
         });
     }
 
-    componentDidMount() {
-
+    extractProperties(payloadSchema) {
+        payloadSchema = payloadSchema || JSON.stringify({ properties: [] });
+        let obj = JSON.parse(payloadSchema);
+        return obj.properties || [];
     }
 
     updateOperations() {
@@ -202,6 +204,9 @@ class Topics extends Component {
                 amznResourceTimeout: null,
                 scopes: [],
                 usedProductIds: [],
+                payloadSchema: JSON.stringify({
+                    properties: topic.payload.properties
+                }),
             };
         });
         this.props.updateAPI({ operations }).finally(() => this.setState({ isSaving: false }));

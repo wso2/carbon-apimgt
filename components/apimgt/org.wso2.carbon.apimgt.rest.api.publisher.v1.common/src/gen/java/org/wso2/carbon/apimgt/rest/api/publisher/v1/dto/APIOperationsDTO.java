@@ -31,6 +31,7 @@ public class APIOperationsDTO   {
     private List<String> usedProductIds = new ArrayList<String>();
     private String amznResourceName = null;
     private Integer amznResourceTimeout = null;
+    private String payloadSchema = null;
 
   /**
    **/
@@ -185,6 +186,23 @@ public class APIOperationsDTO   {
     this.amznResourceTimeout = amznResourceTimeout;
   }
 
+  /**
+   **/
+  public APIOperationsDTO payloadSchema(String payloadSchema) {
+    this.payloadSchema = payloadSchema;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("payloadSchema")
+  public String getPayloadSchema() {
+    return payloadSchema;
+  }
+  public void setPayloadSchema(String payloadSchema) {
+    this.payloadSchema = payloadSchema;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -203,12 +221,13 @@ public class APIOperationsDTO   {
         Objects.equals(scopes, apIOperations.scopes) &&
         Objects.equals(usedProductIds, apIOperations.usedProductIds) &&
         Objects.equals(amznResourceName, apIOperations.amznResourceName) &&
-        Objects.equals(amznResourceTimeout, apIOperations.amznResourceTimeout);
+        Objects.equals(amznResourceTimeout, apIOperations.amznResourceTimeout) &&
+        Objects.equals(payloadSchema, apIOperations.payloadSchema);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, payloadSchema);
   }
 
   @Override
@@ -225,6 +244,7 @@ public class APIOperationsDTO   {
     sb.append("    usedProductIds: ").append(toIndentedString(usedProductIds)).append("\n");
     sb.append("    amznResourceName: ").append(toIndentedString(amznResourceName)).append("\n");
     sb.append("    amznResourceTimeout: ").append(toIndentedString(amznResourceTimeout)).append("\n");
+    sb.append("    payloadSchema: ").append(toIndentedString(payloadSchema)).append("\n");
     sb.append("}");
     return sb.toString();
   }

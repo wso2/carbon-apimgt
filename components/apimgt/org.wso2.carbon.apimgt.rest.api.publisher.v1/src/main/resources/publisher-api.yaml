@@ -7476,6 +7476,8 @@ components:
             - apim:api_publish
         corsConfiguration:
           $ref: '#/components/schemas/APICorsConfiguration'
+        subscription:
+          $ref: '#/components/schemas/APIAsyncSubscription'
         workflowStatus:
           type: string
           example: APPROVED
@@ -8693,6 +8695,20 @@ components:
         technicalOwnerEmail:
           type: string
           example: technicalowner@wso2.com
+
+    APIAsyncSubscription:
+      type: object
+      properties:
+        secret:
+          type: string
+          description: Secret key to be used for subscription
+        signingAlgorithm:
+          type: string
+          description: The algorithm used for signing
+        signatureHeader:
+          type: string
+          description: The header uses to send the signature
+
     APICorsConfiguration:
       type: object
       properties:
@@ -8962,6 +8978,9 @@ components:
           example: ""
         amznResourceTimeout:
           type: integer
+        payloadSchema:
+          type: string
+          example: ""
     ScopeList:
       title: Scope List
       type: object

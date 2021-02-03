@@ -1063,12 +1063,6 @@ class API extends Resource {
             const requestBody = {
                 requestBody: updatedAPI,
             };
-
-
-            console.log('// -------- update api ---------');
-            console.log({ payload, requestBody });
-            console.log('-- -------- update api -------//')
-
             return client.apis['APIs'].updateAPI(payload, requestBody);
         });
         return promisedUpdate.then(response => {

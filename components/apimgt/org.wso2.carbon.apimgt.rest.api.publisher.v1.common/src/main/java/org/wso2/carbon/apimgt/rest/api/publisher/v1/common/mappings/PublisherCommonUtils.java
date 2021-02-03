@@ -339,6 +339,11 @@ public class PublisherCommonUtils {
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
+        } else {
+            // TODO: update the asyncapi.yaml
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
+            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -664,7 +669,7 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
         boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
-        boolean isAsyncAPI = isWSAPI || apiDto.getType().value() == "WEBSUB";
+        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB == apiDto.getType();
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
