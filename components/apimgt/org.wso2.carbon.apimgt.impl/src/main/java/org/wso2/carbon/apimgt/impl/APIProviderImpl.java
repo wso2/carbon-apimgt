@@ -9756,7 +9756,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiId.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.from(ExceptionCodes.
                     ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
         }
         if (StringUtils.isEmpty(revisionUUID)) {
