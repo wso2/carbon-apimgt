@@ -1793,12 +1793,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void updateApiArtifact(API api, boolean updateMetadata, boolean updatePermissions)
             throws APIManagementException {
-         updateApiArtifact(api, updateMetadata, updatePermissions, null, null, null);
+        updateApiArtifact(api, updateMetadata, updatePermissions, null, null, null);
     }
 
     private void updateApiArtifact(API api, boolean updateMetadata, boolean updatePermissions,
-                                   GenericArtifactManager artifactManager, GenericArtifact artifact,
-                                   String oldStatus) throws APIManagementException {
+            GenericArtifactManager artifactManager, GenericArtifact artifact, String oldStatus)
+            throws APIManagementException {
 
         //Validate Transports
         validateAndSetTransports(api);
@@ -1898,7 +1898,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
             String apiStatus = api.getStatus().toUpperCase();
-            //saveAPIStatus(artifactPath, apiStatus);
             String[] visibleRoles = new String[0];
             String publisherAccessControlRoles = api.getAccessControlRoles();
 
@@ -2148,18 +2147,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
-            throws APIManagementException {
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier,
+            APIStatus newStatus) throws APIManagementException {
         return propergateAPIStatusChangeToGateways(null, identifier, newStatus.getStatus());
     }
 
     @Override
-    public Map<String, String> propergateAPIStatusChangeToGateways(API api, APIIdentifier identifier, String newStatus)
-            throws APIManagementException {
-
+    public Map<String, String> propergateAPIStatusChangeToGateways(API api, APIIdentifier identifier,
+            String newStatus) throws APIManagementException {
         Map<String, String> failedGateways = new HashMap<String, String>();
         String providerTenantMode = identifier.getProviderName();
-
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
@@ -2199,7 +2196,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 }
             } else {
-                handleException("Couldn't find an API with the name-" + identifier.getApiName() + "version-" + identifier.getVersion());
+                handleException(
+                        "Couldn't find an API with the name-" + identifier.getApiName() + "version-" + identifier
+                                .getVersion());
             }
 
         } finally {
@@ -2213,14 +2212,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
-                                           Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
+            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
         return updateAPIforStateChange(null, identifier, newStatus, failedGatewaysMap, null, null);
     }
 
     @Override
     public boolean updateAPIforStateChange(API api, APIIdentifier identifier, String newStatus,
-                                           Map<String, String> failedGatewaysMap, GenericArtifactManager artifactManager,
-                                           GenericArtifact artifact)
+            Map<String, String> failedGatewaysMap, GenericArtifactManager artifactManager, GenericArtifact artifact)
             throws APIManagementException, FaultGatewaysException {
 
         boolean isSuccess = false;
@@ -2240,11 +2238,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api == null) {
                 api = getAPI(identifier);
             }
-
             if (api != null) {
                 String currentStatus = api.getStatus();
 
-                if (!currentStatus.equals(newStatus)) {
+                if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
                     api.setStatus(newStatus);
 
                     // If API status changed to publish we should add it to recently added APIs list
@@ -2299,7 +2296,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 isSuccess = true;
             } else {
-                handleException("Couldn't find an API with the name-" + identifier.getApiName() + "version-" + identifier.getVersion());
+                handleException(
+                        "Couldn't find an API with the name-" + identifier.getApiName() + "version-" + identifier
+                                .getVersion());
             }
 
         } finally {
@@ -3929,7 +3928,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
             String apiStatus = api.getStatus();
-            //saveAPIStatus(artifactPath, apiStatus);
             String visibleRolesList = api.getVisibleRoles();
             String[] visibleRoles = new String[0];
             if (visibleRolesList != null) {
@@ -7367,8 +7365,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws RegistryException Registry Exception.
      */
     private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
-                                         String publisherAccessControl, Map<String, String> additionalProperties,
-                                         String apiStatus) throws RegistryException {
+            String publisherAccessControl, Map<String, String> additionalProperties, String apiStatus)
+            throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
         if (publisherAccessControlRoles.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)) {
@@ -7408,7 +7406,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             entry.getValue());
                 }
             }
-
             if (apiStatus != null) {
                 String propValue = apiResource.getProperty(APIConstants.API_STATUS);
                 if (propValue == null) {
@@ -8254,9 +8251,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
 
-            // Make the LC status of the API Product published by default
-            //saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
-
             Set<String> tagSet = apiProduct.getTags();
             if (tagSet != null) {
                 for (String tag : tagSet) {
@@ -8271,6 +8265,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
+            // Make the LC status of the API Product published by default
             updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties(), APIConstants.PUBLISHED);
             APIUtil.setResourcePermissions(apiProduct.getId().getProviderName(), apiProduct.getVisibility(), visibleRoles,

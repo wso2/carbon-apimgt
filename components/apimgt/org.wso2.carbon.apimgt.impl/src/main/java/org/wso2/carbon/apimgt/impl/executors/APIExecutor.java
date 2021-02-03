@@ -157,8 +157,8 @@ public class APIExecutor implements Execution {
     }
 
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
-                                    APIProvider apiProvider, GenericArtifact apiArtifact, String targetState,
-                                    GenericArtifactManager artifactManager)
+            APIProvider apiProvider, GenericArtifact apiArtifact, String targetState,
+            GenericArtifactManager artifactManager)
             throws APIManagementException, FaultGatewaysException, RegistryException {
         boolean executed;
 
@@ -189,7 +189,8 @@ public class APIExecutor implements Execution {
             }
 
             //push the state change to gateway
-            Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api, api.getId(), newStatus);
+            Map<String, String> failedGateways = apiProvider
+                    .propergateAPIStatusChangeToGateways(api, api.getId(), newStatus);
 
             if (log.isDebugEnabled()) {
                 String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
@@ -198,9 +199,12 @@ public class APIExecutor implements Execution {
                 log.debug(logMessage);
             }
 
+            // set api status to old as propergateAPIStatusChangeToGateways() method call will change api status
+            // to newStatus and this modified api is sent back to updateAPIforStateChange() method
+            api.setStatus(oldStatus);
             //update api related information for state change
-            executed = apiProvider.updateAPIforStateChange(api, api.getId(), newStatus, failedGateways,
-                    artifactManager, apiArtifact);
+            executed = apiProvider
+                    .updateAPIforStateChange(api, api.getId(), newStatus, failedGateways, artifactManager, apiArtifact);
 
             // Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
