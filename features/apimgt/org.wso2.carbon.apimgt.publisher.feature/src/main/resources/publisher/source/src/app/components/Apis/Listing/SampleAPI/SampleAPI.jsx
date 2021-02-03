@@ -231,21 +231,20 @@ class SampleAPI extends Component {
      */
     render() {
         const { published, api, deploying } = this.state;
-        const { classes } = this.props;
 
         if (published && api) {
             const url = '/apis/' + api.id + '/overview';
             return <Redirect to={url} />;
         }
         return (
-            <Grid container spacing={3} className={classes.root}>
+            <Grid container spacing={3}>
                 <Grid item xs={12} />
                 {/*
             Following two grids control the placement of whole create page
             For centering the content better use `container` props, but instead used an empty grid item for flexibility
              */}
-                <Grid item sm={0} md={3} />
-                <Grid item sm={12} md={6}>
+                <Grid item sm={0} md={2} />
+                <Grid item sm={12} md={8}>
                     <APICreateMenu deploying={deploying} handleDeploySample={this.handleDeploySample} />
                 </Grid>
             </Grid>

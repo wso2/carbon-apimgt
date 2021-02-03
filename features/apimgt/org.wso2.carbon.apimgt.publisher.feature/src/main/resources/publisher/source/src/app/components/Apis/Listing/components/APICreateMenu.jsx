@@ -55,10 +55,7 @@ const APICreateMenu = (props) => {
     const classes = useStyles();
     const { handleDeploySample, deploying } = props;
     const createTypes = (
-
         <Grid container spacing={5} className={classes.root}>
-            <Hidden mdUp><Box mt={3}>xxxxs</Box></Hidden>
-
             {(deploying !== null && handleDeploySample !== null) && (
                 <Grid item xl={3}>
                     <Box textAlign='center' mb={2}>
@@ -147,7 +144,7 @@ const APICreateMenu = (props) => {
 
                                                 <MUILink
                                                     id='itest-id-createdefault'
-                                                    onClick={this.handleDeploySample}
+                                                    onClick={handleDeploySample}
                                                     className={classes.links}
                                                 >
                                                     <FormattedMessage
@@ -293,7 +290,11 @@ const APICreateMenu = (props) => {
         </Grid>
 
     );
-    return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;
+    if (deploying !== null && handleDeploySample !== null) {
+        return createTypes;
+    } else {
+        return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;
+    }
 };
 APICreateMenu.defaultProps = {
     handleDeploySample: null,
