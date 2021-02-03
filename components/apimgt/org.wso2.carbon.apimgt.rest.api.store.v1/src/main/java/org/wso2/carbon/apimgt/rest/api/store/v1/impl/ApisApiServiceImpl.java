@@ -349,6 +349,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response editComment(String commentId, String apiId, RequestBodyDTO requestBodyDTO, MessageContext messageContext){
+        return null;
+    }
+    @Override
     public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
