@@ -131,9 +131,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 t = velocityengine.getTemplate(getTemplatePath());
 
                 if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
-                    context.put("keystoreLocation",
-                            ServerConfiguration.getInstance().getFirstProperty("Security.InternalKeyStore.Location"));
-
                     context.put("signingAlgorithm", "sha1="); // TODO Get from UI DTO
                     context.put("secret", "secretsample"); // TODO Get from UI DTO
                     context.put("hmacSignatureGenerationAlgorithm", "HmacSHA1"); // TODO Get from UI DTO
