@@ -923,17 +923,19 @@ paths:
   /apis/{apiId}/comments/{commentId}:
     get:
       tags:
-      - Comments
+        - Comments
       summary: Get Details of an API Comment
       description: |
         Get the individual comment given by a username for a certain API.
       operationId: getCommentOfAPI
       parameters:
-      - $ref: '#/components/parameters/commentId'
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/requestedTenant'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/includeCommenterInfo'
+        - $ref: '#/components/parameters/commentId'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/includeCommenterInfo'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         200:
           description: |
@@ -968,10 +970,10 @@ paths:
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
-      - OAuth2Security: []
+        - OAuth2Security: []
       x-code-samples:
-      - lang: Curl
-        source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+        - lang: Curl
+          source: curl -k "https://localhost:9443/api/am/devportal/v2/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
       x-examples:
         $ref: docs/examples/apis/comment_id-comments.yaml#/get
 
