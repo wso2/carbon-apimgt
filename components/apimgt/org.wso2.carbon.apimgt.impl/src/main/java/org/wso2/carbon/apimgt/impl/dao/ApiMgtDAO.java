@@ -16210,9 +16210,31 @@ public class ApiMgtDAO {
                     }
                 }
 
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(), urlMappingNew);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
+
                 PreparedStatement insertURLMappingsStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
-                for (URITemplate urlMapping : urlMappingList) {
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
                     insertURLMappingsStatement.setInt(1, apiId);
                     insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
@@ -16229,8 +16251,8 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
-                for (URITemplate urlMapping : urlMappingList) {
-                    if (urlMapping.getScope() != null) {
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    if (urlMapping.getScopes() != null) {
                         getWorkingCopyURLMappingsStatement.setInt(1, apiId);
                         getWorkingCopyURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
                         getWorkingCopyURLMappingsStatement.setString(3, urlMapping.getAuthType());
@@ -16238,20 +16260,21 @@ public class ApiMgtDAO {
                         getWorkingCopyURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
                         try (ResultSet rs = getWorkingCopyURLMappingsStatement.executeQuery()) {
                             while (rs.next()) {
-                                insertScopeResourceMappingStatement.setString(1, urlMapping.getScope().getKey());
-                                insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
-                                insertScopeResourceMappingStatement.setInt(3, tenantId);
-                                insertScopeResourceMappingStatement.addBatch();
+                                for (Scope scope: urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
                             }
                         }
                     }
                     if (urlMapping.getId() != 0) {
                         getWorkingCopyURLMappingsStatement.setInt(1, apiId);
-                        getWorkingCopyURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
-                        getWorkingCopyURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
-                        getWorkingCopyURLMappingsStatement.setString(4, urlMapping.getAuthType());
-                        getWorkingCopyURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
-                        getWorkingCopyURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                        getWorkingCopyURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getWorkingCopyURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getWorkingCopyURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getWorkingCopyURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
                         try (ResultSet rs = getWorkingCopyURLMappingsStatement.executeQuery()) {
                             while (rs.next()) {
                                 insertProductResourceMappingStatement.setInt(1, urlMapping.getId());
