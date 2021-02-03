@@ -109,11 +109,18 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private static final Log log = LogFactory.getLog(MongoDBPersistenceImpl.class);
     private static Map<String, Boolean> indexCheckCache = new HashMap<>();
     private Map<String, String> configs = ServiceReferenceHolder.getInstance().getPersistenceConfigs();
-    private String threadCount = configs.get(REGISTRY_CONFIG_TREAD_COUNT);
-    private String retryCountConfig = configs.get(REGISTRY_CONFIG_RETRY_COUNT);
-    private int executorThreads = threadCount == null ? DEFAULT_TREAD_COUNT : Integer.parseInt(threadCount);
-    private ExecutorService executor = Executors.newFixedThreadPool(executorThreads);
-    private int retryCount = retryCountConfig == null ? DEFAULT_RETRY_COUNT : Integer.parseInt(retryCountConfig);
+    private ExecutorService executor = Executors.newFixedThreadPool(DEFAULT_TREAD_COUNT);
+    private int retryCount = DEFAULT_RETRY_COUNT;
+
+    public MongoDBPersistenceImpl() {
+        if (configs != null) {
+            String threadCount = configs.get(REGISTRY_CONFIG_TREAD_COUNT);
+            String retryCountConfig = configs.get(REGISTRY_CONFIG_RETRY_COUNT);
+            int executorThreads = threadCount == null ? DEFAULT_TREAD_COUNT : Integer.parseInt(threadCount);
+            executor = Executors.newFixedThreadPool(executorThreads);
+            retryCount = retryCountConfig == null ? DEFAULT_RETRY_COUNT : Integer.parseInt(retryCountConfig);
+        }
+    }
 
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
