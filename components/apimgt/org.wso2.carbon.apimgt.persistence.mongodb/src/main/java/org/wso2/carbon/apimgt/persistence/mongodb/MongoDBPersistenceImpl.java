@@ -210,7 +210,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                         .projection(exclude("swaggerDefinition")).first();
         if (mongoDBAPIDocument == null) {
             String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
-            log.error(msg);
             throw new APIPersistenceException(msg);
         }
         PublisherAPI api = MongoAPIMapper.INSTANCE.toPublisherApi(mongoDBAPIDocument);
@@ -223,7 +222,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoDBDevPortalAPI mongoDBAPIDocument = collection.find(eq("_id", new ObjectId(apiId))).first();
         if (mongoDBAPIDocument == null) {
             String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
-            log.error(msg);
             throw new APIPersistenceException(msg);
         }
         return MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
@@ -782,17 +780,17 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        return database.getCollection(orgName, MongoDBPublisherAPI.class);
+        return database.getCollection(orgName + "_apis", MongoDBPublisherAPI.class);
     }
 
     private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        return database.getCollection(orgName, MongoDBDevPortalAPI.class);
+        return database.getCollection(orgName + "_apis", MongoDBDevPortalAPI.class);
     }
 
     private MongoCollection<Document> getGenericCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        return database.getCollection(orgName, Document.class);
+        return database.getCollection(orgName + "_apis", Document.class);
     }
 
     @Override

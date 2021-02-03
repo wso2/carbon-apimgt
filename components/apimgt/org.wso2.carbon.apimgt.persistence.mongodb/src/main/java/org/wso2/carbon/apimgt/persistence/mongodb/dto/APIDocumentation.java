@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.persistence.mongodb.dto;
 
 /*
  *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -18,6 +17,7 @@ package org.wso2.carbon.apimgt.persistence.mongodb.dto;
  * under the License.
  */
 
+package org.wso2.carbon.apimgt.persistence.mongodb.dto;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 import org.bson.types.ObjectId;
