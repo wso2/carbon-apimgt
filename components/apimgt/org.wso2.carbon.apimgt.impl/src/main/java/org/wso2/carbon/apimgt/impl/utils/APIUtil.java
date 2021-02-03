@@ -11636,13 +11636,11 @@ public final class APIUtil {
                     break;
                 }
             }
-
             if (!isOriginalRoleAlreadyInRoles) {
                 String newRoles = entry.getKey() + "," + entry.getValue();
                 newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
             }
         }
-
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);
