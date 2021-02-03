@@ -188,7 +188,11 @@ export default {
             prefix: '[Publisher]',
             sufix: '- WSO2 APIM',
         },
-        buttonText: '#FF7300',
-        buttonBorder: '#FCA574',
+        serviceCatalog: {
+            onboarding: {
+                buttonText: '#FF7300',
+                buttonBorder: '#FCA574',
+            },
+        },
     },
 };
