@@ -66,8 +66,8 @@ public class MongoDBAtlasAPIConnector {
         database = MongoDBConnectionUtil.getDatabase().getName();
         apiUri = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_API_URI);
         groupId = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID);
-        clusterName = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_GROUP_ID);
-        publicKey = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME);
+        clusterName = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_CLUSTER_NAME);
+        publicKey = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY);
         privateKey = persistenceConfigs.get(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY);
     }
 

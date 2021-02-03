@@ -4035,7 +4035,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response restoreAPIRevision(String apiId, String organizationId, String revisionId, MessageContext messageContext)
+    public Response restoreAPIRevision(String apiId, String revisionId, String organizationId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.restoreAPIRevision(apiId, revisionId, organizationId);

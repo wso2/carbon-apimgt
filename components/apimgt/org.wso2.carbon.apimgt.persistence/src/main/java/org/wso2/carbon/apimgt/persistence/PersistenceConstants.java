@@ -10,7 +10,10 @@ public class PersistenceConstants {
     public static final String REGISTRY_CONFIG_PRIVATE_KEY = "RegistryConfigs.PrivateKey";
     public static final String REGISTRY_CONFIG_CONNECTION_STRING = "RegistryConfigs.ConnectionString";
     public static final String REGISTRY_CONFIG_TYPE = "RegistryConfigs.Type";
+    public static final String REGISTRY_CONFIG_TREAD_COUNT = "RegistryConfigs.ThreadCount";
+    public static final String REGISTRY_CONFIG_RETRY_COUNT = "RegistryConfigs.RetryCount";
     public static final String REGISTRY_CONFIG_TYPE_MONGODB = "mongodb";
-
+    public static final int DEFAULT_RETRY_COUNT = 3;
+    public static final int DEFAULT_TREAD_COUNT = 5;
 
 }

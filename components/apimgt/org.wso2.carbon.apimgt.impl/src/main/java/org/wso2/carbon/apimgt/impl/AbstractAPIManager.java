@@ -267,6 +267,10 @@ public abstract class AbstractAPIManager implements APIManager {
                     apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PUBLIC_KEY));
             configMap.put(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY,
                     apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_PRIVATE_KEY));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT));
+            configMap.put(PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT,
+                    apiManagerConfig.getFirstProperty(PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT));
         }
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());

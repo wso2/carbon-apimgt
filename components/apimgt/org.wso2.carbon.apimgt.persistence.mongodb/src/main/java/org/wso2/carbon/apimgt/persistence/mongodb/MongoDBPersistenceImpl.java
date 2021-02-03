@@ -32,6 +32,8 @@ import com.mongodb.client.result.InsertOneResult;
 import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.mappers.DocumentationMapper;
@@ -80,6 +82,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Aggregates.match;
@@ -93,15 +97,26 @@ import static com.mongodb.client.model.Updates.pull;
 import static com.mongodb.client.model.Updates.push;
 import static com.mongodb.client.model.Updates.set;
 import static com.mongodb.client.model.Projections.exclude;
+import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.DEFAULT_RETRY_COUNT;
+import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.DEFAULT_TREAD_COUNT;
+import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT;
+import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT;
+import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_DEFAULT_ORG;
+import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_SUR_FIX;
 
 public class MongoDBPersistenceImpl implements APIPersistence {
 
     private static final Log log = LogFactory.getLog(MongoDBPersistenceImpl.class);
     private static Map<String, Boolean> indexCheckCache = new HashMap<>();
+    private Map<String, String> configs = ServiceReferenceHolder.getInstance().getPersistenceConfigs();
+    private String threadCount = configs.get(REGISTRY_CONFIG_TREAD_COUNT);
+    private String retryCountConfig = configs.get(REGISTRY_CONFIG_RETRY_COUNT);
+    private int executorThreads = threadCount == null ? DEFAULT_TREAD_COUNT : Integer.parseInt(threadCount);
+    private ExecutorService executor = Executors.newFixedThreadPool(executorThreads);
+    private int retryCount = retryCountConfig == null ? DEFAULT_RETRY_COUNT : Integer.parseInt(retryCountConfig);
 
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
         publisherAPI.setCreatedTime(String.valueOf(new Date().getTime()));
         MongoDBPublisherAPI mongoDBPublisherAPI = MongoAPIMapper.INSTANCE.toMongoDBPublisherApi(publisherAPI);
@@ -109,22 +124,24 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoDBPublisherAPI createdDoc = collection.find(eq("_id", insertOneResult.getInsertedId())).first();
 
         //Create atlas search index in async manner
-        Runnable runnable = () -> {
+        executor.submit(() -> {
             isIndexCreated(org.getName());
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        });
         return MongoAPIMapper.INSTANCE.toPublisherApi(createdDoc);
     }
 
     private Boolean isIndexCreated(String organizationName) {
+        if (organizationName == null) {
+            organizationName = MONGODB_COLLECTION_DEFAULT_ORG + MONGODB_COLLECTION_SUR_FIX;
+        }
         //Check if index is created flag exists in cache
         Boolean indexCacheCheck = indexCheckCache.get(organizationName);
         if (indexCacheCheck != null && indexCacheCheck) {
             return true;
         }
         //Call mongodb atlas rest api to check if index exists
-        boolean isIndexEmpty = MongoDBAtlasAPIConnector.getInstance().getIndexes(organizationName).isEmpty();
+        boolean isIndexEmpty = MongoDBAtlasAPIConnector.getInstance()
+                .getIndexes(organizationName).isEmpty();
         if (!isIndexEmpty) {
             indexCheckCache.put(organizationName, true);
             return true;
@@ -132,7 +149,16 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
         // Should we retry if we failed?
         // Create atlas search index
-        Boolean searchIndexes = MongoDBAtlasAPIConnector.getInstance().createSearchIndexes(organizationName);
+        Boolean searchIndexes;
+        int currentTry = 1;
+        do {
+            searchIndexes = MongoDBAtlasAPIConnector.getInstance().createSearchIndexes(organizationName);
+            if (searchIndexes) {
+                break;
+            }
+            currentTry++;
+
+        } while (currentTry < retryCount);
         indexCheckCache.put(organizationName, searchIndexes);
         return true;
     }
@@ -192,7 +218,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             try {
                 mongoDBPublisherAPI.setSwaggerDefinition(getOASDefinition(org, apiId));
             } catch (OASPersistenceException e) {
-                throw new APIPersistenceException("Error when updating OAS definition of API " + publisherAPI.getId() , e);
+                throw new APIPersistenceException("Error when updating OAS definition of API " + publisherAPI.getId(), e);
             }
         }
         FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
@@ -307,7 +333,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         orMatchList.add(matchRevisions);
         orDoc.put("$or", orMatchList);
         matchDoc.put("$match", orDoc);
-
 
         List<Document> list = new ArrayList<>();
         list.add(search);
@@ -436,6 +461,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                     "mongodb");
         }
         return api.getSwaggerDefinition();
+    }
+
+    @Override
+    public String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException {
+        return null;
     }
 
     @Override
@@ -780,17 +810,26 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        return database.getCollection(orgName + "_apis", MongoDBPublisherAPI.class);
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, MongoDBPublisherAPI.class);
     }
 
     private MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        return database.getCollection(orgName + "_apis", MongoDBDevPortalAPI.class);
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, MongoDBDevPortalAPI.class);
     }
 
     private MongoCollection<Document> getGenericCollection(String orgName) {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        return database.getCollection(orgName + "_apis", Document.class);
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, Document.class);
     }
 
     @Override
