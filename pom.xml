@@ -1283,6 +1283,11 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflection.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -1943,6 +1948,7 @@
         <slf4j.api.version>1.7.29</slf4j.api.version>
         <slf4j.wso2.version>1.5.10.wso2v1</slf4j.wso2.version>
         <spring-web.version>5.1.13.RELEASE</spring-web.version>
+        <hibernate-validator.version>5.4.3.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>

@@ -121,6 +121,10 @@
             <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
