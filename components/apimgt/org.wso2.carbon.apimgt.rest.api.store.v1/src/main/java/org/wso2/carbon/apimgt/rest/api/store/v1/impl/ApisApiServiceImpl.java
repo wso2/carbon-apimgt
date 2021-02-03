@@ -374,6 +374,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext){
+        return null;
+    }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
