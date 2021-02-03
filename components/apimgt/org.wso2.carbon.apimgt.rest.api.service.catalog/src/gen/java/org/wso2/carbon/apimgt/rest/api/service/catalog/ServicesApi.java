@@ -5,8 +5,8 @@ import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceListDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApiService;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.impl.ServiceEntriesApiServiceImpl;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.impl.ServicesApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
@@ -25,18 +25,18 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import java.util.Map;
 import java.util.List;
 import javax.validation.constraints.*;
-@Path("/service-entries")
+@Path("/services")
 
-@Api(description = "the service-entries API")
-
-
+@Api(description = "the services API")
 
 
-public class ServiceEntriesApi  {
+
+
+public class ServicesApi  {
 
   @Context MessageContext securityContext;
 
-ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
+ServicesApiService delegate = new ServicesApiServiceImpl();
 
 
     @POST
@@ -45,7 +45,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new service", notes = "Create a new service and add it to the service catalog of the user's organization (or tenant)  by specifying the details of the service along with its definition.  ", response = ServiceDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_write", description = "write service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_write", description = "write access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -62,14 +62,14 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a service", notes = "Delete a service by providing the service id ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_write", description = "write service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_write", description = "write access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "Successfully deleted the catalog entry. ", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response deleteService(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
+    public Response deleteService(@ApiParam(value = "service key of the service",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
         return delegate.deleteService(serviceKey, securityContext);
     }
 
@@ -79,7 +79,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/zip", "application/json" })
     @ApiOperation(value = "Export a service", notes = "Export a service as an archived zip file. ", response = File.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -95,14 +95,14 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a service", notes = "Get details of a service using the id of the service. ", response = ServiceDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Requested service in the service catalog is returned. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested service does not exist in the service catalog. ", response = ErrorDTO.class) })
-    public Response getServiceById(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
+    public Response getServiceById(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
         return delegate.getServiceById(serviceId, securityContext);
     }
 
@@ -112,14 +112,14 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json", "application/yaml" })
     @ApiOperation(value = "Retrieve a service definition", notes = "Retrieve the definition of a service identified by the service id. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:entry_view", description = "")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successful response with the definition file as entity in the body. ", response = String.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response getServiceDefinition(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
+    public Response getServiceDefinition(@ApiParam(value = "service key of the service",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
         return delegate.getServiceDefinition(serviceKey, securityContext);
     }
 
@@ -129,7 +129,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import a service", notes = "Import  a service by providing an archived service ", response = ServiceInfoListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_write", description = "write service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_write", description = "write access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -145,7 +145,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve/search services", notes = "Retrieve or search services in the service catalog of the user's organization or tenant. ", response = ServiceListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "view service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 
@@ -161,14 +161,14 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a service", notes = "Update a service's details and definition ", response = ServiceDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_write", description = "write service catalog entry")
+            @AuthorizationScope(scope = "service_catalog:service_write", description = "write access to services in service catalog")
         })
     }, tags={ "Services" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Updated. Successful response with the newly updated service as entity in the body. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response updateService(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey, @Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
+    public Response updateService(@ApiParam(value = "service key of the service",required=true) @PathParam("serviceKey") String serviceKey, @Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
         return delegate.updateService(serviceKey, catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
     }
 }

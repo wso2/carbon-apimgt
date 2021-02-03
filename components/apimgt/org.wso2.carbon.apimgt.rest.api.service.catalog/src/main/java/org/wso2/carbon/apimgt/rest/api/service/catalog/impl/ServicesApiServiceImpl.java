@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApiService;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
@@ -54,9 +54,9 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
+public class ServicesApiServiceImpl implements ServicesApiService {
 
-    private static final Log log = LogFactory.getLog(ServiceEntriesApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ServicesApiServiceImpl.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
     public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream,

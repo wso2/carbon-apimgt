@@ -128,8 +128,9 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Pizzashack-Endpoint", value = "")
+  @ApiModelProperty(example = "Pizzashack-Endpoint", required = true, value = "")
   @JsonProperty("name")
+  @NotNull
  @Pattern(regexp="^[^\\*]+$")  public String getName() {
     return name;
   }
