@@ -91,27 +91,6 @@
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-sync</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>bson</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver-core</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.consensys.cava</groupId>
-            <artifactId>cava-toml</artifactId>
-            <version>0.5.0</version>
-            <scope>provided</scope>
-        </dependency>
 		<dependency>
 			<groupId>org.wso2.orbit.org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
