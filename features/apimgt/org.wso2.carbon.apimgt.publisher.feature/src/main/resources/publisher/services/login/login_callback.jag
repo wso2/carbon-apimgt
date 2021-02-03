@@ -113,6 +113,17 @@
                 "maxAge": Integer(tokenResponse.expires_in)
             };
             response.addCookie(cookie);
+
+            cookie = {
+                'name': 'AM_ACC_TOKEN_DEFAULT_P2',
+                'value': accessTokenPart2,
+                'path': "/api/am/service-catalog/",
+                "httpOnly": true,
+                "secure": true,
+                "maxAge": Integer(tokenResponse.expires_in)
+            };
+            response.addCookie(cookie);
+
     
             cookie = {
                 'name': 'AM_REF_TOKEN_DEFAULT_P2',

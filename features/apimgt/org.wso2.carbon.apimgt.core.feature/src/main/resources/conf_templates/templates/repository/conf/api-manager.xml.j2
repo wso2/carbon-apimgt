@@ -253,104 +253,18 @@
     <Analytics>
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
-        <!-- Server URL of the remote StreamProcessor server used to collect statistics. Must
-             be specified in protocol://hostname:port/ format.
 
-             An event can also be published to multiple Receiver Groups each having 1 or more receivers. Receiver
-             Groups are delimited by curly braces whereas receivers are delimited by commas.
-             Ex - Multiple Receivers within a single group
-             tcp://localhost:7612/,tcp://localhost:7613/,tcp://localhost:7614/
-
-             Ex - Multiple Receiver Groups with two receivers each
-             {tcp://localhost:7612/,tcp://localhost:7613},{tcp://localhost:7712/,tcp://localhost:7713/} -->
-        {% if apim.analytics.receiver_urls is defined %}
-        <StreamProcessorServerURL>{{apim.analytics.receiver_urls}}</StreamProcessorServerURL>
-        {% elif apim.analytics.url_group is defined %}
-        <StreamProcessorServerURL>
-            {%- for group in apim.analytics.url_group -%}
-            {%- if group.type == "loadbalance" -%}
-            { {{- group.analytics_url.toList()|join(',') -}} }
-            {%- else -%}{ {{- group.analytics_url.toList()|join('|') -}} }
-            {%- endif -%}
-            {{- "," if not loop.last -}}
-            {%- endfor -%}
-        </StreamProcessorServerURL>
-        {% else %}
-        <StreamProcessorServerURL>{tcp://localhost:7612}</StreamProcessorServerURL>
+        <!-- Event publisher implementation -->
+        {% if apim.analytics.reporter_impl is defined %}
+        <ReporterClass>{{apim.analytics.reporter_impl}}</ReporterClass>
         {% endif %}
 
-
-        {% if apim.analytics.receiver_auth_urls is defined %}
-        <StreamProcessorAuthServerURL>{{apim.analytics.receiver_auth_urls}}</StreamProcessorAuthServerURL>
-        {% elif apim.analytics.url_group is defined%}
-        <StreamProcessorAuthServerURL>
-            {%- for group in apim.analytics.url_group -%}
-            {%- if group.type == "loadbalance" -%}
-            { {{- group.analytics_auth_url.toList()|join(',') -}} }
-            {%- else -%}{ {{- group.analytics_auth_url.toList()|join('|') -}} }
-            {%- endif -%}
-            {{- "," if not loop.last -}}
-            {%- endfor -%}
-        </StreamProcessorAuthServerURL>
-        {% endif %}
-        <!-- Administrator username to login to the remote StreamProcessor server. -->
-        <StreamProcessorUsername>{{apim.analytics.receiver_username}}</StreamProcessorUsername>
-
-        <!-- Administrator password to login to the remote StreamProcessor server. -->
-        <StreamProcessorPassword>{{apim.analytics.receiver_password}}</StreamProcessorPassword>
-
-        <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>{{apim.analytics.provider_impl}}</StatsProviderImpl>
-
-        <!-- StreamProcessor REST API configuration -->
-        <StreamProcessorRestApiURL>{{apim.analytics.store_api_url}}</StreamProcessorRestApiURL>
-
-        <StreamProcessorRestApiUsername>{{apim.analytics.store_api_username}}</StreamProcessorRestApiUsername>
-
-        <StreamProcessorRestApiPassword>{{apim.analytics.store_api_password}}</StreamProcessorRestApiPassword>
-
-        <!-- Below property is used to skip trying to connect to event receiver nodes when publishing events even if
-            the stats enabled flag is set to true. -->
-        <SkipEventReceiverConnection>false</SkipEventReceiverConnection>
-
-        <!--Skip workflow data publisher initiation and even publishing-->
-        <SkipWorkflowEventPublisher>true</SkipWorkflowEventPublisher>
-
-        <!-- API Usage Data Publisher. -->
-        <PublisherClass>{{apim.analytics.event_publisher_impl}}</PublisherClass>
-
-        <!-- If below property set to true,then the response message size will be calculated and publish
-             with each successful API invocation event. -->
-        <PublishResponseMessageSize>{{apim.analytics.publish_response_size}}</PublishResponseMessageSize>
-        <!-- Data publishing stream names and versions of API requests, responses and faults. If the default values
-            are changed, the toolbox also needs to be changed accordingly. -->
-
-        <Streams>
-            <Request>
-                <Name>org.wso2.apimgt.statistics.request</Name>
-                <Version>3.2.0</Version>
-            </Request>
-            <Fault>
-                <Name>org.wso2.apimgt.statistics.fault</Name>
-                <Version>3.2.0</Version>
-            </Fault>
-            <Throttle>
-                <Name>org.wso2.apimgt.statistics.throttle</Name>
-                <Version>3.2.0</Version>
-            </Throttle>
-            <Workflow>
-                <Name>org.wso2.apimgt.statistics.workflow</Name>
-                <Version>1.0.0</Version>
-            </Workflow>
-            <AlertTypes>
-                <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
-                <Version>1.0.1</Version>
-            </AlertTypes>
-            <botData>
-                <Name>org.wso2.botDetectionData.request.stream</Name>
-                <Version>1.0.0</Version>
-            </botData>
-        </Streams>
+        <!-- Properties for Event publisher implementation -->
+        <Properties>
+            {% for key,value in apim.analytics.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
 
     </Analytics>
 
@@ -1310,6 +1224,60 @@
         {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
         <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
+        <SkipList>
+        <APIS>
+        <API>_AuthenticationEPAPI_.xml</API>
+        <API>_AuthorizeAPI_.xml</API>
+        <API>_CommonAuthAPI_.xml</API>
+        <API>_LoginContextAPI_.xml</API>
+        <API>_OIDCAPI_.xml</API>
+        <API>_OpenIDConfigAPI_.xml</API>
+        <API>_OpenService_.xml</API>
+        <API>_RevokeAPI_.xml</API>
+        <API>_TokenAPI_.xml</API>
+        <API>_UserInfoAPI_.xml</API>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.apis is defined %}
+            {%- for api in apim.sync_runtime_artifacts.gateway.skip_list.apis -%}
+            <API>{{api}}</API>
+            {% endfor %}
+        {% endif %}
+        </APIS>
+        <Endpoints>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.endpoints is defined %}
+            {%- for endpoint in apim.sync_runtime_artifacts.gateway.skip_list.endpoints -%}
+            <Endpoint>{{endpoint}}</Endpoint>
+            {% endfor %}
+         {% endif %}
+        </Endpoints>
+        <Sequences>
+            <Sequence>_auth_failure_handler_.xml</Sequence>
+            <Sequence>_build_.xml</Sequence>
+            <Sequence>_cors_request_handler_.xml</Sequence>
+            <Sequence>dispatchSeq.xml</Sequence>
+            <Sequence>fault.xml</Sequence>
+            <Sequence>_graphql_failure_handler_.xml</Sequence>
+            <Sequence>main.xml</Sequence>
+            <Sequence>outDispatchSeq.xml</Sequence>
+            <Sequence>_production_key_error_.xml</Sequence>
+            <Sequence>_resource_mismatch_handler_.xml</Sequence>
+            <Sequence>_sandbox_key_error_.xml</Sequence>
+            <Sequence>_threat_fault_.xml</Sequence>
+            <Sequence>_throttle_out_handler_.xml</Sequence>
+            <Sequence>_token_fault_.xml</Sequence>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
+            {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
+            <Sequence>{{sequence}}</Sequence>
+            {% endfor %}
+         {% endif %}
+        </Sequences>
+        <LocalEntries>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.local_entries is defined %}
+            {%- for local_entry in apim.sync_runtime_artifacts.gateway.skip_list.local_entries -%}
+            <LocalEntry>{{local_entry}}</LocalEntry>
+            {% endfor %}
+         {% endif %}
+        </LocalEntries>
+        </SkipList>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 

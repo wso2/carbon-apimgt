@@ -84,8 +84,7 @@ public class Md5HashGenerator {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
                             // This if only check whether the file start with the name "metadata".
                             try {
-                                ServiceEntry serviceEntry = new ServiceEntry();
-                                fromFileToServiceInfo(aFile, serviceEntry);
+                                ServiceEntry serviceEntry = fromFileToServiceInfo(aFile, null);
                                 if (!StringUtils.isBlank(serviceEntry.getKey())) {
                                     key  = serviceEntry.getKey();
                                 } else {

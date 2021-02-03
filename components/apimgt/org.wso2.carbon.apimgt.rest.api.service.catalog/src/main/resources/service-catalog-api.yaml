@@ -85,6 +85,7 @@ paths:
             If this set to true, a minimal set of fields will be provided for each service including the md5
           schema:
             type: boolean
+            default: true
         - $ref: '#/components/parameters/servicesSortBy'
         - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/limit'
@@ -150,7 +151,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /service-entries/{serviceKey}:
+  /service-entries/{serviceId}:
     #-----------------------------------------------------
     # Retrieve a specific service in the service catalog
     #-----------------------------------------------------
@@ -165,7 +166,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceKey'
+        - $ref: '#/components/parameters/serviceId'
       responses:
         "200":
           description: |
@@ -544,18 +545,12 @@ components:
           example: e27ef979af14c72783b8112dc41c3434c09763ddb230e1a829d5f9134d1abd07
 
     #-----------------------------------------------------
-    # The Paginated Service Catalog Entry Array resource
+    # The Paginated Service Entry Array resource
     #-----------------------------------------------------
     ServiceList:
       type: object
       title: Paginated Service Catalog Entry Array
       properties:
-        limit:
-          type: integer
-        offset:
-          type: integer
-        total:
-          type: integer
         list:
           type: array
           title: Service Catalog Entry Array
@@ -638,6 +633,13 @@ components:
           type: string
           readOnly: true
           example: '2020-02-20T13:57:16.229'
+        md5:
+          type: string
+          example: 36583a6a249b410e7fc4f892029709cac09763ddb230e1a829d5f9134d1abd07
+        definitionUrl:
+          type: string
+          example: https://petstore.swagger.io/v2/swagger.json
+
     #-----------------------------------------------------
     # The Service Catalog Entry resource
     #-----------------------------------------------------

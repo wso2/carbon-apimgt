@@ -3073,6 +3073,8 @@ public class SQLConstants {
     /** Label related constants **/
 
     public static final String GET_LABEL_BY_TENANT = "select * from AM_LABELS where AM_LABELS.TENANT_DOMAIN= ? ";
+    public static final String GET_LABEL_DETAIL_BY_LABEL_AND_TENANT = "select * from AM_LABELS where TENANT_DOMAIN = " +
+            "? AND NAME = ?";
 
     public static final String GET_URL_BY_LABEL_ID = "Select * from  AM_LABEL_URLS where LABEL_ID= ? ";
 
@@ -3159,13 +3161,13 @@ public class SQLConstants {
             "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
     public static final String ADD_GW_PUBLISHED_API_DETAILS = "INSERT INTO AM_GW_PUBLISHED_API_DETAILS (API_ID, " +
-            "API_NAME, API_VERSION, TENANT_DOMAIN) VALUES (?,?,?,?)";
+            "API_NAME, API_VERSION, TENANT_DOMAIN,API_TYPE) VALUES (?,?,?,?,?)";
 
-    public static final String ADD_GW_API_ARTIFACT = "INSERT INTO AM_GW_API_ARTIFACTS (ARTIFACT, GATEWAY_INSTRUCTION," +
-            " TIME_STAMP, API_ID, GATEWAY_LABEL) VALUES (?,?,?,?,?)";
+    public static final String ADD_GW_API_ARTIFACT =
+            "INSERT INTO AM_GW_API_ARTIFACTS (ARTIFACT,TIME_STAMP, API_ID,REVISION_ID) VALUES (?,?,?,?)";
 
     public static final String UPDATE_API_ARTIFACT = "UPDATE AM_GW_API_ARTIFACTS SET ARTIFACT = ?, " +
-            "GATEWAY_INSTRUCTION = ?, TIME_STAMP = ? WHERE (API_ID = ?) AND (GATEWAY_LABEL = ?)";
+            "TIME_STAMP = ? WHERE (API_ID = ?) AND (REVISION_ID = ?)";
 
     public static final String GET_API_ARTIFACT = "SELECT ARTIFACT FROM AM_GW_API_ARTIFACTS WHERE API_ID =? AND " +
             "GATEWAY_LABEL =? AND GATEWAY_INSTRUCTION = ?";
@@ -3189,10 +3191,62 @@ public class SQLConstants {
             " WHERE API_ID = ?";
 
     public static final String CHECK_ARTIFACT_EXISTS = "SELECT 1 FROM AM_GW_API_ARTIFACTS" +
-            " WHERE API_ID = ? AND GATEWAY_LABEL = ?";
-
-
-
+            " WHERE API_ID = ? AND REVISION_ID = ?";
+    public static final String ADD_GW_PUBLISHED_LABELS = "INSERT INTO AM_GW_API_DEPLOYMENTS (API_ID,REVISION_ID," +
+            "LABEL) VALUES (?,?,?)";
+    public static final String DELETE_GW_PUBLISHED_LABELS = "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ? AND " +
+            "REVISION_ID = ?";
+    public static final String DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT = "DELETE FROM " +
+            "AM_GW_API_DEPLOYMENTS WHERE API_ID = ? AND REVISION_ID = ? AND LABEL=?";
+    public static final String DELETE_FROM_AM_GW_API_ARTIFACTS_WHERE_API_ID_AND_REVISION_ID =
+            "DELETE FROM AM_GW_API_ARTIFACTS WHERE API_ID = ? AND REVISION_ID = ?";
+    public static final String DELETE_FROM_AM_GW_API_ARTIFACTS_BY_API_ID =
+            "DELETE FROM AM_GW_API_ARTIFACTS WHERE API_ID = ?";
+    public static final String DELETE_GW_PUBLISHED_LABELS_BY_API_ID =
+            "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ?";
+    public static final String DELETE_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
+            "API_ID = ?";
+    public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
+            "select AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN AS TENANT_DOMAIN," +
+                    "AM_GW_PUBLISHED_API_DETAILS" +
+                    ".API_PROVIDER AS API_PROVIDER," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "FROM " +
+                    "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
+                    "AM_GW_API_DEPLOYMENTS.API_ID= ? AND AM_GW_API_DEPLOYMENTS.LABEL= ? AND " +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?" +
+                    "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
+                    "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
+    public static final String RETRIEVE_ARTIFACTS_BY_LABEL =
+            "select AM_GW_API_DEPLOYMENTS.API_ID AS API_ID,AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN AS TENANT_DOMAIN," +
+                    "AM_GW_PUBLISHED_API_DETAILS" +
+                    ".API_PROVIDER AS API_PROVIDER," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "FROM " +
+                    "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL= ? AND AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?" +
+                    "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
+                    "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
+    public static final String RETRIEVE_ARTIFACTS =
+            "SELECT AM_GW_API_DEPLOYMENTS.API_ID AS API_ID,AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN AS TENANT_DOMAIN,AM_GW_PUBLISHED_API_DETAILS.API_PROVIDER AS " +
+                    "API_PROVIDER,AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS " +
+                    "API_VERSION," +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "FROM " +
+                    "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
+                    "AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
+                    "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
+                    " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID AND " +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{
@@ -3682,6 +3736,8 @@ public class SQLConstants {
         public static final String ADD_API_REVISION_DEPLOYMENT_MAPPING =
                 " INSERT INTO AM_DEPLOYMENT_REVISION_MAPPING (NAME, REVISION_UUID, DISPLAY_ON_DEVPORTAL)" +
                         " VALUES (?,?,?)";
+        public static final String DELETE_API_REVISION_DEPLOYMENTS_MAPPING_BY_REVISION_UUID =
+                " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID
@@ -3775,5 +3831,25 @@ public class SQLConstants {
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION = "SELECT * FROM AM_SERVICE_CATALOG " +
                 "WHERE ENTRY_NAME = ? AND ENTRY_VERSION = ? AND TENANT_ID = ?";
+
+        public static final String GET_SERVICE_BY_SERVICE_ID = "SELECT " +
+                "   UUID, " +
+                "   SERVICE_KEY," +
+                "   MD5," +
+                "   ENTRY_NAME," +
+                "   DISPLAY_NAME," +
+                "   ENTRY_VERSION," +
+                "   SERVICE_URL," +
+                "   DEFINITION_TYPE," +
+                "   DEFINITION_URL," +
+                "   DESCRIPTION," +
+                "   SECURITY_TYPE," +
+                "   MUTUAL_SSL_ENABLED," +
+                "   CREATED_TIME," +
+                "   LAST_UPDATED_TIME," +
+                "   CREATED_BY," +
+                "   UPDATED_BY" +
+                "   FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
+                "   AND TENANT_ID = ?";
     }
 }

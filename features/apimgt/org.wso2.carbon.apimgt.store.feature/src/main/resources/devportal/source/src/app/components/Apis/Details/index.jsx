@@ -50,6 +50,7 @@ const Documents = lazy(() => import('./Documents/Documents' /* webpackChunkName:
 const Credentials = lazy(() => import('./Credentials/Credentials' /* webpackChunkName: "APICredentials" */));
 const Comments = lazy(() => import('./Comments/Comments' /* webpackChunkName: "APIComments" */));
 const Sdk = lazy(() => import('./Sdk' /* webpackChunkName: "APISdk" */));
+const AsyncApiDefinition = lazy(() => import('./Definitions/AsyncApi/AsyncApiDefinitionUI'));
 
 const LoadableSwitch = withRouter((props) => {
     const { match, api } = props;
@@ -71,6 +72,7 @@ const LoadableSwitch = withRouter((props) => {
                 <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route path='/apis/:apiUuid/overview' render={() => <Overview {...props} />} />
                 <Route path='/apis/:apiUuid/documents' component={Documents} />
+                <Route path='/apis/:apiUuid/definition' component={AsyncApiDefinition} />
                 <Route exact path='/apis/:apiUuid/credentials/wizard' component={Wizard} />
                 {!advertised && <Route path='/apis/:apiUuid/comments' component={Comments} />}
                 {!advertised && <Route path='/apis/:apiUuid/credentials' component={Credentials} />}
@@ -361,6 +363,10 @@ class Details extends React.Component {
         this.setState({ api });
     }
 
+    isAsyncAPI(api) {
+        return (api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE'));
+    }
+
     /**
      *
      *
@@ -380,7 +386,7 @@ class Details extends React.Component {
                     rootIconSize, rootIconTextVisible, rootIconVisible, position,
                 },
                 apiDetailPages: {
-                    showCredentials, showComments, showTryout, showDocuments, showSdks,
+                    showCredentials, showComments, showTryout, showDocuments, showSdks, showAsyncSpecification
                 },
                 title: {
                     prefix, sufix,
@@ -395,6 +401,7 @@ class Details extends React.Component {
         // check for widget=true in the query params. If it's present we render without <Base> component.
         const pageUrl = new URL(window.location);
         const isWidget = pageUrl.searchParams.get('widget');
+        const isAsyncApi = this.isAsyncAPI(api);
 
         return api ? (
             <ApiContext.Provider value={this.state}>
@@ -458,8 +465,7 @@ class Details extends React.Component {
                                     
                                 </>
                             )}
-                            {api.type !== 'WS' && showTryout && (
-                               
+                            {!isAsyncApi && showTryout && (
                                     <LeftMenuItem
                                         text={<FormattedMessage id='Apis.Details.index.try.out'
                                             defaultMessage='Try out' />}
@@ -469,6 +475,16 @@ class Details extends React.Component {
                                         open={open}
                                     />
                                 
+                            )}
+                            {isAsyncApi && showAsyncSpecification && (
+                                <LeftMenuItem
+                                    text={<FormattedMessage id='Apis.Details.index.definition'
+                                                            defaultMessage='Definition'/>}
+                                    route='definition'
+                                    iconText='Definition'
+                                    to={pathPrefix + 'definition'}
+                                    open={open}
+                                />
                             )}
                             {showComments && (
                                 

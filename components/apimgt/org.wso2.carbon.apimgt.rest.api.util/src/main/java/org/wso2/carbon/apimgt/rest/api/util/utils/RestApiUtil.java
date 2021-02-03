@@ -202,11 +202,7 @@ public class RestApiUtil {
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
             loginInfoJsonObj.put("user", username);
-            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                loginInfoJsonObj.put("isSuperTenant", true);
-            } else {
-                loginInfoJsonObj.put("isSuperTenant", false);
-            }
+            loginInfoJsonObj.put("isSuperTenant", tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
             String loginInfoString = loginInfoJsonObj.toJSONString();
             String[] groupIdArr = getGroupIds(loginInfoString);
             String groupId = "";

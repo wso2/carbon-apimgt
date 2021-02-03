@@ -147,7 +147,7 @@ public class CertificateMgtDaoTest {
     @Test
     public void testAddCertificate() throws CertificateManagementException, CertificateAliasExistsException,
             EndpointForCertificateExistsException, APIManagementException {
-        boolean result = certificateMgtDAO.addCertificate(Mockito.anyString(),TEST_ALIAS, TEST_ENDPOINT, TENANT_ID);
+        boolean result = certificateMgtDAO.addCertificate(certificate,TEST_ALIAS, TEST_ENDPOINT, TENANT_ID);
         Assert.assertTrue(result);
     }
 
@@ -165,7 +165,7 @@ public class CertificateMgtDaoTest {
     }
 
     @Test
-    public void testGetCertificates() throws CertificateManagementException {
+    public void testGetCertificates() throws CertificateManagementException, CertificateAliasExistsException {
         List<CertificateMetadataDTO> certificates = certificateMgtDAO.getCertificates(null, null, TENANT_ID);
         Assert.assertNotNull(certificates);
         Assert.assertTrue(certificates.size() > 0);

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -111,8 +112,9 @@ public class APIManagerConfiguration {
     private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
+    private static Map<String, String> analyticsProperties;
     private static String tokenRevocationClassName;
-
+    private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
         return realtimeNotifierProperties;
@@ -309,6 +311,17 @@ public class APIManagerConfiguration {
                     }
                 }
                 persistentNotifierProperties = properties;
+            } else if ("Analytics".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> analyticsProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    analyticsProps.put(name, value);
+                }
+                analyticsProperties = analyticsProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
                 OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
@@ -525,9 +538,63 @@ public class APIManagerConfiguration {
                 setRuntimeArtifactsSyncGatewayConfig(element);
             } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName)) {
                 setContainerMgtConfigurations(element);
+            } else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
+                setSkipListConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
+        }
+    }
+
+    private void setSkipListConfigurations(OMElement element) {
+
+        OMElement skippedApis =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_APIS));
+        if (skippedApis != null) {
+            Iterator apiIterator =
+                    skippedApis.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_API);
+            if (apiIterator != null) {
+                while (apiIterator.hasNext()) {
+                    OMElement apiNode = (OMElement) apiIterator.next();
+                    gatewayCleanupSkipList.getApis().add(apiNode.getText());
+                }
+            }
+        }
+        OMElement skippedEndpoints =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_ENDPOINTS));
+        if (skippedEndpoints != null) {
+            Iterator endpoints =
+                    skippedEndpoints.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_ENDPOINT);
+            if (endpoints != null) {
+                while (endpoints.hasNext()) {
+                    OMElement endpointNode = (OMElement) endpoints.next();
+                    gatewayCleanupSkipList.getEndpoints().add(endpointNode.getText());
+                }
+            }
+        }
+        OMElement skippedSequences =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_SEQUENCES));
+        if (skippedEndpoints != null) {
+            Iterator sequences =
+                    skippedSequences.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_SEQUENCE);
+            if (sequences != null) {
+                while (sequences.hasNext()) {
+                    OMElement sequenceNode = (OMElement) sequences.next();
+                    gatewayCleanupSkipList.getSequences().add(sequenceNode.getText());
+                }
+            }
+        }
+        OMElement skippedLocalEntries =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_LOCAL_ENTRIES));
+        if (skippedEndpoints != null) {
+            Iterator localEntries =
+                    skippedLocalEntries.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_LOCAL_ENTRY);
+            if (localEntries != null) {
+                while (localEntries.hasNext()) {
+                    OMElement localEntryNode = (OMElement) localEntries.next();
+                    gatewayCleanupSkipList.getLocalEntries().add(localEntryNode.getText());
+                }
+            }
         }
     }
 
@@ -1798,5 +1865,14 @@ public class APIManagerConfiguration {
         if (!containerMgt.isEmpty()) {
             containerMgtAttributes.add(containerMgt);
         }
+    }
+
+    public GatewayCleanupSkipList getGatewayCleanupSkipList() {
+
+        return gatewayCleanupSkipList;
+    }
+
+    public static Map<String, String> getAnalyticsProperties() {
+        return analyticsProperties;
     }
 }

@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -32,7 +27,10 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
@@ -40,22 +38,15 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class APIProviderImplWrapper extends APIProviderImpl {
 
     private API api;
-    private Map<String, Map<String,String>> failedGateways;
+    private Map<String, Map<String, String>> failedGateways;
     private List<Documentation> documentationList;
-
-    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, ScopesDAO scopesDAO, List<Documentation> documentationList,
-                                  Map<String, Map<String,String>> failedGateways) throws APIManagementException {
-        super(null);
-        this.apiMgtDAO = apiMgtDAO;
-        this.scopesDAO = scopesDAO;
-        if (documentationList != null) {
-            this.documentationList = documentationList;
-        }
-        this.failedGateways = failedGateways;
-    }
 
     public APIProviderImplWrapper(APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO,
             List<Documentation> documentationList, Map<String, Map<String,String>> failedGateways) throws APIManagementException {
@@ -69,9 +60,44 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         this.failedGateways = failedGateways;
     }
 
+    public APIProviderImplWrapper(APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO,
+                                  ImportExportAPI importExportAPI, GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO,
+                                  ArtifactSaver artifactSaver) throws APIManagementException {
+
+        super(null);
+        this.apiPersistenceInstance = apiPersistenceInstance;
+        this.apiMgtDAO = apimgtDAO;
+        this.importExportAPI = importExportAPI;
+        this.gatewayArtifactsMgtDAO = gatewayArtifactsMgtDAO;
+        this.artifactSaver = artifactSaver;
+    }
+
+    public APIProviderImplWrapper(ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO) throws APIManagementException {
+
+        super(null);
+        this.apiMgtDAO = apimgtDAO;
+        this.scopesDAO = scopesDAO;
+    }
+
+    public APIProviderImplWrapper(APIPersistence apiPersistenceInstance, ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO)
+            throws APIManagementException {
+
+        this(apimgtDAO,scopesDAO);
+        this.apiPersistenceInstance = apiPersistenceInstance;
+    }
+
+    public APIProviderImplWrapper(ApiMgtDAO apimgtDAO, ScopesDAO scopesDAO, List<Documentation> documentationList)
+            throws APIManagementException {
+
+        this(apimgtDAO, scopesDAO);
+        this.documentationList = documentationList;
+    }
+
     public int getTenantId() {
+
         return tenantId;
     }
+
     @Override
     protected void registerCustomQueries(UserRegistry registry, String username)
             throws RegistryException, APIManagementException {
@@ -80,12 +106,14 @@ public class APIProviderImplWrapper extends APIProviderImpl {
 
     @Override
     protected String createAPI(API api) throws APIManagementException {
+
         this.api = api;
         return super.createAPI(api);
     }
 
     @Override
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
+
         return api;
 
     }
@@ -97,17 +125,20 @@ public class APIProviderImplWrapper extends APIProviderImpl {
 
     @Override
     public List<Documentation> getAllDocumentation(Identifier apiId) throws APIManagementException {
+
         return documentationList;
     }
 
     @Override
     protected int getTenantId(String tenantDomain) {
+
         return -1234;
     }
 
     @Override
     public String addResourceFile(Identifier identifier, String resourcePath, ResourceFile resourceFile)
             throws APIManagementException {
+
         return null;
     }
 
@@ -117,28 +148,32 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates)  {
+    protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates) {
         //do nothing
     }
 
     @Override
     public JSONObject getSecurityAuditAttributesFromConfig(String userId) throws APIManagementException {
+
         return super.getSecurityAuditAttributesFromConfig(userId);
     }
-    
+
     @Override
     public boolean hasValidLength(String field, int maxLength) {
+
         return true;
     }
-    
+
     @Override
     public void updateWsdlFromUrl(API api) throws APIManagementException {
         // do nothing
     }
 
     protected String getTenantConfigContent() throws RegistryException, UserStoreException {
+
         return "{\"EnableMonetization\":false,\"IsUnlimitedTierPaid\":false,\"ExtensionHandlerPosition\":\"bottom\","
-                + "\"RESTAPIScopes\":{\"Scope\":[{\"Name\":\"apim:api_publish\",\"Roles\":\"admin,Internal/publisher\"},"
+                +
+                "\"RESTAPIScopes\":{\"Scope\":[{\"Name\":\"apim:api_publish\",\"Roles\":\"admin,Internal/publisher\"},"
                 + "{\"Name\":\"apim:api_create\",\"Roles\":\"admin,Internal/creator\"},{\"Name\":\"apim:api_view\","
                 + "\"Roles\":\"admin,Internal/publisher,Internal/creator\"},{\"Name\":\"apim:subscribe\",\"Roles\":"
                 + "\"admin,Internal/subscriber\"},{\"Name\":\"apim:tier_view\",\"Roles\":\"admin,Internal/publisher,"
@@ -150,8 +185,10 @@ public class APIProviderImplWrapper extends APIProviderImpl {
                 + "\"Roles\":\"admin\"},{\"Name\":\"apim:api_workflow_approve\",\"Roles\":\"admin\"},{\"Name\":"
                 + "\"apim:api_workflow_view\",\"Roles\":\"admin\"}]},\"NotificationsEnabled\":"
                 + "\"false\",\"Notifications\":[{\"Type\":\"new_api_version\",\"Notifiers\":[{\"Class\":"
-                + "\"org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier\",\"ClaimsRetrieverImplClass\":"
-                + "\"org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever\",\"Title\":\"Version $2 of $1 Released\","
+                +
+                "\"org.wso2.carbon.apimgt.impl.notification.NewAPIVersionEmailNotifier\",\"ClaimsRetrieverImplClass\":"
+                +
+                "\"org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever\",\"Title\":\"Version $2 of $1 Released\","
                 + "\"Template\":\" <html> <body> <h3 style=\\\"color:Black;\\\">We’re happy to announce the arrival of"
                 + " the next major version $2 of $1 API which is now available in Our API Store.</h3><a href=\\\"https:"
                 + "//localhost:9443/store\\\">Click here to Visit WSO2 API Store</a></body></html>\"}]}],"

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 
 import java.util.List;
@@ -143,5 +144,16 @@ public interface ServiceCatalog {
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
     ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId)
+            throws APIManagementException;
+
+    /**
+     * Search Services in Service Catalog
+     * @param filterParams
+     * @param tenantId
+     * @param shrink
+     * @return
+     * @throws APIManagementException
+     */
+    List<ServiceEntry> getServices(ServiceFilterParams filterParams, int tenantId, boolean shrink)
             throws APIManagementException;
 }

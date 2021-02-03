@@ -42,12 +42,16 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Mediation;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
@@ -72,6 +76,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,7 +216,8 @@ public final class APIImportUtil {
                             + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found";
                     throw new APIMgtResourceNotFoundException(errorMessage);
                 }
-                targetApi = apiProvider.getAPI(apiIdentifier);
+                uuid = ApiMgtDAO.getInstance().getUUIDFromIdentifier(apiIdentifier);
+                targetApi = apiProvider.getAPIbyUUID(uuid, currentTenantDomain);
                 // Store target API status
                 currentStatus = targetApi.getStatus();
                 uuid = targetApi.getUuid();
@@ -264,6 +271,7 @@ public final class APIImportUtil {
                 APIIdentifier apiIdentifier = importedApi.getId();
                 apiIdentifier.setUuid(uuid);
                 importedApi.setId(apiIdentifier);
+                importedApi.setUuid(uuid);
             }
 
             //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
@@ -282,13 +290,13 @@ public final class APIImportUtil {
                 //preProcess swagger definition
                 swaggerContent = OASParserUtil.preProcess(swaggerContent);
 
-                addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
+                addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider, currentTenantDomain);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
 
                 //If graphQL API, import graphQL schema definition to registry
                 if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
                     String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
-                    addGraphqlSchemaDefinition(importedApi, schemaDefinition, apiProvider);
+                    addGraphqlSchemaDefinition(importedApi, schemaDefinition, apiProvider, currentTenantDomain);
                 } else {
                     //Load required properties from swagger to the API
                     Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
@@ -313,27 +321,28 @@ public final class APIImportUtil {
                 // (Adding missing attributes to swagger)
                 SwaggerData swaggerData = new SwaggerData(importedApi);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, swaggerContent);
-                apiProvider.saveSwaggerDefinition(importedApi, newDefinition);
+                apiProvider.saveSwaggerDefinition(importedApi, newDefinition, null);
             }
             // This is required to make url templates and scopes get effected
-            apiProvider.updateAPI(importedApi);
+            addSOAPToREST(pathToArchive, importedApi, registry);
+            API savedAPI = apiProvider.getAPIbyUUID(uuid, currentTenantDomain);
+            apiProvider.updateAPI(importedApi, savedAPI);
 
             //Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
-            APIAndAPIProductCommonUtil.addAPIOrAPIProductImage(pathToArchive, apiTypeWrapperWithUpdatedApi, apiProvider);
-            APIAndAPIProductCommonUtil.addAPIOrAPIProductDocuments(pathToArchive, apiTypeWrapperWithUpdatedApi, apiProvider);
+            APIAndAPIProductCommonUtil.addAPIOrAPIProductImage(pathToArchive, apiTypeWrapperWithUpdatedApi, apiProvider,
+                    currentTenantDomain);
+            APIAndAPIProductCommonUtil.addAPIOrAPIProductDocuments(pathToArchive, apiTypeWrapperWithUpdatedApi,
+                    apiProvider, currentTenantDomain);
             addAPISequences(pathToArchive, importedApi, registry);
-            addAPISpecificSequences(pathToArchive, importedApi, registry);
-            addAPIWsdl(pathToArchive, importedApi, apiProvider, registry);
+            addAPISpecificSequences(pathToArchive, importedApi, apiProvider, currentTenantDomain);
+            addAPIWsdl(pathToArchive, importedApi, apiProvider, currentTenantDomain);
             addEndpointCertificates(pathToArchive, importedApi, apiProvider, tenantId);
-            addSOAPToREST(pathToArchive, importedApi, registry);
 
-            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Importing client certificates.");
-                }
-                APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Importing client certificates.");
             }
+            APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
 
             // Change API lifecycle if state transition is required
             Map<String, Boolean> checklistMap = new HashMap<String, Boolean>();
@@ -345,7 +354,7 @@ public final class APIImportUtil {
                             checklistMap.put(APIImportExportConstants.REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC, true);
                 }
                 
-                apiProvider.changeLifeCycleStatus(uuid, lifecycleAction, checklistMap);
+                apiProvider.changeLifeCycleStatus(currentTenantDomain, uuid, lifecycleAction, checklistMap);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
             }
@@ -415,23 +424,19 @@ public final class APIImportUtil {
      *
      * @param pathToArchive location of the extracted folder of the API
      * @param importedApi   the imported API object
+     * @param apiProvider 
+     * @throws APIManagementException 
      */
-    private static void addAPISpecificSequences(String pathToArchive, API importedApi, Registry registry) {
+    private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider,
+            String orgId) throws APIManagementException {
 
-        String regResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + importedApi.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR
-                + importedApi.getId().getApiName() + RegistryConstants.PATH_SEPARATOR
-                + importedApi.getId().getVersion() + RegistryConstants.PATH_SEPARATOR;
-
-        String inSequenceFileName = importedApi.getInSequence();
+        String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
         String inSequenceFileLocation = pathToArchive + APIImportExportConstants.IN_SEQUENCE_LOCATION
                 + APIImportExportConstants.CUSTOM_TYPE + File.separator + inSequenceFileName;
-
+        String apiId = importedApi.getUuid();
         //Adding in-sequence, if any
-        if (CommonUtil.checkFileExistence(inSequenceFileLocation + APIConstants.XML_EXTENSION)) {
-            String inSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN + RegistryConstants.PATH_SEPARATOR
-                    + inSequenceFileName;
-            addSequenceToRegistry(true, registry, inSequenceFileLocation + APIConstants.XML_EXTENSION, regResourcePath + inSequencePath);
+        if (CommonUtil.checkFileExistence(inSequenceFileLocation)) {
+            addSequenceToAPI(apiProvider, apiId, "in", inSequenceFileName, inSequenceFileLocation, orgId);
         }
 
         String outSequenceFileName = importedApi.getOutSequence() + APIConstants.XML_EXTENSION;
@@ -440,9 +445,8 @@ public final class APIImportUtil {
 
         //Adding out-sequence, if any
         if (CommonUtil.checkFileExistence(outSequenceFileLocation)) {
-            String outSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT + RegistryConstants.PATH_SEPARATOR
-                    + outSequenceFileName;
-            addSequenceToRegistry(true, registry, outSequenceFileLocation, regResourcePath + outSequencePath);
+            addSequenceToAPI(apiProvider, apiId, "out", outSequenceFileName, outSequenceFileLocation, orgId);
+
         }
 
         String faultSequenceFileName = importedApi.getFaultSequence() + APIConstants.XML_EXTENSION;
@@ -451,9 +455,7 @@ public final class APIImportUtil {
 
         //Adding fault-sequence, if any
         if (CommonUtil.checkFileExistence(faultSequenceFileLocation)) {
-            String faultSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT + RegistryConstants.PATH_SEPARATOR
-                    + faultSequenceFileName;
-            addSequenceToRegistry(true, registry, faultSequenceFileLocation, regResourcePath + faultSequencePath);
+            addSequenceToAPI(apiProvider, apiId, "fault", faultSequenceFileName, faultSequenceFileLocation, orgId);
         }
     }
 
@@ -492,6 +494,36 @@ public final class APIImportUtil {
             log.error("I/O error while writing sequence data to the registry : " + regResourcePath, e);
         }
     }
+    
+    /**
+     * This method adds the sequence files to the registry. This updates the API specific sequences if already exists.
+     *
+     * @param isAPISpecific        whether the adding sequence is API specific
+     * @param registry             the registry instance
+     * @param sequenceFileLocation location of the sequence file
+     * @throws APIManagementException 
+     */
+    private static void addSequenceToAPI(APIProvider provider, String apiId, String type, String fileName,
+            String sequenceFileLocation, String orgId) throws APIManagementException {
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding Sequence to the api : " + apiId);
+            }
+            File sequenceFile = new File(sequenceFileLocation);
+            try (InputStream seqStream = new FileInputStream(sequenceFile);) {
+                Mediation mediation = new Mediation();
+                mediation.setType(type);    
+                mediation.setGlobal(false);
+                mediation.setName(fileName);
+                mediation.setConfig(IOUtils.toString(seqStream));
+                provider.addApiSpecificMediationPolicy(apiId, mediation, orgId);
+            }
+        } catch (IOException e) {
+            //this is logged and ignored because sequences are optional
+            log.error("I/O error while writing sequence data to the api : " + apiId, e);
+        }
+    }
 
     /**
      * This method adds the WSDL to the registry, if there is a WSDL associated with the API.
@@ -499,7 +531,7 @@ public final class APIImportUtil {
      * @param pathToArchive location of the extracted folder of the API
      * @param importedApi   the imported API object
      */
-    private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider, Registry registry) {
+    private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider, String orgId) {
 
         String wsdlFileName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
                 + APIConstants.WSDL_FILE_EXTENSION;
@@ -508,21 +540,13 @@ public final class APIImportUtil {
         if (CommonUtil.checkFileExistence(wsdlPath)) {
             try {
                 URL wsdlFileUrl = new File(wsdlPath).toURI().toURL();
-                importedApi.setWsdlUrl(wsdlFileUrl.toString());
-                APIUtil.createWSDL(registry, importedApi);
-                apiProvider.updateAPI(importedApi);
+                apiProvider.addWSDLResource(importedApi.getUuid(), null, wsdlFileUrl.toString(), orgId);
             } catch (MalformedURLException e) {
                 //this exception is logged and ignored since WSDL is optional for an API
                 log.error("Error in getting WSDL URL. ", e);
-            } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
-                //this exception is logged and ignored since WSDL is optional for an API
-                log.error("Error in putting the WSDL resource to registry. ", e);
             } catch (APIManagementException e) {
                 //this exception is logged and ignored since WSDL is optional for an API
                 log.error("Error in creating the WSDL resource in the registry. ", e);
-            } catch (FaultGatewaysException e) {
-                //This is logged and process is continued because WSDL is optional for an API
-                log.error("Failed to update API after adding WSDL. ", e);
             }
         }
     }
@@ -534,11 +558,12 @@ public final class APIImportUtil {
      * @param swaggerContent Content of Swagger file
      * @throws APIImportExportException if there is an error occurs when adding Swagger definition
      */
-    private static void addSwaggerDefinition(APIIdentifier apiId, String swaggerContent, APIProvider apiProvider)
-            throws APIImportExportException {
+    private static void addSwaggerDefinition(APIIdentifier apiId, String swaggerContent, APIProvider apiProvider,
+                                             String tenantDomain) throws APIImportExportException {
 
         try {
-            apiProvider.saveSwagger20Definition(apiId, swaggerContent);
+
+            apiProvider.saveSwagger20Definition(apiId, swaggerContent, tenantDomain);
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();
@@ -552,11 +577,12 @@ public final class APIImportUtil {
      * @param api              API to import
      * @param schemaDefinition Content of schema definition
      * @param apiProvider      API Provider
+     * @param orgId 
      * @throws APIManagementException if there is an error occurs when adding schema definition
      */
-    private static void addGraphqlSchemaDefinition(API api, String schemaDefinition, APIProvider apiProvider)
-            throws APIManagementException {
-        apiProvider.saveGraphqlSchemaDefinition(api, schemaDefinition);
+    private static void addGraphqlSchemaDefinition(API api, String schemaDefinition, APIProvider apiProvider,
+            String orgId) throws APIManagementException {
+        apiProvider.saveGraphqlSchemaDefinition(api.getId().getUUID(), schemaDefinition, orgId);
     }
 
     /**
@@ -666,11 +692,10 @@ public final class APIImportUtil {
             try {
                 // Import inflow mediation logic
                 Path inFlowDirectory = Paths.get(inFlowFileLocation);
-                ImportMediationLogic(inFlowDirectory, registry, soapToRestLocationIn);
-
+                ImportMediationLogicToAPI(inFlowDirectory, importedApi, Direction.IN);
                 // Import outflow mediation logic
                 Path outFlowDirectory = Paths.get(outFlowFileLocation);
-                ImportMediationLogic(outFlowDirectory, registry, soapToRestLocationOut);
+                ImportMediationLogicToAPI(outFlowDirectory, importedApi, Direction.OUT);
 
             } catch (DirectoryIteratorException e) {
                 throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
@@ -711,6 +736,46 @@ public final class APIImportUtil {
             throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
         } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
             throw new APIImportExportException("Error in storing imported SOAP to REST mediation logic", e);
+        } finally {
+            IOUtils.closeQuietly(inputFlowStream);
+        }
+    }
+    
+    /**
+     * Method created to add inflow and outflow mediation logic
+     * @param flowDirectory
+     * @param api
+     * @param direction
+     * @throws APIImportExportException
+     */
+    private static void ImportMediationLogicToAPI(Path flowDirectory, API api, Direction direction)
+            throws APIImportExportException {
+        InputStream inputFlowStream = null;
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(flowDirectory)) {
+            List<SOAPToRestSequence> sequenceList = new ArrayList<SOAPToRestSequence>();
+            for (Path file : stream) {
+                String fileName = file.getFileName().toString();
+                String method = "";
+                String path = "";
+                if (fileName.split(".xml").length != 0) {
+                    method = fileName.split(".xml")[0]
+                            .substring(file.getFileName().toString().lastIndexOf("_") + 1);
+                    path  = fileName.split(".xml")[0]
+                            .substring(0, file.getFileName().toString().lastIndexOf("_") );
+                }
+                inputFlowStream = new FileInputStream(file.toFile());
+                String data = IOUtils.toString(inputFlowStream);
+
+                SOAPToRestSequence sequence = new SOAPToRestSequence(method, path, data, direction);
+                IOUtils.closeQuietly(inputFlowStream);
+                sequenceList.add(sequence);
+            }
+            if (api.getSoapToRestSequences() == null) {
+                api.setSoapToRestSequences(new ArrayList<SOAPToRestSequence>());
+            }
+            api.getSoapToRestSequences().addAll(sequenceList);
+        } catch (IOException | DirectoryIteratorException e) {
+            throw new APIImportExportException("Error in importing SOAP to REST mediation logic", e);
         } finally {
             IOUtils.closeQuietly(inputFlowStream);
         }

@@ -125,7 +125,7 @@ class Operations extends React.Component {
                 {operations && operations.length !== 0 && operations.map(item => (
                     <TableRow style={{ borderStyle: 'hidden' }} key={item.target + '_' + item.verb}>
                         <TableCell>
-                            <Typography className={classes.heading} component='p' variant='body1'>
+                            <Typography className={classes.heading} component='p' variant='body2'>
                                 {item.target}
                             </Typography>
                         </TableCell>

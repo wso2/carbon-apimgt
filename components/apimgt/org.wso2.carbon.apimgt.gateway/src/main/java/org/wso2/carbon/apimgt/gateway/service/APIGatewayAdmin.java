@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
@@ -37,6 +38,8 @@ import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -45,12 +48,20 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import javax.xml.stream.XMLStreamException;
 
 public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     private static Log log = LogFactory.getLog(APIGatewayAdmin.class);
+
+    public APIGatewayAdmin() {
+
+    }
 
     /**
      * Add the API to the gateway
@@ -671,7 +682,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
             for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                 if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                    if (!APIConstants.GA_CONF_KEY.equals(localEntry.getName()) && gatewayAPIDTO.isOverride()) {
+                    if (gatewayAPIDTO.isOverride()) {
                         localEntryServiceProxy.deleteEntry(localEntry.getName());
                         localEntryServiceProxy.addLocalEntry(localEntry.getContent());
                     }

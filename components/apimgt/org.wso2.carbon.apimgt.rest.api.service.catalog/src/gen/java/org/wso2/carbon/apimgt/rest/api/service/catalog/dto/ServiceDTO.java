@@ -105,6 +105,8 @@ return null;
     private Integer usage = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
+    private String md5 = null;
+    private String definitionUrl = null;
 
   /**
    **/
@@ -315,6 +317,40 @@ return null;
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
+  /**
+   **/
+  public ServiceDTO md5(String md5) {
+    this.md5 = md5;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "36583a6a249b410e7fc4f892029709cac09763ddb230e1a829d5f9134d1abd07", value = "")
+  @JsonProperty("md5")
+  public String getMd5() {
+    return md5;
+  }
+  public void setMd5(String md5) {
+    this.md5 = md5;
+  }
+
+  /**
+   **/
+  public ServiceDTO definitionUrl(String definitionUrl) {
+    this.definitionUrl = definitionUrl;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "https://petstore.swagger.io/v2/swagger.json", value = "")
+  @JsonProperty("definitionUrl")
+  public String getDefinitionUrl() {
+    return definitionUrl;
+  }
+  public void setDefinitionUrl(String definitionUrl) {
+    this.definitionUrl = definitionUrl;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -336,12 +372,14 @@ return null;
         Objects.equals(mutualSSLEnabled, service.mutualSSLEnabled) &&
         Objects.equals(usage, service.usage) &&
         Objects.equals(createdTime, service.createdTime) &&
-        Objects.equals(lastUpdatedTime, service.lastUpdatedTime);
+        Objects.equals(lastUpdatedTime, service.lastUpdatedTime) &&
+        Objects.equals(md5, service.md5) &&
+        Objects.equals(definitionUrl, service.definitionUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime);
+    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
   }
 
   @Override
@@ -361,6 +399,8 @@ return null;
     sb.append("    usage: ").append(toIndentedString(usage)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
+    sb.append("    md5: ").append(toIndentedString(md5)).append("\n");
+    sb.append("    definitionUrl: ").append(toIndentedString(definitionUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }

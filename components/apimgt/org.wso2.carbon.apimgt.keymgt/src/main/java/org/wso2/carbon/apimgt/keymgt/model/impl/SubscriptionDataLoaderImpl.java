@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
@@ -50,16 +51,19 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicyList;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     private static final Log log = LogFactory.getLog(SubscriptionDataLoaderImpl.class);
     private EventHubConfigurationDto getEventHubConfigurationDto;
-
+    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
     public static final int retrievalTimeoutInSeconds = 15;
     public static final int retrievalRetries = 15;
     public static final String UTF8 = "UTF-8";
@@ -69,6 +73,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         this.getEventHubConfigurationDto = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getEventHubConfigurationDto();
+        this.gatewayArtifactSynchronizerProperties =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getGatewayArtifactSynchronizerProperties();
     }
 
     @Override
@@ -131,22 +138,29 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public List<API> loadAllApis(String tenantDomain) throws DataLoadingException {
 
-        String apisEP = APIConstants.SubscriptionValidationResources.APIS;
+        Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
         List<API> apis = new ArrayList<>();
-        String responseString = null;
-        try {
-            responseString = invokeService(apisEP, tenantDomain);
-        } catch (IOException e) {
-            String msg = "Error while executing the http client " + apisEP;
-            log.error(msg, e);
-            throw new DataLoadingException(msg, e);
+        if (gatewayLabels != null && gatewayLabels.size() > 0) {
+            for (String gatewayLabel : gatewayLabels) {
+                String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?gatewayLabel=" + gatewayLabel;
+                String responseString = null;
+                try {
+                    responseString = invokeService(apisEP, tenantDomain);
+                } catch (IOException e) {
+                    String msg = "Error while executing the http client " + apisEP;
+                    log.error(msg, e);
+                    throw new DataLoadingException(msg, e);
+                }
+                if (responseString != null && !responseString.isEmpty()) {
+                    APIList apiList = new Gson().fromJson(responseString, APIList.class);
+                    apis.addAll(apiList.getList());
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("apis :" + apis.get(0).toString());
+                }
+            }
         }
-        if (responseString != null && !responseString.isEmpty()) {
-            apis = (new Gson().fromJson(responseString, APIList.class)).getList();
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("apis :" + apis.get(0).toString());
-        }
+
         return apis;
     }
 
@@ -278,49 +292,40 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     @Override
     public API getApi(String context, String version) throws DataLoadingException {
 
-        String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
-                "&version=" + version;
-        API api = new API();
-        String responseString;
-        try {
-            responseString = invokeService(endPoint, null);
-        } catch (IOException e) {
-            String msg = "Error while executing the http client " + endPoint;
-            log.error(msg, e);
-            throw new DataLoadingException(msg, e);
-        }
-        if (responseString != null && !responseString.isEmpty()) {
-            APIList list = new Gson().fromJson(responseString, APIList.class);
-            if (list.getList() != null && !list.getList().isEmpty()) {
-                api = list.getList().get(0);
+        Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
+        List<API> apis = new ArrayList<>();
+        if (gatewayLabels != null && gatewayLabels.size() > 0) {
+            for (String gatewayLabel : gatewayLabels) {
+                String encodedGatewayLabel;
+                try {
+                    encodedGatewayLabel = URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
+                } catch (UnsupportedEncodingException e) {
+                    throw new DataLoadingException("Error while encoding label", e);
+                }
+                encodedGatewayLabel = encodedGatewayLabel.replace("\\+", "%20");
+                String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
+                        "&version=" + version + "&gatewayLabel=" + encodedGatewayLabel;
+                API api = new API();
+                String responseString;
+                try {
+                    responseString = invokeService(apisEP, null);
+                } catch (IOException e) {
+                    String msg = "Error while executing the http client " + apisEP;
+                    log.error(msg, e);
+                    throw new DataLoadingException(msg, e);
+                }
+                if (responseString != null && !responseString.isEmpty()) {
+                    APIList list = new Gson().fromJson(responseString, APIList.class);
+                    if (list.getList() != null && !list.getList().isEmpty()) {
+                        api = list.getList().get(0);
+                    }
+                }
+                return api;
+
             }
         }
-        return api;
+        return null;
     }
-
-    @Override
-    public API getApi(String context, String version, String revisionUUID) throws DataLoadingException {
-
-        String endPoint = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
-                "&version=" + version + "&revisionUUID=" + revisionUUID;
-        API api = new API();
-        String responseString;
-        try {
-            responseString = invokeService(endPoint, null);
-        } catch (IOException e) {
-            String msg = "Error while executing the http client " + endPoint;
-            log.error(msg, e);
-            throw new DataLoadingException(msg, e);
-        }
-        if (responseString != null && !responseString.isEmpty()) {
-            APIList list = new Gson().fromJson(responseString, APIList.class);
-            if (list.getList() != null && !list.getList().isEmpty()) {
-                api = list.getList().get(0);
-            }
-        }
-        return api;
-    }
-
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String policyName, String tenantDomain) throws DataLoadingException {

@@ -57,7 +57,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @DELETE
-    @Path("/{serviceKey}")
+    @Path("/{serviceId}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a service", notes = "Delete a service by providing the service id ", response = Void.class, authorizations = {
@@ -90,7 +90,7 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     }
 
     @GET
-    @Path("/{serviceKey}")
+    @Path("/{serviceId}")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get details of a service", notes = "Get details of a service using the id of the service. ", response = ServiceDTO.class, authorizations = {
@@ -102,8 +102,8 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
         @ApiResponse(code = 200, message = "Requested service in the service catalog is returned. ", response = ServiceDTO.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested service does not exist in the service catalog. ", response = ErrorDTO.class) })
-    public Response getServiceById(@ApiParam(value = "service key of the catalog entry",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
-        return delegate.getServiceById(serviceKey, securityContext);
+    public Response getServiceById(@ApiParam(value = "uuid of the catalog entry",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
+        return delegate.getServiceById(serviceId, securityContext);
     }
 
     @GET
@@ -151,12 +151,12 @@ ServiceEntriesApiService delegate = new ServiceEntriesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Paginated matched list of services returned. ", response = ServiceListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Due to an invalid search parameter ", response = ErrorDTO.class) })
-    public Response searchServices( @ApiParam(value = "Filter services by the name of the service ")  @QueryParam("name") String name,  @ApiParam(value = "Filter services by version of the service ")  @QueryParam("version") String version,  @ApiParam(value = "Filter services by definitionType ", allowableValues="OAS, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API")  @QueryParam("definitionType") String definitionType,  @ApiParam(value = "Filter services by the display name ")  @QueryParam("displayName") String displayName,  @ApiParam(value = "Comma seperated keys of the services to check ")  @QueryParam("key") String key,  @ApiParam(value = "If this set to true, a minimal set of fields will be provided for each service including the md5 ")  @QueryParam("shrink") Boolean shrink,  @ApiParam(value = "", allowableValues="name, definitionType")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum limit of items to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+    public Response searchServices( @ApiParam(value = "Filter services by the name of the service ")  @QueryParam("name") String name,  @ApiParam(value = "Filter services by version of the service ")  @QueryParam("version") String version,  @ApiParam(value = "Filter services by definitionType ", allowableValues="OAS, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API")  @QueryParam("definitionType") String definitionType,  @ApiParam(value = "Filter services by the display name ")  @QueryParam("displayName") String displayName,  @ApiParam(value = "Comma seperated keys of the services to check ")  @QueryParam("key") String key,  @ApiParam(value = "If this set to true, a minimal set of fields will be provided for each service including the md5 ", defaultValue="true") @DefaultValue("true") @QueryParam("shrink") Boolean shrink,  @ApiParam(value = "", allowableValues="name, definitionType")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum limit of items to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
         return delegate.searchServices(name, version, definitionType, displayName, key, shrink, sortBy, sortOrder, limit, offset, securityContext);
     }
 
     @PUT
-    @Path("/{serviceKey}")
+    @Path("/{serviceId}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a service", notes = "Update a service's details and definition ", response = ServiceDTO.class, authorizations = {
