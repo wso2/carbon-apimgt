@@ -65,9 +65,18 @@ public class Comment {
         this.apiId = apiId;
     }
 
+    public String getApiId() {
+        return parentCommentID;
+    }
+
+    public void setApiId(String apiId) {
+        this.parentCommentID = parentCommentID;
+    }
+
     private String user;
     private String text;
     private Date createdTime;
     private String id;
     private String apiId;
+    private String parentCommentID;
 }
