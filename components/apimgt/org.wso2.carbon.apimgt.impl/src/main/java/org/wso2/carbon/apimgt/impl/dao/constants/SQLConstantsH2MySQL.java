@@ -223,4 +223,32 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " limit ? , ? "+
                     " )x ";
 
+    public static final String GET_ALL_SERVICES_BY_TENANT_ID = "SELECT " +
+            "   UUID," +
+            "   SERVICE_KEY," +
+            "   MD5," +
+            "   ENTRY_NAME," +
+            "   DISPLAY_NAME," +
+            "   ENTRY_VERSION," +
+            "   SERVICE_URL," +
+            "   DEFINITION_TYPE," +
+            "   DEFINITION_URL," +
+            "   DESCRIPTION," +
+            "   SECURITY_TYPE," +
+            "   MUTUAL_SSL_ENABLED," +
+            "   CREATED_TIME," +
+            "   LAST_UPDATED_TIME," +
+            "   CREATED_BY," +
+            "   UPDATED_BY," +
+            "   ENDPOINT_DEFINITION," +
+            "   METADATA FROM AM_SERVICE_CATALOG" +
+            "   WHERE TENANT_ID = ? " +
+            "   AND ENTRY_NAME LIKE ? " +
+            "   AND ENTRY_VERSION LIKE ? " +
+            "   AND DEFINITION_TYPE LIKE ?" +
+            "   AND DISPLAY_NAME LIKE ?" +
+            "   AND SERVICE_KEY LIKE ?" +
+            "   ORDER BY $1 $2 " +
+            "   LIMIT ?, ? ";
+
 }

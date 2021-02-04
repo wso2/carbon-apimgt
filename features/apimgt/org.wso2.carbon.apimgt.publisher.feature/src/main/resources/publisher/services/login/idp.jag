@@ -62,7 +62,7 @@
     if (settingsResponse.data && serviceCatalogSettingsResponse.data) {
          scopes = settingsResponse.data.scopes.join(" ");
          // var catalogScopes = serviceCatalogSettingsResponse.data.scopes.join(" ");
-         var catalogScopes = "string";
+         var catalogScopes = "service_catalog:entry_view";
          scopes = scopes + " " + catalogScopes;
     } else {
         response.sendRedirect(erroLogin + "500");
