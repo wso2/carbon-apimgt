@@ -375,6 +375,13 @@ paths:
             **Search condition**.
              Consumer Key of the application
           type: string
+        - name: keymanager
+          in: query
+          description: |
+            **Search condition**.
+             KeyManager asscciated to consumer_key of the application
+          type: string
+
       tags:
         - Subscription Validation
       responses:

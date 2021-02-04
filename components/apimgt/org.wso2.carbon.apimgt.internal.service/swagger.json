@@ -480,6 +480,12 @@
           "description" : "**Search condition**.\n Consumer Key of the application\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "keymanager",
+          "in" : "query",
+          "description" : "**Search condition**.\n KeyManager asscciated to consumer_key of the application\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {

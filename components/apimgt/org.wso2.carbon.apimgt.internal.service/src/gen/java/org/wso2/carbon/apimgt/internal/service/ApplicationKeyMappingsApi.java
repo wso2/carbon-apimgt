@@ -44,7 +44,7 @@ ApplicationKeyMappingsApiService delegate = new ApplicationKeyMappingsApiService
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of application key mappings in the database", response = ApplicationKeyMappingListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response applicationKeyMappingsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Consumer Key of the application ")  @QueryParam("consumerKey") String consumerKey) throws APIManagementException{
-        return delegate.applicationKeyMappingsGet(xWSO2Tenant, consumerKey, securityContext);
+    public Response applicationKeyMappingsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Consumer Key of the application ")  @QueryParam("consumerKey") String consumerKey,  @ApiParam(value = "**Search condition**.  KeyManager asscciated to consumer_key of the application ")  @QueryParam("keymanager") String keymanager) throws APIManagementException{
+        return delegate.applicationKeyMappingsGet(xWSO2Tenant, consumerKey, keymanager, securityContext);
     }
 }
