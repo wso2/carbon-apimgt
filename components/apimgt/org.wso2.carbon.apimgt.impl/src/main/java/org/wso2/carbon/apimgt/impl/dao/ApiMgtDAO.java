@@ -7720,6 +7720,7 @@ public class ApiMgtDAO {
             insertPrepStmt.setString(3, user);
             insertPrepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
             insertPrepStmt.setInt(5, id);
+            insertPrepStmt.setString(6, comment.getParentCommentID());
 
             insertPrepStmt.executeUpdate();
             connection.commit();

@@ -252,6 +252,46 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setText(body.getContent());
             comment.setUser(username);
             comment.setApiId(apiId);
+            comment.setParentCommentID(parentCommentID);
+            //Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
+            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
+            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(commentDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+    //method overloading. This will execute if the request has not parentCommentId
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO body, MessageContext messageContext) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            Comment comment = new Comment();
+            comment.setText(body.getContent());
+            comment.setUser(username);
+            comment.setApiId(apiId);
+            comment.setParentCommentID("null");
             //Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);

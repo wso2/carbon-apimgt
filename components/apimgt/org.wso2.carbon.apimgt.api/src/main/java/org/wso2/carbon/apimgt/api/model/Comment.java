@@ -65,11 +65,11 @@ public class Comment {
         this.apiId = apiId;
     }
 
-    public String getApiId() {
+    public String getParentCommentID() {
         return parentCommentID;
     }
 
-    public void setApiId(String apiId) {
+    public void setParentCommentID(String parentCommentID) {
         this.parentCommentID = parentCommentID;
     }
 
