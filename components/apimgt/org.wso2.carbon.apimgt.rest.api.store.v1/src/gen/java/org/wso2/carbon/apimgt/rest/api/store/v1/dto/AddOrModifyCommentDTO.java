@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class RequestBodyDTO   {
+public class AddOrModifyCommentDTO   {
   
     private String content = null;
     private String category = null;
@@ -26,13 +26,13 @@ public class RequestBodyDTO   {
   /**
    * Content of the comment 
    **/
-  public RequestBodyDTO content(String content) {
+  public AddOrModifyCommentDTO content(String content) {
     this.content = content;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Content of the comment ")
+  @ApiModelProperty(example = "This is a comment", value = "Content of the comment ")
   @JsonProperty("content")
   public String getContent() {
     return content;
@@ -42,14 +42,15 @@ public class RequestBodyDTO   {
   }
 
   /**
+   * Category of the comment 
    **/
-  public RequestBodyDTO category(String category) {
+  public AddOrModifyCommentDTO category(String category) {
     this.category = category;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "general", value = "Category of the comment ")
   @JsonProperty("category")
   public String getCategory() {
     return category;
@@ -67,9 +68,9 @@ public class RequestBodyDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    RequestBodyDTO requestBody = (RequestBodyDTO) o;
-    return Objects.equals(content, requestBody.content) &&
-        Objects.equals(category, requestBody.category);
+    AddOrModifyCommentDTO addOrModifyComment = (AddOrModifyCommentDTO) o;
+    return Objects.equals(content, addOrModifyComment.content) &&
+        Objects.equals(category, addOrModifyComment.category);
   }
 
   @Override
@@ -80,7 +81,7 @@ public class RequestBodyDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class RequestBodyDTO {\n");
+    sb.append("class AddOrModifyCommentDTO {\n");
     
     sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    category: ").append(toIndentedString(category)).append("\n");

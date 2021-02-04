@@ -349,7 +349,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response editComment(String commentId, String apiId, RequestBodyDTO requestBodyDTO, MessageContext messageContext){
+    public Response editComment(String commentId, String apiId, AddOrModifyCommentDTO addOrModifyCommentDTO, MessageContext messageContext){
         return null;
     }
     @Override

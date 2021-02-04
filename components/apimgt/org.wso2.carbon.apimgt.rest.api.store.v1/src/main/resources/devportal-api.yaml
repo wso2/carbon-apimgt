@@ -994,18 +994,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Request body
-              required:
-                - code
-                - message
-              type: object
-              properties:
-                content:
-                  type: string
-                  description: |
-                    Content of the comment
-                category:
-                  type: string
+              $ref: '#/components/schemas/AddOrModifyComment'
         required: true
       responses:
         200:
@@ -4362,6 +4351,20 @@ components:
             $ref: '#/components/schemas/Comment'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    AddOrModifyComment:
+      title: Add or modify comment
+      type: object
+      properties:
+        content:
+          type: string
+          description: |
+            Content of the comment
+          example: This is a comment
+        category:
+          type: string
+          description: |
+            Category of the comment
+          example: general
     Error:
       title: Error object returned with 4XX HTTP status
       required:
