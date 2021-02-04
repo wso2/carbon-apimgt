@@ -3665,6 +3665,12 @@ paths:
             Version of the API
           schema:
             type: string
+        - name: revision
+          in: query
+          description: |
+            Revision number of the API artifact
+          schema:
+            type: string
         - name: providerName
           in: query
           description: |
@@ -3730,6 +3736,13 @@ paths:
           in: query
           description: |
             Preserve Original Provider of the API. This is the user choice to keep or replace the API provider
+          required: false
+          schema:
+            type: boolean
+        - name: rotateRevision
+          in: query
+          description: |
+            Rotate the revisions with each update
           required: false
           schema:
             type: boolean
