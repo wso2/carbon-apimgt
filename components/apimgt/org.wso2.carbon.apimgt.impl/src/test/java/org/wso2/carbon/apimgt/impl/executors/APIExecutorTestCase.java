@@ -102,10 +102,10 @@ public class APIExecutorTestCase {
         Mockito.when(genericArtifactManager.getGenericArtifact(ARTIFACT_ID)).thenReturn(genericArtifact);
         Mockito.when(genericArtifact.getLifecycleState()).thenReturn("CREATED");
 
-        Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIConstants.PUBLISHED))
+        Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(api, apiIdentifier, APIConstants.PUBLISHED))
                 .thenReturn(new HashMap<>());
-        Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIConstants.PUBLISHED, new HashMap<>())).thenReturn
-                (true);
+        Mockito.when(apiProvider.updateAPIforStateChange(api, apiIdentifier, APIConstants.PUBLISHED, new HashMap<>(),
+                genericArtifactManager, genericArtifact)).thenReturn(true);
         Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/2.0.0/api"))
                 .thenReturn(resource);
 
@@ -207,8 +207,9 @@ public class APIExecutorTestCase {
     @Test
     public void testExecuteWhenFaultGatewayException() throws Exception {
         APIExecutor apiExecutor = new APIExecutor();
-        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange
-                (apiIdentifier, APIConstants.PUBLISHED, new HashMap<>());
+        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider)
+                .updateAPIforStateChange(api, apiIdentifier, APIConstants.PUBLISHED, new HashMap<>(),
+                        genericArtifactManager, genericArtifact);
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertFalse(isExecuted);
     }
@@ -216,8 +217,9 @@ public class APIExecutorTestCase {
     @Test
     public void testExecuteWhenUserStoreException() throws Exception {
         APIExecutor apiExecutor = new APIExecutor();
-        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider).updateAPIforStateChange
-                (apiIdentifier, APIConstants.PUBLISHED, new HashMap<>());
+        PowerMockito.doThrow(new FaultGatewaysException(null)).when(apiProvider)
+                .updateAPIforStateChange(api, apiIdentifier, APIConstants.PUBLISHED, new HashMap<>(),
+                        genericArtifactManager, genericArtifact);
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertFalse(isExecuted);
     }
