@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.notifier;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
+import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 
 /**
@@ -30,7 +31,13 @@ public class SubscriptionsNotifier extends AbstractNotifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-
+        if (event instanceof SubscriptionEvent) {
+            SubscriptionEvent subscriptionEvent = (SubscriptionEvent) event;
+            if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(subscriptionEvent.getType())
+                    && APIConstants.SubscriptionStatus.UNBLOCKED.equals(subscriptionEvent.getSubscriptionState())) {
+                event.setTimeStamp(event.getTimeStamp() + 10l);
+            }
+        }
         publishEventToEventHub(event);
         return true;
     }
