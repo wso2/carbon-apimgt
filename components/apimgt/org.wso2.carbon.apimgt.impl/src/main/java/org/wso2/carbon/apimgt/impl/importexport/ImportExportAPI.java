@@ -45,8 +45,9 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
-    public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
-            ExportFormat format, boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException;
+    public File exportAPI(String apiId, String name, String version, String revisionID, String providerName,
+                          boolean preserveStatus, ExportFormat format, boolean preserveDocs,
+                          boolean preserveCredentials) throws APIManagementException, APIImportExportException;
 
 
     /**
@@ -92,7 +93,8 @@ public interface ImportExportAPI {
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite, String[] tokenScopes)
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+                         Boolean overwrite, String[] tokenScopes)
             throws APIManagementException;
 
     /**

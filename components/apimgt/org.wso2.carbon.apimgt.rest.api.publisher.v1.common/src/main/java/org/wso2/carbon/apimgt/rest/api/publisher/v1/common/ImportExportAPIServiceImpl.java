@@ -52,7 +52,8 @@ import java.io.InputStream;
 public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
-    public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
+    public File exportAPI(String apiId, String name, String version, String revisionID, String providerName,
+                          boolean preserveStatus,
                           ExportFormat format, boolean preserveDocs, boolean preserveCredentials)
             throws APIManagementException,
             APIImportExportException {
@@ -131,7 +132,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite,
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider,
+                         Boolean rotateRevision, Boolean overwrite,
             String[] tokenScopes) throws APIManagementException {
         String extractedFolderPath;
         try {

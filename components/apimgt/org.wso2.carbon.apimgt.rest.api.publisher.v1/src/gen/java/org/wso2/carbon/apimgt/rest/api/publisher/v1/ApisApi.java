@@ -396,8 +396,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportAPI( @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
-        return delegate.exportAPI(apiId, name, version, providerName, format, preserveStatus, securityContext);
+    public Response exportAPI( @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "Revision number of the API artifact ")  @QueryParam("revision") String revision,  @ApiParam(value = "Provider name of the API ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve API Status on export ")  @QueryParam("preserveStatus") Boolean preserveStatus) throws APIManagementException{
+        return delegate.exportAPI(apiId, name, version, revision, providerName, format, preserveStatus, securityContext);
     }
 
     @POST
@@ -1019,8 +1019,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response importAPI( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
-        return delegate.importAPI(fileInputStream, fileDetail, preserveProvider, overwrite, securityContext);
+    public Response importAPI( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Rotate the revisions with each update ")  @QueryParam("rotateRevision") Boolean rotateRevision,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite) throws APIManagementException{
+        return delegate.importAPI(fileInputStream, fileDetail, preserveProvider, rotateRevision, overwrite, securityContext);
     }
 
     @POST
