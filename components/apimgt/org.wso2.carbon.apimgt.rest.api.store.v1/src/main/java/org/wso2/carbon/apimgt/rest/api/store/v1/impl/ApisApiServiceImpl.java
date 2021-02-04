@@ -236,7 +236,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, CommentDTO body, String parentCommentID, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO body, String parentCommentID, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -349,7 +349,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response editComment(String commentId, String apiId, AddOrModifyCommentDTO addOrModifyCommentDTO, MessageContext messageContext){
+    public Response editComment(String commentId, String apiId, PutRequestBodyDTO putRequestBodyDTO, MessageContext messageContext){
         return null;
     }
     @Override

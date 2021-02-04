@@ -882,7 +882,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Comment'
+              title: Post request body
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: |
+                    Content of the comment
+                  example: This is a comment
+                category:
+                  type: string
+                  description: |
+                    Category of the comment
+                  example: general
         required: true
       responses:
         201:
@@ -994,7 +1006,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddOrModifyComment'
+              title: Put request body
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: |
+                    Content of the comment
+                  example: This is a comment
+                category:
+                  type: string
+                  description: |
+                    Category of the comment
+                  example: general
         required: true
       responses:
         200:
