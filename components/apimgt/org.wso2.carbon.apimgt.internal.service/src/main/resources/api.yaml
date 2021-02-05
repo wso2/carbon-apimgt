@@ -379,7 +379,7 @@ paths:
           in: query
           description: |
             **Search condition**.
-             KeyManager asscciated to consumer_key of the application
+             KeyManager associated to consumer_key of the application
           type: string
 
       tags:

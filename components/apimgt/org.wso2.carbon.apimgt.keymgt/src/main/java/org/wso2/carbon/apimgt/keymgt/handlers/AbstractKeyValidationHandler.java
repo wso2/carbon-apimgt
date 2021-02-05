@@ -254,7 +254,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                 }
             }
         } else {
-            log.error("Subscription datastore is Not initialized for tenant domain " + apiTenantDomain);
+            log.error("Subscription datastore is not initialized for tenant domain " + apiTenantDomain);
         }
         
         if (api != null && app != null && key != null && sub != null) {
