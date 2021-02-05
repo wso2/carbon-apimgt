@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AddCommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
@@ -9,11 +10,10 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PostRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PutRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.UpdateCommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApisApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -62,8 +62,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PostRequestBodyDTO postRequestBodyDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("parentCommentID") String parentCommentID) throws APIManagementException{
-        return delegate.addCommentToAPI(apiId, postRequestBodyDTO, parentCommentID, securityContext);
+    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) AddCommentDTO addCommentDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("parentCommentID") String parentCommentID) throws APIManagementException{
+        return delegate.addCommentToAPI(apiId, addCommentDTO, parentCommentID, securityContext);
     }
 
     @GET
@@ -375,8 +375,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response editCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PutRequestBodyDTO putRequestBodyDTO) throws APIManagementException{
-        return delegate.editCommentOfAPI(commentId, apiId, putRequestBodyDTO, securityContext);
+    public Response editCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) UpdateCommentDTO updateCommentDTO) throws APIManagementException{
+        return delegate.editCommentOfAPI(commentId, apiId, updateCommentDTO, securityContext);
     }
 
     @GET
