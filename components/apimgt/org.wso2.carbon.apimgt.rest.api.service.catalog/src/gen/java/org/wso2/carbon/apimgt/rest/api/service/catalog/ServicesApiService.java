@@ -25,7 +25,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface ServicesApiService {
       public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
-      public Response deleteService(String serviceKey, MessageContext messageContext) throws APIManagementException;
+      public Response deleteService(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response exportService(String name, String version, MessageContext messageContext) throws APIManagementException;
       public Response getServiceById(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response getServiceDefinition(String serviceKey, MessageContext messageContext) throws APIManagementException;

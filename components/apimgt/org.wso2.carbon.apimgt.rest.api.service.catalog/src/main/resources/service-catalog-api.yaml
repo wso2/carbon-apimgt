@@ -250,7 +250,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceKey'
+        - $ref: '#/components/parameters/serviceId'
       responses:
         "204":
           description: |

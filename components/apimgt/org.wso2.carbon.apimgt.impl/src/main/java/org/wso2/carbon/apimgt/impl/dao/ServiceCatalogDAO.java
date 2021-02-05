@@ -441,30 +441,31 @@ public class ServiceCatalogDAO {
     }
 
     /**
-     * Delete service by service key
+     * Delete service by service ID
      *
-     * @param serviceKey   Service key
+     * @param serviceId   Service ID
      * @param tenantId     ID of the owner's tenant
      * throws APIManagementException if failed to delete
      */
-    public void deleteService(String serviceKey, int tenantId) throws APIManagementException {
+    public void deleteService(String serviceId, int tenantId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ServiceCatalogConstants.DELETE_SERVICE)) {
+             PreparedStatement statement = connection.prepareStatement(SQLConstants
+                     .ServiceCatalogConstants.DELETE_SERVICE_BY_SERVICE_ID)) {
             boolean initialAutoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(false);
-                statement.setString(1, serviceKey);
+                statement.setString(1, serviceId);
                 statement.setInt(2, tenantId);
                 statement.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);
+                handleException("Failed to delete service : " + serviceId + " from service catalog: " + tenantId, e);
             } finally {
                 APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
-            handleException("Failed to delete service : " + serviceKey + " from service catalog: " + tenantId, e);
+            handleException("Failed to delete service : " + serviceId + " from service catalog: " + tenantId, e);
         }
     }
 

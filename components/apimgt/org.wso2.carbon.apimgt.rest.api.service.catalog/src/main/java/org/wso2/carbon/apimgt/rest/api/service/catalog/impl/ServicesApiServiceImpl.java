@@ -76,7 +76,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         int tenantId = APIUtil.getTenantId(userName);
         try {
             serviceCatalog.deleteService(serviceId, tenantId);
-            return Response.ok().build();
+            return Response.noContent().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting the service with key " + serviceId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -187,6 +187,8 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                             && validationResults.get(service.getKey()))) {
                         serviceEntryListToAdd.add(service);
                     } else {
+                        log.warn("Ignore updating the service with key " + service.getKey() + "as the signature " +
+                                "validation fails");
                         serviceEntryListToIgnore.add(service);
                     }
                 } else {
@@ -255,7 +257,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         for (int i = 0; i < verifierArray.length() ; i++) {
             JSONObject verifierJson = new JSONObject(verifierArray.getJSONObject(i));
             ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
-            if (service.getMd5() == verifierJson.get("md5").toString()) {
+            if (service.getMd5().equals(verifierJson.get("md5").toString())) {
                 validationResults.put(service.getKey(), true);
             } else {
                 validationResults.put(service.getKey(), false);

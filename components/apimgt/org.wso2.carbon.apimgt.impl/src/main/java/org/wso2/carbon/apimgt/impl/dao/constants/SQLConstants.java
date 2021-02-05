@@ -3807,7 +3807,7 @@ public class SQLConstants {
                 "ENDPOINT_DEFINITION = ?," +
                 "METADATA = ? " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
-        public static final String DELETE_SERVICE = "DELETE FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? " +
+        public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "AND TENANT_ID = ?";
         public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT * FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? " +
                 "AND TENANT_ID = ?";

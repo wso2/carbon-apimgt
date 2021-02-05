@@ -69,8 +69,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 204, message = "Successfully deleted the catalog entry. ", response = Void.class),
         @ApiResponse(code = 400, message = "Invalid Request ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Service does not exist. ", response = ErrorDTO.class) })
-    public Response deleteService(@ApiParam(value = "service key of the service",required=true) @PathParam("serviceKey") String serviceKey) throws APIManagementException{
-        return delegate.deleteService(serviceKey, securityContext);
+    public Response deleteService(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
+        return delegate.deleteService(serviceId, securityContext);
     }
 
     @GET
