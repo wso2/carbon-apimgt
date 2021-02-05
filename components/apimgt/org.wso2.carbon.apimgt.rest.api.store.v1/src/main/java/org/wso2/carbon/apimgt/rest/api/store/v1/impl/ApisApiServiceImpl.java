@@ -236,7 +236,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String parentCommentID, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -248,7 +248,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
-            Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
+            Comment comment = new Comment();
+            comment.setText(postRequestBodyDTO.getContent());
+            comment.setUser(username);
+            comment.setApiId(apiId);
+//            comment.setParentCommentID(parentCommentID);
+//            if (body.getCategory()==null){
+//                comment.setCategory("general");
+//            }else{
+//                comment.setCategory(body.getCategory());
+//            }
+//            comment.setEntryPoint("devPortal");
+            //Comment comment = CommentMappingUtil.fromDTOToComment(postRequestBodyDTO, username, apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
