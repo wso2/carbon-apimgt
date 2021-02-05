@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.common.jwtgenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +59,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         this.jwtConfigurationDto = jwtConfigurationDto;
         dialectURI = jwtConfigurationDto.getConsumerDialectUri();
         if (dialectURI == null) {
-            dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
+            dialectURI = jwtConfigurationDto.getDefaultDialectUri();
         }
         signatureAlgorithm = jwtConfigurationDto.getSignatureAlgorithm();
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
@@ -108,42 +126,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
             throw new JWTGeneratorException(e);
         }
     }
-
-   /* protected long getTTL() {
-        if (ttl != -1) {
-            return ttl;
-        }
-
-        synchronized (AbstractAPIMgtGatewayJWTGenerator.class) {
-            if (ttl != -1) {
-                return ttl;
-            }
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-            String gwTokenCacheConfig = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-            boolean isGWTokenCacheEnabled = Boolean.parseBoolean(gwTokenCacheConfig);
-
-            if (isGWTokenCacheEnabled) {
-                String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-
-                if (apimKeyCacheExpiry != null) {
-                    ttl = Long.parseLong(apimKeyCacheExpiry);
-                } else {
-                    ttl = Long.valueOf(900);
-                }
-            } else {
-                String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
-                if (ttlValue != null) {
-                    ttl = Long.parseLong(ttlValue);
-                } else {
-                    //15 * 60 (convert 15 minutes to seconds)
-                    ttl = Long.valueOf(900);
-                }
-            }
-            return ttl;
-        }
-    }*/
 
     /**
      * Helper method to add public certificate to JWT_HEADER to signature verification.

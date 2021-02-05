@@ -157,7 +157,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
-import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -224,6 +223,8 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
+import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.JWTSignatureAlg;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;

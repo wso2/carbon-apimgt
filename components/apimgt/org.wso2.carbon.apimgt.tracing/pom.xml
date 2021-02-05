@@ -72,7 +72,6 @@
         <dependency>
             <groupId>io.opentracing</groupId>
             <artifactId>opentracing-api</artifactId>
-            <version>0.31.0</version>
         </dependency>
     </dependencies>
 

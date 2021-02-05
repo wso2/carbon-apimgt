@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.ClaimsRetriever;
 import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 
 @RunWith(PowerMockRunner.class)

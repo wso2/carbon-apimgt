@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;

@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
+import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -97,6 +98,9 @@ public class JWTValidator {
 
         // Set ttl to jwtConfigurationDto
         jwtConfigurationDto.setTtl(getTtl());
+
+        // Set default dialect uri
+        jwtConfigurationDto.setDefaultDialectUri(ClaimsRetriever.DEFAULT_DIALECT_URI);
 
         //setting the jwt configuration dto
         apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
