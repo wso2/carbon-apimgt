@@ -598,6 +598,8 @@ public final class APIConstants {
     public static final String CHAR_ASTERIX = "*";
     public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
+    public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
+            = "overview_websubSubscriptionConfiguration";
 
     public static class TokenStatus {
 
@@ -1237,6 +1239,8 @@ public final class APIConstants {
 
     public static final Set<String> WEBSUB_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+    public static final Set<String> SSE_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
@@ -1765,7 +1769,8 @@ public final class APIConstants {
     public static final String API_PRODUCT_VERSION = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
-    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB"};
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
+            "SSE"};
     public static final String API_PRODUCT_REVISION = "Current";
 
     public static class AdvancedThrottleConstants {
@@ -1948,6 +1953,7 @@ public final class APIConstants {
     }
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
+    public static final String API_TYPE_SSE = "SSE";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
@@ -1955,6 +1961,7 @@ public final class APIConstants {
     public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
     public static final String[] SOAP_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";

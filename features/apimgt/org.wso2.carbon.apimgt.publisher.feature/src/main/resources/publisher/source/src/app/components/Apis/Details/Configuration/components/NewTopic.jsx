@@ -146,7 +146,7 @@ function Topics(props) {
     const { api, updateAPI } = useContext(APIContext);
     const [topic, inputsDispatcher] = useReducer(configReducer, {
         name: '',
-        isSubscribe: (api.type === 'WEBSUB'),
+        isSubscribe: (api.type === 'WEBSUB' || (api.type === 'SSE')),
         isPublish: false,
     });
 
@@ -193,30 +193,40 @@ function Topics(props) {
                         })}
                     />
                 </Grid>
-                {/* <Grid item xs={12}>
-                    <FormGroup row>
-                        <FormControlLabel
-                            control={(
-                                <Checkbox
-                                    name='checkSubscribe'
-                                    color='primary'
-                                    // onChange={(e) => {
-                                    //     newTopicDispatcher({
-                                    //         action: 'isSubscribe',
-                                    //         value: e.target.checked,
-                                    //     });
-                                    // }}
-                                    onChange={(e) => handleOnChange({
-                                        name: 'isSubscribe',
-                                        value: e.target.checked,
-                                    })}
+                { api.type !== 'WEBSUB' && api.type !== 'SSE' && (
+                    <Grid item xs={12}>
+                        <FormGroup row>
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        name='checkPublish'
+                                        color='primary'
+                                        onChange={(e) => handleOnChange({
+                                            name: 'isPublish',
+                                            value: e.target.checked,
+                                        })}
 
-                                />
-                            )}
-                            label='Subscribe'
-                        />
-                    </FormGroup>
-                </Grid> */}
+                                    />
+                                )}
+                                label='Subscribe'
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        name='checkSubscribe'
+                                        color='primary'
+                                        onChange={(e) => handleOnChange({
+                                            name: 'isSubscribe',
+                                            value: e.target.checked,
+                                        })}
+
+                                    />
+                                )}
+                                label='Subscribe'
+                            />
+                        </FormGroup>
+                    </Grid>
+                )}
                 <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                     <Grid item>
                         <Button

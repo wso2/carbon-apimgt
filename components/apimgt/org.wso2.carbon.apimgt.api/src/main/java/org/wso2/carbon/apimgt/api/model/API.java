@@ -114,7 +114,7 @@ public class API implements Serializable {
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
-    private AsyncAPISubscription subscription;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
 
     private String responseCache;
     private int cacheTimeout;
@@ -936,12 +936,12 @@ public class API implements Serializable {
         this.monetizationCategory = monetizationCategory;
     }
 
-    public AsyncAPISubscription getSubscription() {
-        return subscription;
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
     }
 
-    public void setSubscription(AsyncAPISubscription subscription) {
-        this.subscription = subscription;
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
     }
 
     public String getApiLevelPolicy() {

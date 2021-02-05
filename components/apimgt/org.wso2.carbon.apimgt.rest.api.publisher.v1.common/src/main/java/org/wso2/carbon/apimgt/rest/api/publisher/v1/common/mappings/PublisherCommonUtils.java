@@ -102,8 +102,10 @@ public class PublisherCommonUtils {
                 .equals(originalAPI.getType());
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
-        boolean isAsyncAPI = isWSAPI || (originalAPI.getType() != null && APIConstants.APITransportType.WEBSUB.toString()
-                .equals(originalAPI.getType()));
+        boolean isAsyncAPI = originalAPI.getType() != null
+                && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -669,7 +671,7 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
         boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
-        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB == apiDto.getType();
+        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB == apiDto.getType() || APIDTO.TypeEnum.SSE == apiDto.getType();
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 

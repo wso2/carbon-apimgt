@@ -29,7 +29,6 @@ import Grid from '@material-ui/core/Grid';
 
 import Typography from '@material-ui/core/Typography';
 import Api from 'AppData/api';
-import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 function RenderMethodBase(props) {
     const { theme, method } = props;
@@ -106,30 +105,12 @@ class Topics extends React.Component {
             };
         });
         this.setState({ topics });
-
-        // const promisedAPI = this.restApi.getSwagger(id);
-        // promisedAPI
-        //     .then((response) => {
-        //         if (response.obj.paths !== undefined) {
-        //             this.setState({ paths: response.obj.paths });
-        //         }
-        //     })
-        //     .catch((error) => {
-        //         if (process.env.NODE_ENV !== 'production') console.log(error);
-        //         const { status } = error;
-        //         if (status === 404) {
-        //             this.setState({ notFound: true });
-        //         } else if (status === 401) {
-        //             doRedirectToLogin();
-        //         }
-        //     });
     }
 
     /**
      *
      */
     render() {
-        // const { paths } = this.state;
         if (this.state.notFound) {
             return (
                 <div>
@@ -140,16 +121,6 @@ class Topics extends React.Component {
                 </div>
             );
         }
-        // if (!paths) {
-        //     return (
-        //         <div>
-        //             <FormattedMessage
-        //                 id='Apis.Details.NewOverview.Resources.loading'
-        //                 defaultMessage='loading...1'
-        //             />
-        //         </div>
-        //     );
-        // }
         const { classes, parentClasses, api } = this.props;
         return (
             <>
@@ -181,70 +152,6 @@ class Topics extends React.Component {
                                                     </Grid>
                                                 </Grid>
                                             </Grid>
-                                            { api.type !== 'WEBSUB' && (
-                                                <Grid container xs={12} style={{ paddingLeft: 30 }} spacing={1}>
-                                                    <Grid item xs={2}>
-                                                        <Typography
-                                                            component='p'
-                                                            variant='subtitle2'
-                                                            className={classes.subtitle}
-                                                        >
-                                                            Production Endpoint
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        {
-                                                            topic.endpoint.production.url ? (
-                                                                <Typography
-                                                                    component='p'
-                                                                    variant='body1'
-                                                                    className={classes.url}
-                                                                >
-                                                                    {topic.endpoint.production.url}
-                                                                </Typography>
-                                                            ) : (
-                                                                <Typography
-                                                                    component='p'
-                                                                    variant='body1'
-                                                                    className={classes.notConfigured}
-                                                                >
-                                                                    -
-                                                                </Typography>
-                                                            )
-                                                        }
-                                                    </Grid>
-                                                    <Grid item xs={2}>
-                                                        <Typography
-                                                            component='p'
-                                                            variant='subtitle2'
-                                                            className={classes.subtitle}
-                                                        >
-                                                            Sandbox Endpoint
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={10}>
-                                                        {
-                                                            topic.endpoint.sandbox.url ? (
-                                                                <Typography
-                                                                    component='p'
-                                                                    variant='body1'
-                                                                    className={classes.url}
-                                                                >
-                                                                    {topic.endpoint.sandbox.url}
-                                                                </Typography>
-                                                            ) : (
-                                                                <Typography
-                                                                    component='p'
-                                                                    variant='body1'
-                                                                    className={classes.notConfigured}
-                                                                >
-                                                                    -
-                                                                </Typography>
-                                                            )
-                                                        }
-                                                    </Grid>
-                                                </Grid>
-                                            )}
                                         </Grid>
                                     </div>
                                 );

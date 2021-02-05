@@ -151,8 +151,8 @@ function Overview(props) {
             case 'APIProduct':
                 return <ProductResources parentClasses={classes} api={api} />;
             case 'WS':
-                return '';
             case 'WEBSUB':
+            case 'SSE':
                 return <Topics parentClasses={classes} api={api} />;
             default:
                 return <Resources parentClasses={classes} api={api} />;

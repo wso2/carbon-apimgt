@@ -46,6 +46,27 @@ const APICreateStreamingAPI = () => {
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
     const classes = useStyles();
+    const [hideEndpoint, setHideEndpoint] = useState(true);
+
+    const protocols = [
+        {
+            displayName: 'WebSocket',
+            description: 'WebSocket',
+        },
+        {
+            displayName: 'WebSub',
+            description: 'WebSub',
+        },
+        {
+            displayName: 'SSE',
+            description: 'Server Sent Events',
+        },
+    ];
+    const protocolKeys = {
+        WebSocket: 'WS',
+        SSE: 'SSE',
+        WebSub: 'WEBSUB'
+    };
 
     /**
      *
@@ -58,10 +79,13 @@ const APICreateStreamingAPI = () => {
             case 'version':
             case 'context':
             case 'endpoint':
-            case 'protocol':
             case 'policies':
             case 'isFormValid':
                 return { ...currentState, [action]: value };
+            case 'protocol':
+                const key = protocolKeys[value];
+                setHideEndpoint(key === protocolKeys.WebSub);
+                return { ...currentState, [action]: key, };
             default:
                 return currentState;
         }
@@ -71,14 +95,6 @@ const APICreateStreamingAPI = () => {
     });
 
     const isAPICreatable = apiInputs.name && apiInputs.context && apiInputs.version && !isCreating;
-
-    const protocols = [
-        {
-            name: 'websub',
-            displayName: 'WebSub',
-            description: 'WebSub',
-        },
-    ];
 
     /**
      *
@@ -206,7 +222,7 @@ const APICreateStreamingAPI = () => {
                         api={apiInputs}
                         endpointPlaceholderText='Streaming Provider'
                         appendChildrenBeforeEndpoint
-                        hideEndpoint
+                        hideEndpoint={hideEndpoint}
                     >
                         <TextField
                             fullWidth
@@ -237,8 +253,6 @@ const APICreateStreamingAPI = () => {
                                 <MenuItem
                                     dense
                                     disableGutters={false}
-                                    id={protocol.name}
-                                    key={protocol.name}
                                     value={protocol.displayName}
                                 >
                                     <ListItemText primary={protocol.displayName} secondary={protocol.description} />
