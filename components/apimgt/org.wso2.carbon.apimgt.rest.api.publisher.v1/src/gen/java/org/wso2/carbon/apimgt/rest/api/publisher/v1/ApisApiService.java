@@ -72,7 +72,7 @@ public interface ApisApiService {
       public Response deleteAPILifecycleStatePendingTasks(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIMediationPolicyByPolicyId(String apiId, String mediationPolicyId, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIRevision(String apiId, String revisionId, String organizationId, MessageContext messageContext) throws APIManagementException;
-      public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
+      public Response deployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response deploymentsGetStatus(String apiId, String organizationId, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -115,7 +115,7 @@ public interface ApisApiService {
       public Response importWSDLDefinition(String organizationId, InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
       public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response restoreAPIRevision(String apiId, String revisionId, String organizationId, MessageContext messageContext) throws APIManagementException;
-      public Response undeployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
+      public Response undeployAPIRevision(String apiId, String revisionId, String organizationId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPI(String apiId, APIDTO APIDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIClientCertificateByAlias(String alias, String apiId, String organizationId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIDocument(String apiId, String documentId, DocumentDTO documentDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;

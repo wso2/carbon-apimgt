@@ -4432,7 +4432,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
-                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
+                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(), apiRevision
+                        .getApiRevisionDeploymentList(), organizationId);
             }
             deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), organizationId);
         }
@@ -9817,7 +9818,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void addAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                         List<APIRevisionDeployment> apiRevisionDeployments)
+                                         List<APIRevisionDeployment> apiRevisionDeployments, String organizationId)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9833,7 +9834,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        API api = getAPIbyUUID(apiId, apiRevision);
+        API api = getAPIbyUUID(apiId, apiRevision, organizationId);
         Set<String> environmentsToAdd = new HashSet<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
@@ -9857,10 +9858,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private API getAPIbyUUID(String apiId, APIRevision apiRevision)
+    private API getAPIbyUUID(String apiId, APIRevision apiRevision, String organizationId)
             throws APIManagementException {
 
-        API api = getAPIbyUUID(apiRevision.getApiUUID(), tenantDomain);
+        API api = getAPIbyUUID(apiRevision.getApiUUID(), organizationId);
         api.setRevisionedApiId(apiRevision.getRevisionUUID());
         api.setRevisionId(apiRevision.getId());
         api.setUuid(apiId);
@@ -9888,7 +9889,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                              List<APIRevisionDeployment> apiRevisionDeployments)
+                                              List<APIRevisionDeployment> apiRevisionDeployments, String organizationId)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9901,7 +9902,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
-        API api = getAPIbyUUID(apiId, apiRevision);
+        API api = getAPIbyUUID(apiId, apiRevision, organizationId);
         removeFromGateway(api, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiId, apiRevisionId);
@@ -9928,7 +9929,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
+            apiPersistenceInstance.restoreAPIRevision(new Organization(organizationId),
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
@@ -9967,7 +9968,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiIdentifier.setUuid(apiId);
         try {
-            apiPersistenceInstance.deleteAPIRevision(new Organization(tenantDomain),
+            apiPersistenceInstance.deleteAPIRevision(new Organization(organizationId),
                     apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";

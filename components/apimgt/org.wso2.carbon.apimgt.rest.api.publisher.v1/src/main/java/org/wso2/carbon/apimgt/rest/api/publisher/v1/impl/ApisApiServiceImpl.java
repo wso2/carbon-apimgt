@@ -3303,8 +3303,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String organizationId,
-                                            String ifMatch, MessageContext messageContext) {
+    public Response changeAPILifecycle(String action, String apiId, String organizationId, String lifecycleChecklist,
+                                       String ifMatch, MessageContext messageContext) {
         //pre-processing
         String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
@@ -3957,7 +3957,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response deployAPIRevision(String apiId, String revisionId, String organizationId,
+                                      List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -3968,7 +3969,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.addAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
+        apiProvider.addAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments, organizationId);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
@@ -4005,7 +4006,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response undeployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response undeployAPIRevision(String apiId, String revisionId, String organizationId,
+                                        List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -4016,7 +4018,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
+        apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments, organizationId);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {

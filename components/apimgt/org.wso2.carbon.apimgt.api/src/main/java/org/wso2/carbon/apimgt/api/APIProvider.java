@@ -1737,7 +1737,8 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment>
+            apiRevisionDeployments, String organizationId) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details by providing deployment name
@@ -1765,7 +1766,8 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void undeployAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment>
+            apiRevisionDeployments, String organizationId) throws APIManagementException;
 
     /**
      * Restore a provided API Revision as the working copy of the API

@@ -1522,6 +1522,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: Deployment object that needs to be added
         content:
@@ -1568,6 +1569,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: Deployment object that needs to be added
         content:
