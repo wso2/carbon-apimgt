@@ -15,42 +15,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener.dto;
+package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 
-public class ExtensionErrorResponseDTO {
+public class ResponseContextDTO {
 
-    int errorCode;
-    String errorMessage;
-    String errorDescription;
+    MsgInfoDTO msgInfo;
+    APIRequestInfoDTO apiRequestInfo;
+    int statusCode;
 
-    public int getErrorCode() {
+    public APIRequestInfoDTO getApiRequestInfo() {
 
-        return errorCode;
+        return apiRequestInfo;
     }
 
-    public void setErrorCode(int errorCode) {
+    public void setApiRequestInfo(APIRequestInfoDTO apiRequestInfo) {
 
-        this.errorCode = errorCode;
+        this.apiRequestInfo = apiRequestInfo;
     }
 
-    public String getErrorMessage() {
+    public int getStatusCode() {
 
-        return errorMessage;
+        return statusCode;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public void setStatusCode(int statusCode) {
 
-        this.errorMessage = errorMessage;
+        this.statusCode = statusCode;
     }
 
-    public String getErrorDescription() {
+    public MsgInfoDTO getMsgInfo() {
 
-        return errorDescription;
+        return msgInfo;
     }
 
-    public void setErrorDescription(String errorDescription) {
+    public void setMsgInfo(MsgInfoDTO msgInfo) {
 
-        this.errorDescription = errorDescription;
+        this.msgInfo = msgInfo;
     }
 }
 

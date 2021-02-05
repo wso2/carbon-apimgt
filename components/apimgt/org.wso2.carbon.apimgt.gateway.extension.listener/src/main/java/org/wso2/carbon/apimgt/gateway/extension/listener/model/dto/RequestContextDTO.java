@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener.dto;
+package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 
 import java.security.cert.X509Certificate;
 import java.util.Map;

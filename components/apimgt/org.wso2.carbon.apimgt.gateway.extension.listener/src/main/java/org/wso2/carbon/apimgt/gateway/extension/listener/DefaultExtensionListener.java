@@ -17,9 +17,10 @@
  */
 package org.wso2.carbon.apimgt.gateway.extension.listener;
 
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.RequestContextDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.ResponseContextDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionResponseStatus;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
 
 public class DefaultExtensionListener implements ExtensionListener {
 
@@ -30,25 +31,37 @@ public class DefaultExtensionListener implements ExtensionListener {
     /***
      * Process response
      *
-     * @param responseContextDTO@throws Exception
+     * @param responseContextDTO
      */
     @Override
-    public ExtensionResponseDTO preProcessResponse(
-            ResponseContextDTO responseContextDTO) throws Exception {
+    public ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO) {
 
         return null;
     }
 
     @Override
-    public ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO) throws Exception {
+    public ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO) {
 
-        return null;
+        ExtensionResponseDTO responseDTO = new ExtensionResponseDTO();
+//        ExtensionErrorResponseDTO errorResponseDTO = new ExtensionErrorResponseDTO();
+//        errorResponseDTO.setErrorMessage("custom error message");
+//        errorResponseDTO.setErrorDescription("custom error desc");
+//        errorResponseDTO.setErrorCode(90111);
+//        responseDTO.setErrorResponse(errorResponseDTO);
+        responseDTO.setResponseStatus(ExtensionResponseStatus.RETURN_RESPONSE.toString());
+        responseDTO.setStatusCode(500);
+        return responseDTO;
     }
 
+    /**
+     * TODO:// comment
+     *
+     * @return
+     */
     @Override
-    public boolean isBuildPayload() {
+    public String getType() {
 
-        return true;
+        return null;
     }
 
     /***
@@ -57,7 +70,7 @@ public class DefaultExtensionListener implements ExtensionListener {
      * @throws Exception
      */
     @Override
-    public ExtensionResponseDTO preProcessRequest(RequestContextDTO requestDTO) throws Exception {
+    public ExtensionResponseDTO preProcessRequest(RequestContextDTO requestDTO) {
 
         return null;
     }
@@ -68,10 +81,20 @@ public class DefaultExtensionListener implements ExtensionListener {
      * @throws Exception
      */
     @Override
-    public ExtensionResponseDTO postProcessRequest(RequestContextDTO requestDTO) throws Exception {
+    public ExtensionResponseDTO postProcessRequest(RequestContextDTO requestDTO) {
 
         return null;
     }
 
+    /**
+     * TODO://
+     *
+     * @return
+     */
+    @Override
+    public String getErrorHandler() {
+
+        return null;
+    }
 }
 

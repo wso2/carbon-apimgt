@@ -17,9 +17,9 @@
  */
 package org.wso2.carbon.apimgt.gateway.extension.listener;
 
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.RequestContextDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.ResponseContextDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
 
 /**
  * TODO:add comment
@@ -31,21 +31,21 @@ public interface ExtensionListener {
      * @param requestContextDTO
      * @throws Exception
      */
-    ExtensionResponseDTO preProcessRequest(RequestContextDTO requestContextDTO) throws Exception;
+    ExtensionResponseDTO preProcessRequest(RequestContextDTO requestContextDTO);
 
     /***
      * Post process request
      * @param requestContextDTO
      * @throws Exception
      */
-    ExtensionResponseDTO postProcessRequest(RequestContextDTO requestContextDTO) throws Exception;
+    ExtensionResponseDTO postProcessRequest(RequestContextDTO requestContextDTO);
 
     /***
      * Process response
      * @param responseContextDTO
      * @throws Exception
      */
-    ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO) throws Exception;
+    ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO);
 
     /**
      * TODO://add comment
@@ -54,13 +54,20 @@ public interface ExtensionListener {
      * @return
      * @throws Exception
      */
-    ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO) throws Exception;
+    ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO);
 
     /**
-     * TODO:// add comment
+     * TODO://
      *
      * @return
      */
-    boolean isBuildPayload();
+    String getType();
+
+    /**
+     * TODO://
+     *
+     * @return
+     */
+    String getErrorHandler();
 }
 

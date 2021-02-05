@@ -15,10 +15,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener.dto;
+package org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler;
 
-public enum ExtensionResponseStatus {
-    RETURN_RESPONSE,
-    RETURN_ERROR,
-    CONTINUE
+import org.apache.synapse.MessageContext;
+
+/**
+ * TODO: class comment
+ */
+public class SynapsePayloadHandlerFactory {
+
+    private static final SynapsePayloadHandlerFactory instance = new SynapsePayloadHandlerFactory();
+
+    public static SynapsePayloadHandlerFactory getInstance() {
+
+        return instance;
+    }
+
+    private SynapsePayloadHandlerFactory() {
+
+    }
+
+    /**
+     * TODO: comment
+     * @param messageContext
+     * @return
+     */
+    public SynapsePayloadHandler buildPayloadHandler(MessageContext messageContext) {
+
+        return new SynapsePayloadHandler(messageContext);
+    }
+
 }
+

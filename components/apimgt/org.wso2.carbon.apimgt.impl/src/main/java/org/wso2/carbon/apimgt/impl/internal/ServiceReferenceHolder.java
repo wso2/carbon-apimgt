@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.gateway.extension.listener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
@@ -58,6 +59,7 @@ public class ServiceReferenceHolder {
     private ArtifactSaver artifactSaver;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
     private ImportExportAPI importExportService;
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -222,5 +224,20 @@ public class ServiceReferenceHolder {
     public ImportExportAPI getImportExportService() {
 
         return importExportService;
+    }
+
+    public void addExtensionListener(String type, ExtensionListener extensionListener) {
+
+        extensionListenerMap.put(type, extensionListener);
+    }
+
+    public void removeExtensionListener(String type) {
+
+        extensionListenerMap.remove(type);
+    }
+
+    public ExtensionListener getExtensionListener(String type) {
+
+        return extensionListenerMap.get(type);
     }
 }

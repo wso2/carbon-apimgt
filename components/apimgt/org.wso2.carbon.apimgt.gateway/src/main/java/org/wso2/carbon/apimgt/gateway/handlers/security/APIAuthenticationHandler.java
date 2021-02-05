@@ -39,10 +39,9 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.extension.listener.dto.ExtensionResponseDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.ExtensionDataPublisher;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionType;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
@@ -98,6 +97,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private OpenAPI openAPI;
     private String keyManagers;
     private List<String> keyManagersList = new ArrayList<>();
+    private final String type = ExtensionType.AUTHENTICATION.toString();
+
     public String getApiUUID() {
         return apiUUID;
     }
@@ -310,8 +311,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+
         TracingSpan keySpan = null;
-        ExtensionDataPublisher extensionHandler = new ExtensionDataPublisher();
+        if (!ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
+            return false;
+        }
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
@@ -339,21 +343,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (authenticators.isEmpty()) {
                 initializeAuthenticators();
             }
-            try {
-                extensionHandler.preProcessRequest(messageContext, "Authentication");
-            } catch (APIManagementException e) {
-                //TODO: error handle
-                e.printStackTrace();
-            }
 
             if (isAuthenticate(messageContext)) {
                 setAPIParametersToMessageContext(messageContext);
-                try {
-                    ExtensionResponseDTO extensionResponseDTO =
-                            extensionHandler.postProcessRequest(messageContext, "Authentication");
-                } catch (APIManagementException e) {
-                    //TODO: error handle
-                    e.printStackTrace();
+                if (!ExtensionListenerUtil.postProcessRequest(messageContext, type)) {
+                    return false;
                 }
                 return true;
             }
@@ -488,6 +482,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
+
+        if (!ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return false;
+        }
+
+        if (!ExtensionListenerUtil.postProcessResponse(messageContext, type)) {
+            return false;
+        }
         return true;
     }
 

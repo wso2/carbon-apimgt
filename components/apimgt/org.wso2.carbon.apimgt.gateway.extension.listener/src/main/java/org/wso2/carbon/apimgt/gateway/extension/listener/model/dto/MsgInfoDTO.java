@@ -15,7 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener.dto;
+package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
+
+import org.wso2.carbon.apimgt.gateway.extension.listener.PayloadHandler;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -23,10 +25,20 @@ import java.util.Map;
 public class MsgInfoDTO {
 
     Map<String, String> headers;
-    InputStream payload;
+    PayloadHandler payloadHandler;
     String electedResource;
     String httpMethod;
     String messageId;
+
+    public PayloadHandler getPayloadHandler() {
+
+        return payloadHandler;
+    }
+
+    public void setPayloadHandler(PayloadHandler payloadHandler) {
+
+        this.payloadHandler = payloadHandler;
+    }
 
     public Map<String, String> getHeaders() {
 
@@ -36,16 +48,6 @@ public class MsgInfoDTO {
     public void setHeaders(Map<String, String> headers) {
 
         this.headers = headers;
-    }
-
-    public InputStream getPayload() {
-
-        return payload;
-    }
-
-    public void setPayload(InputStream payload) {
-
-        this.payload = payload;
     }
 
     public String getElectedResource() {

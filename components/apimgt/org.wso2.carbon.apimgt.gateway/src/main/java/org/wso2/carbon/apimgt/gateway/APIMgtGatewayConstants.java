@@ -49,6 +49,7 @@ public class APIMgtGatewayConstants {
     public static final String REQUEST_EXECUTION_START_TIME = "request.execution.start.time";
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
+    public static final String CUSTOM_PROPERTY_MAP = "customPropertyMap";
 
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 
@@ -218,5 +219,12 @@ public class APIMgtGatewayConstants {
     public static final String AUTHENTICATION_ENDPOINT_CONTEXT = "/authenticationendpoint";
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
+
+    public static final int EXTENSION_SERVER_ERROR = 900914;
+    public static final String EXTENSION_SERVER_ERROR_MESSAGE = "Internal Server Error";
+    public static final String EXTENSION_SERVER_ERROR_DECRIPTION = "Error while executing handler extension";
+
+    public static final String EXTENSION_NS = "http://wso2.org/apimanager/extension";
+    public static final String EXTENSION_NS_PREFIX = "amx";
 }
 
