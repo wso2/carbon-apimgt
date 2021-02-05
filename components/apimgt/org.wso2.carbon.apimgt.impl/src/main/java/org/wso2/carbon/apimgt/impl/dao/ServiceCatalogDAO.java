@@ -103,12 +103,21 @@ public class ServiceCatalogDAO {
      * @param services List of Services that needs to be added
      * @param tenantId Tenant ID of the logged-in user
      * @param username Logged-in username
+     * @param connection DB Connection
+     *
      * @throws APIManagementException
      */
-    public void addServices(List<ServiceEntry> services, int tenantId, String username) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection
-                     .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
+    public void addServices(List<ServiceEntry> services, int tenantId, String username, Connection connection)
+            throws APIManagementException {
+        boolean isNewConnection = false;
+        PreparedStatement ps = null;
+        try {
+            if (connection == null) {
+                connection = APIMgtDBUtil.getConnection();
+                isNewConnection = true;
+            }
+            ps = connection
+                    .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE);
             boolean initialAutoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(false);
@@ -127,6 +136,28 @@ public class ServiceCatalogDAO {
         } catch (SQLException e) {
             handleException("Failed to add services to service catalog of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, null);
+            if (isNewConnection) {
+                APIMgtDBUtil.closeAllConnections(null, connection, null);
+            }
+        }
+    }
+
+    public void updateServices(List<ServiceEntry> services, int tenantId, String username)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+        PreparedStatement ps = connection.prepareStatement(SQLConstants.ServiceCatalogConstants
+                .DELETE_SERVICE_BY_SERVICE_KEY)) {
+            for (ServiceEntry service: services) {
+                ps.setString(1, service.getKey());
+                ps.setInt(2, tenantId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            addServices(services, tenantId, username, connection);
+        } catch (SQLException e) {
+            handleException("Error while updating Services", e);
         }
     }
 
@@ -155,7 +186,7 @@ public class ServiceCatalogDAO {
                 ps.setString(4, serviceEntry.getVersion());
                 ps.setInt(5, tenantID);
                 ps.setString(6, serviceEntry.getServiceUrl());
-                ps.setString(7, serviceEntry.getDefinitionType());
+                ps.setString(7, serviceEntry.getDefinitionType().name());
                 ps.setString(8, serviceEntry.getDefUrl());
                 ps.setString(9, serviceEntry.getDescription());
                 ps.setString(10, serviceEntry.getSecurityType().toString());
@@ -367,7 +398,8 @@ public class ServiceCatalogDAO {
                 serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
                 serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
                 serviceEntry.setDescription(rs.getString("DESCRIPTION"));
-                serviceEntry.setDefinitionType(rs.getString("DEFINITION_TYPE"));
+                serviceEntry.setDefinitionType(ServiceEntry.DefinitionType
+                            .valueOf(rs.getString("DEFINITION_TYPE")));
                 serviceEntry.setDefUrl(rs.getString("DEFINITION_URL"));
                 serviceEntry.setSecurityType(ServiceEntry.SecurityType
                         .valueOf(rs.getString("SECURITY_TYPE")));
@@ -535,7 +567,7 @@ public class ServiceCatalogDAO {
             ps.setString(6, service.getVersion());
             ps.setInt(7, tenantId);
             ps.setString(8, service.getServiceUrl());
-            ps.setString(9, service.getDefinitionType());
+            ps.setString(9, service.getDefinitionType().name());
             ps.setString(10, service.getDefUrl());
             ps.setString(11, service.getDescription());
             ps.setString(12, service.getSecurityType().toString());
@@ -550,6 +582,7 @@ public class ServiceCatalogDAO {
             handleException("Error when setting parameters to prepared statement ", e);
         }
     }
+
     private ServiceEntry getServiceParams(ResultSet resultSet, boolean shrink) throws APIManagementException {
 
         try {
@@ -563,7 +596,8 @@ public class ServiceCatalogDAO {
                 service.setDisplayName(resultSet.getString(APIConstants.ServiceCatalogConstants
                         .SERVICE_DISPLAY_NAME));
                 service.setServiceUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_URL));
-                service.setDefinitionType(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_TYPE));
+                service.setDefinitionType(ServiceEntry.DefinitionType.valueOf(resultSet.getString(APIConstants
+                        .ServiceCatalogConstants.DEFINITION_TYPE)));
                 service.setDefUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_URL));
                 service.setDescription(resultSet.getString(APIConstants.ServiceCatalogConstants.DESCRIPTION));
                 service.setSecurityType(ServiceEntry.SecurityType.valueOf(resultSet

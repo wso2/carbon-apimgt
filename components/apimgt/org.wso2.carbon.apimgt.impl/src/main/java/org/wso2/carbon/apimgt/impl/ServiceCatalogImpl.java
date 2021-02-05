@@ -38,9 +38,15 @@ public class ServiceCatalogImpl implements ServiceCatalog {
         catalogDAO.addServiceEntry(serviceEntry, tenantId, user);
         return uuid;
     }
+
     @Override
-    public void addServices(List<ServiceEntry> serviceList, int tenantId, String user) throws APIManagementException {
-        catalogDAO.addServices(serviceList, tenantId, user);
+    public void addServices(List<ServiceEntry> serviceList, int tenantId, String username) throws APIManagementException {
+        catalogDAO.addServices(serviceList, tenantId, username, null);
+    }
+
+    @Override
+    public void updateServices(List<ServiceEntry> serviceList, int tenantId, String username) throws APIManagementException {
+        catalogDAO.updateServices(serviceList, tenantId, username);
     }
 
     @Override

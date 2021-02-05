@@ -30,7 +30,11 @@ public class ServiceEntry {
     private String version = null;
     private String displayName = null;
     private String serviceUrl = null;
-    private String definitionType = null;
+
+    public enum DefinitionType {
+        OAS2, OAS3, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API
+    }
+    private DefinitionType definitionType = null;
     private String defUrl = null;
     private String description = null;
 
@@ -134,11 +138,11 @@ public class ServiceEntry {
         this.serviceUrl = serviceUrl;
     }
 
-    public String getDefinitionType() {
+    public DefinitionType getDefinitionType() {
         return definitionType;
     }
 
-    public void setDefinitionType(String definitionType) {
+    public void setDefinitionType(DefinitionType definitionType) {
         this.definitionType = definitionType;
     }
 

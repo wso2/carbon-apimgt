@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -67,10 +68,14 @@ public class ServiceEntryMappingUtil {
         if (service == null) {
             service = new ServiceEntry();
         }
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        service = mapper.readValue(file, ServiceEntry.class);
-        if (StringUtils.isBlank(service.getKey())) {
-            service.setKey(generateServiceKey(service));
+        try {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            service = mapper.readValue(file, ServiceEntry.class);
+            if (StringUtils.isBlank(service.getKey())) {
+                service.setKey(generateServiceKey(service));
+            }
+        } catch (InvalidFormatException e) {
+            RestApiUtil.handleBadRequest("One or more parameters contain disallowed values", e, log);
         }
         return service;
     }
@@ -172,7 +177,8 @@ public class ServiceEntryMappingUtil {
         if (!shrink) {
             serviceDTO.setDisplayName(service.getDisplayName());
             serviceDTO.setServiceUrl(service.getServiceUrl());
-            serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()));
+            serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
+                    .toString()));
             serviceDTO.setDefinitionUrl(service.getDefUrl());
             serviceDTO.setDescription(service.getDescription());
             serviceDTO.setSecurityType(ServiceDTO.SecurityTypeEnum.fromValue(service.getSecurityType().toString()));

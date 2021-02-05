@@ -156,10 +156,12 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         String tempDirPath = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
-        List<ServiceInfoDTO> serviceStatusList;
-        HashMap<String, ServiceEntry> catalogEntries;
+        List<ServiceInfoDTO> serviceList;
+        HashMap<String, ServiceEntry> serviceEntries;
         HashMap<String, String> newResourcesHash;
-        List<ServiceEntry> serviceEntryListToAdd = new ArrayList<>();
+        List<ServiceEntry> serviceListToAdd = new ArrayList<>();
+        List<ServiceEntry> serviceListToUpdate = new ArrayList<>();
+        List<ServiceEntry> serviceListToIgnore = new ArrayList<>();
 
         // unzip the uploaded zip
         try {
@@ -171,27 +173,31 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         }
 
         newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
-        catalogEntries = ServiceEntryMappingUtil.fromDirToServiceEntryMap(tempDirPath);
+        serviceEntries = ServiceEntryMappingUtil.fromDirToServiceEntryMap(tempDirPath);
         Map<String, Boolean> validationResults = new HashMap<>();
         if (overwrite && StringUtils.isNotEmpty(verifier)) {
             validationResults = validateVerifier(verifier, tenantId);
         }
-        for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
+        for (Map.Entry<String, ServiceEntry> entry : serviceEntries.entrySet()) {
             String key = entry.getKey();
-            catalogEntries.get(key).setMd5(newResourcesHash.get(key));
-            ServiceEntry service = catalogEntries.get(key);
+            serviceEntries.get(key).setMd5(newResourcesHash.get(key));
+            ServiceEntry service = serviceEntries.get(key);
             try {
+                String md5 = serviceCatalog.getMD5HashByKey(key, tenantId);
                 if (overwrite) {
-                    if (StringUtils.isEmpty(verifier) || (StringUtils.isNotEmpty(verifier)
-                            && validationResults.get(service.getKey()))) {
-                        serviceEntryListToAdd.add(service);
+                    if (StringUtils.isNotEmpty(verifier) && validationResults
+                            .containsKey(service.getKey()) && !validationResults.get(service.getKey())) {
+                        serviceListToIgnore.add(service);
                     } else {
-                        log.warn("Ignore updating the service with key " + service.getKey() + "as the signature " +
-                                "validation fails");
+                        if (StringUtils.isNotEmpty(md5) && !md5.equals(newResourcesHash.get(key))) {
+                            serviceListToUpdate.add(service);
+                        } else if (StringUtils.isEmpty(md5)) {
+                            serviceListToAdd.add(service);
+                        }
                     }
                 } else {
-                    if (!ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
-                        serviceEntryListToAdd.add(service);
+                    if (StringUtils.isEmpty(md5)) {
+                        serviceListToAdd.add(service);
                     }
                 }
             } catch (APIManagementException e) {
@@ -199,15 +205,32 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
             }
         }
-        serviceCatalog.addServices(serviceEntryListToAdd, tenantId, userName);
-        List<ServiceEntry> addedServicesList = new ArrayList<>();
-        for (ServiceEntry service: serviceEntryListToAdd) {
-            String key = service.getKey();
-            addedServicesList.add(serviceCatalog.getServiceByKey(key, tenantId));
+        if (serviceListToIgnore.size() > 0) {
+            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(serviceListToIgnore);
+            ErrorDTO errorObject = new ErrorDTO();
+            Response.Status status = Response.Status.BAD_REQUEST;
+            errorObject.setCode((long) status.getStatusCode());
+            errorObject.setMessage(new JSONArray(serviceList).toString());
+            errorObject.setDescription("The Service import has been failed since to verifier validation fails");
+            return Response.status(status).entity(errorObject).build();
+        } else {
+            if (serviceListToAdd.size() > 0) {
+                serviceCatalog.addServices(serviceListToAdd, tenantId, userName);
+            }
+            if (serviceListToUpdate.size() > 0) {
+                serviceCatalog.updateServices(serviceListToUpdate, tenantId, userName);
+            }
+            List<ServiceEntry> modifiedServicesList = new ArrayList<>();
+            for (ServiceEntry service : serviceListToAdd) {
+                modifiedServicesList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
+            }
+            for (ServiceEntry service : serviceListToUpdate) {
+                modifiedServicesList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
+            }
+            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(modifiedServicesList);
+            return Response.ok().entity(ServiceEntryMappingUtil
+                    .fromServiceInfoDTOToServiceInfoListDTO(serviceList)).build();
         }
-        serviceStatusList = ServiceEntryMappingUtil.fromServiceListToDTOList(addedServicesList);
-        return Response.ok().entity(ServiceEntryMappingUtil
-                .fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
     }
 
     @Override
@@ -250,7 +273,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         Map<String, Boolean> validationResults = new HashMap<>();
         JSONArray verifierArray = new JSONArray(verifier);
         for (int i = 0; i < verifierArray.length() ; i++) {
-            JSONObject verifierJson = new JSONObject(verifierArray.getJSONObject(i));
+            JSONObject verifierJson = verifierArray.getJSONObject(i);
             ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
             if (service.getMd5().equals(verifierJson.get("md5").toString())) {
                 validationResults.put(service.getKey(), true);
