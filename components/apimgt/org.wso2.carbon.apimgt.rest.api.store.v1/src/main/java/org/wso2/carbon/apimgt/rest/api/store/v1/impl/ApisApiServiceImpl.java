@@ -259,7 +259,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 comment.setCategory(body.getCategory());
             }
             comment.setEntryPoint("devPortal");
-            //Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);//
+            //Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);///
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
