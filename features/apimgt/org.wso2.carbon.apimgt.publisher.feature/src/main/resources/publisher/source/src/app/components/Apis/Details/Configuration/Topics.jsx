@@ -149,6 +149,14 @@ class Topics extends Component {
             showAddTopic: false,
             isSaving: false,
         };
+
+        // TODO: Get the host and the port from suitable location
+        this.gatewayConfigs = {
+            protocol: 'http',
+            host: 'gateway-endpoint',
+            port: 9021,
+        };
+
         this.updateOperations = this.updateOperations.bind(this);
         this.handleCancelSave = this.handleCancelSave.bind(this);
         this.handleAddTopic = this.handleAddTopic.bind(this);
@@ -218,9 +226,9 @@ class Topics extends Component {
 
     buildCallbackURL(topic) {
         const { api } = this.props;
-        // TODO: Get the host and the port from suitable location
-        return 'https://localhost:8243/webhook/cb/' + api.name.toLowerCase() + '/' + api.version + '/'
-            + topic.name.toLowerCase();
+        const { protocol, host, port } = this.gatewayConfigs;
+            return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
+                `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
     }
 
     handleAddTopic(topic) {
