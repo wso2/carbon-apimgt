@@ -54,6 +54,7 @@
         <module>org.wso2.carbon.apimgt.throttle.policy.deployer.feature</module>
         <module>org.wso2.carbon.apimgt.persistence.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.service.catalog.feature</module>
+        <module>org.wso2.carbon.apimgt.persistence.mongodb.feature</module>
     </modules>
     <build>
         <plugins>

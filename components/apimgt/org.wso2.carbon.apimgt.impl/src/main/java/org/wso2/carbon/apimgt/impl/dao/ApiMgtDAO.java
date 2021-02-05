@@ -8157,6 +8157,7 @@ public class ApiMgtDAO {
                     String name = resultSet.getString(2);
                     String version = resultSet.getString(3);
                     identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+                    identifier.setUuid(uuid);
                 }
             }
         } catch (SQLException e) {

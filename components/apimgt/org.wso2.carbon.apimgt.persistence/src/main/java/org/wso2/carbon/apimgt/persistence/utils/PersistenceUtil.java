@@ -43,8 +43,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-
 public class PersistenceUtil {
+
     private static final Log log = LogFactory.getLog(PersistenceUtil.class);
 
     public static void handleException(String msg, Exception e) throws APIManagementException {
@@ -54,7 +54,6 @@ public class PersistenceUtil {
     public static void handleException(String msg) throws APIManagementException {
         throw new APIManagementException(msg);
     }
-
 
     /**
      * When an input is having '-AT-',replace it with @ [This is required to persist API data between registry and database]
@@ -66,85 +65,12 @@ public class PersistenceUtil {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
             input = input.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
-                                            APIConstants.EMAIL_DOMAIN_SEPARATOR);
+                    APIConstants.EMAIL_DOMAIN_SEPARATOR);
         }
         return input;
     }
 
-    public static String extractPDFText(InputStream inputStream) throws IOException {
-        PDFParser parser = new PDFParser(inputStream);
-        parser.parse();
-        COSDocument cosDoc = parser.getDocument();
-        PDFTextStripper stripper = new PDFTextStripper();
-        String text = stripper.getText(new PDDocument(cosDoc));
-        cosDoc.close();
-        return text;
-    }
-
-    public static String extractDocXText(InputStream inputStream) throws IOException {
-        XWPFDocument doc = new XWPFDocument(inputStream);
-        XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(doc);
-        return msWord2007Extractor.getText();
-    }
-
-    public static String extractDocText(InputStream inputStream) throws IOException {
-        POIFSFileSystem fs = new POIFSFileSystem(inputStream);
-        WordExtractor msWord2003Extractor = new WordExtractor(fs);
-        return msWord2003Extractor.getText();
-    }
-
-    public static String extractPlainText(InputStream inputStream) throws IOException {
-        StringBuilder resultStringBuilder = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                resultStringBuilder.append(line).append("\n");
-            }
-        }
-        return resultStringBuilder.toString();
-    }
-
-    public static File writeStream(InputStream uploadedInputStream, String fileName)
-            throws PersistenceException {
-        String randomFolderName = RandomStringUtils.randomAlphanumeric(10);
-        String tmpFolder = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
-                + APIConstants.DOC_UPLOAD_TMPDIR + File.separator + randomFolderName;
-        File docFile = new File(tmpFolder);
-        FileOutputStream outFileStream = null;
-
-        boolean folderCreated = docFile.mkdirs();
-        if (!folderCreated) {
-            throw new PersistenceException("Failed to create temporary folder for document upload ");
-        }
-
-        try {
-            outFileStream = new FileOutputStream(new File(docFile.getAbsolutePath(), fileName));
-            int read;
-            byte[] bytes = new byte[1024];
-            while ((read = uploadedInputStream.read(bytes)) != -1) {
-                outFileStream.write(bytes, 0, read);
-            }
-        } catch (IOException e) {
-            String errorMessage = "Error in transferring files.";
-            log.error(errorMessage, e);
-            throw new PersistenceException(errorMessage, e);
-        } finally {
-            IOUtils.closeQuietly(outFileStream);
-        }
-        return docFile;
-    }
-
-    public static InputStream readStream(File docFile, String fileName) throws PersistenceException {
-        try {
-            InputStream newInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + fileName);
-            return newInputStream;
-        } catch (FileNotFoundException e) {
-            throw new PersistenceException("Failed to open file ");
-        }
-    }
-
-
-      public static boolean isAdminUser(UserContext userContext) {
+    public static boolean isAdminUser(UserContext userContext) {
         boolean isAdmin = false;
         Map<String, Object> properties = userContext.getProperties();
         if (properties != null && properties.containsKey(APIConstants.USER_CTX_PROPERTY_ISADMIN)) {

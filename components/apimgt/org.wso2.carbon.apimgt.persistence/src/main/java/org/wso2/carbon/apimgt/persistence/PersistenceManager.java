@@ -16,16 +16,31 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+
+import java.util.Map;
 import java.util.Properties;
 
 public class PersistenceManager {
-    
-    private static APIPersistence persistence = null;
 
-    public static APIPersistence getPersistenceInstance(Properties properties) {
-        if (persistence == null) {
-            persistence = new RegistryPersistenceImpl(properties);
+    private static APIPersistence apiPersistenceInstance;
+
+    public static APIPersistence getPersistenceInstance(Map<String, String> configs, Properties properties) {
+
+        synchronized (RegistryPersistenceImpl.class) {
+            if (apiPersistenceInstance == null) {
+                String databaseType = configs.get(PersistenceConstants.REGISTRY_CONFIG_TYPE);
+                ServiceReferenceHolder serviceReferenceHolder = ServiceReferenceHolder.getInstance();
+                serviceReferenceHolder.setPersistenceConfigs(configs);
+                if (PersistenceConstants.REGISTRY_CONFIG_TYPE_MONGODB.equalsIgnoreCase(databaseType)) {
+                    apiPersistenceInstance = serviceReferenceHolder.getApiPersistence();
+                } else {
+                    if (apiPersistenceInstance == null) {
+                        apiPersistenceInstance = new RegistryPersistenceImpl(properties);
+                    }
+                }
+            }
+            return apiPersistenceInstance;
         }
-        return persistence;
     }
 }
