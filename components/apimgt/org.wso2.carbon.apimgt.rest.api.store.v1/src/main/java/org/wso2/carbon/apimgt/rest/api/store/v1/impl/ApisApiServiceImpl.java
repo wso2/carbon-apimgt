@@ -312,8 +312,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, MessageContext messageContext) {
+    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer limit, Integer offset, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
