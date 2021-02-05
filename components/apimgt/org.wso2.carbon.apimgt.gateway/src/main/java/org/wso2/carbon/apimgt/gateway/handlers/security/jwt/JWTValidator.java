@@ -201,13 +201,9 @@ public class JWTValidator {
                 log.debug("JWT authentication successful.");
                 String endUserToken = null;
                 if (jwtGenerationEnabled) {
-                    log.debug("SHALKI:Inside jwtGenerationEnabled>>>>>>>>>>");
-
                     JWTInfoDto jwtInfoDto = GatewayUtils
                             .generateJWTInfoDto(null, jwtValidationInfo, apiKeyValidationInfoDTO, synCtx);
                     endUserToken = generateAndRetrieveJWTToken(jwtTokenIdentifier, jwtInfoDto);
-                    log.debug("SHALKI:Generated JWT>>>>>>>>>>");
-                    log.debug(endUserToken);
                 }
                 return GatewayUtils.generateAuthenticationContext(jwtTokenIdentifier, jwtValidationInfo, apiKeyValidationInfoDTO,
                         endUserToken, true);

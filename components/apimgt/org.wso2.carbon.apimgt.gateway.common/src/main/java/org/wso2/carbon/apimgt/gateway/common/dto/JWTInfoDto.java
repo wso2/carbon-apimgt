@@ -39,7 +39,6 @@ public class JWTInfoDto {
     private String apicontext;
     private String apiName;
     private JWTValidationInfo jwtValidationInfo;
-    //private MessageContext messageContext;
     private Map<String, String> appAttributes = new HashMap<>();
 
     public String getApplicationtier() {
