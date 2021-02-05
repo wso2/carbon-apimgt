@@ -497,64 +497,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /synapse-artifacts:
-    get:
-      summary: Get all the synapse artifacts for a given API UUID and gateway label
-      description: |
-        This will provide access to synapse artifacts in database.
-      parameters:
-        - name: apiId
-          in: query
-          description: |
-            **Search condition**.
-              Api ID
-          type: string
-        - name: gatewayLabel
-          in: query
-          description: |
-            **Search condition**.
-             label associated with the API
-          type: string
-        - name: gatewayInstruction
-          in: query
-          description: |
-            **Search condition**.
-             Publish/Remove
-          type: string
-      tags:
-        - Retrieving Synapse artifacts
-      responses:
-        200:
-          description: String of gatewayRuntimeArtifacts
-          schema:
-            type: string
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /gateway-synapse-artifacts:
-    get:
-      summary: Get all synapse artifacts for a given gateway label
-      description: |
-        This will provide access to the synapse artifacts in database.
-      parameters:
-        - name: gatewayLabel
-          in: query
-          description: |
-            **Search condition**.
-             label associated with the API
-          type: string
-      tags:
-        - Retrieving All Synapse artifacts
-      responses:
-        200:
-          description: An array of gatewayRuntimeArtifacts
-          schema:
-            $ref: '#/definitions/SynapseArtifactList'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
   /synapse-attributes:
     get:
       summary: Get API UUID and label associated with it
