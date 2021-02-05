@@ -301,9 +301,9 @@ public class GatewayJMSMessageListener implements MessageListener {
     private synchronized void handleAsyncWebhooksSubscriptionMessage(JsonNode payloadData) {
         if (log.isDebugEnabled()) {
             log.debug("Received event for -  Async Webhooks API subscription for : " + payloadData.
-                    get(APIConstants.Webhooks.API_KEY).asText());
+                    get(APIConstants.Webhooks.API_UUID).asText());
         }
-        String apiKey = payloadData.get(APIConstants.Webhooks.API_KEY).textValue();
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_UUID).textValue();
         String applicationID = payloadData.get(APIConstants.Webhooks.APPLICATION_ID).textValue();
         String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).textValue();
         String callback = payloadData.get(APIConstants.Webhooks.CALLBACK).textValue();
@@ -317,9 +317,9 @@ public class GatewayJMSMessageListener implements MessageListener {
     private synchronized void handleAsyncWebhooksUnSubscriptionMessage(JsonNode payloadData) {
         if (log.isDebugEnabled()) {
             log.debug("Received event for -  Async Webhooks API unsubscription for : " + payloadData.
-                    get(APIConstants.Webhooks.API_KEY).asText());
+                    get(APIConstants.Webhooks.API_UUID).asText());
         }
-        String apiKey = payloadData.get(APIConstants.Webhooks.API_KEY).asText();
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_UUID).asText();
         String applicationID = payloadData.get(APIConstants.Webhooks.APPLICATION_ID).asText();
         String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).asText();
         String callback = payloadData.get(APIConstants.Webhooks.CALLBACK).asText();

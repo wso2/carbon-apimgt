@@ -87,19 +87,19 @@ public class WebhooksDAO {
                 handleConnectionRollBack(conn);
                 throw new APIManagementException("Error while storing webhooks unsubscription request for callback" +
                         properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                        properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                        properties.getProperty(APIConstants.Webhooks.API_UUID), e);
             }
         } catch (SQLException e) {
             throw new APIManagementException("Error while storing subscription with callback " +
                             properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                            properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                            properties.getProperty(APIConstants.Webhooks.API_UUID), e);
         }
     }
 
     private void addSubscription(Connection conn, Properties properties) throws APIManagementException {
         try (PreparedStatement prepareStmt = conn
                 .prepareStatement(SQLConstants.WebhooksSqlConstants.ADD_SUBSCRIPTION)) {
-            prepareStmt.setString(1, properties.getProperty(APIConstants.Webhooks.API_KEY));
+            prepareStmt.setString(1, properties.getProperty(APIConstants.Webhooks.API_UUID));
             prepareStmt.setString(2, properties.getProperty(APIConstants.Webhooks.APPLICATION_ID));
             prepareStmt.setString(3, properties.getProperty(APIConstants.Webhooks.TENANT_DOMAIN));
             prepareStmt.setString(4, properties.getProperty(APIConstants.Webhooks.CALLBACK));
@@ -121,7 +121,7 @@ public class WebhooksDAO {
         } catch (SQLException | CryptoException e) {
             throw new APIManagementException("Error while adding subscriptions request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                    properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                    properties.getProperty(APIConstants.Webhooks.API_UUID), e);
         }
     }
 
@@ -144,14 +144,14 @@ public class WebhooksDAO {
         } catch (SQLException | CryptoException e) {
             throw new APIManagementException("Error while deleting existing subscriptions request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                    properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                    properties.getProperty(APIConstants.Webhooks.API_UUID), e);
         }
     }
 
     private int findSubscription(Connection conn, Properties properties) throws APIManagementException {
         try (PreparedStatement preparedStatement = conn
                 .prepareStatement(SQLConstants.WebhooksSqlConstants.FIND_SUBSCRIPTION)) {
-            preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_KEY));
+            preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_UUID));
             preparedStatement.setString(2, properties.getProperty(APIConstants.Webhooks.APPLICATION_ID));
             preparedStatement.setString(3, properties.getProperty(APIConstants.Webhooks.TENANT_DOMAIN));
             preparedStatement.setString(4, properties.getProperty(APIConstants.Webhooks.CALLBACK));
@@ -166,7 +166,7 @@ public class WebhooksDAO {
         } catch (SQLException e) {
             throw new APIManagementException("Error while select existing subscriptions request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                    properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                    properties.getProperty(APIConstants.Webhooks.API_UUID), e);
         }
     }
 
@@ -186,12 +186,12 @@ public class WebhooksDAO {
                 handleConnectionRollBack(conn);
                 throw new APIManagementException("Error while storing webhooks unsubscription request for callback" +
                         properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                        properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                        properties.getProperty(APIConstants.Webhooks.API_UUID), e);
             }
         } catch (SQLException | CryptoException e) {
             throw new APIManagementException("Error while storing webhooks unsubscription request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                    properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                    properties.getProperty(APIConstants.Webhooks.API_UUID), e);
         }
     }
 
@@ -213,7 +213,7 @@ public class WebhooksDAO {
                 try (ResultSet rs = preparedStatement.executeQuery()) {
                     while (rs.next()) {
                         Subscription subscription = new Subscription();
-                        subscription.setApiKey(rs.getString(APIConstants.Webhooks.API_KEY));
+                        subscription.setApiKey(rs.getString(APIConstants.Webhooks.API_UUID));
                         subscription.setAppID(rs.getString(APIConstants.Webhooks.APPLICATION_ID));
                         subscription.setCallback(rs.getString(APIConstants.Webhooks.CALLBACK));
                         subscription.setTopic(rs.getString(APIConstants.Webhooks.TOPIC));
@@ -273,7 +273,7 @@ public class WebhooksDAO {
     private void deleteSubscription(Connection conn, Properties properties) throws APIManagementException {
         try (PreparedStatement preparedStatement = conn
                 .prepareStatement(SQLConstants.WebhooksSqlConstants.DELETE_IF_EXISTS_SUBSCRIBER)) {
-            preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_KEY));
+            preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_UUID));
             preparedStatement.setString(2, properties.getProperty(APIConstants.Webhooks.APPLICATION_ID));
             preparedStatement.setString(3, properties.getProperty(APIConstants.Webhooks.TENANT_DOMAIN));
             preparedStatement.setString(4, properties.getProperty(APIConstants.Webhooks.CALLBACK));
@@ -282,14 +282,14 @@ public class WebhooksDAO {
         } catch (SQLException e) {
             throw new APIManagementException("Error while deleting existing subscriptions request for callback" +
                     properties.getProperty(APIConstants.Webhooks.CALLBACK) + " for the API " +
-                    properties.getProperty(APIConstants.Webhooks.API_KEY), e);
+                    properties.getProperty(APIConstants.Webhooks.API_UUID), e);
         }
     }
 
     private void addUnsubscription(Connection conn, Properties properties) throws SQLException, CryptoException {
         try (PreparedStatement preparedStatement = conn
                 .prepareStatement(SQLConstants.WebhooksSqlConstants.ADD_UNSUBSCRIPTION)) {
-            preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_KEY));
+            preparedStatement.setString(1, properties.getProperty(APIConstants.Webhooks.API_UUID));
             preparedStatement.setString(2, properties.getProperty(APIConstants.Webhooks.APPLICATION_ID));
             preparedStatement.setString(3, properties.getProperty(APIConstants.Webhooks.TENANT_DOMAIN));
             preparedStatement.setString(4, properties.getProperty(APIConstants.Webhooks.CALLBACK));
