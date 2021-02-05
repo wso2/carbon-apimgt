@@ -281,7 +281,7 @@ paths:
         Retrieve the definition of a service identified by the service id.
       security:
         - OAuth2Security:
-            - service_catalog:entry_view
+            - service_catalog:service_view
       operationId: getServiceDefinition
       tags:
         - Services
@@ -632,58 +632,6 @@ components:
         definitionUrl:
           type: string
           example: https://petstore.swagger.io/v2/swagger.json
-
-    #-----------------------------------------------------
-    # The Service Metadata model
-    #-----------------------------------------------------
-    ServiceMetadata:
-      type: object
-      title: The Service Metadata object
-      properties:
-        key:
-          type: string
-          example: PizzashackEndpoint-1.0.0
-        name:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        displayName:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        description:
-          type: string
-          example: A Service that exposes a REST endpoint
-        version:
-          type: string
-          example: v1
-        serviceUrl:
-          type: string
-          example: http://localhost/pizzashack
-        definitionType:
-          type: string
-          description: The type of the provided API definition
-          example: OAS3
-          enum:
-            - OAS2
-            - OAS3
-            - WSDL1
-            - WSDL2
-            - GRAPHQL_SDL
-            - ASYNC_API
-        securityType:
-          type: string
-          description: The security type of the endpoint
-          example: BASIC
-          enum:
-            - BASIC
-            - DIGEST
-            - OAUTH2
-            - NONE
-        mutualSSLEnabled:
-          type: boolean
-          description: Whether Mutual SSL is enabled for the endpoint
-          default: false
           
     #-----------------------------------------------------
     # Status of CRUD operations of Service model

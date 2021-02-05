@@ -112,7 +112,7 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     @Produces({ "application/json", "application/yaml" })
     @ApiOperation(value = "Retrieve a service definition", notes = "Retrieve the definition of a service identified by the service id. ", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "service_catalog:entry_view", description = "")
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
         })
     }, tags={ "Services",  })
     @ApiResponses(value = { 

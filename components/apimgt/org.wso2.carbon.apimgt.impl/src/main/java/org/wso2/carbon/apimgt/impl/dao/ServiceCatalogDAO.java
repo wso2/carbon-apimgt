@@ -36,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This class represent the ServiceCatalogDAO.
@@ -68,11 +69,11 @@ public class ServiceCatalogDAO {
      *
      * @param serviceEntry ServiceCatalogInfo
      * @param tenantID     ID of the owner's tenant
-     * @param userName     Logged in user name
+     * @param username     Logged in user name
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceEntry(ServiceEntry serviceEntry, int tenantID, String uuid, String userName)
+    public String addServiceEntry(ServiceEntry serviceEntry, int tenantID, String username)
             throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -81,26 +82,7 @@ public class ServiceCatalogDAO {
             boolean initialAutoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(false);
-                ps.setString(1, uuid);
-                ps.setString(2, serviceEntry.getKey());
-                ps.setString(3, serviceEntry.getMd5());
-                ps.setString(4, serviceEntry.getName());
-                ps.setString(5, serviceEntry.getDisplayName());
-                ps.setString(6, serviceEntry.getVersion());
-                ps.setInt(7, tenantID);
-                ps.setString(8, serviceEntry.getServiceUrl());
-                ps.setString(9, serviceEntry.getDefType());
-                ps.setString(10, serviceEntry.getDefUrl());
-                ps.setString(11, serviceEntry.getDescription());
-                ps.setString(12, serviceEntry.getSecurityType());
-                ps.setBoolean(13, serviceEntry.isMutualSSLEnabled());
-                ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
-                ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
-                ps.setString(16, userName);
-                ps.setString(17, userName);
-                ps.setBinaryStream(18, serviceEntry.getEndpointDef());
-                ps.setBinaryStream(19, serviceEntry.getMetadata());
-
+                setServiceParams(ps, serviceEntry, tenantID, username);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -113,7 +95,39 @@ public class ServiceCatalogDAO {
             handleException("Failed to add service catalog of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantID), e);
         }
-        return uuid;
+        return null;
+    }
+
+    /**
+     * Add list of services to Service Catalog
+     * @param services List of Services that needs to be added
+     * @param tenantId Tenant ID of the logged-in user
+     * @param username Logged-in username
+     * @throws APIManagementException
+     */
+    public void addServices(List<ServiceEntry> services, int tenantId, String username) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            try {
+                connection.setAutoCommit(false);
+                for (ServiceEntry service : services) {
+                    setServiceParams(ps, service, tenantId, username);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while adding service list to Service Catalog in tenant " + tenantId, e);
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add services to service catalog of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
     }
 
     /**
@@ -141,10 +155,10 @@ public class ServiceCatalogDAO {
                 ps.setString(4, serviceEntry.getVersion());
                 ps.setInt(5, tenantID);
                 ps.setString(6, serviceEntry.getServiceUrl());
-                ps.setString(7, serviceEntry.getDefType());
+                ps.setString(7, serviceEntry.getDefinitionType());
                 ps.setString(8, serviceEntry.getDefUrl());
                 ps.setString(9, serviceEntry.getDescription());
-                ps.setString(10, serviceEntry.getSecurityType());
+                ps.setString(10, serviceEntry.getSecurityType().toString());
                 ps.setBoolean(11, serviceEntry.isMutualSSLEnabled());
                 ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
                 ps.setString(13, userName);
@@ -353,9 +367,10 @@ public class ServiceCatalogDAO {
                 serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
                 serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
                 serviceEntry.setDescription(rs.getString("DESCRIPTION"));
-                serviceEntry.setDefType(rs.getString("DEFINITION_TYPE"));
+                serviceEntry.setDefinitionType(rs.getString("DEFINITION_TYPE"));
                 serviceEntry.setDefUrl(rs.getString("DEFINITION_URL"));
-                serviceEntry.setSecurityType(rs.getString("SECURITY_TYPE"));
+                serviceEntry.setSecurityType(ServiceEntry.SecurityType
+                        .valueOf(rs.getString("SECURITY_TYPE")));
                 serviceEntry.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
                 serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
                 serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
@@ -363,7 +378,6 @@ public class ServiceCatalogDAO {
                 serviceEntry.setUpdatedBy(rs.getString("UPDATED_BY"));
                 serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
                 serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
-
                 return serviceEntry;
             }
         } catch (SQLException e) {
@@ -480,7 +494,7 @@ public class ServiceCatalogDAO {
             ps.setInt(8, filterParams.getLimit());
             try(ResultSet resultSet = ps.executeQuery()) {
                 while(resultSet.next()) {
-                    ServiceEntry service = setServiceParams(resultSet, shrink);
+                    ServiceEntry service = getServiceParams(resultSet, shrink);
                     serviceEntryList.add(service);
                 }
             }
@@ -498,7 +512,7 @@ public class ServiceCatalogDAO {
             ps.setInt(2, tenantId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    ServiceEntry service = setServiceParams(rs, false);
+                    ServiceEntry service = getServiceParams(rs, false);
                     return service;
                 }
             }
@@ -508,7 +522,34 @@ public class ServiceCatalogDAO {
         return null;
     }
 
-    private ServiceEntry setServiceParams(ResultSet resultSet, boolean shrink) throws APIManagementException {
+    private void setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
+            throws APIManagementException{
+        String uuid = UUID.randomUUID().toString();
+        try {
+            ps.setString(1, uuid);
+            ps.setString(2, service.getKey());
+            ps.setString(3, service.getMd5());
+            ps.setString(4, service.getName());
+            ps.setString(5, service.getDisplayName());
+            ps.setString(6, service.getVersion());
+            ps.setInt(7, tenantId);
+            ps.setString(8, service.getServiceUrl());
+            ps.setString(9, service.getDefinitionType());
+            ps.setString(10, service.getDefUrl());
+            ps.setString(11, service.getDescription());
+            ps.setString(12, service.getSecurityType().toString());
+            ps.setBoolean(13, service.isMutualSSLEnabled());
+            ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
+            ps.setString(16, username);
+            ps.setString(17, username);
+            ps.setBinaryStream(18, service.getEndpointDef());
+            ps.setBinaryStream(19, service.getMetadata());
+        } catch (SQLException e) {
+            handleException("Error when setting parameters to prepared statement ", e);
+        }
+    }
+    private ServiceEntry getServiceParams(ResultSet resultSet, boolean shrink) throws APIManagementException {
 
         try {
             ServiceEntry service = new ServiceEntry();
@@ -521,11 +562,11 @@ public class ServiceCatalogDAO {
                 service.setDisplayName(resultSet.getString(APIConstants.ServiceCatalogConstants
                         .SERVICE_DISPLAY_NAME));
                 service.setServiceUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_URL));
-                service.setDefType(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_TYPE));
+                service.setDefinitionType(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_TYPE));
                 service.setDefUrl(resultSet.getString(APIConstants.ServiceCatalogConstants.DEFINITION_URL));
                 service.setDescription(resultSet.getString(APIConstants.ServiceCatalogConstants.DESCRIPTION));
-                service.setSecurityType(resultSet.getString(APIConstants.ServiceCatalogConstants
-                        .SECURITY_TYPE));
+                service.setSecurityType(ServiceEntry.SecurityType.valueOf(resultSet
+                        .getString(APIConstants.ServiceCatalogConstants.SECURITY_TYPE)));
                 service.setMutualSSLEnabled(resultSet.getBoolean(APIConstants.ServiceCatalogConstants
                         .MUTUAL_SSL_ENABLED));
                 service.setCreatedTime(resultSet.getTimestamp(APIConstants.ServiceCatalogConstants

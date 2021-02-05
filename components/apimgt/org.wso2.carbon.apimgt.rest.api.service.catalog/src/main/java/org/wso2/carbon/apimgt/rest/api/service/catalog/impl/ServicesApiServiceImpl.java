@@ -23,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -157,6 +159,8 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         List<ServiceInfoDTO> serviceStatusList;
         HashMap<String, ServiceEntry> catalogEntries;
         HashMap<String, String> newResourcesHash;
+        List<ServiceEntry> serviceEntryListToAdd = new ArrayList<>();
+        List<ServiceEntry> serviceEntryListToIgnore = new ArrayList<>();
 
         // unzip the uploaded zip
         try {
@@ -168,30 +172,43 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         }
 
         newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
-        catalogEntries = ServiceEntryMappingUtil.fromDirToServiceInfoMap(tempDirPath);
-
-        HashMap<String, ServiceEntry> serviceEntries = new HashMap<>();
+        catalogEntries = ServiceEntryMappingUtil.fromDirToServiceEntryMap(tempDirPath);
+        Map<String, Boolean> validationResults = new HashMap<>();
+        if (overwrite && StringUtils.isNotEmpty(verifier)) {
+            validationResults = validateVerifier(verifier, tenantId);
+        }
         for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
             String key = entry.getKey();
             catalogEntries.get(key).setMd5(newResourcesHash.get(key));
+            ServiceEntry service = catalogEntries.get(key);
             try {
-                if (ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
-                    if (overwrite) {
-                        serviceCatalog.updateService(catalogEntries.get(key), tenantId, userName);
+                if (overwrite) {
+                    if (StringUtils.isEmpty(verifier) || (StringUtils.isNotEmpty(verifier)
+                            && validationResults.get(service.getKey()))) {
+                        serviceEntryListToAdd.add(service);
                     } else {
-                        return Response.status(Response.Status.CONFLICT).build();
+                        serviceEntryListToIgnore.add(service);
                     }
                 } else {
-                    serviceCatalog.addService(catalogEntries.get(key), tenantId, userName);
+                    boolean serviceExists = ServiceCatalogUtils.checkServiceExistence(key, tenantId);
+                    if (serviceExists) {
+                        serviceEntryListToIgnore.add(service);
+                    } else {
+                        serviceEntryListToAdd.add(service);
+                    }
                 }
-                ServiceEntry serviceEntry = serviceCatalog.getServiceByKey(key, tenantId);
-                serviceEntries.put(key, serviceEntry);
             } catch (APIManagementException e) {
                 // client will only be informed by the list of successfully added services
                 log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
             }
         }
-        serviceStatusList = ServiceEntryMappingUtil.fromServiceEntryToDTOList(serviceEntries);
+        serviceCatalog.addServices(serviceEntryListToAdd, tenantId, userName);
+        List<ServiceEntry> addedServicesList = new ArrayList<>();
+        for (ServiceEntry service: serviceEntryListToAdd) {
+            String key = service.getKey();
+            addedServicesList.add(serviceCatalog.getServiceByKey(key, tenantId));
+        }
+        serviceStatusList = ServiceEntryMappingUtil.fromServiceListToDTOList(addedServicesList);
         return Response.ok().entity(ServiceEntryMappingUtil
                 .fromServiceInfoDTOToServiceInfoListDTO(serviceStatusList)).build();
     }
@@ -230,5 +247,20 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         errorObject.setMessage(status.toString());
         errorObject.setDescription("The requested resource has not been implemented for updating services");
         return Response.status(status).entity(errorObject).build();
+    }
+
+    private Map<String, Boolean> validateVerifier(String verifier, int tenantId) throws APIManagementException {
+        Map<String, Boolean> validationResults = new HashMap<>();
+        JSONArray verifierArray = new JSONArray(verifier);
+        for (int i = 0; i < verifierArray.length() ; i++) {
+            JSONObject verifierJson = new JSONObject(verifierArray.getJSONObject(i));
+            ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
+            if (service.getMd5() == verifierJson.get("md5").toString()) {
+                validationResults.put(service.getKey(), true);
+            } else {
+                validationResults.put(service.getKey(), false);
+            }
+        }
+        return validationResults;
     }
 }

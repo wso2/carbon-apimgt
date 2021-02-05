@@ -35,8 +35,12 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     @Override
     public String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
         String uuid = UUID.randomUUID().toString();
-        catalogDAO.addServiceEntry(serviceEntry, tenantId, uuid, user);
+        catalogDAO.addServiceEntry(serviceEntry, tenantId, user);
         return uuid;
+    }
+    @Override
+    public void addServices(List<ServiceEntry> serviceList, int tenantId, String user) throws APIManagementException {
+        catalogDAO.addServices(serviceList, tenantId, user);
     }
 
     @Override
