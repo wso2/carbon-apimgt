@@ -54,7 +54,7 @@ const styles = (theme) => {
             minWidth: '100%',
         },
         root: {
-            minHeight: infoBarHeight,
+            minHeight: 120,
             background: mainBack,
             color: theme.palette.getContrastText(mainBack),
             borderBottom: 'solid 1px ' + theme.palette.grey.A200,

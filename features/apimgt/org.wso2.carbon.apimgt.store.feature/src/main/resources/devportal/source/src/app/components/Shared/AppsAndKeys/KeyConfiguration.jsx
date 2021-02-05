@@ -224,8 +224,8 @@ const KeyConfiguration = (props) => {
 
     // Check for additional properties for token endpoint and revoke endpoints.
     const propPrefix = keyRequest.keyType.toLowerCase();
-    tokenEndpoint = additionalProperties[`${propPrefix}_token_endpoint`] || tokenEndpoint;
-    revokeEndpoint = additionalProperties[`${propPrefix}_revoke_endpoint`] || revokeEndpoint;
+    tokenEndpoint = tokenEndpoint;
+    revokeEndpoint = revokeEndpoint;
 
     return (
         <>
