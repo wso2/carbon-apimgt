@@ -43,11 +43,6 @@ import java.util.UUID;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
-    String apiUUID = "1236233";
-    String apiName = "testAddGatewayPublishedAPIDetails";
-    String version = "1.0.0";
-    String label = "Production and Sandbox";
-    ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
 
     @Before
     public void setUp() throws Exception {
@@ -123,23 +118,21 @@ public class GatewayArtifactsMgtDAOTest {
         String gatewayAPIId = gatewayArtifactsMgtDAO.getGatewayAPIId(name, version, "carbon.super");
         Assert.assertEquals(gatewayAPIId, uuid);
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"));
-        List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(apiUUID,
+        List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
                 "label1", "carbon.super");
         Assert.assertEquals(artifacts.size(), 1);
         RuntimeArtifactDto artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);
-        Assert.assertEquals(artifact.getArtifact(), file);
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         apiRevisionDeployment.setRevisionUUID(revision);
-        apiRevisionDeployment.setDeployment("label2");
+        apiRevisionDeployment.setDeployment("label1");
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label2"),
                 Collections.asSet(apiRevisionDeployment));
-        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(apiUUID, "label1", "carbon.super");
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, "label1", "carbon.super");
         Assert.assertEquals(artifacts.size(), 0);
-        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(apiUUID, "label2", "carbon.super");
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, "label2", "carbon.super");
         Assert.assertEquals(artifacts.size(), 1);
         artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);
-        Assert.assertEquals(artifact.getArtifact(), file);
     }
 }

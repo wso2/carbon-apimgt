@@ -74,6 +74,7 @@ public class GatewayArtifactsMgtDAO {
             statement.setString(4, tenantDomain);
             statement.setString(5, type);
             result = statement.executeUpdate() == 1;
+            connection.commit();
         } catch (SQLException e) {
             APIMgtDBUtil.rollbackConnection(connection,
                     "Failed to rollback add API details for " + name, e);
@@ -98,6 +99,7 @@ public class GatewayArtifactsMgtDAO {
                 statement.setString(3, apiId);
                 statement.setString(4, revision);
                 result = statement.executeUpdate() == 1;
+                connection.commit();
             }
         }
         return result;
