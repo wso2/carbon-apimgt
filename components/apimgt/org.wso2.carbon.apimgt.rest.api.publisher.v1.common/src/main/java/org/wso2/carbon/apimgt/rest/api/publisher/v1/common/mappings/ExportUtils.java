@@ -42,12 +42,12 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
@@ -64,7 +64,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.RegistryException;
@@ -180,6 +179,7 @@ public class ExportUtils {
                 apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
             }
 
+            addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider);
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
             addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
 
@@ -641,6 +641,31 @@ public class ExportUtils {
 
             throw new APIImportExportException(
                     "Error while retrieving saving endpoint certificate details for API: " + apiDto.getName()
+                            + " as YAML", e);
+        }
+    }
+
+    public static void addGatewayEnvironmentsToArchive(String archivePath, APIDTO apiDto,
+                                                        ExportFormat exportFormat, APIProvider apiProvider)
+            throws APIManagementException {
+
+        String apiID = apiDto.getId();
+        try {
+            List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiID);
+            JSONArray deploymentListArray = new JSONArray();
+            for (APIRevisionDeployment deployment : deploymentsList){
+                JSONObject deploymentObject = new JSONObject();
+                deploymentObject.put("name", deployment.getDeployment());
+                deploymentObject.put("displayOnDevportal", deployment.isDisplayOnDevportal());
+                deploymentListArray.put(deploymentObject);
+            }
+            CommonUtil.writeToYamlOrJson(archivePath + "/deployments", exportFormat, deploymentListArray.toString());
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(
+                    "Error in converting deployment details to JSON object in API: " + apiDto.getName(), e);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while saving deployment environment details for API: " + apiDto.getName()
                             + " as YAML", e);
         }
     }

@@ -64,19 +64,25 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api;
+        String revisionUUID;
 
         // apiId == null means the path from the API Controller
         if (apiId == null) {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            api = apiProvider.getAPI(apiIdentifier);
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
+            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         }
+
+        if (revisionID != null) {
+            revisionUUID = apiProvider.getAPIRevisionUUID(revisionID, apiId);
+            api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+        } else {
+            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        }
+        apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs);
     }
