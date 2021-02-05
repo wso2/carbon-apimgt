@@ -25,6 +25,7 @@ public class ServiceDTO   {
     private String displayName = null;
     private String description = null;
     private String version = null;
+    private String serviceKey = null;
     private String serviceUrl = null;
 
     @XmlType(name="DefinitionTypeEnum")
@@ -188,6 +189,23 @@ return null;
   }
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  /**
+   **/
+  public ServiceDTO serviceKey(String serviceKey) {
+    this.serviceKey = serviceKey;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizzashack-Endpoint-1.0.0", value = "")
+  @JsonProperty("serviceKey")
+  public String getServiceKey() {
+    return serviceKey;
+  }
+  public void setServiceKey(String serviceKey) {
+    this.serviceKey = serviceKey;
   }
 
   /**
@@ -362,6 +380,7 @@ return null;
         Objects.equals(displayName, service.displayName) &&
         Objects.equals(description, service.description) &&
         Objects.equals(version, service.version) &&
+        Objects.equals(serviceKey, service.serviceKey) &&
         Objects.equals(serviceUrl, service.serviceUrl) &&
         Objects.equals(definitionType, service.definitionType) &&
         Objects.equals(securityType, service.securityType) &&
@@ -375,7 +394,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
+    return Objects.hash(id, name, displayName, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
   }
 
   @Override
@@ -388,6 +407,7 @@ return null;
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    serviceKey: ").append(toIndentedString(serviceKey)).append("\n");
     sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
     sb.append("    definitionType: ").append(toIndentedString(definitionType)).append("\n");
     sb.append("    securityType: ").append(toIndentedString(securityType)).append("\n");

@@ -160,7 +160,6 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         HashMap<String, ServiceEntry> catalogEntries;
         HashMap<String, String> newResourcesHash;
         List<ServiceEntry> serviceEntryListToAdd = new ArrayList<>();
-        List<ServiceEntry> serviceEntryListToIgnore = new ArrayList<>();
 
         // unzip the uploaded zip
         try {
@@ -189,13 +188,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                     } else {
                         log.warn("Ignore updating the service with key " + service.getKey() + "as the signature " +
                                 "validation fails");
-                        serviceEntryListToIgnore.add(service);
                     }
                 } else {
-                    boolean serviceExists = ServiceCatalogUtils.checkServiceExistence(key, tenantId);
-                    if (serviceExists) {
-                        serviceEntryListToIgnore.add(service);
-                    } else {
+                    if (!ServiceCatalogUtils.checkServiceExistence(key, tenantId)) {
                         serviceEntryListToAdd.add(service);
                     }
                 }

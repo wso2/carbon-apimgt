@@ -586,6 +586,9 @@ components:
         version:
           type: string
           example: v1
+        serviceKey:
+          type: string
+          example: Pizzashack-Endpoint-1.0.0
         serviceUrl:
           type: string
           example: http://localhost/pizzashack
