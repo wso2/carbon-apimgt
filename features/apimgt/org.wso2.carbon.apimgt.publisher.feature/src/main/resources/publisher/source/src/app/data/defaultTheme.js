@@ -190,5 +190,12 @@ export default {
         },
         buttonText: '#FF7300',
         buttonBorder: '#FCA574',
+        landingPageIcons: {
+            graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
+            restApiIcon: '/site/public/images/landing-icons/restapi.svg',
+            soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
+            streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+            websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+        },
     },
 };

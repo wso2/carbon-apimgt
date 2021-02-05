@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import Hidden from '@material-ui/core/Hidden';
 import { Link as MUILink } from '@material-ui/core';
 import green from '@material-ui/core/colors/green';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles, useTheme } from '@material-ui/styles';
 import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -52,6 +52,15 @@ const useStyles = makeStyles(() => ({
 }));
 
 const APICreateMenu = (props) => {
+    const theme = useTheme();
+    const {
+        graphqlIcon,
+        restApiIcon,
+        soapApiIcon,
+        // eslint-disable-next-line no-unused-vars
+        streamingApiIcon,
+        websocketApiIcon,
+    } = theme.custom.landingPageIcons;
     const classes = useStyles();
     const { handleDeploySample, deploying } = props;
     const createTypes = (
@@ -93,7 +102,7 @@ const APICreateMenu = (props) => {
                                 </Typography>
                                 <img
                                     src={Configurations.app.context
-                                + '/site/public/images/landing-icons/restapi.svg'}
+                                + restApiIcon}
                                     alt='Rest API'
                                 />
                                 <Box mt={2}>
@@ -185,7 +194,7 @@ const APICreateMenu = (props) => {
                                 </Typography>
                                 <img
                                     src={Configurations.app.context
-                                + '/site/public/images/landing-icons/soapapi.svg'}
+                                + soapApiIcon}
                                     alt='SOAP API'
                                 />
                                 <Box mt={2}>
@@ -222,7 +231,7 @@ const APICreateMenu = (props) => {
                                 </Typography>
                                 <img
                                     src={Configurations.app.context
-                                + '/site/public/images/landing-icons/graphqlapi.svg'}
+                                + graphqlIcon}
                                     alt='GraphQL'
                                 />
                                 <Box mt={2}>
@@ -256,12 +265,27 @@ const APICreateMenu = (props) => {
                                         id='Apis.Listing.SampleAPI.SampleAPI.websocket.api'
                                         defaultMessage='WebSocket API'
                                     />
+                                    {/* Uncomment following to change the content to streaming */}
+                                    {/*
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
+                                        defaultMessage='Streaming'
+                                    />
+                                    */}
                                 </Typography>
                                 <img
                                     src={Configurations.app.context
-                                + '/site/public/images/landing-icons/websocketapi.svg'}
+                                + websocketApiIcon}
                                     alt='WebSocket API'
                                 />
+                                {/* Uncomment following to change the icon */}
+                                {/*
+                                <img
+                                    src={Configurations.app.context
+                                + streamingApiIcon}
+                                    alt='Streaming API'
+                                />
+                                */}
                                 <Box mt={2}>
                                     <Typography variant='body1'>
                                         <Link
@@ -282,6 +306,49 @@ const APICreateMenu = (props) => {
                                         />
                                     </Typography>
                                 </Box>
+                                {/* Uncomment following to add the two streaming links */}
+                                {/*
+                                <Box mt={2}>
+                                    <Typography variant='body1'>
+                                        <Link
+                                            id='itest-id-createdefault'
+                                            to='/apis/create/changethis'
+                                            className={classes.links}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title'
+                                                defaultMessage='Design New Streaming API Definition'
+                                            />
+                                        </Link>
+                                    </Typography>
+                                    <Typography variant='body2'>
+                                        <FormattedMessage
+                                            id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.content'
+                                            defaultMessage='Design and prototype a new Streaming API'
+                                        />
+                                    </Typography>
+                                </Box>
+                                <Box mt={2}>
+                                    <Typography variant='body1'>
+                                        <Link
+                                            id='itest-id-createdefault'
+                                            to='/apis/create/changethis'
+                                            className={classes.links}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.title'
+                                                defaultMessage='Import streaming API Definition'
+                                            />
+                                        </Link>
+                                    </Typography>
+                                    <Typography variant='body2'>
+                                        <FormattedMessage
+                                            id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.content'
+                                            defaultMessage='Upload the definition or provide the URL'
+                                        />
+                                    </Typography>
+                                </Box>
+                                */}
                             </Box>
                         </Grid>
                     </Grid>
