@@ -253,6 +253,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setUser(username);
             comment.setApiId(apiId);
             comment.setParentCommentID(parentCommentID);
+            if (body.getCategory()==null){
+                comment.setCategory("general");
+            }else{
+                comment.setCategory(body.getCategory());
+            }
+            comment.setEntryPoint("devPortal");
             //Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
