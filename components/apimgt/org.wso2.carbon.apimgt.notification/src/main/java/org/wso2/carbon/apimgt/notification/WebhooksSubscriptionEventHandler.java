@@ -65,7 +65,7 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
      */
     private Properties populateProperties(WebhooksSubscriptionEvent subscriptionEvent) throws APIManagementException {
         Properties properties = new Properties();
-        properties.put(APIConstants.Webhooks.API_KEY, subscriptionEvent.getApiKey());
+        properties.put(APIConstants.Webhooks.API_UUID, subscriptionEvent.getApiKey());
         properties.put(APIConstants.Webhooks.APPLICATION_ID, subscriptionEvent.getAppID());
         properties.put(APIConstants.Webhooks.TENANT_DOMAIN, subscriptionEvent.getTenantDomain());
         properties.put(APIConstants.Webhooks.CALLBACK, subscriptionEvent.getCallback());

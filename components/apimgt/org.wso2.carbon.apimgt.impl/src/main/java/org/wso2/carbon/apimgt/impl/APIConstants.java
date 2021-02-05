@@ -2473,7 +2473,7 @@ public final class APIConstants {
     }
 
     public static class Webhooks {
-        public static final String API_KEY = "API_KEY";
+        public static final String API_UUID = "API_UUID";
         public static final String APPLICATION_ID = "APPLICATION_ID";
         public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
         public static final String CALLBACK = "HUB_CALLBACK_URL";

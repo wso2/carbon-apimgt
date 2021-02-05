@@ -5,7 +5,7 @@
   "description": "",
   "payloadData": [
     {
-      "name": "API_KEY",
+      "name": "API_UUID",
       "type": "STRING"
     },
     {
