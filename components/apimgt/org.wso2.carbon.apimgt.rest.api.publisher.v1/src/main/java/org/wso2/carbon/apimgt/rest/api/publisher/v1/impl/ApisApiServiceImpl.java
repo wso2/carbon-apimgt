@@ -3457,7 +3457,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
-            API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion);
+            API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
 
             newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             //This URI used to set the location header of the POST response
@@ -3977,8 +3977,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //adding the api revision
-            String revisionId = apiProvider.addAPIRevision(apiRevision);
+            String revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
 
             //Retrieve the newly added APIRevision to send in the response payload
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
@@ -4030,7 +4031,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.deleteAPIRevision(apiId, revisionId);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        apiProvider.deleteAPIRevision(apiId, revisionId, tenantDomain);
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
         return Response.ok().entity(apiRevisionListDTO).build();
@@ -4126,7 +4128,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.restoreAPIRevision(apiId, revisionId);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        apiProvider.restoreAPIRevision(apiId, revisionId, tenantDomain);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider);
         Response.Status status = Response.Status.CREATED;
         return Response.status(status).entity(apiToReturn).build();
