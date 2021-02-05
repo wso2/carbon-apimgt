@@ -996,7 +996,7 @@ paths:
       summary: Edit a comment
       description: |
         Edit the individual comment
-      operationId: editComment
+      operationId: editCommentOfAPI
       parameters:
         - $ref: '#/components/parameters/commentId'
         - $ref: '#/components/parameters/apiId'

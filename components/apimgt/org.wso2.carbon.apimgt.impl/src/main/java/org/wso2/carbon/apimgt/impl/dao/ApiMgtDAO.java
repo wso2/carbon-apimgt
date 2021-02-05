@@ -7721,6 +7721,7 @@ public class ApiMgtDAO {
             insertPrepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
             insertPrepStmt.setInt(5, id);
             insertPrepStmt.setString(6, comment.getParentCommentID());
+            insertPrepStmt.setString(7, comment.getCategory());
 
             insertPrepStmt.executeUpdate();
             connection.commit();
@@ -7733,6 +7734,64 @@ public class ApiMgtDAO {
                 }
             }
             handleException("Failed to add comment data, for  " + identifier.getName() + "-" + identifier.getVersion(),
+                    e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(insertPrepStmt, null, insertSet);
+        }
+        return commentId;
+    }
+
+
+    /**
+     * Edits a comment for an API
+     *
+     * @param identifier API identifier
+     * @param comment    Commented Text
+     * @param user       User who did the comment
+     * @return Comment ID
+     */
+    public String editComment(Identifier identifier, Comment comment, String user)throws APIManagementException {
+        Connection connection = null;
+        ResultSet insertSet = null;
+        PreparedStatement insertPrepStmt = null;
+        String commentId = null;
+        int id = -1;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            //Get API Id
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+
+            /*This query is to update the AM_API_COMMENTS table */
+            String editCommentQuery = SQLConstants.EDIT_COMMENT_SQL;
+
+            /*Adding data to the AM_API_COMMENTS table*/
+            String dbProductName = connection.getMetaData().getDatabaseProductName();
+            insertPrepStmt = connection.prepareStatement(editCommentQuery);
+
+            //"UPDATE AM_API_COMMENTS SET COMMENT_TEXT=?, CATEGORY=? WHERE API_ID=? AND COMMENT_ID=?";
+            insertPrepStmt.setString(1, comment.getText());
+            insertPrepStmt.setString(1, comment.getCategory());
+            insertPrepStmt.setString(3, comment.getApiId());
+            insertPrepStmt.setString(4, comment.getId());
+
+            insertPrepStmt.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add comment ", e1);
+                }
+            }
+            handleException("Failed to edit the comment data, for  " + identifier.getName() + "-" + identifier.getVersion(),
                     e);
         } finally {
             APIMgtDBUtil.closeAllConnections(insertPrepStmt, null, insertSet);
@@ -7822,6 +7881,11 @@ public class ApiMgtDAO {
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("COMMENTED_USER"));
                 comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
+                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                comment.setCategory(resultSet.getString("CATEGORY"));
                 return comment;
             }
         } catch (SQLException e) {

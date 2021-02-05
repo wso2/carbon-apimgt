@@ -274,8 +274,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         return null;
     }
-    //method overloading. This will execute if the request has not parentCommentId
-    public Response addCommentToAPI(String apiId, PostRequestBodyDTO body, MessageContext messageContext) {
+
+    @Override
+    public Response editCommentOfAPI(String commentId, String apiId, PutRequestBodyDTO body, MessageContext messageContext){
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -288,11 +289,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
             Comment comment = new Comment();
-            comment.setText(body.getContent());
-            comment.setUser(username);
+            comment.setId(commentId);
             comment.setApiId(apiId);
-            comment.setParentCommentID("null");
-            //Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
+            comment.setText(body.getContent());
+            comment.setCategory(body.getCategory());
+            comment.setUser(username);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
@@ -392,10 +393,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response editComment(String commentId, String apiId, PutRequestBodyDTO putRequestBodyDTO, MessageContext messageContext){
-        return null;
-    }
+/////////////////////////////////////////////////////////////////
+
     @Override
     public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();

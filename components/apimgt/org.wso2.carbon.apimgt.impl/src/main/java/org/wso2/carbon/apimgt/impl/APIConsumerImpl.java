@@ -3504,6 +3504,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.addComment(identifier, comment, user);
     }
 
+    public String editComment(Identifier identifier, Comment comment, String user) throws APIManagementException{
+        return apiMgtDAO.editComment(identifier, comment, user);
+    }
+
+
     @Override
     public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
             throws APIManagementException {

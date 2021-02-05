@@ -445,6 +445,13 @@ public interface APIConsumer extends APIManager {
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
+    String editComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+
+    /**
+     * @param identifier Api identifier
+     * @return Id of the edited comment
+     * @throws APIManagementException if failed to edit comments for identifier
+     */
     Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
 
     /**
