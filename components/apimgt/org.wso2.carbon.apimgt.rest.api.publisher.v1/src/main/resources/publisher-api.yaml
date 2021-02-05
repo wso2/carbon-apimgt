@@ -7303,7 +7303,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
           example: HTTP
           default: HTTP
           enum:
@@ -7313,6 +7313,7 @@ components:
             - SOAP
             - GRAPHQL
             - WEBSUB
+            - SSE
         transport:
           type: array
           description: |
@@ -7476,8 +7477,8 @@ components:
             - apim:api_publish
         corsConfiguration:
           $ref: '#/components/schemas/APICorsConfiguration'
-        subscription:
-          $ref: '#/components/schemas/APIAsyncSubscription'
+        websubSubscriptionConfiguration:
+          $ref: '#/components/schemas/WebsubSubscriptionConfiguration'
         workflowStatus:
           type: string
           example: APPROVED
@@ -8696,7 +8697,7 @@ components:
           type: string
           example: technicalowner@wso2.com
 
-    APIAsyncSubscription:
+    WebsubSubscriptionConfiguration:
       type: object
       properties:
         secret:

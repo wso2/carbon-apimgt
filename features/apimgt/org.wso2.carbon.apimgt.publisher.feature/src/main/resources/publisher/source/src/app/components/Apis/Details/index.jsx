@@ -378,8 +378,8 @@ class Details extends Component {
                     </>
                 );
             case 'WS':
-                return '';
             case 'WEBSUB':
+            case 'SSE':
                 return (
                     <>
                         <LeftMenuItem

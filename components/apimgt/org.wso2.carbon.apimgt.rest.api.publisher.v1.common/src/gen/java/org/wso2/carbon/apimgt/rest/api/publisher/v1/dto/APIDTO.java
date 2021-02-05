@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAsyncSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
@@ -20,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPolic
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -69,7 +69,8 @@ public class APIDTO   {
         SOAPTOREST("SOAPTOREST"),
         SOAP("SOAP"),
         GRAPHQL("GRAPHQL"),
-        WEBSUB("WEBSUB");
+        WEBSUB("WEBSUB"),
+        SSE("SSE");
         private String value;
 
         TypeEnum (String v) {
@@ -223,7 +224,7 @@ return null;
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    private APIAsyncSubscriptionDTO subscription = null;
+    private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
@@ -616,7 +617,7 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -624,7 +625,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -1046,20 +1047,20 @@ return null;
 
   /**
    **/
-  public APIDTO subscription(APIAsyncSubscriptionDTO subscription) {
-    this.subscription = subscription;
+  public APIDTO websubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
+    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("subscription")
-  public APIAsyncSubscriptionDTO getSubscription() {
-    return subscription;
+  @JsonProperty("websubSubscriptionConfiguration")
+  public WebsubSubscriptionConfigurationDTO getWebsubSubscriptionConfiguration() {
+    return websubSubscriptionConfiguration;
   }
-  public void setSubscription(APIAsyncSubscriptionDTO subscription) {
-    this.subscription = subscription;
+  public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
+    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
   }
 
   /**
@@ -1294,7 +1295,7 @@ return null;
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
         Objects.equals(businessInformation, API.businessInformation) &&
         Objects.equals(corsConfiguration, API.corsConfiguration) &&
-        Objects.equals(subscription, API.subscription) &&
+        Objects.equals(websubSubscriptionConfiguration, API.websubSubscriptionConfiguration) &&
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
@@ -1361,7 +1362,7 @@ return null;
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
-    sb.append("    subscription: ").append(toIndentedString(subscription)).append("\n");
+    sb.append("    websubSubscriptionConfiguration: ").append(toIndentedString(websubSubscriptionConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");

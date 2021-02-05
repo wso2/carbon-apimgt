@@ -17,12 +17,12 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
-public class AsyncAPISubscription {
+public class WebsubSubscriptionConfiguration {
     private String secret;
     private String signingAlgorithm;
     private String signatureHeader;
 
-    public AsyncAPISubscription(String secret, String signingAlgorithm, String signatureHeader) {
+    public WebsubSubscriptionConfiguration(String secret, String signingAlgorithm, String signatureHeader) {
         this.secret = secret;
         this.signingAlgorithm = signingAlgorithm;
         this.signatureHeader = signatureHeader;

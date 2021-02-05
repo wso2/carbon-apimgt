@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
@@ -802,6 +803,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setWebsubSubscriptionConfiguration(getWebsubSubscriptionConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
@@ -1358,6 +1360,9 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                     APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
+                    APIUtil.getWebsubSubscriptionConfigurationJsonFromDto(api.getWebsubSubscriptionConfiguration()));
 
             //attaching micro-gateway labels to the API
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
@@ -7918,6 +7923,10 @@ public final class APIUtil {
 
     }
 
+    public static WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationDtoFromJson(String jsonString) {
+        return new Gson().fromJson(jsonString, WebsubSubscriptionConfiguration.class);
+    }
+
     /**
      * Used to generate Json string from CORS Configuration object
      *
@@ -7927,6 +7936,11 @@ public final class APIUtil {
     public static String getCorsConfigurationJsonFromDto(CORSConfiguration corsConfiguration) {
 
         return new Gson().toJson(corsConfiguration);
+    }
+
+    public static String getWebsubSubscriptionConfigurationJsonFromDto(
+            WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+            return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     /**
@@ -8019,6 +8033,16 @@ public final class APIUtil {
         return corsConfiguration;
     }
 
+    public static WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationFromArtifact(
+            GovernanceArtifact artifact) throws GovernanceException {
+        WebsubSubscriptionConfiguration configuration = APIUtil.getWebsubSubscriptionConfigurationDtoFromJson(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION));
+        if (configuration == null) {
+            configuration = getDefaultWebsubSubscriptionConfiguration();
+        }
+        return configuration;
+    }
+
     /**
      * Used to get Default CORS Configuration object according to configuration define in api-manager.xml
      *
@@ -8030,6 +8054,10 @@ public final class APIUtil {
         List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
         List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
         return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
+    }
+
+    public static WebsubSubscriptionConfiguration getDefaultWebsubSubscriptionConfiguration() {
+        return new WebsubSubscriptionConfiguration("", "SHA-256", "x-hub-signature");
     }
 
     /**

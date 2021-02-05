@@ -71,7 +71,7 @@ export default function Subscription(props) {
     const [apiFromContext] = useAPI();
     const {
         configDispatcher,
-        api: { subscription },
+        api: { websubSubscriptionConfiguration },
     } = props;
     const classes = useStyles();
 
@@ -115,7 +115,7 @@ export default function Subscription(props) {
                                                     />
                                                 </>
                                             )}
-                                            value={subscription.secret}
+                                            value={websubSubscriptionConfiguration.secret}
                                             helperText='Use the above secret key while registering at the provider'
                                             name='secret'
                                             InputProps={{
@@ -157,7 +157,7 @@ export default function Subscription(props) {
                                             />
                                         </>
                                     )}
-                                    value={subscription.signingAlgorithm}
+                                    value={websubSubscriptionConfiguration.signingAlgorithm}
                                     helperText='Select an algorithm to sign the message'
                                     name='secret'
                                     InputProps={{
@@ -204,7 +204,7 @@ export default function Subscription(props) {
                                             />
                                         </>
                                     )}
-                                    value={subscription.signatureHeader}
+                                    value={websubSubscriptionConfiguration.signatureHeader}
                                     helperText='Set the HTTP header use by the provider to send the signature'
                                     name='secret'
                                     InputProps={{

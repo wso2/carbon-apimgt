@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class APIAsyncSubscriptionDTO   {
+public class WebsubSubscriptionConfigurationDTO   {
   
     private String secret = null;
     private String signingAlgorithm = null;
@@ -27,7 +27,7 @@ public class APIAsyncSubscriptionDTO   {
   /**
    * Secret key to be used for subscription
    **/
-  public APIAsyncSubscriptionDTO secret(String secret) {
+  public WebsubSubscriptionConfigurationDTO secret(String secret) {
     this.secret = secret;
     return this;
   }
@@ -45,7 +45,7 @@ public class APIAsyncSubscriptionDTO   {
   /**
    * The algorithm used for signing
    **/
-  public APIAsyncSubscriptionDTO signingAlgorithm(String signingAlgorithm) {
+  public WebsubSubscriptionConfigurationDTO signingAlgorithm(String signingAlgorithm) {
     this.signingAlgorithm = signingAlgorithm;
     return this;
   }
@@ -63,7 +63,7 @@ public class APIAsyncSubscriptionDTO   {
   /**
    * The header uses to send the signature
    **/
-  public APIAsyncSubscriptionDTO signatureHeader(String signatureHeader) {
+  public WebsubSubscriptionConfigurationDTO signatureHeader(String signatureHeader) {
     this.signatureHeader = signatureHeader;
     return this;
   }
@@ -87,10 +87,10 @@ public class APIAsyncSubscriptionDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIAsyncSubscriptionDTO apIAsyncSubscription = (APIAsyncSubscriptionDTO) o;
-    return Objects.equals(secret, apIAsyncSubscription.secret) &&
-        Objects.equals(signingAlgorithm, apIAsyncSubscription.signingAlgorithm) &&
-        Objects.equals(signatureHeader, apIAsyncSubscription.signatureHeader);
+    WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = (WebsubSubscriptionConfigurationDTO) o;
+    return Objects.equals(secret, websubSubscriptionConfiguration.secret) &&
+        Objects.equals(signingAlgorithm, websubSubscriptionConfiguration.signingAlgorithm) &&
+        Objects.equals(signatureHeader, websubSubscriptionConfiguration.signatureHeader);
   }
 
   @Override
@@ -101,7 +101,7 @@ public class APIAsyncSubscriptionDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIAsyncSubscriptionDTO {\n");
+    sb.append("class WebsubSubscriptionConfigurationDTO {\n");
     
     sb.append("    secret: ").append(toIndentedString(secret)).append("\n");
     sb.append("    signingAlgorithm: ").append(toIndentedString(signingAlgorithm)).append("\n");
