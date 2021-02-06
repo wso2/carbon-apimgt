@@ -46,10 +46,16 @@ public class CommentMappingUtil {
     public static CommentDTO fromCommentToDTO(Comment comment) throws APIManagementException {
 
         CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setId(comment.getId());
-        commentDTO.setContent(comment.getText());
-        commentDTO.setCreatedBy(comment.getUser());
+        commentDTO.setId(comment.getCommentId());
+        commentDTO.setContent(comment.getCommentText());
+        commentDTO.setCreatedBy(comment.getCreatedBy());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        commentDTO.setUpdatedBy(comment.getUpdatedBy());
+        commentDTO.setUpdatedTime(comment.getUpdatedTime().toString());
+        commentDTO.setParentCommentId(comment.getParentCommentID());
+        commentDTO.setEntryPoint(comment.getEntryPoint());
+        commentDTO.setCategory(comment.getCategory());
+
         return commentDTO;
     }
 
