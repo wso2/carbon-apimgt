@@ -2241,7 +2241,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (api != null) {
                 String currentStatus = api.getStatus();
 
-                if (APIConstants.PUBLISHED.equals(newStatus) || !currentStatus.equals(newStatus)) {
+                if (!currentStatus.equals(newStatus)) {
                     api.setStatus(newStatus);
 
                     // If API status changed to publish we should add it to recently added APIs list
