@@ -7882,9 +7882,9 @@ public class ApiMgtDAO {
             resultSet = prepStmt.executeQuery();
             while (resultSet.next()) {
                 Comment comment = new Comment();
-                comment.setId(resultSet.getString("COMMENT_ID"));
-                comment.setText(resultSet.getString("COMMENT_TEXT"));
-                comment.setUser(resultSet.getString("COMMENTED_USER"));
+                comment.setCommentId(resultSet.getString("COMMENT_ID"));
+                comment.setCommentText(resultSet.getString("COMMENT_TEXT"));
+                comment.setCreatedBy(resultSet.getString("COMMENTED_USER"));
                 comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
                 commentList.add(comment);
             }
