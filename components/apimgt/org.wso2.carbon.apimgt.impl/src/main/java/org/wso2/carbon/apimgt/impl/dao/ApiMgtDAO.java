@@ -7815,10 +7815,17 @@ public class ApiMgtDAO {
             resultSet = prepStmt.executeQuery();
 
             if (resultSet.next()) {
-                comment.setId(resultSet.getString("COMMENT_ID"));
-                comment.setText(resultSet.getString("COMMENT_TEXT"));
-                comment.setUser(resultSet.getString("COMMENTED_USER"));
-                comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
+                comment.setCommentId(resultSet.getString("COMMENT_ID"));
+                comment.setCommentText(resultSet.getString("COMMENT_TEXT"));
+                comment.setCreatedBy(resultSet.getString("CREATED_BY"));
+                comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                comment.setApiId(resultSet.getString("API_ID"));
+                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                comment.setCategory(resultSet.getString("CATEGORY"));
+
                 return comment;
             }
         } catch (SQLException e) {
