@@ -147,7 +147,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
-        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
+        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
+                tokenScopes);
     }
 
     @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,

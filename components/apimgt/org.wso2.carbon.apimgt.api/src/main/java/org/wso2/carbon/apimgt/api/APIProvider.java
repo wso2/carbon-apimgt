@@ -1729,6 +1729,24 @@ public interface APIProvider extends APIManager {
      * @return API Revision List
      * @throws APIManagementException if failed to get the related API revision
      */
+    String getAPIRevisionUUID(String revisionID, String apiUUID) throws APIManagementException;
+
+
+    /**
+     * Get a List of API Revisions related to provided API UUID
+     *
+     * @param apiUUID API  UUID
+     * @return API Revision List
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    String getOldestRevisionID(String apiUUID) throws APIManagementException;
+    /**
+     * Get a List of API Revisions related to provided API UUID
+     *
+     * @param apiUUID API  UUID
+     * @return API Revision List
+     * @throws APIManagementException if failed to get the related API revision
+     */
     List<APIRevision> getAPIRevisions(String apiUUID) throws APIManagementException;
 
     /**
