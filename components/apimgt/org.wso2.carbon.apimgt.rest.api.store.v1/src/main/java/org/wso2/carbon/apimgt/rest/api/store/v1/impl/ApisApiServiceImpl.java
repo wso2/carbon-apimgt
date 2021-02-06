@@ -249,9 +249,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
             Comment comment = new Comment();
-            comment.setText(addCommentDTO.getContent());
-            comment.setUser(username);
+            comment.setCommentText(addCommentDTO.getContent());
+            comment.setCreatedBy(username);
+            comment.setCategory(addCommentDTO.getCategory());
             comment.setApiId(apiId);
+            comment.setParentCommentID(parentCommentID);
+            comment.setEntryPoint("devPortal");
 //            comment.setParentCommentID(parentCommentID);
 //            if (body.getCategory()==null){
 //                comment.setCategory("general");

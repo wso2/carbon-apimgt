@@ -7711,10 +7711,13 @@ public class ApiMgtDAO {
             insertPrepStmt = connection.prepareStatement(addCommentQuery);
 
             insertPrepStmt.setString(1, commentId);
-            insertPrepStmt.setString(2, comment.getText());
-            insertPrepStmt.setString(3, user);
+            insertPrepStmt.setString(2, comment.getCommentText());
+            insertPrepStmt.setString(3, comment.getCreatedBy());
             insertPrepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
             insertPrepStmt.setInt(5, id);
+            insertPrepStmt.setString(6, comment.getParentCommentID());
+            insertPrepStmt.setString(7, comment.getEntryPoint());
+            insertPrepStmt.setString(8, comment.getCategory());
 
             insertPrepStmt.executeUpdate();
             connection.commit();
