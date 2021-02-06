@@ -139,8 +139,10 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     private Boolean isIndexCreated(String organizationName) {
         if (organizationName == null) {
-            organizationName = MONGODB_COLLECTION_DEFAULT_ORG + MONGODB_COLLECTION_SUR_FIX;
+            organizationName = MONGODB_COLLECTION_DEFAULT_ORG;
         }
+        organizationName = organizationName + MONGODB_COLLECTION_SUR_FIX;
+
         //Check if index is created flag exists in cache
         Boolean indexCacheCheck = indexCheckCache.get(organizationName);
         if (indexCacheCheck != null && indexCacheCheck) {
