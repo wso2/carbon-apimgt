@@ -49,7 +49,7 @@ const useStyles = makeStyles(() => ({
     splitWrapper: {
         padding: 0,
     },
-    description: {
+    editorHeader: {
         alignItems: 'center',
         display: 'flex',
     },
@@ -68,7 +68,7 @@ function Transition(props) {
 }
 
 /**
- * MarkdownEditor for API Description
+ * MarkdownEditor for API Description / Overview
  * @param {*} props properties
  * @returns {*} MarkdownEditor component
  */
@@ -81,26 +81,26 @@ export default function MarkdownEditor(props) {
         overview,
     } = props;
     const [open, setOpen] = useState(false);
-    const [description, setDescription] = useState(null);
+    const [content, setContent] = useState(null);
     const [apiFromContext] = useAPI();
     const [isUpdating, setIsUpdating] = useState(false);
 
     const toggleOpen = () => {
         if (!open) {
             if (descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
-                setDescription(api.description);
+                setContent(api.description);
             } else if (descriptionType === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
-                setDescription(overview);
+                setContent(overview);
             }
         }
         setOpen(!open);
     };
-    const changeDescription = (newDescription) => {
-        setDescription(newDescription);
+    const setNewContent = (newContent) => {
+        setContent(newContent);
     };
-    const updateDescription = () => {
+    const modifyContent = () => {
         setIsUpdating(true);
-        updateContent(description);
+        updateContent(content);
         toggleOpen();
         setIsUpdating(false);
     };
@@ -133,7 +133,7 @@ export default function MarkdownEditor(props) {
                     <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
                         <Icon>close</Icon>
                     </IconButton>
-                    <Typography variant='h4' className={classes.description}>
+                    <Typography variant='h4' className={classes.editorHeader}>
                         {descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION
                         ? (
                         <FormattedMessage
@@ -154,7 +154,7 @@ export default function MarkdownEditor(props) {
                         variant='contained'
                         disabled={isUpdating}
                         color='primary'
-                        onClick={updateDescription}
+                        onClick={modifyContent}
                     >
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.MarkdownEditor.update.content.button'
@@ -178,9 +178,9 @@ export default function MarkdownEditor(props) {
                                     height='100vh'
                                     language='markdown'
                                     theme='vs-dark'
-                                    value={description}
+                                    value={content}
                                     options={{ selectOnLineNumbers: true }}
-                                    onChange={changeDescription}
+                                    onChange={setNewContent}
                                     editorDidMount={editorDidMount}
                                 />
                             </Suspense>
@@ -188,7 +188,7 @@ export default function MarkdownEditor(props) {
                         <Grid item xs={6}>
                             <div className={classes.markdownViewWrapper}>
                                 <Suspense fallback={<CircularProgress />}>
-                                    <ReactMarkdown escapeHtml={false} source={description} />
+                                    <ReactMarkdown escapeHtml={false} source={content} />
                                 </Suspense>
                             </div>
                         </Grid>
