@@ -877,9 +877,6 @@ public interface APIProvider extends APIManager {
      Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, String newStatus)
              throws APIManagementException;
 
-    Map<String, String> propergateAPIStatusChangeToGateways(API api, APIIdentifier identifier, String newStatus)
-            throws APIManagementException;
-
     /**
      * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
      * according to the new state.
@@ -916,11 +913,6 @@ public interface APIProvider extends APIManager {
       */
      boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
              Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
-
-    boolean updateAPIforStateChange(API api, APIIdentifier identifier, String newStatus,
-                                    Map<String, String> failedGatewaysMap, GenericArtifactManager artifactManager,
-                                    GenericArtifact artifact) throws APIManagementException,
-            FaultGatewaysException;
 
     /**
      * Update api related information such as database entries, registry updates for state change.
