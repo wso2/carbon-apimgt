@@ -55,10 +55,6 @@
                     <groupId>wsdl4j.wso2</groupId>
                     <artifactId>wsdl4j</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.wso2.orbit.wadl.core</groupId>
-                    <artifactId>wadl-core</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
