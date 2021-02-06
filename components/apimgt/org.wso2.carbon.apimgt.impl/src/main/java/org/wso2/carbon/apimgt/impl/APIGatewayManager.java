@@ -231,12 +231,14 @@ public class APIGatewayManager {
         try {
             File artifact = ServiceReferenceHolder.getInstance().getImportExportService()
                     .exportAPIProduct(apiId, null, null, null, ExportFormat.JSON, true, false, true);
-            GatewayArtifactsMgtDAO.getInstance()
-                    .addGatewayPublishedAPIDetails(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(),
-                            tenantDomain, APIConstants.API_PRODUCT);
-            artifactSaver
-                    .saveArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), APIConstants.API_PRODUCT_REVISION,
-                            tenantDomain, artifact);
+            GatewayArtifactsMgtDAO.getInstance().addGatewayAPIArtifactAndMetaData(apiId,apiIdentifier.getName(),
+                    apiIdentifier.getVersion(),APIConstants.API_PRODUCT_REVISION,tenantDomain,
+                    APIConstants.API_PRODUCT,artifact);
+            if (artifactSaver != null){
+                artifactSaver
+                        .saveArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), APIConstants.API_PRODUCT_REVISION,
+                                tenantDomain, artifact);
+            }
             GatewayArtifactsMgtDAO.getInstance()
                     .addAndRemovePublishedGatewayLabels(apiId, APIConstants.API_PRODUCT_REVISION, gateways);
 
@@ -270,8 +272,12 @@ public class APIGatewayManager {
         String apiProductUuid = apiProduct.getUuid();
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         try {
-            artifactSaver.removeArtifact(apiProductUuid, apiProductIdentifier.getName(),
-                    apiProductIdentifier.getVersion(), APIConstants.API_PRODUCT_REVISION, tenantDomain);
+            if (artifactSaver != null){
+                artifactSaver.removeArtifact(apiProductUuid, apiProductIdentifier.getName(),
+                        apiProductIdentifier.getVersion(), APIConstants.API_PRODUCT_REVISION, tenantDomain);
+            }
+            GatewayArtifactsMgtDAO.getInstance().deleteGatewayArtifact(apiProductUuid,
+                    APIConstants.API_PRODUCT_REVISION);
             GatewayArtifactsMgtDAO.getInstance()
                     .removePublishedGatewayLabels(apiProductUuid, APIConstants.API_PRODUCT_REVISION);
         } catch (ArtifactSynchronizerException e) {

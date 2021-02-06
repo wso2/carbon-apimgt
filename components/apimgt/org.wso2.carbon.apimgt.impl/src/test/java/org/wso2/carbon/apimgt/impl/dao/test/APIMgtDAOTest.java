@@ -919,14 +919,6 @@ public class APIMgtDAOTest {
                 .getName(), subscriber.getName(), clientIdProduction, "Default", UUID.randomUUID().toString());
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
                 .getName(), subscriber.getName(), clientIdSandbox, "Default", UUID.randomUUID().toString());
-        int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
-        int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
-        String tokenProduction = UUID.randomUUID().toString();
-        String tokenSandBox = UUID.randomUUID().toString();
-        String tokenIdProduction = insertAccessTokenForApp(appIdProduction, subscriber.getName(), tokenProduction);
-        String tokenIdSandbox = insertAccessTokenForApp(appIdSandBox, subscriber.getName(), tokenSandBox);
-        insertTokenScope(tokenIdProduction, "default");
-        insertTokenScope(tokenIdSandbox, "default");
         assertTrue(apiMgtDAO.getSubscriptionCount(subscriber, application.getName(), null) > 0);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);
@@ -939,9 +931,6 @@ public class APIMgtDAOTest {
         assertEquals(subscribedAPIFromUuid.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         assertEquals(subscribedAPIFromUuid.getApiId(), apiId);
         assertEquals(subscribedAPIFromUuid.getApplication().getId(), application.getId());
-        List<AccessTokenInfo> accessTokenInfoList = apiMgtDAO.getAccessTokenListForUser(subscriber.getName(),
-                application.getName(), subscriber.getName());
-        assertTrue(accessTokenInfoList.size()==2);
         apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry");
@@ -973,10 +962,6 @@ public class APIMgtDAOTest {
                 -1234);
         apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(clientIdProduction);
         apiMgtDAO.deleteApplicationMappingByConsumerKey(clientIdSandbox);
-        deleteAccessTokenForApp(appIdProduction);
-        deleteAccessTokenForApp(appIdSandBox);
-        deleteConsumerApp(clientIdProduction);
-        deleteConsumerApp(clientIdSandbox);
         deleteSubscriber(subscriber.getId());
     }
 

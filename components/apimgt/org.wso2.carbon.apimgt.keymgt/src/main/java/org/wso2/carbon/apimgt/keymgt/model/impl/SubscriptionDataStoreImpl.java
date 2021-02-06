@@ -114,7 +114,29 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public Application getApplicationById(int appId) {
+        String synchronizeKey = "SubscriptionDataStoreImpl-Application-" + appId;
         Application application = applicationMap.get(appId);
+        if (application == null) {
+            synchronized (synchronizeKey.intern()) {
+                application = applicationMap.get(appId);
+                if (application != null) {
+                    return application;
+                }
+            }
+            try {
+                application = new SubscriptionDataLoaderImpl().getApplicationById(appId);
+            } catch (DataLoadingException e) {
+                log.error("Error while Retrieving Application Metadata From Internal API.", e);
+            }
+            if (application != null && application.getId() != null && application.getId() != 0) {
+                // load to the memory
+                log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
+                addOrUpdateApplication(application);
+            } else {
+                log.debug("Application not found. applicationId = " + application.getId());
+            }
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Retrieving Application information with Application Id : " + appId);
             if (application != null) {
@@ -127,10 +149,31 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
+    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager)  {
+        ApplicationKeyMappingCacheKey applicationKeyMappingCacheKey = new ApplicationKeyMappingCacheKey(key,
+                keyManager);
+        String synchronizeKey = "SubscriptionDataStoreImpl-KeyMapping-" + applicationKeyMappingCacheKey;
 
-        ApplicationKeyMapping applicationKeyMapping =
-                applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
+        ApplicationKeyMapping applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+        if (applicationKeyMapping == null) {
+            synchronized (synchronizeKey.intern()) {
+                applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+                if (applicationKeyMapping != null) {
+                    return applicationKeyMapping;
+                }
+                try {
+                    applicationKeyMapping = new SubscriptionDataLoaderImpl().getKeyMapping(key, keyManager);
+                } catch (DataLoadingException e) {
+                    log.error("Error while Loading KeyMapping Information from Internal API.", e);
+                }
+                if (applicationKeyMapping != null && !StringUtils.isEmpty(applicationKeyMapping.getConsumerKey())) {
+                    // load to the memory
+                    log.debug("Loading Keymapping to the in-memory datastore.");
+                    addOrUpdateApplicationKeyMapping(applicationKeyMapping);
+                }
+            }
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager);
             if (applicationKeyMapping != null) {
@@ -146,7 +189,26 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     public API getApiByContextAndVersion(String context, String version) {
 
         String key = context + DELEM_PERIOD + version;
+        String synchronizeKey = "SubscriptionDataStoreImpl-API-" + key;
         API api = apiMap.get(key);
+        if (api == null) {
+            synchronized (synchronizeKey.intern()) {
+                api = apiMap.get(key);
+                if (api != null) {
+                    return api;
+                }
+                try {
+                    api = new SubscriptionDataLoaderImpl().getApi(context, version);
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Data From Internal Rest API", e);
+                }
+                if (api != null && api.getApiId() != 0) {
+                    // load to the memory
+                    log.debug("Loading API to the in-memory datastore.");
+                    addOrUpdateAPI(api);
+                }
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("Retrieving API information with Context " + context + " and Version : " + version);
             if (api != null) {
@@ -184,9 +246,28 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public Subscription getSubscriptionById(int appId, int apiId) {
-
-        Subscription subscription = subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId,
-                apiId));
+        String subscriptionCacheKey = SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId);
+        String synchronizeKey = "SubscriptionDataStoreImpl-Subscription-" + subscriptionCacheKey;
+        Subscription subscription = subscriptionMap.get(subscriptionCacheKey);
+        if (subscription == null) {
+            synchronized (synchronizeKey.intern()) {
+                subscription = subscriptionMap.get(subscriptionCacheKey);
+                if (subscription != null) {
+                    return subscription;
+                }
+                try {
+                    subscription = new SubscriptionDataLoaderImpl().getSubscriptionById(Integer.toString(apiId),
+                            Integer.toString(appId));
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Subscription Data From Internal API", e);
+                }
+                if (subscription != null && !StringUtils.isEmpty(subscription.getSubscriptionId())) {
+                    // load to the memory
+                    log.debug("Loading Subscription to the in-memory datastore.");
+                    subscriptionMap.put(subscription.getCacheKey(), subscription);
+                }
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("Retrieving API Subscription with Application " + appId + " and APIId : " + apiId);
             if (subscription != null) {
@@ -451,7 +532,14 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         log.debug("Drop the Event " + subscription.toString() + " since the event timestamp was old");
                     }
                 } else {
-                    subscriptionMap.put(subscription.getCacheKey(), subscription);
+                    if (!APIConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getSubscriptionState())) {
+                        subscriptionMap.put(subscription.getCacheKey(), subscription);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Drop the Event " + subscription.toString() + " since the event was marked as " +
+                                    "ON_HOLD");
+                        }
+                    }
                 }
             }
             if (log.isDebugEnabled()) {

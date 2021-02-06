@@ -11,8 +11,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,160 +50,59 @@ public class GatewayArtifactsMgtDAO {
      * Add details of the APIs published in the Gateway
      *
      * @param apiId        - UUID of the API
-     * @param name      - Name of the API
+     * @param name         - Name of the API
      * @param version      - Version of the API
      * @param tenantDomain - Tenant domain of the API
-     * @throws APIManagementException if an error occurs
      */
-    public boolean addGatewayPublishedAPIDetails(String apiId, String name, String version, String tenantDomain,
-                                                 String type)
-            throws APIManagementException {
+    private boolean addGatewayPublishedAPIDetails(Connection connection, String apiId, String name, String version,
+                                                 String tenantDomain, String type)
+            throws SQLException {
 
         boolean result = false;
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.CHECK_API_EXISTS)) {
-                preparedStatement.setString(1, apiId);
-                ResultSet resultSet = preparedStatement.executeQuery();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.CHECK_API_EXISTS)) {
+            preparedStatement.setString(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return true;
                 }
             }
-            connection.setAutoCommit(false);
-            try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
-                statement.setString(1, apiId);
-                statement.setString(2, name);
-                statement.setString(3, version);
-                statement.setString(4, tenantDomain);
-                statement.setString(5, type);
-                result = statement.executeUpdate() == 1;
-                connection.commit();
-            } catch (SQLException e) {
-                APIMgtDBUtil.rollbackConnection(connection,
-                        "Failed to rollback add API details for " + name, e);
-            }
+        }
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_GW_PUBLISHED_API_DETAILS)) {
+            statement.setString(1, apiId);
+            statement.setString(2, name);
+            statement.setString(3, version);
+            statement.setString(4, tenantDomain);
+            statement.setString(5, type);
+            result = statement.executeUpdate() == 1;
+            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to add API details for " + name, e);
+            APIMgtDBUtil.rollbackConnection(connection,
+                    "Failed to rollback add API details for " + name, e);
         }
         return result;
     }
 
-    /**
-     * Add or update details of the APIs published in the Gateway
-     *
-     * @param apiId        - UUID of the API
-     * @param revision - Published api revision
-     * @param inputStream         - Byte array Input stream of the serializide gatewayAPIDTO
-     * @throws APIManagementException if an error occurs
-     */
-    public boolean addGatewayPublishedAPIArtifacts(String apiId, String revision, InputStream inputStream)
-            throws APIManagementException {
+    private boolean addGatewayPublishedAPIArtifacts(Connection connection, String apiId, String revision,
+                                                   InputStream inputStream)
+            throws APIManagementException, SQLException {
 
         String dbQuery = SQLConstants.ADD_GW_API_ARTIFACT;
 
         boolean result = false;
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
-            try {
-                connection.setAutoCommit(false);
-                if (isAPIArtifactExists(connection, apiId, revision)) {
-                    updateGatewayPublishedAPIArtifacts(connection, apiId, revision, inputStream);
-                } else {
-                    try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                        statement.setBinaryStream(1, inputStream);
-                        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                        statement.setTimestamp(2, timestamp);
-                        statement.setString(3, apiId);
-                        statement.setString(4, revision);
-                        result = statement.executeUpdate() == 1;
-                    }
-                }
+        if (isAPIArtifactExists(connection, apiId, revision)) {
+            updateGatewayPublishedAPIArtifacts(connection, apiId, revision, inputStream);
+        } else {
+            try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+                statement.setBinaryStream(1, inputStream);
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                statement.setTimestamp(2, timestamp);
+                statement.setString(3, apiId);
+                statement.setString(4, revision);
+                result = statement.executeUpdate() == 1;
                 connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                throw e;
             }
-        } catch (SQLException e) {
-            handleException("Failed to add artifacts for " + apiId, e);
         }
         return result;
-    }
-
-    /**
-     * Retrieve the blob of the API
-     *
-     * @param APIId        - UUID of the API
-     * @param gatewayLabel - Gateway label of the API
-     * @throws APIManagementException if an error occurs
-     */
-    public String getGatewayPublishedAPIArtifacts(String APIId, String gatewayLabel,
-                                                  String gatewayInstruction)
-            throws APIManagementException {
-
-        ResultSet rs = null;
-        String gatewayRuntimeArtifacts = null;
-        String sqlQuery;
-        if (APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY.equals(gatewayInstruction)) {
-            sqlQuery = SQLConstants.GET_API_ARTIFACT_ANY_INSTRUCTION;
-        } else {
-            sqlQuery = SQLConstants.GET_API_ARTIFACT;
-        }
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-             PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
-            connection.setAutoCommit(false);
-            connection.commit();
-            statement.setString(1, APIId);
-            statement.setString(2, gatewayLabel);
-            if (!APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_ANY.equals(gatewayInstruction)) {
-                statement.setString(3, gatewayInstruction);
-            }
-            rs = statement.executeQuery();
-            if (rs.next()) {
-                try (InputStream inputStream = rs.getBinaryStream(1)) {
-                    gatewayRuntimeArtifacts = IOUtils.toString(inputStream, APIConstants.DigestAuthConstants.CHARSET);
-                } catch (IOException e) {
-                    handleException("Error in generating gatewayRuntimeArtifacts " + APIId, e);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get artifacts of API with ID " + APIId, e);
-        } finally {
-            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
-        }
-        return gatewayRuntimeArtifacts;
-    }
-
-    /**
-     * Retrieve the list of blobs of the APIs for a given label
-     *
-     * @param label - Gateway label of the API
-     * @throws APIManagementException if an error occurs
-     */
-    public List<String> getAllGatewayPublishedAPIArtifacts(String label)
-            throws APIManagementException {
-
-        ResultSet rs = null;
-        List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
-        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_ALL_API_ARTIFACT)) {
-            connection.setAutoCommit(false);
-            connection.commit();
-            statement.setString(1, label);
-            statement.setString(2, APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH);
-            rs = statement.executeQuery();
-            while (rs.next()) {
-                try (InputStream inputStream = rs.getBinaryStream(1)) {
-                    String gatewayRuntimeArtifacts = IOUtils.toString(inputStream,
-                            APIConstants.DigestAuthConstants.CHARSET);
-                    gatewayRuntimeArtifactsArray.add(gatewayRuntimeArtifacts);
-                } catch (IOException e) {
-                    handleException("Error in generating gatewayRuntimeArtifacts ", e);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get artifacts ", e);
-        } finally {
-            GatewayArtifactsMgtDBUtil.closeResultSet(rs);
-        }
-        return gatewayRuntimeArtifactsArray;
     }
 
     /**
@@ -235,8 +133,8 @@ public class GatewayArtifactsMgtDAO {
     /**
      * Retrieve the API ID of the API
      *
-     * @param apiName - Name of the API
-     * @param version - version of the API
+     * @param apiName      - Name of the API
+     * @param version      - version of the API
      * @param tenantDomain - Tenant Domain of the API
      * @throws APIManagementException if an error occurs
      */
@@ -292,20 +190,20 @@ public class GatewayArtifactsMgtDAO {
         return labels;
     }
 
-    private void updateGatewayPublishedAPIArtifacts(Connection connection,String apiId, String revision,
-                                                   InputStream fileInputStream)
+    private void updateGatewayPublishedAPIArtifacts(Connection connection, String apiId, String revision,
+                                                    InputStream fileInputStream)
             throws SQLException {
 
         String query = SQLConstants.UPDATE_API_ARTIFACT;
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setBinaryStream(1, fileInputStream);
-                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                statement.setTimestamp(2, timestamp);
-                statement.setString(3, apiId);
-                statement.setString(4, revision);
-                statement.executeUpdate();
-            }
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setBinaryStream(1, fileInputStream);
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            statement.setTimestamp(2, timestamp);
+            statement.setString(3, apiId);
+            statement.setString(4, revision);
+            statement.executeUpdate();
         }
+    }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
                                                    Set<APIRevisionDeployment> gatewayLabelsToRemove)
@@ -539,6 +437,26 @@ public class GatewayArtifactsMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to delete and add  Gateway environments ", e);
+        }
+    }
+
+
+    public void addGatewayAPIArtifactAndMetaData(String apiUUID, String apiName, String version, String revisionUUID,
+                                                 String tenantDomain, String apiType, File artifact)
+            throws APIManagementException {
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                addGatewayPublishedAPIDetails(connection, apiUUID, apiName, version, tenantDomain, apiType);
+                try (FileInputStream fileInputStream = new FileInputStream(artifact)) {
+                    addGatewayPublishedAPIArtifacts(connection, apiUUID, revisionUUID, fileInputStream);
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException | IOException e) {
+            handleException("Failed to Add Artifact to Database", e);
         }
     }
 }

@@ -236,35 +236,25 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
                                 log.debug("Valid subscription not found for appId " + app.getId() + " and apiId "
                                         + api.getApiId());
                             }
-                            loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey,
-                                    keyManager, datastore, apiTenantDomain, infoDTO, tenantId);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Application not found in the datastore for id " + key.getApplicationId());
                         }
-                        loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager,
-                                datastore, apiTenantDomain, infoDTO, tenantId);
                     }
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug(
                                 "Application keymapping not found in the datastore for id consumerKey " + consumerKey);
                     }
-                    loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager,
-                            datastore, apiTenantDomain, infoDTO, tenantId);
                 }
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("API not found in the datastore for " + context + ":" + version);
                 }
-                loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager, datastore,
-                        apiTenantDomain, infoDTO, tenantId);
             }
         } else {
-            log.error("Subscription datastore is null for tenant domain " + apiTenantDomain);
-            loadInfoFromRestAPIAndValidate(api, app, key, sub, context, version, consumerKey, keyManager, datastore,
-                    apiTenantDomain, infoDTO, tenantId);
+            log.error("Subscription datastore is not initialized for tenant domain " + apiTenantDomain);
         }
         
         if (api != null && app != null && key != null && sub != null) {
@@ -277,70 +267,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         return infoDTO;
     }
 
-    private void loadInfoFromRestAPIAndValidate(API api, Application app, ApplicationKeyMapping key, Subscription sub,
-            String context, String version, String consumerKey, String keyManager, SubscriptionDataStore datastore, String apiTenantDomain, APIKeyValidationInfoDTO infoDTO, int tenantId) {
-        // TODO Load using a single single rest api.
-        if(log.isDebugEnabled()) {
-            log.debug("Loading missing information in the datastore by invoking the Rest API");
-        }
-        try {
-            // only loading if the api is not found previously
-            if (api == null) {
-                api = new SubscriptionDataLoaderImpl().getApi(context, version);
-                if (api != null && api.getApiId() != 0) {
-                    // load to the memory
-                    log.debug("Loading API to the in-memory datastore.");
-                    datastore.addOrUpdateAPI(api);
-                }
-            }
-            // only loading if the key is not found previously
-            if (key == null) {
-                key = new SubscriptionDataLoaderImpl().getKeyMapping(consumerKey);
-                if (key != null && !StringUtils.isEmpty(key.getConsumerKey())) {
-                    // load to the memory
-                    log.debug("Loading Keymapping to the in-memory datastore.");
-                    datastore.addOrUpdateApplicationKeyMapping(key);
-                }
-            }
-            // check whether still api and keys are not found
-            if(api == null || key == null) {
-                // invalid request. nothing to do. return without any further processing
-                if (log.isDebugEnabled()) {
-                    if (api == null) {
-                        log.debug("API not found for the " + context + " " + version);
-                    }
-                    if (key == null) {
-                        log.debug("KeyMapping not found for the " + consumerKey);
-                    }
-                }
-                return;
-            } else {
-                //go further and load missing objects
-                if(app == null) {
-                    app = new SubscriptionDataLoaderImpl().getApplicationById(key.getApplicationId());
-                    if(app != null && app.getId() != null && app.getId() != 0) {
-                        // load to the memory
-                        log.debug("Loading Application to the in-memory datastore. applicationId = " + app.getId());
-                        datastore.addOrUpdateApplication(app);
-                    } else {
-                        log.debug("Application not found. applicationId = " + key.getApplicationId());
-                    }
-                }
-                if (app != null) {
-                    sub = new SubscriptionDataLoaderImpl().getSubscriptionById(Integer.toString(api.getApiId()),
-                            Integer.toString(app.getId()));
-                    if(sub != null && !StringUtils.isEmpty(sub.getSubscriptionId())) {
-                        // load to the memory
-                        log.debug("Loading Subscription to the in-memory datastore.");
-                        datastore.addOrUpdateSubscription(sub);
-                        validate(infoDTO, apiTenantDomain, tenantId, datastore, api, key, app, sub, keyManager);
-                    }
-                }
-            }
-        } catch (DataLoadingException e) {
-            log.error("Error while connecting the backend for loading subscription related data ", e);
-        }
-    }
 
     private APIKeyValidationInfoDTO validate(APIKeyValidationInfoDTO infoDTO, String apiTenantDomain, int tenantId,
             SubscriptionDataStore datastore, API api, ApplicationKeyMapping key, Application app, Subscription sub,
