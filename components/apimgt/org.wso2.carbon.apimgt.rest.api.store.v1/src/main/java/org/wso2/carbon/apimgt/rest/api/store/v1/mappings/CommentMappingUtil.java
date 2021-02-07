@@ -46,16 +46,10 @@ public class CommentMappingUtil {
     public static CommentDTO fromCommentToDTO(Comment comment) throws APIManagementException {
 
         CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setId(comment.getCommentId());
-        commentDTO.setContent(comment.getCommentText());
-        commentDTO.setCreatedBy(comment.getCreatedBy());
+        commentDTO.setId(comment.getId());
+        commentDTO.setContent(comment.getText());
+        commentDTO.setCreatedBy(comment.getUser());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
-        commentDTO.setUpdatedBy(comment.getUpdatedBy());
-        commentDTO.setUpdatedTime(comment.getUpdatedTime().toString());
-        commentDTO.setParentCommentId(comment.getParentCommentID());
-        commentDTO.setEntryPoint(comment.getEntryPoint());
-        commentDTO.setCategory(comment.getCategory());
-
         return commentDTO;
     }
 
@@ -68,8 +62,8 @@ public class CommentMappingUtil {
     public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment, Map<String,
             Map<String, String>> userClaimsMap)  throws APIManagementException {
         CommentDTO commentDTO = fromCommentToDTO(comment);
-        if (userClaimsMap.get(comment.getCreatedBy()) != null) {
-            Map userClaims = userClaimsMap.get(comment.getCreatedBy());
+        if (userClaimsMap.get(comment.getUser()) != null) {
+            Map userClaims = userClaimsMap.get(comment.getUser());
             CommenterInfoDTO commenterInfoDTO = new CommenterInfoDTO();
             commenterInfoDTO.setFullName((String) userClaims.get(APIConstants.FULL_NAME));
             commenterInfoDTO.setFirstName((String) userClaims.get(APIConstants.FIRST_NAME));
@@ -105,8 +99,8 @@ public class CommentMappingUtil {
      */
     public static Comment fromDTOToComment(CommentDTO body, String username, String apiId) {
         Comment comment = new Comment();
-        comment.setCommentText(body.getContent());
-        comment.setCreatedBy(username);
+        comment.setText(body.getContent());
+        comment.setUser(username);
         comment.setApiId(apiId);
         return comment;
     }
@@ -131,7 +125,7 @@ public class CommentMappingUtil {
         for (int i = start; i <= end; i++) {
             try {
                 if (includeCommenterInfo) {
-                    userClaimsMap = retrieveUserClaims(commentList[i].getCreatedBy(), userClaimsMap);
+                    userClaimsMap = retrieveUserClaims(commentList[i].getUser(), userClaimsMap);
                     listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i], userClaimsMap));
                 } else {
                     listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));

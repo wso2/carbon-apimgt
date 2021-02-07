@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class UpdateCommentDTO   {
+public class PostRequestBodyDTO   {
   
     private String content = null;
     private String category = null;
@@ -26,7 +26,7 @@ public class UpdateCommentDTO   {
   /**
    * Content of the comment 
    **/
-  public UpdateCommentDTO content(String content) {
+  public PostRequestBodyDTO content(String content) {
     this.content = content;
     return this;
   }
@@ -44,7 +44,7 @@ public class UpdateCommentDTO   {
   /**
    * Category of the comment 
    **/
-  public UpdateCommentDTO category(String category) {
+  public PostRequestBodyDTO category(String category) {
     this.category = category;
     return this;
   }
@@ -68,9 +68,9 @@ public class UpdateCommentDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UpdateCommentDTO updateComment = (UpdateCommentDTO) o;
-    return Objects.equals(content, updateComment.content) &&
-        Objects.equals(category, updateComment.category);
+    PostRequestBodyDTO postRequestBody = (PostRequestBodyDTO) o;
+    return Objects.equals(content, postRequestBody.content) &&
+        Objects.equals(category, postRequestBody.category);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class UpdateCommentDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class UpdateCommentDTO {\n");
+    sb.append("class PostRequestBodyDTO {\n");
     
     sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    category: ").append(toIndentedString(category)).append("\n");
