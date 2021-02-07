@@ -112,6 +112,25 @@ public class CommentMappingUtil {
         comment.setApiId(apiId);
         return comment;
     }
+//    /**
+//     * Converts a AddCommentDTO to a Comment object
+//     *
+//     * @param addCommentDTO AddCommentDTO body
+//     * @param parentCommentID Parent Comment ID
+//     * @param username username of the consumer
+//     * @param apiId    API ID
+//     * @return Comment object
+//     */
+//    public static Comment fromAddCommentDTOToComment(AddCommentDTO addCommentDTO, String parentCommentID, String username, String apiId) {
+//        Comment comment = new Comment();
+//        comment.setText(addCommentDTO.getContent());
+//        comment.setCategory(addCommentDTO.getCategory());
+//        comment.setParentCommentID(parentCommentID);
+//        comment.setEntryPoint("devPortal");
+//        comment.setUser(username);
+//        comment.setApiId(apiId);
+//        return comment;
+//    }
     /**
      * Wraps a List of Comments to a CommentListDTO
      *
