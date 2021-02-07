@@ -38,6 +38,7 @@ import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ServiceReferenceHolder {
 
@@ -242,5 +243,8 @@ public class ServiceReferenceHolder {
     public GatewayArtifactGenerator getGatewayArtifactGenerator(String type) {
 
         return gatewayArtifactGeneratorMap.get(type);
+    }
+    public Set<String> getGatewayArtifactGeneratorTypes(){
+        return gatewayArtifactGeneratorMap.keySet();
     }
 }

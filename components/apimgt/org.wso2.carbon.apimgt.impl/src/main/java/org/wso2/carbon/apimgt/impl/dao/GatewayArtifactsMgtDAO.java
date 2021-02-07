@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
-import org.apache.commons.io.IOUtils;
+import edu.emory.mathcs.backport.java.util.Collections;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -295,23 +295,28 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDAndLabel(String apiId, String label,
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByAPIIDAndLabel(String apiId, String[] labels,
                                                                                String tenantDomain)
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL;
+        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
-            preparedStatement.setString(2, label);
-            preparedStatement.setString(3, tenantDomain);
+            int index = 2;
+            for (String label : labels) {
+                preparedStatement.setString(index, label);
+                index++;
+            }
+            preparedStatement.setString(index, tenantDomain);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(apiId);
-                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -324,27 +329,32 @@ public class GatewayArtifactsMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to delete Gateway Artifact for Api : " + apiId + " and label: " + label, e);
+            handleException("Failed to retrieve Gateway Artifact for Api : " + apiId + " and labels: " + StringUtils.join(",", labels), e);
         }
 
         return apiRuntimeArtifactDtoList;
     }
 
-    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String label, String tenantDomain)
+    public List<APIRuntimeArtifactDto> retrieveGatewayArtifactsByLabel(String[] labels, String tenantDomain)
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
+        query = query.replace("_GATEWAY_LABELS_", StringUtils.join(",", Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, label);
-            preparedStatement.setString(2, tenantDomain);
+            int index = 1;
+            for (String label : labels) {
+                preparedStatement.setString(index, label);
+                index++;
+            }
+            preparedStatement.setString(index, tenantDomain);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
-                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -357,7 +367,7 @@ public class GatewayArtifactsMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway Artifact for label : " + label, e);
+            handleException("Failed to retrieve Gateway Artifact for labels : " + StringUtils.join(",", labels), e);
         }
 
         return apiRuntimeArtifactDtoList;
