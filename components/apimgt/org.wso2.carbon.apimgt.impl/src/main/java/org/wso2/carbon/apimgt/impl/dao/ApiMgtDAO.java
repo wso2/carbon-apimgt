@@ -15902,6 +15902,54 @@ public class ApiMgtDAO {
     /**
      * Get revision details by providing revision UUID
      *
+     * @return revision object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getRevisionUUID(String revisionID, String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID_ID_AND_API_UUID)) {
+            statement.setString(1, apiUUID);
+            statement.setString(2, revisionID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision details for revision ID: " + revisionID, e);
+        }
+        return revisionUUID;
+    }
+
+
+    /**
+     * Get revision details by providing revision UUID
+     *
+     * @return revision object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getOldestRevision(String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision details for revision ID: " + apiUUID, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Get revision details by providing revision UUID
+     *
      * @return revisions List object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */

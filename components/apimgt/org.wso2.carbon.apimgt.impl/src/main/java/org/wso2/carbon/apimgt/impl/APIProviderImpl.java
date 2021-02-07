@@ -9787,6 +9787,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getRevisionByRevisionUUID(revisionUUID);
     }
 
+
+    /**
+     * Get a Revision related to provided and revision UUID
+     *
+     * @param revisionID API Revision UUID
+     * @return API Revision
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    @Override
+    public String getAPIRevisionUUID(String revisionID, String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getRevisionUUID(revisionID, apiUUID);
+    }
+
+    /**
+     * Get a Revision related to provided and revision UUID
+     *
+     * @param apiUUID  Revision UUID
+     * @return API Revision
+     * @throws APIManagementException if failed to get the related API revision
+     */
+    @Override
+    public String getOldestRevisionID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getOldestRevision(apiUUID);
+    }
+
+
     /**
      * Get a List of API Revisions related to provided API UUID
      *
