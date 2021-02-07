@@ -7968,6 +7968,16 @@ public class ApiMgtDAO {
                         application.getCallbackUrl(), rs
                                 .getString("TOKEN_SCOPE"),
                         rs.getString("INPUTS"), application.getTokenType(),tenantDomain, keyManagerName);
+                if (request.getOAuthApplicationInfo().getParameter("username") == null) {
+                    KeyManagerConfigurationDTO config = getKeyManagerConfigurationByUUID(keyManagerName);
+                    if (config != null) {
+                        request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                                application.getCallbackUrl(), rs
+                                        .getString("TOKEN_SCOPE"),
+                                rs.getString("INPUTS"), application.getTokenType(),tenantDomain,
+                                config.getName());
+                    }
+                }
                 workflowDTO.setAppInfoDTO(request);
             }
         } catch (SQLException e) {
