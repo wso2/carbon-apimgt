@@ -881,7 +881,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Post request body
+              title: Add Comment
               type: object
               properties:
                 content:
@@ -1005,7 +1005,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Put request body
+              title: Update Comment
               type: object
               properties:
                 content:
