@@ -2225,16 +2225,7 @@ public class SQLConstants {
             " VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_COMMENT_SQL =
-            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
-            "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
-            "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
-            "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
-            " FROM AM_API_COMMENTS, AM_API API " +
-            " WHERE API.API_PROVIDER = ? " +
-            "   AND API.API_NAME = ? " +
-            "   AND API.API_VERSION = ? " +
-            "   AND API.API_ID = AM_API_COMMENTS.API_ID " +
-            "   AND AM_API_COMMENTS.COMMENT_ID = ?";
+            " SELECT * FROM AM_API_COMMENTS, AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? AND API.API_ID = AM_API_COMMENTS.API_ID AND AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_COMMENTS_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +

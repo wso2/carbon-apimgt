@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIRealmUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AddCommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommenterInfoDTO;
@@ -50,6 +51,13 @@ public class CommentMappingUtil {
         commentDTO.setContent(comment.getText());
         commentDTO.setCreatedBy(comment.getUser());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        if (comment.getUpdatedTime()!=null){
+            commentDTO.setUpdatedTime(comment.getUpdatedTime().toString());
+        }
+        commentDTO.setUpdatedBy(comment.getUpdatedBy());
+        commentDTO.setCategory(comment.getCategory());
+        commentDTO.setParentCommentId(comment.getParentCommentID());
+        commentDTO.setEntryPoint(comment.getEntryPoint());
         return commentDTO;
     }
 
@@ -104,7 +112,6 @@ public class CommentMappingUtil {
         comment.setApiId(apiId);
         return comment;
     }
-
     /**
      * Wraps a List of Comments to a CommentListDTO
      *
