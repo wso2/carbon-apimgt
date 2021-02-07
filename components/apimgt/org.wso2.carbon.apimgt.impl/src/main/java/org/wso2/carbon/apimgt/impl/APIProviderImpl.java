@@ -3229,7 +3229,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
-        if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)) {
+        if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
+                && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
             handleException("Unsupported Transport [" + transport + ']');
         }
     }

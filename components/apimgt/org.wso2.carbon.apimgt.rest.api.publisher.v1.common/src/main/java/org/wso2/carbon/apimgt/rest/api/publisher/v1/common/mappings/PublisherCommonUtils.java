@@ -100,8 +100,6 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
-        boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS.toString()
-                .equals(originalAPI.getType());
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
 
@@ -306,7 +304,7 @@ public class PublisherCommonUtils {
             }
         }
         // Validate if resources are empty
-        if (!isWSAPI && (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty())) {
+        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
@@ -329,7 +327,7 @@ public class PublisherCommonUtils {
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
-        if (!isWSAPI) {
+        if (!APIUtil.isStreamingApi(originalAPI)) {
             String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
@@ -698,7 +696,7 @@ public class PublisherCommonUtils {
         }
         
 
-        if (!isWSAPI) {
+        if (!isStreamingAPI(apiDto)) {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                 oasParser = new OAS2Parser();
@@ -708,6 +706,10 @@ public class PublisherCommonUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
+        } else {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
         //adding the api
         apiProvider.addAPI(apiToAdd);
@@ -1272,5 +1274,10 @@ public class PublisherCommonUtils {
 
         apiProvider.saveToGateway(createdProduct);
         return createdProduct;
+    }
+
+    public static boolean isStreamingAPI(APIDTO apidto) {
+        return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
     }
 }

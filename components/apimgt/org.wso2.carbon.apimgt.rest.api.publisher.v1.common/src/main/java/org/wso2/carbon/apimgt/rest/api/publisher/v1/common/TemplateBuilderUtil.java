@@ -105,8 +105,8 @@ public class TemplateBuilderUtil {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
-        // WS APIs won't have org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler
-        if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+        if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
+                APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
             if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
                 CORSConfiguration corsConfiguration = api.getCorsConfiguration();
                 if (corsConfiguration.getAccessControlAllowHeaders() != null) {
@@ -202,7 +202,8 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
                         apiUUIDProperty);
             }
-            if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+            if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
+                    APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                         authProperties);
             }
@@ -445,11 +446,8 @@ public class TemplateBuilderUtil {
 
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
-        if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-            return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
-                    extractedFolderPath, apidto,clientCertificatesDTOList);
-        }
-        return null;
+        return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
+                extractedFolderPath, apidto,clientCertificatesDTOList);
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -476,6 +474,13 @@ public class TemplateBuilderUtil {
                 }
             }
         }
+        return retrieveGatewayAPIDto(api, environment, tenantDomain, apidto, extractedFolderPath);
+    }
+
+    public static GatewayAPIDTO retrieveGatewayAPIDtoForStreamingAPI(API api, Environment environment,
+                                                                     String tenantDomain, APIDTO apidto,
+                                                                     String extractedFolderPath)
+            throws APIManagementException, XMLStreamException, APITemplateException, CertificateManagementException {
         return retrieveGatewayAPIDto(api, environment, tenantDomain, apidto, extractedFolderPath);
     }
 
@@ -602,6 +607,20 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUUID(),
                     gatewayAPIDTO.getLocalEntriesToBeRemove()));
 
+            GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
+            apiLocalEntry.setName(api.getUUID());
+            apiLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "\">" +
+                    definition.replaceAll("&(?!amp;)", "&amp;").
+                            replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                    + "</localEntry>");
+            gatewayAPIDTO.setLocalEntriesToBeAdd(addGatewayContentToList(apiLocalEntry,
+                    gatewayAPIDTO.getLocalEntriesToBeAdd()));
+        } else if (api.getType() != null && (APIConstants.APITransportType.WS.toString().equals(api.getType())
+                || APIConstants.APITransportType.SSE.toString().equals(api.getType())
+                || APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
+            gatewayAPIDTO.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(api.getUUID(),
+                    gatewayAPIDTO.getLocalEntriesToBeRemove()));
+            definition = api.getAsyncApiDefinition();
             GatewayContentDTO apiLocalEntry = new GatewayContentDTO();
             apiLocalEntry.setName(api.getUUID());
             apiLocalEntry.setContent("<localEntry key=\"" + api.getUUID() + "\">" +

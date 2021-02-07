@@ -78,12 +78,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
@@ -1961,6 +1963,10 @@ public class APIMappingUtil {
      */
     private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
+        if (apiType.equals(APIConstants.APITransportType.WEBSUB.toString())) {
+            return getDefaultWebSubOperationsList();
+        }
+
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
         String[] supportedMethods = null;
 
@@ -1972,8 +1978,6 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.WS_DEFAULT_METHODS;
         } else if (apiType.equals(APIConstants.APITransportType.SSE.toString())) {
             supportedMethods = APIConstants.SSE_DEFAULT_METHODS;
-        } else if (apiType.equals(APIConstants.APITransportType.WEBSUB.toString())) {
-            supportedMethods = APIConstants.WEBSUB_DEFAULT_METHODS;
         } else {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
@@ -1986,6 +1990,25 @@ public class APIMappingUtil {
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);
         }
+        return operationsDTOs;
+    }
+
+    private static List<APIOperationsDTO> getDefaultWebSubOperationsList() {
+        List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
+        APIOperationsDTO eventsReceiverResourceOperationsDTO = new APIOperationsDTO();
+        eventsReceiverResourceOperationsDTO.setTarget("/webhooks_events_receiver_resource");
+        eventsReceiverResourceOperationsDTO.setVerb("post");
+        eventsReceiverResourceOperationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+        eventsReceiverResourceOperationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        operationsDTOs.add(eventsReceiverResourceOperationsDTO);
+
+        APIOperationsDTO wildcardOperationDTO = new APIOperationsDTO();
+        wildcardOperationDTO.setTarget("/*");
+        wildcardOperationDTO.setVerb("post");
+        wildcardOperationDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+        wildcardOperationDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        operationsDTOs.add(wildcardOperationDTO);
+
         return operationsDTOs;
     }
 

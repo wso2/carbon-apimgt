@@ -52,6 +52,7 @@ public class API implements Serializable {
     private String wadlUrl;
     private String swaggerDefinition;
     private String graphQLSchema;
+    private String asyncApiDefinition;
     private String type;
     private String context;
     private String contextTemplate;
@@ -340,6 +341,14 @@ public class API implements Serializable {
 
     public String getGraphQLSchema() {
         return graphQLSchema;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 
     public Set<String> getEnvironments() {
