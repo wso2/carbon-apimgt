@@ -3657,7 +3657,6 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDocContent;
 
     }
-<<<<<<< HEAD
     
     public String extractQuery(String searchQuery) {
         String[] searchQueries = searchQuery.split("&");
@@ -3972,7 +3971,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException("Error while accessing thumbnail resource ", e);
         }
         return null;
-=======
+    }
 
     /**
      * Returns the AsyncAPI definition of the given API
@@ -3982,7 +3981,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     @Override
-    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException{
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String asyncApiDoc = null;
         boolean tenantFlowStarted = false;
@@ -4014,6 +4013,5 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return asyncApiDoc;
->>>>>>> 72a42d21c36... Backend implementation for AsyncAPI import and validate
     }
 }

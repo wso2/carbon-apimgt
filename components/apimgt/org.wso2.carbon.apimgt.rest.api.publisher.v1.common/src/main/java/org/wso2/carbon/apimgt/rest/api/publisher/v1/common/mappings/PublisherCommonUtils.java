@@ -333,7 +333,7 @@ public class PublisherCommonUtils {
         apiIdentifier.setUuid(apiToUpdate.getUuid());
 
         if (!isAsyncAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
