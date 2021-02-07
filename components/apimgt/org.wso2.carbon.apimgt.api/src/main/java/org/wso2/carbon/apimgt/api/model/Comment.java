@@ -25,37 +25,20 @@ import java.util.Date;
  */
 public class Comment {
 
-    private String commentId;
-    private String commentText;
-    private String createdBy;
-    private Date createdTime;
-    private String updatedBy;
-    private Date updatedTime;
-    private String apiId;
-    private String parentCommentID;
-    private String entryPoint;
-    private String category;
-
-    public String getCommentId() {
-        return commentId;
+    public String getUser() {
+        return user;
     }
 
-    public void setCommentId(String commentId) {
-        this.commentId = commentId;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getCommentText() {
-        return commentText;
+    public String getText() {
+        return text;
     }
 
-    public void setCommentText(String commentText) {this.commentText = commentText; }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public Date getCreatedTime() {
@@ -66,13 +49,13 @@ public class Comment {
         this.createdTime = createdTime;
     }
 
-    public String getUpdatedBy() {return updatedBy;    }
+    public String getId() {
+        return id;
+    }
 
-    public void setUpdatedBy(String updatedBy) {this.updatedBy = updatedBy;  }
-
-    public Date getUpdatedTime() {return updatedTime; }
-
-    public void setUpdatedTime(Date updatedTime) {this.updatedTime = updatedTime; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getApiId() {
         return apiId;
@@ -82,23 +65,9 @@ public class Comment {
         this.apiId = apiId;
     }
 
-    public String getParentCommentID() {return parentCommentID; }
-
-    public void setParentCommentID(String parentCommentID) {
-        this.parentCommentID = parentCommentID;
-    }
-
-    public String getEntryPoint() {return entryPoint; }
-
-    public void setEntryPoint(String entryPoint) {
-        this.entryPoint = entryPoint;
-    }
-
-    public String getCategory() {return category; }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-
+    private String user;
+    private String text;
+    private Date createdTime;
+    private String id;
+    private String apiId;
 }

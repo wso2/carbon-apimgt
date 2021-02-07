@@ -106,9 +106,6 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: v2
 servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/NestedCommenting/DeveloperPortal/v2
   - url: https://apis.wso2.com/api/am/devportal/v2
 ######################################################
 # The "API Collection" resource APIs
@@ -884,7 +881,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Add Comment
+              title: Post request body
               type: object
               properties:
                 content:
@@ -1008,7 +1005,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Update Comment
+              title: Put request body
               type: object
               properties:
                 content:

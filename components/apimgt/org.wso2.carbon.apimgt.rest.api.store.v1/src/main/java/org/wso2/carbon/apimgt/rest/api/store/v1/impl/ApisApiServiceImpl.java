@@ -238,7 +238,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, AddCommentDTO addCommentDTO, String parentCommentID, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String parentCommentID, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -251,12 +251,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
             Comment comment = new Comment();
-            comment.setCommentText(addCommentDTO.getContent());
-            comment.setCreatedBy(username);
-            comment.setCategory(addCommentDTO.getCategory());
+            comment.setText(postRequestBodyDTO.getContent());
+            comment.setUser(username);
             comment.setApiId(apiId);
-            comment.setParentCommentID(parentCommentID);
-            comment.setEntryPoint("devPortal");
 //            comment.setParentCommentID(parentCommentID);
 //            if (body.getCategory()==null){
 //                comment.setCategory("general");
@@ -335,7 +332,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 CommentDTO commentDTO;
                 if (includeCommenterInfo) {
                     Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
-                            .retrieveUserClaims(comment.getCreatedBy(), new HashMap<>());
+                            .retrieveUserClaims(comment.getUser(), new HashMap<>());
                     commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
                 } else {
                     commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
@@ -365,7 +362,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response editCommentOfAPI(String commentId, String apiId, UpdateCommentDTO updateCommentDT, MessageContext messageContext) throws APIManagementException{
+    public Response editCommentOfAPI(String commentId, String apiId, PutRequestBodyDTO putRequestBodyDTO, MessageContext messageContext) throws APIManagementException{
         return null;
     }
 
