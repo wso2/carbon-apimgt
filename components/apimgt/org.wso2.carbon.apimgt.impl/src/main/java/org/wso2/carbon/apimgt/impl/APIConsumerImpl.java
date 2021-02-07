@@ -6240,15 +6240,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         List<Label> gatewayLabels;
         String updatedDefinition = null;
         Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId);
-        AsyncApiParser asyncApiParser = new AsyncApiParser();
-        if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId);
-            gatewayLabels = api.getGatewayLabels();
-            hostsWithSchemes = getHostWithSchemeMappingForLabelWS(gatewayLabels, labelName);
-            updatedDefinition = asyncApiParser.getAsyncApiDefinitionForStore(api, definition, hostsWithSchemes);
-        }
-        return updatedDefinition;
+        // TODO:
+//        String definition = super.getOpenAPIDefinition(apiId);
+//        AsyncApiParser asyncApiParser = new AsyncApiParser();
+//        if (apiId instanceof APIIdentifier) {
+//            API api = getLightweightAPI((APIIdentifier) apiId);
+//            gatewayLabels = api.getGatewayLabels();
+//            hostsWithSchemes = getHostWithSchemeMappingForLabelWS(gatewayLabels, labelName);
+//            updatedDefinition = asyncApiParser.getAsyncApiDefinitionForStore(api, definition, hostsWithSchemes);
+//        }
+//        return updatedDefinition;
+        return "";
     }
 
     @Override
