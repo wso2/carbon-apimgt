@@ -135,18 +135,18 @@ export default function MarkdownEditor(props) {
                     </IconButton>
                     <Typography variant='h4' className={classes.editorHeader}>
                         {descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION
-                        ? (
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.description.of'
-                            defaultMessage='Edit Description of '
-                        />
-                        )
-                        : (
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of'
-                            defaultMessage='Edit Overview of '
-                        />
-                        )}
+                            ? (
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.MarkdownEditor.edit.description.of'
+                                    defaultMessage='Edit Description of '
+                                />
+                            )
+                            : (
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of'
+                                    defaultMessage='Edit Overview of '
+                                />
+                            )}
                         {api.name}
                     </Typography>
                     <Button
