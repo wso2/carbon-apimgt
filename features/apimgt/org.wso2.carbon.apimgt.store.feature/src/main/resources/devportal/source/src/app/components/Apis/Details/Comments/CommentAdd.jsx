@@ -18,7 +18,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, Button, Typography } from '@material-ui/core';
+import { TextField, Button, Typography, InputLabel } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -37,7 +37,7 @@ const styles = theme => ({
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(2),
-        paddingTop: theme.spacing.unig,
+        paddingTop: theme.spacing(1),
         marginTop: theme.spacing(2),
     },
     textField: {
@@ -48,6 +48,10 @@ const styles = theme => ({
     commentAddWrapper: {
         display: 'flex',
         alignItems: 'top',
+        flexFlow: 'column',
+        '& label': {
+            marginBottom: theme.spacing(1),
+        },
     },
     commentAddButton: {
         '& span.MuiButton-label': {
@@ -71,13 +75,14 @@ class CommentAdd extends React.Component {
         super(props);
         this.state = {
             content: '',
+            replyIndex: -1,
             currentLength: 0,
         };
         this.inputChange = this.inputChange.bind(this);
         this.handleClickAddComment = this.handleClickAddComment.bind(this);
         this.handleClickCancel = this.handleClickCancel.bind(this);
         // this.handleCategoryChange = this.handleCategoryChange.bind(this);
-        // this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
+        this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
     }
 
     /**
@@ -94,19 +99,19 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        this.setState({ content: '' });
+        this.setState({ content: '', replyIndex: -1 });
         // const { toggleShowReply } = this.props;
         // toggleShowReply();
     }
 
-    // /**
-    //  * Filters the comment to add the reply
-    //  * @memberof CommentAdd
-    //  */
-    // filterCommentToAddReply(commentToFilter) {
-    //     const { parentCommentId } = this.props;
-    //     return commentToFilter.commentId === parentCommentId;
-    // }
+    /**
+     * Filters the comment to add the reply
+     * @memberof CommentAdd
+     */
+    filterCommentToAddReply(commentToFilter) {
+        const { parentCommentId } = this.props;
+        return commentToFilter.id === parentCommentId;
+    }
 
     /**
      * Handles adding a new comment
@@ -114,7 +119,7 @@ class CommentAdd extends React.Component {
      */
     handleClickAddComment() {
         const {
-            apiId, allComments, commentsUpdate, intl,
+            apiId, allComments, commentsUpdate, intl, parentCommentId,
         } = this.props;
         const { content } = this.state;
         const Api = new API();
@@ -128,14 +133,13 @@ class CommentAdd extends React.Component {
                 .then((newComment) => {
                     this.setState({ content: '' });
                     const addedComment = newComment.body;
-                    // if (parentCommentId === null) {
-                    //     allComments.push(addedComment);
-                    // } else {
-                    //     const index = allComments.findIndex(this.filterCommentToAddReply);
-                    //     allComments[index].replies.push(addedComment);
-                    //     toggleShowReply();
-                    // }
-                    allComments.push(addedComment);
+                    if (parentCommentId === null) {
+                        allComments.push(addedComment);
+                    } else {
+                        const index = allComments.findIndex(this.filterCommentToAddReply)
+                        allComments[index].replies.list.push(addedComment);
+                        this.setState({ replyIndex: -1 });
+                    }
                     commentsUpdate(allComments);
                 })
                 .catch((error) => {
@@ -172,6 +176,12 @@ class CommentAdd extends React.Component {
             <Grid container spacing={3} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
                     <div className={classes.commentAddWrapper}>
+                        <InputLabel htmlFor="standard-multiline-flexible">
+                            <FormattedMessage
+                                id='Apis.Details.Comments.CommentAdd.write.comment.label'
+                                defaultMessage='Write a comment'
+                            />
+                        </InputLabel>
                         <TextField
                             id='standard-multiline-flexible'
                             autoFocus
@@ -183,10 +193,6 @@ class CommentAdd extends React.Component {
                             })}
                             className={classes.textField}
                             margin='normal'
-                            label={intl.formatMessage({
-                                defaultMessage: 'Write a comment',
-                                id: 'Apis.Details.Comments.CommentAdd.write.comment.label',
-                            })}
                             placeholder={intl.formatMessage({
                                 defaultMessage: 'Write a comment',
                                 id: 'Apis.Details.Comments.CommentAdd.write.comment.help',
@@ -196,7 +202,7 @@ class CommentAdd extends React.Component {
                             onChange={this.inputChange}
                             variant='outlined'
                         />
-                        <Typography className={classes.content} align='left'>
+                        <Typography className={classes.content} align='right'>
                             {currentLength + '/' + theme.custom.maxCommentLength}
                         </Typography>
                     </div>
@@ -211,7 +217,7 @@ class CommentAdd extends React.Component {
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentAdd.btn.add.comment'
-                                    defaultMessage='Add Comment'
+                                    defaultMessage='Comment'
                                 />
                             </Button>
                         </Grid>
