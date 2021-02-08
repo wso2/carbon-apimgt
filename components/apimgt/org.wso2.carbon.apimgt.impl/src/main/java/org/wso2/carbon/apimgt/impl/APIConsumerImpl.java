@@ -4207,7 +4207,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             OAuthAppRequest request =
                     ApplicationUtils
                             .createOauthAppRequest(applicationName, null, callbackUrl, authScopeString, jsonString,
-                                    applicationTokenType, this.tenantDomain, keyManagerName);
+                                    applicationTokenType, tenantDomain, keyManagerName);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
