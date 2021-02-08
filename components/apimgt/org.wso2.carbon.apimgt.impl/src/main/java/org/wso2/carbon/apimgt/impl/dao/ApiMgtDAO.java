@@ -5092,6 +5092,17 @@ public class ApiMgtDAO {
                         } catch (APIManagementException e) {
                             log.error("Error while Deleting Client Application", e);
                         }
+                    } else {
+                        KeyManagerConfigurationDTO config = getKeyManagerConfigurationByUUID(keyManagerName);
+                        if (config != null) {
+                            keyManagerName = config.getName();
+                            keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
+                            try {
+                                keyManager.deleteMappedApplication(consumerKey);
+                            } catch (APIManagementException e) {
+                                log.error("Error while Deleting Client Application", e);
+                            }
+                        }
                     }
                     // OAuth app is deleted if only it has been created from API Store. For mapped clients we don't
                     // call delete.
@@ -5199,6 +5210,11 @@ public class ApiMgtDAO {
                 while (resultSet.next()) {
                     String consumerKey = resultSet.getString("CONSUMER_KEY");
                     String keyManager = resultSet.getString("KEY_MANAGER");
+
+                    KeyManagerConfigurationDTO keyManagerConfiguration = getKeyManagerConfigurationByUUID(keyManager);
+                    if (keyManagerConfiguration != null) {
+                        keyManager = keyManagerConfiguration.getName();
+                    }
                     consumerKeysOfApplication.put(consumerKey, keyManager);
                 }
             }
