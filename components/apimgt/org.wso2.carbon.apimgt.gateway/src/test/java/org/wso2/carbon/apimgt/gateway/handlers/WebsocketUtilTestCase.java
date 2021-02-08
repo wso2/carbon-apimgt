@@ -52,6 +52,7 @@ import javax.cache.Caching;
 public class WebsocketUtilTestCase {
     private String apiKey = "abc";
     private String apiContext = "/ishara";
+    private String resource = "/resource";
     private String resourceKey = "resourceKey";
     private String subscriptionKey = "subscriptionKey";
     private String apiName = "PhoneVerify";
@@ -135,16 +136,19 @@ public class WebsocketUtilTestCase {
 
     @Test
     public void testGetAccessTokenCacheKey() {
-        Assert.assertEquals("235erwytgtkyb:/ishara", WebsocketUtil.getAccessTokenCacheKey(cachedToken,apiContext ));
+        Assert.assertEquals("235erwytgtkyb:/ishara:/resource",
+                            WebsocketUtil.getAccessTokenCacheKey(cachedToken, apiContext, resource));
     }
 
     @Test
     public void testInitParams() {
-        Assert.assertEquals("235erwytgtkyb:/ishara", WebsocketUtil.getAccessTokenCacheKey(cachedToken,apiContext ));
+        Assert.assertEquals("235erwytgtkyb:/ishara:/resource",
+                            WebsocketUtil.getAccessTokenCacheKey(cachedToken, apiContext, resource));
     }
 
     @Test
     public void testIsRemoveOAuthHeadersFromOutMessage() {
-        Assert.assertEquals("235erwytgtkyb:/ishara", WebsocketUtil.getAccessTokenCacheKey(cachedToken,apiContext ));
+        Assert.assertEquals("235erwytgtkyb:/ishara:/resource",
+                            WebsocketUtil.getAccessTokenCacheKey(cachedToken, apiContext, resource));
     }
 }
