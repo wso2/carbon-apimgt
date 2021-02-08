@@ -269,6 +269,7 @@
                         <configuration>
                             <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
                             <executable>${npm.executable}</executable>
+                            <skip>${npm.build.skip}</skip>
                             <arguments>
                                 <argument>run</argument>
                                 <argument>${npm.build.command}</argument>
@@ -312,6 +313,7 @@
     </build>
     <properties>
         <maven.test.skip>false</maven.test.skip>
+        <npm.build.skip>true</npm.build.skip>
         <npm.executable>npm</npm.executable>
         <npm.build.command>build:prod</npm.build.command>
         <npm.working.dir>./src/main/</npm.working.dir>
