@@ -404,6 +404,16 @@ public class ImportUtils {
         return tempDirectory;
     }
 
+    public static String getArchivePathOfExtractedDirectory(String baseDirectory, InputStream uploadedInputStream)
+            throws APIImportExportException {
+        String uploadFileName = ImportExportConstants.UPLOAD_API_FILE_NAME;
+        String absolutePath = baseDirectory + File.separator;
+        CommonUtil.transferFile(uploadedInputStream, uploadFileName, absolutePath);
+        String extractedFolderName = CommonUtil.extractArchive(new File(absolutePath + uploadFileName), absolutePath);
+        return preprocessImportedArtifact(absolutePath + extractedFolderName);
+    }
+
+
     /**
      * Extract the imported archive to a temporary folder and return the folder path of it
      *

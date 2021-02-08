@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
+import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
@@ -131,6 +132,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         retrieveBlockConditionsAndKeyTemplates();
+        WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         jmsTransportHandlerForTrafficManager
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
@@ -139,6 +141,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 new APIMgtGatewayCacheMessageListener());
         jmsTransportHandlerForEventHub
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
+        jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
+                new GatewayJMSMessageListener());
     }
 
     private void retrieveAndDeployArtifacts(String tenantDomain) {
@@ -248,6 +252,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
+        WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
 
         cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
         new Thread(() -> {
@@ -268,6 +273,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         ServiceReferenceHolder.getInstance().removeUnloadedTenant(tenantDomain);
         SubscriptionDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
+        WebhooksDataHolder.getInstance().unregisterTenantSubscriptionStore(tenantDomain);
     }
 
     @Override

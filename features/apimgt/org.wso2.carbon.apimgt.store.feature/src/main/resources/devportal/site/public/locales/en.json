@@ -1,4 +1,5 @@
 {
+  "\"Applications.Details.Subscriptions.api.webhooks\"": "Web Hooks",
   "Apis.Details.APIConsole.APIConsole.download.postman": "Postman collection",
   "Apis.Details.APIConsole.APIConsole.download.swagger": "OpenAPI",
   "Apis.Details.ApiCOnsole.generate.test.key": "GET TEST KEY ",
@@ -18,6 +19,7 @@
   "Apis.Details.ApiConsole.security.scheme.apikey": "API Key",
   "Apis.Details.ApiConsole.security.scheme.basic": "Basic",
   "Apis.Details.ApiConsole.security.scheme.oauth": "OAuth",
+  "Apis.Details.Async.Definition.title": "AsyncAPI Specification",
   "Apis.Details.Comments.CommentAdd.btn.add.comment": "Add Comment",
   "Apis.Details.Comments.CommentAdd.btn.cancel": "Cancel",
   "Apis.Details.Comments.CommentAdd.error.blank.comment": "You cannot enter a blank comment",
@@ -94,7 +96,6 @@
   "Apis.Details.Documents.Documentation.no.docs.content": "No documents are available for this API",
   "Apis.Details.Documents.Documentation.show": "SHOW",
   "Apis.Details.Documents.Documentation.title": "API Documentation",
-  "Apis.Details.Async.Definition.title": "AsyncAPI Specification",
   "Apis.Details.Documents.View.btn.download": "Download",
   "Apis.Details.Documents.View.error.downloading": "Error downloading the file",
   "Apis.Details.Documents.View.file.availability": "No file available",

@@ -115,6 +115,7 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -294,7 +295,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
+     * Returns a list of agit ll #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Providers
@@ -3319,9 +3320,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion)
-            throws DuplicateAPIException, APIManagementException {
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
+                                   String tenantDomain) throws DuplicateAPIException, APIManagementException {
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
         if (existingAPI == null) {
@@ -4294,7 +4294,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            deleteAPIRevisions(api.getUuid());
+            deleteAPIRevisions(api.getUuid(), tenantDomain);
             deleteAPIFromDB(api);
             /**
              * Delete the API in Kubernetes
@@ -4421,13 +4421,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void deleteAPIRevisions(String apiUUID) throws APIManagementException {
+    private void deleteAPIRevisions(String apiUUID, String tenantDomain) throws APIManagementException {
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         for (APIRevision apiRevision : apiRevisionList) {
             if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
                 undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
             }
-            deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID());
+            deleteAPIRevision(apiUUID, apiRevision.getRevisionUUID(), tenantDomain);
         }
     }
 
@@ -9030,6 +9030,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return deploymentStatusList;
     }
 
+    @Override
+    public void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            AsyncApiParserUtil.saveAPIDefinition(api, jsonText, registry);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
     /**
      * This method returns an instance of ContainerManager
      *
@@ -9707,7 +9718,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
-    public String addAPIRevision(APIRevision apiRevision) throws APIManagementException {
+    public String addAPIRevision(APIRevision apiRevision, String tenantDomain) throws APIManagementException {
         int revisionCountPerAPI = apiMgtDAO.getRevisionCountByAPI(apiRevision.getApiUUID());
         if (revisionCountPerAPI > 4) {
             String errorMessage = "Maximum number of revisions per API has reached. " +
@@ -9762,11 +9773,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             File artifact = importExportAPI
                     .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
-            gatewayArtifactsMgtDAO
-                    .addGatewayPublishedAPIDetails(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                            tenantDomain, APIConstants.HTTP_PROTOCOL);
-            artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                    apiRevision.getRevisionUUID(),tenantDomain, artifact);
+            gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiId.getApiName(),
+                    apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL, artifact);
+            if (artifactSaver != null){
+                artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
+                        apiRevision.getRevisionUUID(),tenantDomain, artifact);
+            }
         } catch (APIImportExportException|ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while Store the Revision Artifact",
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
@@ -9907,7 +9919,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to restore APIRevision
      */
     @Override
-    public void restoreAPIRevision(String apiId, String apiRevisionId) throws APIManagementException {
+    public void restoreAPIRevision(String apiId, String apiRevisionId, String tenantDomain) throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -9938,7 +9950,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to delete APIRevision
      */
     @Override
-    public void deleteAPIRevision(String apiId, String apiRevisionId) throws APIManagementException {
+    public void deleteAPIRevision(String apiId, String apiRevisionId, String tenantDomain) throws APIManagementException {
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifier == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -9951,10 +9963,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = getAPIRevisionDeploymentList(apiRevisionId);
         if (apiRevisionDeploymentsResponse.size() != 0) {
-            String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway." +
+            String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway" +
+                    "." +
                     "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "
                     + apiRevision.getRevisionUUID();
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
         apiIdentifier.setUuid(apiId);
@@ -9963,16 +9976,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
-        try {
-            artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                    apiRevision.getRevisionUUID(),tenantDomain);
-        } catch (ArtifactSynchronizerException e) {
-            log.error("Error while deleting Runtime artifacts from artifact Store", e);
+        gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        if (artifactSaver != null) {
+            try {
+                artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiIdentifier.getApiName(),
+                        apiIdentifier.getVersion(),
+                        apiRevision.getRevisionUUID(), tenantDomain);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error while deleting Runtime artifacts from artifact Store", e);
+            }
         }
     }
-
 }
