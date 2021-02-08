@@ -223,10 +223,6 @@ const KeyConfiguration = (props) => {
     );
 
     // Check for additional properties for token endpoint and revoke endpoints.
-    const propPrefix = keyRequest.keyType.toLowerCase();
-    tokenEndpoint = tokenEndpoint;
-    revokeEndpoint = revokeEndpoint;
-
     return (
         <>
             <Box display='flex' alignItems='center'>
