@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class represent the model for API comments
@@ -35,6 +37,14 @@ public class Comment {
     private String parentCommentID;
     private String entryPoint;
     private String category;
+//    private CommentList replies;
+    private List<Comment> replies = new ArrayList<Comment>();
+
+    public List<Comment> getReplies(){return this.replies; }
+
+    public void setReplies(List<Comment> replies) {this.replies = replies; }
+
+    public void addReply(Comment comment) { this.replies.add(comment); }
 
     public String getId() {return id; }
 

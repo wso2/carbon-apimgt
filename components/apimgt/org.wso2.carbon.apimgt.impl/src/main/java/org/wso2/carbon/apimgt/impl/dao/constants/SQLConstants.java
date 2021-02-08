@@ -2225,7 +2225,22 @@ public class SQLConstants {
             " VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_COMMENT_SQL =
-            " SELECT * FROM AM_API_COMMENTS, AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? AND API.API_ID = AM_API_COMMENTS.API_ID AND AM_API_COMMENTS.COMMENT_ID = ?";
+            " SELECT * " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                    "AND " +
+                "API.API_NAME = ? " +
+                    "AND " +
+                "API.API_VERSION = ? " +
+                    "AND " +
+                "API.API_ID = AM_API_COMMENTS.API_ID " +
+                    "AND " +
+                "AM_API_COMMENTS.COMMENT_ID = ?";
+
+    public static final String GET_REPLIES_SQL = "SELECT * FROM AM_API_COMMENTS WHERE PARENT_COMMENT_ID=?";
 
     public static final String GET_COMMENTS_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +

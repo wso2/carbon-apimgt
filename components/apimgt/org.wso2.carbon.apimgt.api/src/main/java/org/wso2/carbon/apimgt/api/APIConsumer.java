@@ -456,7 +456,7 @@ public interface APIConsumer extends APIManager {
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(Identifier identifier, String commentId) throws APIManagementException;
+    Comment getComment(Identifier identifier, String commentId, Integer limit, Integer offset) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper Api type wrapper
