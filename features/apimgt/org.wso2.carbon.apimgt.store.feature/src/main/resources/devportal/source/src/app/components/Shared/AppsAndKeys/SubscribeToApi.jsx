@@ -205,8 +205,8 @@ const subscribeToApi = (props) => {
                     >
                         <InputLabel shrink htmlFor='policy-label-placeholder' className={classes.quotaHelp}>
                             <FormattedMessage
-                                id='Shared.AppsAndKeys.SubscribeToApi.throttling.policy'
-                                defaultMessage='Throttling Policy'
+                                id='Shared.AppsAndKeys.SubscribeToApi.business.plan'
+                                defaultMessage='Business Plan'
                             />
                         </InputLabel>
                         <Select
