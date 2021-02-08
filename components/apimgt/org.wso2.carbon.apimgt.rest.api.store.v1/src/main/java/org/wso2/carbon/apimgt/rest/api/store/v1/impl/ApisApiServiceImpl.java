@@ -259,7 +259,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setApiId(apiId);
             //Comment comment = CommentMappingUtil.fromAddCommentDTOToComment(addCommentDTO, parentCommentID, username, apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
-            Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
+            Comment createdComment = apiConsumer.getComment(identifier, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -322,7 +322,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
 
-            Comment comment = apiConsumer.getComment(identifier, commentId);
+            Comment comment = apiConsumer.getComment(identifier, commentId, limit, offset);
 
             if (comment != null) {
                 CommentDTO commentDTO;

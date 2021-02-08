@@ -7961,6 +7961,74 @@ public class ApiMgtDAO {
         return commentList.toArray(new Comment[commentList.size()]);
     }
 
+    public List<Comment> getReplies(String commentId, Integer limit, Integer offset) throws APIManagementException {
+        List<Comment> commentList = new ArrayList<Comment>();
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepStmt = null;
+        //boolean isProduct = apiTypeWrapper.isAPIProduct();
+        //int id = -1;
+        String sqlQuery = SQLConstants.GET_REPLIES_SQL;
+        Identifier identifier;
+//    public static final String GET_REPLIES_SQL = "SELECT * FROM AM_API_COMMENTS WHERE PARENT_COMMENT_ID=?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+//            if (!isProduct) {
+//                identifier = apiTypeWrapper.getApi().getId();
+//            } else  {
+//                identifier = apiTypeWrapper.getApiProduct().getId();
+//            }
+//            id = getAPIID(identifier, connection);
+//            if (id == -1) {
+//                String msg = "Could not load API record for: " + identifier.getName();
+//                log.error(msg);
+//                throw new APIManagementException(msg);
+//            }
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, commentId);
+//            prepStmt.setString(2, identifier.getName());
+//            prepStmt.setString(3, identifier.getVersion());
+            resultSet = prepStmt.executeQuery();
+            while (resultSet.next()) {
+                Comment comment = new Comment();
+                comment.setId(resultSet.getString("COMMENT_ID"));
+                comment.setText(resultSet.getString("COMMENT_TEXT"));
+                comment.setUser(resultSet.getString("CREATED_BY"));
+                comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                comment.setApiId(resultSet.getString("API_ID"));
+                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                comment.setCategory(resultSet.getString("CATEGORY"));
+
+
+//                Comment comment = new Comment();
+//                comment.setId(resultSet.getString("COMMENT_ID"));
+//                comment.setText(resultSet.getString("COMMENT_TEXT"));
+//                comment.setUser(resultSet.getString("CREATED_BY"));
+//                comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                commentList.add(comment);
+            }
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e1) {
+                log.error("Failed to retrieve comments ", e1);
+            }
+            //handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+//        return commentList.toArray(new Comment[commentList.size()]);
+        return commentList;
+    }
+
+
+
+
     /**
      * Returns a specific comment of an API
      *
@@ -7969,7 +8037,7 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
+    public Comment getComment(Identifier identifier, String commentId, Integer limit, Integer offset) throws APIManagementException {
 
         Comment comment = new Comment();
         Connection connection = null;
@@ -8004,6 +8072,11 @@ public class ApiMgtDAO {
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                 comment.setCategory(resultSet.getString("CATEGORY"));
+
+                if (limit>0){
+                    comment.setReplies(getReplies(commentId, limit, offset));
+                }
+
                 return comment;
             }
         } catch (SQLException e) {
@@ -8021,7 +8094,6 @@ public class ApiMgtDAO {
         }
         return null;
     }
-
     /**
      * Returns all the Comments on an API
      *
