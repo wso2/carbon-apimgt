@@ -29,7 +29,8 @@ const styles = theme => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.primary.main),
         '& span.MuiButton-label': {
-            color: theme.palette.getContrastText(theme.palette.primary.main),
+            color: theme.palette.primary.main,
+            fontWeight: '400',
         },
         cursor: 'pointer',
     },
@@ -38,7 +39,6 @@ const styles = theme => ({
         marginTop: theme.spacing(0.3),
     },
     verticalSpace: {
-        marginTop: theme.spacing(1),
         display: 'flex',
         alignItems: 'center',
     },
@@ -149,15 +149,14 @@ class CommentOptions extends React.Component {
             classes, comment, editIndex, index, theme,
         } = this.props;
         return (
-            <Grid container spacing={1} className={classes.verticalSpace} key={comment.id}>
+            <Grid container className={classes.verticalSpace} key={comment.id}>
                 {/* only the comment owner or admin can delete a comment */}
                 {AuthManager.getUser() && (comment.createdBy === AuthManager.getUser().name) && [
                         <Grid item key='key-delete'>
                             <Button
-                                variant="outlined" size="small"
+                                size='small'
                                 className={editIndex === -1 ? classes.link : classes.disable}
                                 onClick={() => this.handleClickOpen(comment)}
-                                variant='contained'
                                 color='primary'
                             >
                                 <FormattedMessage
@@ -166,25 +165,21 @@ class CommentOptions extends React.Component {
                                 />
                             </Button>
                         </Grid>,
-                        <Grid item key='key-delete-vertical-divider'>
-                            <VerticalDivider height={15} />
-                        </Grid>,
+
                     ]}
 
-                {/* {AuthManager.getUser() && comment.parentCommentId == null && [
+                {comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
-                        <Typography
-                            component='a'
+                        <Button
+                            size='small'
                             className={editIndex === -1 ? classes.link : classes.disable}
                             onClick={() => this.showAddComment(index)}
+                            color='primary'
                         >
                             <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
-                        </Typography>
+                        </Button>
                     </Grid>,
-                    <Grid item key='key-reply-vertical-divider'>
-                        <VerticalDivider height={15} />
-                    </Grid>,
-                ]} */}
+                ]}
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
                 {/* {comment.createdBy === AuthManager.getUser().name
@@ -205,7 +200,7 @@ class CommentOptions extends React.Component {
                             <VerticalDivider height={15} />
                         </Grid>,
                     ]} */}
-                <Grid item className={classes.time}>
+                {/* <Grid item className={classes.time}>
                     <Typography component='a' variant='caption'>
                         {this.displayDate(comment.createdTime)}
                     </Typography>

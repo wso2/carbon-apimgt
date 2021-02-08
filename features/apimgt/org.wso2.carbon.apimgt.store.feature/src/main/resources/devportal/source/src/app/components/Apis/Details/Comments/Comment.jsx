@@ -23,7 +23,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
-import Paper from '@material-ui/core/Paper';
+import Box from '@material-ui/core/Box';
+import moment from 'moment';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
@@ -31,6 +32,7 @@ import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
 import API from 'AppData/api';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
+import CommentAdd from './CommentAdd';
 
 const styles = (theme) => ({
     link: {
@@ -60,7 +62,9 @@ const styles = (theme) => ({
         width: '100%',
     },
     divider: {
-        marginTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        width: '60%',
     },
     paper: {
         margin: 0,
@@ -259,10 +263,10 @@ class Comment extends React.Component {
             classes, comments, apiId, allComments, commentsUpdate, isOverview,
         } = this.props;
 
-        const { editIndex, openDialog } = this.state;
+        const { editIndex, openDialog, replyIndex } = this.state;
         return (
             <>
-                <Paper className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
+                <div className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
                     {comments
                     && comments
                         .slice(0)
@@ -277,13 +281,16 @@ class Comment extends React.Component {
                                 )}
                             >
                                 {index !== 0 && <Divider className={classes.divider} />}
-                                <Grid container spacing={1} className={classNames({ [classes.root]: !isOverview })}>
+                                <Grid md={8} container spacing={1} className={classNames({ [classes.root]: !isOverview })}>
                                     <Grid item>
-                                        <Icon className={classes.commentIcon}>account_box</Icon>
+                                        <Icon className={classes.commentIcon}>account_circle</Icon>
                                     </Grid>
                                     <Grid item xs zeroMinWidth>
                                         <Typography noWrap className={classes.commentText}>
-                                            {comment.createdBy}
+                                            {(comment.commenterInfo && comment.commenterInfo.fullName) ? comment.commenterInfo.fullName : comment.createdBy}
+                                        </Typography>
+                                        <Typography noWrap className={classes.commentText} variant='caption'>
+                                            {moment(comment.createdTime).fromNow()}
                                         </Typography>
 
                                         {index !== editIndex && (
@@ -309,16 +316,16 @@ class Comment extends React.Component {
                                             showEditComment={this.showEditComment}
                                         />
 
-                                        {/* {index === replyIndex && (
+                                        {index === replyIndex && (
                                         <CommentAdd
                                             apiId={apiId}
-                                            //parentCommentId={comment.commentId}
+                                            parentCommentId={comment.id}
                                             allComments={allComments}
                                             commentsUpdate={commentsUpdate}
                                             cancelButton
                                         />
-                                    )}
-                                    {comment.replies !== 0 && (
+                                        )}
+                                        {/*  {comment.replies !== 0 && (
                                         <CommentReply
                                             classes={classes}
                                             apiId={apiId}
@@ -327,11 +334,56 @@ class Comment extends React.Component {
                                             allComments={allComments}
                                         />
                                     )} */}
+                                        {comment.replies && comment.replies.list.slice(0).map((replie, index) => (
+                                            <>
+                                                <Box ml={8}>
+                                                    {index !== 0 && <Divider className={classes.divider} />}
+                                                    <Grid container spacing={1} className={classes.root}>
+                                                        <Grid item>
+                                                            <Icon className={classes.commentIcon}>account_circle</Icon>
+                                                        </Grid>
+                                                        <Grid item xs zeroMinWidth>
+                                                            <Typography noWrap className={classes.commentText}>
+                                                                {(replie.commenterInfo && replie.commenterInfo.fullName)
+                                                                    ? replie.commenterInfo.fullName : replie.createdBy}
+                                                            </Typography>
+                                                            <Typography noWrap className={classes.commentText} variant='caption'>
+                                                                {moment(replie.createdTime).fromNow()}
+                                                            </Typography>
+
+                                                            {index !== editIndex && (
+                                                                <Typography className={classes.commentText}>
+                                                                    {replie.content}</Typography>
+                                                            )}
+
+                                                            {index === editIndex && (
+                                                            <CommentEdit
+                                                                apiId={apiId}
+                                                                allComments={replie}
+                                                                commentsUpdate={commentsUpdate}
+                                                                comment={replie}
+                                                                toggleShowEdit={this.handleShowEdit}
+                                                            />
+                                                            )}
+
+                                                            <CommentOptions
+                                                                comment={replie}
+                                                                editIndex={editIndex}
+                                                                index={index}
+                                                                showAddComment={this.showAddComment}
+                                                                handleClickOpen={this.handleClickOpen}
+                                                                showEditComment={this.showEditComment}
+                                                            />
+                                                        </Grid>
+                                                    </Grid>
+                                                </Box>
+                                            </>
+                                        ))}
                                     </Grid>
                                 </Grid>
                             </div>
                         ))}
-                </Paper>
+                </div>
                 <ConfirmDialog
                     key='key-dialog'
                     labelCancel='Cancel'
