@@ -532,6 +532,30 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /webhooks-subscriptions:
+    get:
+      summary: Get webhooks subscriptions
+      description: |
+        This will provide list of webhooks subscriptions from the database.
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
+          type: string
+          required: true
+      tags:
+        - Retrieving webhooks subscriptions
+      responses:
+        200:
+          description: An array of webhooks subscriptions
+          schema:
+            $ref: '#/definitions/webhooksSubscriptionsList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /notify:
     post:
       summary: Push notification events into nodes.
@@ -958,7 +982,42 @@ definitions:
           type: string
 
 
-
+  #-----------------------------------------------------
+  # The Webhooks Subscription List resource
+  #-----------------------------------------------------
+  webhooksSubscriptionsList:
+    title: Scopes List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/webhooksSubscription'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Webhooks Subscription resource
+  #-----------------------------------------------------
+  webhooksSubscription:
+    properties:
+      apiKey:
+        type: string
+        description: The API key
+      appID:
+        type: string
+        description: The application ID of the subscription.
+      callbackURL:
+        type: string
+        description: The callback URL
+      topicName:
+        type: string
+        description: The topic name.
+      secret:
+        type: string
+        description: Secret value of the subscription.
+      expiryTime:
+        type: integer
+        format: int64
+        description: the expiry time in millis
 
 
   #---------------------  --------------------------------

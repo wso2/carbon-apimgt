@@ -750,6 +750,34 @@
         }
       }
     },
+    "/webhooks-subscriptions" : {
+      "get" : {
+        "tags" : [ "Retrieving webhooks subscriptions" ],
+        "summary" : "Get webhooks subscriptions",
+        "description" : "This will provide list of webhooks subscriptions from the database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of webhooks subscriptions",
+            "schema" : {
+              "$ref" : "#/definitions/webhooksSubscriptionsList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/notify" : {
       "post" : {
         "tags" : [ "Notification" ],
@@ -1248,6 +1276,49 @@
           "items" : {
             "type" : "string"
           }
+        }
+      }
+    },
+    "webhooksSubscriptionsList" : {
+      "properties" : {
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/webhooksSubscription"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Scopes List"
+    },
+    "webhooksSubscription" : {
+      "properties" : {
+        "apiKey" : {
+          "type" : "string",
+          "description" : "The API key"
+        },
+        "appID" : {
+          "type" : "string",
+          "description" : "The application ID of the subscription."
+        },
+        "callbackURL" : {
+          "type" : "string",
+          "description" : "The callback URL"
+        },
+        "topicName" : {
+          "type" : "string",
+          "description" : "The topic name."
+        },
+        "secret" : {
+          "type" : "string",
+          "description" : "Secret value of the subscription."
+        },
+        "expiryTime" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "the expiry time in millis"
         }
       }
     },
