@@ -159,8 +159,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         List<ServiceInfoDTO> serviceList;
         HashMap<String, ServiceEntry> serviceEntries;
         HashMap<String, String> newResourcesHash;
-        List<ServiceEntry> serviceListToAdd = new ArrayList<>();
-        List<ServiceEntry> serviceListToUpdate = new ArrayList<>();
+        List<ServiceEntry> serviceListToImport = new ArrayList<>();
         List<ServiceEntry> serviceListToIgnore = new ArrayList<>();
 
         // unzip the uploaded zip
@@ -182,27 +181,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             String key = entry.getKey();
             serviceEntries.get(key).setMd5(newResourcesHash.get(key));
             ServiceEntry service = serviceEntries.get(key);
-            try {
-                String md5 = serviceCatalog.getMD5HashByKey(key, tenantId);
-                if (overwrite) {
-                    if (StringUtils.isNotEmpty(verifier) && validationResults
-                            .containsKey(service.getKey()) && !validationResults.get(service.getKey())) {
-                        serviceListToIgnore.add(service);
-                    } else {
-                        if (StringUtils.isNotEmpty(md5) && !md5.equals(newResourcesHash.get(key))) {
-                            serviceListToUpdate.add(service);
-                        } else if (StringUtils.isEmpty(md5)) {
-                            serviceListToAdd.add(service);
-                        }
-                    }
+            if (overwrite) {
+                if (StringUtils.isNotEmpty(verifier) && validationResults
+                        .containsKey(service.getKey()) && !validationResults.get(service.getKey())) {
+                    serviceListToIgnore.add(service);
                 } else {
-                    if (StringUtils.isEmpty(md5)) {
-                        serviceListToAdd.add(service);
-                    }
+                    serviceListToImport.add(service);
                 }
-            } catch (APIManagementException e) {
-                // client will only be informed by the list of successfully added services
-                log.error("Failed to add or update service key: " + key + " since " + e.getMessage(), e);
+            } else {
+                serviceListToImport.add(service);
             }
         }
         if (serviceListToIgnore.size() > 0) {
@@ -214,20 +201,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             errorObject.setDescription("The Service import has been failed since to verifier validation fails");
             return Response.status(status).entity(errorObject).build();
         } else {
-            if (serviceListToAdd.size() > 0) {
-                serviceCatalog.addServices(serviceListToAdd, tenantId, userName);
+            List<ServiceEntry> importedServiceList = new ArrayList<>();
+            List<ServiceEntry> retrievedServiceList = new ArrayList<>();
+            if (serviceListToImport.size() > 0) {
+                importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName);
             }
-            if (serviceListToUpdate.size() > 0) {
-                serviceCatalog.updateServices(serviceListToUpdate, tenantId, userName);
+            for (ServiceEntry service : importedServiceList) {
+                retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
             }
-            List<ServiceEntry> modifiedServicesList = new ArrayList<>();
-            for (ServiceEntry service : serviceListToAdd) {
-                modifiedServicesList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
-            }
-            for (ServiceEntry service : serviceListToUpdate) {
-                modifiedServicesList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
-            }
-            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(modifiedServicesList);
+            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(retrievedServiceList);
             return Response.ok().entity(ServiceEntryMappingUtil
                     .fromServiceInfoDTOToServiceInfoListDTO(serviceList)).build();
         }

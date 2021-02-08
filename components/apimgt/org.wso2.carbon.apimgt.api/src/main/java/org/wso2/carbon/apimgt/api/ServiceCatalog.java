@@ -37,22 +37,13 @@ public interface ServiceCatalog {
     String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException;
 
     /**
-     * Adds List of Services to Service Catalog
-     *
-     * @param serviceList List of Services that needs to be added
-     * @param tenantId Tenant ID of Logged-In-User
-     * @param user Logged in username
+     * Imports the List of Services to Service Catalog
+     * @param serviceList
+     * @param tenantId
+     * @param username
      * @throws APIManagementException
      */
-    void addServices(List<ServiceEntry> serviceList, int tenantId, String user) throws APIManagementException;
-
-    /**
-     * Updates the List of Services to Service Catalog
-     * @param serviceList List of Services that needs to be updated
-     * @param tenantId Tenant ID of logged-in user
-     * @throws APIManagementException
-     */
-    void updateServices(List<ServiceEntry> serviceList, int tenantId, String username) throws APIManagementException;
+    List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username) throws APIManagementException;
 
     /**
      * Update an existing Service Catalog

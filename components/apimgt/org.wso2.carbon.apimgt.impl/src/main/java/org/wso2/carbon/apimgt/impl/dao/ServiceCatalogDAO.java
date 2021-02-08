@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -79,7 +80,6 @@ public class ServiceCatalogDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
-            boolean initialAutoCommit = connection.getAutoCommit();
             try {
                 connection.setAutoCommit(false);
                 setServiceParams(ps, serviceEntry, tenantID, username);
@@ -88,8 +88,6 @@ public class ServiceCatalogDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to rollback adding endpoint information", e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add service catalog of tenant "
@@ -105,60 +103,72 @@ public class ServiceCatalogDAO {
      * @param username Logged-in username
      * @param connection DB Connection
      *
-     * @throws APIManagementException
      */
-    public void addServices(List<ServiceEntry> services, int tenantId, String username, Connection connection)
-            throws APIManagementException {
-        boolean isNewConnection = false;
-        PreparedStatement ps = null;
-        try {
-            if (connection == null) {
-                connection = APIMgtDBUtil.getConnection();
-                isNewConnection = true;
+    private void addServices(List<ServiceEntry> services, int tenantId, String username, Connection connection)
+            throws SQLException {
+        try (PreparedStatement preparedStatement = connection
+                .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
+            for (ServiceEntry service : services) {
+                setServiceParams(preparedStatement, service, tenantId, username);
+                preparedStatement.addBatch();
             }
-            ps = connection
-                    .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE);
-            boolean initialAutoCommit = connection.getAutoCommit();
-            try {
-                connection.setAutoCommit(false);
-                for (ServiceEntry service : services) {
-                    setServiceParams(ps, service, tenantId, username);
-                    ps.addBatch();
-                }
-                ps.executeBatch();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while adding service list to Service Catalog in tenant " + tenantId, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to add services to service catalog of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, null);
-            if (isNewConnection) {
-                APIMgtDBUtil.closeAllConnections(null, connection, null);
-            }
+            preparedStatement.executeBatch();
         }
     }
 
-    public void updateServices(List<ServiceEntry> services, int tenantId, String username)
-            throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-        PreparedStatement ps = connection.prepareStatement(SQLConstants.ServiceCatalogConstants
-                .DELETE_SERVICE_BY_SERVICE_KEY)) {
+    /**
+     * Update list of services available in Service Catalog
+     * @param services List of Services that needs to be updated
+     * @param tenantId Tenant ID of the logged-in user
+     * @param username Logged-in username
+     * @param connection DB Connection
+     *
+     */
+    private void updateServices(List<ServiceEntry> services, int tenantId, String username, Connection connection)
+            throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(SQLConstants.ServiceCatalogConstants
+                .UPDATE_SERVICE_BY_KEY)) {
             for (ServiceEntry service: services) {
-                ps.setString(1, service.getKey());
-                ps.setInt(2, tenantId);
+                setUpdateServiceParams(ps, service, tenantId, username);
                 ps.addBatch();
             }
             ps.executeBatch();
-            addServices(services, tenantId, username, connection);
-        } catch (SQLException e) {
-            handleException("Error while updating Services", e);
         }
+    }
+
+    public List<ServiceEntry> importServices(List<ServiceEntry> services, int tenantId, String username)
+            throws APIManagementException {
+        List<ServiceEntry> serviceListToAdd = new ArrayList<>();
+        List<ServiceEntry> serviceListToUpdate = new ArrayList<>();
+        for (int i = 0; i < services.size(); i++) {
+            ServiceEntry service = services.get(i);
+            String md5 = getMd5HashByKey(service.getKey(), tenantId);
+            if (StringUtils.isNotEmpty(md5)) {
+                if (!md5.equals(service.getMd5())) {
+                    serviceListToUpdate.add(service);
+                }
+            } else {
+                serviceListToAdd.add(service);
+            }
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                addServices(serviceListToAdd, tenantId, username, connection);
+                updateServices(serviceListToUpdate, tenantId, username, connection);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to import services to service catalog of tenant " + tenantId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to import services to service catalog of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+        List<ServiceEntry> importedServiceList = new ArrayList<>();
+        importedServiceList.addAll(serviceListToAdd);
+        importedServiceList.addAll(serviceListToUpdate);
+        return importedServiceList;
     }
 
     /**
@@ -180,24 +190,7 @@ public class ServiceCatalogDAO {
 
             try {
                 connection.setAutoCommit(false);
-                ps.setString(1, serviceEntry.getMd5());
-                ps.setString(2, serviceEntry.getName());
-                ps.setString(3, serviceEntry.getDisplayName());
-                ps.setString(4, serviceEntry.getVersion());
-                ps.setInt(5, tenantID);
-                ps.setString(6, serviceEntry.getServiceUrl());
-                ps.setString(7, serviceEntry.getDefinitionType().name());
-                ps.setString(8, serviceEntry.getDefUrl());
-                ps.setString(9, serviceEntry.getDescription());
-                ps.setString(10, serviceEntry.getSecurityType().toString());
-                ps.setBoolean(11, serviceEntry.isMutualSSLEnabled());
-                ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
-                ps.setString(13, userName);
-                ps.setBinaryStream(14, serviceEntry.getEndpointDef());
-                ps.setBinaryStream(15, serviceEntry.getMetadata());
-                ps.setString(16, serviceEntry.getKey());
-                ps.setInt(17, tenantID);
-
+                setUpdateServiceParams(ps, serviceEntry, tenantID, userName);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -555,32 +548,49 @@ public class ServiceCatalogDAO {
         return null;
     }
 
+    private void setUpdateServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
+            throws SQLException {
+        ps.setString(1, service.getMd5());
+        ps.setString(2, service.getName());
+        ps.setString(3, service.getDisplayName());
+        ps.setString(4, service.getVersion());
+        ps.setInt(5, tenantId);
+        ps.setString(6, service.getServiceUrl());
+        ps.setString(7, service.getDefinitionType().name());
+        ps.setString(8, service.getDefUrl());
+        ps.setString(9, service.getDescription());
+        ps.setString(10, service.getSecurityType().toString());
+        ps.setBoolean(11, service.isMutualSSLEnabled());
+        ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
+        ps.setString(13, username);
+        ps.setBinaryStream(14, service.getEndpointDef());
+        ps.setBinaryStream(15, service.getMetadata());
+        ps.setString(16, service.getKey());
+        ps.setInt(17, tenantId);
+    }
+
     private void setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
-            throws APIManagementException{
+            throws SQLException {
         String uuid = UUID.randomUUID().toString();
-        try {
-            ps.setString(1, uuid);
-            ps.setString(2, service.getKey());
-            ps.setString(3, service.getMd5());
-            ps.setString(4, service.getName());
-            ps.setString(5, service.getDisplayName());
-            ps.setString(6, service.getVersion());
-            ps.setInt(7, tenantId);
-            ps.setString(8, service.getServiceUrl());
-            ps.setString(9, service.getDefinitionType().name());
-            ps.setString(10, service.getDefUrl());
-            ps.setString(11, service.getDescription());
-            ps.setString(12, service.getSecurityType().toString());
-            ps.setBoolean(13, service.isMutualSSLEnabled());
-            ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
-            ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
-            ps.setString(16, username);
-            ps.setString(17, username);
-            ps.setBinaryStream(18, service.getEndpointDef());
-            ps.setBinaryStream(19, service.getMetadata());
-        } catch (SQLException e) {
-            handleException("Error when setting parameters to prepared statement ", e);
-        }
+        ps.setString(1, uuid);
+        ps.setString(2, service.getKey());
+        ps.setString(3, service.getMd5());
+        ps.setString(4, service.getName());
+        ps.setString(5, service.getDisplayName());
+        ps.setString(6, service.getVersion());
+        ps.setInt(7, tenantId);
+        ps.setString(8, service.getServiceUrl());
+        ps.setString(9, service.getDefinitionType().name());
+        ps.setString(10, service.getDefUrl());
+        ps.setString(11, service.getDescription());
+        ps.setString(12, service.getSecurityType().toString());
+        ps.setBoolean(13, service.isMutualSSLEnabled());
+        ps.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
+        ps.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
+        ps.setString(16, username);
+        ps.setString(17, username);
+        ps.setBinaryStream(18, service.getEndpointDef());
+        ps.setBinaryStream(19, service.getMetadata());
     }
 
     private ServiceEntry getServiceParams(ResultSet resultSet, boolean shrink) throws APIManagementException {
