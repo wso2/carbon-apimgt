@@ -18,21 +18,18 @@
 package org.wso2.carbon.apimgt.gateway.extension.listener;
 
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionResponseStatus;
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
 
+/**
+ * Default implementation of ExtensionListener interface.
+ */
 public class DefaultExtensionListener implements ExtensionListener {
 
     public DefaultExtensionListener() {
 
     }
 
-    /***
-     * Process response
-     *
-     * @param responseContextDTO
-     */
     @Override
     public ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO) {
 
@@ -43,58 +40,30 @@ public class DefaultExtensionListener implements ExtensionListener {
     public ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO) {
 
         ExtensionResponseDTO responseDTO = new ExtensionResponseDTO();
-//        ExtensionErrorResponseDTO errorResponseDTO = new ExtensionErrorResponseDTO();
-//        errorResponseDTO.setErrorMessage("custom error message");
-//        errorResponseDTO.setErrorDescription("custom error desc");
-//        errorResponseDTO.setErrorCode(90111);
-//        responseDTO.setErrorResponse(errorResponseDTO);
-        responseDTO.setResponseStatus(ExtensionResponseStatus.RETURN_RESPONSE.toString());
-        responseDTO.setStatusCode(500);
         return responseDTO;
     }
 
-    /**
-     * TODO:// comment
-     *
-     * @return
-     */
     @Override
     public String getType() {
 
         return null;
     }
 
-    /***
-     * Pre process Request
-     * @param requestDTO
-     * @throws Exception
-     */
     @Override
     public ExtensionResponseDTO preProcessRequest(RequestContextDTO requestDTO) {
 
         return null;
     }
 
-    /***
-     * Post process request
-     * @param requestDTO
-     * @throws Exception
-     */
     @Override
     public ExtensionResponseDTO postProcessRequest(RequestContextDTO requestDTO) {
 
         return null;
     }
 
-    /**
-     * TODO://
-     *
-     * @return
-     */
     @Override
     public String getErrorHandler() {
 
         return null;
     }
 }
-

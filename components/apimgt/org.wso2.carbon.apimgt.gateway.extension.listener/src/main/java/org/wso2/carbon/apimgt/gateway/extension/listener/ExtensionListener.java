@@ -22,51 +22,51 @@ import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContex
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
 
 /**
- * TODO:add comment
+ * This Interface is providing functionality to listen and extend request/response
+ * handler/filter flows in API Gateway.
+ * You can implement pre-process request, post-process request, pre-process response and post-process response flows
+ * of gateway handlers/filters by implementing this interface. Furthermore you need to register your implementation as
+ * an OSGI service for this interface with the type using ExtensionType enum.
+ * This interface is providing a method to read the ExtensionType. Moreover this interface supports to pass a custom
+ * error handler name to handle the fault logic during request/response flows.
  */
 public interface ExtensionListener {
 
     /***
      * Pre process Request
-     * @param requestContextDTO
-     * @throws Exception
+     * @param requestContextDTO RequestContextDTO
      */
     ExtensionResponseDTO preProcessRequest(RequestContextDTO requestContextDTO);
 
     /***
-     * Post process request
-     * @param requestContextDTO
-     * @throws Exception
+     * Post process Request
+     * @param requestContextDTO RequestContextDTO
      */
     ExtensionResponseDTO postProcessRequest(RequestContextDTO requestContextDTO);
 
     /***
-     * Process response
-     * @param responseContextDTO
-     * @throws Exception
+     * Pre process Response
+     * @param responseContextDTO ResponseContextDTO
      */
     ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO);
 
-    /**
-     * TODO://add comment
-     *
-     * @param responseContextDTO
-     * @return
-     * @throws Exception
+    /***
+     * Post process Response
+     * @param responseContextDTO ResponseContextDTO
      */
     ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO);
 
     /**
-     * TODO://
+     * Returns the extension listener type. This should be a value from ExtensionType enum.
      *
-     * @return
+     * @return ExtensionType enum value
      */
     String getType();
 
     /**
-     * TODO://
+     * Returns the name of custom error handler. Specific to synapse gateway. Eg: _custom_auth_failure.xml
      *
-     * @return
+     * @return name of custom error handler
      */
     String getErrorHandler();
 }

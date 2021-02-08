@@ -17,12 +17,15 @@
  */
 package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 
+/**
+ * Representation of Invoked GW API Request Information of Request/Response.
+ */
 public class APIRequestInfoDTO {
 
     String apiContext;
     String apiVersion;
     String username;
-    String clientId;
+    String consumerKey;
 
     public String getApiContext() {
 
@@ -54,14 +57,14 @@ public class APIRequestInfoDTO {
         this.username = username;
     }
 
-    public String getClientId() {
+    public String getConsumerKey() {
 
-        return clientId;
+        return consumerKey;
     }
 
-    public void setClientId(String clientId) {
+    public void setConsumerKey(String consumerKey) {
 
-        this.clientId = clientId;
+        this.consumerKey = consumerKey;
     }
 }
 

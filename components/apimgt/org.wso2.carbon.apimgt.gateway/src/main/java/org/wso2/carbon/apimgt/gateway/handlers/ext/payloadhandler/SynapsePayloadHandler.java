@@ -32,6 +32,10 @@ import java.nio.charset.StandardCharsets;
 
 import javax.xml.stream.XMLStreamException;
 
+/**
+ * This class is the synapse implementation of PayloadHandler interface. This handle synapse specific logic to consume
+ * the payload from the related message context.
+ */
 public class SynapsePayloadHandler implements PayloadHandler {
 
     private static final Log log = LogFactory.getLog(SynapsePayloadHandler.class);
@@ -43,9 +47,10 @@ public class SynapsePayloadHandler implements PayloadHandler {
     }
 
     /**
-     * TODO://comment
+     * Consume and return the payload as String.
      *
-     * @return
+     * @return String payload
+     * @throws APIManagementException if an error occurs
      */
     @Override
     public String consumeAsString() throws APIManagementException {
@@ -54,25 +59,27 @@ public class SynapsePayloadHandler implements PayloadHandler {
     }
 
     /**
-     * TODO://comment
+     * Consume and return payload as InputStream.
      *
-     * @return
+     * @return InputStream payload
+     * @throws APIManagementException if an error occurs
      */
     @Override
     public InputStream consumeAsStream() throws APIManagementException {
 
         String payload = buildMessage();
         if (payload != null) {
+            //for now, a wrapped stream of the string payload is returned. will have to improve this later.
             return new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));
         }
         return null;
     }
 
     /**
-     * TODO://comment
+     * Build message in axis2 message context and return the SOAP envelope body as string the payload.
      *
-     * @return
-     * @throws APIManagementException
+     * @return String payload
+     * @throws APIManagementException if an error occurs while building the message
      */
     private String buildMessage() throws APIManagementException {
 

@@ -19,15 +19,20 @@ package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 
 import org.wso2.carbon.apimgt.gateway.extension.listener.PayloadHandler;
 
-import java.io.InputStream;
 import java.util.Map;
 
+/**
+ * Representation of Message Information of Request/Response.
+ */
 public class MsgInfoDTO {
 
+    // Transport Headers
     Map<String, String> headers;
+    // Reference object to consume payload if needed
     PayloadHandler payloadHandler;
     String electedResource;
     String httpMethod;
+    // Unique Id to identify the message
     String messageId;
 
     public PayloadHandler getPayloadHandler() {

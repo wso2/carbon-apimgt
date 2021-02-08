@@ -20,7 +20,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler;
 import org.apache.synapse.MessageContext;
 
 /**
- * TODO: class comment
+ * This is a singleton class acting as the factory class to build SynapsePayloadHandler objects for each message
+ * context.
  */
 public class SynapsePayloadHandlerFactory {
 
@@ -36,9 +37,10 @@ public class SynapsePayloadHandlerFactory {
     }
 
     /**
-     * TODO: comment
-     * @param messageContext
-     * @return
+     * Build synapse payload handler object.
+     *
+     * @param messageContext synapse message context
+     * @return SynapsePayloadHandler
      */
     public SynapsePayloadHandler buildPayloadHandler(MessageContext messageContext) {
 

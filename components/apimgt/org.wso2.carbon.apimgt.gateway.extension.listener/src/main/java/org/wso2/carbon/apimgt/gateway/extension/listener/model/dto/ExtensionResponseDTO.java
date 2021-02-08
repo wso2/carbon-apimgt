@@ -20,14 +20,21 @@ package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 import java.io.InputStream;
 import java.util.Map;
 
+/**
+ * Representation of Extension Response Information received after processing the Request/Response.
+ */
 public class ExtensionResponseDTO {
 
-    int statusCode;
-    InputStream payload;
-    Map<String,String> headers;
+    // Response Status type. Should be a value of ExtensionResponseStatus enum.
     String responseStatus;
-    ExtensionErrorResponseDTO errorResponse;
-    Map<String,String> customProperties;
+    // HTTP status code to set
+    int statusCode;
+    // Payload to set
+    InputStream payload;
+    // Transport headers to set
+    Map<String, String> headers;
+    // customProperty map to set
+    Map<String, Object> customProperty;
 
     public int getStatusCode() {
 
@@ -69,24 +76,14 @@ public class ExtensionResponseDTO {
         this.responseStatus = responseStatus;
     }
 
-    public ExtensionErrorResponseDTO getErrorResponse() {
+    public Map<String, Object> getCustomProperty() {
 
-        return errorResponse;
+        return customProperty;
     }
 
-    public void setErrorResponse(ExtensionErrorResponseDTO errorResponse) {
+    public void setCustomProperty(Map<String, Object> customProperty) {
 
-        this.errorResponse = errorResponse;
-    }
-
-    public Map<String, String> getCustomProperties() {
-
-        return customProperties;
-    }
-
-    public void setCustomProperties(Map<String, String> customProperties) {
-
-        this.customProperties = customProperties;
+        this.customProperty = customProperty;
     }
 }
 

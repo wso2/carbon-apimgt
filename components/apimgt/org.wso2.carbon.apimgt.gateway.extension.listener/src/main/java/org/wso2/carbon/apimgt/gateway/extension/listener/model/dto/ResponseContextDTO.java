@@ -17,10 +17,16 @@
  */
 package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 
+/**
+ * Representation of Response Information.
+ */
 public class ResponseContextDTO {
 
+    // response message information
     MsgInfoDTO msgInfo;
+    // invoked API request information related to the response
     APIRequestInfoDTO apiRequestInfo;
+    // status code received from backend
     int statusCode;
 
     public APIRequestInfoDTO getApiRequestInfo() {
