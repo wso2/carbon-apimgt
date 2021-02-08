@@ -76,6 +76,7 @@ public class CommentMappingUtil {
         }
         CommentListDTO commentListDTO = new CommentListDTO();
         commentListDTO.setList(replieslist);
+        commentListDTO.setCount(replieslist.size());
         commentDTO.setReplies(commentListDTO);
         return commentDTO;
 

@@ -7930,7 +7930,8 @@ public class ApiMgtDAO {
         boolean isProduct = apiTypeWrapper.isAPIProduct();
         int id = -1;
         String sqlQuery;
-        sqlQuery  = SQLConstants.GET_COMMENTS_SQL;
+//        sqlQuery  = SQLConstants.GET_COMMENTS_SQL;
+        sqlQuery  = SQLConstants.GET_PARENT_COMMENTS_SQL;
         Identifier identifier;
 
         try {
@@ -7957,6 +7958,13 @@ public class ApiMgtDAO {
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("CREATED_BY"));
                 comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                comment.setApiId(resultSet.getString("API_ID"));
+                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                comment.setCategory(resultSet.getString("CATEGORY"));
+                comment.setReplies(getReplies(resultSet.getString("COMMENT_ID"), 5, 0));
                 commentList.add(comment);
             }
         } catch (SQLException e) {
