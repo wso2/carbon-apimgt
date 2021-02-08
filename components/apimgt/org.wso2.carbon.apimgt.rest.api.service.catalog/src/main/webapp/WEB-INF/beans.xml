@@ -17,6 +17,7 @@
 
       <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApi"/>
       <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.SettingsApi"/>
+      <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.SwaggerYamlApi"/>
 
     </jaxrs:serviceBeans>
     <jaxrs:providers>
@@ -30,8 +31,6 @@
   <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
   <bean id="TokenMergeInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.TokenMergeInterceptor" />
 
-  <!-- For Basic Authentication scheme please comment the AuthenticationInterceptor which contains "OAuthAuthenticationInterceptor"
-          and uncomment the AuthenticationInterceptor which contains "BasicAuthenticationInterceptor"-->
   <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
   <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
   <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
