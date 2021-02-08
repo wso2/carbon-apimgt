@@ -1963,6 +1963,9 @@ public final class APIConstants {
 
     public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
     public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+    public static final String[] SSE_DEFAULT_METHODS = {"get"};
+    public static final String[] WS_DEFAULT_METHODS = {"post"};
+    public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
 
@@ -2585,7 +2588,7 @@ public final class APIConstants {
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
-    
+
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 
     public static class ServiceCatalogConstants {

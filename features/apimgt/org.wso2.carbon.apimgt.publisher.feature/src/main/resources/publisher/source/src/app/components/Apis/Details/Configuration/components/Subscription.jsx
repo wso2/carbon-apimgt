@@ -83,7 +83,7 @@ export default function Subscription(props) {
     }
 
     function getAlgorithms() {
-        return ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'];
+        return ['SHA1', 'SHA256', 'SHA384', 'SHA512'];
     }
 
     return (

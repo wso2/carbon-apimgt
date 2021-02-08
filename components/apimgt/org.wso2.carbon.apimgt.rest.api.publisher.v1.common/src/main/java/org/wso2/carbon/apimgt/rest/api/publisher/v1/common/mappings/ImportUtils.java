@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
@@ -110,7 +111,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -167,8 +167,8 @@ public class ImportUtils {
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiDTO.getProvider());
 
-            // Validate swagger content except for WebSocket APIs
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
+            // Validate swagger content except for streaming APIs
+            if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 swaggerDefinitionValidationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
                         extractedFolderPath);
@@ -223,7 +223,7 @@ public class ImportUtils {
             lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
 
             // Add/update swagger content except for WebSocket APIs
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)
+            if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
                 PublisherCommonUtils.updateSwagger(importedApi.getUUID(), swaggerDefinitionValidationResponse);
@@ -632,6 +632,36 @@ public class ImportUtils {
             jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
         }
         return jsonContent;
+    }
+
+    public static String retrieveValidatedAsyncApiDefinitionFromArchive(String pathToArchive)
+            throws APIManagementException {
+        try {
+            String asyncApiDefinition = loadAsyncApiDefinitionFromFile(pathToArchive);
+            APIDefinitionValidationResponse validationResponse =
+                    AsyncApiParserUtil.validateAsyncAPISpecification(asyncApiDefinition, true);
+            if (!validationResponse.isValid()) {
+                throw new APIManagementException(
+                        "Error occurred while importing the API. Invalid AsyncAPI definition found. "
+                                + validationResponse.getErrorItems());
+            }
+            return asyncApiDefinition;
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
+                    ExceptionCodes.ERROR_READING_META_DATA);
+        }
+    }
+
+    private static String loadAsyncApiDefinitionFromFile(String pathToArchive) throws IOException {
+        if (CommonUtil.checkFileExistence(pathToArchive + ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found AsyncAPI file " + pathToArchive
+                        + ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION);
+            }
+            return FileUtils.readFileToString(
+                    new File(pathToArchive, ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION));
+        }
+        throw new IOException("Missing AsyncAPI definition file.");
     }
 
     /**

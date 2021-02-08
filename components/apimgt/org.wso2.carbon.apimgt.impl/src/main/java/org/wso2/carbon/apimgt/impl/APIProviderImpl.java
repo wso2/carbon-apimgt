@@ -295,7 +295,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns a list of agit ll #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
+     * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get Providers
@@ -2057,10 +2057,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // wsdls for each update.
                 //check for wsdl endpoint
                 org.json.JSONObject response1 = new org.json.JSONObject(api.getEndpointConfig());
-                boolean isWSAPI = APIConstants.APITransportType.WS.toString().equals(api.getType());
                 String wsdlURL;
-                if (!isWSAPI && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString()) && response1.has
-                        ("production_endpoints")) {
+                if (!APIUtil.isStreamingApi(api) && "wsdl".equalsIgnoreCase(response1.get("endpoint_type").toString())
+                        && response1.has("production_endpoints")) {
                     wsdlURL = response1.getJSONObject("production_endpoints").get("url").toString();
 
                     if (APIUtil.isValidWSDLURL(wsdlURL, true)) {
@@ -2399,7 +2398,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -2433,7 +2432,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -2467,7 +2466,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             break;
                         }
                     }
-                    if (!found) { // global policy 
+                    if (!found) { // global policy
                         if (globalPolicies == null) {
                             globalPolicies = getAllGlobalMediationPolicies();
                         }
@@ -3231,7 +3230,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void checkIfValidTransport(String transport) throws APIManagementException {
-        if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)) {
+        if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
+                && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
             handleException("Unsupported Transport [" + transport + ']');
         }
     }
@@ -3380,7 +3380,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // copy wsdl 
+        // copy wsdl
         if (existingAPI.getWsdlUrl() != null) {
             ResourceFile wsdl = getWSDL(existingApiId, tenantDomain);
             if (wsdl != null) {
@@ -6123,7 +6123,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiSecurity = api.getApiSecurity();
                 boolean isOauthProtected = apiSecurity == null
                         || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                if (endPoint != null && endPoint.trim().length() > 0) {
+                if (api.getType().equals(APIConstants.API_TYPE_WEBSUB) || endPoint != null && endPoint.trim().length() > 0) {
                     if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
                         throw new APIManagementException("Failed to publish service to API store while executing "
                                 + "APIExecutor. No Tiers selected");
