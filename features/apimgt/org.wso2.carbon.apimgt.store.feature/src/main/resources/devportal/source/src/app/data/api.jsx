@@ -548,6 +548,34 @@ export default class API extends Resource {
     }
 
     /**
+     * Get topic subscriptions for a web hook Api.
+     * @param apiId of the web hook api which holds the topics
+     * @param applicationId of the application making the subscription
+     * @returns promise
+     */
+    getTopicSubscriptions(apiId, applicationId) {
+        var promisedTopicSubscriptionGet = this.client.then((client) => {
+                return client.apis["Topics"].get_topics_subscriptions(
+                    { apiId: apiId, applicationId: applicationId });
+            }
+        );
+        return promisedTopicSubscriptionGet;
+    }
+
+    /**
+     * Get all topics available for a specified webhook API.
+     * @param apiId of the web hook api
+     * @returns promise
+     */
+    getAllTopics(apiId) {
+        const payload = { apiId };
+        const promisedTopicGet = this.client.then((client) => {
+             return client.apis.Topics.get_topics__apiId_(payload);
+        });
+        return promisedTopicGet;
+    }
+
+    /**
      * Create a subscription
      * @param {string} apiId id of the API that needs to be subscribed
      * @param {string} applicationId id of the application that needs to be subscribed

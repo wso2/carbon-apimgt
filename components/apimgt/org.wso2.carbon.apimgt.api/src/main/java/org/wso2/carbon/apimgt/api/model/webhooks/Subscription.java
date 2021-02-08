@@ -1,20 +1,21 @@
 /*
- * Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.apimgt.api.model.webhooks;
 
 import java.io.Serializable;
@@ -24,23 +25,17 @@ import java.util.Date;
  * This class represents the model for webhook subscriptions
  */
 public class Subscription implements Serializable {
-
     private String apiKey;
-    private String appID;
     private String tenantDomain;
+    private String apiUuid;
+    private String appID;
     private String callback;
     private String topic;
     private String secret;
     private Date updatedTime;
     private long expiryTime;
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
+    private Date lastDelivery;
+    private int lastDeliveryState;
 
     public String getAppID() {
         return appID;
@@ -95,6 +90,46 @@ public class Subscription implements Serializable {
     }
 
     public void setTenantDomain(String tenantDomain) {
+
         this.tenantDomain = tenantDomain;
+
+    }
+    public Date getLastDelivery() {
+
+        return lastDelivery;
+    }
+
+    public void setLastDelivery(Date lastDelivery) {
+
+        this.lastDelivery = lastDelivery;
+    }
+
+    public int getLastDeliveryState() {
+
+        return lastDeliveryState;
+    }
+
+    public void setLastDeliveryState(int lastDeliveryState) {
+
+        this.lastDeliveryState = lastDeliveryState;
+    }
+
+    public String getApiUuid() {
+
+        return apiUuid;
+    }
+
+    public void setApiUuid(String apiUuid) {
+        this.apiUuid = apiUuid;
+    }
+
+    public String getApiKey() {
+
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+
+        this.apiKey = apiKey;
     }
 }
