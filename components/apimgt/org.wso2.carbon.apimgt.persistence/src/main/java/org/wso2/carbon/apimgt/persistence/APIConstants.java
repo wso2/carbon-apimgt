@@ -366,6 +366,8 @@ public final class APIConstants {
     public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+    
+    public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
 
     public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.yml";
 }

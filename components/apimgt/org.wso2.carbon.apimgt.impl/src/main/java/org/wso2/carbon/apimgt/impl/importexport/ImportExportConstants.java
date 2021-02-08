@@ -41,6 +41,10 @@ public final class ImportExportConstants {
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "schema.graphql";
 
+    // Location of the graphql schema definition file
+    public static final String GRAPHQL_COMPLEXITY_INFO_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "graphql-complexity";
+
     // Location of the wsdl file
     public static final String WSDL_LOCATION = File.separator + "WSDL" + File.separator;
 
@@ -72,12 +76,6 @@ public final class ImportExportConstants {
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
-
-    // Location of the API YAML file
-    public static final String YAML_API_FILE_LOCATION = File.separator + "api.yaml";
-
-    // Location of the API JSON file
-    public static final String JSON_API_FILE_LOCATION = File.separator + "api.json";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
@@ -175,6 +173,8 @@ public final class ImportExportConstants {
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
     public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
+
+    public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
 
     public static final String UPLOAD_APPLICATION_FILE_NAME = "ApplicationArchive.zip";
 

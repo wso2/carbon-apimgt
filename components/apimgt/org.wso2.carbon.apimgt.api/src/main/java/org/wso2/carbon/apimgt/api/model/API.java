@@ -121,6 +121,16 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
+    
+    private List<SOAPToRestSequence> soapToRestSequences;
+
+    public List<SOAPToRestSequence> getSoapToRestSequences() {
+        return soapToRestSequences;
+    }
+
+    public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
+        this.soapToRestSequences = soapToRestSequences;
+    }
 
     //Custom authorization header specific to the API
     private String authorizationHeader;

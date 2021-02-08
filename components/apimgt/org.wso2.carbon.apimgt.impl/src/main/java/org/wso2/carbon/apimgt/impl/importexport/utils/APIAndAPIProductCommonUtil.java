@@ -45,9 +45,11 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -432,8 +434,10 @@ public class APIAndAPIProductCommonUtil {
      *
      * @param pathToArchive Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper   The imported API object
+     * @param orgId 
      */
-    public static void addAPIOrAPIProductImage(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    public static void addAPIOrAPIProductImage(String pathToArchive, ApiTypeWrapper apiTypeWrapper,
+            APIProvider apiProvider, String orgId) {
 
         //Adding image icon to the API if there is any
         File imageFolder = new File(pathToArchive + APIImportExportConstants.IMAGE_FILE_LOCATION);
@@ -442,7 +446,7 @@ public class APIAndAPIProductCommonUtil {
             //This loop locates the icon of the API
             for (File imageFile : fileArray) {
                 if (imageFile != null && imageFile.getName().contains(APIConstants.API_ICON_IMAGE)) {
-                    updateAPIOrAPIProductWithThumbnail(imageFile, apiTypeWrapper, apiProvider);
+                    updateAPIOrAPIProductWithThumbnail(imageFile, apiTypeWrapper, apiProvider, orgId);
                     //the loop is terminated after successfully locating the icon
                     break;
                 }
@@ -456,8 +460,9 @@ public class APIAndAPIProductCommonUtil {
      * @param imageFile             Image file
      * @param apiTypeWrapper        API or API Product to update
      * @param apiProvider           API Provider
+     * @param orgId 
      */
-    private static void updateAPIOrAPIProductWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    private static void updateAPIOrAPIProductWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider, String orgId) {
 
         Identifier identifier = apiTypeWrapper.getId();
         String fileName = imageFile.getName();
@@ -478,19 +483,13 @@ public class APIAndAPIProductCommonUtil {
         }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
             ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
-            String thumbPath = APIUtil.getIconPath(identifier);
-            String thumbnailUrl = apiProvider.addResourceFile(identifier, thumbPath, apiImage);
-            apiTypeWrapper.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl,
-                    identifier.getProviderName()));
-            APIUtil.setResourcePermissions(identifier.getProviderName(), null, null, thumbPath);
+            String apiId;
             if (apiTypeWrapper.isAPIProduct()) {
-                apiProvider.updateAPIProduct(apiTypeWrapper.getApiProduct());
+                apiId = apiTypeWrapper.getApiProduct().getUuid();
             } else {
-                apiProvider.updateAPI(apiTypeWrapper.getApi());
+                apiId = apiTypeWrapper.getApi().getUuid();
             }
-        } catch (FaultGatewaysException e) {
-            //This is logged and process is continued because icon is optional for an API
-            log.error("Failed to update API/API Product after adding icon. ", e);
+            apiProvider.setThumbnailToAPI(apiId, apiImage, orgId);
         } catch (APIManagementException e) {
             log.error("Failed to add icon to the API/API Product: " + identifier.getName(), e);
         } catch (FileNotFoundException e) {
@@ -505,23 +504,26 @@ public class APIAndAPIProductCommonUtil {
      *
      * @param pathToArchive     Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper    Imported API or API Product
+     * @param orgId 
      */
-    public static void addAPIOrAPIProductDocuments(String pathToArchive, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    public static void addAPIOrAPIProductDocuments(String pathToArchive, ApiTypeWrapper apiTypeWrapper,
+            APIProvider apiProvider, String orgId) {
 
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_DOCUMENT_FILE_LOCATION;
         String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_DOCUMENT_FILE_LOCATION;
         Identifier identifier = apiTypeWrapper.getId();
+        String apiUUID = apiTypeWrapper.getId().getUUID();
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
         String provider = apiTypeWrapper.getApi().getId().getProviderName();
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         try {
             //remove all documents associated with the API before update
-            List<Documentation> documents = apiProvider.getAllDocumentation(identifier);
+            List<Documentation> documents = apiProvider.getAllDocumentation(apiUUID, orgId);
             if (documents != null) {
                 for (Documentation documentation : documents) {
-                    apiProvider.removeDocumentation(identifier, documentation.getId(), tenantDomain);
+                    apiProvider.removeDocumentation(apiUUID, documentation.getId(), orgId);
                 }
             }
             //load document file if exists
@@ -549,7 +551,9 @@ public class APIAndAPIProductCommonUtil {
             documentations = new Gson().fromJson(jsonContent, Documentation[].class);
             //For each type of document separate action is performed
             for (Documentation doc : documentations) {
-
+                //Add documentation accordingly.
+                Documentation addedDoc = apiProvider.addDocumentation(apiUUID, doc, orgId);
+                DocumentationContent content = null;
                 String docSourceType = doc.getSourceType().toString();
                 boolean docContentExists = Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(docSourceType)
                         || Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(docSourceType);
@@ -560,6 +564,10 @@ public class APIAndAPIProductCommonUtil {
                             + APIImportExportConstants.INLINE_DOCUMENT_DIRECTORY + File.separator + doc.getName())) {
 
                         inlineContent = IOUtils.toString(inputStream, APIImportExportConstants.CHARSET);
+                        content = new DocumentationContent();
+                        content.setSourceType(ContentSourceType.valueOf(docSourceType));
+                        content.setTextContent(inlineContent);
+                        apiProvider.addDocumentationContent(apiUUID, addedDoc.getId(), orgId, content);
                     }
                 } else if (APIImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                     String filePath = doc.getFilePath();
@@ -567,32 +575,16 @@ public class APIAndAPIProductCommonUtil {
                             + APIImportExportConstants.FILE_DOCUMENT_DIRECTORY + File.separator + filePath)) {
                         String docExtension = FilenameUtils.getExtension(pathToArchive + File.separator
                                 + APIImportExportConstants.DOCUMENT_DIRECTORY + File.separator + filePath);
-                        ResourceFile apiDocument = new ResourceFile(inputStream, docExtension);
-                        String visibleRolesList = apiTypeWrapper.getVisibleRoles();
-                        String[] visibleRoles = new String[0];
-                        if (visibleRolesList != null) {
-                            visibleRoles = visibleRolesList.split(",");
-                        }
-                        String filePathDoc = APIUtil.getDocumentationFilePath(identifier, filePath);
-                        APIUtil.setResourcePermissions(apiTypeWrapper.getId().getProviderName(),
-                                apiTypeWrapper.getVisibility(), visibleRoles, filePathDoc);
-                        doc.setFilePath(apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
+                        content = new DocumentationContent();
+                        ResourceFile resourceFile = new ResourceFile(inputStream, docExtension);
+                        resourceFile.setName(filePath);
+                        content.setResourceFile(resourceFile);
+                        content.setSourceType(ContentSourceType.FILE);
+                        apiProvider.addDocumentationContent(apiUUID, addedDoc.getId(), orgId, content);
                     } catch (FileNotFoundException e) {
                         //this error is logged and ignored because documents are optional in an API
                         log.error("Failed to locate the document files of the API/API Product: " + apiTypeWrapper.getId().getName(), e);
                         continue;
-                    }
-                }
-
-                //Add documentation accordingly.
-                apiProvider.addDocumentation(identifier, doc);
-
-                if (docContentExists) {
-                    //APIProvider.addDocumentationContent method handles both create/update documentation content
-                    if (!apiTypeWrapper.isAPIProduct()) {
-                        apiProvider.addDocumentationContent(apiTypeWrapper.getApi(), doc.getName(), inlineContent);
-                    } else {
-                        apiProvider.addProductDocumentationContent(apiTypeWrapper.getApiProduct(), doc.getName(), inlineContent);
                     }
                 }
             }

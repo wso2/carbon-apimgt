@@ -112,18 +112,19 @@ public class APIKeyValidationService {
             if (axis2MessageContext != null) {
                 MessageContext responseMessageContext = axis2MessageContext.getOperationContext().
                         getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                if (log.isDebugEnabled()) {
-                    List headersList = new ArrayList();
-                    Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                    if (headers != null && headers instanceof Map) {
-                        headersMap = (Map) headers;
-                        activityID = (String) headersMap.get("activityID");
+                if (responseMessageContext != null) {
+                    if (log.isDebugEnabled()) {
+                        List headersList = new ArrayList();
+                        Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        if (headers != null && headers instanceof Map) {
+                            headersMap = (Map) headers;
+                            activityID = (String) headersMap.get("activityID");
+                        }
+                        if(headersMap != null) {
+                            headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
+                        }
+                        responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                     }
-                    if(headersMap != null) {
-                        headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
-                    }
-
-                    responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                 }
             }
         } catch (AxisFault axisFault) {

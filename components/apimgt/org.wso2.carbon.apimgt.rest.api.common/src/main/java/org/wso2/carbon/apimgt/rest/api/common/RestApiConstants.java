@@ -73,6 +73,8 @@ public final class RestApiConstants {
     public static final String QUERY_PARAM = "{query}";
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
+    public static final String SORTBY_PARAM = "{sortBy}";
+    public static final String SORTORDER_PARAM = "{sortOrder}";
     public static final String TYPE_PARAM = "{type}";
     public static final String TIER_LEVEL_PARAM = "{tierLevel}";
     public static final String SUBSCRIBER_PARAM = "{subscriber}";
@@ -181,6 +183,10 @@ public final class RestApiConstants {
     public static final String APPLICATIONS_GET_PAGINATION_URL =
             RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&groupId="
                     + GROUPID_PARAM;
+
+    public static final String APPLICATIONS_GET_PAGINATION_URL_WITH_SORTBY_SORTORDER  =
+            RESOURCE_PATH_APPLICATIONS + "?sortBy=" + SORTBY_PARAM + "&sortOrder=" + SORTORDER_PARAM +
+                    "&limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&groupId=" + GROUPID_PARAM;
 
     public static final String SUBSCRIPTIONS_GET_PAGINATION_URL_APIID =
             RESOURCE_PATH_SUBSCRIPTIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&apiId="

@@ -15,38 +15,38 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.analytics.dto;
+package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 /**
- * Response event data DTO
+ * abstract analytics event
  */
-public class ResponseEvent {
+public class AnalyticsEvent {
+    private String requestTimestamp;
     private String correlationId;
     private String keyType;
     private String apiId;
     private String apiName;
     private String apiVersion;
     private String apiCreator;
-    private String apiMethod;
     private String apiCreatorTenantDomain;
-    private String apiResourceTemplate;
-    private String destination;
     private String applicationId;
     private String applicationName;
     private String applicationOwner;
     private String regionId;
     private String gatewayType;
-    private String userAgent;
     private String proxyResponseCode;
     private String targetResponseCode;
-    private String responseCacheHit;
-    private String responseLatency;
-    private String backendLatency;
-    private String requestMediationLatency;
-    private String responseMediationLatency;
     private String deploymentId;
     private String eventType;
-    private String requestTimeStamp;
+    private String userAgent;
+
+    public String getRequestTimestamp() {
+        return requestTimestamp;
+    }
+
+    public void setRequestTimestamp(String requestTimestamp) {
+        this.requestTimestamp = requestTimestamp;
+    }
 
     public String getCorrelationId() {
         return correlationId;
@@ -96,36 +96,12 @@ public class ResponseEvent {
         this.apiCreator = apiCreator;
     }
 
-    public String getApiMethod() {
-        return apiMethod;
-    }
-
-    public void setApiMethod(String apiMethod) {
-        this.apiMethod = apiMethod;
-    }
-
     public String getApiCreatorTenantDomain() {
         return apiCreatorTenantDomain;
     }
 
     public void setApiCreatorTenantDomain(String apiCreatorTenantDomain) {
         this.apiCreatorTenantDomain = apiCreatorTenantDomain;
-    }
-
-    public String getApiResourceTemplate() {
-        return apiResourceTemplate;
-    }
-
-    public void setApiResourceTemplate(String apiResourceTemplate) {
-        this.apiResourceTemplate = apiResourceTemplate;
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
-        this.destination = destination;
     }
 
     public String getApplicationId() {
@@ -168,14 +144,6 @@ public class ResponseEvent {
         this.gatewayType = gatewayType;
     }
 
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
     public String getProxyResponseCode() {
         return proxyResponseCode;
     }
@@ -184,44 +152,12 @@ public class ResponseEvent {
         this.proxyResponseCode = proxyResponseCode;
     }
 
-    public String getResponseCacheHit() {
-        return responseCacheHit;
+    public String getTargetResponseCode() {
+        return targetResponseCode;
     }
 
-    public void setResponseCacheHit(String responseCacheHit) {
-        this.responseCacheHit = responseCacheHit;
-    }
-
-    public String getResponseLatency() {
-        return responseLatency;
-    }
-
-    public void setResponseLatency(String responseLatency) {
-        this.responseLatency = responseLatency;
-    }
-
-    public String getBackendLatency() {
-        return backendLatency;
-    }
-
-    public void setBackendLatency(String backendLatency) {
-        this.backendLatency = backendLatency;
-    }
-
-    public String getRequestMediationLatency() {
-        return requestMediationLatency;
-    }
-
-    public void setRequestMediationLatency(String requestMediationLatency) {
-        this.requestMediationLatency = requestMediationLatency;
-    }
-
-    public String getResponseMediationLatency() {
-        return responseMediationLatency;
-    }
-
-    public void setResponseMediationLatency(String responseMediationLatency) {
-        this.responseMediationLatency = responseMediationLatency;
+    public void setTargetResponseCode(String targetResponseCode) {
+        this.targetResponseCode = targetResponseCode;
     }
 
     public String getDeploymentId() {
@@ -240,19 +176,11 @@ public class ResponseEvent {
         this.eventType = eventType;
     }
 
-    public String getTargetResponseCode() {
-        return targetResponseCode;
+    public String getUserAgent() {
+        return userAgent;
     }
 
-    public void setTargetResponseCode(String targetResponseCode) {
-        this.targetResponseCode = targetResponseCode;
-    }
-
-    public String getRequestTimeStamp() {
-        return requestTimeStamp;
-    }
-
-    public void setRequestTimeStamp(String requestTimeStamp) {
-        this.requestTimeStamp = requestTimeStamp;
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }

@@ -258,7 +258,7 @@ public class SubscriptionValidationSQLConstants {
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING" +
                     " WHERE " +
-                    "CONSUMER_KEY = ? ";
+                    "CONSUMER_KEY = ? AND KEY_MANAGER = ?";
 
     public static final String GET_TENANT_SUBSCRIPTIONS_SQL =
             "SELECT " +

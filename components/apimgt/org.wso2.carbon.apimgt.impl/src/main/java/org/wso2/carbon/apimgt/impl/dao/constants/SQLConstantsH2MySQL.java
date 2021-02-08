@@ -46,12 +46,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
+            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
             " And " +
             "    NAME like ?" +
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
@@ -77,9 +76,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -109,10 +107,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "     (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " And " +
-                    "    NAME like ?" +
-                    " limit ? , ? "+
+                    "    NAME like ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 " ;
+                    " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -143,9 +140,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " )" +
                     " And "+
                     "    NAME like ?"+
-                    " limit ? , ? "+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 " ;
+                    " ORDER BY $1 $2 limit ? , ?";
 
 
 
@@ -169,12 +165,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "    SUB.USER_ID = ? "+
+            "    LOWER(SUB.USER_ID) = LOWER(?)"+
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-             " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
@@ -199,9 +194,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   LOWER (SUB.USER_ID) =LOWER (?)" +
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
@@ -228,5 +222,33 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " ) ORDER BY $1 $2 " +
                     " limit ? , ? "+
                     " )x ";
+
+    public static final String GET_ALL_SERVICES_BY_TENANT_ID = "SELECT " +
+            "   UUID," +
+            "   SERVICE_KEY," +
+            "   MD5," +
+            "   ENTRY_NAME," +
+            "   DISPLAY_NAME," +
+            "   ENTRY_VERSION," +
+            "   SERVICE_URL," +
+            "   DEFINITION_TYPE," +
+            "   DEFINITION_URL," +
+            "   DESCRIPTION," +
+            "   SECURITY_TYPE," +
+            "   MUTUAL_SSL_ENABLED," +
+            "   CREATED_TIME," +
+            "   LAST_UPDATED_TIME," +
+            "   CREATED_BY," +
+            "   UPDATED_BY," +
+            "   ENDPOINT_DEFINITION," +
+            "   METADATA FROM AM_SERVICE_CATALOG" +
+            "   WHERE TENANT_ID = ? " +
+            "   AND ENTRY_NAME LIKE ? " +
+            "   AND ENTRY_VERSION LIKE ? " +
+            "   AND DEFINITION_TYPE LIKE ?" +
+            "   AND DISPLAY_NAME LIKE ?" +
+            "   AND SERVICE_KEY LIKE ?" +
+            "   ORDER BY $1 $2 " +
+            "   LIMIT ?, ? ";
 
 }

@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
@@ -106,18 +107,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             try {
                 synchronized (this) {
                     if (usageDataPublisher == null) {
-                        try {
-                            log.debug("Instantiating Web Socket Data Publisher");
-                            usageDataPublisher =
-                                    (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
-                            usageDataPublisher.init();
-                        } catch (ClassNotFoundException e) {
-                            log.error("Class not found " + publisherClass, e);
-                        } catch (InstantiationException e) {
-                            log.error("Error instantiating " + publisherClass, e);
-                        } catch (IllegalAccessException e) {
-                            log.error("Illegal access to " + publisherClass, e);
-                        }
+                        log.debug("Instantiating Web Socket Data Publisher");
+                        usageDataPublisher = new APIMgtUsageDataBridgeDataPublisher();
+                        usageDataPublisher.init();
                     }
                 }
             } catch (Exception e) {

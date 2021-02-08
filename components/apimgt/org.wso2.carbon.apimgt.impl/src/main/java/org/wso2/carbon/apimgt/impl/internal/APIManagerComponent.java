@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -202,6 +201,8 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
             registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
@@ -215,8 +216,7 @@ public class APIManagerComponent {
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
             // when ServiceDataPublisherAdmin is set.
-            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            analyticsConfiguration.setAPIManagerConfiguration(configuration);
+
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_APPLICATION_DATA_LOCATION), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + "/trunk"), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_APPLICATION_DATA_LOCATION), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
@@ -264,10 +264,12 @@ public class APIManagerComponent {
             SQLConstantManagerFactory.initializeSQLConstantManager();
             // Initialize PasswordResolver
             PasswordResolverFactory.initializePasswordResolver();
+
             boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
             if (analyticsEnabled) {
                 ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
             }
+
             APIUtil.init();
 
             // Activating UserPostSelfRegistration handler componeAPITemplateBuilderImplnt
@@ -296,10 +298,6 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-                if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
-                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
-                    bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
-                }
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -875,24 +873,16 @@ public class APIManagerComponent {
     @Reference(
             name = "gateway.artifact.saver",
             service = ArtifactSaver.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeArtifactSaver")
-    protected void addArtifactSaver (ArtifactSaver artifactSaver) {
-
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getGatewayArtifactSynchronizerProperties();
-
-        if (gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
-            ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
-
-            try {
-                ServiceReferenceHolder.getInstance().getArtifactSaver().init();
-            } catch (Exception e) {
-                log.error("Error connecting with the Artifact Saver");
-                removeArtifactSaver(null);
-            }
+    protected void addArtifactSaver(ArtifactSaver artifactSaver) {
+        ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
+        try {
+            ServiceReferenceHolder.getInstance().getArtifactSaver().init();
+        } catch (Exception e) {
+            log.error("Error connecting with the Artifact Saver");
+            removeArtifactSaver(null);
         }
     }
 
