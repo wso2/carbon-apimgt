@@ -392,14 +392,13 @@ export default function CustomizedSteppers() {
                                         Deploy as a prototype
                                 {isUpdating && <CircularProgress size={20} />}
                             </Button>
-
                         ) : (
                             <Button
                                 size='small'
                                 variant='contained'
                                 color='primary'
                                 onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                disabled={(!isEndpointAvailable || !isTierAvailable) || api.isRevision
+                                disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable) || api.isRevision
                                         || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
                             >
                                         Publish
@@ -468,31 +467,33 @@ export default function CustomizedSteppers() {
                     <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
                         <div className={`${classes.pointerMiddle} ${step2Class}`}>
                             <Box p={2} borderLeft='0' borderRight='0'>
-                                <Tooltip
-                                    title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
-                                    placement='top'
-                                >
-                                    <Grid className={classes.gridEndpoint}>
-                                        {isEndpointAvailable ? (
-                                            <CheckIcon className={classes.iconTrue} />
-                                        ) : (
-                                            <CloseIcon className={classes.iconFalse} />
-                                        )}
-                                        <Typography variant='h7'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
-                                                defaultMessage='Endpoint'
-                                            />
-                                        </Typography>
-                                        <Link to={'/apis/' + api.id + '/endpoints'}>
-                                            <LaunchIcon
-                                                style={{ marginLeft: '5px' }}
-                                                color='primary'
-                                                fontSize='small'
-                                            />
-                                        </Link>
-                                    </Grid>
-                                </Tooltip>
+                                { api.type !== 'WEBSUB' &&  (
+                                    <Tooltip
+                                        title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
+                                        placement='top'
+                                    >
+                                        <Grid className={classes.gridEndpoint}>
+                                            {isEndpointAvailable ? (
+                                                <CheckIcon className={classes.iconTrue} />
+                                            ) : (
+                                                <CloseIcon className={classes.iconFalse} />
+                                            )}
+                                            <Typography variant='h7'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
+                                                    defaultMessage='Endpoint'
+                                                />
+                                            </Typography>
+                                            <Link to={'/apis/' + api.id + '/endpoints'}>
+                                                <LaunchIcon
+                                                    style={{ marginLeft: '5px' }}
+                                                    color='primary'
+                                                    fontSize='small'
+                                                />
+                                            </Link>
+                                        </Grid>
+                                    </Tooltip>
+                                )}
                                 <Tooltip
                                     title={isTierAvailable ? '' : 'You have to select the business plan for the API'}
                                     placement='bottom'

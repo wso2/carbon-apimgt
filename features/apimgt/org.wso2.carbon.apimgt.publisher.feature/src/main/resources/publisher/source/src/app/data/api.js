@@ -204,13 +204,13 @@ class API extends Resource {
 
     /**
      * export an API Directory as A Zpi file
-     * @returns {promise} Promise Containing the ZPI file of the selected API 
+     * @returns {promise} Promise Containing the ZPI file of the selected API
      */
     exportApi(apiId) {
         const apiZip = this.client.then((client) => {
             return client.apis['Import Export'].exportAPI({
                 apiId: apiId
-            },  this._requestMetaData({ 
+            },  this._requestMetaData({
                     'accept': 'application/zip'
                 })
             );
@@ -316,6 +316,29 @@ class API extends Resource {
             const payload = {
                 'Content-Type': 'application/json',
                 openAPIVersion,
+            };
+            const requestBody = {
+                'requestBody': data,
+            };
+            return client.apis['APIs'].createAPI(payload, requestBody, this._requestMetaData());
+        });
+        return promisedAPIResponse.then(response => {
+            return new API(response.body);
+        });
+    }
+
+    saveStreamingAPI() {
+        const promisedAPIResponse = this.client.then(client => {
+            const properties = client.spec.components.schemas.API.properties;
+            const data = {};
+            Object.keys(this).forEach(apiAttribute => {
+                if (apiAttribute in properties) {
+                    data[apiAttribute] = this[apiAttribute];
+                }
+            });
+
+            const payload = {
+                'Content-Type': 'application/json',
             };
             const requestBody = {
                 'requestBody': data,
@@ -478,13 +501,13 @@ class API extends Resource {
     /**
      * Mock sample responses for Inline Prototyping
      * of a swagger OAS defintion
-     * 
+     *
      * @param id {String} The api id.
      */
     generateMockScripts(id=this.id) {
-        const promise_get = this.client.then(client => { 
+        const promise_get = this.client.then(client => {
             return client.apis['APIs'].generateMockScripts(
-                { 
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -496,13 +519,13 @@ class API extends Resource {
 
     /**
      * Resets sample responses for inline prototyping
-     * 
-     * @param {String} id 
+     *
+     * @param {String} id
      */
     getGeneratedMockScriptsOfAPI(id=this.id) {
-        const promise_get = this.client.then(client => { 
-            return client.apis['APIs'].getGeneratedMockScriptsOfAPI( 
-                { 
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].getGeneratedMockScriptsOfAPI(
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -748,6 +771,7 @@ class API extends Resource {
      * @deprecated
      */
     updateSwagger(id, swagger) {
+        alert('update swagger() invoked!');
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
@@ -1371,7 +1395,7 @@ class API extends Resource {
 
     /**
      * Downloads the WSDL of an API
-     * 
+     *
      * @param {string} apiId Id (UUID) of the API
      */
     getWSDL(apiId) {
@@ -1388,7 +1412,7 @@ class API extends Resource {
 
     /**
      * Get WSDL meta info of an API - indicates whether the WSDL is a ZIP or a single file.
-     * 
+     *
      * @param {string} apiId Id (UUID) of the API
      */
     getWSDLInfo(apiId) {
@@ -1405,8 +1429,8 @@ class API extends Resource {
 
     /**
      * Updates the API's WSDL with the WSDL of the provided URL
-     * 
-     * @param {string} apiId Id (UUID) of the API 
+     *
+     * @param {string} apiId Id (UUID) of the API
      * @param {string} url WSDL url
      */
     updateWSDLByUrl(apiId, url) {
@@ -1430,8 +1454,8 @@ class API extends Resource {
 
     /**
      * Updates the API's WSDL with the WSDL of the provided file (zip or .wsdl)
-     * 
-     * @param {string} apiId Id (UUID) of the API 
+     *
+     * @param {string} apiId Id (UUID) of the API
      * @param {*} file WSDL file (zip or .wsdl)
      */
     updateWSDLByFileOrArchive(apiId, file) {
@@ -1714,7 +1738,7 @@ class API extends Resource {
     /**
      * Get the complexity related details of an API
      */
-    
+
     getGraphqlPoliciesComplexity(id) {
         const promisePolicies = this.client.then(client => {
             return client.apis['GraphQL Policies'].getGraphQLPolicyComplexityOfAPI(
@@ -1726,7 +1750,7 @@ class API extends Resource {
         });
         return promisePolicies.then(response => response.body);
     }
-    
+
     /**
      * Update complexity related details of an API
      */
@@ -1760,7 +1784,7 @@ class API extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
-    
+
 
     /**
      *
@@ -1976,7 +2000,7 @@ class API extends Resource {
         } else {
             return promisedAPI;
         }
-       
+
     }
 
     /**
@@ -2781,6 +2805,20 @@ class API extends Resource {
             return client.apis["Key Managers (Collection)"].getAllKeyManagers(
                 this._requestMetaData(),
             );
+        });
+    }
+
+    static updateTopics(apiId, topics) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            const payload = {
+                'Content-Type': 'application/json',
+                apiId
+            };
+            const requestBody = {
+                'requestBody': topics,
+            };
+            return client.apis["APIs"].updateTopics(payload, requestBody, this._requestMetaData());
         });
     }
 }

@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -63,18 +64,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
@@ -120,6 +110,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -139,6 +130,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class APIMappingUtil {
@@ -253,6 +245,7 @@ public class APIMappingUtil {
         model.setScopes(scopes);
 
         //URI Templates
+        // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
         model.setUriTemplates(uriTemplates);
 
@@ -336,6 +329,21 @@ public class APIMappingUtil {
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
+
+        if (dto.getType().toString().equals(APIConstants.API_TYPE_WEBSUB)) {
+            WebsubSubscriptionConfigurationDTO websubSubscriptionConfigurationDTO
+                    = dto.getWebsubSubscriptionConfiguration();
+            WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+            if (websubSubscriptionConfigurationDTO != null) {
+                websubSubscriptionConfiguration = new WebsubSubscriptionConfiguration(
+                        websubSubscriptionConfigurationDTO.getSecret(),
+                        websubSubscriptionConfigurationDTO.getSigningAlgorithm(),
+                        websubSubscriptionConfigurationDTO.getSignatureHeader());
+            } else {
+                websubSubscriptionConfiguration = getDefaultWebsubSubscriptionConfiguration();
+            }
+            model.setWebsubSubscriptionConfiguration(websubSubscriptionConfiguration);
+        }
 
         //attach api categories to API model
         setAPICategoriesToModel(dto, model, provider);
@@ -1031,9 +1039,14 @@ public class APIMappingUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
                 .getProviderName()));
 
+        boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
+                || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
+                || APIDTO.TypeEnum.SSE.toString().equals(model.getType());
+
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
-        if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+        if (!isAsyncAPI) {
+            // Get from swagger definition
             List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition;
             if (model.getSwaggerDefinition() != null) {
@@ -1046,6 +1059,11 @@ public class APIMappingUtil {
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
+        } else {
+            // Get from asyncapi definition
+            List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
+            dto.setOperations(apiOperationsDTO);
+            // TODO: get scopes
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1132,6 +1150,17 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
+
+        WebsubSubscriptionConfigurationDTO websubSubscriptionConfigurationDTO
+                = new WebsubSubscriptionConfigurationDTO();
+        WebsubSubscriptionConfiguration websubSubscriptionConfiguration = model.getWebsubSubscriptionConfiguration();
+        if (websubSubscriptionConfiguration == null) {
+            websubSubscriptionConfiguration = APIUtil.getDefaultWebsubSubscriptionConfiguration();
+        }
+        websubSubscriptionConfigurationDTO.setSecret(websubSubscriptionConfiguration.getSecret());
+        websubSubscriptionConfigurationDTO.setSigningAlgorithm(websubSubscriptionConfiguration.getSigningAlgorithm());
+        websubSubscriptionConfigurationDTO.setSignatureHeader(websubSubscriptionConfiguration.getSignatureHeader());
+        dto.setWebsubSubscriptionConfiguration(websubSubscriptionConfigurationDTO);
 
         if (model.getWsdlUrl() != null) {
             WSDLInfoDTO wsdlInfoDTO = getWsdlInfoDTO(model);
@@ -1441,7 +1470,8 @@ public class APIMappingUtil {
             }
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
-                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) ||
+                    (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) || (APIConstants.SSE_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -1468,6 +1498,12 @@ public class APIMappingUtil {
                 if(APIConstants.GRAPHQL_API.equals(model.getType())){
                     handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
                             + "' is invalid");
+                } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
+                    handleException("The WEBSUB operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
+                    handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
                 } else {
                     handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
                             + "' is invalid");
@@ -1477,6 +1513,9 @@ public class APIMappingUtil {
             if (!isHttpVerbDefined) {
                 if(APIConstants.GRAPHQL_API.equals(model.getType())) {
                     handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType()) || APIConstants.API_TYPE_SSE.equals(model.getType())) {
+                    handleException("Topic '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
                     handleException("Resource '" + uriTempVal + "' has global parameters without " +
@@ -1688,6 +1727,34 @@ public class APIMappingUtil {
                 OpenAPIDefinitionValidationResponseInfoDTO infoDTO =
                         new OpenAPIDefinitionValidationResponseInfoDTO();
                 infoDTO.setOpenAPIVersion(modelInfo.getOpenAPIVersion());
+                infoDTO.setName(modelInfo.getName());
+                infoDTO.setVersion(modelInfo.getVersion());
+                infoDTO.setContext(modelInfo.getContext());
+                infoDTO.setDescription(modelInfo.getDescription());
+                infoDTO.setEndpoints(modelInfo.getEndpoints());
+                responseDTO.setInfo(infoDTO);
+            }
+            if (returnContent) {
+                responseDTO.setContent(model.getContent());
+            }
+        } else {
+            responseDTO.setErrors(getErrorListItemsDTOsFromErrorHandlers(model.getErrorItems()));
+        }
+        return responseDTO;
+    }
+
+    public static AsyncAPISpecificationValidationResponseDTO getAsyncAPISpecificationValidationResponseFromModel(
+            APIDefinitionValidationResponse model, boolean returnContent) {
+
+        AsyncAPISpecificationValidationResponseDTO responseDTO = new AsyncAPISpecificationValidationResponseDTO();
+        responseDTO.setIsValid(model.isValid());
+
+        if (model.isValid()){
+            APIDefinitionValidationResponse.Info modelInfo = model.getInfo();
+            if (modelInfo != null){
+                AsyncAPISpecificationValidationResponseInfoDTO infoDTO =
+                        new AsyncAPISpecificationValidationResponseInfoDTO();
+                infoDTO.setAsyncAPIVersion(modelInfo.getOpenAPIVersion());
                 infoDTO.setName(modelInfo.getName());
                 infoDTO.setVersion(modelInfo.getVersion());
                 infoDTO.setContext(modelInfo.getContext());
@@ -1962,19 +2029,27 @@ public class APIMappingUtil {
     private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
-        String[] supportedMethods = null;
+        String[] supportedMethods;
 
         if (apiType.equals(APIConstants.GRAPHQL_API)) {
             supportedMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
         } else if (apiType.equals(APIConstants.API_TYPE_SOAP)) {
             supportedMethods = APIConstants.SOAP_DEFAULT_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_WEBSUB)) {
+            supportedMethods = APIConstants.WEBSUB_SUPPORTED_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_SSE)) {
+            supportedMethods = APIConstants.SSE_SUPPORTED_METHODS;
         } else {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
 
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setTarget("/*");
+            if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
+                operationsDTO.setTarget("*");
+            } else {
+                operationsDTO.setTarget("/*");
+            }
             operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);

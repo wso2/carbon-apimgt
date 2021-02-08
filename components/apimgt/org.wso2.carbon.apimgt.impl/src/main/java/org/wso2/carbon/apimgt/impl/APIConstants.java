@@ -210,7 +210,7 @@ public final class APIConstants {
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
-    public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.yml";
+    public static final String API_ASYNCAPI_DEFINITION_RESOURCE_NAME = "asyncapi.json";
 
     public static final String API_ICON_IMAGE = "icon";
 
@@ -599,6 +599,8 @@ public final class APIConstants {
     public static final String CHAR_ASTERIX = "*";
     public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
+    public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
+            = "overview_websubSubscriptionConfiguration";
 
     public static class TokenStatus {
 
@@ -1236,6 +1238,11 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList(new String[]{"QUERY", "MUTATION", "SUBSCRIPTION", "head", "options"})));
 
+    public static final Set<String> WEBSUB_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+    public static final Set<String> SSE_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
@@ -1595,6 +1602,11 @@ public final class APIConstants {
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
 
+    public static final String WS_PROTOCOL = "ws";
+    public static final String WS_PROTOCOL_URL_PREFIX = "ws://";
+    public static final String WSS_PROTOCOL = "wss";
+    public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
+
     public static final String EMAIL_TRANSPORT = "mailto";
 
     public static final long MAX_FILE_SIZE = 1024L;
@@ -1640,6 +1652,8 @@ public final class APIConstants {
     public static final String SWAGGER_CODEGEN_DIRECTORY = "swaggerCodegen";
     public static final String JSON_FILE_EXTENSION = ".json";
     public static final String ZIP_FILE_EXTENSION = ".zip";
+    public static final String YAML_FILE_EXTENSION = ".yaml";
+    public static final String YML_FILE_EXTENSION = ".yml";
 
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";
@@ -1758,8 +1772,10 @@ public final class APIConstants {
     public static final String API_PRODUCT_VERSION = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
-    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP"};
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
+            "SSE"};
     public static final String API_PRODUCT_REVISION = "Current";
+
     public static class AdvancedThrottleConstants {
 
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1939,11 +1955,16 @@ public final class APIConstants {
         HTTP, WS, GRAPHQL, WEBSUB, SSE
     }
 
+    public static final String API_TYPE_WEBSUB = "WEBSUB";
+    public static final String API_TYPE_SSE = "SSE";
+
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
 
     public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
     public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+    public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";

@@ -423,6 +423,55 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: deleteAPI
 
+  /apis/{apiId}/topics:
+    put:
+      tags:
+      - APIs
+      summary: Update Topics
+      description: This operation can be used to update topics of an existing API.
+      operationId: updateTopics
+      parameters:
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: API object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+
   /apis/{apiId}/swagger:
     get:
       tags:
@@ -6815,6 +6864,236 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/92bc1330-1848-4fe8-b992-c792186c212e/deployments/"'
 
+  /apis/validate-asyncapi:
+    post:
+      tags:
+        - Validation
+      summary: Validate an AsyncAPI Specification
+      description:
+        This operation can be used to validate and AsyncAPI Specification and retrieve a summary. Provide either 'url'
+        or 'file' to specify the definition.
+      operationId: validateAsyncAPISpecification
+      parameters:
+        - name: returnContent
+          in: query
+          description:
+            Specify whether to return the full content of the AsyncAPI specification in the response. This is only
+            applicable when using url based validation
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                url:
+                  type: string
+                  description: AsyncAPI definition url
+                file:
+                  type: string
+                  description: AsyncAPI definition as a file
+                  format: binary
+      responses:
+        200:
+          description:
+            OK.
+            API definition validation information is returned
+          headers:
+            Content-Type:
+              description:
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncAPISpecificationValidationResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+
+  /apis/import-asyncapi:
+    post:
+      tags:
+        - APIs
+      summary: import an AsyncAPI Specification
+      description:
+        This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file'
+        to specify the definition.
+
+        Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
+      operationId: importAsyncAPISpecification
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  description: Definition to upload as a file
+                  format: binary
+                url:
+                  type: string
+                  description: Definition url
+                additionalProperties:
+                  type: string
+                  description: Additional attributes specified as a stringified JSON with API's schema
+      responses:
+        201:
+          description:
+            Created. Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          headers:
+            Etag:
+              description:
+                Entity Tag of the respons resource. Used by caches, or in conditional requests (Will be supported in the future).
+              schema:
+                type: string
+            Location:
+              description:
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-type:
+              description:
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+
+  /apis/{apiId}/asyncapi:
+    get:
+      tags:
+        - APIs
+      summary: Get AsyncAPI definition
+      description: |
+        This operation can be used to retrieve the AsyncAPI definition of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested AsyncAPI definition of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Willl= be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has beed modified the last time.
+                Used by caches, or in conditional request (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+
+    put:
+      tags:
+        - APIs
+      summary: Update AsyncAPI definition
+      description: |
+        This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                apiDefinition:
+                  type: string
+                  description: AsyncAPI definition of the API
+                url:
+                  type: string
+                  description: AsyncAPI definition URL of the API
+                file:
+                  type: string
+                  description: AsyncAPI definition as a file
+                  format: binary
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated AsyncAPI definition
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has beed modified the last time.
+                Use =d by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+
 components:
   schemas:
     APIList:
@@ -6887,6 +7166,49 @@ components:
           type: array
           items:
             type: string
+
+    Topic:
+      title: Topic object
+      required:
+      - name
+      - mode
+      - description
+      type: object
+      properties:
+        id:
+          type: string
+          description: id
+          readOnly: true
+          example: 1222344
+        name:
+          maxLength: 50
+          minLength: 1
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
+          type: string
+          example: PizzaShackAPI
+        mode:
+          maxLength: 32766
+          type: string
+          example: This is a simple API for Pizza Shack online pizza delivery store.
+        description:
+          maxLength: 32766
+          type: string
+          example: This is a simple API for Pizza Shack online pizza delivery store.
+    TopicList:
+      title: Topic List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Topics returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Topic'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     API:
       title: API object
       required:
@@ -6981,7 +7303,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
           example: HTTP
           default: HTTP
           enum:
@@ -6990,6 +7312,8 @@ components:
             - SOAPTOREST
             - SOAP
             - GRAPHQL
+            - WEBSUB
+            - SSE
         transport:
           type: array
           description: |
@@ -7153,6 +7477,8 @@ components:
             - apim:api_publish
         corsConfiguration:
           $ref: '#/components/schemas/APICorsConfiguration'
+        websubSubscriptionConfiguration:
+          $ref: '#/components/schemas/WebsubSubscriptionConfiguration'
         workflowStatus:
           type: string
           example: APPROVED
@@ -8370,6 +8696,20 @@ components:
         technicalOwnerEmail:
           type: string
           example: technicalowner@wso2.com
+
+    WebsubSubscriptionConfiguration:
+      type: object
+      properties:
+        secret:
+          type: string
+          description: Secret key to be used for subscription
+        signingAlgorithm:
+          type: string
+          description: The algorithm used for signing
+        signatureHeader:
+          type: string
+          description: The header uses to send the signature
+
     APICorsConfiguration:
       type: object
       properties:
@@ -8639,6 +8979,9 @@ components:
           example: ""
         amznResourceTimeout:
           type: integer
+        payloadSchema:
+          type: string
+          example: ""
     ScopeList:
       title: Scope List
       type: object
@@ -9802,6 +10145,55 @@ components:
         creationTimestamp:
           type: string
           example: 2020-05-12T06:12:00Z
+    AsyncAPISpecificationValidationResponse:
+      title: AsyncAPI Specification Validation Response
+      required:
+        - isValid
+      type: object
+      properties:
+        isValid:
+          type: boolean
+          description:
+            This attribute declares whether this definition is valid or not.
+          example: true
+        content:
+          type: string
+          description:
+            AsyncAPI specification content
+        info:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Streetlights
+            version:
+              type: string
+              example: 1.0.0
+            context:
+              type: string
+              example: /streetlights
+            description:
+              type: string
+              example: A sample API that uses a streetlights as an example to demonstrate AsyncAPI specifications
+            asyncAPIVersion:
+              type: string
+              example: 2.0
+            endpoints:
+              type: array
+              description:
+                contains host/servers specified in the AsyncAPI file/URL
+              items:
+                type: string
+                example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+          description:
+            API definition information
+        errors:
+          type: array
+          description:
+            If there are more than one error list them out.
+            For example, list out validation error by each field.
+          items:
+            $ref: '#/components/schemas/ErrorListItem'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
