@@ -83,7 +83,7 @@ public class JWTValidator {
         this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
         this.apiKeyValidator = apiKeyValidator;
         jwtConfigurationDto =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
+                (JWTConfigurationDto) ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getJwtConfigurationDto();
         jwtGenerationEnabled = jwtConfigurationDto.isEnabled();
         apiMgtGatewayJWTGenerator =
                 ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
