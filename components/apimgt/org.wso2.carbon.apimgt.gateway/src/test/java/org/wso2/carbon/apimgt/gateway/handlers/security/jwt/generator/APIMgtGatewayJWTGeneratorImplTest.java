@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGenera
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
@@ -49,11 +50,10 @@ public class APIMgtGatewayJWTGeneratorImplTest {
                 .thenReturn(apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
 
-        JWTConfigurationDto jwtConfigurationDto = Mockito.mock(JWTConfigurationDto.class);
+        ExtendedJWTConfigurationDto jwtConfigurationDto = Mockito.mock(ExtendedJWTConfigurationDto.class);
         Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(jwtConfigurationDto);
 
         String defaultDialectUri = "http://wso2.org/claims";
-        Mockito.when(jwtConfigurationDto.getDefaultDialectUri()).thenReturn(defaultDialectUri);
         // default dialect if not changed
         AbstractAPIMgtGatewayJWTGenerator generator = new APIMgtGatewayJWTGeneratorImpl();
         // Set jwtConfigurationDto
@@ -64,8 +64,6 @@ public class APIMgtGatewayJWTGeneratorImplTest {
         String claimDialect = "http://test.com";
         Mockito.when(jwtConfigurationDto.getConsumerDialectUri()).thenReturn(claimDialect);
         generator = new APIMgtGatewayJWTGeneratorImpl();
-        // Set jwtConfigurationDto
-        jwtConfigurationDto.setDefaultDialectUri(ClaimsRetriever.DEFAULT_DIALECT_URI);
         generator.setJWTConfigurationDto(jwtConfigurationDto);
         Assert.assertEquals(generator.getDialectURI(), claimDialect);
     }

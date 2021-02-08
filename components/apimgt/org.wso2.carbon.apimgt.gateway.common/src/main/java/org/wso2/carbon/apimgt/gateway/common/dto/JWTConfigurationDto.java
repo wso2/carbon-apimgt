@@ -33,8 +33,6 @@ public class JWTConfigurationDto {
     private String jwtHeader = "X-JWT-Assertion";
     private String consumerDialectUri = "http://wso2.org/claims";
     private String signatureAlgorithm = "SHA256withRSA";
-    private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";
-    private String claimRetrieverImplClass;
     private boolean enableUserClaims;
     private String gatewayJWTGeneratorImpl;
     private Map<String, TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
@@ -42,7 +40,6 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
-    private String defaultDialectUri;
 
     public boolean isEnabled() {
 
@@ -82,26 +79,6 @@ public class JWTConfigurationDto {
     public void setSignatureAlgorithm(String signatureAlgorithm) {
 
         this.signatureAlgorithm = signatureAlgorithm;
-    }
-
-    public String getJwtGeneratorImplClass() {
-
-        return jwtGeneratorImplClass;
-    }
-
-    public void setJwtGeneratorImplClass(String jwtGeneratorImplClass) {
-
-        this.jwtGeneratorImplClass = jwtGeneratorImplClass;
-    }
-
-    public String getClaimRetrieverImplClass() {
-
-        return claimRetrieverImplClass;
-    }
-
-    public void setClaimRetrieverImplClass(String claimRetrieverImplClass) {
-
-        this.claimRetrieverImplClass = claimRetrieverImplClass;
     }
 
     public void setGatewayJWTGeneratorImpl(String gatewayJWTGeneratorImpl) {
@@ -168,11 +145,4 @@ public class JWTConfigurationDto {
         return ttl;
     }
 
-    public void setDefaultDialectUri(String defaultDialectUri) {
-        this.defaultDialectUri = defaultDialectUri;
-    }
-
-    public String getDefaultDialectUri() {
-        return defaultDialectUri;
-    }
 }

@@ -89,18 +89,13 @@ public class JWTValidator {
                 ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
         // Set certificate to jwtConfigurationDto
-        Certificate publicCert = ServiceReferenceHolder.getInstance().getPublicCert();
-        jwtConfigurationDto.setPublicCert(publicCert);
+        jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
 
         // Set private key to jwtConfigurationDto
-        PrivateKey privateKey = ServiceReferenceHolder.getInstance().getPrivateKey();
-        jwtConfigurationDto.setPrivateKey(privateKey);
+        jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
 
         // Set ttl to jwtConfigurationDto
         jwtConfigurationDto.setTtl(getTtl());
-
-        // Set default dialect uri
-        jwtConfigurationDto.setDefaultDialectUri(ClaimsRetriever.DEFAULT_DIALECT_URI);
 
         //setting the jwt configuration dto
         apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);

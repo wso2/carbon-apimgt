@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +107,7 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
-    private JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+    private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
     private static JSONObject redisConfigProperties = new JSONObject();
@@ -1689,7 +1690,7 @@ public class APIManagerConfiguration {
         this.eventHubConfigurationDto = eventHubConfigurationDto;
     }
 
-    public JWTConfigurationDto getJwtConfigurationDto() {
+    public ExtendedJWTConfigurationDto getJwtConfigurationDto() {
 
         return jwtConfigurationDto;
     }

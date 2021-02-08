@@ -59,7 +59,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         this.jwtConfigurationDto = jwtConfigurationDto;
         dialectURI = jwtConfigurationDto.getConsumerDialectUri();
         if (dialectURI == null) {
-            dialectURI = jwtConfigurationDto.getDefaultDialectUri();
+            dialectURI = "http://wso2.org/claims";
         }
         signatureAlgorithm = jwtConfigurationDto.getSignatureAlgorithm();
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
