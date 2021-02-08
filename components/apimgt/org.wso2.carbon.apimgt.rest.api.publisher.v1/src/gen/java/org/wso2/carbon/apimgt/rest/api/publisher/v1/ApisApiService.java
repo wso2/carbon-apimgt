@@ -96,6 +96,7 @@ public interface ApisApiService {
       public Response getAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevisions(String apiId, String query, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIRevisionsWithAPIName(String name, String version, String provider, String query, MessageContext messageContext) throws APIManagementException;
       public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

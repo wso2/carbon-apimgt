@@ -3963,6 +3963,18 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response getAPIRevisionsWithAPIName(String name, String version, String provider, String query,
+                                               MessageContext messageContext) throws APIManagementException {
+
+        if (provider == null) {
+            provider = RestApiCommonUtil.getLoggedInUsername();
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+        String apiUuid = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+        return getAPIRevisions(apiUuid, query, messageContext);
+    }
+
     /**
      * Create a new API revision
      *
