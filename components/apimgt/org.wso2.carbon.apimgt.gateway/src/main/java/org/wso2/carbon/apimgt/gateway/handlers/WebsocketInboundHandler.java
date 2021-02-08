@@ -363,7 +363,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     }
                     String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
                     if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                        info = getApiKeyDataForWSClient(apiKey, tenantDomain, apiContext, version, matchingResource);
+                        info = getApiKeyDataForWSClient(apiKey, tenantDomain, apiContext, version);
                     } else {
                         return false;
                     }
@@ -400,10 +400,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
-                                                             String apiVersion, String matchingResource)
-            throws APISecurityException {
+                                                               String apiVersion) throws APISecurityException {
 
-        return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain, matchingResource);
+        return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain);
     }
 
     protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {

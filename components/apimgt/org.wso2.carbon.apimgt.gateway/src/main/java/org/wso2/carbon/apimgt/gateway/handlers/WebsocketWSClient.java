@@ -41,17 +41,15 @@ public class WebsocketWSClient {
 	 * @param apiVersion
 	 * @param apiKey
 	 * @param tenantDomain
-	 * @param matchingResource
 	 * @return
 	 * @throws APISecurityException
 	 */
-	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String tenantDomain,
-	                                             String matchingResource) throws APISecurityException {
+	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String tenantDomain)
+			throws APISecurityException {
 		try {
 			return apiKeyValidationService.validateKeyForHandshake(context, apiVersion, apiKey, tenantDomain,
 			                                                       Arrays.asList(
-					                                                       APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS),
-			                                                       matchingResource);
+					                                                       APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
 			                               "Error while accessing backend services for API key validation", e);

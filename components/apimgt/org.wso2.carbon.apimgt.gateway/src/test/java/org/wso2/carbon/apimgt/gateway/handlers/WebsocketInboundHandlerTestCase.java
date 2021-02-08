@@ -288,7 +288,7 @@ public class WebsocketInboundHandlerTestCase {
         APIKeyValidationService apiKeyValidationService = Mockito.mock(APIKeyValidationService.class);
         WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
         try {
-            PowerMockito.when(websocketWSClient.getAPIKeyData(TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "abc.com", ""))
+            PowerMockito.when(websocketWSClient.getAPIKeyData(TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "abc.com"))
                     .thenReturn(apiKeyValidationInfoDTO);
             PowerMockito.whenNew(WebsocketWSClient.class).withNoArguments().thenReturn(websocketWSClient);
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
@@ -432,7 +432,7 @@ public class WebsocketInboundHandlerTestCase {
         WebsocketWSClient websocketWSClient = Mockito.mock(WebsocketWSClient.class);
         try {
             PowerMockito.when(
-                    websocketWSClient.getAPIKeyData(SUPER_TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "carbon.super", ""))
+                    websocketWSClient.getAPIKeyData(SUPER_TENANT_URL, "1.0", "587hfbt4i8ydno87ywq", "carbon.super"))
                     .thenReturn(apiKeyValidationInfoDTO);
             PowerMockito.whenNew(WebsocketWSClient.class).withAnyArguments().thenReturn(websocketWSClient);
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
@@ -446,7 +446,7 @@ public class WebsocketInboundHandlerTestCase {
 
             @Override
             protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
-                                                                       String apiVersion, String matchingResource) {
+                                                                       String apiVersion) {
                 return info;
             }
 
@@ -488,7 +488,7 @@ public class WebsocketInboundHandlerTestCase {
 
             @Override
             protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiKey,
-                                                                       String tenantDomain, String matchingResource)
+                                                                       String tenantDomain)
                     throws APISecurityException {
                 info.setAuthorized(true);
                 info.setApiName("Phoneverify*1.0");

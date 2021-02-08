@@ -465,14 +465,12 @@ public class APIKeyValidationService {
      * @param accessToken      access token of the request
      * @param tenantDomain
      * @param keyManagers
-     * @param matchingResource matching resource
      * @return
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
     public APIKeyValidationInfoDTO validateKeyForHandshake(String context, String version, String accessToken,
-                                                           String tenantDomain, List<String> keyManagers,
-                                                           String matchingResource)
+                                                           String tenantDomain, List<String> keyManagers)
             throws APIKeyMgtException, APIManagementException {
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
         info.setAuthorized(false);
@@ -484,15 +482,11 @@ public class APIKeyValidationService {
         validationContext.setTenantDomain(tenantDomain);
         validationContext.setRequiredAuthenticationLevel("Any");
         validationContext.setKeyManagers(keyManagers);
-        validationContext.setMatchingResource(matchingResource);
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         boolean state = keyValidationHandler.validateToken(validationContext);
         if (state) {
             state = keyValidationHandler.validateSubscription(validationContext);
-            if (state) {
-                state = keyValidationHandler.validateScopes(validationContext);
-            }
             if (state) {
                 if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
                         validationContext.getValidationInfoDTO().getEndUserName() != null
