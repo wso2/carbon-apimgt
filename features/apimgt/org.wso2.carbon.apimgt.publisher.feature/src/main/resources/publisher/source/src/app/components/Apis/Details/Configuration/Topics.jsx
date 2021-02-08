@@ -42,6 +42,9 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTopic'
 
+import $RefParser from "@apidevtools/json-schema-ref-parser";
+import { parse } from '@asyncapi/parser';
+
 const styles = (theme) => ({
     root: {
         ...theme.mixins.gutters(),
@@ -145,6 +148,9 @@ class Topics extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            asyncAPI: null,
+            definition: this.getAsyncAPIDefinition(),
+            resolvedDefinition: null,
             topics: this.loadTopics(this.getSortedOperations()),
             showAddTopic: false,
             isSaving: false,
@@ -161,6 +167,28 @@ class Topics extends Component {
         this.renderEditableProperty = this.renderEditableProperty.bind(this);
         this.loadTopics = this.loadTopics.bind(this);
         this.getSortedOperations = this.getSortedOperations.bind(this);
+        this.getAsyncAPIDefinition = this.getAsyncAPIDefinition.bind(this);
+        this.loadTopicMetaData = this.loadTopicMetaData.bind(this);
+    }
+
+    getAsyncAPIDefinition() {
+        const result = this.props.api.getAsyncAPIDefinition();
+        result.then(async (response) => {
+            $RefParser.dereference(response.body, (err, schema) => {
+                if (err) {
+                    console.error(err);
+                }
+                else {
+                    //console.log(schema);
+                    this.setState({
+                        resolvedDefinition: schema,
+                        definition: response.body
+                    });
+                }
+            })
+            const doc = await parse(response.body);
+            this.setState({asyncAPI: doc}, this.loadTopicMetaData);
+        });
     }
 
     getSortedOperations() {
@@ -187,6 +215,68 @@ class Topics extends Component {
 
     componentDidMount() {
 
+    }
+
+    loadTopicMetaData() {
+        const {asyncAPI, topics} = this.state;
+        topics.map((topic) => {
+            asyncAPI.channelNames().map((name) => {
+                let channel = asyncAPI.channel(name)
+                if (topic.name === name) {
+                    if (channel.hasPublish()) {
+                        topic.description = channel.publish().message()._json["x-parser-message-name"]
+                        for (let i in channel.publish().message().payload().properties()) {
+                            topic.payload.properties.push({
+                                name: i,
+                                type: channel.publish().message().payload().properties()[i]._json.type,
+                                advanced: '',
+                                description: '',
+                                editable: false,
+                                new: false
+                            })
+                            if (channel.publish().message().payload().properties()[i]._json.type === "object"){
+                                for (let j in channel.publish().message().payload().properties()[i].properties()) {
+                                    topic.payload.properties.push({
+                                        name: i+" / "+j,
+                                        type: channel.publish().message().payload().properties()[i].properties()[j]._json.type,
+                                        advanced: '',
+                                        description: '',
+                                        editable: false,
+                                        new: false
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    if (channel.hasSubscribe()) {
+                        console.log(channel.subscribe().message().payload().properties())
+                        topic.description = channel.subscribe().message()._json["x-parser-message-name"]
+                        for (let i in channel.subscribe().message().payload().properties()) {
+                            topic.payload.properties.push({
+                                name: i,
+                                type: channel.subscribe().message().payload().properties()[i]._json.type,
+                                advanced: '',
+                                description: '',
+                                editable: false,
+                                new: false
+                            })
+                            if (channel.subscribe().message().payload().properties()[i]._json.type === "object"){
+                                for (let j in channel.subscribe().message().payload().properties()[i].properties()) {
+                                    topic.payload.properties.push({
+                                        name: i+" / "+j,
+                                        type: channel.subscribe().message().payload().properties()[i].properties()[j]._json.type,
+                                        advanced: '',
+                                        description: '',
+                                        editable: false,
+                                        new: false
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+        })
     }
 
     updateOperations() {

@@ -146,7 +146,7 @@ export default function ApiCreateAsyncAPI(props) {
             version,
             context,
             policies,
-            type: protocol.toUpperCase(),
+            type: protocol.toUpperCase() === "WEBSOCKET" ? "WS" : protocol.toUpperCase(),
         };
         if (endpoint) {
             additionalProperties.endpointConfig = {
