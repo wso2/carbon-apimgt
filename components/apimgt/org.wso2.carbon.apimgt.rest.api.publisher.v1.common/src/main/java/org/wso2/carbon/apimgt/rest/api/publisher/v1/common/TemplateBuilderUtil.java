@@ -201,6 +201,15 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
                         apiUUIDProperty);
             }
+
+            if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
+                Map<String, String> webhookApiHandlerProperties = new HashMap<>();
+                webhookApiHandlerProperties.put("eventReceivingResourcePath", "/webhooks_events_receiver_resource");
+                webhookApiHandlerProperties.put("topicQueryParamName", "hub.topic");
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler",
+                        webhookApiHandlerProperties);
+            }
+
             if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                         authProperties);
