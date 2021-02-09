@@ -40,8 +40,8 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const APICreateStreamingAPI = () => {
-    // parameter: props
+const APICreateStreamingAPI = (props) => {
+    const { history } = props;
     const { settings } = useAppContext();
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
@@ -151,29 +151,19 @@ const APICreateStreamingAPI = () => {
             .saveStreamingAPI()
             .then((api) => {
                 Alert.info('API created successfully');
-                return api;
+                history.push(`/apis/${api.id}/overview`);
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
-                    setPageError(error.response.body);
                 } else {
-                    const message = 'Something went wrong while adding the API';
-                    Alert.error(message);
-                    setPageError(message);
+                    Alert.error('Something went wrong while adding the API');
                 }
                 console.error(error);
             })
             .finally(() => {
                 setIsCreating(false);
             });
-        return promisedCreatedAPI.finally(() => setIsCreating(false));
-    }
-
-    function createAPIOnly() {
-        createAPI().then((api) => {
-            window.history.push(`/apis/${api.id}/overview`);
-        });
     }
 
     const pageTitle = (
@@ -269,7 +259,7 @@ const APICreateStreamingAPI = () => {
                                 variant='contained'
                                 color='primary'
                                 disabled={!(isAPICreatable && apiInputs.isFormValid)}
-                                onClick={createAPIOnly}
+                                onClick={createAPI}
                             >
                                 Create
                                 {' '}

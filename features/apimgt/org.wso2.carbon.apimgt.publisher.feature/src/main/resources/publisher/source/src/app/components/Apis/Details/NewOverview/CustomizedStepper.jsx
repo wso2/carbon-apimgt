@@ -546,7 +546,7 @@ export default function CustomizedSteppers() {
                                                 defaultMessage=' Deployments'
                                             />
                                         </Typography>
-                                        {((!isEndpointAvailable || !isTierAvailable)
+                                        {(((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
                                         || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED')
                                             ? (
                                                 <LaunchIcon
