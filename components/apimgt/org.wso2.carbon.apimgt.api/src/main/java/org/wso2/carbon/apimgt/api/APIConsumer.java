@@ -20,24 +20,8 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +31,19 @@ import java.util.Set;
  * APIConsumer responsible for providing helper functionality
  */
 public interface APIConsumer extends APIManager {
+
+
+    List<Label> getLabelDataFromDAO() throws APIManagementException;
+
+    Float getRatingFromDAO(String Id) throws APIManagementException;
+
+    Set<URITemplate> getURITemplateFromDAO(String Id) throws APIManagementException;
+
+    List<Scope> getScopeDataDromDAO(String Id) throws APIManagementException;
+
+
+    Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException, UserStoreException;
+
 
     /**
      * @param subscriberId id of the Subscriber

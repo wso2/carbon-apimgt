@@ -41,39 +41,12 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -188,6 +161,10 @@ import javax.cache.Caching;
 import javax.validation.constraints.NotNull;
 import javax.wsdl.Definition;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getAPIScopes;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTiers;
+import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.replaceEmailDomainBack;
+
 /**
  * This class provides the core API store functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -268,6 +245,59 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscriber;
     }
 
+
+    @Override
+    public List<Label> getLabelDataFromDAO() throws APIManagementException {
+        List<Label> labels = ApiMgtDAO.getInstance().getAllLabels(MultitenantUtils.getTenantDomain("wso2.anonymous.user"));
+
+        return labels;
+    }
+
+    @Override
+    public Float getRatingFromDAO(String Id) throws APIManagementException {
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier1, null);
+        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);
+
+        return rating;
+    }
+
+    @Override
+    public Set<URITemplate> getURITemplateFromDAO(String Id) throws APIManagementException {
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+
+        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiIdentifier1);
+
+        return uriTemplates;
+    }
+
+    @Override
+    public List<Scope> getScopeDataDromDAO(String Id) throws APIManagementException {
+        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(apiIdentifier1.getProviderName()));
+
+
+        Map<String, Scope> scopeToKeyMapping = getAPIScopes(apiIdentifier1, tenantDomainName);
+        Set<Scope> scopes = new LinkedHashSet<>(scopeToKeyMapping.values());
+
+
+        List<Scope> scopeList = new ArrayList<>(scopes);
+
+        return scopeList;
+    }
+
+    @Override
+    public Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException,UserStoreException{
+        APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        String  provider = apiIdentifier.getProviderName();
+        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomainName);
+
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+
+        return definedTiers;
+    }
 
     /**
      * Returns the set of APIs with the given tag from the taggedAPIs Map

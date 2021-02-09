@@ -1,10 +1,16 @@
 package org.wso2.carbon.graphql.api.devportal;
 
+import org.dataloader.BatchLoader;
+import org.dataloader.DataLoader;
+import org.dataloader.DataLoaderRegistry;
 import org.wso2.carbon.graphql.api.devportal.data.*;
-import org.wso2.carbon.graphql.api.devportal.data.tagData.TagData;
 import org.wso2.carbon.graphql.api.devportal.modules.*;
 import graphql.schema.DataFetcher;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Component
 public class ApiService{
@@ -33,6 +39,56 @@ public class ApiService{
 
 
     ApiListingData apiListingData = new ApiListingData();
+
+
+    ///////////////////////
+    public static class Context {
+
+        final DataLoaderRegistry dataLoaderRegistry;
+
+        public Context() {
+            this.dataLoaderRegistry = new DataLoaderRegistry();
+            dataLoaderRegistry.register("characters", newCharacterDataLoader());
+        }
+
+        public DataLoaderRegistry getDataLoaderRegistry() {
+            return dataLoaderRegistry;
+        }
+
+        public DataLoader<String, Object> getCharacterDataLoader() {
+            return dataLoaderRegistry.getDataLoader("characters");
+        }
+    }
+
+
+    private static List<Object> getCharacterDataViaBatchHTTPApi(List<String> keys) {
+        return keys.stream().map(TierData::getCharacterData).collect(Collectors.toList());
+    }
+
+    // a batch loader function that will be called with N or more keys for batch loading
+    private static BatchLoader<String,Object> characterBatchLoader = keys -> {
+
+        //
+        // we are using multi threading here.  Imagine if getCharacterDataViaBatchHTTPApi was
+        // actually a HTTP call - its not here - but it could be done asynchronously as
+        // a batch API call say
+        //
+        //
+        // direct return of values
+        //CompletableFuture.completedFuture(getCharacterDataViaBatchHTTPApi(keys))
+        //
+        // or
+        //
+        // async supply of values
+
+        return CompletableFuture.supplyAsync(() -> getCharacterDataViaBatchHTTPApi(keys));
+    };
+    private static DataLoader<String, Object> newCharacterDataLoader() {
+        return new DataLoader<>(characterBatchLoader);
+    }
+
+    ///////////////////////
+
 
 
     public DataFetcher getApiListing(){
@@ -85,9 +141,14 @@ public class ApiService{
     public DataFetcher getTierNames(){
         return env->{
             Api api = env.getSource();
-            return tierData.getTierName(api.getId());
+            //List<TierNameDTO> tierNames = tierData.getTierName(api.getId());
+
+            Context ctx = env.getContext();
+            return ctx.getCharacterDataLoader().load("1000");
+           //return tierData.getTierName(api.getId());
         };
     }
+
 
     public DataFetcher getTierDetails(){
         return env->{
@@ -122,6 +183,7 @@ public class ApiService{
 
     public DataFetcher getLabelInformation(){
         return env->{
+//            DataLoader<String,Object> dataLoader = env.getDataLoader("")
           Api api = env.getSource();
           return labelData.getLabelNames(api.getId());
         };
@@ -129,7 +191,7 @@ public class ApiService{
     public DataFetcher getLabelsDetails(){
         return env->{
             LabelNameDTO labelNameDTO = env.getSource();
-            return labelData.getLabeldata(labelNameDTO.getId(),labelNameDTO.getName());
+            return labelData.getLabeldata(labelNameDTO.getName());
         };
     }
     public DataFetcher getScopeInformation(){

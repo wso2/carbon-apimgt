@@ -1,8 +1,10 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.OperationDTO;
@@ -20,18 +22,16 @@ public class OperationData {
 
     public List<OperationDTO> getOperationData(String Id) throws  APIManagementException {
 
-
+        //APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
         APIDTOData apidtoData = new APIDTOData();
 
-        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
-
-        String type = apidtoData.getApiType(Id);
-
-        List<OperationDTO> operationList = null;
-        if (APIConstants.APITransportType.GRAPHQL.toString().equals(type)) {
+        List<OperationDTO> operationList = new ArrayList<>();
+        if (APIConstants.APITransportType.GRAPHQL.toString().equals(apidtoData.getApiType(Id))) {
             operationList = new ArrayList<>();
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiIdentifier1);
+            Set<URITemplate> uriTemplates = apiConsumer.getURITemplateFromDAO(Id);
             for (URITemplate template : uriTemplates) {
                 String target = template.getUriTemplate();
                 String verb = template.getHTTPVerb();

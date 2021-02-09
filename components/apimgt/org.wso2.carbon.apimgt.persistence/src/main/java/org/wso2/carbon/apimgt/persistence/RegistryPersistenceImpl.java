@@ -1056,6 +1056,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 devPortalAPI.setAvailableTierNames(availableTiers);
 
+
                 devPortalAPI.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
 
                 devPortalAPI.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute

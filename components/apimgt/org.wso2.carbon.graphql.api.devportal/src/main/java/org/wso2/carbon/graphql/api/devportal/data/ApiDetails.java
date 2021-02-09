@@ -1,6 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -8,6 +9,7 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.Api;
 import org.apache.commons.lang3.StringUtils;
@@ -149,10 +151,17 @@ public class ApiDetails {
 
 
 
-        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
-        int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier1, null);
-        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);
+//        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+//        int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier1, null);
+//        Float rating  = ApiMgtDAO.getInstance().getAverageRating(apiId);
+//
+//        return rating;
 
+
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+
+        Float rating  = apiConsumer.getRatingFromDAO(Id);
         return rating;
     }
 

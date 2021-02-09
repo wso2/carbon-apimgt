@@ -1,18 +1,18 @@
 type Api{
-    id:String
-    name:String
+    id:String!
+    name:String!
     description:String
-    context:String
-    version:String
+    context:String!
+    version:String!
     provider:String
-    type:String
-    apiDefinition:String
-    transport:String
+    type:String!
+    apiDefinition:String!
+    transport:String!
     hasthumbnail:Boolean
     additionalProperties:String
     environments:String
     wsdUrl:String
-    status:String
+    status:String!
     isSubscriptionAvailable:Boolean
     monetizationLabel:String
     businessInformation:BusinessInformation
@@ -22,7 +22,7 @@ type Api{
     tierInformation:[Tier]
     isDefault:Boolean
     authorizationHeader:String
-    apiSecurity:String
+    apiSecurity:String!
     tags:String
     operationInformation:[Operation]
     isMonetizationEnabled:Boolean
@@ -31,10 +31,10 @@ type Api{
     throttlingPolicies:String
     thumbnailUrl:String
     categories:String
-    keyManagers:String
+    keyManagers:String!
     advertiseInfo:Advertise
-    createdTime:String
-    lastUpdate:String
+    createdTime:String!
+    lastUpdate:String!
 }
 type Tag{
     value:String

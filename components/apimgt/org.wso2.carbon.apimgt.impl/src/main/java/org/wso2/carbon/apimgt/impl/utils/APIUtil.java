@@ -477,6 +477,7 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
 
+
             String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(apiId);
             api.setApiLevelPolicy(apiLevelTier);
 

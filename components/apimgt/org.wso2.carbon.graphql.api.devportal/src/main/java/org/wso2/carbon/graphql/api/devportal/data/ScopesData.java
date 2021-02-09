@@ -1,5 +1,6 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -8,6 +9,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.ScopesDTO;
@@ -30,15 +32,19 @@ public class ScopesData {
 
     public List<ScopesDTO> getScopesData(String Id) throws APIManagementException{
 
-        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(apiIdentifier1.getProviderName()));
+
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+
+//        APIIdentifier apiIdentifier1 = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+//        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(apiIdentifier1.getProviderName()));
+//
+//
+//        Map<String, Scope> scopeToKeyMapping = getAPIScopes(apiIdentifier1, tenantDomainName);
+//        Set<Scope> scopes = new LinkedHashSet<>(scopeToKeyMapping.values());
 
 
-        Map<String, Scope> scopeToKeyMapping = getAPIScopes(apiIdentifier1, tenantDomainName);
-        Set<Scope> scopes = new LinkedHashSet<>(scopeToKeyMapping.values());
-
-
-        List<Scope> scopeList = new ArrayList<>(scopes);
+        List<Scope> scopeList = apiConsumer.getScopeDataDromDAO(Id);//new ArrayList<>(scopes);
 
         List<ScopesDTO> scopeData = new ArrayList<ScopesDTO>();
 

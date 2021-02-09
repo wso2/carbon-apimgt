@@ -1,6 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -8,6 +9,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.RegistryData;
@@ -41,13 +43,17 @@ public class MonetizationLabelData {
 
         Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
-        APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
-        String  provider = apiIdentifier.getProviderName();
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomainName);
 
-        Map<String, Tier> definedTiers = getTiers(tenantId);
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+
+//        APIIdentifier apiIdentifier = ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(Id);
+//        String  provider = apiIdentifier.getProviderName();
+//        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
+//        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+//                .getTenantId(tenantDomainName);
+
+        Map<String, Tier> definedTiers = apiConsumer.getTierDetailsFromDAO(Id);
 
         String monetizationLabel = null;
         int free = 0, commercial = 0;

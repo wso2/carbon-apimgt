@@ -41,6 +41,7 @@ public class GraphqlProvider {
         return graphQL;
     }
 
+
     @PostConstruct
     public void init() throws IOException
     {
