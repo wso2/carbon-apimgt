@@ -26,10 +26,6 @@ import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseConte
  */
 public class DefaultExtensionListener implements ExtensionListener {
 
-    public DefaultExtensionListener() {
-
-    }
-
     @Override
     public ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO) {
 
@@ -39,8 +35,7 @@ public class DefaultExtensionListener implements ExtensionListener {
     @Override
     public ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO) {
 
-        ExtensionResponseDTO responseDTO = new ExtensionResponseDTO();
-        return responseDTO;
+        return null;
     }
 
     @Override
