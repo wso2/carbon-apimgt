@@ -34,8 +34,8 @@ public class AnalyticsEvent {
     private String applicationOwner;
     private String regionId;
     private String gatewayType;
-    private String proxyResponseCode;
-    private String targetResponseCode;
+    private int proxyResponseCode;
+    private int targetResponseCode;
     private String deploymentId;
     private String eventType;
     private String userAgent;
@@ -144,19 +144,19 @@ public class AnalyticsEvent {
         this.gatewayType = gatewayType;
     }
 
-    public String getProxyResponseCode() {
+    public int getProxyResponseCode() {
         return proxyResponseCode;
     }
 
-    public void setProxyResponseCode(String proxyResponseCode) {
+    public void setProxyResponseCode(int proxyResponseCode) {
         this.proxyResponseCode = proxyResponseCode;
     }
 
-    public String getTargetResponseCode() {
+    public int getTargetResponseCode() {
         return targetResponseCode;
     }
 
-    public void setTargetResponseCode(String targetResponseCode) {
+    public void setTargetResponseCode(int targetResponseCode) {
         this.targetResponseCode = targetResponseCode;
     }
 
