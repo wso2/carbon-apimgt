@@ -88,17 +88,19 @@ public class JWTValidator {
         apiMgtGatewayJWTGenerator =
                 ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                         .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
-        // Set certificate to jwtConfigurationDto
-        jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
+        if (jwtGenerationEnabled) {
+            // Set certificate to jwtConfigurationDto
+            jwtConfigurationDto.setPublicCert(ServiceReferenceHolder.getInstance().getPublicCert());
 
-        // Set private key to jwtConfigurationDto
-        jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
+            // Set private key to jwtConfigurationDto
+            jwtConfigurationDto.setPrivateKey(ServiceReferenceHolder.getInstance().getPrivateKey());
 
-        // Set ttl to jwtConfigurationDto
-        jwtConfigurationDto.setTtl(getTtl());
+            // Set ttl to jwtConfigurationDto
+            jwtConfigurationDto.setTtl(getTtl());
 
-        //setting the jwt configuration dto
-        apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
+            //setting the jwt configuration dto
+            apiMgtGatewayJWTGenerator.setJWTConfigurationDto(jwtConfigurationDto);
+        }
 
         jwtValidationService = ServiceReferenceHolder.getInstance().getJwtValidationService();
     }
