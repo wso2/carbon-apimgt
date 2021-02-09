@@ -40,10 +40,10 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionType;
-import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
@@ -94,7 +94,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
-    private OpenAPI openAPI;
     private String keyManagers;
     private List<String> keyManagersList = new ArrayList<>();
     private final String type = ExtensionType.AUTHENTICATION.toString();
@@ -312,10 +311,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
-        TracingSpan keySpan = null;
         if (!ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
             return false;
         }
+        TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
                     (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
@@ -346,10 +345,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             if (isAuthenticate(messageContext)) {
                 setAPIParametersToMessageContext(messageContext);
-                if (!ExtensionListenerUtil.postProcessRequest(messageContext, type)) {
-                    return false;
-                }
-                return true;
+                return ExtensionListenerUtil.postProcessRequest(messageContext, type);
             }
         } catch (APISecurityException e) {
 
@@ -390,7 +386,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             stopMetricTimer(context);
 
         }
-
+        ExtensionListenerUtil.postProcessRequest(messageContext, type);
         return false;
     }
 
@@ -486,11 +482,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (!ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
             return false;
         }
-
-        if (!ExtensionListenerUtil.postProcessResponse(messageContext, type)) {
-            return false;
-        }
-        return true;
+        return ExtensionListenerUtil.postProcessResponse(messageContext, type);
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {

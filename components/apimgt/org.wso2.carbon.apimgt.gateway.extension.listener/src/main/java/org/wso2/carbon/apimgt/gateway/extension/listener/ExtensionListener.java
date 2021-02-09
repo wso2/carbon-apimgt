@@ -33,25 +33,25 @@ import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseConte
 public interface ExtensionListener {
 
     /***
-     * Pre process Request
+     * Pre process Request.
      * @param requestContextDTO RequestContextDTO
      */
     ExtensionResponseDTO preProcessRequest(RequestContextDTO requestContextDTO);
 
     /***
-     * Post process Request
+     * Post process Request.
      * @param requestContextDTO RequestContextDTO
      */
     ExtensionResponseDTO postProcessRequest(RequestContextDTO requestContextDTO);
 
     /***
-     * Pre process Response
+     * Pre process Response.
      * @param responseContextDTO ResponseContextDTO
      */
     ExtensionResponseDTO preProcessResponse(ResponseContextDTO responseContextDTO);
 
     /***
-     * Post process Response
+     * Post process Response.
      * @param responseContextDTO ResponseContextDTO
      */
     ExtensionResponseDTO postProcessResponse(ResponseContextDTO responseContextDTO);

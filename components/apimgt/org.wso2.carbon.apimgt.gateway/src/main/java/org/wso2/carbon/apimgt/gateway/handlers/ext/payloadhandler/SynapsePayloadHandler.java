@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler;
 
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -84,17 +86,19 @@ public class SynapsePayloadHandler implements PayloadHandler {
     private String buildMessage() throws APIManagementException {
 
         try {
-            RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+            RelayUtils.buildMessage(((Axis2MessageContext) this.messageContext).getAxis2MessageContext());
         } catch (IOException | XMLStreamException e) {
             String errorMessage = "Error while consuming payload";
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         }
-        if (messageContext.getEnvelope().getBody() != null) {
-            //TODO:check with other message types/multipart etc
-            //OMElement.buildWithAttachment.
-            //OM to String
-            return messageContext.getEnvelope().getBody().toString();
+        SOAPEnvelope env = ((Axis2MessageContext) this.messageContext).getAxis2MessageContext().getEnvelope();
+        if (env != null) {
+            SOAPBody body = env.getBody();
+            if (body != null) {
+                env.buildWithAttachments();
+                return body.toString();
+            }
         }
         return null;
     }

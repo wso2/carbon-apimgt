@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.extension.listener.model;
 
 /**
- * Enum holding values for ExtensionResponseStatus
+ * Enum holding values for ExtensionResponseStatus.
  */
 public enum ExtensionResponseStatus {
     RETURN_RESPONSE,

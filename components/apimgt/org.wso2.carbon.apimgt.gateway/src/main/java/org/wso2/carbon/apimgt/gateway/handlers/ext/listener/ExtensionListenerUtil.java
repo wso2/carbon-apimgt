@@ -36,13 +36,13 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.APIRequestInfoDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionResponseStatus;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.MsgInfoDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.extension.listener.DefaultExtensionListener;
 import org.wso2.carbon.apimgt.gateway.extension.listener.ExtensionListener;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionResponseStatus;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.APIRequestInfoDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.MsgInfoDTO;
+import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler.SynapsePayloadHandlerFactory;
@@ -68,6 +68,11 @@ public class ExtensionListenerUtil {
 
     private static final Log log = LogFactory.getLog(ExtensionListenerUtil.class);
     private static ExtensionListener defaultExtensionListener = new DefaultExtensionListener();
+
+    private ExtensionListenerUtil() {
+
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * Handles pre-process request by constructing the request context DTO, invoking the matching extension listener
@@ -221,7 +226,6 @@ public class ExtensionListenerUtil {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         msgInfoDTO.setHttpMethod((String) (axis2MC.getProperty(Constants.Configuration.HTTP_METHOD)));
-        msgInfoDTO.setMessageId(messageContext.getMessageID());
         populateCommonMessageInfo(messageContext, msgInfoDTO);
         return msgInfoDTO;
     }
@@ -236,7 +240,6 @@ public class ExtensionListenerUtil {
 
         MsgInfoDTO msgInfoDTO = new MsgInfoDTO();
         msgInfoDTO.setHttpMethod((String) messageContext.getProperty(RESTConstants.REST_METHOD));
-        msgInfoDTO.setMessageId(messageContext.getRelatesTo().getValue());
         populateCommonMessageInfo(messageContext, msgInfoDTO);
         return msgInfoDTO;
     }
@@ -256,6 +259,7 @@ public class ExtensionListenerUtil {
         msgInfoDTO.setElectedResource(GatewayUtils.extractResource(messageContext));
         //Add a payload handler instance for the current message context to consume the payload later
         msgInfoDTO.setPayloadHandler(SynapsePayloadHandlerFactory.getInstance().buildPayloadHandler(messageContext));
+        msgInfoDTO.setMessageId(axis2MC.getLogCorrelationID());
     }
 
     /**
