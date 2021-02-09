@@ -105,8 +105,7 @@ public class TemplateBuilderUtil {
             corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
-        if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
-                APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
+        if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
             if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
                 CORSConfiguration corsConfiguration = api.getCorsConfiguration();
                 if (corsConfiguration.getAccessControlAllowHeaders() != null) {
@@ -202,8 +201,7 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
                         apiUUIDProperty);
             }
-            if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
-                    APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
+            if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                         authProperties);
             }
