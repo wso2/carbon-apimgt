@@ -132,7 +132,7 @@ public class SQLConstants {
                     + "DISTINCT API_ID "
                     + "FROM AM_API_URL_MAPPING "
                     + "WHERE URL_MAPPING_ID IN "
-                    + "(SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL)";
+                    + "(SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = 'Working Copy')";
 
     public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL =
             " SELECT " +
@@ -2194,7 +2194,7 @@ public class SQLConstants {
             "   FROM AM_API_URL_MAPPING AUM " +
             "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
             "   WHERE API.API_PROVIDER = ? AND " +
-            "   API.API_NAME = ? AND API.API_VERSION = ? AND AUM.REVISION_UUID IS NULL)";
+            "   API.API_NAME = ? AND API.API_VERSION = ? AND AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Working Copy')";
 
     public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
             "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
@@ -2440,10 +2440,10 @@ public class SQLConstants {
             "   ES.API_ID = ? ";
 
     public static final String ADD_PRODUCT_RESOURCE_MAPPING_SQL = "INSERT INTO AM_API_PRODUCT_MAPPING "
-            + "(API_ID,URL_MAPPING_ID) " + "VALUES (?, ?)";
+            + "(API_ID,URL_MAPPING_ID,REVISION_UUID) " + "VALUES (?, ?, ?)";
 
     public static final String DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL = "DELETE FROM AM_API_PRODUCT_MAPPING WHERE "
-            + "API_ID = ? ";
+            + "API_ID = ? AND REVISION_UUID = 'Working Copy' ";
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
             "SELECT DISTINCT ARSM.SCOPE_NAME " +
@@ -3123,7 +3123,17 @@ public class SQLConstants {
                 "ON API.API_ID = API_UM.API_ID " +
             "INNER JOIN AM_API_PRODUCT_MAPPING PROD_MAP " +
                 "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
-            "WHERE PROD_MAP.API_ID = ? AND API_UM.REVISION_UUID IS NULL";
+            "WHERE PROD_MAP.API_ID = ? AND API_UM.REVISION_UUID IS NULL AND PROD_MAP.REVISION_UUID = 'Working Copy' ";
+
+    public static final String GET_RESOURCES_OF_PRODUCT_REVISION =
+            "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
+                    "API_UM.THROTTLING_TIER, API.API_PROVIDER, API.API_NAME, API.API_VERSION, API.CONTEXT, API.API_UUID " +
+                    "FROM AM_API_URL_MAPPING API_UM " +
+                    "INNER JOIN AM_API API " +
+                    "ON API.API_ID = API_UM.API_ID " +
+                    "INNER JOIN AM_API_PRODUCT_MAPPING PROD_MAP " +
+                    "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
+                    "WHERE PROD_MAP.API_ID = ? AND API_UM.REVISION_UUID IS NULL AND PROD_MAP.REVISION_UUID = ? ";
 
     public static final String GET_SCOPE_KEYS_BY_URL_MAPPING_ID =
             "SELECT SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE URL_MAPPING_ID = ?" ;
@@ -3725,6 +3735,10 @@ public class SQLConstants {
                 "(SCOPE_NAME, URL_MAPPING_ID, TENANT_ID) VALUES (?, ?, ?)";
         public static final String INSERT_PRODUCT_RESOURCE_MAPPING = "INSERT INTO AM_API_PRODUCT_MAPPING" +
                 "(API_ID, URL_MAPPING_ID) VALUES (?, ?)";
+        public static final String GET_PRODUCT_RESOURCES = "SELECT URL_MAPPING_ID " +
+                "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID='Working Copy'";
+        public static final String INSERT_PRODUCT_REVISION_RESOURCE_MAPPING = "INSERT INTO AM_API_PRODUCT_MAPPING" +
+                "(API_ID, URL_MAPPING_ID, REVISION_UUID) VALUES (?, ?, ?)";
         public static final String DELETE_API_REVISION =
                 "DELETE FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISION_COUNT_BY_API_UUID = "SELECT COUNT(ID) FROM AM_REVISION WHERE API_UUID = ?";
@@ -3777,6 +3791,12 @@ public class SQLConstants {
                 "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ? AND REMOVED IS FALSE";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID =
                 "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ? AND REVISION_UUID = ?";
+        public static final String REMOVE_WORKING_COPY_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_API_PRODUCT_ID =
+                "DELETE FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID='Working Copy'";
+        public static final String GET_PRODUCT_RESOURCES_BY_REVISION_UUID = "SELECT URL_MAPPING_ID " +
+                "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = ?";
+        public static final String REMOVE_REVISION_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_REVISION_UUID =
+                "DELETE FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = ?";
     }
 
     /**

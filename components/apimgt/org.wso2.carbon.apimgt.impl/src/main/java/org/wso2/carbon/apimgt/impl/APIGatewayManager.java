@@ -266,9 +266,8 @@ public class APIGatewayManager {
         sendUnDeploymentEvent(api, tenantDomain, gatewaysToRemove);
     }
 
-    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs)
-            throws APIManagementException {
-
+    public void unDeployFromGateway(APIProduct apiProduct, String tenantDomain, Set<API> associatedAPIs,
+                                    Set<String> gatewaysToRemove) throws APIManagementException {
         String apiProductUuid = apiProduct.getUuid();
         APIProductIdentifier apiProductIdentifier = apiProduct.getId();
         try {
@@ -286,7 +285,7 @@ public class APIGatewayManager {
         if (debugEnabled) {
             log.debug("Status of " + apiProductIdentifier + " has been updated to DB");
         }
-        sendUnDeploymentEvent(apiProduct, tenantDomain, Collections.emptySet(), associatedAPIs);
+        sendUnDeploymentEvent(apiProduct, tenantDomain, gatewaysToRemove, associatedAPIs);
 
     }
 

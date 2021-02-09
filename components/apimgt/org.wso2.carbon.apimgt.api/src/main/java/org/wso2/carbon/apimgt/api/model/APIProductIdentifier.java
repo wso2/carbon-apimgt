@@ -45,6 +45,13 @@ public class APIProductIdentifier implements Serializable, Identifier {
         this.version = "1.0.0";
     }
 
+    public APIProductIdentifier(String providerName, String apiProductName, String version, String uuid){
+        this.apiProductName = apiProductName;
+        this.providerName = providerName;
+        this.version = "1.0.0";
+        this.uuid = uuid;
+    }
+
     public String getTier() {
         return tier;
     }
