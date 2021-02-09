@@ -87,51 +87,51 @@ public class SynapsePropertiesHandler extends AbstractHandler {
                     config.getFirstProperty(APIConstants.AUTH_MANAGER + APIConstants.IS_KM_REVERSE_PROXY_ENABLED));
         }
         // Modify location header only if ISKMReverseProxyEnabled property is set to true
-        if (iskmReverseProxyEnabled) {
-            // The logic is related if the API context is "/authorize", "/commonauth" or "/oidc" while status code is 302
-            if (APIMgtGatewayConstants.AUTHORIZE_CONTEXT
-                    .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))
-                    || APIMgtGatewayConstants.COMMON_AUTH_CONTEXT
-                    .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))
-                    || APIMgtGatewayConstants.OIDC_CONTEXT
-                    .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))) {
-                if (302 == (Integer) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                        .getProperty(SynapseConstants.HTTP_SC)) {
-                    // Retrieve the transport headers in the response and identify the location header
-                    TreeMap<String, String> headers = (TreeMap) ((Axis2MessageContext) messageContext)
-                            .getAxis2MessageContext().getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS);
-                    String locationURI = headers.get(APIMgtGatewayConstants.LOCATION);
-                    // KM host and port which is included in the location header value
-                    String kmHost = messageContext.getProperty("keyManager.hostname") + ":" + messageContext
-                            .getProperty("keyManager.port");
-                    String hostHeader = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_HEADER);
+        if (!iskmReverseProxyEnabled) {
+            return true;
+        }
+        // The logic is related if the API context is "/authorize", "/commonauth" or "/oidc" while status code is 302
+        if (APIMgtGatewayConstants.AUTHORIZE_CONTEXT.equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))
+                || APIMgtGatewayConstants.COMMON_AUTH_CONTEXT
+                .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))
+                || APIMgtGatewayConstants.OIDC_CONTEXT
+                .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))) {
+            if (302 == (Integer) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .getProperty(SynapseConstants.HTTP_SC)) {
+                // Retrieve the transport headers in the response and identify the location header
+                TreeMap<String, String> headers = (TreeMap) ((Axis2MessageContext) messageContext)
+                        .getAxis2MessageContext().getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS);
+                String locationURI = headers.get(APIMgtGatewayConstants.LOCATION);
+                // KM host and port which is included in the location header value
+                String kmHost = messageContext.getProperty("keyManager.hostname") + ":" + messageContext
+                        .getProperty("keyManager.port");
+                String hostHeader = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_HEADER);
 
-                    // This check to change the location header is done to make sure that only location headers of the
-                    // appropriate endpoints which have been proxied are changed. Without this check condition to change
-                    // the location header, any endpoint which is having KM host as part of the URL will be redirected
-                    // which could lead to wrong endpoints.
-                    if (locationURI.contains(APIMgtGatewayConstants.AUTHENTICATION_ENDPOINT_CONTEXT) || locationURI
-                            .contains(APIMgtGatewayConstants.OAUTH2_CONTEXT + APIMgtGatewayConstants.AUTHORIZE_CONTEXT)
-                            || locationURI.contains(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT) || locationURI
-                            .contains(APIMgtGatewayConstants.LOGIN_CONTEXT) || locationURI
-                            .contains(APIMgtGatewayConstants.OIDC_CONTEXT)) {
-                        // Replacing KM host with Gateway host
-                        locationURI = locationURI.replaceFirst(kmHost, hostHeader);
-                    }
-
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                            .setProperty("PRE_LOCATION_HEADER", locationURI);
-                    if (APIMgtGatewayConstants.COMMON_AUTH_CONTEXT
-                            .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))) {
-                        // Commonauth endpoints return location header /oauth2/authorize. Since GW has /authorize we have to
-                        // omit the /oauth2 portion from the location header value
-                        locationURI = locationURI.replaceFirst(APIMgtGatewayConstants.OAUTH2_CONTEXT, "");
-                    }
-                    // Inserting modified headers to the message context
-                    headers.put(APIMgtGatewayConstants.LOCATION, locationURI);
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                            setProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS, headers);
+                // This check to change the location header is done to make sure that only location headers of the
+                // appropriate endpoints which have been proxied are changed. Without this check condition to change
+                // the location header, any endpoint which is having KM host as part of the URL will be redirected
+                // which could lead to wrong endpoints.
+                if (locationURI.contains(APIMgtGatewayConstants.AUTHENTICATION_ENDPOINT_CONTEXT) || locationURI
+                        .contains(APIMgtGatewayConstants.OAUTH2_CONTEXT + APIMgtGatewayConstants.AUTHORIZE_CONTEXT)
+                        || locationURI.contains(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT) || locationURI
+                        .contains(APIMgtGatewayConstants.LOGIN_CONTEXT) || locationURI
+                        .contains(APIMgtGatewayConstants.OIDC_CONTEXT)) {
+                    // Replacing KM host with Gateway host
+                    locationURI = locationURI.replaceFirst(kmHost, hostHeader);
                 }
+
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                        .setProperty("PRE_LOCATION_HEADER", locationURI);
+                if (APIMgtGatewayConstants.COMMON_AUTH_CONTEXT
+                        .equals(messageContext.getProperty(RESTConstants.REST_API_CONTEXT))) {
+                    // Commonauth endpoints return location header /oauth2/authorize. Since GW has /authorize we have to
+                    // omit the /oauth2 portion from the location header value
+                    locationURI = locationURI.replaceFirst(APIMgtGatewayConstants.OAUTH2_CONTEXT, "");
+                }
+                // Inserting modified headers to the message context
+                headers.put(APIMgtGatewayConstants.LOCATION, locationURI);
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                        setProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS, headers);
             }
         }
         return true;
