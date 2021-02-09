@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, {Component, lazy} from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
@@ -44,6 +44,10 @@ import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTop
 
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { parse } from '@asyncapi/parser';
+
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 const styles = (theme) => ({
     root: {
@@ -148,6 +152,8 @@ class Topics extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            schema: {},
+            tabValue: 0,
             asyncAPI: null,
             definition: this.getAsyncAPIDefinition(),
             resolvedDefinition: null,
@@ -169,6 +175,7 @@ class Topics extends Component {
         this.getSortedOperations = this.getSortedOperations.bind(this);
         this.getAsyncAPIDefinition = this.getAsyncAPIDefinition.bind(this);
         this.loadTopicMetaData = this.loadTopicMetaData.bind(this);
+        this.renderSchemaForTopic = this.renderSchemaForTopic.bind(this);
     }
 
     getAsyncAPIDefinition() {
@@ -249,7 +256,7 @@ class Topics extends Component {
                         }
                     }
                     if (channel.hasSubscribe()) {
-                        console.log(channel.subscribe().message().payload().properties())
+                        //console.log(channel.subscribe().message().payload().properties())
                         topic.description = channel.subscribe().message()._json["x-parser-message-name"]
                         for (let i in channel.subscribe().message().payload().properties()) {
                             topic.payload.properties.push({
@@ -585,9 +592,26 @@ class Topics extends Component {
         );
     }
 
+    renderSchemaForTopic(topic) {
+        const {asyncAPI} = this.state;
+        let schema = {}
+        asyncAPI.channelNames().map((name) => {
+            let channel = asyncAPI.channel(name)
+            if (name === topic.name) {
+                if (topic.mode === "SUBSCRIBE") {
+                    schema = channel.subscribe().message().payload();
+                }
+                if (topic.mode === "PUBLISH") {
+                    schema = channel.publish().message().payload();
+                }
+            }
+        })
+        return JSON.stringify(schema, null, '\t');
+    }
+
     renderTopics() {
         const { classes } = this.props;
-        const { topics } = this.state;
+        const { topics, tabValue, definition } = this.state;
         return (
             <div className={classes.root}>
                 {topics.map((topic, i) => {
@@ -679,43 +703,75 @@ class Topics extends Component {
                                             Payload
                                         </Typography>
                                     </Grid>
-                                    <Grid item style={{ paddingLeft: 0 }}>
-                                        <Grid container direction='column'>
-                                            <Grid container direction='row'>
-                                                <Grid item xs={2}>
-                                                    <Typography style={{ fontWeight: 'bold' }}>
-                                                        Name
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={2}>
-                                                    <Typography style={{ fontWeight: 'bold' }}>
-                                                        Type
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={6}>
-                                                    <Typography style={{ fontWeight: 'bold' }}>
-                                                        Advanced
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={2} align='right'>
-                                                    <Button
-                                                        color='primary'
-                                                        variant='contained'
-                                                        onClick={() => this.handleAddProperty(i)}
-                                                    >
-                                                        Add New Property
-                                                    </Button>
-                                                </Grid>
-                                            </Grid>
-                                            {
-                                                topic.payload.properties.map((property, pi) => {
-                                                    return (property && !!property.editable)
-                                                        ? this.renderEditableProperty(property, i, pi)
-                                                        : this.renderProperty(property, i, pi);
-                                                })
-                                            }
-                                        </Grid>
+                                    <Grid item style={{paddingBottom: "2%"}}>
+                                        <Tabs
+                                            indicatorColor="primary"
+                                            textColor="primary"
+                                            value={tabValue}
+                                            onChange={(event, value) => {this.setState({tabValue: value})}}
+                                        >
+                                            <Tab label="Properties"/>
+                                            <Tab label="Schema"/>
+                                        </Tabs>
                                     </Grid>
+                                    {tabValue === 0 ?
+                                        <Grid item style={{ paddingLeft: 0 }}>
+                                            <Grid container direction='column'>
+                                                <Grid container direction='row'>
+                                                    <Grid item xs={2}>
+                                                        <Typography style={{ fontWeight: 'bold' }}>
+                                                            Name
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Typography style={{ fontWeight: 'bold' }}>
+                                                            Type
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <Typography style={{ fontWeight: 'bold' }}>
+                                                            Advanced
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2} align='right'>
+                                                        <Button
+                                                            color='primary'
+                                                            variant='contained'
+                                                            onClick={() => this.handleAddProperty(i)}
+                                                        >
+                                                            Add New Property
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                                {
+                                                    topic.payload.properties.map((property, pi) => {
+                                                        return (property && !!property.editable)
+                                                            ? this.renderEditableProperty(property, i, pi)
+                                                            : this.renderProperty(property, i, pi);
+                                                    })
+                                                }
+                                            </Grid>
+                                        </Grid>
+                                    :
+                                        <Grid item style={{ paddingLeft: 0 }}>
+                                            <Grid container direction='column'>
+                                                <MonacoEditor
+                                                    //value={JSON.stringify(this.state.definition, null, '\t')}
+                                                    value={this.renderSchemaForTopic(topic)}
+                                                    language="json"
+                                                    width='100%'
+                                                    height='500px'
+                                                    theme='vs-dark'
+                                                    options={{
+                                                        selectOnLineNumbers: true,
+                                                        readOnly: true,
+                                                        smoothScrolling: true,
+                                                        wordWrap: 'on',
+                                                    }}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    }
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
