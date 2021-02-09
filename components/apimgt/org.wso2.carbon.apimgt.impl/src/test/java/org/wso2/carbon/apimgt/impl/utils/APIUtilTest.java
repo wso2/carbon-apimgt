@@ -2435,7 +2435,7 @@ public class APIUtilTest {
 
         String searchQuery = "status:PUBLISHED";
         String expectedQuery =
-                "status=*published*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
+                "status=*published*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
     }
 
@@ -2444,7 +2444,7 @@ public class APIUtilTest {
 
         String searchQuery = "status PUBLISHED";
         String expectedQuery =
-                "name=*status*&name=*PUBLISHED*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
+                "name=*status*&name=*PUBLISHED*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
     }
 
@@ -2452,7 +2452,7 @@ public class APIUtilTest {
     public void testConstructApisGetQuery3() throws APIManagementException {
 
         String searchQuery = "status:PUBLISHED provider:wso2";
-        String expectedQuery = "status=*published*&provider=*wso2*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
+        String expectedQuery = "status=*published*&provider=*wso2*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR WEBSUB OR SSE)";
         Assert.assertEquals(expectedQuery, APIUtil.constructApisGetQuery(searchQuery));
     }
 
