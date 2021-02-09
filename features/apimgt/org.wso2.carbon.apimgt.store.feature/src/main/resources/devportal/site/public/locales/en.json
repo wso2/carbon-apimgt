@@ -20,7 +20,7 @@
   "Apis.Details.ApiConsole.security.scheme.oauth": "OAuth",
   "Apis.Details.Async.Definition.title": "AsyncAPI Specification",
   "Apis.Details.Comments.Comment.something.went.wrong": "Something went wrong while deleting comment",
-  "Apis.Details.Comments.CommentAdd.btn.add.comment": "Comment",
+  "Apis.Details.Comments.CommentAdd.btn.add.comment": "Add Comment",
   "Apis.Details.Comments.CommentAdd.btn.cancel": "Cancel",
   "Apis.Details.Comments.CommentAdd.comment": "Comment",
   "Apis.Details.Comments.CommentAdd.error.blank.comment": "You cannot enter a blank comment",
