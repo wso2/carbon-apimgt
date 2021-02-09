@@ -122,9 +122,7 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    protected TenantManager getTenantManager() {
-        return tenantManager;
-    }
+    protected TenantManager getTenantManager() {return tenantManager;}
 
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         try {

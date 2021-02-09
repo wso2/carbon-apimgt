@@ -410,15 +410,16 @@ public interface APIProvider extends APIManager {
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
-     * @param apiId      The id of the API to be copied
-     * @param newVersion The version of the new API
+     * @param apiId          The id of the API to be copied
+     * @param newVersion     The version of the new API
      * @param defaultVersion whether this version is default or not
+     * @param orgId          Identifier of an organization
      * @return api created api
      * @throws DuplicateAPIException  If the API trying to be created already exists
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
-    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion)
+    API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
             throws DuplicateAPIException, APIManagementException;
 
     /**
@@ -1706,10 +1707,11 @@ public interface APIProvider extends APIManager {
     /**
      * Adds a new APIRevision to an existing API
      *
-     * @param apiRevision APIRevision
+     * @param apiRevision    APIRevision
+     * @param orgId          Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    String addAPIRevision(APIRevision apiRevision) throws APIManagementException;
+    String addAPIRevision(APIRevision apiRevision, String orgId) throws APIManagementException;
 
     /**
      * Get a Revision Object related to provided revision UUID
@@ -1770,19 +1772,21 @@ public interface APIProvider extends APIManager {
     /**
      * Restore a provided API Revision as the working copy of the API
      *
-     * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
+     * @param apiId          API UUID
+     * @param apiRevisionId  API Revision UUID
+     * @param orgId          Identifier of an organization
      * @throws APIManagementException if failed to restore APIRevision
      */
-    void restoreAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+    void restoreAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
     /**
      * Delete an API Revision
      *
-     * @param apiId API UUID
+     * @param apiId         API UUID
      * @param apiRevisionId API Revision UUID
+     * @param orgId         Identifier of an organization
      * @throws APIManagementException if failed to delete APIRevision
      */
-    void deleteAPIRevision(String apiId, String apiRevisionId) throws APIManagementException;
+    void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
 }

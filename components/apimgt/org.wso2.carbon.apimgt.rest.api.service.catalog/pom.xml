@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.177-SNAPSHOT</version>
+        <version>6.8.193-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -40,7 +40,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-<!--            <scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>

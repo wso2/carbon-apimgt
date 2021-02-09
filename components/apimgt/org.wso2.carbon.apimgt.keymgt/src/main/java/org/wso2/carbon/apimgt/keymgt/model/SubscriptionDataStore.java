@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.util.Map;
 

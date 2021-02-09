@@ -4,22 +4,28 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mapstruct.ap.internal.util.Collections;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
+import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
 import org.wso2.carbon.base.MultitenantConstants;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -29,16 +35,14 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class GatewayArtifactsMgtDAOTest {
     public static GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
-    String apiUUID = "1236233";
-    String apiName = "testAddGatewayPublishedAPIDetails";
-    String version = "1.0.0";
-    String label = "Production and Sandbox";
-    ByteArrayInputStream anyInputStream = new ByteArrayInputStream("test data".getBytes());
 
     @Before
     public void setUp() throws Exception {
@@ -102,18 +106,33 @@ public class GatewayArtifactsMgtDAOTest {
     }
 
     @Test
-    public void testAddValidateGatewayPublishedAPIDetails() throws APIManagementException {
-        boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIDetails(apiUUID, apiName, version,
-                String.valueOf(MultitenantConstants.SUPER_TENANT_ID),APIConstants.API_PRODUCT);
-        Assert.assertTrue(result);
+    public void testAddGatewayAPIArtifactAndMetaData() throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        String name = "apiname";
+        String version = "1.0.0";
+        String revision = UUID.randomUUID().toString();
+        URL resource = getClass().getClassLoader().getResource("admin-PizzaShackAPI-1.0.0.zip");
+        File file = new File(resource.getPath());
+        gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(uuid, name, version, revision, "carbon.super",
+                APIConstants.HTTP_PROTOCOL, file);
+        String gatewayAPIId = gatewayArtifactsMgtDAO.getGatewayAPIId(name, version, "carbon.super");
+        Assert.assertEquals(gatewayAPIId, uuid);
+        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"));
+        List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
+                "label1", "carbon.super");
+        Assert.assertEquals(artifacts.size(), 1);
+        RuntimeArtifactDto artifact = artifacts.get(0);
+        Assert.assertNotNull(artifact);
+        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+        apiRevisionDeployment.setRevisionUUID(revision);
+        apiRevisionDeployment.setDeployment("label1");
+        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label2"),
+                Collections.asSet(apiRevisionDeployment));
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, "label1", "carbon.super");
+        Assert.assertEquals(artifacts.size(), 0);
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, "label2", "carbon.super");
+        Assert.assertEquals(artifacts.size(), 1);
+        artifact = artifacts.get(0);
+        Assert.assertNotNull(artifact);
     }
-
-//    @Test
-//    public void testAddValidateGatewayPublishedAPIArtifacts() throws APIManagementException {
-//        boolean result = gatewayArtifactsMgtDAO.addGatewayPublishedAPIArtifacts(apiUUID, label , anyInputStream,
-//                APIConstants.GatewayArtifactSynchronizer.GATEWAY_INSTRUCTION_PUBLISH,
-//                SQLConstants.ADD_GW_API_ARTIFACT);
-//        Assert.assertTrue(result);
-//    }
-
 }
