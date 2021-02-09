@@ -311,82 +311,81 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (!ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
-            return false;
-        }
-        TracingSpan keySpan = null;
-        if (Util.tracingEnabled()) {
-            TracingSpan responseLatencySpan =
-                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-            TracingTracer tracer = Util.getGlobalTracer();
-            keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
-            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-            org.apache.axis2.context.MessageContext axis2MC =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-        }
-
-        Timer.Context context = startMetricTimer();
-        long startTime = System.nanoTime();
-        long endTime;
-        long difference;
-
-        try {
-            if (isAnalyticsEnabled()) {
-                long currentTime = System.currentTimeMillis();
-                messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
-            }
-
-            messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
-
-            if (authenticators.isEmpty()) {
-                initializeAuthenticators();
-            }
-
-            if (isAuthenticate(messageContext)) {
-                setAPIParametersToMessageContext(messageContext);
-                return ExtensionListenerUtil.postProcessRequest(messageContext, type);
-            }
-        } catch (APISecurityException e) {
-
-            if (Util.tracingEnabled() && keySpan != null) {
-                Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
-            }
-            if (log.isDebugEnabled()) {
-                // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
-                // to all the gateway calls that is happening.
-                endTime = System.nanoTime();
-                difference = (endTime - startTime) / 1000000;
-                String messageDetails = logMessageDetails(messageContext);
-                log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
-                        difference / 1000000);
-            }
-
-            String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
-
-            if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
-                log.error("API authentication failure due to "
-                        + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
-            } else {
-                // We do not need to log known authentication failures as errors since these are not product errors.
-                log.warn("API authentication failure due to " + errorMessage);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("API authentication failed with error " + e.getErrorCode(), e);
-                }
-            }
-
-            handleAuthFailure(messageContext, e);
-        } finally {
+        if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
+            TracingSpan keySpan = null;
             if (Util.tracingEnabled()) {
-                Util.finishSpan(keySpan);
+                TracingSpan responseLatencySpan =
+                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+                TracingTracer tracer = Util.getGlobalTracer();
+                keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+                messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+                org.apache.axis2.context.MessageContext axis2MC =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+                axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
             }
-            messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
-                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
-            stopMetricTimer(context);
 
+            Timer.Context context = startMetricTimer();
+            long startTime = System.nanoTime();
+            long endTime;
+            long difference;
+
+            try {
+                if (isAnalyticsEnabled()) {
+                    long currentTime = System.currentTimeMillis();
+                    messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
+                }
+
+                messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
+
+                if (authenticators.isEmpty()) {
+                    initializeAuthenticators();
+                }
+
+                if (isAuthenticate(messageContext)) {
+                    setAPIParametersToMessageContext(messageContext);
+                    return ExtensionListenerUtil.postProcessRequest(messageContext, type);
+                }
+            } catch (APISecurityException e) {
+
+                if (Util.tracingEnabled() && keySpan != null) {
+                    Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+                }
+                if (log.isDebugEnabled()) {
+                    // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
+                    // to all the gateway calls that is happening.
+                    endTime = System.nanoTime();
+                    difference = (endTime - startTime) / 1000000;
+                    String messageDetails = logMessageDetails(messageContext);
+                    log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                            difference / 1000000);
+                }
+
+                String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
+
+                if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
+                    log.error("API authentication failure due to "
+                            + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                } else {
+                    // We do not need to log known authentication failures as errors since these are not product errors.
+                    log.warn("API authentication failure due to " + errorMessage);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                    }
+                }
+
+                handleAuthFailure(messageContext, e);
+            } finally {
+                if (Util.tracingEnabled()) {
+                    Util.finishSpan(keySpan);
+                }
+                messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
+                        TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
+                stopMetricTimer(context);
+
+            }
+            ExtensionListenerUtil.postProcessRequest(messageContext, type);
         }
-        ExtensionListenerUtil.postProcessRequest(messageContext, type);
         return false;
     }
 
@@ -479,10 +478,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
 
-        if (!ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
-            return false;
+        if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return ExtensionListenerUtil.postProcessResponse(messageContext, type);
         }
-        return ExtensionListenerUtil.postProcessResponse(messageContext, type);
+        return false;
+
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {

@@ -87,10 +87,7 @@ public class ExtensionListenerUtil {
         RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.preProcessRequest(requestContextDTO);
-        if (responseDTO != null) {
-            return processExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
-        }
-        return true;    // if responseDTO is null, nothing to do hence continuing the normal flow
+        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
     }
 
     /**
@@ -106,10 +103,7 @@ public class ExtensionListenerUtil {
         RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.postProcessRequest(requestContextDTO);
-        if (responseDTO != null) {
-            return processExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
-        }
-        return true;     // if responseDTO is null, nothing to do hence continuing the normal flow
+        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
     }
 
     /**
@@ -125,10 +119,7 @@ public class ExtensionListenerUtil {
         ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.preProcessResponse(responseContextDTO);
-        if (responseDTO != null) {
-            return processExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
-        }
-        return true;     // if responseDTO is null, nothing to do hence continuing the normal flow
+        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
     }
 
     /**
@@ -144,10 +135,7 @@ public class ExtensionListenerUtil {
         ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.postProcessResponse(responseContextDTO);
-        if (responseDTO != null) {
-            return processExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
-        }
-        return true;     // if responseDTO is null, nothing to do hence continuing the normal flow
+        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
     }
 
     /**
@@ -163,8 +151,7 @@ public class ExtensionListenerUtil {
         APIRequestInfoDTO apiRequestInfoDTO = generateAPIInfoDTO(messageContext);
         requestDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestDTO.setMsgInfo(msgInfoDTO);
-        requestDTO.setCustomProperty(
-                (HashMap<String, Object>) messageContext.getProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY));
+        requestDTO.setCustomProperty(getCustomPropertyMapFromMsgContext(messageContext));
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Object sslCertObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
@@ -222,11 +209,9 @@ public class ExtensionListenerUtil {
      */
     private static MsgInfoDTO generateRequestMessageInfoDTO(MessageContext messageContext) {
 
-        MsgInfoDTO msgInfoDTO = new MsgInfoDTO();
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        msgInfoDTO.setHttpMethod((String) (axis2MC.getProperty(Constants.Configuration.HTTP_METHOD)));
-        populateCommonMessageInfo(messageContext, msgInfoDTO);
+        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
+        msgInfoDTO.setHttpMethod((String) (((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(Constants.Configuration.HTTP_METHOD)));
         return msgInfoDTO;
     }
 
@@ -238,9 +223,8 @@ public class ExtensionListenerUtil {
      */
     private static MsgInfoDTO generateResponseMessageInfoDTO(MessageContext messageContext) {
 
-        MsgInfoDTO msgInfoDTO = new MsgInfoDTO();
+        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
         msgInfoDTO.setHttpMethod((String) messageContext.getProperty(RESTConstants.REST_METHOD));
-        populateCommonMessageInfo(messageContext, msgInfoDTO);
         return msgInfoDTO;
     }
 
@@ -248,18 +232,18 @@ public class ExtensionListenerUtil {
      * Populate common MsgInfoDTO properties for both Request and Response from MessageContext.
      *
      * @param messageContext Synapse MessageContext
-     * @param msgInfoDTO     MsgInfoDTO
      */
-    private static void populateCommonMessageInfo(MessageContext messageContext, MsgInfoDTO msgInfoDTO) {
+    private static MsgInfoDTO generateMessageInfo(MessageContext messageContext) {
 
+        MsgInfoDTO msgInfoDTO = new MsgInfoDTO();
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        msgInfoDTO.setHeaders(
-                (Map<String, String>) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        msgInfoDTO.setHeaders(getAxis2TransportHeaders(axis2MC));
         msgInfoDTO.setElectedResource(GatewayUtils.extractResource(messageContext));
         //Add a payload handler instance for the current message context to consume the payload later
         msgInfoDTO.setPayloadHandler(SynapsePayloadHandlerFactory.getInstance().buildPayloadHandler(messageContext));
         msgInfoDTO.setMessageId(axis2MC.getLogCorrelationID());
+        return msgInfoDTO;
     }
 
     /**
@@ -268,32 +252,54 @@ public class ExtensionListenerUtil {
      *
      * @param messageContext       Synapse Message Context
      * @param extensionResponseDTO ExtensionResponseDTO
+     * @param customErrorHandler   Custom Error Handler
+     * @return true or false indicating continue or return response
      */
-    private static boolean processExtensionResponse(MessageContext messageContext,
-                                                    ExtensionResponseDTO extensionResponseDTO,
-                                                    String customErrorHandler) {
+    private static boolean handleExtensionResponse(MessageContext messageContext,
+                                                   ExtensionResponseDTO extensionResponseDTO,
+                                                   String customErrorHandler) {
+
+        if (extensionResponseDTO == null) {
+            return true;    // if responseDTO is null, nothing to do hence continuing the normal flow
+        }
+        Map<String, String> headers = extensionResponseDTO.getHeaders();
+        if (headers != null) {
+            // if headers not sent back, the existing headers will not be changed
+            ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+        }
+        // handle payload
+        processResponsePayload(extensionResponseDTO, messageContext);
+        // set customProperty map to send in throttle stream
+        messageContext
+                .setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionResponseDTO.getCustomProperty());
+        // set Http Response status code
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
+                extensionResponseDTO.getStatusCode());
+        return evaluateExtensionResponseStatus(extensionResponseDTO, messageContext, customErrorHandler);
+    }
+
+    /**
+     * Process Extension Response Payload in DTO and set it to the message context.
+     *
+     * @param extensionResponseDTO ExtensionResponseDTO
+     * @param messageContext       Synapse MessageContext
+     */
+    private static void processResponsePayload(ExtensionResponseDTO extensionResponseDTO,
+                                               MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        try {
-            Map<String, String> headers = extensionResponseDTO.getHeaders();
-            if (headers != null) {
-                // if headers not sent back, the existing headers will not be changed
-                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS,
-                        extensionResponseDTO.getHeaders());
-            }
-            String contentType = ((Map<String, String>) axis2MC
-                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                    .get(APIConstants.HEADER_CONTENT_TYPE);
-            if (extensionResponseDTO.getPayload() != null && contentType != null) {
-                // if payload null, not modifying existing payload
+        String contentType = getAxis2TransportHeaders(axis2MC).get(APIConstants.HEADER_CONTENT_TYPE);
+        if (extensionResponseDTO.getPayload() != null && contentType != null) {
+            // if payload null, not modifying existing payload
+            try {
                 String payload = IOUtils.toString(extensionResponseDTO.getPayload());
                 // based on Content-Type header reset the payload
                 if (StringUtils.equals(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
                     JsonUtil.removeJsonPayload(axis2MC);
                     JsonUtil.getNewJsonPayload(axis2MC, payload, true, true);
-                    axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                            APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 } else {
                     // by default treat payload in well formed xml format
                     OMElement omElement = AXIOMUtil.stringToOM(payload);
@@ -302,20 +308,31 @@ public class ExtensionListenerUtil {
                     axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
                             APIConstants.APPLICATION_XML_SOAP_MEDIA_TYPE);
                 }
+            } catch (IOException | XMLStreamException e) {
+                log.error("Error while setting payload " + axis2MC.getLogIDString(), e);
             }
-        } catch (IOException | XMLStreamException e) {
-            log.error("Error while setting payload", e);
         }
-        // set customProperty map to send in throttle stream
-        messageContext
-                .setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionResponseDTO.getCustomProperty());
-        // set Http Response status code
-        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
-                extensionResponseDTO.getStatusCode());
-        // evaluate extension response status
+    }
+
+    /**
+     * Evaluate Extension Response Status and process whether to continue the message flow or break the handler
+     * execution and return response/fault.
+     *
+     * @param extensionResponseDTO ExtensionResponseDTO
+     * @param messageContext       MessageContext
+     * @param customErrorHandler   Custom Error Handler
+     * @return true or false indicating continue or return response
+     */
+    private static boolean evaluateExtensionResponseStatus(ExtensionResponseDTO extensionResponseDTO,
+                                                           MessageContext messageContext, String customErrorHandler) {
+
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
         String responseStatus = extensionResponseDTO.getResponseStatus();
         if (ExtensionResponseStatus.CONTINUE.toString().equals(responseStatus)) {
-            //continue the handler flow
+            if (log.isDebugEnabled()) {
+                log.debug("Continuing the handler flow " + axis2MC.getLogIDString());
+            }
             return true;
         } else if (ExtensionResponseStatus.RETURN_ERROR.toString().equals(responseStatus) ||
                 ExtensionResponseStatus.RETURN_RESPONSE.toString().equals(responseStatus)) {
@@ -327,7 +344,7 @@ public class ExtensionListenerUtil {
             } catch (AxisFault axisFault) {
                 // In case of an error it is logged and the process is continued because we have set a message in
                 // the payload.
-                log.error("Error occurred while consuming and discarding the message", axisFault);
+                log.error("Error occurred while discarding the message " + axis2MC.getLogIDString(), axisFault);
             }
             if (ExtensionResponseStatus.RETURN_ERROR.toString().equals(responseStatus)) {
                 // Break the handler flow invoke the custom error handler specified by the user and return
@@ -342,10 +359,14 @@ public class ExtensionListenerUtil {
                 }
             }
             //break the handler flow and return back from the existing handler phase
+            if (log.isDebugEnabled()) {
+                log.debug("Exiting the handler flow and returning response back. " + axis2MC.getLogIDString());
+            }
             Utils.send(messageContext, extensionResponseDTO.getStatusCode());
             return false;
         } else {
-            log.error("Invalid extension response status received. Continuing the default flow.");
+            log.error("Invalid extension response status received. Continuing the default flow."
+                    + axis2MC.getLogIDString());
             return true;
         }
     }
@@ -364,5 +385,18 @@ public class ExtensionListenerUtil {
             extensionListener = defaultExtensionListener;
         }
         return extensionListener;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, String> getAxis2TransportHeaders(org.apache.axis2.context.MessageContext axis2MC) {
+
+        return ((Map<String, String>) axis2MC
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> getCustomPropertyMapFromMsgContext(MessageContext messageContext) {
+
+        return (HashMap<String, Object>) messageContext.getProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY);
     }
 }

@@ -556,10 +556,10 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
 
-        if (!ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
-            return false;
+        if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return ExtensionListenerUtil.postProcessResponse(messageContext, type);
         }
-        return ExtensionListenerUtil.postProcessResponse(messageContext, type);
+        return false;
     }
 
 
