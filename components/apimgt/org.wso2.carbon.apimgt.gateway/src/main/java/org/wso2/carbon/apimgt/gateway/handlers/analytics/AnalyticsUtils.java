@@ -26,6 +26,9 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 /**
@@ -116,4 +119,9 @@ public class AnalyticsUtils {
         return resMediationLatency == null ? 0 : ((Number) resMediationLatency).longValue();
     }
 
+    public static String getTimeInISO(long time) {
+        OffsetDateTime offsetDateTime = OffsetDateTime
+                .ofInstant(Instant.ofEpochMilli(time), ZoneOffset.UTC.normalized());
+        return offsetDateTime.toString();
+    }
 }
