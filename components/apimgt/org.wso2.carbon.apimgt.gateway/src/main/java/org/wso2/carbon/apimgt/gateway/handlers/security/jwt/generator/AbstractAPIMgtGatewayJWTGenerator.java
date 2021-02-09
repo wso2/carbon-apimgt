@@ -44,7 +44,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private static final Log log = LogFactory.getLog(AbstractAPIMgtGatewayJWTGenerator.class);
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
-    private static final String SHA256 = "SHA-256";
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
     public static final String FORMAT_JSON_ARRAY_PROPERTY = "formatJWTJsonArray";
 
@@ -69,7 +68,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         kidSignatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getJwtConfigurationDto().getKidSignatureAlgorithm();
         if (kidSignatureAlgorithm == null) {
-            kidSignatureAlgorithm = SHA256;
+            kidSignatureAlgorithm = APIConstants.SHA_256;
         }
     }
 

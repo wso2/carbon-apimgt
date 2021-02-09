@@ -72,8 +72,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
 
-    private static final String SHA256 = "SHA-256";
-
     private static final String NONE = "NONE";
 
     private static volatile long ttl = -1L;
@@ -100,7 +98,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
         kidSignatureAlgorithm = jwtConfigurationDto.getKidSignatureAlgorithm();
         if (kidSignatureAlgorithm == null) {
-            signatureAlgorithm = SHA256;
+            signatureAlgorithm = APIConstants.SHA_256;
         }
 
 

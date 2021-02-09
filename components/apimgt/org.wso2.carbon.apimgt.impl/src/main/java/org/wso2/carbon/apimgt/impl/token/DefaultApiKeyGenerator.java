@@ -110,7 +110,7 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
             KeyStoreManager tenantKSM = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
             publicCert = tenantKSM.getDefaultPrimaryCertificate();
             String headerWithoutKid = APIUtil.generateHeader(publicCert,
-                    APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA, "SHA-1");
+                    APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA, null);
             headerWithKid = new JSONObject(headerWithoutKid);
             headerWithKid.put("kid", APIUtil.getApiKeyAlias());
 

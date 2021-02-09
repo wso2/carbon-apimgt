@@ -10226,6 +10226,9 @@ public final class APIUtil {
             throws APIManagementException {
 
         try {
+            if(kidSignatureAlgorithm == null || kidSignatureAlgorithm.isEmpty()) {
+                kidSignatureAlgorithm = APIConstants.SHA_256;
+            }
             MessageDigest digestValue = MessageDigest.getInstance(kidSignatureAlgorithm);
             byte[] der = publicCert.getEncoded();
             digestValue.update(der);
