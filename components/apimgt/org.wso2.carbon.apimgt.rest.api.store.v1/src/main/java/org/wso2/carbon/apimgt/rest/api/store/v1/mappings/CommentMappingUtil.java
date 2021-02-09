@@ -79,24 +79,6 @@ public class CommentMappingUtil {
         commentListDTO.setCount(replieslist.size());
         commentDTO.setReplies(commentListDTO);
         return commentDTO;
-
-//        CommentDTO commentDTOreply1 = new CommentDTO();
-//        commentDTOreply1.setId("reply1id");
-//        commentDTOreply1.setContent("reply1Content");
-//
-//        CommentDTO commentDTOreply2 = new CommentDTO();
-//        commentDTOreply2.setId("reply2id");
-//        commentDTOreply2.setContent("reply2Content");
-//
-//        List<CommentDTO> replylist = new ArrayList<CommentDTO>();
-//
-//        replylist.add(commentDTOreply1);
-//        replylist.add(commentDTOreply2);
-//        CommentListDTO commentlistdto = new CommentListDTO();
-//        commentlistdto.setList(replylist);
-//
-//        commentDTO.setReplies(commentlistdto);
-//        return commentDTO;
     }
 
     /**
