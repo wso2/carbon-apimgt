@@ -239,7 +239,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @param req Full Http Request
      * @return true if the access token is valid
      */
-    private boolean validateOAuthHeader(FullHttpRequest req) throws APISecurityException {
+    private boolean validateOAuthHeader(FullHttpRequest req) throws APISecurityException, APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);

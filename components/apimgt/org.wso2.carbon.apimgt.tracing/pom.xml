@@ -69,6 +69,10 @@
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

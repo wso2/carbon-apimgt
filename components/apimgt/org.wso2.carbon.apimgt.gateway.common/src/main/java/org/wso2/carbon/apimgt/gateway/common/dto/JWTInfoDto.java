@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,16 +15,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.dto;
 
-import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
+package org.wso2.carbon.apimgt.gateway.common.dto;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Holds information related to jwt token.
+ *
+ */
 public class JWTInfoDto {
-
     private String applicationtier;
     private String keytype;
     private String version;
@@ -38,8 +39,8 @@ public class JWTInfoDto {
     private String apicontext;
     private String apiName;
     private JWTValidationInfo jwtValidationInfo;
-    private MessageContext messageContext;
     private Map<String, String> appAttributes = new HashMap<>();
+
     public String getApplicationtier() {
 
         return applicationtier;
@@ -160,7 +161,7 @@ public class JWTInfoDto {
         this.jwtValidationInfo = jwtValidationInfo;
     }
 
-    public MessageContext getMessageContext() {
+    /*public MessageContext getMessageContext() {
 
         return messageContext;
     }
@@ -168,7 +169,7 @@ public class JWTInfoDto {
     public void setMessageContext(MessageContext messageContext) {
 
         this.messageContext = messageContext;
-    }
+    }*/
 
     public String getApiName() {
 
