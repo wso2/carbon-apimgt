@@ -963,6 +963,7 @@ public class APIGatewayManager {
         gatewayAPIDTO.setVersion(api.getId().getVersion());
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
         gatewayAPIDTO.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        gatewayAPIDTO.setOverride(true);
         try {
             String production_endpoint = null;
             String sandbox_endpoint = null;
