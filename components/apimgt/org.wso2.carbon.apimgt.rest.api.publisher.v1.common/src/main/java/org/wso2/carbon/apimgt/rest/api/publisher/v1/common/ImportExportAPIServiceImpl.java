@@ -52,7 +52,7 @@ import java.io.InputStream;
 public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
-    public File exportAPI(String apiId, String name, String version, String revisionID, String providerName,
+    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
                           boolean preserveStatus,
                           ExportFormat format, boolean preserveDocs, boolean preserveCredentials)
             throws APIManagementException,
@@ -76,8 +76,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         }
 
-        if (revisionID != null) {
-            revisionUUID = apiProvider.getAPIRevisionUUID(revisionID, apiId);
+        if (revisionNum != null) {
+            revisionUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            //if a revision number provided, revision api object is used
             api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
         } else {
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);

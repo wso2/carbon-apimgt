@@ -3730,7 +3730,7 @@ public class SQLConstants {
         public static final String GET_REVISION_COUNT_BY_API_UUID = "SELECT COUNT(ID) FROM AM_REVISION WHERE API_UUID = ?";
         public static final String GET_MOST_RECENT_REVISION_ID = "SELECT MAX(ID) FROM AM_REVISION WHERE API_UUID = ?";
         public static final String GET_REVISION_BY_REVISION_UUID = "SELECT * FROM AM_REVISION WHERE REVISION_UUID = ?";
-        public static final String GET_REVISION_UUID_ID_AND_API_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +
+        public static final String GET_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +
                 "API_UUID = ? AND ID = ?";
         public static final String GET_EARLIEST_REVISION_ID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +
                 "API_UUID = ? ORDER BY ID ASC LIMIT 1";
@@ -3744,8 +3744,6 @@ public class SQLConstants {
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
-        public static final String GET_API_REVISION_ID_BY_NAME
-                = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? AND ID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID

@@ -3497,7 +3497,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param preserveStatus Preserve API status on export
      * @return
      */
-    @Override public Response exportAPI(String apiId, String name, String version, String revisionID,
+    @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
                                         String providerName,
             String format, Boolean preserveStatus, MessageContext messageContext) {
 
@@ -3510,7 +3510,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ExportFormat.YAML;
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            File file = importExportAPI.exportAPI(apiId, name, version, revisionID, providerName, preserveStatus,
+            File file = importExportAPI.exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus,
                     exportFormat, true, true);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
@@ -3963,6 +3963,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Retrieve available revisions of an API from the identifier info provided.
+     *
+     * @param name              API Name
+     * @param version           API version
+     * @param provider          provider
+     * @param query             query for filtering based on deployed or not
+     * @param messageContext    message context object
+     * @return response containing list of API revisions
+     */
     @Override
     public Response getAPIRevisionsWithAPIName(String name, String version, String provider, String query,
                                                MessageContext messageContext) throws APIManagementException {

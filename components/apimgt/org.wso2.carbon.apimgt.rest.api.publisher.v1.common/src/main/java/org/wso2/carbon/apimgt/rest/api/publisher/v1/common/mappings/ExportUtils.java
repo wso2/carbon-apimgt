@@ -645,24 +645,34 @@ public class ExportUtils {
         }
     }
 
+    /**
+     * Retrieve the deployed gateway environments and store those in the archive directory.
+     *
+     * @param archivePath  File path to export the endpoint certificates
+     * @param apiDto       API DTO to be exported
+     * @param exportFormat Export format of file
+     * @param apiProvider  API Provider
+     * @throws APIImportExportException If an error occurs while exporting gateway environments
+     */
     public static void addGatewayEnvironmentsToArchive(String archivePath, APIDTO apiDto,
-                                                        ExportFormat exportFormat, APIProvider apiProvider)
+                                                       ExportFormat exportFormat, APIProvider apiProvider)
             throws APIManagementException {
 
-        String apiID = apiDto.getId();
         try {
-            List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiID);
-            JSONArray deploymentListArray = new JSONArray();
-            for (APIRevisionDeployment deployment : deploymentsList){
+            List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiDto.getId());
+            JSONArray deploymentsArray = new JSONArray();
+            for (APIRevisionDeployment deployment : deploymentsList) {
                 JSONObject deploymentObject = new JSONObject();
-                deploymentObject.put("name", deployment.getDeployment());
-                deploymentObject.put("displayOnDevportal", deployment.isDisplayOnDevportal());
-                deploymentListArray.put(deploymentObject);
+                deploymentObject.put(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
+                deploymentObject
+                        .put(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION, deployment.isDisplayOnDevportal());
+                deploymentsArray.put(deploymentObject);
             }
-            CommonUtil.writeToYamlOrJson(archivePath + "/deployments", exportFormat, deploymentListArray.toString());
+            CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
+                    deploymentsArray.toString());
         } catch (APIImportExportException e) {
             throw new APIManagementException(
-                    "Error in converting deployment details to JSON object in API: " + apiDto.getName(), e);
+                    "Error in converting deployment environment details to JSON object in API: " + apiDto.getName(), e);
         } catch (IOException e) {
             throw new APIManagementException(
                     "Error while saving deployment environment details for API: " + apiDto.getName()

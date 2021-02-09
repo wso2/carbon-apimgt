@@ -255,7 +255,6 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getAllowedOrigins;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
 /**
@@ -9789,27 +9788,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     /**
-     * Get a Revision related to provided and revision UUID
+     * Get the revision UUID from the Revision no and API UUID
      *
-     * @param revisionID API Revision UUID
-     * @return API Revision
-     * @throws APIManagementException if failed to get the related API revision
+     * @param revisionNum   revision number
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if failed to get the API revision uuid
      */
     @Override
-    public String getAPIRevisionUUID(String revisionID, String apiUUID) throws APIManagementException {
-        return apiMgtDAO.getRevisionUUID(revisionID, apiUUID);
+    public String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getRevisionUUID(revisionNum, apiUUID);
     }
 
     /**
-     * Get a Revision related to provided and revision UUID
+     * Get the earliest revision UUID from the revision list for a given API
      *
-     * @param apiUUID  Revision UUID
-     * @return API Revision
-     * @throws APIManagementException if failed to get the related API revision
+     * @param apiUUID API UUID
+     * @return Earliest revision's UUID
+     * @throws APIManagementException if failed to get the revision
      */
     @Override
-    public String getOldestRevisionID(String apiUUID) throws APIManagementException {
-        return apiMgtDAO.getOldestRevision(apiUUID);
+    public String getEarliestRevisionUUID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getEarliestRevision(apiUUID);
     }
 
 

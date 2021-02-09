@@ -37,6 +37,7 @@ public interface ImportExportAPI {
      * @param apiId          UUID of API.
      * @param name           name of API.
      * @param version        version of API.
+     * @param revisionNum    revision number.
      * @param providerName   provider of API.
      * @param preserveStatus Preserve API status on export
      * @param format         Format of output documents. Can be YAML or JSON
@@ -45,7 +46,7 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
-    public File exportAPI(String apiId, String name, String version, String revisionID, String providerName,
+    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
                           boolean preserveStatus, ExportFormat format, boolean preserveDocs,
                           boolean preserveCredentials) throws APIManagementException, APIImportExportException;
 
