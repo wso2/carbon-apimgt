@@ -287,7 +287,8 @@ class Comment extends React.Component {
                                     </Grid>
                                     <Grid item xs zeroMinWidth>
                                         <Typography noWrap className={classes.commentText}>
-                                            {(comment.commenterInfo && comment.commenterInfo.fullName) ? comment.commenterInfo.fullName : comment.createdBy}
+                                            {(comment.commenterInfo && comment.commenterInfo.fullName) ? 
+                                                comment.commenterInfo.fullName : comment.createdBy}
                                         </Typography>
                                         <Typography noWrap className={classes.commentText} variant='caption'>
                                             {moment(comment.createdTime).fromNow()}
@@ -334,7 +335,7 @@ class Comment extends React.Component {
                                             allComments={allComments}
                                         />
                                     )} */}
-                                        {comment.replies && comment.replies.list.slice(0).map((replie, index) => (
+                                        {comment.replies && comment.replies.list.slice(0).map((reply, index) => (
                                             <>
                                                 <Box ml={8}>
                                                     {index !== 0 && <Divider className={classes.divider} />}
@@ -344,30 +345,30 @@ class Comment extends React.Component {
                                                         </Grid>
                                                         <Grid item xs zeroMinWidth>
                                                             <Typography noWrap className={classes.commentText}>
-                                                                {(replie.commenterInfo && replie.commenterInfo.fullName)
-                                                                    ? replie.commenterInfo.fullName : replie.createdBy}
+                                                                {(reply.commenterInfo && reply.commenterInfo.fullName)
+                                                                    ? reply.commenterInfo.fullName : reply.createdBy}
                                                             </Typography>
                                                             <Typography noWrap className={classes.commentText} variant='caption'>
-                                                                {moment(replie.createdTime).fromNow()}
+                                                                {moment(reply.createdTime).fromNow()}
                                                             </Typography>
 
                                                             {index !== editIndex && (
                                                                 <Typography className={classes.commentText}>
-                                                                    {replie.content}</Typography>
+                                                                    {reply.content}</Typography>
                                                             )}
 
                                                             {index === editIndex && (
                                                             <CommentEdit
                                                                 apiId={apiId}
-                                                                allComments={replie}
+                                                                allComments={reply}
                                                                 commentsUpdate={commentsUpdate}
-                                                                comment={replie}
+                                                                comment={reply}
                                                                 toggleShowEdit={this.handleShowEdit}
                                                             />
                                                             )}
 
                                                             <CommentOptions
-                                                                comment={replie}
+                                                                comment={reply}
                                                                 editIndex={editIndex}
                                                                 index={index}
                                                                 showAddComment={this.showAddComment}
