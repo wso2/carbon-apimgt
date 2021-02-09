@@ -17,6 +17,8 @@
 package org.wso2.carbon.apimgt.keymgt.token;
 
 import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
@@ -262,7 +264,7 @@ public class TokenGenTest {
         Certificate cert = keystore.getCertificate("wso2carbon");
 
         //Generate JWT header using the above certificate
-        String header = APIUtil.generateHeader(cert, "SHA256withRSA");
+        String header = APIUtil.generateHeader(cert, "SHA256withRSA", "SHA-1");
 
         //Get the public certificate's thumbprint and base64url encode it
         byte[] der = cert.getEncoded();
@@ -270,8 +272,8 @@ public class TokenGenTest {
         digestValue.update(der);
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);
-        String encodedThumbprint = java.util.Base64.getUrlEncoder()
-                .encodeToString(publicCertThumbprint.getBytes(StandardCharsets.UTF_8));
+        String encodedThumbprint = new String(new Base64(0, null, true).encode(
+                publicCertThumbprint.getBytes(Charsets.UTF_8)), Charsets.UTF_8);
         //Check if the encoded thumbprint get matched with JWT header's x5t
         Assert.assertTrue(header.contains(encodedThumbprint));
     }

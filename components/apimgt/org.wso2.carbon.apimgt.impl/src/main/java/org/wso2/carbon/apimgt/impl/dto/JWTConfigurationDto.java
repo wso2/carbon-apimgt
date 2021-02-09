@@ -28,6 +28,7 @@ public class JWTConfigurationDto {
     private String jwtHeader = "X-JWT-Assertion";
     private String consumerDialectUri = "http://wso2.org/claims";
     private String signatureAlgorithm = "SHA256withRSA";
+    private String kidSignatureAlgorithm = "SHA-256";
     private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";
     private String claimRetrieverImplClass;
     private String gatewayJWTGeneratorImpl;
@@ -122,5 +123,15 @@ public class JWTConfigurationDto {
     public void setJwtExcludedClaims(Set<String> jwtClaims) {
 
         this.jwtExcludedClaims = jwtClaims;
+    }
+
+    public String getKidSignatureAlgorithm() {
+
+        return kidSignatureAlgorithm;
+    }
+
+    public void setKidSignatureAlgorithm(String kidSignatureAlgorithm) {
+
+        this.kidSignatureAlgorithm = kidSignatureAlgorithm;
     }
 }

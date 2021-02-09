@@ -448,6 +448,7 @@ public final class APIConstants {
     public static final String CLAIMS_RETRIEVER_CLASS = "ClaimsRetrieverImplClass";
     public static final String CONSUMER_DIALECT_URI = "ConsumerDialectURI";
     public static final String JWT_SIGNATURE_ALGORITHM = "SignatureAlgorithm";
+    public static final String KID_JWT_SIGNATURE_ALGORITHM = "KIDSignatureAlgorithm";
     public static final String GATEWAY_JWT_GENERATOR = "GatewayJWTGeneration";
     public static final String GATEWAY_JWT_GENERATOR_IMPL = "ImplClass";
     public static final String TOKEN_ISSUERS = "TokenIssuers";

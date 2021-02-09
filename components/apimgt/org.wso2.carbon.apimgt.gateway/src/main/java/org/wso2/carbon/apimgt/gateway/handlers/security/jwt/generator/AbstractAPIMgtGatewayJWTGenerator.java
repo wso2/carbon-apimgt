@@ -44,6 +44,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private static final Log log = LogFactory.getLog(AbstractAPIMgtGatewayJWTGenerator.class);
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
+    private static final String SHA256 = "SHA-256";
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
     public static final String FORMAT_JSON_ARRAY_PROPERTY = "formatJWTJsonArray";
 
@@ -51,6 +52,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private String dialectURI;
 
     private String signatureAlgorithm;
+    private String kidSignatureAlgorithm;
 
     public AbstractAPIMgtGatewayJWTGenerator() {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -64,7 +66,11 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
-
+        kidSignatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getJwtConfigurationDto().getKidSignatureAlgorithm();
+        if (kidSignatureAlgorithm == null) {
+            kidSignatureAlgorithm = SHA256;
+        }
     }
 
     public String generateToken(JWTInfoDto jwtInfoDto) throws APIManagementException {
@@ -172,7 +178,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         try {
             KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
             Certificate publicCert = keyStoreManager.getDefaultPrimaryCertificate();
-            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
+            return APIUtil.generateHeader(publicCert, signatureAlgorithm, kidSignatureAlgorithm);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new APIManagementException(error, e);
@@ -207,7 +213,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 }
             } else if (Boolean.parseBoolean(System.getProperty(FORMAT_JSON_ARRAY_PROPERTY)) &&
                     claimVal instanceof String && claimVal.toString().contains("[\"")
-                    && claimVal.toString().contains("\"]")){
+                    && claimVal.toString().contains("\"]")) {
                 try {
                     List<String> arrayList = mapper.readValue(claimVal.toString(), List.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), arrayList);
@@ -229,13 +235,16 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
         return jwtClaimsSet.toJSONObject().toString();
     }
+
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
         return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
     }
+
     public String getDialectURI() {
         return dialectURI;
     }
 
-    public abstract Map<String,Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
-    public abstract Map<String,Object> populateCustomClaims(JWTInfoDto jwtInfoDto);
+    public abstract Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
+
+    public abstract Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto);
 }

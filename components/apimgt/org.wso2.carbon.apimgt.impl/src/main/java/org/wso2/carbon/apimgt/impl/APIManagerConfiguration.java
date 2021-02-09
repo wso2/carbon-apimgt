@@ -1287,6 +1287,11 @@ public class APIManagerConfiguration {
             if (signatureElement != null) {
                 jwtConfigurationDto.setSignatureAlgorithm(signatureElement.getText());
             }
+            OMElement kidSignatureElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.KID_JWT_SIGNATURE_ALGORITHM));
+            if (kidSignatureElement != null) {
+                jwtConfigurationDto.setKidSignatureAlgorithm(kidSignatureElement.getText());
+            }
             OMElement claimRetrieverImplElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.CLAIMS_RETRIEVER_CLASS));
             if (claimRetrieverImplElement != null) {

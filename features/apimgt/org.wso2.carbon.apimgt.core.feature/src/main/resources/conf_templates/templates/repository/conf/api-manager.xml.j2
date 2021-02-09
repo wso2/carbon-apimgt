@@ -74,6 +74,9 @@
         <!-- Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE". -->
         <SignatureAlgorithm>{{apim.jwt.signing_algorithm}}</SignatureAlgorithm>
 
+        <!-- Signature algorithm JWKS Endpoint used. Accepts "SHA-1", "SHA-256"...etc -->
+        <KIDSignatureAlgorithm>{{apim.jwt.kid_signing_algorithm}}</KIDSignatureAlgorithm>
+
         <!-- This parameter specifies which implementation should be used for generating the Token. JWTGenerator is the
 	     default implementation provided. -->
         {% if apim.jwt.generator_impl is defined %}
