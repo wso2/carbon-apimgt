@@ -129,4 +129,13 @@ public class LocalEntryServiceProxy {
             }
         }
     }
+
+    public String[] getLocalEntries() throws AxisFault {
+
+        try {
+            return localEntryAdmin.getEntryNames();
+        } catch (LocalEntryAdminException e) {
+            throw new AxisFault("Error while retrieving local entries",e);
+        }
+    }
 }

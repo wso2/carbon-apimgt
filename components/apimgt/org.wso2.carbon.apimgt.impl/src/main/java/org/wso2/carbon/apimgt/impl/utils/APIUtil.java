@@ -123,12 +123,12 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -145,18 +145,7 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -168,7 +157,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
-import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -235,6 +223,8 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
+import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.JWTSignatureAlg;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -294,10 +284,10 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.UUID;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -595,16 +585,7 @@ public final class APIUtil {
                 }
             }
         } while (retry);
-
-        if (httpResponse.getStatusLine().getStatusCode() == 200) {
-            return httpResponse;
-        } else {
-            httpResponse.close();
-            String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
-                    APIConstants.DigestAuthConstants.CHARSET);
-            throw new APIManagementException(errorMessage + "Event-Hub status code is : "
-                    + httpResponse.getStatusLine().getStatusCode());
-        }
+        return httpResponse;
     }
 
     /**
@@ -7554,7 +7535,7 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         } catch (RegistryException e) {
             String msg = "RegistryException thrown when loading GA config from registry";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.INTERNAL_ERROR);
         }
     }
 
@@ -11269,31 +11250,6 @@ public final class APIUtil {
         return keyManagerConfigurationDTO;
     }
 
-    public static void setTokenAndRevokeEndpointsToDevPortal(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
-
-        APIManagerConfiguration apiManagerConfiguration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        String revokeEndpointContext =
-                apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
-        String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
-
-        if (StringUtils.isEmpty(tokenEndpointContext)) {
-            tokenEndpointContext = "/token";
-        }
-        if (StringUtils.isNotEmpty(revokeEndpointContext)) {
-            revokeEndpointContext = "/revoke";
-        }
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
-    }
-
     public static String getTokenEndpointsByType(String type) {
 
         APIManagerConfiguration config =
@@ -11895,5 +11851,22 @@ public final class APIUtil {
             userRoles = filteredUserRoles.toArray(new String[0]);
         }
         return userRoles;
+    }
+
+    public static Environment getEnvironment(String name, String tenantDomain) throws APIManagementException {
+
+        Environment environment = getEnvironments().get(name);
+        if (environment != null) {
+            return environment;
+        }
+        Label label =
+                ApiMgtDAO.getInstance().getLabelDetailByLabelAndTenantDomain(name, tenantDomain);
+        if (label != null) {
+            environment = new Environment();
+            environment.setName(label.getName());
+            environment.setType(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
+            return environment;
+        }
+        return null;
     }
 }

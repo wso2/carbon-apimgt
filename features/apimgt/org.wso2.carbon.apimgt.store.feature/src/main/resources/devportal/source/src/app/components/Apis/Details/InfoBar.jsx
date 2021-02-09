@@ -18,19 +18,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Settings from 'Settings';
-import ReactMarkdown from 'react-markdown';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import { Link, withRouter } from 'react-router-dom';
-import Collapse from '@material-ui/core/Collapse';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
-import Grade from '@material-ui/icons/Grade';
-import Chip from '@material-ui/core/Chip';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import LaunchIcon from '@material-ui/icons/Launch';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
@@ -43,7 +36,7 @@ import ApiThumb from '../Listing/ApiThumb';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import Environments from './Environments';
-import Labels from './Labels';
+import Breadcrumb from './Breadcrumb';
 
 const propertyDisplaySuffix = Settings.app.propertyDisplaySuffix || '__display';
 /**
@@ -53,7 +46,7 @@ const propertyDisplaySuffix = Settings.app.propertyDisplaySuffix || '__display';
  */
 const styles = (theme) => {
     const mainBack = theme.custom.infoBar.background || '#ffffff';
-    const infoBarHeight = theme.custom.infoBar.height || 70;
+    const infoBarHeight = theme.custom.infoBar.height || 170;
     const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(mainBack);
 
     return {
@@ -61,7 +54,7 @@ const styles = (theme) => {
             minWidth: '100%',
         },
         root: {
-            height: infoBarHeight,
+            minHeight: infoBarHeight,
             background: mainBack,
             color: theme.palette.getContrastText(mainBack),
             borderBottom: 'solid 1px ' + theme.palette.grey.A200,
@@ -166,6 +159,19 @@ const styles = (theme) => {
         linkTitle: {
             color: theme.palette.getContrastText(theme.custom.infoBar.background),
         },
+        endpointLabel: {
+            display: 'inline-block',
+            marginRight: theme.spacing(),
+            fontWeight: 500,
+        },
+        infoWrapper: {
+            display: 'flex',
+            alignItems: 'center',
+        },
+        avatarRoot: {
+            width: 30,
+            height: 30,
+        },
         leftMenu: {},
         leftMenuHorizontal: {},
         leftMenuVerticalLeft: {},
@@ -203,10 +209,12 @@ class InfoBar extends React.Component {
             avgRating: 0,
             total: 0,
             count: 0,
+            descriptionHidden: true,
         };
         this.getSchema = this.getSchema.bind(this);
         this.getProvider = this.getProvider.bind(this);
         this.setRatingUpdate = this.setRatingUpdate.bind(this);
+        this.collapseAllDescription = this.collapseAllDescription.bind(this);
     }
 
     ditectCurrentMenu = (location) => {
@@ -329,6 +337,10 @@ class InfoBar extends React.Component {
         }
     }
 
+    collapseAllDescription(e) {
+        e.preventDefault();
+        this.setState({ descriptionHidden: !this.state.descriptionHidden });
+    }
     /**
      *
      *
@@ -340,7 +352,7 @@ class InfoBar extends React.Component {
 
         const { classes, theme, intl } = this.props;
         const {
-            notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl, avgRating, total, count,
+            notFound, avgRating, total, count, descriptionHidden,
         } = this.state;
         const {
             custom: {
@@ -372,24 +384,24 @@ class InfoBar extends React.Component {
         }
 
         let securityScheme_display = null;
-        if(securityScheme) {
+        if (securityScheme) {
             securityScheme_display = [];
-            securityScheme.forEach( (scm) => {
-                if(scm === 'basic_auth') {
+            securityScheme.forEach((scm) => {
+                if (scm === 'basic_auth') {
                     securityScheme_display.push(
                         intl.formatMessage({
                             defaultMessage: 'Basic',
                             id: 'Apis.Details.InfoBar.security.basic',
                         })
                     );
-                } else if(scm === 'api_key') {
+                } else if (scm === 'api_key') {
                     securityScheme_display.push(
                         intl.formatMessage({
                             defaultMessage: 'Api Key',
                             id: 'Apis.Details.InfoBar.security.api_key',
                         })
                     );
-                } else if(scm === 'oauth2') {
+                } else if (scm === 'oauth2') {
                     securityScheme_display.push(
                         intl.formatMessage({
                             defaultMessage: 'OAuth2',
@@ -399,6 +411,18 @@ class InfoBar extends React.Component {
                 }
             })
         }
+        // Truncating the description
+        let descriptionIsBig = false;
+        let smallDescription = '';
+        if (api.description) {
+            const limit = 40;
+            if (api.description.split(' ').length > limit) {
+                let newContent = api.description.split(' ').slice(0, limit);
+                smallDescription = newContent.join(' ') + '...';
+                descriptionIsBig = true;
+            }
+        }
+
 
         const { resourceNotFountMessage } = this.props;
         const user = AuthManager.getUser();
@@ -408,329 +432,161 @@ class InfoBar extends React.Component {
 
         return (
             <div className={classes.infoBarMain} id='infoBar'>
+                <Breadcrumb />
                 <div className={classes.root}>
                     {showThumbnail && (
-                        <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
+                        <Box>
+                            <ApiThumb api={api} customWidth={70} customHeight={50} showInfo={false} />
+                        </Box>
                     )}
-                    <div style={{ marginLeft: theme.spacing(1) }}>
-                        <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
-                            <Typography variant='h4'>{api.name}</Typography>
-                        </Link>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            {this.getProvider(api)}
-                        </Typography>
-                    </div>
-                    <VerticalDivider height={70} />
-                    {!api.advertiseInfo.advertised && user && showRating && (
-                        <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
+                    <Box display='flex' flexDirection='column'>
+                        <Box display='flex' flexDirection='row' alignItems='center' pt={1}>
+                            <Box ml={1} mr={2}>
+                                <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
+                                    <Typography variant='h4'>{api.name}</Typography>
+                                </Link>
+                            </Box>
+                            {!api.advertiseInfo.advertised && user && showRating && (
+                                <>
+                                    <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
+                                    <VerticalDivider height={30} />
+                                    <StarRatingBar
+                                        apiId={api.id}
+                                        isEditable
+                                        showSummary={false}
+                                        setRatingUpdate={this.setRatingUpdate}
+                                    />
+                                </>
+                            )}
+                            {api.advertiseInfo.advertised && (
+                                <>
+                                    <a
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                        href={api.advertiseInfo.originalStoreUrl}
+                                        className={classes.viewInPubStoreLauncher}
+                                    >
+                                        <div>
+                                            <LaunchIcon />
+                                        </div>
+                                        <div className={classes.linkText}>Visit Publisher Dev Portal</div>
+                                    </a>
+                                    <VerticalDivider height={70} />
+                                </>
+                            )}
+                            <Social />
+                        </Box>
+                        <Box display='flex' flexDirection='row' alignItems='center' pl={1}>
+                            <Grid container spacing={2}>
+                                <Grid item xl={2} className={classes.infoWrapper}>
+                                    <Typography variant='body2' className={classes.endpointLabel}>
+                                        <FormattedMessage
+                                            id='Apis.Details.InfoBar.list.endpoint'
+                                            defaultMessage='Endpoint'
+                                        />
+                                    </Typography>
+                                    <Environments renderOnlyOne />
+                                </Grid>
 
-                    )}
-                    {api.advertiseInfo.advertised && (
-                        <>
-                            <a
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                href={api.advertiseInfo.originalDevportalUrl}
-                                className={classes.viewInPubStoreLauncher}
-                            >
-                                <div>
-                                    <LaunchIcon />
-                                </div>
-                                <div className={classes.linkText}>Visit Publisher Dev Portal</div>
-                            </a>
-                            <VerticalDivider height={70} />
-                        </>
-                    )}
-                    <Social />
+                                {/* User info */}
+                                <Grid item xl={2} className={classes.infoWrapper}>
+                                    <Icon className={classes.iconEven}>person</Icon>
+                                    <Box display='flex' flexDirection='column' pl={1}>
+                                        <Typography variant='body2' gutterBottom align='left'>
+                                            {this.getProvider(api)}
+                                        </Typography>
+                                        <Typography variant='body2' className={classes.endpointLabel}>
+                                            {api.businessInformation.businessOwnerEmail}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+
+                                {/* Context */}
+                                <Grid item xl={2} className={classes.infoWrapper}>
+                                    <Icon className={classes.iconOdd}>account_balance_wallet</Icon>
+                                    <Box display='flex' flexDirection='column' pl={1}>
+                                        <Typography variant='body2' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.InfoBar.list.context'
+                                                defaultMessage='Context'
+                                            />
+                                        </Typography>
+                                        <Typography variant='body2' className={classes.endpointLabel}>
+                                            {api.context}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+
+                                {/* Version */}
+                                <Grid item xl={2} className={classes.infoWrapper}>
+                                    <Icon className={classes.iconEven}>settings_input_component</Icon>
+                                    <Box display='flex' flexDirection='column' pl={1}>
+                                        <Typography variant='body2' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.InfoBar.list.version'
+                                                defaultMessage='Version'
+                                            />
+                                        </Typography>
+                                        <Typography variant='body2' className={classes.endpointLabel}>
+                                            {api.version}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+
+                                {/* Key Managers */}
+                                <Grid item xl={2} className={classes.infoWrapper}>
+                                    <Icon className={classes.iconOdd}>vpn_key</Icon>
+                                    <Box display='flex' flexDirection='column' pl={1}>
+                                        <Typography variant='body2' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.InfoBar.keyManagers'
+                                                defaultMessage='Key Managers'
+                                            />
+                                        </Typography>
+                                        <Typography variant='body2' className={classes.endpointLabel}>
+                                            {this.getKeyManagers(api)}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+
+                                {/* Tags */}
+                                <Grid item xl={2} className={classes.infoWrapper}>
+                                    <Icon className={classes.iconEven}>bookmark</Icon>
+                                    <Box display='flex' flexDirection='column' pl={1}>
+                                        <Typography variant='body2' gutterBottom align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.InfoBar.list.tags'
+                                                defaultMessage='Tags'
+                                            />
+                                        </Typography>
+                                        <Typography variant='body2' className={classes.endpointLabel}>
+                                            {apisTagsWithoutGroups.map((tag, index) => (
+                                                <Link to={`/apis?offset=0&query=tag:${tag}`} style={{ lineHeight: 0 }}>
+                                                    {tag} {(index + 1) !== apisTagsWithoutGroups.length && ', '}
+                                                </Link>
+                                            ))}
+                                            {apisTagsWithoutGroups.length === 0 && (<FormattedMessage
+                                                id='Apis.Details.InfoBar.list.tags.not'
+                                                defaultMessage='Not Tagged'
+                                            />)}
+                                        </Typography>
+
+                                    </Box>
+                                </Grid>
+
+                                {api.description && (<Grid item xs={12} className={classes.infoWrapper}>
+                                    <Typography variant='body2' gutterBottom align='left'>
+                                        {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
+                                        {descriptionIsBig && (<a onClick={this.collapseAllDescription} href='#'>
+                                            {descriptionHidden ? 'more' : 'less'}
+                                        </a>)}
+                                    </Typography>
+                                </Grid>)}
+                            </Grid>
+                        </Box>
+                    </Box>
                 </div>
                 {position === 'horizontal' && <div style={{ height: 60 }} />}
-                {showOverview && (
-                    <Collapse in={showOverview}>
-                        <div className={classes.infoContent}>
-                            <div className={classes.contentWrapper}>
-                                <Typography>
-                                    <ReactMarkdown source={api.description} />
-                                </Typography>
-                                <Table className={classes.table}>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                                <div className={classes.iconAligner}>
-                                                    <Icon className={classes.iconOdd}>settings_input_component</Icon>
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.list.version'
-                                                            defaultMessage='Version'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.version}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <Icon className={classes.iconOdd}>account_balance_wallet</Icon>
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.list.context'
-                                                            defaultMessage='Context'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.context}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <Icon className={classes.iconOdd}>account_circle</Icon>
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.provider'
-                                                            defaultMessage='Provider'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{this.getProvider(api)} {this.getProviderMail(api)}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <Icon className={classes.iconOdd}>account_box</Icon>
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.technical'
-                                                            defaultMessage='Technical Owner'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{this.getTechnical(api)} {this.getTechnicalMail(api)}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <Icon className={classes.iconOdd}>vpn_key</Icon>
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.keyManagers'
-                                                            defaultMessage='Key Managers'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{this.getKeyManagers(api)}</TableCell>
-                                        </TableRow>
-                                        {/* <TableRow>
-                                                    <TableCell component='th' scope='row'>
-                                                        <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconEven}>update</Icon>
-                                                            <span className={classes.iconTextWrapper}>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.last.updated'
-                                                                    defaultMessage='Last updated'
-                                                                />
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>21 May 2018</TableCell>
-                                                </TableRow> */}
-                                        {user && !api.advertiseInfo.advertised && showRating && (
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Grade className={classes.iconOdd} />
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.InfoBar.list.context.rating'
-                                                                defaultMessage='Rating'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <StarRatingBar
-                                                        apiId={api.id}
-                                                        isEditable
-                                                        showSummary={false}
-                                                        setRatingUpdate={this.setRatingUpdate}
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                        {api.type === 'GRAPHQL' && (
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.iconOdd}>cloud_download</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.InfoBar.download.Schema'
-                                                                defaultMessage='Download Schema'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        onClick={this.getSchema}
-                                                        size='small'
-                                                        fontSize='small'
-                                                        variant='outlined'
-                                                    >
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.graphQL.schema'
-                                                            defaultMessage='GraphQL Schema'
-                                                        />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                        {!api.advertiseInfo.advertised ? (
-                                            <>
-                                                <TableRow>
-                                                    <TableCell
-                                                        component='th'
-                                                        scope='row'
-                                                        className={classes.contentToTop}
-                                                    >
-                                                        <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconOdd}>desktop_windows</Icon>
-                                                            <span className={classes.iconTextWrapper}>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.gateway.environments'
-                                                                    defaultMessage='Gateway Environments'
-                                                                />
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Environments />
-                                                    </TableCell>
-                                                </TableRow>
-                                                {api.labels.length !== 0 && (
-                                                    <TableRow>
-                                                        <TableCell
-                                                            component='th'
-                                                            scope='row'
-                                                            className={classes.contentToTop}
-                                                        >
-                                                            <div className={classes.iconAligner}>
-                                                                <Icon className={classes.iconOdd}>games</Icon>
-                                                                <span className={classes.iconTextWrapper}>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.InfoBar.available.gLabels'
-                                                                        defaultMessage='Available Gateways'
-                                                                    />
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Labels />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </>
-                                        ) : (
-                                                <TableRow>
-                                                    <TableCell component='th' scope='row'>
-                                                        <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconOdd}>account_circle</Icon>
-                                                            <span className={classes.iconTextWrapper}>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.owner'
-                                                                    defaultMessage='Owner'
-                                                                />
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
-                                                </TableRow>
-                                            )}
-                                        {apisTagsWithoutGroups && apisTagsWithoutGroups.length > 0 && (
-                                            <TableRow>
-                                                <TableCell component='th' scope='row'>
-                                                    <div className={classes.iconAligner}>
-                                                        <Icon className={classes.iconOdd}>bookmark</Icon>
-                                                        <span className={classes.iconTextWrapper}>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.InfoBar.list.tags'
-                                                                defaultMessage='Tags'
-                                                            />
-                                                        </span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {apisTagsWithoutGroups.map((tag) => (
-                                                        <Link to={`/apis?offset=0&query=tag:${tag}`}>
-                                                            <Chip label={tag} className={classes.chip} key={tag} style={{cursor: 'pointer'}}/>
-                                                        </Link>
-                                                    ))}
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                        <TableRow>
-                                            <TableCell
-                                                component='th'
-                                                scope='row'
-                                                className={classes.contentToTop}
-                                            >
-                                                <div className={classes.iconAligner}>
-                                                    <Icon className={classes.iconOdd}>lock</Icon>
-                                                    <span className={classes.iconTextWrapper}>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.InfoBar.application.security'
-                                                            defaultMessage='Application Level Security'
-                                                        />
-                                                    </span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {securityScheme_display && (
-                                                    <span> {securityScheme_display.join(', ')} </span>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                        {additionalProperties__display && additionalProperties__display.length > 0 && (
-                                            additionalProperties__display.map((displayProp, index) => (
-                                                <TableRow>
-                                                    <TableCell component='th' scope='row'>
-                                                        <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconEven}>adjust</Icon>
-                                                            <span className={classes.iconTextWrapper}>
-                                                                {displayProp.split(propertyDisplaySuffix)[0]}
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {additionalProperties[displayProp]}
-                                                    </TableCell>
-                                                </TableRow>))
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </Collapse>
-                )}
-                <div className={classes.infoContentBottom}>
-                    <Button className={classes.expandWrapper} onClick={this.toggleOverview}>
-                        <div className={classes.buttonView}>
-                            {showOverview ? (
-                                <Typography className={classes.buttonOverviewText}>
-                                    <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
-                                </Typography>
-                            ) : (
-                                    <Typography className={classes.buttonOverviewText}>
-                                        <FormattedMessage id='Apis.Details.InfoBar.more' defaultMessage='MORE' />
-                                    </Typography>
-                                )}
-                            {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
-                        </div>
-                    </Button>
-                </div>
             </div>
         );
     }

@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
@@ -50,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -135,13 +133,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             checkAccessControlPermission(api.getId());
         }
         super.updateAPI(api);
-    }
-
-    @Override
-    public void deleteAPI(APIIdentifier identifier, String apiUUid) throws APIManagementException {
-        checkCreatePermission();
-        checkAccessControlPermission(identifier);
-        super.deleteAPI(identifier, apiUUid);
     }
 
     @Override
@@ -251,22 +242,23 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getOpenAPIDefinition(apiId);
+        return super.getOpenAPIDefinition(apiId, orgId);
     }
 
     @Override
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
+
+    public void removeDocumentation(APIIdentifier apiId, String docName, String docType, String orgId) throws APIManagementException {
         checkCreatePermission();
         checkAccessControlPermission(apiId);
-        super.removeDocumentation(apiId, docName, docType);
+        super.removeDocumentation(apiId, docName, docType, orgId);
     }
 
     @Override
-    public void removeDocumentation(Identifier id, String docId) throws APIManagementException {
+    public void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException {
         checkAccessControlPermission(id);
-        super.removeDocumentation(id, docId);
+        super.removeDocumentation(id, docId, orgId);
     }
 
     @Override
@@ -275,14 +267,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Documentation updateDocumentation(String apiId, Documentation documentation) throws APIManagementException {
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
         if (!checkCreateOrPublishPermission()) {
             throw new APIManagementException("User '" + username + "' has neither '" +
                     APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
                     "' permission to update API documentation");
         }
         //checkAccessControlPermission(apiId);
-        return super.updateDocumentation(apiId, documentation);
+        return super.updateDocumentation(apiId, documentation, orgId);
     }
 
     @Override
@@ -427,9 +419,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        super.saveSwagger20Definition(apiId, jsonText);
+        super.saveSwagger20Definition(apiId, jsonText, orgId);
     }
 
     @Override

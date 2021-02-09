@@ -104,7 +104,7 @@ public class RestApiPublisherUtils {
             content.setSourceType(ContentSourceType.FILE);
             //apiProvider.addFileToDocumentation(apiIdentifier, documentation, filename, docInputStream, mediaType);
             //apiProvider.updateDocumentation(apiIdentifier, documentation);
-            apiProvider.addDocumentationContent(apiId, documentId, content);
+            apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
@@ -196,7 +196,7 @@ public class RestApiPublisherUtils {
             content.setSourceType(ContentSourceType.FILE);
             //apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
             //apiProvider.updateDocumentation(productIdentifier, documentation);
-            apiProvider.addDocumentationContent(productId, documentId, content);
+            apiProvider.addDocumentationContent(productId, documentId, tenantDomain, content);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);

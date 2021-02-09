@@ -39,6 +39,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.ExtensionType;
@@ -94,6 +95,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
+    private OpenAPI openAPI;
     private String keyManagers;
     private List<String> keyManagersList = new ArrayList<>();
     private final String type = ExtensionType.AUTHENTICATION.toString();
@@ -340,10 +342,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 if (authenticators.isEmpty()) {
                     initializeAuthenticators();
                 }
-
-                if (isAuthenticate(messageContext)) {
-                    setAPIParametersToMessageContext(messageContext);
-                    return ExtensionListenerUtil.postProcessRequest(messageContext, type);
+                try {
+                    if (isAuthenticate(messageContext)) {
+                        setAPIParametersToMessageContext(messageContext);
+                        return ExtensionListenerUtil.postProcessRequest(messageContext, type);
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Authentication of message context failed", e);
+                    }
                 }
             } catch (APISecurityException e) {
 
@@ -406,7 +413,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @return true if the authentication is successful (never returns false)
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
+    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException, APIManagementException {
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();

@@ -27,7 +27,7 @@ public interface ServiceEntriesApiService {
       public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
       public Response deleteService(String serviceKey, MessageContext messageContext) throws APIManagementException;
       public Response exportService(String name, String version, MessageContext messageContext) throws APIManagementException;
-      public Response getServiceById(String serviceKey, MessageContext messageContext) throws APIManagementException;
+      public Response getServiceById(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response getServiceDefinition(String serviceKey, MessageContext messageContext) throws APIManagementException;
       public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, String verifier, MessageContext messageContext) throws APIManagementException;
       public Response searchServices(String name, String version, String definitionType, String displayName, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;

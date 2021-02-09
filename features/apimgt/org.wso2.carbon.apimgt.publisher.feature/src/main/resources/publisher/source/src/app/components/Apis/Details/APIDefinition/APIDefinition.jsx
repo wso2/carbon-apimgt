@@ -85,6 +85,14 @@ const styles = (theme) => ({
     progressLoader: {
         marginLeft: theme.spacing(1),
     },
+    updateApiWarning: {
+        marginLeft: theme.spacing(5),
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+        borderColor: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
+    warningIconStyle: {
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
 });
 /**
  * This component holds the functionality of viewing the api definition content of an api. The initial view is a
@@ -387,7 +395,10 @@ class APIDefinition extends React.Component {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
             securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
         } = this.state;
-        const { classes, resourceNotFountMessage, api } = this.props;
+        const {
+            classes, resourceNotFountMessage, api,
+        } = this.props;
+
         let downloadLink;
         let fileName;
         let isGraphQL = 0;

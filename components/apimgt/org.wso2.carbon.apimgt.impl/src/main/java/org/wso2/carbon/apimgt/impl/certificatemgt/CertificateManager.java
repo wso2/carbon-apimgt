@@ -84,13 +84,6 @@ public interface CertificateManager {
     boolean isConfigured();
 
     /**
-     * This method checks whether API Management is configured to handle client certificate based authentication.
-     *
-     * @return true if the API manager is configured to handle mutual ssl based authentication, otherwise false.
-     */
-    boolean isClientCertificateBasedAuthenticationConfigured();
-
-    /**
      * This method will return the Certificate Metadata object which maps to the endpoint and belongs to the provided
      * tenant.
      *

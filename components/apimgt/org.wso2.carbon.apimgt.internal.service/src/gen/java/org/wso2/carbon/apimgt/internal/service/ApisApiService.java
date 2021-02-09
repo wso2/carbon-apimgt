@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {
-      public Response apisGet(String xWSO2Tenant, String context, String version, String revisionUUID, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response apisGet(String xWSO2Tenant, String apiId, String context, String version, String gatewayLabel, String accept, MessageContext messageContext) throws APIManagementException;
 }

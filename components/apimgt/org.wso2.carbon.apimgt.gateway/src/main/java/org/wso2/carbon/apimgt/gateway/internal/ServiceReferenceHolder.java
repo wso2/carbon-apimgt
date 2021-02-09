@@ -17,32 +17,42 @@
 package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axis2.context.ConfigurationContext;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.base.api.ServerConfigurationService;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.ConfigurationContextService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class ServiceReferenceHolder {
+
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
@@ -64,10 +74,12 @@ public class ServiceReferenceHolder {
     private CacheInvalidationService cacheInvalidationService;
     private RevokedTokenService revokedTokenService;
     private APIThrottleDataService throttleDataService;
+    private Certificate publicCert;
+    private PrivateKey privateKey;
 
     private JWTValidationService jwtValidationService;
     private KeyManagerDataService keyManagerDataService;
-
+    private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -285,5 +297,50 @@ public class ServiceReferenceHolder {
     public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
 
         this.keyManagerDataService = keyManagerDataService;
+    }
+
+    public void setPublicCert() {
+        try {
+            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+            this.publicCert = keyStoreManager.getDefaultPrimaryCertificate();
+
+        } catch (Exception e) {
+            String error = "Error in obtaining keystore";
+            log.debug(error, e);
+
+        }
+    }
+
+    public Certificate getPublicCert() {
+        return this.publicCert;
+    }
+
+    public void setPrivateKey() {
+        try {
+            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
+            this.privateKey = keyStoreManager.getDefaultPrivateKey();
+        } catch (Exception e) {
+            String error = "Error in obtaining keystore";
+            log.debug(error, e);
+        }
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
+
+    public void addLoadedTenant(String tenantDomain) {
+
+        activeTenants.add(tenantDomain);
+    }
+
+    public void removeUnloadedTenant(String tenantDomain) {
+
+        activeTenants.remove(tenantDomain);
+    }
+
+    public boolean isTenantLoaded(String tenantDomain) {
+
+        return activeTenants.contains(tenantDomain);
     }
 }

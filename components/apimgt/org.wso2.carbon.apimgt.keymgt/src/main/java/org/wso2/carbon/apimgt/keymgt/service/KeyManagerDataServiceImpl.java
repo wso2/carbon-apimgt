@@ -60,6 +60,12 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateApplication(getApplicationFromApplicationEvent(event));
     }
 
@@ -158,6 +164,12 @@ public class KeyManagerDataServiceImpl implements KeyManagerDataService {
         }
         SubscriptionDataStore store = SubscriptionDataHolder.getInstance()
                 .getTenantSubscriptionStore(event.getTenantDomain());
+        if (store == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Ignoring the Event due to tenant " + event.getTenantDomain() + " not loaded");
+            }
+            return;
+        }
         store.addOrUpdateApiPolicy(getAPIPolicyFromAPIPolicyEvent(event));
     }
 

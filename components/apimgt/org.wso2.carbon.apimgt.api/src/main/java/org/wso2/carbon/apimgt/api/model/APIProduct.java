@@ -572,4 +572,10 @@ public class APIProduct {
         return apiCategories;
     }
 
+    public boolean isAsync() {
+        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
+            return true;
+        }
+        return false;
+    }
 }

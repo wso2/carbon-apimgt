@@ -336,6 +336,32 @@
   src: local('Open Sans Bold'), local('OpenSans-Bold'), url(../fonts/Open_Sans/mem5YaGs126MiZpBA-UN7rgOUuhpKKSTjw.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+@font-face {
+  font-family: "SAP-icons";
+  src: url("../fonts/Sap/SAP-icons.woff2") format("woff2"),
+  url("../fonts/Sap/SAP-icons.woff") format("woff"),
+  url("../fonts/Sap/SAP-icons.ttf") format("truetype"), local("SAP-icons");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "72";
+  font-style: normal;
+  font-weight: 400;
+  src: local("72"), url("../fonts/Sap/72-Regular.woff2") format("woff2"),
+  url("../fonts/Sap/72-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "72";
+  font-style: normal;
+  font-weight: 700;
+  src: local("72-Bold"), url("../fonts/Sap/72-Bold.woff2") format("woff2"),
+  url("../fonts/Sap/72-Bold.woff") format("woff");
+}
+
 .apim-dual-ring {
   display: inline-block;
   width: 64px;

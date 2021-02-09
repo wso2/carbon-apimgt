@@ -44,9 +44,10 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
-import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -54,8 +55,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -79,6 +80,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -929,7 +931,7 @@ public class GatewayUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        jwtInfoDto.setMessageContext(null);
+        //jwtInfoDto.setMessageContext(null);
         jwtInfoDto.setApicontext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(null, apiKeyValidationInfoDTO, jwtInfoDto);
@@ -987,7 +989,7 @@ public class GatewayUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        jwtInfoDto.setMessageContext(synCtx);
+        //jwtInfoDto.setMessageContext(synCtx);
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         jwtInfoDto.setApicontext(apiContext);
@@ -1052,4 +1054,5 @@ public class GatewayUtils {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }
+
 }

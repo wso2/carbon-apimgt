@@ -48,6 +48,23 @@ public interface ImportExportAPI {
     public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
             ExportFormat format, boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException;
 
+
+    /**
+     * Used to export API artifact
+     *
+     * @param apiId          UUID of API.
+     * @param revisionUUID UUID of revision.
+     * @param preserveStatus Preserve API status on export
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveDocs   Preserve documentation on Export.
+     * @return API artifact.
+     * @throws APIManagementException
+     * @throws APIImportExportException
+     */
+    public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
+                          boolean preserveDocs, boolean preserveCredentials)
+            throws APIManagementException, APIImportExportException;
+
     /**
      * Used to export API product artifact.
      *
@@ -72,8 +89,8 @@ public interface ImportExportAPI {
      *                         (This will not be null when importing dependent APIs with API Products)
      * @param preserveProvider Decision to keep or replace the provider
      * @param overwrite        Whether to update the API or not
-     * @throws APIImportExportException If there is an error in importing an API
-     * @@return Imported API
+     * @return Imported API
+     * @throws APIManagementException If there is an error in importing an API
      */
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite, String[] tokenScopes)
             throws APIManagementException;
@@ -84,10 +101,14 @@ public interface ImportExportAPI {
      * @param fileInputStream     Input stream from the REST request
      *                            (This will not be null when importing dependent APIs with API Products)
      * @param preserveProvider    User choice to keep or replace the API Product provider
+     * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already
+     *                            existing API Products.
+     * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already
+     *                            existing dependent APIs of an API Product.
      * @param importAPIs          Whether to import the dependent APIs or not.
-     * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already existing API Products.
-     * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
-     * @@return Imported API Product
+     * @param tokenScopes         Scopes in the passed token from the REST API call.
+     * @return Imported API Product
+     * @throws APIManagementException If there is an error in importing an API Product
      */
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
             Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
