@@ -10215,6 +10215,31 @@ public class ApiMgtDAO {
         return false;
     }
 
+    public boolean isDuplicateContextTemplateMatchesOrganization(String contextTemplate, String organizationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        String sqlQuery = SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, contextTemplate.toLowerCase());
+            ps.setString(2, organizationId);
+
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                int count = resultSet.getInt("CTX_COUNT");
+                return count > 0;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate + " for the oraganization : " + organizationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return false;
+    }
+
     /**
      * retrieve list of API names which matches given context
      *
