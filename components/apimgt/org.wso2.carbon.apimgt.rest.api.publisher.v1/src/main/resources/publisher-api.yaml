@@ -1718,7 +1718,7 @@ paths:
       description: This operation can be used to create an API from a Service from Service Catalog
       operationId: importServiceFromCatalog
       parameters:
-        - name: serviceId
+        - name: serviceKey
           in: query
           required: true
           schema:
@@ -1728,7 +1728,7 @@ paths:
         content:
           application/json:
             schema:
-              '$ref': '#/components/schemas/APIProperties'
+              '$ref': '#/components/schemas/API'
       responses:
         201:
           description: |
@@ -7314,24 +7314,6 @@ components:
             $ref: '#/components/schemas/API'
         pagination:
           $ref: '#/components/schemas/Pagination'
-
-    APIProperties:
-      title: API properties with required API details
-      type: object
-      required:
-        - name
-        - version
-        - context
-      properties:
-        name:
-          type: string
-          example: PizzaShackAPI
-        version:
-          type: string
-          example: 1.0.0
-        context:
-          type: string
-          example: /pizza
 
     APIInfo:
       title: API Info object with basic API details.

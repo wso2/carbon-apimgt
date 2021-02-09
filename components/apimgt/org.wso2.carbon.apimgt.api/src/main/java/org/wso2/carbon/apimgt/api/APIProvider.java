@@ -1828,9 +1828,9 @@ public interface APIProvider extends APIManager {
 
     /**
      * Get Service Info from Service Catalog using ID of the service
-     * @param serviceId
+     * @param serviceKey Service Key of the Service from Service Catalog
      * @return
      * @throws APIManagementException
      */
-    ServiceEntry retrieveServiceByID(String serviceId, int tenantId) throws APIManagementException;
+    ServiceEntry retrieveServiceByKey(String serviceKey, int tenantId) throws APIManagementException;
 }

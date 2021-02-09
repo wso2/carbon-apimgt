@@ -56,7 +56,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -741,20 +740,21 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
-    public static API prepareToCreateAPIFromAPIPropertiesDTO(APIPropertiesDTO apiProperties, APIProvider apiProvider,
-                                         String username, ServiceEntry service) throws APIManagementException {
-        String context = apiProperties.getContext();
-        //Make sure context starts with "/". ex: /pizza
-        context = context.startsWith("/") ? context : ("/" + context);
-        validateAPIProperties(apiProvider, apiProperties.getName(), context, apiProperties.getVersion(), username);
-        API apiToAdd = APIMappingUtil.fromDTOtoAPI(apiProperties, username);
-        apiToAdd.setStatus(APIConstants.CREATED);
-        apiToAdd.setApiOwner(username);
-        apiToAdd.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
-        JSONObject serviceInfo = new JSONObject();
-        serviceInfo.put("serviceId", service.getUuid());
-        serviceInfo.put("md5", service.getMd5());
-        apiToAdd.setServiceInfo(serviceInfo);
+    /**
+     * Prepares the API Model object to be created using the DTO object
+     *
+     * @param body        APIDTO of the API
+     * @param apiProvider API Provider
+     * @param username    Username
+     * @param service ServiceEntry in Service Catalog
+     * @return API object to be created
+     * @throws APIManagementException Error while creating the API
+     */
+    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username,
+                                              ServiceEntry service) throws APIManagementException {
+        API apiToAdd = prepareToCreateAPIByDTO(body, apiProvider, username);
+        apiToAdd.setServiceInfo("serviceKey", service.getKey());
+        apiToAdd.setServiceInfo("md5", service.getMd5());
         return apiToAdd;
     }
 

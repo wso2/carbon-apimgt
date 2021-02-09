@@ -248,7 +248,7 @@ public class API implements Serializable {
 
     public JSONObject getServiceInfoObject() { return serviceInfo; }
 
-    public void setServiceInfo(JSONObject serviceInfo) { this.serviceInfo = serviceInfo; }
+    public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
 
     public String getServiceInfo(String key) {
         return serviceInfo.get(key).toString();
