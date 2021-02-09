@@ -18,43 +18,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class SequencesDTO   {
   
-    private List<String> deployedSequences = new ArrayList<>();
-    private List<String> unDeployedSequences = new ArrayList<>();
+    private List<String> sequences = new ArrayList<>();
 
   /**
    * The sequences which has been deployed in the gateway 
    **/
-  public SequencesDTO deployedSequences(List<String> deployedSequences) {
-    this.deployedSequences = deployedSequences;
+  public SequencesDTO sequences(List<String> sequences) {
+    this.sequences = sequences;
     return this;
   }
 
   
   @ApiModelProperty(value = "The sequences which has been deployed in the gateway ")
-  @JsonProperty("deployedSequences")
-  public List<String> getDeployedSequences() {
-    return deployedSequences;
+  @JsonProperty("sequences")
+  public List<String> getSequences() {
+    return sequences;
   }
-  public void setDeployedSequences(List<String> deployedSequences) {
-    this.deployedSequences = deployedSequences;
-  }
-
-  /**
-   * The sequences which has not been deployed in the gateway 
-   **/
-  public SequencesDTO unDeployedSequences(List<String> unDeployedSequences) {
-    this.unDeployedSequences = unDeployedSequences;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The sequences which has not been deployed in the gateway ")
-  @JsonProperty("UnDeployedSequences")
-  public List<String> getUnDeployedSequences() {
-    return unDeployedSequences;
-  }
-  public void setUnDeployedSequences(List<String> unDeployedSequences) {
-    this.unDeployedSequences = unDeployedSequences;
+  public void setSequences(List<String> sequences) {
+    this.sequences = sequences;
   }
 
 
@@ -67,13 +48,12 @@ public class SequencesDTO   {
       return false;
     }
     SequencesDTO sequences = (SequencesDTO) o;
-    return Objects.equals(deployedSequences, sequences.deployedSequences) &&
-        Objects.equals(unDeployedSequences, sequences.unDeployedSequences);
+    return Objects.equals(sequences, sequences.sequences);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployedSequences, unDeployedSequences);
+    return Objects.hash(sequences);
   }
 
   @Override
@@ -81,8 +61,7 @@ public class SequencesDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SequencesDTO {\n");
     
-    sb.append("    deployedSequences: ").append(toIndentedString(deployedSequences)).append("\n");
-    sb.append("    unDeployedSequences: ").append(toIndentedString(unDeployedSequences)).append("\n");
+    sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");
     sb.append("}");
     return sb.toString();
   }

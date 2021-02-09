@@ -33,6 +33,20 @@ public class DeployAPIInGatewayEvent extends Event {
         this.associatedApis = associatedApis;
     }
 
+    /**
+     *
+     * @param eventId
+     * @param timestamp
+     * @param type
+     * @param tenantDomain
+     * @param apiId
+     * @param gatewayLabels
+     * @param name
+     * @param version
+     * @param provider
+     * @param apiType
+     * @param context
+     */
     public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, String apiId,
                                    Set<String> gatewayLabels, String name, String version, String provider,
                                    String apiType, String context) {

@@ -2,9 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.gateway.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.EndpointsDTO;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.LocalEntryDTO;
-import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.SequencesDTO;
 import javax.validation.constraints.*;
 
 
@@ -19,78 +16,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class APIArtifactDTO   {
   
-    private Integer count = null;
-    private EndpointsDTO endpoints = null;
-    private LocalEntryDTO localEntries = null;
-    private SequencesDTO sequences = null;
+    private String api = null;
 
   /**
-   * Number of Artifacts Returned 
+   * API Artifact deployed in Gateway. 
    **/
-  public APIArtifactDTO count(Integer count) {
-    this.count = count;
+  public APIArtifactDTO api(String api) {
+    this.api = api;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of Artifacts Returned ")
-  @JsonProperty("count")
-  public Integer getCount() {
-    return count;
+  @ApiModelProperty(example = "", value = "API Artifact deployed in Gateway. ")
+  @JsonProperty("api")
+  public String getApi() {
+    return api;
   }
-  public void setCount(Integer count) {
-    this.count = count;
-  }
-
-  /**
-   **/
-  public APIArtifactDTO endpoints(EndpointsDTO endpoints) {
-    this.endpoints = endpoints;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("endpoints")
-  public EndpointsDTO getEndpoints() {
-    return endpoints;
-  }
-  public void setEndpoints(EndpointsDTO endpoints) {
-    this.endpoints = endpoints;
-  }
-
-  /**
-   **/
-  public APIArtifactDTO localEntries(LocalEntryDTO localEntries) {
-    this.localEntries = localEntries;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("localEntries")
-  public LocalEntryDTO getLocalEntries() {
-    return localEntries;
-  }
-  public void setLocalEntries(LocalEntryDTO localEntries) {
-    this.localEntries = localEntries;
-  }
-
-  /**
-   **/
-  public APIArtifactDTO sequences(SequencesDTO sequences) {
-    this.sequences = sequences;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("sequences")
-  public SequencesDTO getSequences() {
-    return sequences;
-  }
-  public void setSequences(SequencesDTO sequences) {
-    this.sequences = sequences;
+  public void setApi(String api) {
+    this.api = api;
   }
 
 
@@ -103,15 +46,12 @@ public class APIArtifactDTO   {
       return false;
     }
     APIArtifactDTO apIArtifact = (APIArtifactDTO) o;
-    return Objects.equals(count, apIArtifact.count) &&
-        Objects.equals(endpoints, apIArtifact.endpoints) &&
-        Objects.equals(localEntries, apIArtifact.localEntries) &&
-        Objects.equals(sequences, apIArtifact.sequences);
+    return Objects.equals(api, apIArtifact.api);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, endpoints, localEntries, sequences);
+    return Objects.hash(api);
   }
 
   @Override
@@ -119,10 +59,7 @@ public class APIArtifactDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIArtifactDTO {\n");
     
-    sb.append("    count: ").append(toIndentedString(count)).append("\n");
-    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
-    sb.append("    localEntries: ").append(toIndentedString(localEntries)).append("\n");
-    sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");
+    sb.append("    api: ").append(toIndentedString(api)).append("\n");
     sb.append("}");
     return sb.toString();
   }

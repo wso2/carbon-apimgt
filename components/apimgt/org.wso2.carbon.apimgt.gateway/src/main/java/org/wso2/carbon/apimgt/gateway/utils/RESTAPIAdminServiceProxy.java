@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.gateway.utils;
 
 import org.apache.axis2.AxisFault;
+import org.apache.synapse.api.API;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rest.api.APIData;

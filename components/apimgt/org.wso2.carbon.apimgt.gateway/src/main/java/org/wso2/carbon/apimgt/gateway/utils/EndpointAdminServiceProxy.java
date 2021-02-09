@@ -150,6 +150,10 @@ public class EndpointAdminServiceProxy {
             return null;
     }
 
+    public String getEndpoint(String endpointName) throws EndpointAdminException {
+        return endpointAdmin.getEndpointConfiguration(endpointName);
+    }
+
     public boolean isEndpointExist(String endpointName)
             throws EndpointAdminException {
 

@@ -18,43 +18,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class EndpointsDTO   {
   
-    private List<String> deployedEndpoints = new ArrayList<>();
-    private List<String> unDeployedEndpoints = new ArrayList<>();
+    private List<String> endpoints = new ArrayList<>();
 
   /**
    * The end points which has been deployed in the gateway 
    **/
-  public EndpointsDTO deployedEndpoints(List<String> deployedEndpoints) {
-    this.deployedEndpoints = deployedEndpoints;
+  public EndpointsDTO endpoints(List<String> endpoints) {
+    this.endpoints = endpoints;
     return this;
   }
 
   
   @ApiModelProperty(value = "The end points which has been deployed in the gateway ")
-  @JsonProperty("deployedEndpoints")
-  public List<String> getDeployedEndpoints() {
-    return deployedEndpoints;
+  @JsonProperty("endpoints")
+  public List<String> getEndpoints() {
+    return endpoints;
   }
-  public void setDeployedEndpoints(List<String> deployedEndpoints) {
-    this.deployedEndpoints = deployedEndpoints;
-  }
-
-  /**
-   * The end points which has not been deployed in the gateway 
-   **/
-  public EndpointsDTO unDeployedEndpoints(List<String> unDeployedEndpoints) {
-    this.unDeployedEndpoints = unDeployedEndpoints;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The end points which has not been deployed in the gateway ")
-  @JsonProperty("UnDeployedEndpoints")
-  public List<String> getUnDeployedEndpoints() {
-    return unDeployedEndpoints;
-  }
-  public void setUnDeployedEndpoints(List<String> unDeployedEndpoints) {
-    this.unDeployedEndpoints = unDeployedEndpoints;
+  public void setEndpoints(List<String> endpoints) {
+    this.endpoints = endpoints;
   }
 
 
@@ -67,13 +48,12 @@ public class EndpointsDTO   {
       return false;
     }
     EndpointsDTO endpoints = (EndpointsDTO) o;
-    return Objects.equals(deployedEndpoints, endpoints.deployedEndpoints) &&
-        Objects.equals(unDeployedEndpoints, endpoints.unDeployedEndpoints);
+    return Objects.equals(endpoints, endpoints.endpoints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployedEndpoints, unDeployedEndpoints);
+    return Objects.hash(endpoints);
   }
 
   @Override
@@ -81,8 +61,7 @@ public class EndpointsDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class EndpointsDTO {\n");
     
-    sb.append("    deployedEndpoints: ").append(toIndentedString(deployedEndpoints)).append("\n");
-    sb.append("    unDeployedEndpoints: ").append(toIndentedString(unDeployedEndpoints)).append("\n");
+    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("}");
     return sb.toString();
   }

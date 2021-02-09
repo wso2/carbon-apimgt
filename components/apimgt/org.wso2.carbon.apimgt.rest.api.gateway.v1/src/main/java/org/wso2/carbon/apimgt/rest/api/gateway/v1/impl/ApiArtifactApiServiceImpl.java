@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.v1.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -28,14 +29,18 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.LocalEntryServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.ApiArtifactApiService;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.APIArtifactDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -48,100 +53,19 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
     @Override
     public Response apiArtifactGet(String apiName, String version, String tenantDomain,
                                    MessageContext messageContext) {
-
-        InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        if (tenantDomain == null) {
-            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
-        }
-        GatewayAPIDTO gatewayAPIDTO = null;
-        JSONObject responseObj = new JSONObject();
+        tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
         try {
-            Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
-                    tenantDomain);
-            String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-            String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
-
-            if (label == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway")
-                        .build();
+            String api = GatewayUtils.retrieveDeployedAPI(apiName, version, tenantDomain);
+            if (StringUtils.isNotEmpty(api)) {
+                APIArtifactDTO apiArtifactDTO = new APIArtifactDTO();
+                apiArtifactDTO.api(api);
+                return Response.ok().entity(apiArtifactDTO).build();
             }
-
-            gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
-            if (debugEnabled) {
-                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
-            }
-        } catch (ArtifactSynchronizerException e) {
-            String errorMessage = "Error in fetching artifacts from storage";
-            log.error(errorMessage, e);
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (AxisFault axisFault) {
+            String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
+            log.error(errorMessage, axisFault);
+            RestApiUtil.handleInternalServerError(errorMessage, axisFault, log);
         }
-
-        if (gatewayAPIDTO != null) {
-            try {
-                JSONArray endPointArray = new JSONArray();
-                JSONArray unDeployedEndPointArray = new JSONArray();
-                if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
-                    EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy
-                            (gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO gatewayEndpoint : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
-                        if (endpointAdminServiceProxy.isEndpointExist(gatewayEndpoint.getName())) {
-                            endPointArray.put(endpointAdminServiceProxy.getEndpoints(gatewayEndpoint.getName()));
-                        } else {
-                            log.error(gatewayEndpoint.getName() + " was not deployed in the gateway");
-                            unDeployedEndPointArray.put(gatewayEndpoint.getContent());
-                        }
-                    }
-                }
-                responseObj.put("Deployed Endpoints", endPointArray);
-                responseObj.put("UnDeployed Endpoints", unDeployedEndPointArray);
-
-                JSONArray localEntryArray = new JSONArray();
-                JSONArray UnDeploeydLocalEntryArray = new JSONArray();
-                if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
-                    LocalEntryServiceProxy localEntryServiceProxy = new
-                            LocalEntryServiceProxy(gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
-                        if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                            localEntryArray.put(localEntryServiceProxy.getEntry(localEntry.getName()));
-                        } else {
-                            log.error(localEntry.getName() + " was not deployed in the gateway");
-                            UnDeploeydLocalEntryArray.put(localEntry.getContent());
-                        }
-                    }
-                }
-                responseObj.put("Deployed Local Entries", localEntryArray);
-                responseObj.put("Undeployed Local Entries", UnDeploeydLocalEntryArray);
-
-                JSONArray sequencesArray = new JSONArray();
-                JSONArray undeployedsequencesArray = new JSONArray();
-                if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
-                    SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                            new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                        if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
-                            sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
-                        } else {
-                            log.error(sequence.getName() + " was not deployed in the gateway");
-                            undeployedsequencesArray.put(sequence.getContent());
-                        }
-                    }
-                }
-                responseObj.put("Deployed Sequences", sequencesArray);
-                responseObj.put("Undeployed Sequences", undeployedsequencesArray);
-            } catch (EndpointAdminException e) {
-                String errorMessage = "Error in fetching deployed Endpoints from Synapse Configuration";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            } catch (AxisFault e) {
-                String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.ok().entity(responseStringObj).build();
-        } else {
-            return Response.serverError().entity("Unexpected error occurred").build();
-        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 }

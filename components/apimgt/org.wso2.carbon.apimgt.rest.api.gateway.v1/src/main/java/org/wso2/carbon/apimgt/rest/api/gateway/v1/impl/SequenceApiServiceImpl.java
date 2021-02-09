@@ -26,16 +26,18 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.gateway.v1.dto.SequencesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
-import java.util.Map;
+import java.util.List;
 
 public class SequenceApiServiceImpl implements SequenceApiService {
 
@@ -43,58 +45,22 @@ public class SequenceApiServiceImpl implements SequenceApiService {
     private boolean debugEnabled = log.isDebugEnabled();
 
     public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext) {
+        tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
 
-        InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        if (tenantDomain == null) {
-            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
-        }
-        GatewayAPIDTO gatewayAPIDTO = null;
-        JSONObject responseObj = new JSONObject();
         try {
-            Map<String, String> apiAttributes = inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version,
-                    tenantDomain);
-            String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-            String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
 
-            if (label == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway")
-                        .build();
-            }
-            gatewayAPIDTO = inMemoryApiDeployer.getAPIArtifact(apiId, label);
+            List<String> deployedSequences = GatewayUtils.retrieveDeployedSequences(apiName, version, tenantDomain);
             if (debugEnabled) {
                 log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
             }
-        } catch (ArtifactSynchronizerException e) {
-            String errorMessage = "Error in fetching artifacts from storage";
+            SequencesDTO sequencesDTO = new SequencesDTO();
+            sequencesDTO.sequences(deployedSequences);
+            return Response.ok().entity(sequencesDTO).build();
+        } catch (AxisFault e) {
+            String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
             log.error(errorMessage, e);
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
-        if (gatewayAPIDTO != null) {
-            try {
-                JSONArray sequencesArray = new JSONArray();
-                JSONArray undeployedsequencesArray = new JSONArray();
-                if (gatewayAPIDTO.getSequenceToBeAdd() != null) {
-                    SequenceAdminServiceProxy sequenceAdminServiceProxy =
-                            new SequenceAdminServiceProxy(gatewayAPIDTO.getTenantDomain());
-                    for (GatewayContentDTO sequence : gatewayAPIDTO.getSequenceToBeAdd()) {
-                        if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
-                            sequencesArray.put(sequenceAdminServiceProxy.getSequence(sequence.getName()));
-                        } else {
-                            log.error(sequence.getName() + " was not deployed in the gateway");
-                            undeployedsequencesArray.put(sequence.getContent());
-                        }
-                    }
-                }
-            } catch (AxisFault e) {
-                String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-                log.error(errorMessage, e);
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-            String responseStringObj = String.valueOf(responseObj);
-            return Response.ok().entity(responseStringObj).build();
-        } else {
-            return Response.serverError().entity("Unexpected error occurred").build();
-        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 }

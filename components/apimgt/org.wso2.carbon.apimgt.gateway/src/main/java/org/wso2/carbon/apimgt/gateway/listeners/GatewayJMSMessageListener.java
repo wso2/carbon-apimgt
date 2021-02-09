@@ -116,20 +116,18 @@ public class GatewayJMSMessageListener implements MessageListener {
         if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
             DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
-            gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             String tenantDomain = gatewayEvent.getTenantDomain();
             boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
             if (tenantLoaded) {
+                gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
                 if (!gatewayEvent.getGatewayLabels().isEmpty()) {
-                    for (String gatewayLabel : gatewayEvent.getGatewayLabels()) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
                         if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-
                             boolean tenantFlowStarted = false;
                             try {
                                 startTenantFlow(tenantDomain);
                                 tenantFlowStarted = true;
-                                inMemoryApiDeployer.deployAPI(gatewayEvent, gatewayLabel);
+                                inMemoryApiDeployer.deployAPI(gatewayEvent);
                             } catch (ArtifactSynchronizerException e) {
                                 log.error("Error in deploying artifacts for " + gatewayEvent.getApiId() +
                                         "in the Gateway");
@@ -138,8 +136,6 @@ public class GatewayJMSMessageListener implements MessageListener {
                                     endTenantFlow();
                                 }
                             }
-                        }
-
                     }
                     if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
                         boolean tenantFlowStarted = false;

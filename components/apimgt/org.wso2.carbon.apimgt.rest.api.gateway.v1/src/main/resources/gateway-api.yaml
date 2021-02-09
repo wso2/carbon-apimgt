@@ -535,15 +535,9 @@ definitions:
   Endpoints:
     title: Endpoints Response
     properties:
-      deployedEndpoints:
+      endpoints:
         description: |
           The end points which has been deployed in the gateway
-        type: array
-        items:
-          type: string
-      UnDeployedEndpoints:
-        description: |
-          The end points which has not been deployed in the gateway
         type: array
         items:
           type: string
@@ -554,16 +548,9 @@ definitions:
   Sequences:
     title: Sequences Response
     properties:
-      deployedSequences:
+      sequences:
         description: |
           The sequences which has been deployed in the gateway
-        type: array
-        items:
-          type: string
-          example: "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
-      UnDeployedSequences:
-        description: |
-          The sequences which has not been deployed in the gateway
         type: array
         items:
           type: string
@@ -575,20 +562,13 @@ definitions:
   LocalEntry:
     title: LocalEntry Response
     properties:
-      deployedLocalEntries:
+      localEntries:
         description: |
           The local entries which has been deployed in the gateway
         type: array
         items:
           type : string
           example : "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
-      UnDeployedLocalEntries:
-        description: |
-          The local entries which has not been deployed in the gateway
-        type: array
-        items:
-          type : string
-          example: "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
 
   #-----------------------------------------------------
   # The API Artifact response resource
@@ -596,17 +576,11 @@ definitions:
   APIArtifact:
     title: API Artifact Response
     properties:
-      count:
-        type: integer
+      api:
+        type: string
         description: |
-          Number of Artifacts Returned
-        example: 1
-      endpoints:
-        $ref: '#/definitions/Endpoints'
-      localEntries:
-        $ref: '#/definitions/LocalEntry'
-      sequences:
-        $ref: '#/definitions/Sequences'
+          API Artifact deployed in Gateway.
+        example: ""
 
   #-----------------------------------------------------
   # The Error resource

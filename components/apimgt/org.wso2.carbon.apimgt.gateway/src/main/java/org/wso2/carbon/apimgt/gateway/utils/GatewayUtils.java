@@ -24,8 +24,11 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import kafka.api.ApiUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.clustering.ClusteringAgent;
@@ -58,15 +61,21 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.rest.api.APIData;
+import org.wso2.carbon.rest.api.RestApiAdminUtils;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -79,15 +88,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -709,9 +710,9 @@ public class GatewayUtils {
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
      * the API information.
      *
-     * @param apiContext API context
-     * @param apiVersion API version
-     * @param jwtValidationInfo    The payload of the JWT token
+     * @param apiContext        API context
+     * @param apiVersion        API version
+     * @param jwtValidationInfo The payload of the JWT token
      * @return an JSON object containing subscribed API information retrieved from token payload.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
@@ -734,7 +735,7 @@ public class GatewayUtils {
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                       )) {
+                                )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -794,7 +795,7 @@ public class GatewayUtils {
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                       )) {
+                                )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -829,8 +830,8 @@ public class GatewayUtils {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwt SignedJwt Token
-     * @param alias      public certificate keystore alias
+     * @param jwt   SignedJwt Token
+     * @param alias public certificate keystore alias
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -865,8 +866,8 @@ public class GatewayUtils {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwt SignedJwt Token
-     * @param publicKey      public certificate
+     * @param jwt       SignedJwt Token
+     * @param publicKey public certificate
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -1058,4 +1059,102 @@ public class GatewayUtils {
         }
     }
 
+    public static List<String> retrieveDeployedSequences(String apiName, String version, String tenantDomain)
+            throws AxisFault {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        List<String> deployedSequences = new ArrayList<>();
+        if (tenantSubscriptionStore != null) {
+            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+            if (retrievedAPI != null) {
+                String inSequenceExtensionName = APIUtil.getSequenceExtensionName(retrievedAPI.getApiProvider(),
+                        retrievedAPI.getApiName(), retrievedAPI.getApiVersion()) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                String outSequenceExtensionName = APIUtil.getSequenceExtensionName(retrievedAPI.getApiProvider(),
+                        retrievedAPI.getApiName(), retrievedAPI.getApiVersion()) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                String faultSequenceExtensionName = APIUtil.getSequenceExtensionName(retrievedAPI.getApiProvider(),
+                        retrievedAPI.getApiName(), retrievedAPI.getApiVersion()) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                SequenceAdminServiceProxy sequenceAdminServiceProxy = new SequenceAdminServiceProxy(tenantDomain);
+                if (sequenceAdminServiceProxy.isExistingSequence(inSequenceExtensionName)) {
+                    OMElement sequence = sequenceAdminServiceProxy.getSequence(inSequenceExtensionName);
+                    deployedSequences.add(sequence.getText());
+                }
+                if (sequenceAdminServiceProxy.isExistingSequence(outSequenceExtensionName)) {
+                    OMElement sequence = sequenceAdminServiceProxy.getSequence(outSequenceExtensionName);
+                    deployedSequences.add(sequence.getText());
+                }
+                if (sequenceAdminServiceProxy.isExistingSequence(faultSequenceExtensionName)) {
+                    OMElement sequence = sequenceAdminServiceProxy.getSequence(faultSequenceExtensionName);
+                    deployedSequences.add(sequence.getText());
+                }
+            }
+        }
+        return deployedSequences;
+    }
+
+    public static List<String> retrieveDeployedLocalEntries(String apiName, String version, String tenantDomain)
+            throws AxisFault {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        List<String> deployedLocalEntries = new ArrayList<>();
+        if (tenantSubscriptionStore != null) {
+            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+            if (retrievedAPI != null) {
+                LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
+                String localEntryKey = retrievedAPI.getUuid();
+                if (APIConstants.GRAPHQL_API.equals(retrievedAPI.getApiType())) {
+                    localEntryKey = retrievedAPI.getUuid().concat(APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION);
+                }
+                if (localEntryServiceProxy.isEntryExists(localEntryKey)) {
+                    OMElement entry = localEntryServiceProxy.getEntry(localEntryKey);
+                    deployedLocalEntries.add(entry.getText());
+                }
+            }
+        }
+        return deployedLocalEntries;
+    }
+
+    public static List<String> retrieveDeployedEndpoints(String apiName, String version, String tenantDomain)
+            throws EndpointAdminException {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        List<String> deployedEndpoints = new ArrayList<>();
+        if (tenantSubscriptionStore != null) {
+            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+            if (retrievedAPI != null) {
+                EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+                String productionEndpointKey = apiName.concat("--v").concat(version).concat(
+                        "_APIproductionEndpoint");
+                String sandboxEndpointKey = apiName.concat("--v").concat(version).concat(
+                        "_APIsandboxEndpoint");
+                if (endpointAdminServiceProxy.isEndpointExist(productionEndpointKey)) {
+                    String entry = endpointAdminServiceProxy.getEndpoint(productionEndpointKey);
+                    deployedEndpoints.add(entry);
+                }
+                if (endpointAdminServiceProxy.isEndpointExist(sandboxEndpointKey)) {
+                    String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
+                    deployedEndpoints.add(entry);
+                }
+            }
+        }
+        return deployedEndpoints;
+    }
+
+    public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain) throws AxisFault {
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        List<String> deployedEndpoints = new ArrayList<>();
+        if (tenantSubscriptionStore != null) {
+            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+            if (retrievedAPI != null) {
+                RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
+                String qualifiedName = GatewayUtils.getQualifiedApiName(retrievedAPI.getApiProvider(), apiName,
+                        version);
+                APIData api = restapiAdminServiceProxy.getApi(qualifiedName);
+                if (api != null) {
+                    return RestApiAdminUtils.retrieveAPIOMElement(api).getText();
+                }
+            }
+        }
+        return null;
+    }
 }

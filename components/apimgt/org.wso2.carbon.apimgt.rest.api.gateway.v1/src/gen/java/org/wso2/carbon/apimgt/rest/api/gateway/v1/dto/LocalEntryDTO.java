@@ -18,43 +18,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class LocalEntryDTO   {
   
-    private List<String> deployedLocalEntries = new ArrayList<>();
-    private List<String> unDeployedLocalEntries = new ArrayList<>();
+    private List<String> localEntries = new ArrayList<>();
 
   /**
    * The local entries which has been deployed in the gateway 
    **/
-  public LocalEntryDTO deployedLocalEntries(List<String> deployedLocalEntries) {
-    this.deployedLocalEntries = deployedLocalEntries;
+  public LocalEntryDTO localEntries(List<String> localEntries) {
+    this.localEntries = localEntries;
     return this;
   }
 
   
   @ApiModelProperty(value = "The local entries which has been deployed in the gateway ")
-  @JsonProperty("deployedLocalEntries")
-  public List<String> getDeployedLocalEntries() {
-    return deployedLocalEntries;
+  @JsonProperty("localEntries")
+  public List<String> getLocalEntries() {
+    return localEntries;
   }
-  public void setDeployedLocalEntries(List<String> deployedLocalEntries) {
-    this.deployedLocalEntries = deployedLocalEntries;
-  }
-
-  /**
-   * The local entries which has not been deployed in the gateway 
-   **/
-  public LocalEntryDTO unDeployedLocalEntries(List<String> unDeployedLocalEntries) {
-    this.unDeployedLocalEntries = unDeployedLocalEntries;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The local entries which has not been deployed in the gateway ")
-  @JsonProperty("UnDeployedLocalEntries")
-  public List<String> getUnDeployedLocalEntries() {
-    return unDeployedLocalEntries;
-  }
-  public void setUnDeployedLocalEntries(List<String> unDeployedLocalEntries) {
-    this.unDeployedLocalEntries = unDeployedLocalEntries;
+  public void setLocalEntries(List<String> localEntries) {
+    this.localEntries = localEntries;
   }
 
 
@@ -67,13 +48,12 @@ public class LocalEntryDTO   {
       return false;
     }
     LocalEntryDTO localEntry = (LocalEntryDTO) o;
-    return Objects.equals(deployedLocalEntries, localEntry.deployedLocalEntries) &&
-        Objects.equals(unDeployedLocalEntries, localEntry.unDeployedLocalEntries);
+    return Objects.equals(localEntries, localEntry.localEntries);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(deployedLocalEntries, unDeployedLocalEntries);
+    return Objects.hash(localEntries);
   }
 
   @Override
@@ -81,8 +61,7 @@ public class LocalEntryDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LocalEntryDTO {\n");
     
-    sb.append("    deployedLocalEntries: ").append(toIndentedString(deployedLocalEntries)).append("\n");
-    sb.append("    unDeployedLocalEntries: ").append(toIndentedString(unDeployedLocalEntries)).append("\n");
+    sb.append("    localEntries: ").append(toIndentedString(localEntries)).append("\n");
     sb.append("}");
     return sb.toString();
   }

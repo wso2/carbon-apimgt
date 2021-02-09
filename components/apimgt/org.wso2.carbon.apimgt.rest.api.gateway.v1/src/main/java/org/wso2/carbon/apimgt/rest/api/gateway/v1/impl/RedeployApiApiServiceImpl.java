@@ -23,6 +23,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.v1.RedeployApiApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.util.Map;
@@ -35,36 +36,20 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
 
     public Response redeployApiPost(String apiName, String version, String tenantDomain,
                                     MessageContext messageContext) {
-
+        tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        if (tenantDomain == null) {
-            tenantDomain = APIConstants.SUPER_TENANT_DOMAIN;
-        }
         boolean status = false;
         try {
-            Map<String, String> apiAttributes =
-                    inMemoryApiDeployer.getGatewayAPIAttributes(apiName, version, tenantDomain);
-            String apiId = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.API_ID);
-            String label = apiAttributes.get(APIConstants.GatewayArtifactSynchronizer.LABEL);
-
-            if (label == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(apiName + " is not deployed in the Gateway")
-                        .build();
+            inMemoryApiDeployer.reDeployAPI(apiName, version, tenantDomain);
+            if (debugEnabled) {
+                log.debug("Successfully deployed " + apiName + " in gateway");
             }
-            status = inMemoryApiDeployer.deployAPI(apiId, label);
+            return Response.ok().entity(apiName + " redeployed successfully in the Gateway").build();
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
-        if (status) {
-            if (debugEnabled) {
-                log.debug("Successfully deployed " + apiName + " in gateway");
-            }
-            return Response.ok().entity(apiName + " redeployed successfully in the Gateway").build();
-        } else {
-            return Response.serverError().entity("Unexpected error occurred").build();
-        }
+        return null;
     }
 }
