@@ -17,8 +17,9 @@
  */
 package org.wso2.carbon.apimgt.gateway.extension.listener.model.dto;
 
-import java.security.cert.X509Certificate;
 import java.util.Map;
+
+import javax.security.cert.X509Certificate;
 
 /**
  * Representation of Request Information.
@@ -30,7 +31,7 @@ public class RequestContextDTO {
     // invoked API request information
     APIRequestInfoDTO apiRequestInfo;
     // client certificate from transport level
-    X509Certificate clientCert;
+    javax.security.cert.X509Certificate clientCert;
     // custom property map used to populate customProperty key template value
     Map<String, Object> customProperty;
 
@@ -59,7 +60,7 @@ public class RequestContextDTO {
         return clientCert;
     }
 
-    public void setClientCert(X509Certificate clientCert) {
+    public void setClientCert(javax.security.cert.X509Certificate clientCert) {
 
         this.clientCert = clientCert;
     }

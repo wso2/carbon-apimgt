@@ -17,10 +17,12 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.ext.listener;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.axis2.transport.TransportUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -51,10 +53,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.security.cert.X509Certificate;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -161,9 +163,9 @@ public class ExtensionListenerUtil {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         Object sslCertObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
-        java.security.cert.X509Certificate clientCert = null;
+        javax.security.cert.X509Certificate clientCert = null;
         if (sslCertObject != null) {
-            java.security.cert.X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+            javax.security.cert.X509Certificate[] certs = (X509Certificate[]) sslCertObject;
             clientCert = certs[0];
         }
         requestDTO.setClientCert(clientCert);
@@ -249,7 +251,8 @@ public class ExtensionListenerUtil {
 
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        msgInfoDTO.setHeaders((Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        msgInfoDTO.setHeaders(
+                (Map<String, String>) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
         msgInfoDTO.setElectedResource(GatewayUtils.extractResource(messageContext));
         //Add a payload handler instance for the current message context to consume the payload later
         msgInfoDTO.setPayloadHandler(SynapsePayloadHandlerFactory.getInstance().buildPayloadHandler(messageContext));
@@ -271,30 +274,30 @@ public class ExtensionListenerUtil {
         try {
             Map<String, String> headers = extensionResponseDTO.getHeaders();
             if (headers != null) {
-                // if headers not sent back, the existing headers + payload will not be changed
+                // if headers not sent back, the existing headers will not be changed
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS,
                         extensionResponseDTO.getHeaders());
-                if (extensionResponseDTO.getPayload() != null) {
-                    // if payload null, not modifying existing payload
-                    String payload = IOUtils.toString(extensionResponseDTO.getPayload());
-                    String contentType = headers.get(APIConstants.HEADER_CONTENT_TYPE);
-                    // based on Content-Type header reset the payload
-                    if (StringUtils.equals(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
-                        JsonUtil.removeJsonPayload(axis2MC);
-                        JsonUtil.getNewJsonPayload(axis2MC, payload, true, true);
-                    } else {
-                        // by default treat payload in well formed xml format
-                        SOAPEnvelope env = messageContext.getEnvelope();
-                        if (env != null && env.getBody() != null) {
-                            env.getBody().addChild(AXIOMUtil.stringToOM(payload));
-                        }
-                    }
+            }
+            String contentType = ((Map<String, String>) axis2MC
+                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                    .get(APIConstants.HEADER_CONTENT_TYPE);
+            if (extensionResponseDTO.getPayload() != null && contentType != null) {
+                // if payload null, not modifying existing payload
+                String payload = IOUtils.toString(extensionResponseDTO.getPayload());
+                // based on Content-Type header reset the payload
+                if (StringUtils.equals(contentType, APIConstants.APPLICATION_JSON_MEDIA_TYPE)) {
+                    JsonUtil.removeJsonPayload(axis2MC);
+                    JsonUtil.getNewJsonPayload(axis2MC, payload, true, true);
+                    axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                            APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 } else {
-                    log.debug("Payload null in ExtensionResponseDTO. Hence preserving current payload.");
+                    // by default treat payload in well formed xml format
+                    OMElement omElement = AXIOMUtil.stringToOM(payload);
+                    SOAPEnvelope env = TransportUtils.createSOAPEnvelope(omElement);
+                    messageContext.setEnvelope(env);
+                    axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                            APIConstants.APPLICATION_XML_SOAP_MEDIA_TYPE);
                 }
-            } else {
-                log.debug("Transport Headers are null in ExtensionResponseDTO. Hence preserving current headers and " +
-                        "payload.");
             }
         } catch (IOException | XMLStreamException e) {
             log.error("Error while setting payload", e);
