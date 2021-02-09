@@ -64,7 +64,7 @@ public class ServiceEntryMappingUtil {
      * Converts a single metadata file content into a model object
      *
      * @param file Metadata file
-     * @return Converted ServiceCatalogInfo model object
+     * @return Converted ServiceMetadataDTO model object
      * @throws IOException
      */
     public static ServiceMetadataDTO fromMetadataFileToServiceDTO(File file) throws IOException {
@@ -81,21 +81,18 @@ public class ServiceEntryMappingUtil {
      * @return Converted ServiceCatalogInfo model object
      * @throws IOException
      */
-    public static ServiceEntry fromFileToServiceInfo(File file, ServiceEntry entry) throws IOException {
-        if (entry == null) {
-            entry = new ServiceEntry();
-        }
+    public static void fromFileToServiceInfo(File file, ServiceEntry serviceEntry) throws IOException {
         ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
-        entry.setKey(serviceMetadataDTO.getKey());
-        entry.setName(serviceMetadataDTO.getName());
-        entry.setVersion(serviceMetadataDTO.getVersion());
-        entry.setDisplayName(serviceMetadataDTO.getDisplayName());
-        entry.setServiceUrl(serviceMetadataDTO.getServiceUrl());
-        entry.setDefType(serviceMetadataDTO.getDefinitionType().value());
-        entry.setDescription(serviceMetadataDTO.getDescription());
-        entry.setSecurityType(serviceMetadataDTO.getSecurityType().value());
-        entry.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
-        return entry;
+
+        serviceEntry.setKey(serviceMetadataDTO.getKey());
+        serviceEntry.setName(serviceMetadataDTO.getName());
+        serviceEntry.setVersion(serviceMetadataDTO.getVersion());
+        serviceEntry.setDisplayName(serviceMetadataDTO.getDisplayName());
+        serviceEntry.setServiceUrl(serviceMetadataDTO.getServiceUrl());
+        serviceEntry.setDefType(serviceMetadataDTO.getDefinitionType().value());
+        serviceEntry.setDescription(serviceMetadataDTO.getDescription());
+        serviceEntry.setSecurityType(serviceMetadataDTO.getSecurityType().value());
+        serviceEntry.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
     }
 
     /**
