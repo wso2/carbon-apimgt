@@ -34,8 +34,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.time.Clock;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
@@ -118,18 +116,18 @@ public class SuccessRequestDataCollector implements RequestDataCollector {
         responseEvent.setRegionId(Constants.REGION_ID);
         responseEvent.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
         responseEvent.setUserAgent(userAgent);
-        responseEvent.setProxyResponseCode(String.valueOf(proxyResponseCode));
-        responseEvent.setTargetResponseCode(String.valueOf(targetResponseCode));
-        responseEvent.setResponseCacheHit(String.valueOf(isCacheHit));
-        responseEvent.setResponseLatency(String.valueOf(responseTime));
-        responseEvent.setBackendLatency(String.valueOf(backendLatency));
-        responseEvent.setRequestMediationLatency(String.valueOf(reqMediationLatency));
-        responseEvent.setResponseMediationLatency(String.valueOf(resMediationLatency));
+        responseEvent.setProxyResponseCode(proxyResponseCode);
+        responseEvent.setTargetResponseCode(targetResponseCode);
+        responseEvent.setResponseCacheHit(isCacheHit);
+        responseEvent.setResponseLatency(responseTime);
+        responseEvent.setBackendLatency(backendLatency);
+        responseEvent.setRequestMediationLatency(reqMediationLatency);
+        responseEvent.setResponseMediationLatency(resMediationLatency);
         responseEvent.setDeploymentId(Constants.DEPLOYMENT_ID);
         responseEvent.setEventType(Constants.SUCCESS_EVENT_TYPE);
 
-        OffsetDateTime time = OffsetDateTime.now(Clock.systemUTC());
-        responseEvent.setRequestTimestamp(time.toString());
+        String offsetDateTime = AnalyticsUtils.getTimeInISO(requestInTime);
+        responseEvent.setRequestTimestamp(offsetDateTime);
 
         this.processor.publish(responseEvent);
     }
