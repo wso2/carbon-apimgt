@@ -4155,6 +4155,9 @@ components:
         name:
           type: string
           example: orderBooks
+        type:
+          type: string
+          example: publisher
     TopicSubscriptionList:
       title: Subscribed Topic List
       type: object
