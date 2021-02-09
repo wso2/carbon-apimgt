@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
@@ -55,8 +56,7 @@ public class SynapsePropertiesHandler extends AbstractHandler {
         boolean isContentTypeNotSet = false;
         if (headers != null) {
             isContentTypeNotSet = headers.get("Content-Type") == null || headers.get("Content-Type").equals("");
-            if (headers.get(APIMgtGatewayConstants.HOST) != null || !("")
-                    .equals(headers.get(APIMgtGatewayConstants.HOST))) {
+            if (StringUtils.isNotEmpty((String) headers.get(APIMgtGatewayConstants.HOST))) {
                 // Derive the outward facing host and port from host header
                 String hostHeader = (String) headers.get(APIMgtGatewayConstants.HOST);
                 // Set it as a message context property to retrieve in HandleResponse method
