@@ -22,8 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
-import kotlin.jvm.Throws;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -213,7 +211,6 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -1000,9 +997,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
-        String serviceId = api.getServiceInfo("serviceId");
-        if (StringUtils.isNotEmpty(serviceId)) {
-            apiMgtDAO.addAPIServiceMapping(api.getUuid(), serviceId, api.getServiceInfo("md5"), null);
+        String serviceKey = api.getServiceInfo("serviceKey");
+        if (StringUtils.isNotEmpty(serviceKey)) {
+            apiMgtDAO.addAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"));
         }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -8377,10 +8374,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ServiceEntry retrieveServiceByID(String serviceId, int tenantId) throws APIManagementException {
-        ServiceEntry service = apiMgtDAO.retrieveServiceById(serviceId, tenantId);
+    public ServiceEntry retrieveServiceByKey(String serviceKey, int tenantId) throws APIManagementException {
+        ServiceEntry service = apiMgtDAO.retrieveServiceByKey(serviceKey, tenantId);
         if (service == null) {
-            String msg = "Failed to fetch the Service Info. Service with id " + serviceId + " does not exist";
+            String msg = "Failed to fetch the Service Info. Service with key " + serviceKey + " does not exist";
             throw new APIMgtResourceNotFoundException(msg);
         }
         return service;

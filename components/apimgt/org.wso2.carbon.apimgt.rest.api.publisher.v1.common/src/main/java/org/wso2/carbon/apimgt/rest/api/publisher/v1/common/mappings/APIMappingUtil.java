@@ -78,13 +78,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
@@ -145,33 +145,6 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class APIMappingUtil {
 
     private static final Log log = LogFactory.getLog(APIMappingUtil.class);
-
-    public static API fromDTOtoAPI(APIPropertiesDTO dto, String provider) throws APIManagementException {
-        String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
-
-        APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
-        API model = new API(apiId);
-        String context = dto.getContext();
-        final String originalContext = context;
-
-        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
-            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
-        }
-
-        context = context.startsWith("/") ? context : ("/" + context);
-        String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
-            context = "/t/" + providerDomain + context;
-        }
-
-        // This is to support the pluggable version strategy
-        // if the context does not contain any {version} segment, we use the default version strategy.
-        context = checkAndSetVersionParam(context);
-        model.setContextTemplate(context);
-        context = updateContextWithVersion(dto.getVersion(), originalContext, context);
-        model.setContext(context);
-        return model;
-    }
 
     public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
 
@@ -913,7 +886,13 @@ public class APIMappingUtil {
         } else {
             dto.setResponseCachingEnabled(Boolean.FALSE);
         }
-
+        String serviceId = model.getServiceInfo("id");
+        if (StringUtils.isNotEmpty(serviceId)) {
+            APIServiceInfoDTO apiServiceInfoDTO = new APIServiceInfoDTO();
+            apiServiceInfoDTO.setId(serviceId);
+            apiServiceInfoDTO.setOutdated(Boolean.parseBoolean(model.getServiceInfo("outdated")));
+            dto.setServiceInfo(apiServiceInfoDTO);
+        }
         dto.setCacheTimeout(model.getCacheTimeout());
         String endpointConfig = model.getEndpointConfig();
         if (!StringUtils.isBlank(endpointConfig)) {

@@ -131,7 +131,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
@@ -2924,6 +2923,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (OpenAPIDefinitionValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
         return Response.ok().entity(validationResponseDTO).build();
     }
+
     /**
      * Importing an OpenAPI definition and create an API
      *
@@ -4155,21 +4155,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response importServiceFromCatalog(String serviceId, APIPropertiesDTO apIPropertiesDTO,
-                                             MessageContext messageContext) throws APIManagementException {
-        if (StringUtils.isEmpty(serviceId)) {
-            RestApiUtil.handleBadRequest("Required parameter serviceId is missing", log);
+    public Response importServiceFromCatalog(String serviceKey, APIDTO apiDto, MessageContext messageContext) {
+        if (StringUtils.isEmpty(serviceKey)) {
+            RestApiUtil.handleBadRequest("Required parameter serviceKey is missing", log);
         }
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String userName = RestApiCommonUtil.getLoggedInUsername();
-            int tenantId = APIUtil.getTenantId(userName);
-            ServiceEntry service = apiProvider.retrieveServiceByID(serviceId, tenantId);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            int tenantId = APIUtil.getTenantId(username);
+            ServiceEntry service = apiProvider.retrieveServiceByKey(serviceKey, tenantId);
             if ("OAS3".equals(service.getDefType()) || "OAS2".equals(service.getDefType())) {
                 String openAPIContent = IOUtils.toString(service.getEndpointDef(), RestApiConstants.CHARSET);
                 APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent,
                         true);
-                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIFromAPIPropertiesDTO(apIPropertiesDTO, apiProvider,
+                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
                         RestApiCommonUtil.getLoggedInUsername(), service);
                 APIDefinition apiDefinition = validationResponse.getParser();
                 SwaggerData swaggerData;
@@ -4198,17 +4197,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+                RestApiUtil.handleResourceNotFoundError("Service", serviceKey, e, log);
             } else {
-                String errorMessage = "Error while fetching Service with Id : " + serviceId + " from Service Catalog";
+                String errorMessage = "Error while fetching Service with Id : " + serviceKey + " from Service Catalog";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error occurred while creating API using service with Id " +
-                    serviceId, e, log);
+                    serviceKey, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location : " + apIPropertiesDTO.getName() + "-"
-                    + apIPropertiesDTO.getVersion();
+            String errorMessage = "Error while retrieving API location : " + apiDto.getName() + "-"
+                    + apiDto.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
