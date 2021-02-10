@@ -16474,47 +16474,6 @@ public class ApiMgtDAO {
         }
     }
 
-    /**
-     * Retrieve Service Information from Service Catalog
-     * @param servicKey Unique Key of the Service
-     * @param tenantId Logged in user tenant domain
-     * @return
-     * @throws APIManagementException
-     */
-    public ServiceEntry retrieveServiceByKey(String servicKey, int tenantId) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_SERVICE_INFO_BY_SERVICE_KEY)) {
-            statement.setString(1, servicKey);
-            statement.setInt(2, tenantId);
-            try(ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    ServiceEntry serviceEntry = new ServiceEntry();
-                    serviceEntry.setUuid(resultSet.getString("UUID"));
-                    serviceEntry.setKey(resultSet.getString("SERVICE_KEY"));
-                    serviceEntry.setMd5(resultSet.getString("MD5"));
-                    serviceEntry.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    serviceEntry.setVersion(resultSet.getString("ENTRY_VERSION"));
-                    serviceEntry.setServiceUrl(resultSet.getString("SERVICE_URL"));
-                    serviceEntry.setDefType(resultSet.getString("DEFINITION_TYPE"));
-                    serviceEntry.setDefUrl(resultSet.getString("DEFINITION_URL"));
-                    serviceEntry.setSecurityType(resultSet.getString("SECURITY_TYPE"));
-                    serviceEntry.setMutualSSLEnabled(Boolean.parseBoolean(resultSet.getString("MUTUAL_SSL_ENABLED")));
-                    serviceEntry.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
-                    serviceEntry.setLastUpdatedTime(resultSet.getTimestamp("LAST_UPDATED_TIME"));
-                    serviceEntry.setCreatedBy("CREATED_BY");
-                    serviceEntry.setUpdatedBy("UPDATED_BY");
-                    serviceEntry.setEndpointDef(resultSet.getBinaryStream("ENDPOINT_DEFINITION"));
-                    serviceEntry.setMetadata(resultSet.getBinaryStream("METADATA"));
-                    return serviceEntry;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving the Service Entry with ID " + servicKey + " - " + tenantId,
-                    e);
-        }
-        return null;
-    }
-
     public void setServiceStatusInfoToAPI(API api) throws APIManagementException {
         try(Connection connection = APIMgtDBUtil.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
@@ -16544,22 +16503,23 @@ public class ApiMgtDAO {
      *
      * @throws APIManagementException
      */
-    public void addAPIServiceMapping(String apiId, String serviceKey, String md5sum) throws
+    public void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId) throws
             APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            addAPIServiceMapping(apiId, serviceKey, md5sum, connection);
+            addAPIServiceMapping(apiId, serviceKey, md5sum, tenantId, connection);
         } catch (SQLException e) {
             handleException("Error while adding API Service Mapping" , e);
         }
     }
 
-    private void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, Connection connection)
-            throws SQLException {
+    private void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId,
+                                      Connection connection) throws SQLException {
         String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
           preparedStatement.setString(1, apiId);
           preparedStatement.setString(2, serviceKey);
           preparedStatement.setString(3, md5sum);
+          preparedStatement.setInt(4, tenantId);
           preparedStatement.executeUpdate();
         }
     }

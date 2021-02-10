@@ -2635,7 +2635,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if(url != null || fileInputStream != null) {
                 // Validate and retrieve the OpenAPI definition
                 Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail,
-                        true);
+                        true, false);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
                 if (!validationResponse.isValid()) {
@@ -2919,7 +2919,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, returnContent);
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, returnContent, false);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
@@ -3398,8 +3398,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
             if (StringUtils.isNotEmpty(serviceVersion)) {
+                ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
                 String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
-                ServiceEntry service = apiProvider.retrieveServiceByKey(serviceKey, tenantId);
+                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
                 API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
                 if (existingAPI == null) {
                     throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
@@ -3705,9 +3706,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      *  validation response of type APIDefinitionValidationResponse coming from the impl level.
      */
     private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-           Boolean returnContent) throws APIManagementException {
+           Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url);
+        handleInvalidParams(fileInputStream, fileDetail, url, isServiceAPI);
 
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -3747,11 +3748,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileInputStream file content stream
      * @param url             URL of the definition
      */
-    private void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url) {
+    private void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url,
+                                     Boolean isServiceAPI) {
 
         String msg = "";
-        boolean isFileSpecified = fileInputStream != null && fileDetail != null &&
-                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null;
+        boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
+                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
+                || (fileInputStream != null && isServiceAPI);
         if (url == null && !isFileSpecified) {
             msg = "Either 'file' or 'url' should be specified";
         }
@@ -4132,12 +4135,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Required parameter serviceKey is missing", log);
         }
         try {
+            ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
-            ServiceEntry service = apiProvider.retrieveServiceByKey(serviceKey, tenantId);
+            ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
             APIDTO createdApiDTO = null;
-            if ("OAS2".equals(service.getDefType()) || "OAS3".equals(service.getDefType())) {
+            if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
+                    ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
                 createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service);
             }
             if (createdApiDTO != null) {
@@ -4145,7 +4150,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 return Response.created(createdApiUri).entity(createdApiDTO).build();
             } else {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot create API " +
-                        "using the service type " + service.getDefType(), log);
+                        "using the service type " + service.getDefinitionType().name(), log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -4173,8 +4178,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
             ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-            if ("OAS2".equals(service.getDefType()) || "OAS3".equals(service.getDefType())) {
-                Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, true);
+            if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
+                    ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
+                Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, true, true);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
                 // TODO: Needs to be updated - APIM specific vendor extensions should be preserved for old resources
@@ -4184,7 +4190,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             } else {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to API" +
-                        " using the service type " + service.getDefType(), log);
+                        " using the service type " + service.getDefinitionType(), log);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service associated with " +
@@ -4201,7 +4207,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, true);
+            boolean isServiceAPI = false;
+            if (service != null) {
+                isServiceAPI = true;
+            }
+            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, true,
+                    isServiceAPI);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }

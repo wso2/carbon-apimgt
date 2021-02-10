@@ -743,14 +743,14 @@ public class PublisherCommonUtils {
     public static String constructEndpointConfigForService(ServiceEntry service) {
         StringBuilder sb = new StringBuilder();
         String endpoint_type = APIDTO.TypeEnum.HTTP.value();
-        switch (service.getDefType()) {
-            case "GRAPHQL_SDL" :
+        switch (service.getDefinitionType()) {
+            case GRAPHQL_SDL:
                 endpoint_type = APIDTO.TypeEnum.GRAPHQL.value();
-            case "WSDL1":
+            case WSDL1:
                 endpoint_type = APIDTO.TypeEnum.SOAP.value();
-            case "WSDL2":
+            case WSDL2:
                 endpoint_type = APIDTO.TypeEnum.SOAP.value();
-            case "ASYNC_API":
+            case ASYNC_API:
                 // TODO Need to update the endpoint_type for ASYNC_API
         }
         if (StringUtils.isNotEmpty(service.getServiceUrl())) {
@@ -759,9 +759,8 @@ public class PublisherCommonUtils {
                     .append("\",")
                     .append("\"production_endpoints\": {\"url\": \"")
                     .append(service.getServiceUrl())
-                    .append("\"},")
-                    .append("\"endpoint_security\": \"{\"production\": {}}");
-        }
+                    .append("\"}}");
+        } // TODO Need to check on the endpoint security
         return sb.toString();
     }
 
@@ -795,7 +794,17 @@ public class PublisherCommonUtils {
                         .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, body.getName(), body.getVersion()));
             }
         }
-        validateAPIProperties(apiProvider, body.getName(), body.getContext(), body.getVersion(), username);
+        if (body.getContext() == null) {
+            throw new APIManagementException("Parameter: \"context\" cannot be null",
+                    ExceptionCodes.PARAMETER_NOT_PROVIDED);
+        } else if (body.getContext().endsWith("/")) {
+            throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
+        }
+        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
+            throw new APIManagementException(
+                    "Error occurred while adding API. API with name " + body.getName() + " already exists.",
+                    ExceptionCodes.API_ALREADY_EXISTS);
+        }
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
         }
@@ -812,6 +821,34 @@ public class PublisherCommonUtils {
             String errorMessage = PublisherCommonUtils.validateRoles(body.getVisibleRoles());
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
+            }
+        }
+
+        //Get all existing versions of  api been adding
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+        if (apiVersions.size() > 0) {
+            //If any previous version exists
+            for (String version : apiVersions) {
+                if (version.equalsIgnoreCase(body.getVersion())) {
+                    //If version already exists
+                    if (apiProvider.isDuplicateContextTemplate(context)) {
+                        throw new APIManagementException(
+                                "Error occurred while " + "adding the API. A duplicate API already exists for "
+                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
+                    } else {
+                        throw new APIManagementException(
+                                "Error occurred while adding API. API with name " + body.getName()
+                                        + " already exists with different context" + context,
+                                ExceptionCodes.API_ALREADY_EXISTS);
+                    }
+                }
+            }
+        } else {
+            //If no any previous version exists
+            if (apiProvider.isDuplicateContextTemplate(context)) {
+                throw new APIManagementException(
+                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
+                                + context, ExceptionCodes.API_ALREADY_EXISTS);
             }
         }
 
@@ -1268,46 +1305,5 @@ public class PublisherCommonUtils {
 
         apiProvider.saveToGateway(createdProduct);
         return createdProduct;
-    }
-
-    private static void validateAPIProperties(APIProvider apiProvider, String apiName, String context,
-                                              String apiVersion, String username) throws APIManagementException {
-        if (context == null) {
-            throw new APIManagementException("Parameter: \"context\" cannot be null",
-                    ExceptionCodes.PARAMETER_NOT_PROVIDED);
-        } else if (context.endsWith("/")) {
-            throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
-        }
-        if (apiProvider.isApiNameWithDifferentCaseExist(apiName)) {
-            throw new APIManagementException(
-                    "Error occurred while adding API. API with name " + apiName + " already exists.",
-                    ExceptionCodes.API_ALREADY_EXISTS);
-        }
-        //Get all existing versions of  api been adding
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(apiName, username);
-        if (apiVersions.size() > 0) {
-            //If any previous version exists
-            for (String version : apiVersions) {
-                if (version.equalsIgnoreCase(apiVersion)) {
-                    //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(context)) {
-                        throw new APIManagementException(
-                                "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
-                    } else {
-                        throw new APIManagementException("Error occurred while adding API. API with name "
-                                + apiName + " already exists with different context" + context,
-                                ExceptionCodes.API_ALREADY_EXISTS);
-                    }
-                }
-            }
-        } else {
-            //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplate(context)) {
-                throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                                + context, ExceptionCodes.API_ALREADY_EXISTS);
-            }
-        }
     }
 }
