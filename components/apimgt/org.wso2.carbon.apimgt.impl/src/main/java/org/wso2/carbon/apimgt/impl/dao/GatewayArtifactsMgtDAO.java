@@ -339,7 +339,7 @@ public class GatewayArtifactsMgtDAO {
             throws APIManagementException {
 
         String query = SQLConstants.RETRIEVE_ARTIFACTS_BY_LABEL;
-        query = query.replace("_GATEWAY_LABELS_", StringUtils.join(",", Collections.nCopies(labels.length, "?")));
+        query = query.replaceAll("_GATEWAY_LABELS_", String.join(",",Collections.nCopies(labels.length, "?")));
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = new ArrayList<>();
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {

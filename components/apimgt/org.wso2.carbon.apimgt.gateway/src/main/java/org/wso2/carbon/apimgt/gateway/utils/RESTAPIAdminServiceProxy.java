@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.api.API;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -68,6 +69,16 @@ public class RESTAPIAdminServiceProxy {
             throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
         }
     }
+    public OMElement getApiContent(String apiName) throws AxisFault {
+
+        try {
+            return restApiAdmin.getAPIContent(apiName, tenantDomain);
+
+        } catch (Exception e) {
+            throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
+        }
+    }
+
 
     public boolean updateApi(String apiName, String apiConfig) throws AxisFault {
 

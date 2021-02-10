@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v1</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v2</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -83,11 +83,11 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v1</artifactId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v2</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#gateway.war</destFileName>
+                                    <destFileName>api#am#gateway#v2.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -110,7 +110,7 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#gateway.war</include>
+                                        <include>api#am#gateway#v2.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
                                     </includes>
@@ -149,7 +149,7 @@
                             <resources>
                                 <resource>
                                     <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v1/src/main/resources/documentation
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v2/src/main/resources/documentation
                                     </directory>
                                     <includes>
                                         <include>*</include>
@@ -209,7 +209,7 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v1/src/main/resources/gateway-api.yaml
+                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v2/src/main/resources/gateway-api.yaml
                             </inputSpec>
                             <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
                             <templateDirectory>

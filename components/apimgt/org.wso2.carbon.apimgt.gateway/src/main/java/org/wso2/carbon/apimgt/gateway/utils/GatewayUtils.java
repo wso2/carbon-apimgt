@@ -1076,15 +1076,15 @@ public class GatewayUtils {
                 SequenceAdminServiceProxy sequenceAdminServiceProxy = new SequenceAdminServiceProxy(tenantDomain);
                 if (sequenceAdminServiceProxy.isExistingSequence(inSequenceExtensionName)) {
                     OMElement sequence = sequenceAdminServiceProxy.getSequence(inSequenceExtensionName);
-                    deployedSequences.add(sequence.getText());
+                    deployedSequences.add(sequence.toString());
                 }
                 if (sequenceAdminServiceProxy.isExistingSequence(outSequenceExtensionName)) {
                     OMElement sequence = sequenceAdminServiceProxy.getSequence(outSequenceExtensionName);
-                    deployedSequences.add(sequence.getText());
+                    deployedSequences.add(sequence.toString());
                 }
                 if (sequenceAdminServiceProxy.isExistingSequence(faultSequenceExtensionName)) {
                     OMElement sequence = sequenceAdminServiceProxy.getSequence(faultSequenceExtensionName);
-                    deployedSequences.add(sequence.getText());
+                    deployedSequences.add(sequence.toString());
                 }
             }
         }
@@ -1106,7 +1106,7 @@ public class GatewayUtils {
                 }
                 if (localEntryServiceProxy.isEntryExists(localEntryKey)) {
                     OMElement entry = localEntryServiceProxy.getEntry(localEntryKey);
-                    deployedLocalEntries.add(entry.getText());
+                    deployedLocalEntries.add(entry.toString());
                 }
             }
         }
@@ -1142,16 +1142,15 @@ public class GatewayUtils {
     public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain) throws AxisFault {
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        List<String> deployedEndpoints = new ArrayList<>();
         if (tenantSubscriptionStore != null) {
             API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
             if (retrievedAPI != null) {
                 RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
                 String qualifiedName = GatewayUtils.getQualifiedApiName(retrievedAPI.getApiProvider(), apiName,
                         version);
-                APIData api = restapiAdminServiceProxy.getApi(qualifiedName);
+                OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
                 if (api != null) {
-                    return RestApiAdminUtils.retrieveAPIOMElement(api).getText();
+                    return api.toString();
                 }
             }
         }

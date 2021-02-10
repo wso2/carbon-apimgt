@@ -142,7 +142,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         List<API> apis = new ArrayList<>();
         if (gatewayLabels != null && gatewayLabels.size() > 0) {
             for (String gatewayLabel : gatewayLabels) {
-                String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?gatewayLabel=" + gatewayLabel;
+                String apisEP =
+                        APIConstants.SubscriptionValidationResources.APIS + "?gatewayLabel=" + getEncodedLabel(gatewayLabel);
                 String responseString = null;
                 try {
                     responseString = invokeService(apisEP, tenantDomain);
@@ -299,15 +300,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         List<API> apis = new ArrayList<>();
         if (gatewayLabels != null && gatewayLabels.size() > 0) {
             for (String gatewayLabel : gatewayLabels) {
-                String encodedGatewayLabel;
-                try {
-                    encodedGatewayLabel = URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
-                } catch (UnsupportedEncodingException e) {
-                    throw new DataLoadingException("Error while encoding label", e);
-                }
-                encodedGatewayLabel = encodedGatewayLabel.replace("\\+", "%20");
                 String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
-                        "&version=" + version + "&gatewayLabel=" + encodedGatewayLabel;
+                        "&version=" + version + "&gatewayLabel=" + getEncodedLabel(gatewayLabel);
                 API api = new API();
                 String responseString;
                 try {
@@ -488,4 +482,13 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 (StandardCharsets.UTF_8));
     }
 
+    private String getEncodedLabel(String label) throws DataLoadingException {
+        String encodedGatewayLabel;
+        try {
+            encodedGatewayLabel = URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            throw new DataLoadingException("Error while encoding label", e);
+        }
+        return encodedGatewayLabel.replace("\\+", "%20");
+    }
 }
