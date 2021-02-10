@@ -337,7 +337,6 @@ class TestConsole extends React.Component {
             this.context.updateAPI({ enableStore: false, testKey: token });
         }).catch((error) => {
             console.error(error);
-        }).finally(() => {
             this.setState({ loading: false });
         });
     };
