@@ -265,27 +265,21 @@ const APICreateMenu = (props) => {
                                         id='Apis.Listing.SampleAPI.SampleAPI.websocket.api'
                                         defaultMessage='WebSocket API'
                                     />
-                                    {/* Uncomment following to change the content to streaming */}
-                                    {/*
                                     <FormattedMessage
                                         id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
                                         defaultMessage='Streaming'
                                     />
-                                    */}
                                 </Typography>
                                 <img
                                     src={Configurations.app.context
                                 + websocketApiIcon}
                                     alt='WebSocket API'
                                 />
-                                {/* Uncomment following to change the icon */}
-                                {/*
                                 <img
                                     src={Configurations.app.context
                                 + streamingApiIcon}
                                     alt='Streaming API'
                                 />
-                                */}
                                 <Box mt={2}>
                                     <Typography variant='body1'>
                                         <Link
@@ -306,13 +300,11 @@ const APICreateMenu = (props) => {
                                         />
                                     </Typography>
                                 </Box>
-                                {/* Uncomment following to add the two streaming links */}
-                                {/*
                                 <Box mt={2}>
                                     <Typography variant='body1'>
                                         <Link
                                             id='itest-id-createdefault'
-                                            to='/apis/create/changethis'
+                                            to='/apis/create/streamingapi'
                                             className={classes.links}
                                         >
                                             <FormattedMessage
@@ -332,7 +324,7 @@ const APICreateMenu = (props) => {
                                     <Typography variant='body1'>
                                         <Link
                                             id='itest-id-createdefault'
-                                            to='/apis/create/changethis'
+                                            to='/apis/create/asyncapi'
                                             className={classes.links}
                                         >
                                             <FormattedMessage
@@ -348,7 +340,6 @@ const APICreateMenu = (props) => {
                                         />
                                     </Typography>
                                 </Box>
-                                */}
                             </Box>
                         </Grid>
                     </Grid>
