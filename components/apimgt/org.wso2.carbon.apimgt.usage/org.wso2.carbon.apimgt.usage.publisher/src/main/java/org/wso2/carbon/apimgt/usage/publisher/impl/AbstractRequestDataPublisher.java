@@ -23,7 +23,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.exception.MetricReportingException;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
+import org.wso2.am.analytics.publisher.reporter.MetricEventBuilder;
 import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
+import org.wso2.carbon.apimgt.usage.publisher.dto.AnalyticsEvent;
 
 import java.util.Map;
 
@@ -33,20 +35,32 @@ import java.util.Map;
 public abstract class AbstractRequestDataPublisher implements RequestDataPublisher {
     private static final Log log = LogFactory.getLog(AbstractRequestDataPublisher.class);
     protected static final ObjectMapper mapper = new ObjectMapper();
-    protected static final TypeReference<Map<String, String>> mapTypeRef = new TypeReference<Map<String, String>>() {
+    protected static final TypeReference<Map<String, Object>> mapTypeRef = new TypeReference<Map<String, Object>>() {
     };
 
-    final protected void publishData(Map<String, String> eventMap) {
+    @Override
+    public void publish(AnalyticsEvent analyticsEvent) {
         CounterMetric counterMetric = this.getCounterMetric();
         if (counterMetric == null) {
             log.error("counterMetric cannot be null.");
             return;
         }
+
+        Map<String, Object> dataMap = mapper.convertValue(analyticsEvent, mapTypeRef);
+        MetricEventBuilder builder = counterMetric.getEventBuilder();
+        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+            try {
+                builder.addAttribute(entry.getKey(), entry.getValue());
+            } catch (MetricReportingException e) {
+                log.error("Error adding data to the event stream.", e);
+                return;
+            }
+        }
+
         try {
-            counterMetric.incrementCount(eventMap);
+            counterMetric.incrementCount(builder);
         } catch (MetricReportingException e) {
             log.error("Error occurred when publishing event.", e);
         }
     }
-
 }

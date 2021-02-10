@@ -1230,16 +1230,7 @@
         {% endif %}
         <SkipList>
         <APIS>
-        <API>_AuthenticationEPAPI_.xml</API>
-        <API>_AuthorizeAPI_.xml</API>
-        <API>_CommonAuthAPI_.xml</API>
-        <API>_LoginContextAPI_.xml</API>
-        <API>_OIDCAPI_.xml</API>
-        <API>_OpenIDConfigAPI_.xml</API>
-        <API>_OpenService_.xml</API>
-        <API>_RevokeAPI_.xml</API>
-        <API>_TokenAPI_.xml</API>
-        <API>_UserInfoAPI_.xml</API>
+            <API>_OpenService_.xml</API>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.apis is defined %}
             {%- for api in apim.sync_runtime_artifacts.gateway.skip_list.apis -%}
             <API>{{api}}</API>

@@ -336,11 +336,17 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (authenticators.isEmpty()) {
                 initializeAuthenticators();
             }
-            if (isAuthenticate(messageContext)) {
-                setAPIParametersToMessageContext(messageContext);
-                return true;
+            try {
+                if (isAuthenticate(messageContext)) {
+                    setAPIParametersToMessageContext(messageContext);
+                    return true;
+                }
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Authentication of message context failed", e);
+                }
             }
-        } catch (APISecurityException e) {
+        } catch (APISecurityException  e) {
 
             if (Util.tracingEnabled() && keySpan != null) {
                 Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
@@ -400,7 +406,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @return true if the authentication is successful (never returns false)
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
+    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException, APIManagementException {
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
