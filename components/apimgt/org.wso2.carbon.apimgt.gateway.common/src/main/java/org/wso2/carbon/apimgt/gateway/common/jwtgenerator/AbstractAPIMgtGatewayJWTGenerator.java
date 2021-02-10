@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,22 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
+
+package org.wso2.carbon.apimgt.gateway.common.jwtgenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.apimgt.gateway.common.constants.JWTConstants;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.gateway.common.util.JWTUtil;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -41,24 +37,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Abstract class for jwt generation.
+ */
 public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private static final Log log = LogFactory.getLog(AbstractAPIMgtGatewayJWTGenerator.class);
-    private static final String NONE = "NONE";
-    private static final String SHA256_WITH_RSA = "SHA256withRSA";
+    public static final String NONE = "NONE";
+    public static final String SHA256_WITH_RSA = "SHA256withRSA";
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
+    public static JWTConfigurationDto jwtConfigurationDto;
 
     private static volatile long ttl = -1L;
-    private String dialectURI;
+    public String dialectURI;
 
-    private String signatureAlgorithm;
+    public String signatureAlgorithm;
 
     public AbstractAPIMgtGatewayJWTGenerator() {
-        JWTConfigurationDto jwtConfigurationDto =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getJwtConfigurationDto();
+    }
+
+    public void setJWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
+        this.jwtConfigurationDto = jwtConfigurationDto;
         dialectURI = jwtConfigurationDto.getConsumerDialectUri();
         if (dialectURI == null) {
-            dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
+            dialectURI = "http://wso2.org/claims";
         }
         signatureAlgorithm = jwtConfigurationDto.getSignatureAlgorithm();
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
@@ -68,7 +69,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
 
     }
 
-    public String generateToken(JWTInfoDto jwtInfoDto) throws APIManagementException {
+    public String generateToken(JWTInfoDto jwtInfoDto) throws JWTGeneratorException {
 
         String jwtHeader = buildHeader();
         String jwtBody = buildBody(jwtInfoDto);
@@ -97,14 +98,14 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         }
     }
 
-    public String buildHeader() throws APIManagementException {
+    public String buildHeader() throws JWTGeneratorException {
         String jwtHeader = null;
 
         if (NONE.equals(signatureAlgorithm)) {
             StringBuilder jwtHeaderBuilder = new StringBuilder();
             jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
             jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append(APIUtil.getJWSCompliantAlgorithmCode(NONE));
+            jwtHeaderBuilder.append(JWTUtil.getJWSCompliantAlgorithmCode(NONE));
             jwtHeaderBuilder.append('\"');
             jwtHeaderBuilder.append('}');
 
@@ -116,67 +117,29 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         return jwtHeader;
     }
 
-    public byte[] signJWT(String assertion) throws APIManagementException {
+    public byte[] signJWT(String assertion) throws JWTGeneratorException {
 
         try {
-            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
-            PrivateKey privateKey = keyStoreManager.getDefaultPrivateKey();
-            return APIUtil.signJwt(assertion, privateKey, signatureAlgorithm);
+            PrivateKey privateKey = jwtConfigurationDto.getPrivateKey();
+            return JWTUtil.signJwt(assertion, privateKey, signatureAlgorithm);
         } catch (Exception e) {
-            throw new APIManagementException(e);
-        }
-    }
-
-    protected long getTTL() {
-        if (ttl != -1) {
-            return ttl;
-        }
-
-        synchronized (AbstractAPIMgtGatewayJWTGenerator.class) {
-            if (ttl != -1) {
-                return ttl;
-            }
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-            String gwTokenCacheConfig = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-            boolean isGWTokenCacheEnabled = Boolean.parseBoolean(gwTokenCacheConfig);
-
-            if (isGWTokenCacheEnabled) {
-                String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-
-                if (apimKeyCacheExpiry != null) {
-                    ttl = Long.parseLong(apimKeyCacheExpiry);
-                } else {
-                    ttl = Long.valueOf(900);
-                }
-            } else {
-                String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
-                if (ttlValue != null) {
-                    ttl = Long.parseLong(ttlValue);
-                } else {
-                    //15 * 60 (convert 15 minutes to seconds)
-                    ttl = Long.valueOf(900);
-                }
-            }
-            return ttl;
+            throw new JWTGeneratorException(e);
         }
     }
 
     /**
      * Helper method to add public certificate to JWT_HEADER to signature verification.
      *
-     * @throws APIManagementException
+     * @throws JWTGeneratorException
      */
-    protected String addCertToHeader() throws APIManagementException {
+    protected String addCertToHeader() throws JWTGeneratorException {
 
         try {
-            KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
-            Certificate publicCert = keyStoreManager.getDefaultPrimaryCertificate();
-            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
+            Certificate publicCert = jwtConfigurationDto.getPublicCert();
+            return JWTUtil.generateHeader(publicCert, signatureAlgorithm);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
-            throw new APIManagementException(error, e);
+            throw new JWTGeneratorException(error, e);
         }
     }
 
@@ -207,7 +170,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                     log.error(String.format("Error while reading claim values for %s", claimVal), e);
                 }
             } else if (claimVal instanceof String && claimVal.toString().contains("[\"")
-                    && claimVal.toString().contains("\"]")){
+                    && claimVal.toString().contains("\"]")) {
 
                 try {
                     List<String> arrayList = mapper.readValue(claimVal.toString(), List.class);
@@ -217,9 +180,9 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                     // occurred during the retrieving claims.
                     log.error("Error while reading claim values", e);
                 }
-            } else if (APIConstants.JwtTokenConstants.EXPIRY_TIME.equals(claimEntry.getKey())) {
+            } else if (JWTConstants.EXPIRY_TIME.equals(claimEntry.getKey())) {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
-            } else if (APIConstants.JwtTokenConstants.ISSUED_TIME.equals(claimEntry.getKey())) {
+            } else if (JWTConstants.ISSUED_TIME.equals(claimEntry.getKey())) {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), new Date(Long.parseLong((String) claimEntry.getValue())));
             } else {
                 jwtClaimSetBuilder.claim(claimEntry.getKey(), claimEntry.getValue());
@@ -230,13 +193,17 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
         return jwtClaimsSet.toJSONObject().toString();
     }
-    public String encode(byte[] stringToBeEncoded) throws APIManagementException {
+
+    public String encode(byte[] stringToBeEncoded) throws JWTGeneratorException {
         return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
     }
+
     public String getDialectURI() {
         return dialectURI;
     }
 
-    public abstract Map<String,Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
-    public abstract Map<String,Object> populateCustomClaims(JWTInfoDto jwtInfoDto);
+    public abstract Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
+
+    public abstract Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto);
 }
+

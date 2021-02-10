@@ -14657,7 +14657,7 @@ public class ApiMgtDAO {
      * @param field field to be queried to obtain the bot detection alert subscription. Can be uuid or email
      * @param value value corresponding to the field (uuid or email value)
      * @return if subscription exist, returns the bot detection alert subscription, else returns a null object
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when retrieving a bot detection alert subscription
      */
     public BotDetectionData getBotDetectionAlertSubscription(String field, String value)
             throws APIManagementException {
