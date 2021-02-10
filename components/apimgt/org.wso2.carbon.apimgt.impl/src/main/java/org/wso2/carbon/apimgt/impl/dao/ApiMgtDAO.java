@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -16473,4 +16474,90 @@ public class ApiMgtDAO {
         }
     }
 
+    public void setServiceStatusInfoToAPI(API api) throws APIManagementException {
+        try(Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                    .GET_MD5_VALUE_OF_SERVICE_SQL)) {
+            preparedStatement.setString(1, api.getUuid());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    api.setServiceInfo("id", resultSet.getString("SERVICE_KEY"));
+                    if (resultSet.getString("SERVICE_MD5").equals(resultSet
+                            .getString("API_SERVICE_MD5"))) {
+                        api.setServiceInfo("outdated", "false");
+                    } else {
+                        api.setServiceInfo("outdated", "true");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the service status associated the API with id " + api.getUuid(), e);
+        }
+    }
+
+    /**
+     * Add API Service Mapping in AM_API_SERVICE_MAPPING
+     * @param apiId Unique Identifier of the API
+     * @param serviceKey Unique Key of the service
+     * @param md5sum MD5 SUM of the Service
+     *
+     * @throws APIManagementException
+     */
+    public void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId) throws
+            APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            addAPIServiceMapping(apiId, serviceKey, md5sum, tenantId, connection);
+        } catch (SQLException e) {
+            handleException("Error while adding API Service Mapping" , e);
+        }
+    }
+
+    private void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId,
+                                      Connection connection) throws SQLException {
+        String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
+          preparedStatement.setString(1, apiId);
+          preparedStatement.setString(2, serviceKey);
+          preparedStatement.setString(3, md5sum);
+          preparedStatement.setInt(4, tenantId);
+          preparedStatement.executeUpdate();
+        }
+    }
+
+    public String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException {
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
+        String serviceKey = StringUtils.EMPTY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString("SERVICE_KEY");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
+//    /**
+//     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
+//     * @param apiId
+//     * @param serviceId
+//     * @param md5
+//     * @throws APIManagementException
+//     */
+//    public void updateAPIServiceMapping(String apiId, String serviceId, String md5) throws APIManagementException {
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_SERVICE_MAPPING_SQL)) {
+//            statement.setString(1, apiId);
+//            statement.setString(2, serviceId);
+//            statement.execute();
+//            addAPIServiceMapping(apiId, serviceId, md5, connection);
+//        } catch (SQLException e) {
+//            handleException("Error while updating API Service Mapping for API with ID " + apiId, e);
+//        }
+//    }
 }

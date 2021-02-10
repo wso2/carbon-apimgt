@@ -25,8 +25,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -139,6 +141,7 @@ public class API implements Serializable {
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
+    private JSONObject serviceInfo = new JSONObject();
     /**
      * Used to set the workflow status in lifecycle state change workflow
      */
@@ -232,6 +235,17 @@ public class API implements Serializable {
         this.additionalProperties = properties;
     }
 
+    public JSONObject getServiceInfoObject() { return serviceInfo; }
+
+    public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
+
+    public String getServiceInfo(String key) {
+        if (serviceInfo != null && serviceInfo.get(key) != null) {
+            return serviceInfo.get(key).toString();
+        } else {
+            return null;
+        }
+    }
     /**
      * This method is used to get the properties related to monetization
      *

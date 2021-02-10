@@ -423,6 +423,40 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: deleteAPI
 
+  /apis/{apiId}/reimport-service:
+    put:
+      tags:
+        - APIs
+      summary: Update the Service that is used to create the API
+      description: This operation can be used to re-import the Service used to create the API
+      operationId: reimportServiceFromCatalog
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
   /apis/{apiId}/swagger:
     get:
       tags:
@@ -1037,20 +1071,26 @@ paths:
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
       parameters:
-        - name: newVersion
-          in: query
-          description: Version of the new API.
-          required: true
-          schema:
-            maxLength: 30
-            type: string
-        - name: defaultVersion
-          in: query
-          description: Specifies whether new API should be added as default version.
-          schema:
-            type: boolean
-            default: false
-        - $ref: '#/components/parameters/apiId-Q'
+      - name: newVersion
+        in: query
+        description: Version of the new API.
+        required: true
+        schema:
+          maxLength: 30
+          type: string
+      - name: defaultVersion
+        in: query
+        description: Specifies whether new API should be added as default version.
+        schema:
+          type: boolean
+          default: false
+      - name: serviceVersion
+        in: query
+        description: Version of the Service that will used in creating new version
+        schema:
+          type: string
+        required: false
+      - $ref: '#/components/parameters/apiId-Q'
       responses:
         201:
           description: |
@@ -1669,6 +1709,51 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
+  /apis/import-service:
+    post:
+      tags:
+        - APIs
+      summary: Import a Service from Service Catalog
+      description: This operation can be used to create an API from a Service from Service Catalog
+      operationId: importServiceFromCatalog
+      parameters:
+        - name: serviceKey
+          in: query
+          required: true
+          schema:
+            type: string
+          description: ID of service that should be imported from Service Catalog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              '$ref': '#/components/schemas/API'
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains the URL of the newly created entity.
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
   /apis/import-openapi:
     post:
@@ -6918,6 +7003,7 @@ components:
             $ref: '#/components/schemas/API'
         pagination:
           $ref: '#/components/schemas/Pagination'
+
     APIInfo:
       title: API Info object with basic API details.
       type: object
@@ -7380,6 +7466,15 @@ components:
           description: |
             API Key Managers
           readOnly: true
+        serviceInfo:
+          type: object
+          properties:
+            id:
+              type: string
+              example: 36d4988b-f4ea-46d1-bfd8-38bc1fc5a118
+            outdated:
+              type: boolean
+              example: false
       x-scopes:
         - apim:api_create
         - apim:api_import_export

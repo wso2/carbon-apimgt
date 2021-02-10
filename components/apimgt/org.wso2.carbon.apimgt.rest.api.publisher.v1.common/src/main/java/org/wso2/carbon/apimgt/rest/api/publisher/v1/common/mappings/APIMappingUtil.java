@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
@@ -885,7 +886,13 @@ public class APIMappingUtil {
         } else {
             dto.setResponseCachingEnabled(Boolean.FALSE);
         }
-
+        String serviceId = model.getServiceInfo("id");
+        if (StringUtils.isNotEmpty(serviceId)) {
+            APIServiceInfoDTO apiServiceInfoDTO = new APIServiceInfoDTO();
+            apiServiceInfoDTO.setId(serviceId);
+            apiServiceInfoDTO.setOutdated(Boolean.parseBoolean(model.getServiceInfo("outdated")));
+            dto.setServiceInfo(apiServiceInfoDTO);
+        }
         dto.setCacheTimeout(model.getCacheTimeout());
         String endpointConfig = model.getEndpointConfig();
         if (!StringUtils.isBlank(endpointConfig)) {
