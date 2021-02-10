@@ -117,6 +117,7 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -274,6 +275,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     private static Map<String,List<Integer>> revisionIDList = new HashMap<>();
+    private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
@@ -993,13 +995,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while adding the API
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
-
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
         String serviceKey = api.getServiceInfo("serviceKey");
         if (StringUtils.isNotEmpty(serviceKey)) {
-            apiMgtDAO.addAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"));
+            apiMgtDAO.addAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), tenantId);
         }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -8238,16 +8239,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<ResourcePath> getResourcePathsOfAPI(APIIdentifier apiId) throws APIManagementException {
         return apiMgtDAO.getResourcePathsOfAPI(apiId);
-    }
-
-    @Override
-    public ServiceEntry retrieveServiceByKey(String serviceKey, int tenantId) throws APIManagementException {
-        ServiceEntry service = apiMgtDAO.retrieveServiceByKey(serviceKey, tenantId);
-        if (service == null) {
-            String msg = "Failed to fetch the Service Info. Service with key " + serviceKey + " does not exist";
-            throw new APIMgtResourceNotFoundException(msg);
-        }
-        return service;
     }
 
     private void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {

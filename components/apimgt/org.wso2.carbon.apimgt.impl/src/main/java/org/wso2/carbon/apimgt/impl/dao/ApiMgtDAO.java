@@ -17127,22 +17127,23 @@ public class ApiMgtDAO {
      *
      * @throws APIManagementException
      */
-    public void addAPIServiceMapping(String apiId, String serviceKey, String md5sum) throws
+    public void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId) throws
             APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            addAPIServiceMapping(apiId, serviceKey, md5sum, connection);
+            addAPIServiceMapping(apiId, serviceKey, md5sum, tenantId, connection);
         } catch (SQLException e) {
             handleException("Error while adding API Service Mapping" , e);
         }
     }
 
-    private void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, Connection connection)
-            throws SQLException {
+    private void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId,
+                                      Connection connection) throws SQLException {
         String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
           preparedStatement.setString(1, apiId);
           preparedStatement.setString(2, serviceKey);
           preparedStatement.setString(3, md5sum);
+          preparedStatement.setInt(4, tenantId);
           preparedStatement.executeUpdate();
         }
     }

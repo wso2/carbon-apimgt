@@ -209,17 +209,6 @@ public class API implements Serializable {
      */
     private int revisionId;
 
-    enum ENDPOINT_TYPE { DEFAULT, SERVICE_ENDPOINT }
-    private ENDPOINT_TYPE endpointType = ENDPOINT_TYPE.DEFAULT;
-
-    public void setEndpointType(String endpointType) {
-        this.endpointType = ENDPOINT_TYPE.valueOf(endpointType.toUpperCase());
-    }
-
-    public ENDPOINT_TYPE getEndpointType() {
-        return this.endpointType;
-    }
-
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
     }
@@ -251,7 +240,11 @@ public class API implements Serializable {
     public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
 
     public String getServiceInfo(String key) {
-        return serviceInfo.get(key).toString();
+        if (serviceInfo != null && serviceInfo.get(key) != null) {
+            return serviceInfo.get(key).toString();
+        } else {
+            return null;
+        }
     }
     /**
      * This method is used to get the properties related to monetization
