@@ -249,6 +249,8 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                                             RegistryPersistenceUtil.getCorsConfigurationJsonFromDto(
                                                                             api.getCorsConfiguration()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
+                    RegistryPersistenceUtil.getWebsubSubscriptionJsonFromDto(api.getWebsubSubscriptionConfiguration()));
 
             //attaching micro-gateway labels to the API
             
@@ -312,6 +314,11 @@ public class RegistryPersistenceUtil {
     public static String getCorsConfigurationJsonFromDto(org.wso2.carbon.apimgt.api.model.CORSConfiguration corsConfiguration) {
 
         return new Gson().toJson(corsConfiguration);
+    }
+
+    public static String getWebsubSubscriptionJsonFromDto(org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+
+        return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     /**
@@ -720,6 +727,7 @@ public class RegistryPersistenceUtil {
 
             api.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setWebsubSubscriptionConfiguration(getWebsubSubscriptionConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
@@ -1147,6 +1155,15 @@ public class RegistryPersistenceUtil {
                 artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION),
                 org.wso2.carbon.apimgt.api.model.CORSConfiguration.class);
         return corsConfiguration;
+    }
+
+    public static org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationFromArtifact(
+            GovernanceArtifact artifact) throws GovernanceException {
+
+        org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration websubSubscriptionConfiguration = new Gson()
+                .fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION),
+                org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration.class);
+        return websubSubscriptionConfiguration;
     }
     
     /**

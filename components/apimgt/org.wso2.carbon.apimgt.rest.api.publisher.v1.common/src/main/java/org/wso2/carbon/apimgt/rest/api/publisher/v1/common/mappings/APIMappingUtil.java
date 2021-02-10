@@ -2048,7 +2048,7 @@ public class APIMappingUtil {
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
-                operationsDTO.setTarget("*");
+                operationsDTO.setTarget(APIConstants.WEBSUB_DEFAULT_TOPIC_NAME);
             } else {
                 operationsDTO.setTarget("/*");
             }
