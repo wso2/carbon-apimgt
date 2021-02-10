@@ -452,7 +452,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            if (api.isAsync()) {
+                api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
+            } else {
+                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            }
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             }
@@ -1211,7 +1215,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return definition;
     }
-    
+
     @Override
     public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
         String definition = null;
@@ -1281,7 +1285,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
     }
-    
+
     public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
@@ -1534,7 +1538,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return documentation;
     }
-    
+
     @Override
     public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
             throws APIManagementException {
@@ -3657,7 +3661,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDocContent;
 
     }
-    
+
     public String extractQuery(String searchQuery) {
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
@@ -3707,7 +3711,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return filteredQuery.toString();
     }
-    
+
     protected void populateAPIInformation(String uuid, String requestedTenantDomain, Organization org, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
         //UUID
@@ -3748,8 +3752,8 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         api.setAvailableTiers(availableTier);
-        
-        //Scopes 
+
+        //Scopes
         Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
@@ -3816,7 +3820,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if(api.getCorsConfiguration() == null) {
             api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
         }
-        
+
         // set category
         List<APICategory> categories = api.getApiCategories();
         if (categories != null) {
@@ -3845,12 +3849,12 @@ public abstract class AbstractAPIManager implements APIManager {
             api.setApiCategories(categoryList);
         }
     }
-    
+
     protected void populateAPIProductInformation(String uuid, String requestedTenantDomain, Organization org,
             APIProduct apiProduct) throws APIManagementException, OASPersistenceException, ParseException {
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
-        
+
         List<APIProductResource> resources = ApiMgtDAO.getInstance().
                 getAPIProductResourceMappings(apiProduct.getId());
 
@@ -3911,8 +3915,8 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
         apiProduct.setAvailableTiers(availableTier);
-        
-        //Scopes 
+
+        //Scopes
         /*
         Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
         apiProduct.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
@@ -3929,7 +3933,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getCorsConfiguration() == null) {
             apiProduct.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
         }
-        
+
         // set category
         List<APICategory> categories = apiProduct.getApiCategories();
         if (categories != null) {
@@ -3958,7 +3962,7 @@ public abstract class AbstractAPIManager implements APIManager {
             apiProduct.setApiCategories(categoryList);
         }
     }
-    
+
     @Override
     public ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException {
         try {

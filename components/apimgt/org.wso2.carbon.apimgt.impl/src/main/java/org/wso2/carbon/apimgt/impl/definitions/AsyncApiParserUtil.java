@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -14,6 +16,7 @@ import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -25,6 +28,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -194,5 +198,39 @@ public class AsyncApiParserUtil {
                             + apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDocContent;
+    }
+
+    public static API loadTopicsFromAsyncAPIDefinition(API api, String definitionJSON) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        uriTemplates.clear();
+
+        AaiDocument definition = (AaiDocument) Library.readDocumentFromJSONString(definitionJSON);
+        if (definition.getChannels().size() > 0) {
+            for (String topic : definition.channels.keySet()) {
+                if (definition.channels.get(topic).publish != null && definition.channels.get(topic).subscribe != null) {
+                    URITemplate uriTemplateSub = new URITemplate();
+                    uriTemplateSub.setUriTemplate(topic);
+                    uriTemplateSub.setHTTPVerb("SUBSCRIBE");
+                    uriTemplates.add(uriTemplateSub);
+                    URITemplate uriTemplatePub = new URITemplate();
+                    uriTemplatePub.setUriTemplate(topic);
+                    uriTemplatePub.setHTTPVerb("PUBLISH");
+                    uriTemplates.add(uriTemplatePub);
+                } else if (definition.channels.get(topic).publish != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setHTTPVerb("PUBLISH");
+                    uriTemplates.add(uriTemplate);
+                } else if (definition.channels.get(topic).subscribe != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setHTTPVerb("SUBSCRIBE");
+                    uriTemplates.add(uriTemplate);
+                }
+            }
+        }
+
+        api.setUriTemplates(uriTemplates);
+        return api;
     }
 }

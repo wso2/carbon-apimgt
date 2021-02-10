@@ -599,6 +599,7 @@ public final class APIConstants {
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
 
     public static class TokenStatus {
 

@@ -3139,7 +3139,7 @@ public class SQLConstants {
             "AND SUBSCRIPTION.API_UUID = ?";
 
     public static final String GET_ALL_TOPICS_BY_API_ID = "" +
-            "SELECT URL.URL_PATTERN, API.API_ID FROM AM_API_URL_MAPPING URL INNER JOIN " +
+            "SELECT URL.URL_PATTERN, URL.HTTP_METHOD, API.API_ID FROM AM_API_URL_MAPPING URL INNER JOIN " +
             "AM_API API ON URL.API_ID = API.API_ID WHERE API.API_UUID = ?";
 
     public static final String GET_SCOPE_KEYS_BY_URL_MAPPING_ID =

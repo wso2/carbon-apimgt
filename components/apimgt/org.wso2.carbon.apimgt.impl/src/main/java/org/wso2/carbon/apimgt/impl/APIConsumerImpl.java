@@ -5117,7 +5117,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiIdentifier.toString()));
         }
     }
-    
+
     @Override
     public ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
             throws APIManagementException {
@@ -5427,7 +5427,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String definition = super.getOpenAPIDefinition(apiId, orgId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
-    
+
     @Override
     public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
         String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
@@ -5457,7 +5457,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             throw new APIManagementException("Missing API definition in the api " + api.getUuid());
         }
-        
+
         APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         gatewayLabels = api.getGatewayLabels();
         hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
@@ -5515,7 +5515,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return updatedDefinition;
     }
-    
+
     /**
      * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
      * @param synapseEnvName Name of the synapse gateway environment
@@ -5933,7 +5933,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
     }
-    
+
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
             throws APIManagementException {
@@ -5975,7 +5975,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return result ;
     }
-    
+
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
             throws APIManagementException {
@@ -5991,7 +5991,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
                     populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
-                    
+
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
@@ -6008,7 +6008,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, e);
         }
     }
-    
+
     protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
             throws APIManagementException {
 
@@ -6070,7 +6070,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         api.addAvailableTiers(availableTiers);
         return api;
     }
-    
+
     /**
      * Get minimal details of API by registry artifact id
      *
@@ -6087,7 +6087,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles());
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                
+
                 /// populate relavant external info
                 // environment
                 String environmentString = null;
@@ -6109,7 +6109,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException(msg, e);
         }
     }
-    
+
     /**
      * Get minimal details of API by API identifier
      *
@@ -6117,7 +6117,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
- 
+
     public API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException {
 
         String uuid = null;
@@ -6131,7 +6131,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid );
             if (devPortalApi != null) {
                 API api = APIMapper.INSTANCE.toApi(devPortalApi);
-                
+
                 /// populate relavant external info
                 /*
                 // environment
@@ -6163,13 +6163,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         int totalLength = 0;
-        
+
         String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         Organization org = new Organization(tenantDomain);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
         String[] roles = APIUtil.getFilteredUserRoles(userame);;
         UserContext ctx = new UserContext(userame, org, properties, roles);
-        
+
         try {
             DevPortalContentSearchResult sResults = apiPersistenceInstance.searchContentForDevPortal(org, searchQuery,
                     start, end, ctx);
@@ -6211,7 +6211,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("length", totalLength );
         return result;
     }
-    
+
     protected void checkAPIVisibilityRestriction(String apiId, String tenantDomain) throws APIManagementException {
         try {
             DevPortalAPI api = apiPersistenceInstance.getDevPortalAPI(new Organization(tenantDomain), apiId);
@@ -6222,20 +6222,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throw new APIManagementException("Error while accessing dev portal API", e);
         }
     }
-    
+
     @Override
     public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
         checkAPIVisibilityRestriction(uuid, tenantDomain);
         return super.getAllDocumentation(uuid, tenantDomain);
     }
-    
+
     @Override
     public Documentation getDocumentation(String apiId, String docId, String requestedTenantDomain)
             throws APIManagementException {
         checkAPIVisibilityRestriction(apiId, requestedTenantDomain);
         return super.getDocumentation(apiId, docId, requestedTenantDomain);
     }
-    
+
     @Override
     public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
             throws APIManagementException {
