@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.jwt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
@@ -47,8 +48,10 @@ public class RevokedJWTMapCleaner extends TimerTask {
         int count = 0;
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
-            long expiryTime = (long) (entry.getValue()) * 1000;
-            if (currentTimestamp > expiryTime) { // if token is expired, remove from the revoked map
+            BigInteger entryValue = BigInteger.valueOf((long)entry.getValue());
+            BigInteger expiryTime = entryValue.multiply(BigInteger.valueOf(1000));
+            int compareValue = BigInteger.valueOf(currentTimestamp).compareTo(expiryTime);
+            if (compareValue == 1) { // if token is expired, remove from the revoked map
                 it.remove();
                 if (log.isDebugEnabled()) {
                     log.debug("Removed entry : " + entry.getKey());
