@@ -3511,8 +3511,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(Identifier identifier, String commentId, Integer limit, Integer offset) throws APIManagementException {
-        return apiMgtDAO.getComment(identifier, commentId, limit, offset);
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws APIManagementException {
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
     }
 
     @Override

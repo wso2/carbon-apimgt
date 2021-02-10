@@ -7812,16 +7812,29 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(Identifier identifier, String commentId, Integer limit, Integer offset) throws APIManagementException {
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws APIManagementException {
 
         Comment comment = new Comment();
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
         int id = -1;
+        Identifier identifier;
+        if (apiTypeWrapper.isAPIProduct()) {
+            identifier = apiTypeWrapper.getApiProduct().getId();
+        } else {
+            identifier = apiTypeWrapper.getApi().getId();
+        }
+        id = getAPIID(identifier, connection);
+        if (id == -1) {
+            String msg = "Could not load API record for: " + identifier.getName();
+            log.error(msg);
+            throw new APIManagementException(msg);
+        }
 
         String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
         try {
+
             connection = APIMgtDBUtil.getConnection();
             id = getAPIID(identifier, connection);
             if (id == -1) {
@@ -7848,7 +7861,7 @@ public class ApiMgtDAO {
                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                 comment.setCategory(resultSet.getString("CATEGORY"));
                 if (limit>0){
-                    comment.setReplies(getReplies(identifier, commentId, limit, offset));
+                    comment.setReplies(Arrays.asList(getComments(apiTypeWrapper, commentId)));
                 }
                 return comment;
             }
