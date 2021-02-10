@@ -5724,6 +5724,14 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Returns whether a given API Name already exists
+     *
+     * @param apiName          Name of the API
+     * @param organizationId   Identifier of an Organization
+     * @return true/false
+     * @throws APIManagementException if failed to get API Names
+     */
     public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
             throws APIManagementException {
 
@@ -7229,7 +7237,7 @@ public class ApiMgtDAO {
      * Check the given api name is already available in the api table under given Organization
      *
      * @param apiName         candidate api name
-     * @param oraganizationId UUID of the oragnization
+     * @param organizationId UUID of the oragnization
      * @return true if the name is already available
      * @throws APIManagementException
      */
@@ -10215,6 +10223,14 @@ public class ApiMgtDAO {
         return false;
     }
 
+    /**
+     * Returns whether a given API Context already exists
+     *
+     * @param contextTemplate  Requested context template
+     * @param organizationId   Identifier of an Organization
+     * @return true/false
+     * @throws APIManagementException if failed to get API Contexts
+     */
     public boolean isDuplicateContextTemplateMatchesOrganization(String contextTemplate, String organizationId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
@@ -16304,8 +16320,8 @@ public class ApiMgtDAO {
     /**
      * Remove an API revision Deployment mapping record to the database
      *
-     * @param apiRevisionId          uuid of the revision
-     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @param apiUUID         uuid of the API
+     * @param deployments     deployments of the API
      * @throws APIManagementException if an error occurs when adding a new API revision
      */
     public void removeAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
