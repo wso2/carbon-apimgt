@@ -58,26 +58,27 @@ public class CommentMappingUtil {
         commentDTO.setCategory(comment.getCategory());
         commentDTO.setParentCommentId(comment.getParentCommentID());
         commentDTO.setEntryPoint(comment.getEntryPoint());
-        List<CommentDTO> replieslist = new ArrayList<CommentDTO>();
-        for (Comment reply : comment.getReplies()){
-            CommentDTO commentDTOOfReply = new CommentDTO();
-            commentDTOOfReply.setId(reply.getId());
-            commentDTOOfReply.setContent(reply.getText());
-            commentDTOOfReply.setCreatedBy(reply.getUser());
-            commentDTOOfReply.setCreatedTime(reply.getCreatedTime().toString());
-            if (reply.getUpdatedTime()!=null){
-                commentDTOOfReply.setUpdatedTime(reply.getUpdatedTime().toString());
-            }
-            commentDTOOfReply.setUpdatedBy(reply.getUpdatedBy());
-            commentDTOOfReply.setCategory(reply.getCategory());
-            commentDTOOfReply.setParentCommentId(reply.getParentCommentID());
-            commentDTOOfReply.setEntryPoint(reply.getEntryPoint());
-            replieslist.add(commentDTOOfReply);
-        }
-        CommentListDTO commentListDTO = new CommentListDTO();
-        commentListDTO.setList(replieslist);
-        commentListDTO.setCount(replieslist.size());
-        commentDTO.setReplies(commentListDTO);
+        commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(new Comment[comment.getReplies().size()]), 30, 0, false));
+//        List<CommentDTO> replieslist = new ArrayList<CommentDTO>();
+//        for (Comment reply : comment.getReplies()){
+//            CommentDTO commentDTOOfReply = new CommentDTO();
+//            commentDTOOfReply.setId(reply.getId());
+//            commentDTOOfReply.setContent(reply.getText());
+//            commentDTOOfReply.setCreatedBy(reply.getUser());
+//            commentDTOOfReply.setCreatedTime(reply.getCreatedTime().toString());
+//            if (reply.getUpdatedTime()!=null){
+//                commentDTOOfReply.setUpdatedTime(reply.getUpdatedTime().toString());
+//            }
+//            commentDTOOfReply.setUpdatedBy(reply.getUpdatedBy());
+//            commentDTOOfReply.setCategory(reply.getCategory());
+//            commentDTOOfReply.setParentCommentId(reply.getParentCommentID());
+//            commentDTOOfReply.setEntryPoint(reply.getEntryPoint());
+//            replieslist.add(commentDTOOfReply);
+//        }
+//        CommentListDTO commentListDTO = new CommentListDTO();
+//        commentListDTO.setList(replieslist);
+//        commentListDTO.setCount(replieslist.size());
+//        commentDTO.setReplies(commentListDTO);
         return commentDTO;
     }
 

@@ -463,7 +463,7 @@ public interface APIConsumer extends APIManager {
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
