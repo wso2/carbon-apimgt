@@ -19,6 +19,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPolic
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -53,6 +54,9 @@ public class APIDTO   {
     private String destinationStatsEnabled = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
+    private Boolean isRevision = null;
+    private String revisionedApiId = null;
+    private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private Boolean enableStore = null;
@@ -65,7 +69,8 @@ public class APIDTO   {
         SOAPTOREST("SOAPTOREST"),
         SOAP("SOAP"),
         GRAPHQL("GRAPHQL"),
-        WEBSUB("WEBSUB");
+        WEBSUB("WEBSUB"),
+        SSE("SSE");
         private String value;
 
         TypeEnum (String v) {
@@ -219,10 +224,11 @@ return null;
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
+    private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
-    private java.util.Date createdTime = null;
+    private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
-    private java.util.Date lastUpdatedTime = null;
+    private String lastUpdatedTime = null;
     private Object endpointConfig = null;
 
     @XmlType(name="EndpointImplementationTypeEnum")
@@ -526,6 +532,58 @@ return null;
 
   /**
    **/
+  public APIDTO isRevision(Boolean isRevision) {
+    this.isRevision = isRevision;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isRevision")
+  public Boolean isIsRevision() {
+    return isRevision;
+  }
+  public void setIsRevision(Boolean isRevision) {
+    this.isRevision = isRevision;
+  }
+
+  /**
+   * UUID of the api registry artifact 
+   **/
+  public APIDTO revisionedApiId(String revisionedApiId) {
+    this.revisionedApiId = revisionedApiId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the api registry artifact ")
+  @JsonProperty("revisionedApiId")
+  public String getRevisionedApiId() {
+    return revisionedApiId;
+  }
+  public void setRevisionedApiId(String revisionedApiId) {
+    this.revisionedApiId = revisionedApiId;
+  }
+
+  /**
+   **/
+  public APIDTO revisionId(Integer revisionId) {
+    this.revisionId = revisionId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("revisionId")
+  public Integer getRevisionId() {
+    return revisionId;
+  }
+  public void setRevisionId(Integer revisionId) {
+    this.revisionId = revisionId;
+  }
+
+  /**
+   **/
   public APIDTO enableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
     return this;
@@ -559,7 +617,7 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -567,7 +625,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -719,7 +777,7 @@ return null;
   }
 
   /**
-   * The user roles that are able to access the API in Store
+   * The user roles that are able to access the API in Developer Portal
    **/
   public APIDTO visibleRoles(List<String> visibleRoles) {
     this.visibleRoles = visibleRoles;
@@ -727,7 +785,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[]", value = "The user roles that are able to access the API in Store")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to access the API in Developer Portal")
   @JsonProperty("visibleRoles")
   public List<String> getVisibleRoles() {
     return visibleRoles;
@@ -989,6 +1047,24 @@ return null;
 
   /**
    **/
+  public APIDTO websubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
+    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("websubSubscriptionConfiguration")
+  public WebsubSubscriptionConfigurationDTO getWebsubSubscriptionConfiguration() {
+    return websubSubscriptionConfiguration;
+  }
+  public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
+    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+  }
+
+  /**
+   **/
   public APIDTO workflowStatus(String workflowStatus) {
     this.workflowStatus = workflowStatus;
     return this;
@@ -1006,7 +1082,7 @@ return null;
 
   /**
    **/
-  public APIDTO createdTime(java.util.Date createdTime) {
+  public APIDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -1014,16 +1090,16 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public java.util.Date getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(java.util.Date createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 
   /**
    **/
-  public APIDTO lastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -1031,10 +1107,10 @@ return null;
   
   @ApiModelProperty(value = "")
   @JsonProperty("lastUpdatedTime")
-  public java.util.Date getLastUpdatedTime() {
+  public String getLastUpdatedTime() {
     return lastUpdatedTime;
   }
-  public void setLastUpdatedTime(java.util.Date lastUpdatedTime) {
+  public void setLastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
   }
 
@@ -1190,6 +1266,9 @@ return null;
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(isRevision, API.isRevision) &&
+        Objects.equals(revisionedApiId, API.revisionedApiId) &&
+        Objects.equals(revisionId, API.revisionId) &&
         Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(enableStore, API.enableStore) &&
         Objects.equals(type, API.type) &&
@@ -1216,6 +1295,7 @@ return null;
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
         Objects.equals(businessInformation, API.businessInformation) &&
         Objects.equals(corsConfiguration, API.corsConfiguration) &&
+        Objects.equals(websubSubscriptionConfiguration, API.websubSubscriptionConfiguration) &&
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
@@ -1230,7 +1310,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
   }
 
   @Override
@@ -1253,6 +1333,9 @@ return null;
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
+    sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
+    sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
@@ -1279,6 +1362,7 @@ return null;
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
+    sb.append("    websubSubscriptionConfiguration: ").append(toIndentedString(websubSubscriptionConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");

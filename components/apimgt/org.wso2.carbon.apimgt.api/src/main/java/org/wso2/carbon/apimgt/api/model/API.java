@@ -97,6 +97,10 @@ public class API implements Serializable {
     private String inSequence;
     private String outSequence;
     private String faultSequence;
+    
+    private Mediation inSequenceMediation;
+    private Mediation outSequenceMediation;
+    private Mediation faultSequenceMediation;
 
     private String oldInSequence;
     private String oldOutSequence;
@@ -110,6 +114,7 @@ public class API implements Serializable {
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
 
     private String responseCache;
     private int cacheTimeout;
@@ -117,6 +122,16 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
+    
+    private List<SOAPToRestSequence> soapToRestSequences;
+
+    public List<SOAPToRestSequence> getSoapToRestSequences() {
+        return soapToRestSequences;
+    }
+
+    public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
+        this.soapToRestSequences = soapToRestSequences;
+    }
 
     //Custom authorization header specific to the API
     private String authorizationHeader;
@@ -177,6 +192,20 @@ public class API implements Serializable {
 
     private String testKey;
 
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private boolean isRevision = false;
+
+    /**
+     * Property to hold api id of a revision.
+     */
+    private String revisionedApiId;
+
+    /**
+     * Property to hold revision id
+     */
+    private int revisionId;
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -218,6 +247,7 @@ public class API implements Serializable {
      *
      * @return flag to indicate the monetization status (true or false)
      */
+    @Deprecated
     public boolean getMonetizationStatus() {
         return isMonetizationEnabled;
     }
@@ -227,8 +257,27 @@ public class API implements Serializable {
      *
      * @param monetizationStatus flag to indicate the monetization status (true or false)
      */
+    @Deprecated
     public void setMonetizationStatus(boolean monetizationStatus) {
         this.isMonetizationEnabled = monetizationStatus;
+    }
+    
+    /**
+     * This method is used to get the properties related to monetization
+     *
+     * @return properties related to monetization
+     */
+    public boolean isMonetizationEnabled() {
+        return isMonetizationEnabled;
+    }
+
+    /**
+     * This method is used to set the monetization status (true or false)
+     *
+     * @param isMonetizationEnabled flag to indicate the monetization status (true or false)
+     */
+    public void setMonetizationEnabled(boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
     }
 
     /**
@@ -328,15 +377,24 @@ public class API implements Serializable {
     private boolean isLatest;
 
     //TODO: missing - total user count, up time statistics,tier
-
+    @Deprecated
     public String getUUID() {
         return uuid;
     }
-
+    
+    @Deprecated
     public void setUUID(String uuid) {
         this.uuid = uuid;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    } 
+    
     public String getProductionMaxTps() {
         return productionMaxTps;
     }
@@ -490,8 +548,13 @@ public class API implements Serializable {
     public Set<String> getTags() {
         return Collections.unmodifiableSet(tags);
     }
-
+    
+    @Deprecated
     public void addTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+    
+    public void setTags(Set<String> tags) {
         this.tags.addAll(tags);
     }
 
@@ -520,21 +583,30 @@ public class API implements Serializable {
     }
 
     public Date getLastUpdated() {
-        return new Date(lastUpdated.getTime());
+        if (lastUpdated != null) {
+            return new Date(lastUpdated.getTime());
+        }
+        return null;
     }
 
     public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = new Date(lastUpdated.getTime());
+        if (lastUpdated != null) {
+            this.lastUpdated = new Date(lastUpdated.getTime());
+        }
     }
 
     public Set<Tier> getAvailableTiers() {
         return Collections.unmodifiableSet(availableTiers);
     }
 
+    @Deprecated
     public void addAvailableTiers(Set<Tier> availableTiers) {
         this.availableTiers.addAll(availableTiers);
     }
 
+    public void setAvailableTiers(Set<Tier> availableTiers) {
+        this.availableTiers.addAll(availableTiers);
+    } 
     /**
      * Removes all Tiers from the API object.
      */
@@ -827,8 +899,13 @@ public class API implements Serializable {
         this.scopes = scopes;
     }
 
+    @Deprecated
     public void setAsDefaultVersion(boolean value) {
         isDefaultVersion = value;
+    }
+
+    public void setDefaultVersion(boolean isDefaultVersion) {
+        this.isDefaultVersion = isDefaultVersion;
     }
 
     public void setAsPublishedDefaultVersion(boolean value) {
@@ -857,6 +934,14 @@ public class API implements Serializable {
 
     public void setMonetizationCategory(String monetizationCategory) {
         this.monetizationCategory = monetizationCategory;
+    }
+
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
+    }
+
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
     }
 
     public String getApiLevelPolicy() {
@@ -916,6 +1001,7 @@ public class API implements Serializable {
      *
      * @return Status of the validator property.
      */
+    @Deprecated
     public boolean isEnabledSchemaValidation() {
         return enableSchemaValidation;
     }
@@ -927,6 +1013,15 @@ public class API implements Serializable {
      */
     public void setEnableSchemaValidation(boolean enableSchemaValidation) {
         this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+    /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnableSchemaValidation() {
+        return enableSchemaValidation;
     }
 
     /**
@@ -1054,6 +1149,54 @@ public class API implements Serializable {
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
     }
+    
+    public Mediation getInSequenceMediation() {
+        return inSequenceMediation;
+    }
+
+    public void setInSequenceMediation(Mediation inSequenceMediation) {
+        this.inSequenceMediation = inSequenceMediation;
+    }
+
+    public Mediation getOutSequenceMediation() {
+        return outSequenceMediation;
+    }
+
+    public void setOutSequenceMediation(Mediation outSequenceMediation) {
+        this.outSequenceMediation = outSequenceMediation;
+    }
+
+    public Mediation getFaultSequenceMediation() {
+        return faultSequenceMediation;
+    }
+
+    public void setFaultSequenceMediation(Mediation faultSequenceMediation) {
+        this.faultSequenceMediation = faultSequenceMediation;
+    }
+
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setRevision(boolean revision) {
+        isRevision = revision;
+    }
+
+    public String getRevisionedApiId() {
+        return revisionedApiId;
+    }
+
+    public void setRevisionedApiId(String revisionedApiId) {
+        this.revisionedApiId = revisionedApiId;
+    }
+
+    public int getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(int revisionId) {
+        this.revisionId = revisionId;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -1069,5 +1212,12 @@ public class API implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public boolean isAsync() {
+        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
+            return true;
+        }
+        return false;
     }
 }

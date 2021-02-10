@@ -51,6 +51,7 @@ export default function ApiCreateAsyncAPI(props) {
     const { history } = props;
     const { settings } = useAppContext();
     const classes = useStyles();
+    const [hideEndpoint, setHideEndpoint] = useState(false);
 
     /**
      *
@@ -114,6 +115,11 @@ export default function ApiCreateAsyncAPI(props) {
      */
     function handleOnChange(event) {
         const { name: action, value } = event.target;
+        if (value === "WebSub") {
+            setHideEndpoint(true);
+        } else {
+            setHideEndpoint(false);
+        }
         inputsDispatcher({ action, value });
     }
 
@@ -238,7 +244,7 @@ export default function ApiCreateAsyncAPI(props) {
                             onChange={handleOnChange}
                             api={apiInputs}
                             isAPIProduct={false}
-                            hideEndpoint = {false}
+                            hideEndpoint = {hideEndpoint}
                             endpointPlaceholderText='Streaming Provider'
                             appendChildrenBeforeEndpoint
                         >

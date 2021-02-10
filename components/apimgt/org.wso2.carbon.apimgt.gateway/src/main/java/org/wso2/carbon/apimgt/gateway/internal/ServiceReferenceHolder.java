@@ -24,8 +24,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
@@ -41,6 +41,8 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class ServiceReferenceHolder {
 
@@ -67,7 +69,7 @@ public class ServiceReferenceHolder {
 
     private JWTValidationService jwtValidationService;
     private KeyManagerDataService keyManagerDataService;
-
+    private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -285,5 +287,20 @@ public class ServiceReferenceHolder {
     public void setKeyManagerDataService(KeyManagerDataService keyManagerDataService) {
 
         this.keyManagerDataService = keyManagerDataService;
+    }
+
+    public void addLoadedTenant(String tenantDomain) {
+
+        activeTenants.add(tenantDomain);
+    }
+
+    public void removeUnloadedTenant(String tenantDomain) {
+
+        activeTenants.remove(tenantDomain);
+    }
+
+    public boolean isTenantLoaded(String tenantDomain) {
+
+        return activeTenants.contains(tenantDomain);
     }
 }

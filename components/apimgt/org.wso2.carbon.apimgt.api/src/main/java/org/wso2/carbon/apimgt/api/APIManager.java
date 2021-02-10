@@ -1,32 +1,33 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.api;
+
 
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -74,33 +75,32 @@ public interface APIManager {
 
     /**
      * Returns details of an API
-     *
-     * @param uuid                  UUID of the API's registry artifact
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param uuid   UUID of the API's registry artifact
+     * @param orgId  Identifier of an organization
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getAPIbyUUID(String uuid, String orgId) throws APIManagementException;
 
     /**
      * Get API or APIProduct by registry artifact id
      *
-     * @param uuid                  Registry artifact id
-     * @param requestedTenantDomain tenantDomain for the registry
+     * @param uuid   Registry artifact id
+     * @param orgId  Identifier of an organization
      * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
      * @throws APIManagementException
      */
-    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
-            throws APIManagementException;
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String orgId) throws APIManagementException;
 
     /**
      * Get minimal details of API by registry artifact id
      *
      * @param uuid Registry artifact id
+     * @param orgId  Identifier of an organization
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException;
 
     /**
      * Get minimal details of API by API identifier
@@ -156,6 +156,7 @@ public interface APIManager {
      */
     boolean isApiNameExist(String apiName) throws APIManagementException;
 
+
     /**
      * Checks whether a different letter case of the given API name is already registered in the system
      *
@@ -178,18 +179,47 @@ public interface APIManager {
     String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
+     * Get graphql schema definition
+     * @param apiId  ID of the API
+     * @param orgId  Identifier of an organization
+     * @return
+     * @throws APIManagementException
+     */
+    String getGraphqlSchemaDefinition(String apiId, String orgId) throws APIManagementException;
+
+    /**
      * Returns the swagger v2.0 definition as a string
      *
-     * @param apiId id of the APIIdentifier
+     * @param apiId  ID of the APIIdentifier
+     * @param orgId  Identifier of an organization
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
+    String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException;
+
+    /**
+     * Returns the OpenAPI definition as a string
+     *
+     * @param apiId  ID of the API
+     * @param orgId  Identifier of an organization
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
+
+    /**
+     * Returns the async-api v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return async specification string
+     * @throws APIManagementException
+     */
+    String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api/product
      *
-     * @param identifier API/Product Identifier
+     * @param identifier API/Product id
      * @param docName    Name of the document
      * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
@@ -216,6 +246,15 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Returns a list of documentation attached to a particular API
+     *
+     * @param uuid id of the api
+     * @param orgId  Identifier of an organization
+     * @return List<Documentation>
+     * @throws APIManagementException if failed to get Documentations
+     */
+    List<Documentation> getAllDocumentation(String uuid, String orgId) throws APIManagementException;
+    /**
      * Returns the specified document attached to the given API
      *
      * @param apiId   APIIdentifier
@@ -229,18 +268,32 @@ public interface APIManager {
     /**
      * Get a documentation by artifact Id
      *
+     * @param apiId   apiId
      * @param docId   DocumentID
-     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @param orgId   Identifier of the organization
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-     Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+    Documentation getDocumentation(String apiId, String docId, String orgId)
+            throws APIManagementException;
+
+    /**
+     * Get a documentation Content by apiid and doc id
+     *
+     * @param apiId  ID of the API
+     * @param docId  DocumentID
+     * @param orgId  Identifier of an organization
+     * @return DocumentationContent
+     * @throws APIManagementException if failed to get Documentation
+     */
+    DocumentationContent getDocumentationContent(String apiId, String docId, String orgId)
+            throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
      *
-     * @param identifier,        API/Product identifier
-     * @param documentationName, name of the inline documentation
+     * @param identifier        API/Product identifier
+     * @param documentationName name of the inline documentation
      * @return if failed to get doc content
      * @throws APIManagementException if the asking documentation content is unavailable
      */
@@ -249,7 +302,7 @@ public interface APIManager {
     /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
-     * @param apiId API ID
+     * @param  apiId ID of the API
      * @return GraphqlComplexityInfo object
      * @throws APIManagementException if failed to retrieve complexity details of the given API
      */
@@ -270,7 +323,7 @@ public interface APIManager {
     /**
      * Retrieves the subscriber from the given access token
      *
-     * @param accessToken Subscriber key
+     * @param  accessToken Subscriber key
      * @return Subscriber
      * @throws APIManagementException if failed to get Subscriber from access token
      */
@@ -279,7 +332,7 @@ public interface APIManager {
     /**
      * returns the SubscribedAPI object which is related to the UUID
      *
-     * @param uuid UUID of Subscription
+     * @param  uuid UUID of Subscription
      * @return SubscribedAPI object which is related to the UUID
      * @throws APIManagementException
      */
@@ -339,6 +392,16 @@ public interface APIManager {
      * @throws APIManagementException if an error occurs while retrieving the image
      */
     ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Retrieves the icon image associated with a particular API as a stream.
+     *
+     * @param apiId ID representing the API
+     * @param orgId  Identifier of an organization
+     * @return an Icon containing image content and content type information
+     * @throws APIManagementException if an error occurs while retrieving the image
+     */
+    ResourceFile getIcon(String apiId, String orgId) throws APIManagementException;
 
     /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended
@@ -463,9 +526,9 @@ public interface APIManager {
      * Check if a given context template already exists
      *
      * @param contextTemplate - The contextTemplate to be checked for
-        *                        <p>
-        *                        Ex: /foo/{version}/bar
-        *                        </p>
+     *                        <p>
+     *                        Ex: /foo/{version}/bar
+     *                        </p>
      * @return boolean - true if the template exists, false otherwise.
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
@@ -502,7 +565,7 @@ public interface APIManager {
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end,
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
                                            boolean limitAttributes) throws APIManagementException;
 
     /**
@@ -510,7 +573,7 @@ public interface APIManager {
      * search in multiple fields.
      *
      * @param searchQuery     search query. Ex: provider=*admin*&version=*1*
-     * @param tenantDomain    tenant domain
+     * @param orgId           Identifier of an organization
      * @param start           starting number
      * @param end             ending number
      * @param limitAttributes whether or not to limit attributes in the search result
@@ -518,9 +581,9 @@ public interface APIManager {
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end,
-            boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
-    
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end,
+                                            boolean limitAttributes, boolean isPublisherListing) throws APIManagementException;
+
     /**
      * fetches the lastUpdated timestamp for the API swagger resource
      *
@@ -642,11 +705,13 @@ public interface APIManager {
     /**
      * Returns a list of api versions that matches the given context template
      *
-     * @param apiName api name in the payload
+     * @param apiName        API name in the payload
+     * @param username       logged in user name of the user
      * @return api versions that matches context template
      * @throws APIManagementException If failed to get the list of api versions
      */
-    List<String> getApiVersionsMatchingApiName(String apiName,String username) throws APIManagementException;
+    List<String> getApiVersionsMatchingApiName(String apiName,String username)
+            throws APIManagementException;
 
     /**
      * Returns list of wsdls
@@ -716,9 +781,19 @@ public interface APIManager {
     ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException;
 
     /**
+     * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
+     * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
+     *
+     * @param apiId ID of the API
+     * @param tenantDomain tenant
+     * @return wsdl content matching name if exist else throws an APIManagementException
+     */
+    ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException;
+
+    /**
      * Returns the graphql schema content in registry specified by the schema name
      *
-     * @param apiId api identifier of the API
+     * @param  apiId  ID of the API
      * @return schema content matching name if exist else null
      */
     String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
@@ -812,6 +887,29 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
+
+    /**
+     * @param searchQuery search query. ex : provider:admin
+     * @param orgId Identifier of an organization
+     * @param start starting number
+     * @param end ending number
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, String orgId, int start, int end)
+            throws APIManagementException;
+
+    /**
+     * Search in content of apis, api products and documents and provide the results
+     * @param searchQuery search query
+     * @param orgId Identifier of an organization
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
+            throws APIManagementException;
 
     /**
      * Returns the AsyncAPI definition as a string

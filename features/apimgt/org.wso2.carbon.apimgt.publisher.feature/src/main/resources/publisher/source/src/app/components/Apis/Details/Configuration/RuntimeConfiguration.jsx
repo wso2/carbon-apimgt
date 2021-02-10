@@ -153,10 +153,10 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        subscription: {
-            secret: api.subscription.secret,
-            signingAlgorithm: api.subscription.signingAlgorithm,
-            signatureHeader: api.subscription.signatureHeader,
+        websubSubscriptionConfiguration: {
+            secret: api.websubSubscriptionConfiguration.secret,
+            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
+            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
         },
     };
     return apiConfigJson;
@@ -289,7 +289,7 @@ export default function RuntimeConfiguration() {
             case 'secret':
             case 'signingAlgorithm':
             case 'signatureHeader':
-                nextState.subscription[action] = value;
+                nextState.websubSubscriptionConfiguration[action] = value;
                 return nextState;
             default:
                 return state;
@@ -297,14 +297,11 @@ export default function RuntimeConfiguration() {
     }
     const { api, updateAPI } = useContext(APIContext);
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
-    // TODO:
-    if (isAsyncAPI) {
-        api.subscription = api.subscription || {
-            secret: '',
-            signingAlgorithm: '',
-            signatureHeader: '',
-        };
-    }
+    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
+        secret: '',
+        signingAlgorithm: '',
+        signatureHeader: '',
+    };
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
@@ -479,7 +476,7 @@ export default function RuntimeConfiguration() {
                                             />
                                         </Box>
                                     )}
-                                    {isAsyncAPI && (
+                                    {api.type === 'WEBSUB' && (
                                         <Subscription api={apiConfig} configDispatcher={configDispatcher} />
                                     )}
                                 </Paper>
@@ -572,7 +569,7 @@ export default function RuntimeConfiguration() {
                     <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
                         <Grid item>
                             <Button
-                                disabled={isUpdating
+                                disabled={isUpdating || api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
                                     || isRestricted(['apim:api_create'], api))}
                                 type='submit'

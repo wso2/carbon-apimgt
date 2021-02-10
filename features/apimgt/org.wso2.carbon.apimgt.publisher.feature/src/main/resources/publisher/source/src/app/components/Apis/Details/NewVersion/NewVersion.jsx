@@ -318,6 +318,7 @@ class CreateNewVersion extends React.Component {
                                                         || valid.version.alreadyExists
                                                         || valid.version.hasSpecialChars
                                                         || valid.version.MaxLengthExceeds
+                                                        || api.isRevision
                                                     }
                                                 >
                                                     <FormattedMessage

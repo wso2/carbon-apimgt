@@ -435,7 +435,8 @@ function Properties(props) {
                         size='small'
                         className={classes.button}
                         onClick={toggleAddProperty}
-                        disabled={showAddProperty || isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                        disabled={showAddProperty
+                            || isRestricted(['apim:api_create', 'apim:api_publish'], api) || api.isRevision}
                     >
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
@@ -493,7 +494,8 @@ function Properties(props) {
                                     color='primary'
                                     className={classes.button}
                                     onClick={toggleAddProperty}
-                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)
+                                        || api.isRevision}
                                 >
                                     <FormattedMessage
                                         id='Apis.Details.Properties.Properties.add.new.property'
@@ -678,7 +680,7 @@ function Properties(props) {
                                             color='primary'
                                             onClick={handleSubmit}
                                             disabled={
-                                                editing || updating || (isEmpty(additionalProperties)
+                                                editing || api.isRevision || updating || (isEmpty(additionalProperties)
                                                 && !isAdditionalPropertiesStale)
                                                 || isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                             }

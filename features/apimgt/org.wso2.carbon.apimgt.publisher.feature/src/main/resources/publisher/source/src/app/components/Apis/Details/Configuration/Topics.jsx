@@ -161,6 +161,14 @@ class Topics extends Component {
             showAddTopic: false,
             isSaving: false,
         };
+
+        // TODO: Get the host and the port from suitable location
+        this.gatewayConfigs = {
+            protocol: 'http',
+            host: 'gateway-endpoint',
+            port: 9021,
+        };
+
         this.updateOperations = this.updateOperations.bind(this);
         this.handleCancelSave = this.handleCancelSave.bind(this);
         this.handleAddTopic = this.handleAddTopic.bind(this);
@@ -214,7 +222,7 @@ class Topics extends Component {
                 scopes: [],
                 payload: {
                     type: 'object',
-                    properties: [],
+                    properties: this.extractProperties(op.payloadSchema),
                 },
             };
         });
@@ -241,10 +249,10 @@ class Topics extends Component {
                                 editable: false,
                                 new: false
                             })
-                            if (channel.publish().message().payload().properties()[i]._json.type === "object"){
+                            if (channel.publish().message().payload().properties()[i]._json.type === "object") {
                                 for (let j in channel.publish().message().payload().properties()[i].properties()) {
                                     topic.payload.properties.push({
-                                        name: i+" / "+j,
+                                        name: i + " / " + j,
                                         type: channel.publish().message().payload().properties()[i].properties()[j]._json.type,
                                         advanced: '',
                                         description: '',
@@ -267,10 +275,10 @@ class Topics extends Component {
                                 editable: false,
                                 new: false
                             })
-                            if (channel.subscribe().message().payload().properties()[i]._json.type === "object"){
+                            if (channel.subscribe().message().payload().properties()[i]._json.type === "object") {
                                 for (let j in channel.subscribe().message().payload().properties()[i].properties()) {
                                     topic.payload.properties.push({
-                                        name: i+" / "+j,
+                                        name: i + " / " + j,
                                         type: channel.subscribe().message().payload().properties()[i].properties()[j]._json.type,
                                         advanced: '',
                                         description: '',
@@ -286,6 +294,12 @@ class Topics extends Component {
         })
     }
 
+    extractProperties(payloadSchema) {
+        payloadSchema = payloadSchema || JSON.stringify({ properties: [] });
+        let obj = JSON.parse(payloadSchema);
+        return obj.properties || [];
+    }
+
     updateOperations() {
         this.setState({ isSaving: true });
         const operations = this.state.topics.map(topic => {
@@ -299,6 +313,9 @@ class Topics extends Component {
                 amznResourceTimeout: null,
                 scopes: [],
                 usedProductIds: [],
+                payloadSchema: JSON.stringify({
+                    properties: topic.payload.properties
+                }),
             };
         });
         this.props.updateAPI({ operations }).finally(() => this.setState({ isSaving: false }));
@@ -310,9 +327,9 @@ class Topics extends Component {
 
     buildCallbackURL(topic) {
         const { api } = this.props;
-        // TODO: Get the host and the port from suitable location
-        return 'https://localhost:8243/webhook/cb/' + api.name.toLowerCase() + '/' + api.version + '/'
-            + topic.name.toLowerCase();
+        const { protocol, host, port } = this.gatewayConfigs;
+            return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
+                `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
     }
 
     handleAddTopic(topic) {
@@ -407,9 +424,9 @@ class Topics extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                    <Typography>
+                    {/*<Typography>
                         {property.advanced}
-                    </Typography>
+                    </Typography>*/}
                 </Grid>
                 <Grid item xs={2} align='right'>
                     <IconButton
@@ -510,7 +527,7 @@ class Topics extends Component {
                     />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField
+                    {/*<TextField
                         autoFocus
                         fullWidth
                         id='topic-description'
@@ -538,7 +555,7 @@ class Topics extends Component {
                             topics[i].payload.properties[pi].advanced = e.target.value;
                             this.setState({ topics });
                         }}
-                    />
+                    />*/}
                 </Grid>
                 <Grid item xs={2} align='right'>
                     <IconButton
@@ -599,10 +616,18 @@ class Topics extends Component {
             let channel = asyncAPI.channel(name)
             if (name === topic.name) {
                 if (topic.mode === "SUBSCRIBE") {
-                    schema = channel.subscribe().message().payload();
+                    if (channel.hasSubscribe()){
+                        if (channel.subscribe().message() !== null) {
+                            schema = channel.subscribe().message().payload();
+                        }
+                    }
                 }
                 if (topic.mode === "PUBLISH") {
-                    schema = channel.publish().message().payload();
+                    if (channel.hasPublish()){
+                        if (channel.publish().message() !== null) {
+                            schema = channel.publish().message().payload();
+                        }
+                    }
                 }
             }
         })
@@ -729,9 +754,9 @@ class Topics extends Component {
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs={6}>
-                                                        <Typography style={{ fontWeight: 'bold' }}>
+                                                        {/*<Typography style={{ fontWeight: 'bold' }}>
                                                             Advanced
-                                                        </Typography>
+                                                        </Typography>*/}
                                                     </Grid>
                                                     <Grid item xs={2} align='right'>
                                                         <Button

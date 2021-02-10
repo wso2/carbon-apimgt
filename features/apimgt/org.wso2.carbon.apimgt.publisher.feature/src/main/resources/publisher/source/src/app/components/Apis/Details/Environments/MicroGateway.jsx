@@ -16,22 +16,27 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Alert from 'AppComponents/Shared/Alert';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Checkbox from '@material-ui/core/Checkbox';
+import Switch from '@material-ui/core/Switch';
+import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
+import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { isRestricted } from 'AppData/AuthManager';
+import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
     },
     mainTitle: {
         paddingTop: theme.spacing(3),
+        marginBottom: theme.spacing(2),
     },
     gatewayPaper: {
         marginTop: theme.spacing(2),
@@ -60,6 +66,19 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(),
         textAlign: 'center',
     },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 130,
+    },
+    button1: {
+        color: '#1B3A57',
+        marginLeft: 7,
+    },
+    button2: {
+        color: '#1B3A57',
+        marginLeft: 7,
+        marginTop: 10,
+    },
 }));
 
 /**
@@ -70,15 +89,72 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function MicroGateway(props) {
     const classes = useStyles();
-    const { selectedMgLabel, setSelectedMgLabel, api } = props;
+    const {
+        api,
+        updateAPI,
+        mgLabels,
+        allRevisions,
+        allEnvRevision,
+    } = props;
     const restApi = new API();
-    const [mgLabels, setMgLabels] = useState(null);
-    useEffect(() => {
-        restApi.microgatewayLabelsGet()
-            .then((result) => {
-                setMgLabels(result.body.list);
+    const [selectedRevision, setRevision] = useState(null);
+
+    const handleSelect = (event) => {
+        setRevision(event.target.value);
+    };
+    const handleChange = () => {
+        // display in devportal check
+    };
+
+    /**
+      * Handles undeploy a revision
+      * @memberof Revisions
+      */
+    function undeployRevision(revisionId, envName) {
+        const body = [{
+            name: envName,
+            displayOnDevportal: false,
+        }];
+        restApi.undeployRevision(api.id, revisionId, body)
+            .then(() => {
+                Alert.info('Revision Undeployed  Successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while undeploying the revision');
+                }
+                console.error(error);
+            }).finally(() => {
+                updateAPI();
             });
-    }, []);
+    }
+
+    /**
+      * Handles deploy a revision
+      * @memberof Revisions
+      */
+    function deployRevision(revisionId, envName) {
+        const body = [{
+            name: envName,
+            displayOnDevportal: true,
+        }];
+        restApi.deployRevision(api.id, revisionId, body)
+            .then(() => {
+                Alert.info('Revision Deployed Successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while deploying the revision');
+                }
+                console.error(error);
+            }).finally(() => {
+                updateAPI();
+            });
+    }
     if (!mgLabels) {
         return (
             <div className={classes.progressWrapper}>
@@ -88,81 +164,192 @@ export default function MicroGateway(props) {
     }
     return (
         <>
-            <Typography variant='h4' align='left' className={classes.mainTitle}>
+            <Typography variant='h6' align='left' className={classes.mainTitle}>
                 <FormattedMessage
-                    id='Apis.Details.Environments.Environments.GatewayLabels'
+                    id='Apis.Details.Environments.MicroGateway.GatewayLabels'
                     defaultMessage='Gateway Labels'
                 />
             </Typography>
             {mgLabels.length > 0 ? (
-                <Paper className={classes.gatewayPaper}>
+                <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell />
-                                <TableCell align='left'>Label</TableCell>
-                                <TableCell align='left'>Description</TableCell>
-                                <TableCell align='left'>Access URL</TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.label'
+                                        defaultMessage='Label'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.description'
+                                        defaultMessage='Description'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.access.url'
+                                        defaultMessage='Access URL'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.deployed.revision'
+                                        defaultMessage='Deployed Revision'
+                                    />
+                                </TableCell>
+                                <TableCell align='left'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.MicroGateway.devportal.display'
+                                        defaultMessage='Display in devportal'
+                                    />
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {mgLabels.map((row) => (
                                 <TableRow key={row.name}>
-                                    <TableCell padding='checkbox'>
-                                        <Checkbox
-                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
-                                            checked={selectedMgLabel.includes(row.name)}
-                                            onChange={
-                                                (event) => {
-                                                    const { checked, name } = event.target;
-                                                    if (checked) {
-                                                        setSelectedMgLabel([...selectedMgLabel, name]);
-                                                    } else {
-                                                        setSelectedMgLabel(
-                                                            selectedMgLabel.filter((env) => env !== name),
-                                                        );
-                                                    }
-                                                }
-                                            }
-                                            name={row.name}
-                                            color='primary'
-                                        />
-                                    </TableCell>
                                     <TableCell component='th' scope='row' align='left'>
                                         {row.name}
                                     </TableCell>
                                     <TableCell align='left'>{row.description}</TableCell>
-                                    <TableCell align='left'>{row.accessUrls.join(', ')}</TableCell>
+                                    <TableCell align='left'>
+                                        {row.accessUrls.map((host) => (
+                                            <div>{host}</div>
+                                        ))}
+
+                                    </TableCell>
+                                    <TableCell align='left'>
+                                        {allEnvRevision && allEnvRevision.filter(
+                                            (o1) => {
+                                                if (o1.deploymentInfo.filter(
+                                                    (o2) => o2.name === row.name,
+                                                ).length > 0) {
+                                                    return o1;
+                                                }
+                                                return null;
+                                            },
+                                        ).length !== 0 ? (
+                                                allEnvRevision && allEnvRevision.filter(
+                                                    (o1) => {
+                                                        if (o1.deploymentInfo.filter(
+                                                            (o2) => o2.name === row.name,
+                                                        ).length > 0) {
+                                                            return o1;
+                                                        }
+                                                        return null;
+                                                    },
+                                                ).map((o3) => (
+                                                    <div>
+                                                        <Chip
+                                                            label={o3.displayName}
+                                                            style={{ backgroundColor: '#15B8CF' }}
+                                                        />
+                                                        <Button
+
+                                                            className={classes.button1}
+                                                            variant='outlined'
+                                                            disabled={api.isRevision}
+                                                            onClick={() => undeployRevision(o3.id, row.name)}
+                                                            size='small'
+                                                        >
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.MicroGateway.undeploy.btn'
+                                                                defaultMessage='Undeploy'
+                                                            />
+                                                        </Button>
+                                                    </div>
+                                                ))) : (
+                                                // eslint-disable-next-line react/jsx-indent
+                                                <div>
+                                                    <TextField
+                                                        id='revision-selector'
+                                                        select
+                                                        label={(
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.MicroGateway.select.table'
+                                                                defaultMessage='Select Revision'
+                                                            />
+                                                        )}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
+                                                            },
+                                                        }}
+                                                        name='selectRevision'
+                                                        onChange={handleSelect}
+                                                        margin='dense'
+                                                        variant='outlined'
+                                                        style={{ width: '50%' }}
+                                                        disabled={api.isRevision
+                                                            || !allRevisions || allRevisions.length === 0}
+                                                    >
+                                                        {allRevisions && allRevisions.length !== 0 && allRevisions.map(
+                                                            (number) => (
+                                                                <MenuItem value={number.id}>
+                                                                    {number.displayName}
+                                                                </MenuItem>
+                                                            ),
+                                                        )}
+                                                    </TextField>
+                                                    <Button
+                                                        className={classes.button2}
+                                                        disabled={api.isRevision || !selectedRevision}
+                                                        variant='outlined'
+                                                        onClick={() => deployRevision(selectedRevision, row.name)}
+
+                                                    >
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Environments.MicroGateway.deploy.button'
+                                                            defaultMessage='Deploy'
+                                                        />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                    </TableCell>
+                                    <TableCell align='left'>
+                                        <Switch
+                                            // checked={row.showInApiConsole}
+                                            checked={false}
+                                            onChange={handleChange}
+                                            disabled={api.isRevision}
+                                            name='checkedA'
+                                        />
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
-                </Paper>
-            )
-                : (
-                    <InlineMessage type='info' height={100} className={classes.emptyBox}>
-                        <div className={classes.contentWrapper}>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Gateway.labels.emptym1'
-                                    defaultMessage='Gateway labels are not available.'
-                                />
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Gateway.labels.emptym2'
-                                    defaultMessage=' You can request the administrator to add labels.'
-                                />
-                            </Typography>
-                        </div>
-                    </InlineMessage>
-                )}
+                </TableContainer>
+            ) : (
+                <InlineMessage type='info' height={100} className={classes.emptyBox}>
+                    <div className={classes.contentWrapper}>
+                        <Typography component='p' className={classes.content}>
+                            <FormattedMessage
+                                id='Apis.Details.Environments.MicroGateway.labels.emptym1'
+                                defaultMessage='Gateway labels are not available.'
+                            />
+                            <FormattedMessage
+                                id='Apis.Details.Environments.MicroGateway.labels.emptym2'
+                                defaultMessage=' You can request the administrator to add labels.'
+                            />
+                        </Typography>
+                    </div>
+                </InlineMessage>
+            )}
         </>
     );
 }
-MicroGateway.defaultProps = {
-    api: {},
-};
+
 MicroGateway.propTypes = {
-    selectedMgLabel: PropTypes.arrayOf(PropTypes.string).isRequired,
-    setSelectedMgLabel: PropTypes.func.isRequired,
-    api: PropTypes.shape({}),
+    api: PropTypes.shape({}).isRequired,
+    updateAPI: PropTypes.func.isRequired,
+    mgLabels: PropTypes.shape({ length: PropTypes.func, map: PropTypes.func }).isRequired,
+    allRevisions: PropTypes.shape({ length: PropTypes.func, map: PropTypes.func }).isRequired,
+    allEnvRevision: PropTypes.shape({ filter: PropTypes.func }).isRequired,
 };

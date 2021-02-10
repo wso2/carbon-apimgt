@@ -104,7 +104,7 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'The direct URI of the web service.',
             }),
             options: null,
-            disabled: ['GRAPHQL'],
+            disabled: ['GRAPHQL', 'SSE'],
         },
         {
             type: 'prototyped',
@@ -124,7 +124,7 @@ function NewEndpointCreate(props) {
                         id: 'Apis.Details.Endpoints.NewEndpointCreate.prototype.implementation',
                         defaultMessage: 'Prototype Implementation',
                     }),
-                    disabled: ['SOAP', 'SOAPTOREST'],
+                    disabled: ['SOAP', 'SOAPTOREST', 'SSE'],
                 },
                 {
                     type: 'prototyped',
@@ -135,7 +135,7 @@ function NewEndpointCreate(props) {
                     disabled: [],
                 },
             ],
-            disabled: ['GRAPHQL'],
+            disabled: ['GRAPHQL', 'SSE'],
         },
         {
             type: 'dynamic',
@@ -148,7 +148,7 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'If you need to send the request to the URI specified in the TO header.',
             }),
             options: null,
-            disabled: [],
+            disabled: ['SSE'],
         },
         {
             type: 'awslambda',
@@ -161,9 +161,13 @@ function NewEndpointCreate(props) {
                 defaultMessage: 'If you need to invoke AWS Lambda functions through API gateway.',
             }),
             options: null,
-            disabled: ['SOAPTOREST', 'GRAPHQL'],
+            disabled: ['SOAPTOREST', 'GRAPHQL', 'SSE'],
         },
     ];
+
+    let eligibleTypes = endpointTypes.filter((type) => !type.disabled.includes(apiType)).map((type) => {
+        return type;
+    });
 
     return (
         <>
@@ -174,7 +178,7 @@ function NewEndpointCreate(props) {
                 />
             </Typography>
             <Grid container justify='flex-start' spacing={2}>
-                {endpointTypes.filter((type) => !type.disabled.includes(apiType)).map(((type) => {
+                {eligibleTypes.map(((type) => {
                     return (
                         <Grid item className={classes.inlineMessageContainer}>
                             <Card className={classes.endpointTypeCard}>

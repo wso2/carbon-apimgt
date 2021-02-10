@@ -91,6 +91,7 @@ public class APIExecutor implements Execution {
      * @return Returns whether the execution was successful or not.
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
+        /*
         boolean executed = false;
         String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -153,6 +154,8 @@ public class APIExecutor implements Execution {
                     "RegistryException:" + e.getMessage());
         }
         return executed;
+        */
+        return true;
     }
 
     private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
@@ -175,7 +178,7 @@ public class APIExecutor implements Execution {
                 String apiSecurity = api.getApiSecurity();
                 boolean isOauthProtected =
                         apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                if (endPoint != null && endPoint.trim().length() > 0) {
+                if (api.getType().equals(APIConstants.API_TYPE_WEBSUB) || (endPoint != null && endPoint.trim().length() > 0)) {
                     if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
                         throw new APIManagementException("Failed to publish service to API store while executing " +
                                 "APIExecutor. No Tiers selected");
@@ -197,6 +200,7 @@ public class APIExecutor implements Execution {
             }
 
             //update api related information for state change
+
             executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
 
             // Setting resource again to the context as it's updated within updateAPIStatus method

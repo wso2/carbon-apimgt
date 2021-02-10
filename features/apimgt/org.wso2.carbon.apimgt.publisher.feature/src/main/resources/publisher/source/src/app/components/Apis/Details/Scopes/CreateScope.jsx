@@ -560,6 +560,7 @@ class CreateScope extends React.Component {
                                             || this.state.valid.name.invalid
                                             || invalidRoles.length !== 0
                                             || scopeAddDisabled
+                                            || api.isRevision
                                             || this.state.valid.description.invalid
                                         }
                                         className={classes.saveButton}

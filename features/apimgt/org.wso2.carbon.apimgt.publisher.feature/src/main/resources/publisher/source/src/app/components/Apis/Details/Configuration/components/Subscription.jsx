@@ -71,7 +71,7 @@ export default function Subscription(props) {
     const [apiFromContext] = useAPI();
     const {
         configDispatcher,
-        api: { subscription },
+        api: { websubSubscriptionConfiguration },
     } = props;
     const classes = useStyles();
 
@@ -83,11 +83,7 @@ export default function Subscription(props) {
     }
 
     function getAlgorithms() {
-        return [
-            { id: 'sha-1', name: 'SHA-1'},
-            { id: 'sha-2', name: 'SHA-2'},
-            { id: 'sha-3', name: 'SHA-3'},
-        ];
+        return ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'];
     }
 
     return (
@@ -105,30 +101,48 @@ export default function Subscription(props) {
                     <Grid item md={12}>
                         <Grid container>
                             <Grid item md={12}>
-                                <TextField
-                                    autoFocus
-                                    fullWidth
-                                    disabled
-                                    label={(
-                                        <>
-                                            <FormattedMessage
-                                                id='Apis.Details.Configuration.components.Subscription.secret'
-                                                defaultMessage='Secret'
-                                            />
-                                        </>
-                                    )}
-                                    value={generateSecret()}
-                                    helperText='Use the above secret key while registering at the provider'
-                                    name='secret'
-                                    InputProps={{
-                                        id: 'itest-id-runtime-subscription-secret',
-                                        onBlur: ({ target: { value } }) => {
-                                            // TODO: validate
-                                        },
-                                    }}
-                                    margin='normal'
-                                    variant='outlined'
-                                />
+                                <Grid container direction='row'>
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            autoFocus
+                                            fullWidth
+                                            disabled
+                                            label={(
+                                                <>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Configuration.components.Subscription.secret'
+                                                        defaultMessage='Secret'
+                                                    />
+                                                </>
+                                            )}
+                                            value={websubSubscriptionConfiguration.secret}
+                                            helperText='Use the above secret key while registering at the provider'
+                                            name='secret'
+                                            InputProps={{
+                                                id: 'itest-id-runtime-subscription-secret',
+                                                onBlur: ({ target: { value } }) => {
+                                                    // TODO: validate
+                                                },
+                                            }}
+                                            margin='normal'
+                                            variant='outlined'
+                                        />
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            onClick={() => configDispatcher({
+                                                action: 'secret',
+                                                value: generateSecret(),
+                                            })}
+                                            style={{marginLeft: 10, marginTop: 25}}
+                                        >
+                                            Generate
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+
                             </Grid>
                             <Grid item md={12}>
                                 <TextField
@@ -143,7 +157,7 @@ export default function Subscription(props) {
                                             />
                                         </>
                                     )}
-                                    value={subscription.signingAlgorithm}
+                                    value={websubSubscriptionConfiguration.signingAlgorithm}
                                     helperText='Select an algorithm to sign the message'
                                     name='secret'
                                     InputProps={{
@@ -163,15 +177,15 @@ export default function Subscription(props) {
                                         Select an algorithm
                                     </MenuItem>
                                     {
-                                        getAlgorithms().map((a) => {
+                                        getAlgorithms().map((name) => {
                                             return (
                                                 <MenuItem
                                                     dense
-                                                    id={a.id}
-                                                    key={a.id}
-                                                    value={a.id}
+                                                    id={name}
+                                                    key={name}
+                                                    value={name}
                                                 >
-                                                    {a.name}
+                                                    {name}
                                                 </MenuItem>
                                             );
                                         })
@@ -190,7 +204,7 @@ export default function Subscription(props) {
                                             />
                                         </>
                                     )}
-                                    value={subscription.signatureHeader}
+                                    value={websubSubscriptionConfiguration.signatureHeader}
                                     helperText='Set the HTTP header use by the provider to send the signature'
                                     name='secret'
                                     InputProps={{

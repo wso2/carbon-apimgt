@@ -433,7 +433,7 @@ class EditScope extends React.Component {
                                         variant='contained'
                                         color='primary'
                                         onClick={this.updateScope}
-                                        disabled={invalidRoles.length !== 0}
+                                        disabled={invalidRoles.length !== 0 || api.isRevision}
                                         className={classes.saveButton}
                                     >
                                         <FormattedMessage

@@ -18,6 +18,7 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
+import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -774,11 +775,17 @@ class API extends Resource {
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
-                endpointId: JSON.stringify(swagger),
                 'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    apiDefinition: JSON.stringify(swagger),
+                }
             };
             return client.apis['APIs'].updateAPISwagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -794,18 +801,23 @@ class API extends Resource {
      * @returns {boolean|*}
      */
     updateAPIDefinitionByUrl(apiId, openAPIUrl) {
-        let payload, promise_updated;
+        let payload, requestBody, promise_updated;
 
         promise_updated = this.client.then(client => {
-            const apiData = this.getDataFromSpecFields(client);
-
             payload = {
-                apiId: apiId,
-                url: openAPIUrl,
+                apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            requestBody = {
+                requestBody: {
+                    url: openAPIUrl,
+                }
             };
 
             const promisedResponse = client.apis['APIs'].updateAPISwagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -822,18 +834,23 @@ class API extends Resource {
      * @returns {boolean|*}
      */
     updateAPIDefinitionByFile(apiId, openAPIFile) {
-        let payload, promise_updated;
+        let payload, requestBody, promise_updated;
 
         promise_updated = this.client.then(client => {
-            const apiData = this.getDataFromSpecFields(client);
-
             payload = {
-                apiId: apiId,
-                file: openAPIFile,
+                apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            requestBody = {
+                requestBody: {
+                    file: openAPIFile,
+                }
             };
 
             const promisedResponse = client.apis['APIs'].updateAPISwagger(
                 payload,
+                requestBody,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }),
@@ -1046,12 +1063,6 @@ class API extends Resource {
             const requestBody = {
                 requestBody: updatedAPI,
             };
-
-
-            console.log('// -------- update api ---------');
-            console.log({ payload, requestBody });
-            console.log('-- -------- update api -------//')
-
             return client.apis['APIs'].updateAPI(payload, requestBody);
         });
         return promisedUpdate.then(response => {
@@ -2042,6 +2053,149 @@ class API extends Resource {
             return client.apis['Unified Search'].search(params, Resource._requestMetaData());
         });
     }
+
+    /**
+     * Get list of revisions.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisions(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions( {
+                    apiId: apiId,
+                },
+            );
+        });
+    }
+
+    /**
+     * Get list of revisions with environments.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisionsWithEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions(
+                    {
+                        apiId: apiId,
+                        query: 'deployed:true',
+                    },
+            );
+        });
+    }
+
+    getRevisionsEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisionDeployments( {
+                    apiId: apiId,
+                },
+            );
+        });
+    }
+
+    /**
+     * Add revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    createRevision(apiId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].createAPIRevision(
+                    {apiId: apiId},
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Delete revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deleteRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deleteAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    undeployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].undeployAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+     /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deployAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Restore revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    restoreRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].restoreAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
 
     /**
      * Get details of a given API

@@ -1,0 +1,5 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/webapps/);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.rest.api.service.catalog_${feature.version}/api#am#service-catalog.war,target:${installFolder}/../../deployment/server/webapps/api#am#service-catalog.war,overwrite:true);\

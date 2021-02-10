@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RuntimeArtifactsApiService {
-      public Response runtimeArtifactsGet(String apiId, String gatewayLabel, String type, MessageContext messageContext) throws APIManagementException;
+      public Response runtimeArtifactsGet(String xWSO2Tenant, String apiId, String gatewayLabel, String type, MessageContext messageContext) throws APIManagementException;
 }

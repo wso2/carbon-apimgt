@@ -291,7 +291,7 @@ export default function DesignConfigurations() {
                                     <Box pt={2}>
                                         <Button
                                             disabled={
-                                                isUpdating || invalidTagsExist
+                                                isUpdating || api.isRevision || invalidTagsExist
                                                 || (apiConfig.visibility === 'RESTRICTED'
                                                     && apiConfig.visibleRoles.length === 0)
                                             }

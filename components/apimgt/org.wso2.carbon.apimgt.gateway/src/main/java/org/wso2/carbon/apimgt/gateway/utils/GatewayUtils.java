@@ -44,6 +44,7 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
@@ -79,6 +80,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1052,4 +1054,5 @@ public class GatewayUtils {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }
+
 }
