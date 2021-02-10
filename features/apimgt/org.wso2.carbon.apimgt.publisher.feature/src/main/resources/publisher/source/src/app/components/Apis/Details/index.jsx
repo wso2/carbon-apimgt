@@ -667,17 +667,15 @@ class Details extends Component {
                             />
                         )}
                         {!isAPIProduct && <Divider />}
-                        {!isAPIProduct && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.environments',
-                                    defaultMessage: 'Deployments',
-                                })}
-                                route='deployments'
-                                to={pathPrefix + 'deployments'}
-                                Icon={<PersonPinCircleOutlinedIcon />}
-                            />
-                        )}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.environments',
+                                defaultMessage: 'Deployments',
+                            })}
+                            route='deployments'
+                            to={pathPrefix + 'deployments'}
+                            Icon={<PersonPinCircleOutlinedIcon />}
+                        />
                         {!isAPIProduct && <Divider />}
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
                             api) && api.lifeCycleStatus !== 'PUBLISHED' && (
@@ -754,6 +752,10 @@ class Details extends Component {
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
                                 <Route
                                     path={Details.subPaths.ENVIRONMENTS}
+                                    component={() => <Environments api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.ENVIRONMENTS_PRODUCT}
                                     component={() => <Environments api={api} />}
                                 />
                                 <Route
@@ -850,6 +852,7 @@ Details.subPaths = {
     RUNTIME_CONFIGURATION_WEBSOCKET: '/apis/:api_uuid/runtime-configuration-websocket',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     ENVIRONMENTS: '/apis/:api_uuid/deployments',
+    ENVIRONMENTS_PRODUCT: '/api-products/:apiprod_uuid/deployments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',

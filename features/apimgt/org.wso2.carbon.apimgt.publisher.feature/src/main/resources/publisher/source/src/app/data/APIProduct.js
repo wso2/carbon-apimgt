@@ -552,6 +552,139 @@ class APIProduct extends Resource {
     }
 
     /**
+     * Get list of revisions.
+     *
+     * @param {string} apiProductId Id of the API.
+     * */
+    getProductRevisions(apiProductId) {
+        const promiseGetRevision = this.client
+            .then(client => {
+                   return client.apis['API Product Revisions'].getAPIProductRevisions( {
+                    apiProductId: apiProductId,
+                },
+            );
+        });
+        return promiseGetRevision;
+    }
+
+    /**
+     * Get list of revisions with environments.
+     *
+     * @param {string} apiProductId Id of the API.
+     * */
+    getProductRevisionsWithEnv(apiProductId) {
+        const promiseGetRevisionWithEnv = this.client
+            .then(client => {
+                return client.apis['API Product Revisions'].getAPIProductRevisions( 
+                    {
+                        apiProductId: apiProductId,
+                        query: 'deployed:true',
+                    },
+            );
+        });
+        return promiseGetRevisionWithEnv;    
+    }
+
+    /**
+     * Add revision.
+     *
+     * @param {string} apiProductId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    createProductRevision(apiProductId, body) {
+        const promiseAddRevision = this.client
+            .then(client => {
+                return client.apis['API Product Revisions'].createAPIProductRevision(
+                    {apiProductId: apiProductId},
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            }); 
+        return promiseAddRevision;
+    }
+    /**
+     * Delete revision.
+     *
+     * @param {string} apiProductId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deleteProductRevision(apiProductId, revisionId) {
+        const promiseDeleteRevision = this.client
+            .then(client => {
+                return client.apis['API Product Revisions'].deleteAPIProductRevision(
+                    {   
+                        apiProductId: apiProductId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+        return  promiseDeleteRevision;  
+    }
+
+    /**
+     * Undeploy revision.
+     *
+     * @param {string} apiProductId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    undeployProductRevision(apiProductId, revisionId, body) {
+        const promiseUndeployRevision = this.client
+            .then(client => {
+                return client.apis['API Product Revisions'].undeployAPIProductRevision(
+                    {   
+                        apiProductId: apiProductId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+        return  promiseUndeployRevision;     
+    }
+
+     /**
+     * Undeploy revision.
+     *
+     * @param {string} apiProductId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deployProductRevision(apiProductId, revisionId, body) {
+        const promiseDeployRevision = this.client
+            .then(client => {
+                return client.apis['API Product Revisions'].deployAPIProductRevision(
+                    {   
+                        apiProductId: apiProductId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+        return promiseDeployRevision;  
+    }
+
+    /**
+     * Restore revision.
+     *
+     * @param {string} apiProductId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    restoreProductRevision(apiProductId, revisionId) {
+        const promiseRestoreRevision = this.client
+            then(client => {
+                return client.apis['API Product Revisions'].restoreAPIProductRevision(
+                    {   
+                        apiProductId: apiProductId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+        return promiseRestoreRevision;  
+    }
+
+    /**
      * Update an api swagger via PUT HTTP method
      * @param {*} swagger
      */
