@@ -202,6 +202,7 @@ function AddEdit(props) {
     useEffect(() => {
         if (isEdit) {
             restApi.subscriptionThrottlingPolicyGet(params.id).then((result) => {
+                console.log('edit state');
                 console.log(result.body);
                 let requestCountEdit = '';
                 let dataAmountEdit = '';
@@ -222,10 +223,10 @@ function AddEdit(props) {
                     timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
                     typeEdit = result.body.defaultLimit.type;
-                } else if (result.result.body.defaultLimit.eventBased != null) {
-                    eventCountEdit = result.body.defaultLimit.eventBased.eventCount;
-                    dataUnitEdit = result.body.defaultLimit.eventBased.dataUnit;
-                    timeUnitEdit = result.body.defaultLimit.eventBased.timeUnit;
+                } else if (result.result.body.defaultLimit.eventCount != null) {
+                    eventCountEdit = result.body.defaultLimit.eventCount.eventCount;
+                    dataUnitEdit = result.body.defaultLimit.eventCount.dataUnit;
+                    timeUnitEdit = result.body.defaultLimit.eventCount.timeUnit;
                     typeEdit = result.body.defaultLimit.type;
                 }
                 const editState = {
@@ -452,7 +453,8 @@ function AddEdit(props) {
         }
         let subscriptionThrottlingPolicy;
         let promisedAddSubscriptionPolicy;
-
+        console.log('subscriber count ' + state.subscriberCount);
+        console.log('rate limit ' + state.rateLimitCount);
         if (type === 'REQUESTCOUNTLIMIT') {
             subscriptionThrottlingPolicy = {
                 policyName: state.policyName,
@@ -528,7 +530,7 @@ function AddEdit(props) {
                 description: state.description,
                 defaultLimit: {
                     type: state.defaultLimit.type,
-                    eventBased: {
+                    eventCount: {
                         eventCount: state.defaultLimit.eventCount,
                         //subscriberCount: state.defaultLimit.subscriberCount,
                         timeUnit: state.defaultLimit.timeUnit,
@@ -561,6 +563,7 @@ function AddEdit(props) {
 
         if (isEdit) {
             const policyId = params.id;
+            console.log(subscriptionThrottlingPolicy);
             promisedAddSubscriptionPolicy = restApi.updateSubscriptionThrottlingPolicy(policyId,
                 subscriptionThrottlingPolicy);
             if (promisedAddSubscriptionPolicy) {
@@ -762,7 +765,7 @@ function AddEdit(props) {
                                     label='Request Bandwidth'
                                 />
                                 <FormControlLabel
-                                    value='EVENTBASEDLIMIT'
+                                    value='EVENTCOUNTLIMIT'
                                     control={<Radio />}
                                     label='Event Based (Async API)'
                                 />
@@ -837,7 +840,7 @@ function AddEdit(props) {
                                     </FormControl>
                                 </Box>
                             )}
-                            {type === 'EVENTBASEDLIMIT' && (
+                            {type === 'EVENTCOUNTLIMIT' && (
                                 <Box display='flex' flexDirection='row'>
                                     <TextField
                                         margin='dense'
@@ -1053,15 +1056,15 @@ function AddEdit(props) {
                             <Box flex='1'>
                                 <Typography color='inherit' variant='subtitle2' component='div'>
                                     <FormattedMessage
-                                        id='Throttling.Subscription.GraphQL'
-                                        defaultMessage='Web Hook API'
+                                        id='Throttling.Subscription.Subscriber.Count'
+                                        defaultMessage='Subscription Count (Connections)'
                                     />
                                 </Typography>
                                 <Typography color='inherit' variant='caption' component='p'>
                                     <FormattedMessage
-                                        id='Throttling.Subscription.AddEdit.graphql.add.description'
-                                        defaultMessage={'Provide the Maximum Complexity and Maximum depth'
-                                        + ' values for GraphQL APIs using this policy.'}
+                                        id='Throttling.Subscription.AddEdit.subscription.count.add.description'
+                                        defaultMessage={'Maximum number of subscriber connections allowed for a web hook API ' +
+                                        'using this policy.'}
                                     />
                                 </Typography>
                             </Box>

@@ -25,6 +25,7 @@ import java.util.Map;
 public class SubscriptionPolicy extends Policy {
     private int rateLimitCount;
     private String rateLimitTimeUnit;
+    private int subscriberCount;
     private byte[] customAttributes;
     private boolean stopOnQuotaReach;
     private String billingPlan;
@@ -125,5 +126,13 @@ public class SubscriptionPolicy extends Policy {
                 + ", monetizationPlanProperties=" + monetizationPlanProperties + ", tierQuotaType=" + tierQuotaType
                 + ", maxDepth=" + graphQLMaxDepth + ", maxComplexity=" + graphQLMaxComplexity
                 + "]";
+    }
+
+    public int getSubscriberCount() {
+        return subscriberCount;
+    }
+
+    public void setSubscriberCount(int subscriberCount) {
+        this.subscriberCount = subscriberCount;
     }
 }

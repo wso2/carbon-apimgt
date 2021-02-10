@@ -3996,6 +3996,10 @@ components:
             type: string
             description: Burst control time unit
             example: min
+          subscriberCount:
+            type: integer
+            description: Number of subscriptions allowed
+            example: 10
           customAttributes:
             type: array
             description: |
@@ -4277,10 +4281,13 @@ components:
           enum:
           - REQUESTCOUNTLIMIT
           - BANDWIDTHLIMIT
+          - EVENTCOUNTLIMIT
         requestCount:
           $ref: '#/components/schemas/RequestCountLimit'
         bandwidth:
           $ref: '#/components/schemas/BandwidthLimit'
+        eventCount:
+          $ref: '#/components/schemas/EventCountLimit'
     MonetizationInfo:
       title: API monetization details object
       required:
@@ -4332,6 +4339,19 @@ components:
             description: Maximum number of requests allowed
             format: int64
             example: 30
+    EventCountLimit:
+      title: Event Count Limit object
+      allOf:
+      - $ref: '#/components/schemas/ThrottleLimitBase'
+      - required:
+        - eventCount
+        type: object
+        properties:
+          eventCount:
+            type: integer
+            description: Maximum number of events allowed
+            format: int64
+            example: 3000
     BlockingCondition:
       title: Blocking Conditions
       required:
