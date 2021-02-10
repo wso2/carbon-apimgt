@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -42,6 +45,7 @@ public class Comment {
 //    private CommentList replies;
     private List<Comment> replies = new ArrayList<Comment>();
 
+//    List<Comment> commentList = new ArrayList<Comment>();
 
     public List<Comment> getReplies(){return this.replies; }
 

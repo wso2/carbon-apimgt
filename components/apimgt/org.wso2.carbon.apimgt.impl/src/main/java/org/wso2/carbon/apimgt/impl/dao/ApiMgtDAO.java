@@ -8053,7 +8053,7 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
+    public Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException {
         List<Comment> commentList = new ArrayList<Comment>();
         Connection connection = null;
         ResultSet resultSet = null;
@@ -8061,8 +8061,11 @@ public class ApiMgtDAO {
 //        boolean isProduct = apiTypeWrapper.isAPIProduct();
         int id = -1;
         String sqlQuery;
-//        sqlQuery  = SQLConstants.GET_COMMENTS_SQL;
-        sqlQuery  = SQLConstants.GET_PARENT_COMMENTS_SQL;
+        if (parentCommentID == null){
+            sqlQuery  = SQLConstants.GET_ROOT_COMMENTS_SQL;
+        }else {
+            sqlQuery  = SQLConstants.GET_REPLIES_SQL;
+        }
         Identifier identifier;
 
         try {
@@ -8082,6 +8085,9 @@ public class ApiMgtDAO {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getName());
             prepStmt.setString(3, identifier.getVersion());
+            if (parentCommentID != null){
+                prepStmt.setString(4, parentCommentID);
+            }
             resultSet = prepStmt.executeQuery();
             while (resultSet.next()) {
                 Comment comment = new Comment();
@@ -8095,7 +8101,10 @@ public class ApiMgtDAO {
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                 comment.setCategory(resultSet.getString("CATEGORY"));
-                comment.setReplies(getReplies(identifier, resultSet.getString("COMMENT_ID"), 5, 0));
+                //comment.setReplies(getReplies(identifier, resultSet.getString("COMMENT_ID"), 5, 0));
+                Comment[] replies1 = getComments(apiTypeWrapper, resultSet.getString("COMMENT_ID"));
+                List<Comment> replies = Arrays.asList(replies1);
+                comment.setReplies(replies);
                 commentList.add(comment);
             }
         } catch (SQLException e) {
@@ -8126,13 +8135,14 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
 
-        String sqlQuery = SQLConstants.GET_PARENT_COMMENTS_SQL;
+        String sqlQuery = SQLConstants.GET_ROOT_COMMENTS_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
             prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(4, "parentCommentID");
             resultSet = prepStmt.executeQuery();
             while (resultSet.next()) {
                 Comment comment = new Comment();
