@@ -357,7 +357,7 @@ public class PublisherCommonUtils {
         }
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
-        
+
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
                 CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
     }
@@ -668,8 +668,8 @@ public class PublisherCommonUtils {
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
-        boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
-        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB == apiDto.getType() || APIDTO.TypeEnum.SSE == apiDto.getType();
+        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
+        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) || APIDTO.TypeEnum.SSE.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -693,12 +693,12 @@ public class PublisherCommonUtils {
             }
         }
 
-        if (isWSAPI) {
+       /* if (isWSAPI) {
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDto.setTransport(websocketTransports);
-        }
+        }*/
 
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
         validateScopes(apiToAdd);
@@ -969,7 +969,7 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition

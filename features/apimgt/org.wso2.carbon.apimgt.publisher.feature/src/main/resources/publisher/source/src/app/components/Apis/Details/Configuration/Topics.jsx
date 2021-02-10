@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, {Component, lazy} from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
@@ -41,6 +41,13 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTopic'
+
+import $RefParser from "@apidevtools/json-schema-ref-parser";
+import { parse } from '@asyncapi/parser';
+
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 const styles = (theme) => ({
     root: {
@@ -145,6 +152,11 @@ class Topics extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            schema: {},
+            tabValue: 0,
+            asyncAPI: null,
+            definition: this.getAsyncAPIDefinition(),
+            resolvedDefinition: null,
             topics: this.loadTopics(this.getSortedOperations()),
             showAddTopic: false,
             isSaving: false,
@@ -169,6 +181,29 @@ class Topics extends Component {
         this.renderEditableProperty = this.renderEditableProperty.bind(this);
         this.loadTopics = this.loadTopics.bind(this);
         this.getSortedOperations = this.getSortedOperations.bind(this);
+        this.getAsyncAPIDefinition = this.getAsyncAPIDefinition.bind(this);
+        this.loadTopicMetaData = this.loadTopicMetaData.bind(this);
+        this.renderSchemaForTopic = this.renderSchemaForTopic.bind(this);
+    }
+
+    getAsyncAPIDefinition() {
+        const result = this.props.api.getAsyncAPIDefinition();
+        result.then(async (response) => {
+            $RefParser.dereference(response.body, (err, schema) => {
+                if (err) {
+                    console.error(err);
+                }
+                else {
+                    //console.log(schema);
+                    this.setState({
+                        resolvedDefinition: schema,
+                        definition: response.body
+                    });
+                }
+            })
+            const doc = await parse(response.body);
+            this.setState({asyncAPI: doc}, this.loadTopicMetaData);
+        });
     }
 
     getSortedOperations() {
@@ -191,6 +226,72 @@ class Topics extends Component {
                 },
             };
         });
+    }
+
+    componentDidMount() {
+
+    }
+
+    loadTopicMetaData() {
+        const {asyncAPI, topics} = this.state;
+        topics.map((topic) => {
+            asyncAPI.channelNames().map((name) => {
+                let channel = asyncAPI.channel(name)
+                if (topic.name === name) {
+                    if (channel.hasPublish()) {
+                        topic.description = channel.publish().message()._json["x-parser-message-name"]
+                        for (let i in channel.publish().message().payload().properties()) {
+                            topic.payload.properties.push({
+                                name: i,
+                                type: channel.publish().message().payload().properties()[i]._json.type,
+                                advanced: '',
+                                description: '',
+                                editable: false,
+                                new: false
+                            })
+                            if (channel.publish().message().payload().properties()[i]._json.type === "object") {
+                                for (let j in channel.publish().message().payload().properties()[i].properties()) {
+                                    topic.payload.properties.push({
+                                        name: i + " / " + j,
+                                        type: channel.publish().message().payload().properties()[i].properties()[j]._json.type,
+                                        advanced: '',
+                                        description: '',
+                                        editable: false,
+                                        new: false
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    if (channel.hasSubscribe()) {
+                        //console.log(channel.subscribe().message().payload().properties())
+                        topic.description = channel.subscribe().message()._json["x-parser-message-name"]
+                        for (let i in channel.subscribe().message().payload().properties()) {
+                            topic.payload.properties.push({
+                                name: i,
+                                type: channel.subscribe().message().payload().properties()[i]._json.type,
+                                advanced: '',
+                                description: '',
+                                editable: false,
+                                new: false
+                            })
+                            if (channel.subscribe().message().payload().properties()[i]._json.type === "object") {
+                                for (let j in channel.subscribe().message().payload().properties()[i].properties()) {
+                                    topic.payload.properties.push({
+                                        name: i + " / " + j,
+                                        type: channel.subscribe().message().payload().properties()[i].properties()[j]._json.type,
+                                        advanced: '',
+                                        description: '',
+                                        editable: false,
+                                        new: false
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+        })
     }
 
     extractProperties(payloadSchema) {
@@ -325,9 +426,9 @@ class Topics extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                    <Typography>
+                    {/*<Typography>
                         {property.advanced}
-                    </Typography>
+                    </Typography>*/}
                 </Grid>
                 <Grid item xs={2} align='right'>
                     <IconButton
@@ -428,7 +529,7 @@ class Topics extends Component {
                     />
                 </Grid>
                 <Grid item xs={6}>
-                    <TextField
+                    {/*<TextField
                         autoFocus
                         fullWidth
                         id='topic-description'
@@ -456,7 +557,7 @@ class Topics extends Component {
                             topics[i].payload.properties[pi].advanced = e.target.value;
                             this.setState({ topics });
                         }}
-                    />
+                    />*/}
                 </Grid>
                 <Grid item xs={2} align='right'>
                     <IconButton
@@ -510,9 +611,34 @@ class Topics extends Component {
         );
     }
 
+    renderSchemaForTopic(topic) {
+        const {asyncAPI} = this.state;
+        let schema = {}
+        asyncAPI.channelNames().map((name) => {
+            let channel = asyncAPI.channel(name)
+            if (name === topic.name) {
+                if (topic.mode === "SUBSCRIBE") {
+                    if (channel.hasSubscribe()){
+                        if (channel.subscribe().message() !== null) {
+                            schema = channel.subscribe().message().payload();
+                        }
+                    }
+                }
+                if (topic.mode === "PUBLISH") {
+                    if (channel.hasPublish()){
+                        if (channel.publish().message() !== null) {
+                            schema = channel.publish().message().payload();
+                        }
+                    }
+                }
+            }
+        })
+        return JSON.stringify(schema, null, '\t');
+    }
+
     renderTopics() {
         const { classes } = this.props;
-        const { topics } = this.state;
+        const { topics, tabValue, definition } = this.state;
         return (
             <div className={classes.root}>
                 {topics.map((topic, i) => {
@@ -604,43 +730,75 @@ class Topics extends Component {
                                             Payload
                                         </Typography>
                                     </Grid>
-                                    <Grid item style={{ paddingLeft: 0 }}>
-                                        <Grid container direction='column'>
-                                            <Grid container direction='row'>
-                                                <Grid item xs={2}>
-                                                    <Typography style={{ fontWeight: 'bold' }}>
-                                                        Name
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={2}>
-                                                    <Typography style={{ fontWeight: 'bold' }}>
-                                                        Type
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={6}>
-                                                    <Typography style={{ fontWeight: 'bold' }}>
-                                                        Advanced
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid item xs={2} align='right'>
-                                                    <Button
-                                                        color='primary'
-                                                        variant='contained'
-                                                        onClick={() => this.handleAddProperty(i)}
-                                                    >
-                                                        Add New Property
-                                                    </Button>
-                                                </Grid>
-                                            </Grid>
-                                            {
-                                                topic.payload.properties.map((property, pi) => {
-                                                    return (property && !!property.editable)
-                                                        ? this.renderEditableProperty(property, i, pi)
-                                                        : this.renderProperty(property, i, pi);
-                                                })
-                                            }
-                                        </Grid>
+                                    <Grid item style={{paddingBottom: "2%"}}>
+                                        <Tabs
+                                            indicatorColor="primary"
+                                            textColor="primary"
+                                            value={tabValue}
+                                            onChange={(event, value) => {this.setState({tabValue: value})}}
+                                        >
+                                            <Tab label="Properties"/>
+                                            <Tab label="Schema"/>
+                                        </Tabs>
                                     </Grid>
+                                    {tabValue === 0 ?
+                                        <Grid item style={{ paddingLeft: 0 }}>
+                                            <Grid container direction='column'>
+                                                <Grid container direction='row'>
+                                                    <Grid item xs={2}>
+                                                        <Typography style={{ fontWeight: 'bold' }}>
+                                                            Name
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <Typography style={{ fontWeight: 'bold' }}>
+                                                            Type
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        {/*<Typography style={{ fontWeight: 'bold' }}>
+                                                            Advanced
+                                                        </Typography>*/}
+                                                    </Grid>
+                                                    <Grid item xs={2} align='right'>
+                                                        <Button
+                                                            color='primary'
+                                                            variant='contained'
+                                                            onClick={() => this.handleAddProperty(i)}
+                                                        >
+                                                            Add New Property
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                                {
+                                                    topic.payload.properties.map((property, pi) => {
+                                                        return (property && !!property.editable)
+                                                            ? this.renderEditableProperty(property, i, pi)
+                                                            : this.renderProperty(property, i, pi);
+                                                    })
+                                                }
+                                            </Grid>
+                                        </Grid>
+                                    :
+                                        <Grid item style={{ paddingLeft: 0 }}>
+                                            <Grid container direction='column'>
+                                                <MonacoEditor
+                                                    //value={JSON.stringify(this.state.definition, null, '\t')}
+                                                    value={this.renderSchemaForTopic(topic)}
+                                                    language="json"
+                                                    width='100%'
+                                                    height='500px'
+                                                    theme='vs-dark'
+                                                    options={{
+                                                        selectOnLineNumbers: true,
+                                                        readOnly: true,
+                                                        smoothScrolling: true,
+                                                        wordWrap: 'on',
+                                                    }}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    }
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
