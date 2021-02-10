@@ -206,8 +206,12 @@ export default function WebHookDetails(props) {
             {subscribedTopics && value === 'existing' &&
             <List className={classes.listWrapper}>
                 <Divider/>
-                {
-                    Object.keys(subscribedTopics).map((key, i) => (
+                {Object.keys(subscribedTopics).length < 1 &&
+                <Typography color="textPrimary" display="block">
+                    No Web hook Subscriptions Available
+                </Typography>
+                }
+                {Object.keys(subscribedTopics).map((key, i) => (
                         <>
                             <ListItem className={classes.SubscriptionHeader}>
                                 <ListItemText primary={key}/>
@@ -215,10 +219,10 @@ export default function WebHookDetails(props) {
                             {subscribedTopics[key].map((subscription, index) => (
                                 <Grid container direction="row">
                                     <Grid item xs={1}>
-                                        {subscription.deliveryStatus && subscription.deliveryStatus === 1 &&
+                                        {subscription.deliveryStatus && subscription.deliveryStatus.toString() === '1' &&
                                         <CheckCircleIcon style={{color: 'green', fontSize: '14px', paddingTop: '3px'}}/>
                                         }
-                                        {subscription.deliveryStatus && (subscription.deliveryStatus === 2) &&
+                                        {subscription.deliveryStatus && (subscription.deliveryStatus.toString() === '0') &&
                                         <CancelIcon style={{color: 'red', fontSize: '14px', paddingTop: '3px'}}/>
                                         }
                                         {!subscription.deliveryStatus &&
@@ -240,7 +244,7 @@ export default function WebHookDetails(props) {
                                                 display="block"
                                                 variant="caption"
                                                 className={classes.subscriptionTimestamp}>
-                                                {getRelativeTIme(subscription.deliveryTime)}
+                                                {subscription.deliveryTime}
                                             </Typography>
                                         ): (
                                             <Typography
@@ -257,8 +261,7 @@ export default function WebHookDetails(props) {
                             ))}
                             <Divider component="li"/>
                         </>
-                    ))
-                }
+                    ))}
             </List>
             }
             {allTopics && value === 'all' &&
