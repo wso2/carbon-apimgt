@@ -205,6 +205,9 @@ public class SQLConstants {
     public static final String ADD_API_SERVICE_MAPPING_SQL = "INSERT INTO AM_API_SERVICE_MAPPING (API_UUID, SERVICE_KEY, " +
             "MD5) VALUES (?,?,?)";
 
+    public static final String GET_SERVICE_KEY_BY_API_ID_SQL = "SELECT SERVICE_KEY FROM AM_API_SERVICE_MAPPING WHERE " +
+            " API_UUID = ? AND TENANT_ID = ?";
+
     public static final String DELETE_API_SERVICE_MAPPING_SQL = "DELETE FROM AM_API_SERVICE_MAPPING WHERE API_UUID = ? " +
             "AND SERVICE_ID = ?";
 

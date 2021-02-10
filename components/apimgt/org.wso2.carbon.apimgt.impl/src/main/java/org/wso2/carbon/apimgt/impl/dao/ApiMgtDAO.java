@@ -17147,6 +17147,24 @@ public class ApiMgtDAO {
         }
     }
 
+    public String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException {
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
+        String serviceKey = StringUtils.EMPTY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString("SERVICE_KEY");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
 //    /**
 //     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
 //     * @param apiId
