@@ -489,6 +489,7 @@ class Details extends Component {
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
         const redirectUrl = pathPrefix;
+        const isAsyncAPI = api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFoundMessageText = defineMessages({
@@ -693,7 +694,7 @@ class Details extends Component {
                             />
                         )}
                         {!isAPIProduct && <Divider />}
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI && !isRestricted(['apim:api_publish'],
                             api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({

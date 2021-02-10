@@ -117,7 +117,9 @@ public final class APIConstants {
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
-    
+    public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
+            = "overview_websubSubscriptionConfiguration";
+
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     /**

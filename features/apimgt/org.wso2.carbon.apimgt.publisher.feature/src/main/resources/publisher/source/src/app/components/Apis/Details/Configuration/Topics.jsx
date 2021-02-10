@@ -227,8 +227,10 @@ class Topics extends Component {
     buildCallbackURL(topic) {
         const { api } = this.props;
         const { protocol, host, port } = this.gatewayConfigs;
-            return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
-                `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
+            return `https://{GATEWAY_ENDPOINT_HOST}:{GATEWAY_ENDPOINT_PORT}/${api.name.toLowerCase()}/${api.version}/`
+                + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
+            // return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
+            //     `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
     }
 
     handleAddTopic(topic) {
