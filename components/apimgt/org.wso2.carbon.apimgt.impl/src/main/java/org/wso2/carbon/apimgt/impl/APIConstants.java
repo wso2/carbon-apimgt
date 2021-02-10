@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -563,6 +562,7 @@ public final class APIConstants {
     public static final String KEY_TEMPLATE_STREM_ID = "org.wso2.keytemplate.request.stream:1.0.0";
     public static final String CACHE_INVALIDATION_STREAM_ID = "org.wso2.apimgt.cache.invalidation.stream:1.0.0";
     public static final String NOTIFICATION_STREAM_ID = "org.wso2.apimgt.notification.stream:1.0.0";
+    public static final String WEBHOOKS_SUBSCRIPTION_STREAM_ID = "org.wso2.apimgt.webhooks.request.stream:1.0.0";
 
     //Property for enabling scope sharing between APIs
     public static final String ENABLE_API_SCOPES_SHARING = "enable-api-scopes-sharing";
@@ -587,7 +587,6 @@ public final class APIConstants {
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
-    public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
@@ -600,6 +599,7 @@ public final class APIConstants {
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
 
     public static class TokenStatus {
 
@@ -1548,6 +1548,8 @@ public final class APIConstants {
     public static final String API_DATA_URL = "url";
     public static final String API_UUID = "apiUUID";
 
+    public static final String TRANSPORT_URL_IN = "TransportInURL";
+
     // mock response generation
     public static final String MOCK_GEN_POLICY_LIST = "policyList";
 
@@ -1960,6 +1962,9 @@ public final class APIConstants {
 
     public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
     public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+    public static final String[] SSE_DEFAULT_METHODS = {"get"};
+    public static final String[] WS_DEFAULT_METHODS = {"post"};
+    public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
 
@@ -2254,6 +2259,9 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
     public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
 
+    public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";
+    public static final String TENANT_DOMAIN_INFO_PROPERTY = "tenant.info.domain";
+
     public static class CertificateReLoaderConfiguration {
 
         public static final String CERTIFICATE_RELOADER_CONFIGURATION_ROOT = "CertificateReLoaderConfiguration";
@@ -2280,7 +2288,7 @@ public final class APIConstants {
         public static final String CLAIM_MAPPINGS = "ClaimMappings";
         public static final String CLAIM_MAPPING = "ClaimMapping";
         public static final String CONSUMER_KEY_CLAIM = "ConsumerKeyClaim";
-        
+
 
         public static class JWKSConfiguration {
 
@@ -2484,6 +2492,49 @@ public final class APIConstants {
         public static final String TOPIC_CACHE_INVALIDATION = "cacheInvalidation";
         public static final String TOPIC_KEY_MANAGER = "keyManager";
         public static final String TOPIC_NOTIFICATION = "notification";
+        public static final String TOPIC_ASYNC_WEBHOOKS_DATA = "asyncWebhooksData";
+    }
+
+    public static class Webhooks {
+        public static final String API_UUID = "API_UUID";
+        public static final String APPLICATION_ID = "APPLICATION_ID";
+        public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
+        public static final String CALLBACK = "HUB_CALLBACK_URL";
+        public static final String SECRET = "HUB_SECRET";
+        public static final String TOPIC = "HUB_TOPIC";
+        public static final String MODE = "HUB_MODE";
+        public static final String WH_SUBSCRIPTION_ID = "WH_SUBSCRIPTION_ID";
+        public static final String SUBSCRIBE_MODE = "subscribe";
+        public static final String UNSUBSCRIBE_MODE = "unsubscribe";
+        public static final String LEASE_SECONDS = "HUB_LEASE_SECONDS";
+        public static final String UPDATED_AT = "UPDATED_AT";
+        public static final String EXPIRY_AT = "EXPIRY_AT";
+        public static final String API_KEY_PROPERTY = "apiKey";
+        public static final String APP_ID_PROPERTY = "appID";
+        public static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
+        public static final String CALLBACK_PROPERTY = "callback";
+        public static final String TOPIC_PROPERTY = "topic";
+        public static final String MODE_PROPERTY = "mode";
+        public static final String SECRET_PROPERTY = "secret";
+        public static final String LEASE_SECONDS_PROPERTY = "leaseSeconds";
+        public static final String STATUS_PROPERTY = "status";
+        public static final String SUBSCRIPTION_EVENT_TYPE = "subscriptionEventType";
+        public static final String DELIVERY_EVENT_TYPE = "diliveryStatusEventType";
+        public static final String GET_SUBSCRIPTIONS_URL = "/webhooks-subscriptions";
+        public static final String HUB_TOPIC_QUERY_PARAM = "hub.topic";
+        public static final String HUB_CALLBACK_QUERY_PARAM = "hub.callback";
+        public static final String HUB_SECRET_QUERY_PARAM = "hub.secret";
+        public static final String HUB_MODE_QUERY_PARAM = "hub.mode";
+        public static final String HUB_LEASE_SECONDS_QUERY_PARAM = "hub.lease_seconds";
+        public static final String TOPIC_QUERY_PARAM = "topic";
+        public static final String STATUS = "STATUS";
+        public static final String SUBSCRIBERS_LIST_PROPERTY = "SUBSCRIBERS_LIST";
+        public static final String SUBSCRIBERS_COUNT_PROPERTY = "SUBSCRIBERS_COUNT";
+        public static final String SUBSCRIBER_CALLBACK_PROPERTY = "SUBSCRIBER_CALLBACK";
+        public static final String SUBSCRIBER_SECRET_PROPERTY = "SUBSCRIBER_SECRET";
+        public static final String SUBSCRIBER_TOPIC_PROPERTY = "SUBSCRIBER_TOPIC";
+        public static final String SUBSCRIBER_APPLICATION_ID_PROPERTY = "SUBSCRIBER_APPLICATION_ID";
+        public static final String PAYLOAD_PROPERTY = "ORIGINAL_PAYLOAD";
     }
 
     public enum PolicyType {

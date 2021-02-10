@@ -37,6 +37,10 @@ public final class ImportExportConstants {
     public static final String SWAGGER_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger";
 
+    // Location of the AsyncAPI definition file
+    public static final String ASYNCAPI_DEFINITION_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi";
+
     // Location of the graphql schema definition file
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "schema.graphql";
@@ -84,6 +88,10 @@ public final class ImportExportConstants {
     // Location of the API swagger definition file
     public static final String YAML_SWAGGER_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "swagger.yaml";
+
+    // Location of the AsyncAPI definition file
+    public static final String JSON_ASYNCAPI_DEFINITION_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi.json";
 
     // Name of the API provider element tag of the api.json file
     public static final String PROVIDER_ELEMENT = "provider";

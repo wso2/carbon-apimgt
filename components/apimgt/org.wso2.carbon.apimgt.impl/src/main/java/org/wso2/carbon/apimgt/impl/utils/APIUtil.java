@@ -11292,31 +11292,6 @@ public final class APIUtil {
         return keyManagerConfigurationDTO;
     }
 
-    public static void setTokenAndRevokeEndpointsToDevPortal(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
-
-        APIManagerConfiguration apiManagerConfiguration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        String revokeEndpointContext =
-                apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_ENDPOINT_CONTEXT);
-        String tokenEndpointContext = apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_CONTEXT);
-
-        if (StringUtils.isEmpty(tokenEndpointContext)) {
-            tokenEndpointContext = "/token";
-        }
-        if (StringUtils.isNotEmpty(revokeEndpointContext)) {
-            revokeEndpointContext = "/revoke";
-        }
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_TOKEN_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(tokenEndpointContext));
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_TOKEN_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(tokenEndpointContext));
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.PRODUCTION_REVOKE_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION).concat(revokeEndpointContext));
-        keyManagerConfigurationDTO.getAdditionalProperties().put(APIConstants.KeyManager.SANDBOX_REVOKE_ENDPOINT,
-                getTokenEndpointsByType(APIConstants.GATEWAY_ENV_TYPE_SANDBOX).concat(revokeEndpointContext));
-    }
-
     public static String getTokenEndpointsByType(String type) {
 
         APIManagerConfiguration config =
@@ -11935,5 +11910,17 @@ public final class APIUtil {
             return environment;
         }
         return null;
+    }
+
+    public static boolean isStreamingApi(API api) {
+        return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(api.getType()) ||
+                APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(api.getType()) ||
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(api.getType());
+    }
+
+    public static boolean isStreamingApi(APIProduct apiProduct) {
+        return APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiProduct.getType()) ||
+                APIConstants.APITransportType.SSE.toString().equalsIgnoreCase(apiProduct.getType()) ||
+                APIConstants.APITransportType.WEBSUB.toString().equalsIgnoreCase(apiProduct.getType());
     }
 }
