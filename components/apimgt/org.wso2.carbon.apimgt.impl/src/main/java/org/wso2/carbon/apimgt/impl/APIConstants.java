@@ -1153,7 +1153,7 @@ public final class APIConstants {
         public static final String DEFAULT_TOPIC_QUERY_PARAM_NAME = "hub.topic";
         public static final String WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER = "_web_hook_subscription_failure_handler";
         public static final String DEFAULT_SUBSCRIPTION_RESOURCE_PATH = "/webhooks_events_receiver_resource";
-        public static final String EVENT_RECEIVING_RESOURCE_PATH = "eventReceivingResourcePath";
+        public static final String EVENT_RECEIVING_RESOURCE_PATH = "eventReceiverResourcePath";
         public static final String TOPIC_QUERY_PARAM_NAME = "topicQueryParamName";
     }
 
