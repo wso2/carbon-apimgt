@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -171,7 +171,7 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
         newResourcesHash = Md5HashGenerator.generateHash(tempDirPath);
         catalogEntries = ServiceEntryMappingUtil.fromDirToServiceInfoMap(tempDirPath);
 
-        HashMap<String, ServiceEntryResponse> serviceEntries = new HashMap<>();
+        HashMap<String, ServiceEntryInfo> serviceEntries = new HashMap<>();
         for (Map.Entry<String, ServiceEntry> entry : catalogEntries.entrySet()) {
             String key = entry.getKey();
             catalogEntries.get(key).setMd5(newResourcesHash.get(key));
@@ -185,7 +185,7 @@ public class ServiceEntriesApiServiceImpl implements ServiceEntriesApiService {
                 } else {
                     serviceCatalog.addService(catalogEntries.get(key), tenantId, userName);
                 }
-                ServiceEntryResponse serviceEntry = serviceCatalog.getServiceBasicInfoByKey(key, tenantId);
+                ServiceEntryInfo serviceEntry = serviceCatalog.getServiceBasicInfoByKey(key, tenantId);
                 serviceEntries.put(key, serviceEntry);
             } catch (APIManagementException e) {
                 // client will be informed only by the list of successfully added services

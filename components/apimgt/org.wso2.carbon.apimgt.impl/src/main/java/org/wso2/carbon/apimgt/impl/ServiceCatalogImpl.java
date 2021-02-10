@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ServiceCatalog;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryInfo;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
 import java.util.List;
@@ -92,7 +92,7 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public ServiceEntryResponse getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceEntryInfo getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
         return catalogDAO.getServiceBasicInfoByKey(key, tenantId);
     }
 

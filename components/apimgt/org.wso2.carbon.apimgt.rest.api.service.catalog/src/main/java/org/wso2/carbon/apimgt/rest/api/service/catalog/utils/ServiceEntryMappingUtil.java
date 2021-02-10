@@ -25,10 +25,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -46,9 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,10 +161,10 @@ public class ServiceEntryMappingUtil {
      * @param catalogEntries Hash Map of services provided in zip
      * @return build the List<ServiceInfoDTO> list
      */
-    public static List<ServiceInfoDTO> fromServiceEntryToDTOList(HashMap<String, ServiceEntryResponse> catalogEntries) {
+    public static List<ServiceInfoDTO> fromServiceEntryToDTOList(HashMap<String, ServiceEntryInfo> catalogEntries) {
         List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
-        for (Map.Entry<String, ServiceEntryResponse> entry : catalogEntries.entrySet()) {
-            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceEntryResponseToServiceInfoDTO(
+        for (Map.Entry<String, ServiceEntryInfo> entry : catalogEntries.entrySet()) {
+            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceEntryInfoToServiceInfoDTO(
                     catalogEntries.get(entry.getKey())));
         }
         return serviceStatusList;
@@ -179,7 +176,7 @@ public class ServiceEntryMappingUtil {
      * @param serviceEntry ServiceEntry model object
      * @return Converted ServiceInfoDTO object
      */
-    public static ServiceInfoDTO fromServiceEntryResponseToServiceInfoDTO(ServiceEntryResponse serviceEntry) {
+    public static ServiceInfoDTO fromServiceEntryInfoToServiceInfoDTO(ServiceEntryInfo serviceEntry) {
         ServiceInfoDTO serviceInfoDTO = new ServiceInfoDTO();
 
         serviceInfoDTO.setId(serviceEntry.getId());

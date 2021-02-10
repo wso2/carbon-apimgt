@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -336,7 +336,7 @@ public class ServiceCatalogDAO {
      * @return ServiceEntry
      * throws APIManagementException if failed to retrieve
      */
-    public ServiceEntryResponse getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
+    public ServiceEntryInfo getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_SERVICE_STATUS_INFO)) {
@@ -344,7 +344,7 @@ public class ServiceCatalogDAO {
             ps.setInt(2, tenantId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    ServiceEntryResponse serviceEntry = new ServiceEntryResponse();
+                    ServiceEntryInfo serviceEntry = new ServiceEntryInfo();
 
                     serviceEntry.setId(rs.getString("UUID"));
                     serviceEntry.setKey(rs.getString("SERVICE_KEY"));

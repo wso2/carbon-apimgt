@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.sql.Timestamp;
 
-public class ServiceEntryResponse {
+public class ServiceEntryInfo {
     private String id = null;
     private String name = null;
     private String key = null;

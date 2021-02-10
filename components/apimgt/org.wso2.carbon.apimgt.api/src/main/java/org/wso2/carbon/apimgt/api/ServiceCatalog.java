@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryInfo;
 
 import java.util.List;
 
@@ -129,10 +129,10 @@ public interface ServiceCatalog {
      *
      * @param key Service key unique to each tenant
      * @param tenantId Tenant Identifier
-     * @return ServiceEntry object including endpoint information
+     * @return ServiceEntryInfo object including basic endpoint information
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceEntryResponse getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException;
+    ServiceEntryInfo getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException;
 
     /**
      * Get metadata and endpoint definition resources of a service endpoint
