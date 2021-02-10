@@ -119,7 +119,7 @@ class Topics extends React.Component {
                         <TableRow style={{borderStyle: 'hidden', padding:'0px'}} key={topic.name}>
                             <TableCell style={{padding:'0px'}}>
                                 <Typography component='p' variant='body2'>
-                                    {topic.name}
+                                    <b>{topic.name}</b> - {topic.type.toLowerCase()}
                                 </Typography>
                             </TableCell>
                         </TableRow>

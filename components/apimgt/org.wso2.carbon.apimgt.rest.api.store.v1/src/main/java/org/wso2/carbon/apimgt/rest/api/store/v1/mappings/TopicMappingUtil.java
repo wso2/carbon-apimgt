@@ -70,6 +70,7 @@ public class TopicMappingUtil {
         TopicDTO topicDTO = new TopicDTO();
         topicDTO.setApiId(topic.getApiId());
         topicDTO.setName(topic.getName());
+        topicDTO.setType(topic.getType());
         return topicDTO;
     }
 
