@@ -811,12 +811,12 @@ public class PublisherCommonUtils {
                     if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organizationId)) {
                         throw new APIManagementException(
                                 "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
+                                        + context + " in the organization : " + organizationId , ExceptionCodes.API_ALREADY_EXISTS);
                     } else {
                         throw new APIManagementException(
                                 "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context,
-                                ExceptionCodes.API_ALREADY_EXISTS);
+                                        + " already exists with different context" + context  + " in the organization" +
+                                        " : " + organizationId,  ExceptionCodes.API_ALREADY_EXISTS);
                     }
                 }
             }
@@ -825,7 +825,7 @@ public class PublisherCommonUtils {
             if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organizationId)) {
                 throw new APIManagementException(
                         "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                                + context, ExceptionCodes.API_ALREADY_EXISTS);
+                        + context + " in the organization" + " : " + organizationId, ExceptionCodes.API_ALREADY_EXISTS);
             }
         }
 
