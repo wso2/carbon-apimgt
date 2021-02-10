@@ -1040,7 +1040,7 @@ public class RestApiUtil {
      */
     public static Set<URITemplate> getServiceCatalogAPIResourceMapping() {
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
-                RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL, "v1"));
+                RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL, "v0"));
 
         if (serviceCatalogAPIResourceMappings != null) {
             return serviceCatalogAPIResourceMappings;
