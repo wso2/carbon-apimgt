@@ -17,21 +17,16 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
-import org.wso2.carbon.apimgt.usage.publisher.dto.AnalyticsEvent;
-
-import java.util.Map;
 
 /**
  * Success event publisher implementation
  */
 public class SuccessRequestDataPublisher extends AbstractRequestDataPublisher {
 
-    @Override
-    public void publish(AnalyticsEvent analyticsEvent) {
-        Map<String, String> responseEventMap = mapper.convertValue(analyticsEvent, mapTypeRef);
-        this.publishData(responseEventMap);
-    }
+    private static final Log log = LogFactory.getLog(SuccessRequestDataPublisher.class);
 
     @Override
     public CounterMetric getCounterMetric() {

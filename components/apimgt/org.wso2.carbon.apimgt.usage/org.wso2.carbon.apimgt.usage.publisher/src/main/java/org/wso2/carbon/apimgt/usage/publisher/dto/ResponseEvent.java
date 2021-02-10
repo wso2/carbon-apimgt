@@ -24,11 +24,11 @@ public class ResponseEvent extends AnalyticsEvent {
     private String apiMethod;
     private String apiResourceTemplate;
     private String destination;
-    private String responseCacheHit;
-    private String responseLatency;
-    private String backendLatency;
-    private String requestMediationLatency;
-    private String responseMediationLatency;
+    private boolean responseCacheHit;
+    private long responseLatency;
+    private long backendLatency;
+    private long requestMediationLatency;
+    private long responseMediationLatency;
 
     public String getApiMethod() {
         return apiMethod;
@@ -54,43 +54,43 @@ public class ResponseEvent extends AnalyticsEvent {
         this.destination = destination;
     }
 
-    public String getResponseCacheHit() {
+    public boolean getResponseCacheHit() {
         return responseCacheHit;
     }
 
-    public void setResponseCacheHit(String responseCacheHit) {
+    public void setResponseCacheHit(boolean responseCacheHit) {
         this.responseCacheHit = responseCacheHit;
     }
 
-    public String getResponseLatency() {
+    public long getResponseLatency() {
         return responseLatency;
     }
 
-    public void setResponseLatency(String responseLatency) {
+    public void setResponseLatency(long responseLatency) {
         this.responseLatency = responseLatency;
     }
 
-    public String getBackendLatency() {
+    public long getBackendLatency() {
         return backendLatency;
     }
 
-    public void setBackendLatency(String backendLatency) {
+    public void setBackendLatency(long backendLatency) {
         this.backendLatency = backendLatency;
     }
 
-    public String getRequestMediationLatency() {
+    public long getRequestMediationLatency() {
         return requestMediationLatency;
     }
 
-    public void setRequestMediationLatency(String requestMediationLatency) {
+    public void setRequestMediationLatency(long requestMediationLatency) {
         this.requestMediationLatency = requestMediationLatency;
     }
 
-    public String getResponseMediationLatency() {
+    public long getResponseMediationLatency() {
         return responseMediationLatency;
     }
 
-    public void setResponseMediationLatency(String responseMediationLatency) {
+    public void setResponseMediationLatency(long responseMediationLatency) {
         this.responseMediationLatency = responseMediationLatency;
     }
 }
