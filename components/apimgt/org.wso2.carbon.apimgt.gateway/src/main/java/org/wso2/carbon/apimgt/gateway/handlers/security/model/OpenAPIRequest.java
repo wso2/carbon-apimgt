@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -48,11 +48,13 @@ public class OpenAPIRequest implements Request {
         OpenAPIRequest openAPIRequest = new OpenAPIRequest();
         openAPIRequest.method = Request.Method.valueOf((String) messageContext.getProperty("api.ut.HTTP_METHOD"));
 
-        openAPIRequest.path = (String) messageContext.getProperty("API_ELECTED_RESOURCE");
+        openAPIRequest.path = SchemaValidationUtils.getRestSubRequestPath(
+                messageContext.getProperty("REST_SUB_REQUEST_PATH").toString());
         Map<String, String> transportHeaders = (Map<String, String>)
                 (axis2MessageContext.getProperty("TRANSPORT_HEADERS"));
         try {
-            openAPIRequest.requestBody = Utils.buildMessagePayload(axis2MessageContext, transportHeaders);
+            openAPIRequest.requestBody =
+                    SchemaValidationUtils.buildMessagePayload(axis2MessageContext, transportHeaders);
         } catch (APIManagementException e) {
             logger.error("Failed to build the message payload");
         }
@@ -68,7 +70,8 @@ public class OpenAPIRequest implements Request {
         }
         String apiResource = messageContext.getProperty("api.ut.resource").toString();
         try {
-            openAPIRequest.queryParams = getQueryParams(apiResource, openAPIRequest.path);
+            openAPIRequest.queryParams = getQueryParams(apiResource, (String)
+                    messageContext.getProperty("API_ELECTED_RESOURCE"));
         } catch (UnsupportedEncodingException e) {
             logger.error("Failed to decode query string");
         }
@@ -80,7 +83,7 @@ public class OpenAPIRequest implements Request {
             throws UnsupportedEncodingException {
 
         Map<String, String> queryParams = new HashMap<>();
-        if (!apiResource.equals(path)) {
+        if (!apiResource.equals(path) && apiResource.contains("?")) {
             String queryString = apiResource.replace(path + "?", "");
             String[] query = queryString.split("&");
             for (String keyValue : query) {
@@ -134,7 +137,7 @@ public class OpenAPIRequest implements Request {
         if (this.queryParams == null) {
             return Collections.emptyList();
         }
-        return Utils.getFromMapOrEmptyList(this.queryParams, s);
+        return SchemaValidationUtils.getFromMapOrEmptyList(this.queryParams, s);
     }
 
     @Nonnull
@@ -154,7 +157,7 @@ public class OpenAPIRequest implements Request {
         if (this.headers == null) {
             return Collections.emptyList();
         }
-        return Utils.getFromMapOrEmptyList(this.headers.asMap(), s);
+        return SchemaValidationUtils.getFromMapOrEmptyList(this.headers.asMap(), s);
     }
 
 }

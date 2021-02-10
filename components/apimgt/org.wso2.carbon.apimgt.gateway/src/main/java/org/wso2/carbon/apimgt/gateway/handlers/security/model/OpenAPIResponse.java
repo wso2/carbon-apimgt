@@ -11,7 +11,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +23,7 @@ public class OpenAPIResponse implements Response {
 
     private static final Log logger = LogFactory.getLog(OpenAPIResponse.class);
     private int status;
-    private Optional<String> body;
+    private Optional<String> responseBody;
     private Multimap<String, String> headers = ArrayListMultimap.create();
     private Method method;
     private String path;
@@ -55,7 +55,7 @@ public class OpenAPIResponse implements Response {
                 (axis2MessageContext.getProperty("TRANSPORT_HEADERS"));
 
         try {
-            openAPIResponse.body = Utils.buildMessagePayload(axis2MessageContext, transportHeaders);
+            openAPIResponse.responseBody = SchemaValidationUtils.buildMessagePayload(axis2MessageContext, transportHeaders);
         } catch (APIManagementException e) {
             logger.error("Failed to build the message payload");
         }
@@ -88,14 +88,14 @@ public class OpenAPIResponse implements Response {
     @Override
     public Optional<String> getBody() {
 
-        return body;
+        return responseBody;
     }
 
     @NotNull
     @Override
     public Collection<String> getHeaderValues(String s) {
 
-        return Utils.getFromMapOrEmptyList(headers.asMap(), s);
+        return SchemaValidationUtils.getFromMapOrEmptyList(headers.asMap(), s);
     }
 
     public Method getMethod() {
