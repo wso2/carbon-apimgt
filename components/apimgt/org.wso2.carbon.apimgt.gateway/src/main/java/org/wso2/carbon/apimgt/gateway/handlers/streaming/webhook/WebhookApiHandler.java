@@ -22,19 +22,25 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -52,7 +58,7 @@ import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
  * }
  * </pre>
  */
-public class WebhookApiHandler extends AbstractHandler {
+public class WebhookApiHandler extends APIAuthenticationHandler {
 
     private static final Log log = LogFactory.getLog(WebhookApiHandler.class);
     private static final String EMPTY_STRING = "";
@@ -73,17 +79,31 @@ public class WebhookApiHandler extends AbstractHandler {
             }
             org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
-            synCtx.setProperty(APIConstants.HTTP_VERB, httpVerb);
             axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
             synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_WEBSUB);
             synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, topicName);
+            boolean authenticationResolved = super.handleRequest(synCtx);
+            ((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                    setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
+            return authenticationResolved;
+        } else {
+            org.apache.axis2.context.MessageContext axisMsgContext = ((Axis2MessageContext) synCtx).
+                    getAxis2MessageContext();
+            try {
+                RelayUtils.buildMessage(axisMsgContext);
+                String payload;
+                if (JsonUtil.hasAJsonPayload(axisMsgContext)) {
+                    payload = JsonUtil.jsonPayloadToString(axisMsgContext);
+                } else {
+                    payload = synCtx.getEnvelope().getBody().getFirstElement().toString();
+                }
+                synCtx.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, payload);
+                return true;
+            } catch (IOException | XMLStreamException e) {
+                log.error("Error while building the message", e);
+                return false;
+            }
         }
-        return true;
-    }
-
-    @Override
-    public boolean handleResponse(MessageContext messageContext) {
-        return true;
     }
 
     private String getRequestSubPath(MessageContext synCtx) {
