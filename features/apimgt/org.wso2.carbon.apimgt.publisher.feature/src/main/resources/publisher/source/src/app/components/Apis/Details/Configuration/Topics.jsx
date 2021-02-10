@@ -44,6 +44,7 @@ import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTop
 
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { parse } from '@asyncapi/parser';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -143,7 +144,6 @@ const styles = (theme) => ({
         textOverflow: 'ellipsis',
     },
 });
-
  /**
   * API Topics page
   */
@@ -328,7 +328,7 @@ class Topics extends Component {
     buildCallbackURL(topic) {
         const { api } = this.props;
         const { protocol, host, port } = this.gatewayConfigs;
-            return `https://{GATEWAY_ENDPOINT_HOST}:{GATEWAY_ENDPOINT_PORT}/${api.name.toLowerCase()}/${api.version}/`
+            return `https://{GATEWAY_HOST}:9091/${api.name.toLowerCase()}/${api.version}/`
                 + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
             // return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
             //     `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
@@ -637,7 +637,7 @@ class Topics extends Component {
     }
 
     renderTopics() {
-        const { classes } = this.props;
+        const { classes, api } = this.props;
         const { topics, tabValue, definition } = this.state;
         return (
             <div className={classes.root}>
@@ -673,27 +673,29 @@ class Topics extends Component {
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Grid container direction='column'>
-                                    <Grid item>
-                                        <TextField
-                                            autoFocus
-                                            fullWidth
-                                            disabled
-                                            id='topic-description'
-                                            label={(
-                                                <>
-                                                    <FormattedMessage
-                                                        id='Apis.Create.Components.DefaultAPIForm.callbackUrl'
-                                                        defaultMessage='Callback URL'
-                                                    />
-                                                </>
-                                            )}
-                                            value={this.buildCallbackURL(topic)}
-                                            helperText='Use the above callback URL when register at the provider'
-                                            name='description'
-                                            margin='normal'
-                                            variant='outlined'
-                                        />
-                                    </Grid>
+                                    {api.type === 'WEBSUB' && (
+                                        <Grid item>
+                                            <TextField
+                                                autoFocus
+                                                fullWidth
+                                                disabled
+                                                id='topic-description'
+                                                label={(
+                                                    <>
+                                                        <FormattedMessage
+                                                            id='Apis.Create.Components.DefaultAPIForm.callbackUrl'
+                                                            defaultMessage='Callback URL'
+                                                        />
+                                                    </>
+                                                )}
+                                                value={this.buildCallbackURL(topic)}
+                                                helperText='Use the above callback URL when register at the provider'
+                                                name='description'
+                                                margin='normal'
+                                                variant='outlined'
+                                            />
+                                        </Grid>
+                                    )}
                                     <Grid item>
                                         <TextField
                                             autoFocus

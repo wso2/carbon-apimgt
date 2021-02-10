@@ -147,7 +147,7 @@ class APIDefinition extends React.Component {
         let promisedApi;
         if (api.type === 'GRAPHQL') {
             promisedApi = api.getSchema(api.id);
-        } else if (api.type === 'WS' || api.type === 'WEBSUB') {
+        } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
                 promisedApi = api.getAsyncAPIDefinition(api.id);
         } else {
             promisedApi = api.getSwagger(api.id);
@@ -162,7 +162,7 @@ class APIDefinition extends React.Component {
                         graphQL: response.obj.schemaDefinition,
                         format: 'txt',
                     });
-                } else if (api.type === 'WS' || api.type === 'WEBSUB') {
+                } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
                     this.setState({
                         asyncAPI: YAML.safeDump(YAML.safeLoad(response.data)),
                         asyncAPIModified: YAML.safeDump(YAML.safeLoad(response.data)),
@@ -526,6 +526,7 @@ class APIDefinition extends React.Component {
             securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
             asyncAPI, asyncAPIModified, isAsyncAPIValid,
         } = this.state;
+
         const {
             classes, resourceNotFountMessage, api,
         } = this.props;
