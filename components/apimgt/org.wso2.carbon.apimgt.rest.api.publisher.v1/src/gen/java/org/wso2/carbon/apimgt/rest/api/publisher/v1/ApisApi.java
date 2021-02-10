@@ -780,14 +780,15 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @GET
     @Path("/revisions")
-
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "List available revisions of an API", notes = "List available revisions of an API ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Revisions",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of API revisions are returned. ", response = APIRevisionListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getAPIRevisionsWithAPIName( @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the API ")  @QueryParam("version") String version,  @ApiParam(value = "API Provider ")  @QueryParam("provider") String provider,  @ApiParam(value = "")  @QueryParam("query") String query) throws APIManagementException{

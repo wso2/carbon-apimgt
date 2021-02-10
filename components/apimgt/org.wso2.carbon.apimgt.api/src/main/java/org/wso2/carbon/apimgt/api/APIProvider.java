@@ -1732,7 +1732,6 @@ public interface APIProvider extends APIManager {
      */
     String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException;
 
-
     /**
      * Get the earliest revision UUID from the revision list for a given API
      *
@@ -1741,6 +1740,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get the revision
      */
     String getEarliestRevisionUUID(String apiUUID) throws APIManagementException;
+
     /**
      * Get a List of API Revisions related to provided API UUID
      *

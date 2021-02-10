@@ -9786,7 +9786,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getRevisionByRevisionUUID(revisionUUID);
     }
 
-
     /**
      * Get the revision UUID from the Revision no and API UUID
      *
@@ -9811,7 +9810,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String getEarliestRevisionUUID(String apiUUID) throws APIManagementException {
         return apiMgtDAO.getEarliestRevision(apiUUID);
     }
-
 
     /**
      * Get a List of API Revisions related to provided API UUID
