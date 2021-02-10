@@ -74,7 +74,7 @@ public interface ApisApiService {
       public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response deploymentsGetStatus(String apiId, MessageContext messageContext) throws APIManagementException;
-      public Response exportAPI(String apiId, String name, String version, String revision, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
+      public Response exportAPI(String apiId, String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
@@ -96,7 +96,6 @@ public interface ApisApiService {
       public Response getAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevisions(String apiId, String query, MessageContext messageContext) throws APIManagementException;
-      public Response getAPIRevisionsWithAPIName(String name, String version, String provider, String query, MessageContext messageContext) throws APIManagementException;
       public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -110,7 +109,7 @@ public interface ApisApiService {
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
+      public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
       public Response importGraphQLSchema(String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;

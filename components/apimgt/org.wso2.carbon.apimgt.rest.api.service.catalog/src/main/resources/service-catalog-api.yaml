@@ -27,7 +27,7 @@ paths:
   ######################################################
   # The Service Catalog API operations
   ######################################################
-  /services:
+  /service-entries:
   
     #-----------------------------------------------------
     # Retrieve/search services in the service catalog
@@ -39,7 +39,7 @@ paths:
       operationId: searchServices
       security:
         - OAuth2Security:
-            - service_catalog:service_view
+            - service_catalog:entry_view
       tags:
         - Services
       parameters:
@@ -85,8 +85,8 @@ paths:
             If this set to true, a minimal set of fields will be provided for each service including the md5
           schema:
             type: boolean
-            default: false
-        - $ref: '#/components/parameters/sortBy'
+            default: true
+        - $ref: '#/components/parameters/servicesSortBy'
         - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -116,7 +116,7 @@ paths:
         by specifying the details of the service along with its definition. 
       security:
         - OAuth2Security:
-            - service_catalog:service_write
+            - service_catalog:entry_write
       tags:
         - Services
       operationId: createService
@@ -124,7 +124,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ServiceSchema'
+              $ref: '#/components/schemas/CreateServiceRequest'
       responses:
         201:
           description: |
@@ -151,7 +151,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /services/{serviceId}:
+  /service-entries/{serviceId}:
     #-----------------------------------------------------
     # Retrieve a specific service in the service catalog
     #-----------------------------------------------------
@@ -161,7 +161,7 @@ paths:
         Get details of a service using the id of the service.
       security:
         - OAuth2Security:
-            - service_catalog:service_view
+            - service_catalog:entry_view
       operationId: getServiceById
       tags:
         - Services
@@ -200,7 +200,7 @@ paths:
         Update a service's details and definition
       security:
         - OAuth2Security:
-            - service_catalog:service_write
+            - service_catalog:entry_write
       operationId: updateService
       tags:
         - Services
@@ -210,7 +210,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ServiceSchema'
+              $ref: '#/components/schemas/CreateServiceRequest'
       responses:
         "200":
           description: |
@@ -235,7 +235,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     #-----------------------------------------------------
     # Delete a service in the service catalog
     #-----------------------------------------------------
@@ -245,12 +244,12 @@ paths:
         Delete a service by providing the service id
       security:
         - OAuth2Security:
-            - service_catalog:service_write
+            - service_catalog:entry_write
       operationId: deleteService
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceId'
+        - $ref: '#/components/parameters/serviceKey'
       responses:
         "204":
           description: |
@@ -274,14 +273,14 @@ paths:
   #-----------------------------------------------------
   # Retrieve definition of a service in the service catalog
   #-----------------------------------------------------
-  /services/{serviceKey}/definition:
+  /service-entries/{serviceKey}/definition:
     get:
       summary: Retrieve a service definition
       description: |
         Retrieve the definition of a service identified by the service id.
       security:
         - OAuth2Security:
-            - service_catalog:service_view
+            - service_catalog:entry_view
       operationId: getServiceDefinition
       tags:
         - Services
@@ -318,14 +317,14 @@ paths:
   #-------------------------------------------------------------------
   # Import a service into the service catalog from a zipped archive
   #-------------------------------------------------------------------
-  /services/import:
+  /service-entries/import:
     post:
       summary: Import a service
       description: |
         Import  a service by providing an archived service
       security:
         - OAuth2Security:
-            - service_catalog:service_write
+            - service_catalog:entry_create
       operationId: importService
       tags:
         - Services
@@ -377,7 +376,7 @@ paths:
   #----------------------------------------------------------
   # Exporting a service as a zipped archive
   #----------------------------------------------------------
-  /services/export:
+  /service-entries/export:
 
     #-----------------------------------------
     # Retrieve a service as a zipped archive
@@ -388,7 +387,7 @@ paths:
         Export a service as an archived zip file.
       security:
         - OAuth2Security:
-            - service_catalog:service_view
+            - service_catalog:entry_view
       operationId: exportService
       tags:
         - Services
@@ -468,16 +467,19 @@ components:
     OAuth2Security:
       type: oauth2
       flows:
-        password:
-          tokenUrl: https://localhost:9443/oauth2/token
+        implicit:
+          authorizationUrl: https://example.com/oauth/authorize
           scopes:
-            service_catalog:service_view: view access to services in service catalog
-            service_catalog:service_write: write access to services in service catalog
+            service_catalog:view: view service catalog
+            service_catalog:write: update service catalog
+            service_catalog:entry_view: view service catalog entry
+            service_catalog:entry_write: write service catalog entry
 
   #-------------------------------------------------------
   # The definitions of resources used by some of the APIs
   #-------------------------------------------------------
   schemas:
+
     ServiceInfoList:
       title: Services List
       type: object
@@ -547,24 +549,24 @@ components:
     #-----------------------------------------------------
     ServiceList:
       type: object
-      title: Paginated List of Services in Service Catalog
+      title: Paginated Service Catalog Entry Array
       properties:
         list:
           type: array
-          title: List of Services in Service Catalog
+          title: Service Catalog Entry Array
           items:
             $ref: '#/components/schemas/Service'
         pagination:
           $ref: '#/components/schemas/Pagination'
 
     #-----------------------------------------------------
-    # The Service resource model
+    # The Service Catalog Entry resource
     #-----------------------------------------------------
     Service:
       type: object
-      title: The Service Object
+      title: The Service Catalog Entry object
       required:
-        - name
+        - entryName
         - version
         - serviceType
       properties:
@@ -586,9 +588,6 @@ components:
         version:
           type: string
           example: v1
-        serviceKey:
-          type: string
-          example: Pizzashack-Endpoint-1.0.0
         serviceUrl:
           type: string
           example: http://localhost/pizzashack
@@ -639,11 +638,65 @@ components:
           example: https://petstore.swagger.io/v2/swagger.json
 
     #-----------------------------------------------------
-    # Status of CRUD operations of Service model
+    # The Service Catalog Entry resource
+    #-----------------------------------------------------
+    ServiceMetadata:
+      type: object
+      title: The Service Metadata Entry object
+      properties:
+        key:
+          type: string
+          example: PizzashackEndpoint-1.0.0
+        name:
+          type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        displayName:
+          type: string
+          pattern: '^[^\*]+$'
+          example: Pizzashack-Endpoint
+        description:
+          type: string
+          example: A Catalog Entry that exposes a REST endpoint
+        version:
+          type: string
+          example: v1
+        serviceUrl:
+          type: string
+          example: http://localhost/pizzashack
+        definitionType:
+          type: string
+          description: The type of the provided API definition
+          example: OAS3
+          enum:
+            - OAS2
+            - OAS3
+            - WSDL1
+            - WSDL2
+            - GRAPHQL_SDL
+            - ASYNC_API
+        securityType:
+          type: string
+          description: The security type of the endpoint
+          example: BASIC
+          enum:
+            - BASIC
+            - DIGEST
+            - OAUTH2
+            - X509
+            - API_KEY
+            - NONE
+        mutualSSLEnabled:
+          type: boolean
+          description: Whether Mutual SSL is enabled for the endpoint
+          default: false
+          
+    #-----------------------------------------------------
+    # Status of CRUD operations of Service Catalog Entry resource 
     #-----------------------------------------------------
     ServiceCRUDStatus:
       type: object
-      title: The Service object
+      title: The Service Catalog Entry object
       required:
         - entryName
         - version
@@ -678,7 +731,7 @@ components:
     
     ServiceInfo:
       type: object
-      title: The Service Info object
+      title: The Service Catalog Entry object
       properties:
         id:
           type: string
@@ -699,11 +752,11 @@ components:
           example: 36583a6a249b410e7fc4f892029709cac09763ddb230e1a829d5f9134d1abd07
           
     #-----------------------------------------------------
-    # The Service Schema resource
+    # The Service Catalog Entry Schema resource
     #-----------------------------------------------------
-    ServiceSchema:
+    CreateServiceRequest:
       type: object
-      title: The Service Schema object
+      title: The Service Catalog Entry Schema object
       required:
         - catalogEntry
         - definitionFile
@@ -815,7 +868,7 @@ components:
     serviceId:
       name: serviceId
       in: path
-      description: uuid of the service
+      description: uuid of the catalog entry
       required: true
       schema:
         type: string
@@ -826,7 +879,7 @@ components:
     serviceKey:
       name: serviceKey
       in: path
-      description: service key of the service
+      description: service key of the catalog entry
       required: true
       schema:
         type: string
@@ -868,9 +921,9 @@ components:
         default: 0
 
     #-------------------------------------------------------------------------------
-    # sortBy - sort the returned services list by given field
+    # servicesSortBy - sort the returned services list by given field
     #-------------------------------------------------------------------------------
-    sortBy:
+    servicesSortBy:
       name: sortBy
       in: query
       schema:

@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -52,8 +51,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -113,6 +110,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -141,7 +139,7 @@ public class ImportUtils {
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-                                Boolean rotateRevision, Boolean overwrite, String[] tokenScopes) throws APIManagementException {
+            Boolean overwrite, String[] tokenScopes) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -270,50 +268,6 @@ public class ImportUtils {
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
             }
             importedApi.setStatus(targetStatus);
-            JSONArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath);
-            if (deploymentInfoArray != null && deploymentInfoArray.length() > 0) {
-                String importedAPIUuid = importedApi.getUuid();
-                String revisionId;
-                APIRevision apiRevision = new APIRevision();
-                apiRevision.setApiUUID(importedAPIUuid);
-                apiRevision.setDescription("Revision created after importing the API");
-                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                try {
-                    revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
-                } catch (APIManagementException e) {
-                    //if the revision count is more than 5, addAPIRevision will throw an exception. If rotateRevision
-                    //enabled, earliest revision will be deleted before creating a revision again
-                    if (e.getErrorHandler().getErrorCode() ==
-                            ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED).getErrorCode() &&
-                            rotateRevision) {
-                        String earliestRevisionUuid = apiProvider.getEarliestRevisionUUID(importedAPIUuid);
-                        List<APIRevisionDeployment> deploymentsList =
-                                apiProvider.getAPIRevisionDeploymentList(earliestRevisionUuid);
-                        //if the earliest revision is already deployed in gateway environments, it will be undeployed
-                        //before deleting
-                        apiProvider
-                                .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList);
-                        apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
-                        revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
-                    } else {
-                        throw new APIManagementException(e);
-                    }
-                }
-
-                //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
-                //environments
-                List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-                for (int i = 0; i < deploymentInfoArray.length(); i++) {
-                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(
-                            deploymentInfoArray.getJSONObject(i).getString(ImportExportConstants.DEPLOYMENT_NAME));
-                    apiRevisionDeployment
-                            .setDisplayOnDevportal(deploymentInfoArray.getJSONObject(i)
-                                    .getBoolean(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION));
-                    apiRevisionDeployments.add(apiRevisionDeployment);
-                }
-                apiProvider.addAPIRevisionDeployment(importedAPIUuid, revisionId, apiRevisionDeployments);
-            }
             return importedApi;
         } catch (CryptoException | IOException e) {
             throw new APIManagementException(
@@ -727,28 +681,6 @@ public class ImportUtils {
             GraphqlComplexityInfo graphqlComplexityInfo =
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(complexityDTO, schema);
             return graphqlComplexityInfo;
-        } catch (IOException e) {
-            throw new APIManagementException("Error while reading graphql complexity info from path: " + pathToArchive,
-                    e, ExceptionCodes.ERROR_READING_META_DATA);
-        }
-    }
-
-    /**
-     * Retrieve the deployment information from the file
-     *
-     * @param pathToArchive Path to API archive
-     * @return a JSONArray of the deployed gateway environments
-     * @throws APIManagementException If an error occurs while reading the file
-     */
-    private static JSONArray retrieveDeploymentLabelsFromArchive(String pathToArchive)
-            throws APIManagementException {
-        try {
-            String jsonContent =
-                    getFileContentAsJson(pathToArchive + ImportExportConstants.DEPLOYMENT_INFO_LOCATION);
-            if (jsonContent == null) {
-                return null;
-            }
-            return new JSONArray(jsonContent);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading graphql complexity info from path: " + pathToArchive,
                     e, ExceptionCodes.ERROR_READING_META_DATA);
@@ -1879,12 +1811,12 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    false, Boolean.TRUE, tokenScopes);
+                                    Boolean.TRUE, tokenScopes);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                false, Boolean.FALSE, tokenScopes);
+                                Boolean.FALSE, tokenScopes);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -1899,13 +1831,13 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                false, Boolean.FALSE, tokenScopes);
+                                Boolean.FALSE, tokenScopes);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    false, Boolean.TRUE, tokenScopes);
+                                    Boolean.TRUE, tokenScopes);
                         }
                     }
                 }

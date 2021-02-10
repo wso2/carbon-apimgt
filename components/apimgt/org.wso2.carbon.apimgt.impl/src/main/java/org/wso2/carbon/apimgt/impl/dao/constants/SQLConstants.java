@@ -3730,10 +3730,6 @@ public class SQLConstants {
         public static final String GET_REVISION_COUNT_BY_API_UUID = "SELECT COUNT(ID) FROM AM_REVISION WHERE API_UUID = ?";
         public static final String GET_MOST_RECENT_REVISION_ID = "SELECT MAX(ID) FROM AM_REVISION WHERE API_UUID = ?";
         public static final String GET_REVISION_BY_REVISION_UUID = "SELECT * FROM AM_REVISION WHERE REVISION_UUID = ?";
-        public static final String GET_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
-                "AND ID = ?";
-        public static final String GET_EARLIEST_REVISION_ID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
-                "ORDER BY ID ASC LIMIT 1";
         public static final String GET_REVISION_APIID_BY_REVISION_UUID = "SELECT API_UUID, ID FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT * FROM AM_REVISION AR LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING ADRM"
                 + " ON AR.REVISION_UUID = ADRM.REVISION_UUID  WHERE AR.API_UUID = ? ";
@@ -3811,10 +3807,8 @@ public class SQLConstants {
                 "ENDPOINT_DEFINITION = ?," +
                 "METADATA = ? " +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
-        public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
+        public static final String DELETE_SERVICE = "DELETE FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? " +
                 "AND TENANT_ID = ?";
-        public static final String DELETE_SERVICE_BY_SERVICE_KEY = "DELETE FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = " +
-                "? AND TENANT_ID = ?";
         public static final String GET_SERVICE_BY_SERVICE_KEY = "SELECT * FROM AM_SERVICE_CATALOG WHERE SERVICE_KEY = ? " +
                 "AND TENANT_ID = ?";
         public static final String GET_SERVICE_BY_NAME_AND_VERSION = "SELECT * FROM AM_SERVICE_CATALOG " +

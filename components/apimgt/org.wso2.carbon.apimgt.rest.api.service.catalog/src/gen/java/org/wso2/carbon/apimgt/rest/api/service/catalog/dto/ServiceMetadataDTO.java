@@ -18,9 +18,9 @@ import javax.validation.Valid;
 
 
 
-public class ServiceDTO   {
+public class ServiceMetadataDTO   {
   
-    private String id = null;
+    private String key = null;
     private String name = null;
     private String displayName = null;
     private String description = null;
@@ -99,32 +99,27 @@ return null;
     }
     private SecurityTypeEnum securityType = null;
     private Boolean mutualSSLEnabled = false;
-    private Integer usage = null;
-    private String createdTime = null;
-    private String lastUpdatedTime = null;
-    private String md5 = null;
-    private String definitionUrl = null;
 
   /**
    **/
-  public ServiceDTO id(String id) {
-    this.id = id;
+  public ServiceMetadataDTO key(String key) {
+    this.key = key;
     return this;
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
+  @ApiModelProperty(example = "PizzashackEndpoint-1.0.0", value = "")
+  @JsonProperty("key")
+  public String getKey() {
+    return key;
   }
-  public void setId(String id) {
-    this.id = id;
+  public void setKey(String key) {
+    this.key = key;
   }
 
   /**
    **/
-  public ServiceDTO name(String name) {
+  public ServiceMetadataDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -141,7 +136,7 @@ return null;
 
   /**
    **/
-  public ServiceDTO displayName(String displayName) {
+  public ServiceMetadataDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -158,7 +153,7 @@ return null;
 
   /**
    **/
-  public ServiceDTO description(String description) {
+  public ServiceMetadataDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -175,15 +170,14 @@ return null;
 
   /**
    **/
-  public ServiceDTO version(String version) {
+  public ServiceMetadataDTO version(String version) {
     this.version = version;
     return this;
   }
 
   
-  @ApiModelProperty(example = "v1", required = true, value = "")
+  @ApiModelProperty(example = "v1", value = "")
   @JsonProperty("version")
-  @NotNull
   public String getVersion() {
     return version;
   }
@@ -193,7 +187,7 @@ return null;
 
   /**
    **/
-  public ServiceDTO serviceUrl(String serviceUrl) {
+  public ServiceMetadataDTO serviceUrl(String serviceUrl) {
     this.serviceUrl = serviceUrl;
     return this;
   }
@@ -211,7 +205,7 @@ return null;
   /**
    * The type of the provided API definition
    **/
-  public ServiceDTO definitionType(DefinitionTypeEnum definitionType) {
+  public ServiceMetadataDTO definitionType(DefinitionTypeEnum definitionType) {
     this.definitionType = definitionType;
     return this;
   }
@@ -229,7 +223,7 @@ return null;
   /**
    * The security type of the endpoint
    **/
-  public ServiceDTO securityType(SecurityTypeEnum securityType) {
+  public ServiceMetadataDTO securityType(SecurityTypeEnum securityType) {
     this.securityType = securityType;
     return this;
   }
@@ -247,7 +241,7 @@ return null;
   /**
    * Whether Mutual SSL is enabled for the endpoint
    **/
-  public ServiceDTO mutualSSLEnabled(Boolean mutualSSLEnabled) {
+  public ServiceMetadataDTO mutualSSLEnabled(Boolean mutualSSLEnabled) {
     this.mutualSSLEnabled = mutualSSLEnabled;
     return this;
   }
@@ -262,92 +256,6 @@ return null;
     this.mutualSSLEnabled = mutualSSLEnabled;
   }
 
-  /**
-   * Number of usages of the service in APIs
-   **/
-  public ServiceDTO usage(Integer usage) {
-    this.usage = usage;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1", value = "Number of usages of the service in APIs")
-  @JsonProperty("usage")
-  public Integer getUsage() {
-    return usage;
-  }
-  public void setUsage(Integer usage) {
-    this.usage = usage;
-  }
-
-  /**
-   **/
-  public ServiceDTO createdTime(String createdTime) {
-    this.createdTime = createdTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2020-02-20T13:57:16.229", value = "")
-  @JsonProperty("createdTime")
-  public String getCreatedTime() {
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  /**
-   **/
-  public ServiceDTO lastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "2020-02-20T13:57:16.229", value = "")
-  @JsonProperty("lastUpdatedTime")
-  public String getLastUpdatedTime() {
-    return lastUpdatedTime;
-  }
-  public void setLastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-  }
-
-  /**
-   **/
-  public ServiceDTO md5(String md5) {
-    this.md5 = md5;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "36583a6a249b410e7fc4f892029709cac09763ddb230e1a829d5f9134d1abd07", value = "")
-  @JsonProperty("md5")
-  public String getMd5() {
-    return md5;
-  }
-  public void setMd5(String md5) {
-    this.md5 = md5;
-  }
-
-  /**
-   **/
-  public ServiceDTO definitionUrl(String definitionUrl) {
-    this.definitionUrl = definitionUrl;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "https://petstore.swagger.io/v2/swagger.json", value = "")
-  @JsonProperty("definitionUrl")
-  public String getDefinitionUrl() {
-    return definitionUrl;
-  }
-  public void setDefinitionUrl(String definitionUrl) {
-    this.definitionUrl = definitionUrl;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -357,34 +265,29 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ServiceDTO service = (ServiceDTO) o;
-    return Objects.equals(id, service.id) &&
-        Objects.equals(name, service.name) &&
-        Objects.equals(displayName, service.displayName) &&
-        Objects.equals(description, service.description) &&
-        Objects.equals(version, service.version) &&
-        Objects.equals(serviceUrl, service.serviceUrl) &&
-        Objects.equals(definitionType, service.definitionType) &&
-        Objects.equals(securityType, service.securityType) &&
-        Objects.equals(mutualSSLEnabled, service.mutualSSLEnabled) &&
-        Objects.equals(usage, service.usage) &&
-        Objects.equals(createdTime, service.createdTime) &&
-        Objects.equals(lastUpdatedTime, service.lastUpdatedTime) &&
-        Objects.equals(md5, service.md5) &&
-        Objects.equals(definitionUrl, service.definitionUrl);
+    ServiceMetadataDTO serviceMetadata = (ServiceMetadataDTO) o;
+    return Objects.equals(key, serviceMetadata.key) &&
+        Objects.equals(name, serviceMetadata.name) &&
+        Objects.equals(displayName, serviceMetadata.displayName) &&
+        Objects.equals(description, serviceMetadata.description) &&
+        Objects.equals(version, serviceMetadata.version) &&
+        Objects.equals(serviceUrl, serviceMetadata.serviceUrl) &&
+        Objects.equals(definitionType, serviceMetadata.definitionType) &&
+        Objects.equals(securityType, serviceMetadata.securityType) &&
+        Objects.equals(mutualSSLEnabled, serviceMetadata.mutualSSLEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
+    return Objects.hash(key, name, displayName, description, version, serviceUrl, definitionType, securityType, mutualSSLEnabled);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ServiceDTO {\n");
+    sb.append("class ServiceMetadataDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -393,11 +296,6 @@ return null;
     sb.append("    definitionType: ").append(toIndentedString(definitionType)).append("\n");
     sb.append("    securityType: ").append(toIndentedString(securityType)).append("\n");
     sb.append("    mutualSSLEnabled: ").append(toIndentedString(mutualSSLEnabled)).append("\n");
-    sb.append("    usage: ").append(toIndentedString(usage)).append("\n");
-    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    md5: ").append(toIndentedString(md5)).append("\n");
-    sb.append("    definitionUrl: ").append(toIndentedString(definitionUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }
