@@ -82,8 +82,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     private String signatureAlgorithm = SHA256_WITH_RSA;
 
-    private String kidSignatureAlgorithm;
-
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
 
     public AbstractJWTGenerator() {
@@ -95,10 +93,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         dialectURI = jwtConfigurationDto.getConsumerDialectUri();
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
-        }
-        kidSignatureAlgorithm = jwtConfigurationDto.getKidSignatureAlgorithm();
-        if (kidSignatureAlgorithm == null) {
-            signatureAlgorithm = APIConstants.SHA_256;
         }
 
 
@@ -333,7 +327,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         try {
             KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
             Certificate publicCert = keyStoreManager.getDefaultPrimaryCertificate();
-            return APIUtil.generateHeader(publicCert, signatureAlgorithm, kidSignatureAlgorithm);
+            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new APIManagementException(error, e);

@@ -264,11 +264,11 @@ public class TokenGenTest {
         Certificate cert = keystore.getCertificate("wso2carbon");
 
         //Generate JWT header using the above certificate
-        String header = APIUtil.generateHeader(cert, "SHA256withRSA", "SHA-1");
+        String header = APIUtil.generateHeader(cert, "SHA256withRSA");
 
         //Get the public certificate's thumbprint and base64url encode it
         byte[] der = cert.getEncoded();
-        MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+        MessageDigest digestValue = MessageDigest.getInstance("SHA-256");
         digestValue.update(der);
         byte[] digestInBytes = digestValue.digest();
         String publicCertThumbprint = hexify(digestInBytes);

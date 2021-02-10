@@ -51,7 +51,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     private String dialectURI;
 
     private String signatureAlgorithm;
-    private String kidSignatureAlgorithm;
 
     public AbstractAPIMgtGatewayJWTGenerator() {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -64,11 +63,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
-        }
-        kidSignatureAlgorithm = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration().getJwtConfigurationDto().getKidSignatureAlgorithm();
-        if (kidSignatureAlgorithm == null) {
-            kidSignatureAlgorithm = APIConstants.SHA_256;
         }
     }
 
@@ -177,7 +171,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         try {
             KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
             Certificate publicCert = keyStoreManager.getDefaultPrimaryCertificate();
-            return APIUtil.generateHeader(publicCert, signatureAlgorithm, kidSignatureAlgorithm);
+            return APIUtil.generateHeader(publicCert, signatureAlgorithm);
         } catch (Exception e) {
             String error = "Error in obtaining keystore";
             throw new APIManagementException(error, e);
