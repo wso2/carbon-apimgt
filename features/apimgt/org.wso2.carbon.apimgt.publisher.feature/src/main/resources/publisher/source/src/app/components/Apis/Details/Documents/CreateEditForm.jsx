@@ -174,7 +174,7 @@ class CreateEditForm extends React.Component {
 
     onDrop = (acceptedFile) => {
         const { intl } = this.props;
-        var specialChars = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,<>\/?~]/;
+        var specialChars = /[`!@#$%^*()+\-={};'"\\|,<>\/?~]/;
         if (specialChars.test(acceptedFile[0].name)) {
             this.setState({ file: null });
             Alert.error(intl.formatMessage({
