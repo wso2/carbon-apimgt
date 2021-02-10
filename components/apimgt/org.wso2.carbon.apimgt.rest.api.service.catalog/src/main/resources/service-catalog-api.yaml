@@ -612,9 +612,6 @@ components:
             - OAUTH2
             - X509
             - API_KEY
-            - END_TO_END_ENCRYPTION
-            - HTTP_AUTH
-            - HTTP_API_KEY
             - NONE
         mutualSSLEnabled:
           type: boolean
@@ -688,9 +685,6 @@ components:
             - OAUTH2
             - X509
             - API_KEY
-            - END_TO_END_ENCRYPTION
-            - HTTP_AUTH
-            - HTTP_API_KEY
             - NONE
         mutualSSLEnabled:
           type: boolean

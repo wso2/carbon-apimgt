@@ -71,9 +71,6 @@ return null;
         OAUTH2("OAUTH2"),
         X509("X509"),
         API_KEY("API_KEY"),
-        END_TO_END_ENCRYPTION("END_TO_END_ENCRYPTION"),
-        HTTP_AUTH("HTTP_AUTH"),
-        HTTP_API_KEY("HTTP_API_KEY"),
         NONE("NONE");
         private String value;
 
