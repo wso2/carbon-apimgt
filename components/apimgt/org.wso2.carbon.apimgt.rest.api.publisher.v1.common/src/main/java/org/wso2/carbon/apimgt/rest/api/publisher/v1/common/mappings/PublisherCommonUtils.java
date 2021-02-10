@@ -740,22 +740,29 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
-    /**
-     * Prepares the API Model object to be created using the DTO object
-     *
-     * @param body        APIDTO of the API
-     * @param apiProvider API Provider
-     * @param username    Username
-     * @param service ServiceEntry in Service Catalog
-     * @return API object to be created
-     * @throws APIManagementException Error while creating the API
-     */
-    public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username,
-                                              ServiceEntry service) throws APIManagementException {
-        API apiToAdd = prepareToCreateAPIByDTO(body, apiProvider, username);
-        apiToAdd.setServiceInfo("serviceKey", service.getKey());
-        apiToAdd.setServiceInfo("md5", service.getMd5());
-        return apiToAdd;
+    public static String constructEndpointConfigForService(ServiceEntry service) {
+        StringBuilder sb = new StringBuilder();
+        String endpoint_type = APIDTO.TypeEnum.HTTP.value();
+        switch (service.getDefType()) {
+            case "GRAPHQL_SDL" :
+                endpoint_type = APIDTO.TypeEnum.GRAPHQL.value();
+            case "WSDL1":
+                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+            case "WSDL2":
+                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+            case "ASYNC_API":
+                // TODO Need to update the endpoint_type for ASYNC_API
+        }
+        if (StringUtils.isNotEmpty(service.getServiceUrl())) {
+            sb.append("{\"endpoint_type\": \"")
+                    .append(endpoint_type)
+                    .append("\",")
+                    .append("\"production_endpoints\": {\"url\": \"")
+                    .append(service.getServiceUrl())
+                    .append("\"},")
+                    .append("\"endpoint_security\": \"{\"production\": {}}");
+        }
+        return sb.toString();
     }
 
     /**
@@ -876,7 +883,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI)
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -915,7 +922,11 @@ public class PublisherCommonUtils {
                             existingAPI.getId().getVersion()));
         }
 
-        existingAPI.setUriTemplates(uriTemplates);
+        if (isServiceAPI) {
+            mergeURITemplates(existingAPI.getUriTemplates(), uriTemplates);
+        } else {
+            existingAPI.setUriTemplates(uriTemplates);
+        }
         existingAPI.setScopes(scopes);
         PublisherCommonUtils.validateScopes(existingAPI);
 
@@ -932,6 +943,11 @@ public class PublisherCommonUtils {
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
+    private static void mergeURITemplates(Set<URITemplate> existingResources, Set<URITemplate> newResources) {
+        for (URITemplate uriTemplate : newResources) {
+
+        }
+    }
     /**
      * Add GraphQL schema
      *

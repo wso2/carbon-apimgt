@@ -60,11 +60,13 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.ServiceCatalog;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -97,6 +99,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
+import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
@@ -198,6 +201,8 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
+
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_ALREADY_EXISTS;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -2636,7 +2641,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!validationResponse.isValid()) {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
-                updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, validationResponse);
+                updatedSwagger = PublisherCommonUtils.updateSwagger(apiId, validationResponse, false);
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition);
             }
@@ -2677,7 +2682,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
-        return PublisherCommonUtils.updateSwagger(apiId, response);
+        return PublisherCommonUtils.updateSwagger(apiId, response, false);
     }
 
     /**
@@ -2943,24 +2948,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
         }
 
-        // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = null;
-        try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
-        }
-
-        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
-                (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
-        APIDefinitionValidationResponse validationResponse =
-                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-
-        if (!validationResponseDTO.isIsValid()) {
-            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
-            throw RestApiUtil.buildBadRequestException(errorDTO);
-        }
-
         // Convert the 'additionalProperties' json into an APIDTO object
         ObjectMapper objectMapper = new ObjectMapper();
         APIDTO apiDTOFromProperties;
@@ -2970,58 +2957,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
-        // Only HTTP type APIs should be allowed
-        if (!APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())) {
-            throw RestApiUtil.buildBadRequestException("The API's type should only be HTTP when " +
-                    "importing an OpenAPI definition");
-        }
-
         // Import the API and Definition
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername());
-            boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
-            // Rearrange paths according to the API payload and save the OpenAPI definition
-
-            APIDefinition apiDefinition = validationResponse.getParser();
-            SwaggerData swaggerData;
-            String definitionToAdd = validationResponse.getJsonContent();
-            if (syncOperations) {
-                PublisherCommonUtils.validateScopes(apiToAdd);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
+            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, apiDTOFromProperties, fileDetail, null);
+            if (createdApiDTO != null) {
+                // This URI used to set the location header of the POST response
+                URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+                return Response.created(createdApiUri).entity(createdApiDTO).build();
             }
-            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
-            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
-            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-            apiToAdd.setUriTemplates(uriTemplates);
-            apiToAdd.setScopes(scopes);
-            //Set extensions from API definition to API object
-            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
-            if (!syncOperations) {
-                PublisherCommonUtils.validateScopes(apiToAdd);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition
-                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
-            }
-
-            // adding the API and definition
-            apiToAdd.setSwaggerDefinition(definitionToAdd);
-            API addedAPI = apiProvider.addAPI(apiToAdd);
-            //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
-
-            // retrieving the added API for returning as the response
-            // this would provide the updated templates
-            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
-            APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
-            // This URI used to set the location header of the POST response
-            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
-            return Response.created(createdApiUri).entity(createdApiDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
-                    apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
@@ -3452,13 +3395,29 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-
-            API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
-
-            newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            int tenantId = APIUtil.getTenantId(username);
+            if (StringUtils.isNotEmpty(serviceVersion)) {
+                String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
+                ServiceEntry service = apiProvider.retrieveServiceByKey(serviceKey, tenantId);
+                API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+                if (existingAPI == null) {
+                    throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
+                            ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+                }
+                if (newVersion.equals(existingAPI.getId().getVersion())) {
+                    throw new APIMgtResourceAlreadyExistsException("Version " + newVersion + " exists for api "
+                            + existingAPI.getId().getApiName(), ExceptionCodes.from(API_ALREADY_EXISTS, apiId));
+                }
+                APIDTO apidto = createAPIDTO(existingAPI, newVersion);
+                newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto, null, service);
+            } else {
+                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
+                newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
+            }
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
-                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + versionedAPI.getUuid());
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException | DuplicateAPIException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
@@ -3726,6 +3685,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    private APIDTO createAPIDTO(API existingAPI, String newVersion) {
+        APIDTO apidto = new APIDTO();
+        apidto.setName(existingAPI.getId().getApiName());
+        apidto.setContext(existingAPI.getContext());
+        apidto.setVersion(newVersion);
+        return apidto;
+    }
+
     /**
      * Validate the provided OpenAPI definition (via file or url) and return a Map with the validation response
      * information.
@@ -3747,16 +3714,21 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (url != null) {
             validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
         } else if (fileInputStream != null) {
-            String filename = fileDetail.getContentDisposition().getFilename();
             try {
-                if (filename.endsWith(".zip")) {
-                    validationResponse =
-                            OASParserUtil. extractAndValidateOpenAPIArchive(fileInputStream,returnContent);
-                } else  {
+                if (fileDetail != null) {
+                    String filename = fileDetail.getContentDisposition().getFilename();
+                    if (filename.endsWith(".zip")) {
+                        validationResponse =
+                                OASParserUtil.extractAndValidateOpenAPIArchive(fileInputStream, returnContent);
+                    } else {
+                        String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                        validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
+                    }
+                } else {
                     String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
                     validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
                 }
-            } catch (IOException e) {
+            }  catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }
         }
@@ -4164,31 +4136,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
             ServiceEntry service = apiProvider.retrieveServiceByKey(serviceKey, tenantId);
-            if ("OAS3".equals(service.getDefType()) || "OAS2".equals(service.getDefType())) {
-                String openAPIContent = IOUtils.toString(service.getEndpointDef(), RestApiConstants.CHARSET);
-                APIDefinitionValidationResponse validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent,
-                        true);
-                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto, apiProvider,
-                        RestApiCommonUtil.getLoggedInUsername(), service);
-                APIDefinition apiDefinition = validationResponse.getParser();
-                SwaggerData swaggerData;
-                String definitionToAdd = validationResponse.getJsonContent();
-                definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
-                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
-                Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-                apiToAdd.setUriTemplates(uriTemplates);
-                apiToAdd.setScopes(scopes);
-                //Set extensions from API definition to API object
-                apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
-                PublisherCommonUtils.validateScopes(apiToAdd);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition
-                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
-                apiToAdd.setSwaggerDefinition(definitionToAdd);
-                API addedAPI = apiProvider.addAPI(apiToAdd);
-                addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
-                APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
-                // This URI used to set the location header of the POST response
+            APIDTO createdApiDTO = null;
+            if ("OAS2".equals(service.getDefType()) || "OAS3".equals(service.getDefType())) {
+                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service);
+            }
+            if (createdApiDTO != null) {
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
                 return Response.created(createdApiUri).entity(createdApiDTO).build();
             } else {
@@ -4199,12 +4151,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError("Service", serviceKey, e, log);
             } else {
-                String errorMessage = "Error while fetching Service with Id : " + serviceKey + " from Service Catalog";
+                String errorMessage = "Error while creating API using Service with Id : " + serviceKey
+                        + " from Service Catalog";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (IOException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while creating API using service with Id " +
-                    serviceKey, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + apiDto.getName() + "-"
                     + apiDto.getVersion();
@@ -4216,7 +4166,110 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response reimportServiceFromCatalog(String apiId, MessageContext messageContext)
             throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(username);
+        try {
+            String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
+            ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
+            ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+            if ("OAS2".equals(service.getDefType()) || "OAS3".equals(service.getDefType())) {
+                Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, true);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+                // TODO: Needs to be updated - APIM specific vendor extensions should be preserved for old resources
+                PublisherCommonUtils.updateSwagger(apiId, validationResponse, true);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+            } else {
+                RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to API" +
+                        " using the service type " + service.getDefType(), log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service associated with " +
+                    "API with id " + apiId, log);
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
+    private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
+                                                Attachment fileDetail, ServiceEntry service) {
+        // Validate and retrieve the OpenAPI definition
+        Map validationResponseMap = null;
+        try {
+            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, true);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
+
+        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
+                (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        APIDefinitionValidationResponse validationResponse =
+                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+
+        if (!validationResponseDTO.isIsValid()) {
+            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
+            throw RestApiUtil.buildBadRequestException(errorDTO);
+        }
+
+        // Only HTTP type APIs should be allowed
+        if (!APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())) {
+            throw RestApiUtil.buildBadRequestException("The API's type should only be HTTP when " +
+                    "importing an OpenAPI definition");
+        }
+        // Import the API and Definition
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+                    RestApiCommonUtil.getLoggedInUsername());
+            if (service != null) {
+                apiToAdd.setServiceInfo("serviceKey", service.getKey());
+                apiToAdd.setServiceInfo("md5", service.getMd5());
+                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service));
+            }
+            boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
+            // Rearrange paths according to the API payload and save the OpenAPI definition
+
+            APIDefinition apiDefinition = validationResponse.getParser();
+            SwaggerData swaggerData;
+            String definitionToAdd = validationResponse.getJsonContent();
+            if (syncOperations) {
+                PublisherCommonUtils.validateScopes(apiToAdd);
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
+            }
+            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
+            apiToAdd.setUriTemplates(uriTemplates);
+            apiToAdd.setScopes(scopes);
+            //Set extensions from API definition to API object
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
+            if (!syncOperations) {
+                PublisherCommonUtils.validateScopes(apiToAdd);
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition
+                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+            }
+
+            // adding the API and definition
+            apiToAdd.setSwaggerDefinition(definitionToAdd);
+            API addedAPI = apiProvider.addAPI(apiToAdd);
+            //apiProvider.saveSwaggerDefinition(apiToAdd, definitionToAdd);
+
+            // retrieving the added API for returning as the response
+            // this would provide the updated templates
+            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
+            return APIMappingUtil.fromAPItoDTO(addedAPI);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
+                    apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
 }

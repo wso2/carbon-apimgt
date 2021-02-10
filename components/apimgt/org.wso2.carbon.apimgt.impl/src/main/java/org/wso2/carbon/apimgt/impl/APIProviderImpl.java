@@ -3329,7 +3329,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
         if (existingAPI == null) {
-            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
+            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, existingApiId));
         }
         if (newVersion.equals(existingAPI.getId().getVersion())) {
             throw new APIMgtResourceAlreadyExistsException(
@@ -3419,6 +3420,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return newAPI;
+    }
+
+    public String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException {
+        return apiMgtDAO.retrieveServiceKeyByApiId(apiId, tenantId);
     }
 
     /**
