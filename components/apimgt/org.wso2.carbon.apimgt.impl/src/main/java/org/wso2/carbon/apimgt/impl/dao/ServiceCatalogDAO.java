@@ -22,9 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryResponse;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -128,7 +128,6 @@ public class ServiceCatalogDAO {
      */
     public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID, String userName)
             throws APIManagementException {
-
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.UPDATE_SERVICE_BY_KEY)) {
@@ -177,7 +176,6 @@ public class ServiceCatalogDAO {
      * throws APIManagementException if failed to update service catalog
      */
     public String addEndPointDefinition(ServiceEntry serviceEntry, String uuid) throws APIManagementException {
-
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_ENDPOINT_RESOURCES)) {
@@ -206,38 +204,25 @@ public class ServiceCatalogDAO {
     /**
      * Update MD5 hash value of existing ServiceEntry object
      *
-     * @param serviceInfo  ServiceEntry object
-     * @param tenantId     ID of the owner's tenant
+     * @param serviceInfo ServiceEntry object
+     * @param tenantId    ID of the owner's tenant
      * @return ServiceEntry
      * throws APIManagementException if failed
      */
     public ServiceEntry getMd5Hash(ServiceEntry serviceInfo, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_MD5_BY_NAME_AND_VERSION;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_SERVICE_MD5_BY_NAME_AND_VERSION)) {
             ps.setString(1, serviceInfo.getName());
             ps.setString(2, serviceInfo.getVersion());
             ps.setInt(3, tenantId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                serviceInfo.setMd5(rs.getString("MD5"));
-            }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting md5 hash value", ex);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceInfo.setMd5(resultSet.getString("MD5"));
                 }
             }
-            handleException("Error while executing SQL for getting User MD5 hash : SQL " + sqlQuery, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User MD5 hash", e);
         }
         return serviceInfo;
     }
@@ -245,38 +230,25 @@ public class ServiceCatalogDAO {
     /**
      * Get MD5 hash value of a service
      *
-     * @param key          Service key of service
-     * @param tenantId     ID of the owner's tenant
+     * @param key      Service key of service
+     * @param tenantId ID of the owner's tenant
      * @return String key
      * throws APIManagementException if failed
      */
     public String getMd5HashByKey(String key, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         String md5 = null;
-
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_MD5_BY_SERVICE_KEY;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_SERVICE_MD5_BY_SERVICE_KEY)) {
             ps.setString(1, key);
             ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                md5 = rs.getString("MD5");
-            }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting md5 hash value by service key", ex);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    md5 = resultSet.getString("MD5");
                 }
             }
-            handleException("Error while executing SQL for getting User MD5 hash : SQL " + sqlQuery, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting User MD5 hash", e);
         }
         return md5;
     }
@@ -284,41 +256,28 @@ public class ServiceCatalogDAO {
     /**
      * Get service resources by service key
      *
-     * @param key          Service key of service
-     * @param tenantId     ID of the owner's tenant
+     * @param key      Service key of service
+     * @param tenantId ID of the owner's tenant
      * @return ServiceEntry
      * throws APIManagementException if failed to retrieve
      */
     public ServiceEntry getServiceResourcesByKey(String key, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_KEY;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_KEY)) {
             ps.setString(1, key);
             ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                ServiceEntry serviceEntry = new ServiceEntry();
-                serviceEntry.setUuid(rs.getString("UUID"));
-                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
-                return serviceEntry;
-            }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting service resource by service key", ex);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ServiceEntry serviceEntry = new ServiceEntry();
+                    serviceEntry.setUuid(rs.getString("UUID"));
+                    serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
+                    serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                    return serviceEntry;
                 }
             }
-            handleException("Error while executing SQL for getting catalog entry resources : SQL " + sqlQuery, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting catalog entry resources", e);
         }
         return null;
     }
@@ -326,58 +285,45 @@ public class ServiceCatalogDAO {
     /**
      * Get service information by service key
      *
-     * @param key          Service key of service
-     * @param tenantId     ID of the owner's tenant
+     * @param key      Service key of service
+     * @param tenantId ID of the owner's tenant
      * @return ServiceEntry
      * throws APIManagementException if failed to retrieve
      */
     public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_BY_SERVICE_KEY;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_SERVICE_BY_SERVICE_KEY)) {
             ps.setString(1, key);
             ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                ServiceEntry serviceEntry = new ServiceEntry();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ServiceEntry serviceEntry = new ServiceEntry();
 
-                serviceEntry.setUuid(rs.getString("UUID"));
-                serviceEntry.setKey(rs.getString("SERVICE_KEY"));
-                serviceEntry.setMd5(rs.getString("MD5"));
-                serviceEntry.setName(rs.getString("ENTRY_NAME"));
-                serviceEntry.setDisplayName(rs.getString("DISPLAY_NAME"));
-                serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
-                serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
-                serviceEntry.setDescription(rs.getString("DESCRIPTION"));
-                serviceEntry.setDefType(rs.getString("DEFINITION_TYPE"));
-                serviceEntry.setDefUrl(rs.getString("DEFINITION_URL"));
-                serviceEntry.setSecurityType(rs.getString("SECURITY_TYPE"));
-                serviceEntry.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
-                serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
-                serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
-                serviceEntry.setCreatedBy(rs.getString("CREATED_BY"));
-                serviceEntry.setUpdatedBy(rs.getString("UPDATED_BY"));
-                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                    serviceEntry.setUuid(rs.getString("UUID"));
+                    serviceEntry.setKey(rs.getString("SERVICE_KEY"));
+                    serviceEntry.setMd5(rs.getString("MD5"));
+                    serviceEntry.setName(rs.getString("ENTRY_NAME"));
+                    serviceEntry.setDisplayName(rs.getString("DISPLAY_NAME"));
+                    serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
+                    serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
+                    serviceEntry.setDescription(rs.getString("DESCRIPTION"));
+                    serviceEntry.setDefType(rs.getString("DEFINITION_TYPE"));
+                    serviceEntry.setDefUrl(rs.getString("DEFINITION_URL"));
+                    serviceEntry.setSecurityType(rs.getString("SECURITY_TYPE"));
+                    serviceEntry.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
+                    serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                    serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
+                    serviceEntry.setCreatedBy(rs.getString("CREATED_BY"));
+                    serviceEntry.setUpdatedBy(rs.getString("UPDATED_BY"));
+                    serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
+                    serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
 
-                return serviceEntry;
-            }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting service by service key", ex);
+                    return serviceEntry;
                 }
             }
-            handleException("Error while executing SQL for getting service information : SQL " + sqlQuery, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting service information", e);
         }
         return null;
     }
@@ -385,48 +331,35 @@ public class ServiceCatalogDAO {
     /**
      * Get service information by service key
      *
-     * @param key          Service key of service
-     * @param tenantId     ID of the owner's tenant
+     * @param key      Service key of service
+     * @param tenantId ID of the owner's tenant
      * @return ServiceEntry
      * throws APIManagementException if failed to retrieve
      */
     public ServiceEntryResponse getServiceBasicInfoByKey(String key, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_SERVICE_STATUS_INFO;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_SERVICE_STATUS_INFO)) {
             ps.setString(1, key);
             ps.setInt(2, tenantId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                ServiceEntryResponse serviceEntry = new ServiceEntryResponse();
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ServiceEntryResponse serviceEntry = new ServiceEntryResponse();
 
-                serviceEntry.setId(rs.getString("UUID"));
-                serviceEntry.setKey(rs.getString("SERVICE_KEY"));
-                serviceEntry.setMd5(rs.getString("MD5"));
-                serviceEntry.setName(rs.getString("ENTRY_NAME"));
-                serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
-                serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
-                serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
-                serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
+                    serviceEntry.setId(rs.getString("UUID"));
+                    serviceEntry.setKey(rs.getString("SERVICE_KEY"));
+                    serviceEntry.setMd5(rs.getString("MD5"));
+                    serviceEntry.setName(rs.getString("ENTRY_NAME"));
+                    serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
+                    serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
+                    serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
+                    serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
 
-                return serviceEntry;
-            }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting service by service key", ex);
+                    return serviceEntry;
                 }
             }
-            handleException("Error while executing SQL for getting service information : SQL " + sqlQuery, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting service information", e);
         }
         return null;
     }
@@ -434,44 +367,31 @@ public class ServiceCatalogDAO {
     /**
      * Get service information by name and version
      *
-     * @param name          Service name
-     * @param version       Service version
-     * @param tenantId     ID of the owner's tenant
+     * @param name     Service name
+     * @param version  Service version
+     * @param tenantId ID of the owner's tenant
      * @return ServiceEntry
      * throws APIManagementException if failed to retrieve
      */
     public ServiceEntry getServiceByNameAndVersion(String name, String version, int tenantId)
             throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        String sqlQuery = SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION)) {
             ps.setString(1, name);
             ps.setString(2, version);
             ps.setInt(3, tenantId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                ServiceEntry serviceEntry = new ServiceEntry();
-                serviceEntry.setUuid(rs.getString("UUID"));
-                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
-                return serviceEntry;
-            }
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting service by service name and version", ex);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    ServiceEntry serviceEntry = new ServiceEntry();
+                    serviceEntry.setUuid(rs.getString("UUID"));
+                    serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
+                    serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                    return serviceEntry;
                 }
             }
-            handleException("Error while executing SQL for getting catalog entry resources : SQL " + sqlQuery, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while executing SQL for getting catalog entry resources", e);
         }
         return null;
     }
@@ -479,8 +399,8 @@ public class ServiceCatalogDAO {
     /**
      * Delete service by service key
      *
-     * @param serviceKey   Service key
-     * @param tenantId     ID of the owner's tenant
+     * @param serviceKey Service key
+     * @param tenantId   ID of the owner's tenant
      * throws APIManagementException if failed to delete
      */
     public void deleteService(String serviceKey, int tenantId) throws APIManagementException {
@@ -506,9 +426,10 @@ public class ServiceCatalogDAO {
 
     /**
      * Get services
+     *
      * @param filterParams Service Filter parameters
-     * @param tenantId Tenant ID of the logged in user
-     * @param shrink Whether to shrink the response or not
+     * @param tenantId     Tenant ID of the logged in user
+     * @param shrink       Whether to shrink the response or not
      * @return List of Services
      * @throws APIManagementException
      */
@@ -528,8 +449,8 @@ public class ServiceCatalogDAO {
             ps.setString(6, "%" + filterParams.getKey() + "%");
             ps.setInt(7, filterParams.getOffset());
             ps.setInt(8, filterParams.getLimit());
-            try(ResultSet resultSet = ps.executeQuery()) {
-                while(resultSet.next()) {
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
                     ServiceEntry service = setServiceParams(resultSet, shrink);
                     serviceEntryList.add(service);
                 }
