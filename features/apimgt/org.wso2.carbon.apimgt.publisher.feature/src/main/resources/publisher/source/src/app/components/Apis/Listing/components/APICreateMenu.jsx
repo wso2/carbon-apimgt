@@ -261,26 +261,26 @@ const APICreateMenu = (props) => {
                             <Hidden mdUp><Box height={30} /></Hidden>
                             <Box textAlign='center' mt={2}>
                                 <Typography variant='subtitle' component='div'>
-                                    <FormattedMessage
+                                    {/* <FormattedMessage
                                         id='Apis.Listing.SampleAPI.SampleAPI.websocket.api'
                                         defaultMessage='WebSocket API'
-                                    />
+                                    /> */}
                                     <FormattedMessage
                                         id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
-                                        defaultMessage='Streaming'
+                                        defaultMessage='Streaming API'
                                     />
                                 </Typography>
-                                <img
+                                {/* <img
                                     src={Configurations.app.context
                                 + websocketApiIcon}
                                     alt='WebSocket API'
-                                />
+                                /> */}
                                 <img
                                     src={Configurations.app.context
                                 + streamingApiIcon}
                                     alt='Streaming API'
                                 />
-                                <Box mt={2}>
+                                {/* <Box mt={2}>
                                     <Typography variant='body1'>
                                         <Link
                                             id='itest-id-createdefault'
@@ -299,7 +299,7 @@ const APICreateMenu = (props) => {
                                             defaultMessage='Design and prototype a new WebSocket API'
                                         />
                                     </Typography>
-                                </Box>
+                                </Box> */}
                                 <Box mt={2}>
                                     <Typography variant='body1'>
                                         <Link
@@ -309,7 +309,7 @@ const APICreateMenu = (props) => {
                                         >
                                             <FormattedMessage
                                                 id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title'
-                                                defaultMessage='Design New Streaming API Definition'
+                                                defaultMessage='Design New Streaming API'
                                             />
                                         </Link>
                                     </Typography>
@@ -329,7 +329,7 @@ const APICreateMenu = (props) => {
                                         >
                                             <FormattedMessage
                                                 id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.title'
-                                                defaultMessage='Import streaming API Definition'
+                                                defaultMessage='Import AsyncAPI Definition'
                                             />
                                         </Link>
                                     </Typography>
