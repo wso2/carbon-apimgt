@@ -332,7 +332,33 @@ class Details extends Component {
                     </>
                 );
             case 'WS':
-                return '';
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.asyncApi.definition',
+                                defaultMessage: 'AsyncAPI Definition',
+                            })}
+                            route='asyncApi definition'
+                            to={pathPrefix + 'asyncApi definition'}
+                            Icon={<CodeIcon />}
+                        />
+                    </>
+                );
+            case 'WEBSUB':
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.asyncApi.definition',
+                                defaultMessage: 'AsyncAPI Definition',
+                            })}
+                            route='asyncApi definition'
+                            to={pathPrefix + 'asyncApi definition'}
+                            Icon={<CodeIcon />}
+                        />
+                    </>
+                );
             case 'SOAP':
                 return (
                     <>
@@ -379,6 +405,18 @@ class Details extends Component {
                 );
             case 'WS':
             case 'WEBSUB':
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.topics',
+                                defaultMessage: 'Topics',
+                            })}
+                            to={pathPrefix + 'topics'}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </>
+                );
             case 'SSE':
                 return (
                     <>
@@ -745,6 +783,10 @@ class Details extends Component {
                                     path={Details.subPaths.SCHEMA_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.ASYNCAPI_DEFINITION}
+                                    component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -891,6 +933,7 @@ Details.subPaths = {
     TRYOUT: '/apis/:api_uuid/test-console',
     QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
     TOPICS: '/apis/:api_uuid/topics',
+    ASYNCAPI_DEFINITION: '/apis/:api_uuid/asyncApi definition',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

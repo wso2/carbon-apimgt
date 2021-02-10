@@ -22,6 +22,7 @@ public class TopicDTO   {
   
     private String apiId = null;
     private String name = null;
+    private String type = null;
 
   /**
    **/
@@ -57,6 +58,23 @@ public class TopicDTO   {
     this.name = name;
   }
 
+  /**
+   **/
+  public TopicDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "publisher", value = "")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -68,12 +86,13 @@ public class TopicDTO   {
     }
     TopicDTO topic = (TopicDTO) o;
     return Objects.equals(apiId, topic.apiId) &&
-        Objects.equals(name, topic.name);
+        Objects.equals(name, topic.name) &&
+        Objects.equals(type, topic.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, name);
+    return Objects.hash(apiId, name, type);
   }
 
   @Override
@@ -83,6 +102,7 @@ public class TopicDTO   {
     
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
   }

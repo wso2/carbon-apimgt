@@ -19,28 +19,28 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 
+import org.apache.axis2.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 
-public class SseApiHandler extends AbstractHandler {
+/**
+ * Wraps the authentication handler and for the purpose of changing the http method before calling it.
+ */
+public class SseApiHandler extends APIAuthenticationHandler {
 
     @Override
     public boolean handleRequest(MessageContext synCtx) {
+
         org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
-        synCtx.setProperty(APIConstants.HTTP_VERB, httpVerb);
         axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-        synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_SSE);
-        return true;
-    }
-
-    @Override
-    public boolean handleResponse(MessageContext messageContext) {
-        return true;
+        boolean authenticate = super.handleRequest(synCtx);
+        axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
+        return authenticate;
     }
 
 }

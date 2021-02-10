@@ -206,7 +206,7 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
-  
+
     /**
      * Returns the async-api v2.0 definition as a string
      *
