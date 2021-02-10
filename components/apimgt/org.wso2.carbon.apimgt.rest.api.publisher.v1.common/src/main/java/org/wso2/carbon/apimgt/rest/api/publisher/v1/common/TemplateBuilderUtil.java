@@ -211,8 +211,13 @@ public class TemplateBuilderUtil {
             }
 
             if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
-                        authProperties);
+                if (APIConstants.APITransportType.SSE.toString().equals(api.getType())) {
+                    vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
+                            authProperties);
+                } else {
+                    vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
+                            authProperties);
+                }
             }
 
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
