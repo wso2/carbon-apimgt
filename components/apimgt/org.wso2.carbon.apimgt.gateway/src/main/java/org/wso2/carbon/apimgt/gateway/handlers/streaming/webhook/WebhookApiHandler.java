@@ -61,13 +61,10 @@ import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 public class WebhookApiHandler extends APIAuthenticationHandler {
 
     private static final Log log = LogFactory.getLog(WebhookApiHandler.class);
-    private static final String DEFAULT_TOPIC_QUERY_PARAM_NAME = "hub.topic";
     private static final String EMPTY_STRING = "";
-    private static final String WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER = "_web_hook_subscription_failure_handler";
-    private static final String DEFAULT_SUBSCRIPTION_RESOURCE_PATH = "/webhooks_events_receiver_resource";
 
-    private String eventReceiverResourcePath = DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
-    private String topicQueryParamName = DEFAULT_TOPIC_QUERY_PARAM_NAME;
+    private String eventReceiverResourcePath = APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
+    private String topicQueryParamName = APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME;
 
     @Override
     public boolean handleRequest(MessageContext synCtx) {
@@ -160,7 +157,8 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
 
         OMElement payload = getFaultPayload(errorDescription);
         Utils.setFaultPayload(messageContext, payload);
-        Mediator sequence = messageContext.getSequence(WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
+        Mediator sequence =
+                messageContext.getSequence(APIConstants.WebHookProperties.WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
