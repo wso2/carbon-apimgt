@@ -62,17 +62,21 @@ export default function ImportDefinition(props) {
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
     const isSOAP = api.isSOAP();
-    const isWebSocket = api.isWebSocket();      const isWebSub = api.isWebSub();
+    // const isWebSocket = api.isWebSocket();
+    // const isWebSub = api.isWebSub();
+    const isAsyncAPI = api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
     const [asyncAPIDefinitionImport, setAsyncAPIDefinitionImport] = useState(false);
 
     const handleAPIDefinitionImportOpen = () => {
         // eslint-disable-next-line no-unused-expressions
-        isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
+        isAsyncAPI ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
+        // isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
     };
 
     const handleAPIDefinitionImportCancel = () => {
         // eslint-disable-next-line no-unused-expressions
-        isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
+        isAsyncAPI ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
+        // isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
     };
 
     function apiInputsReducer(currentState, inputAction) {
@@ -281,7 +285,8 @@ export default function ImportDefinition(props) {
             updateGraphQLSchema();
         } else if (isSOAP) {
             updateWSDL();
-        } else if (isWebSocket || isWebSub) {
+        // } else if (isWebSocket || isWebSub) {
+        } else if (isAsyncAPI) {
             updateAsyncAPIDefinition();
         } else {
             updateOASDefinition();
@@ -355,7 +360,8 @@ export default function ImportDefinition(props) {
             />
         );
     }
-    if (isWebSocket || isWebSub) {
+    // if (isWebSocket || isWebSub) {
+    if (isAsyncAPI) {
         dialogTitle = (
             <FormattedMessage
                 id='Apis.Details.APIDefinition.APIDefinition.import.definition.asyncApi'
@@ -388,9 +394,13 @@ export default function ImportDefinition(props) {
                 <CloudUploadRounded className={classes.buttonIcon} />
                 {btnText}
             </Button>
-            <Dialog
+            {/* <Dialog
                 onBackdropClick={isWebSocket || isWebSub ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
                 open={isWebSocket || isWebSub ? asyncAPIDefinitionImport : openAPIDefinitionImport}
+            ></Dialog> */}
+            <Dialog
+                onBackdropClick={isAsyncAPI ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
+                open={isAsyncAPI ? asyncAPIDefinitionImport : openAPIDefinitionImport}
             >
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
