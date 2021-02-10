@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
-import org.wso2.carbon.apimgt.api.model.ServiceEntryInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceListDTO;
-import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.ByteArrayInputStream;
@@ -59,40 +58,26 @@ public class ServiceEntryMappingUtil {
     private static final Log log = LogFactory.getLog(Md5HashGenerator.class);
 
     /**
-     * Converts a single metadata file content into a model object
+     * Converts a single metadata file content into a ServiceEntry model
      *
      * @param file Metadata file
-     * @return Converted ServiceMetadataDTO model object
-     * @throws IOException If error happens
+     * @return Converted ServiceEntry model object
+     * @throws IOException
      */
-    public static ServiceMetadataDTO fromMetadataFileToServiceDTO(File file) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        ServiceMetadataDTO serviceMetadataDTO = mapper.readValue(file, ServiceMetadataDTO.class);
-        return serviceMetadataDTO;
-    }
-
-    /**
-     * Converts a single metadata file content into a model object
-     *
-     * @param file Metadata file
-     * @throws IOException If error happens
-     */
-    public static ServiceEntry fromFileToServiceInfo(File file, ServiceEntry entry) throws IOException {
-        if (entry == null) {
-            entry = new ServiceEntry();
+    static ServiceEntry fromFileToServiceEntry(File file, ServiceEntry service) throws IOException {
+        if (service == null) {
+            service = new ServiceEntry();
         }
-        ServiceMetadataDTO serviceMetadataDTO = fromMetadataFileToServiceDTO(file);
-        entry.setKey(serviceMetadataDTO.getKey());
-        entry.setName(serviceMetadataDTO.getName());
-        entry.setVersion(serviceMetadataDTO.getVersion());
-        entry.setDisplayName(serviceMetadataDTO.getDisplayName());
-        entry.setServiceUrl(serviceMetadataDTO.getServiceUrl());
-        entry.setDefType(serviceMetadataDTO.getDefinitionType().value());
-        entry.setDescription(serviceMetadataDTO.getDescription());
-        entry.setSecurityType(serviceMetadataDTO.getSecurityType().value());
-        entry.setMutualSSLEnabled(serviceMetadataDTO.isMutualSSLEnabled());
-        return entry;
+        try {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            service = mapper.readValue(file, ServiceEntry.class);
+            if (StringUtils.isBlank(service.getKey())) {
+                service.setKey(generateServiceKey(service));
+            }
+        } catch (InvalidFormatException e) {
+            RestApiUtil.handleBadRequest("One or more parameters contain disallowed values", e, log);
+        }
+        return service;
     }
 
     /**
@@ -101,7 +86,7 @@ public class ServiceEntryMappingUtil {
      * @param path path to the directory which include files
      * @return HashMap with service key as key and ServiceEntry object as value
      */
-    public static HashMap<String, ServiceEntry> fromDirToServiceInfoMap(String path) {
+    public static HashMap<String, ServiceEntry> fromDirToServiceEntryMap(String path) {
         HashMap<String, ServiceEntry> endpointDetails = new HashMap<>();
         File[] files = new File(path).listFiles();
         assert files != null;
@@ -113,14 +98,9 @@ public class ServiceEntryMappingUtil {
                 try {
                     for (File aFile : fList) {
                         if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            fromFileToServiceInfo(aFile, serviceInfo);
-                            if (!StringUtils.isBlank(serviceInfo.getKey())) {
-                                key = serviceInfo.getKey();
-                            } else {
-                                key = generateServiceKey(serviceInfo);
-                            }
-                            serviceInfo.setKey(key);
+                            serviceInfo = fromFileToServiceEntry(aFile, serviceInfo);
                             serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
+                            key = serviceInfo.getKey();
                         } else if (aFile.getName().startsWith(APIConstants.DEFINITION_FILE)) {
                             serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
                         }
@@ -158,16 +138,15 @@ public class ServiceEntryMappingUtil {
     /**
      * Convert entries in Hash Map to list of ServiceInfoDTO objects
      *
-     * @param catalogEntries Hash Map of services provided in zip
+     * @param serviceList List of services provided in zip
      * @return build the List<ServiceInfoDTO> list
      */
-    public static List<ServiceInfoDTO> fromServiceEntryToDTOList(HashMap<String, ServiceEntryInfo> catalogEntries) {
-        List<ServiceInfoDTO> serviceStatusList = new ArrayList<>();
-        for (Map.Entry<String, ServiceEntryInfo> entry : catalogEntries.entrySet()) {
-            serviceStatusList.add(ServiceEntryMappingUtil.fromServiceEntryInfoToServiceInfoDTO(
-                    catalogEntries.get(entry.getKey())));
+    public static List<ServiceInfoDTO> fromServiceListToDTOList(List<ServiceEntry> serviceList) {
+        List<ServiceInfoDTO> serviceInfoDTOList = new ArrayList<>();
+        for (ServiceEntry service: serviceList) {
+            serviceInfoDTOList.add(fromServiceEntryToServiceInfoDTO(service));
         }
-        return serviceStatusList;
+        return serviceInfoDTOList;
     }
 
     /**
@@ -176,10 +155,10 @@ public class ServiceEntryMappingUtil {
      * @param serviceEntry ServiceEntry model object
      * @return Converted ServiceInfoDTO object
      */
-    public static ServiceInfoDTO fromServiceEntryInfoToServiceInfoDTO(ServiceEntryInfo serviceEntry) {
+    public static ServiceInfoDTO fromServiceEntryToServiceInfoDTO(ServiceEntry serviceEntry) {
         ServiceInfoDTO serviceInfoDTO = new ServiceInfoDTO();
 
-        serviceInfoDTO.setId(serviceEntry.getId());
+        serviceInfoDTO.setId(serviceEntry.getUuid());
         serviceInfoDTO.setName(serviceEntry.getName());
         serviceInfoDTO.setKey(serviceEntry.getKey());
         serviceInfoDTO.setVersion(serviceEntry.getVersion());
@@ -194,13 +173,15 @@ public class ServiceEntryMappingUtil {
         serviceDTO.setName(service.getName());
         serviceDTO.setVersion(service.getVersion());
         serviceDTO.setMd5(service.getMd5());
+        serviceDTO.setServiceKey(service.getKey());
         if (!shrink) {
             serviceDTO.setDisplayName(service.getDisplayName());
             serviceDTO.setServiceUrl(service.getServiceUrl());
-            serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefType()));
+            serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
+                    .toString()));
             serviceDTO.setDefinitionUrl(service.getDefUrl());
             serviceDTO.setDescription(service.getDescription());
-            serviceDTO.setSecurityType(ServiceDTO.SecurityTypeEnum.fromValue(service.getSecurityType()));
+            serviceDTO.setSecurityType(ServiceDTO.SecurityTypeEnum.fromValue(service.getSecurityType().toString()));
             serviceDTO.setMutualSSLEnabled(service.isMutualSSLEnabled());
             serviceDTO.setCreatedTime(String.valueOf(service.getCreatedTime()));
             serviceDTO.setLastUpdatedTime(String.valueOf(service.getLastUpdatedTime()));

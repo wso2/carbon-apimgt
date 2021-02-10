@@ -30,11 +30,19 @@ public class ServiceEntry {
     private String version = null;
     private String displayName = null;
     private String serviceUrl = null;
-    private String defType = null;
+
+    public enum DefinitionType {
+        OAS2, OAS3, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API
+    }
+    private DefinitionType definitionType = null;
     private String defUrl = null;
     private String description = null;
-    private String securityType = null;
-    private boolean isMutualSSLEnabled = false;
+
+    public enum SecurityType {
+        BASIC, DIGEST, OAUTH2, NONE
+    }
+    private SecurityType securityType = SecurityType.NONE;
+    private boolean mutualSSLEnabled = false;
     private String createdBy = null;
     private String updatedBy = null;
     private Timestamp createdTime = null;
@@ -75,11 +83,11 @@ public class ServiceEntry {
     }
 
     public boolean isMutualSSLEnabled() {
-        return isMutualSSLEnabled;
+        return mutualSSLEnabled;
     }
 
     public void setMutualSSLEnabled(boolean mutualSSLEnabled) {
-        isMutualSSLEnabled = mutualSSLEnabled;
+        this.mutualSSLEnabled = mutualSSLEnabled;
     }
 
     public String getUuid() {
@@ -130,12 +138,12 @@ public class ServiceEntry {
         this.serviceUrl = serviceUrl;
     }
 
-    public String getDefType() {
-        return defType;
+    public DefinitionType getDefinitionType() {
+        return definitionType;
     }
 
-    public void setDefType(String defType) {
-        this.defType = defType;
+    public void setDefinitionType(DefinitionType definitionType) {
+        this.definitionType = definitionType;
     }
 
     public String getDefUrl() {
@@ -154,11 +162,11 @@ public class ServiceEntry {
         this.description = description;
     }
 
-    public String getSecurityType() {
+    public SecurityType getSecurityType() {
         return securityType;
     }
 
-    public void setSecurityType(String securityType) {
+    public void setSecurityType(SecurityType securityType) {
         this.securityType = securityType;
     }
 

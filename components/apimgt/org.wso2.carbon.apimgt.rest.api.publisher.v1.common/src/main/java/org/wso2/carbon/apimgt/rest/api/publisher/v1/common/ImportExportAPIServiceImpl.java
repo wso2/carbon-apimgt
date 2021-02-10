@@ -52,7 +52,8 @@ import java.io.InputStream;
 public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
-    public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
+    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
+                          boolean preserveStatus,
                           ExportFormat format, boolean preserveDocs, boolean preserveCredentials)
             throws APIManagementException,
             APIImportExportException {
@@ -63,19 +64,26 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api;
+        String revisionUUID;
 
         // apiId == null means the path from the API Controller
         if (apiId == null) {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            api = apiProvider.getAPI(apiIdentifier);
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
+            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier);
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         }
+
+        if (revisionNum != null) {
+            revisionUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            //if a revision number provided, revision api object is used
+            api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+        } else {
+            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        }
+        apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs);
     }
@@ -131,7 +139,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite,
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider,
+                         Boolean rotateRevision, Boolean overwrite,
             String[] tokenScopes) throws APIManagementException {
         String extractedFolderPath;
         try {
@@ -139,7 +148,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
-        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, overwrite, tokenScopes);
+        return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
+                tokenScopes);
     }
 
     @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
