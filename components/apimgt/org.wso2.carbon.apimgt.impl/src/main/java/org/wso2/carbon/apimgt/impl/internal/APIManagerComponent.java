@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -299,10 +298,6 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-                if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
-                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
-                    bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
-                }
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -878,24 +873,16 @@ public class APIManagerComponent {
     @Reference(
             name = "gateway.artifact.saver",
             service = ArtifactSaver.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeArtifactSaver")
-    protected void addArtifactSaver (ArtifactSaver artifactSaver) {
-
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getGatewayArtifactSynchronizerProperties();
-
-        if (gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
-            ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
-
-            try {
-                ServiceReferenceHolder.getInstance().getArtifactSaver().init();
-            } catch (Exception e) {
-                log.error("Error connecting with the Artifact Saver");
-                removeArtifactSaver(null);
-            }
+    protected void addArtifactSaver(ArtifactSaver artifactSaver) {
+        ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
+        try {
+            ServiceReferenceHolder.getInstance().getArtifactSaver().init();
+        } catch (Exception e) {
+            log.error("Error connecting with the Artifact Saver");
+            removeArtifactSaver(null);
         }
     }
 

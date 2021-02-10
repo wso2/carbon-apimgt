@@ -226,7 +226,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint =
                 APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS + "?apiId=" + apiId + "&appId=" + appId;
-        Subscription subscription = new Subscription();
+        Subscription subscription = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -248,7 +248,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public Application getApplicationById(int appId) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APPLICATIONS + "?appId=" + appId;
-        Application application = new Application();
+        Application application = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -267,13 +267,16 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException {
+    public ApplicationKeyMapping getKeyMapping(String consumerKey,String keymanager) throws DataLoadingException {
 
-        String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
-                + consumerKey;
-        ApplicationKeyMapping application = new ApplicationKeyMapping();
+        ApplicationKeyMapping application = null;
         String responseString;
+        String endPoint = null;
         try {
+            keymanager = URLEncoder.encode(keymanager, APIConstants.DigestAuthConstants.CHARSET);
+            keymanager = keymanager.replace("\\+", "%20");
+            endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
+                    + consumerKey + "&keymanager=" + keymanager;
             responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;

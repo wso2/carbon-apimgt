@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -16,16 +16,21 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator;
+package org.wso2.carbon.apimgt.gateway.common.jwtgenerator;
 
-import org.apache.commons.codec.binary.Base64;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+/**
+ * Enum for the jwt signature algorithm
+ */
+public enum JWTSignatureAlg {
+    SHA256_WITH_RSA("RS256"), NONE("none");
 
-public class APIMgtGatewayUrlSafeJWTGeneratorImpl extends APIMgtGatewayJWTGeneratorImpl {
+    private String jwsCompliantCode;
 
-    @Override
-    public String encode(byte[] stringToBeEncoded) throws APIManagementException {
-        return Base64.encodeBase64URLSafeString(stringToBeEncoded);
+    JWTSignatureAlg(String s) {
+        jwsCompliantCode = s;
+    }
 
+    public String getJwsCompliantCode() {
+        return jwsCompliantCode;
     }
 }

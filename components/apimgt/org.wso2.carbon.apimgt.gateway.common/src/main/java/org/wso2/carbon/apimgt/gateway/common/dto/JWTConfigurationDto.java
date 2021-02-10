@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,25 +15,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.dto;
 
+package org.wso2.carbon.apimgt.gateway.common.dto;
+
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * Holds configs related to jwt generation.
+ *
+ */
 public class JWTConfigurationDto {
-
     private boolean enabled = false;
     private String jwtHeader = "X-JWT-Assertion";
     private String consumerDialectUri = "http://wso2.org/claims";
     private String signatureAlgorithm = "SHA256withRSA";
-    private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";
-    private String claimRetrieverImplClass;
     private boolean enableUserClaims;
     private String gatewayJWTGeneratorImpl;
-    private Map<String,TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
+    private Map<String, TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
     private Set<String> jwtExcludedClaims = new HashSet<>();
+    private Certificate publicCert;
+    private PrivateKey privateKey;
+    private long ttl;
 
     public boolean isEnabled() {
 
@@ -75,26 +81,6 @@ public class JWTConfigurationDto {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    public String getJwtGeneratorImplClass() {
-
-        return jwtGeneratorImplClass;
-    }
-
-    public void setJwtGeneratorImplClass(String jwtGeneratorImplClass) {
-
-        this.jwtGeneratorImplClass = jwtGeneratorImplClass;
-    }
-
-    public String getClaimRetrieverImplClass() {
-
-        return claimRetrieverImplClass;
-    }
-
-    public void setClaimRetrieverImplClass(String claimRetrieverImplClass) {
-
-        this.claimRetrieverImplClass = claimRetrieverImplClass;
-    }
-
     public void setGatewayJWTGeneratorImpl(String gatewayJWTGeneratorImpl) {
         this.gatewayJWTGeneratorImpl = gatewayJWTGeneratorImpl;
     }
@@ -134,4 +120,29 @@ public class JWTConfigurationDto {
 
         this.enableUserClaims = enableUserClaims;
     }
+
+    public void setPublicCert(Certificate publicCert) {
+        this.publicCert = publicCert;
+    }
+
+    public Certificate getPublicCert() {
+        return publicCert;
+    }
+
+    public void setPrivateKey(PrivateKey privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setTtl(long ttl) {
+        this.ttl = ttl;
+    }
+
+    public long getTTL() {
+        return ttl;
+    }
+
 }

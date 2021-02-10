@@ -123,7 +123,7 @@ public class FaultyRequestDataCollector implements RequestDataCollector {
 
         FaultyEvent event = new FaultyEvent();
         event.setCorrelationId(UUID.randomUUID().toString());
-        event.setErrorCode(String.valueOf(errorCode));
+        event.setErrorCode(errorCode);
         event.setErrorMessage(errorMessage);
         event.setApiId(apiUUID);
         event.setApiName(apiName);
@@ -132,12 +132,13 @@ public class FaultyRequestDataCollector implements RequestDataCollector {
         event.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
         event.setRegionId(Constants.REGION_ID);
         event.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-        event.setProxyResponseCode(String.valueOf(proxyResponseCode));
-        event.setTargetResponseCode(Constants.UNKNOWN_VALUE);
+        event.setProxyResponseCode(proxyResponseCode);
+        event.setTargetResponseCode(Constants.UNKNOWN_INT_VALUE);
         event.setDeploymentId(Constants.DEPLOYMENT_ID);
         event.setEventType(Constants.FAULTY_EVENT_TYPE);
-        OffsetDateTime time = OffsetDateTime.now(Clock.systemUTC());
-        event.setRequestTimestamp(time.toString());
+        long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
+        String offsetDateTime = AnalyticsUtils.getTimeInISO(requestInTime);
+        event.setRequestTimestamp(offsetDateTime);
 
         return event;
     }
