@@ -10042,8 +10042,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiProductIdentifier.getName(),
                     apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
                             APIConstants.HTTP_PROTOCOL, artifact);
-            artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
-                    apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(),tenantDomain, artifact);
+            if (artifactSaver != null) {
+                artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
+                        apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, artifact);
+            }
         } catch (APIImportExportException|ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while Store the Revision Artifact",
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
@@ -10172,11 +10174,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIProductRevision(apiRevision);
-        try {
-            artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
-                    apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(),tenantDomain);
-        } catch (ArtifactSynchronizerException e) {
-            log.error("Error while deleting Runtime artifacts from artifact Store", e);
+        if (artifactSaver != null) {
+            try {
+                artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
+                        apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error while deleting Runtime artifacts from artifact Store", e);
+            }
         }
     }
 }
