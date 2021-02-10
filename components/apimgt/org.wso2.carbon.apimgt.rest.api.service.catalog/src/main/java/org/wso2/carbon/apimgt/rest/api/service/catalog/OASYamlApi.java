@@ -35,13 +35,13 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 
-@Path("/swagger.yaml")
+@Path("/oas.yaml")
 @Consumes({ "text/yaml" })
 @Produces({ "text/yaml" })
-@io.swagger.annotations.Api(value = "/swagger.yaml", description = "the swagger.yaml API")
-public class SwaggerYamlApi {
+@io.swagger.annotations.Api(value = "/oas.yaml", description = "the oas.yaml API")
+public class OASYamlApi {
 
-    private static final Log log = LogFactory.getLog(SwaggerYamlApi.class);
+    private static final Log log = LogFactory.getLog(OASYamlApi.class);
     private static final String LOCK_SERVICE_CATALOG_OPENAPI_DEF = "LOCK_SERVICE_CATALOG_OPENAPI_DEF";
     private String openAPIDef = null;
 
@@ -53,9 +53,9 @@ public class SwaggerYamlApi {
     @GET
     @Consumes({ "text/yaml" })
     @Produces({ "text/yaml" })
-    @io.swagger.annotations.ApiOperation(value = "Get Swagger Definition", notes = "Get Swagger Definition of Service Catalog REST API.", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "Get OpenAPI Definition", notes = "Get OpenAPI Definition of Service Catalog REST API.", response = Void.class)
     @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSwagger Definition is returned."),
+            @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nOpenAPI Definition is returned."),
 
             @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource."),
 

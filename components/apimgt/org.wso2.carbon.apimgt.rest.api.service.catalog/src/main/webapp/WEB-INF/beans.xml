@@ -17,7 +17,7 @@
 
       <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.ServiceEntriesApi"/>
       <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.SettingsApi"/>
-      <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.SwaggerYamlApi"/>
+      <bean class="org.wso2.carbon.apimgt.rest.api.service.catalog.OASYamlApi"/>
 
     </jaxrs:serviceBeans>
     <jaxrs:providers>
