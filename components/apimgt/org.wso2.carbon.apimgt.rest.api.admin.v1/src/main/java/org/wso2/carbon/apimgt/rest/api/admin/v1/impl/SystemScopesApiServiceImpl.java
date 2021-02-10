@@ -11,11 +11,12 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;

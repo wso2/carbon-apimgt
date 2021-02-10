@@ -21,8 +21,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
 
 import java.text.ParseException;
 import java.util.Arrays;
