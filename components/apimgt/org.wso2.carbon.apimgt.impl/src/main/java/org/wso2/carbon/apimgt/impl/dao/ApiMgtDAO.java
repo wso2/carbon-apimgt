@@ -1324,6 +1324,7 @@ public class ApiMgtDAO {
                 Topic topic = new Topic();
                 topic.setName(resultSet.getString("URL_PATTERN"));
                 topic.setApiId(resultSet.getString("API_ID"));
+                topic.setType(resultSet.getString("HTTP_METHOD"));
                 topicSet.add(topic);
             }
             return topicSet;
