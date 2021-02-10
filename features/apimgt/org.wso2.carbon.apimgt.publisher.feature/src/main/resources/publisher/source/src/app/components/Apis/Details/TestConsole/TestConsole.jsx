@@ -336,6 +336,11 @@ class TestConsole extends React.Component {
             apiData.testKey = token;
             this.context.updateAPI({ enableStore: false, testKey: token });
         }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
             console.error(error);
             this.setState({ loading: false });
         });
