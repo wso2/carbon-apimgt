@@ -203,14 +203,16 @@ public class TemplateBuilderUtil {
             }
 
             if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
-                Map<String, String> webhookApiHandlerProperties = new HashMap<>();
-                webhookApiHandlerProperties.put("eventReceivingResourcePath", "/webhooks_events_receiver_resource");
-                webhookApiHandlerProperties.put("topicQueryParamName", "hub.topic");
+                authProperties.put(APIConstants.WebHookProperties.EVENT_RECEIVING_RESOURCE_PATH,
+                        APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH);
+                authProperties.put(APIConstants.WebHookProperties.TOPIC_QUERY_PARAM_NAME,
+                        APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler",
-                        webhookApiHandlerProperties);
-            }
-
-            if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
+                        authProperties);
+            } else if (APIConstants.APITransportType.SSE.toString().equals(api.getType())) {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
+                        authProperties);
+            } else if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                         authProperties);
             }

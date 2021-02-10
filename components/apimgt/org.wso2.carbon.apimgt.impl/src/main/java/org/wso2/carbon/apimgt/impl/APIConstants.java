@@ -1149,6 +1149,14 @@ public final class APIConstants {
         }
     }
 
+    public static class WebHookProperties {
+        public static final String DEFAULT_TOPIC_QUERY_PARAM_NAME = "hub.topic";
+        public static final String WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER = "_web_hook_subscription_failure_handler";
+        public static final String DEFAULT_SUBSCRIPTION_RESOURCE_PATH = "/webhooks_events_receiver_resource";
+        public static final String EVENT_RECEIVING_RESOURCE_PATH = "eventReceivingResourcePath";
+        public static final String TOPIC_QUERY_PARAM_NAME = "topicQueryParamName";
+    }
+
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
     public static final String ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION = "EnablePerTenantServiceProviderCreation";
     public static final String DISABLE_DEFAULT_APPLICATION_CREATION = "DisableDefaultApplicationCreation";
