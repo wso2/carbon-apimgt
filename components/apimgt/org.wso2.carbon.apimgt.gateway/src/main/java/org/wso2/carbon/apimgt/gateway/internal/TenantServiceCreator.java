@@ -61,7 +61,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String corsSequenceName = "_cors_request_handler_";
     private String threatFaultSequenceName = "_threat_fault_";
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
-    private String securedWebSocketInboundEp = "SecureWebSocketEP";
+    private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
