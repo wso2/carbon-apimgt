@@ -477,12 +477,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Adds an application
      *
-     * @param application Application
-     * @param userId      User Id
+     * @param application     Application
+     * @param userId          User Id
+     * @param organizationId  Identifier of an organization
      * @return Id of the newly created application
      * @throws APIManagementException if failed to add Application
      */
-    int addApplication(Application application, String userId) throws APIManagementException;
+    int addApplication(Application application, String userId, String organizationId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -595,7 +596,7 @@ public interface APIConsumer extends APIManager {
      */
 
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset ,
-                                                String search, String sortColumn, String sortOrder)
+                                                String search, String sortColumn, String sortOrder, String organizationId)
             throws APIManagementException;
 
 

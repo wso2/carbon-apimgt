@@ -1088,6 +1088,7 @@ paths:
         This operation can be used to retrieve list of applications that is belonged to the user associated with the provided access token.
       parameters:
         - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/organizationId'
         - name: query
           in: query
           description: |
@@ -1161,6 +1162,8 @@ paths:
         Create a New Application
       description: |
         This operation can be used to create a new application specifying the details of the application in the payload.
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
       requestBody:
         description: |
           Application object that is to be created.
@@ -2104,6 +2107,7 @@ paths:
       description: |
         This operation can be used to import an application.
       parameters:
+        - $ref: '#/components/parameters/organizationId'
         - name: preserveOwner
           in: query
           description: |

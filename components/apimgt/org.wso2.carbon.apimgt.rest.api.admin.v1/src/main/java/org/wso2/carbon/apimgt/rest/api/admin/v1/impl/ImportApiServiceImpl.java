@@ -287,7 +287,7 @@ public class ImportApiServiceImpl implements ImportApiService {
                 applicationDetails.updateSubscriber(application.getSubscriber());
                 consumer.updateApplication(applicationDetails);
             } else {
-                appId = consumer.addApplication(applicationDetails, ownerId);
+                appId = consumer.addApplication(applicationDetails, ownerId, null);
             }
 
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
