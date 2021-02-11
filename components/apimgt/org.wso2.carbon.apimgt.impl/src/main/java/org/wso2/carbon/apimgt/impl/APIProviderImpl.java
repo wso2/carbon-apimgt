@@ -9691,7 +9691,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (maxId < revisionIdStored) {
             revisionId = revisionIdStored + 1;
         } else {
-            revisionId = maxId +1 ;
+            revisionId = maxId + 1;
         }
         apiRevision.setId(revisionId);
         APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
@@ -9707,31 +9707,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiId.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
         }
         if (StringUtils.isEmpty(revisionUUID)) {
             String errorMessage = "Failed to retrieve revision uuid";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIRevision(apiRevision);
         idList.add(revisionId);
-        revisionIDList.put(apiRevision.getApiUUID(),idList);
-        try {
-            File artifact = importExportAPI
-                    .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
-            gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiId.getApiName(),
-                    apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL, artifact);
-            if (artifactSaver != null){
-                artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                        apiRevision.getRevisionUUID(),tenantDomain, artifact);
+        revisionIDList.put(apiRevision.getApiUUID(), idList);
+        if (importExportAPI != null) {
+            try {
+                File artifact = importExportAPI
+                        .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
+                gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
+                        apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL,
+                         artifact);
+                if (artifactSaver != null) {
+                    artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
+                            apiRevision.getRevisionUUID(), tenantDomain, artifact);
+                }
+            } catch (APIImportExportException | ArtifactSynchronizerException e) {
+                throw new APIManagementException("Error while Store the Revision Artifact",
+                        ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
             }
-        } catch (APIImportExportException|ArtifactSynchronizerException e) {
-            throw new APIManagementException("Error while Store the Revision Artifact",
-                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
-
         return revisionUUID;
     }
 

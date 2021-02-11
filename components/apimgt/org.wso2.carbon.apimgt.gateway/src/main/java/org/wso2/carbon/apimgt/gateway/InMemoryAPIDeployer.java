@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -129,6 +130,8 @@ public class InMemoryAPIDeployer {
                     String encodedString = Base64.encodeBase64URLSafeString(labelString.getBytes());
                     APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
                     MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                     List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder
                             .getInstance().getArtifactRetriever().retrieveAllArtifacts(encodedString, tenantDomain);
                     for (String runtimeArtifact : gatewayRuntimeArtifacts) {
@@ -141,7 +144,7 @@ public class InMemoryAPIDeployer {
                                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                             }
                         } catch (AxisFault axisFault) {
-                            log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ");
+                            log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ",axisFault);
                         }
                     }
 
@@ -155,6 +158,7 @@ public class InMemoryAPIDeployer {
                     throw new ArtifactSynchronizerException(msg, e);
                 }finally {
                     MessageContext.destroyCurrentMessageContext();
+                    PrivilegedCarbonContext.endTenantFlow();
                 }
             } else {
                 String msg = "Artifact retriever not found";
