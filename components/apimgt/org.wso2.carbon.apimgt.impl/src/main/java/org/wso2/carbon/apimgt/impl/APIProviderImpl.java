@@ -255,7 +255,6 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getAllowedOrigins;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
 /**
@@ -9785,6 +9784,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public APIRevision getAPIRevision(String revisionUUID) throws APIManagementException {
         return apiMgtDAO.getRevisionByRevisionUUID(revisionUUID);
+    }
+
+    /**
+     * Get the revision UUID from the Revision no and API UUID
+     *
+     * @param revisionNum   revision number
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if failed to get the API revision uuid
+     */
+    @Override
+    public String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getRevisionUUID(revisionNum, apiUUID);
+    }
+
+    /**
+     * Get the earliest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID API UUID
+     * @return Earliest revision's UUID
+     * @throws APIManagementException if failed to get the revision
+     */
+    @Override
+    public String getEarliestRevisionUUID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getEarliestRevision(apiUUID);
     }
 
     /**
