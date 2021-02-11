@@ -20,31 +20,39 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.usage.publisher.impl.FaultyRequestDataPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 
-/**
- * Auth faulty request data collector
- */
-public class AuthFaultDataCollector extends AbstractFaultDataCollector {
-    private static final Log log = LogFactory.getLog(AuthFaultDataCollector.class);
+public class UnclassifiedFaultDataCollector extends AbstractFaultDataCollector {
+    private static final Log log = LogFactory.getLog(TargetFaultDataCollector.class);
 
-    public AuthFaultDataCollector() {
+    public UnclassifiedFaultDataCollector() {
         this(new FaultyRequestDataPublisher());
     }
 
-    public AuthFaultDataCollector(RequestDataPublisher processor) {
-        super(FAULT_EVENT_TYPE.AUTH, processor);
+    public UnclassifiedFaultDataCollector(RequestDataPublisher processor) {
+        super(FAULT_EVENT_TYPE.OTHER, processor);
     }
 
     @Override
     public void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent) {
-        log.debug("handling auth failure analytics events");
+        log.debug("handling unclassified failure analytics events");
+        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        if (authContext == null) {
+            log.warn("Ignore API request without authentication context.");
+            return;
+        }
 
-        this.setUnknownApp(faultyEvent);
-
+        if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
+            this.setAnonymousApp(faultyEvent);
+        } else {
+            setApplicationData(authContext, faultyEvent);
+        }
         this.processRequest(faultyEvent);
     }
 }

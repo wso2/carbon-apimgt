@@ -289,6 +289,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
+            authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
             synCtx.setProperty("API_NAME", apiName.substring(apiName.indexOf("--") + 2, apiName.indexOf(":")));
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
@@ -367,6 +368,7 @@ public class OAuthAuthenticator implements Authenticator {
             }
             authContext.setCallerToken(info.getEndUserToken());
             authContext.setApplicationId(info.getApplicationId());
+            authContext.setApplicationUUID(info.getApplicationUUID());
             authContext.setApplicationName(info.getApplicationName());
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());
