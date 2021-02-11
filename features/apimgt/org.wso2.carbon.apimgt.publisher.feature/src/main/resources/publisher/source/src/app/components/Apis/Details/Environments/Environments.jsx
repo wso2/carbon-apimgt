@@ -265,6 +265,9 @@ const useStyles = makeStyles((theme) => ({
     labelSpacingDown: {
         marginBottom: theme.spacing(2),
     },
+    warningText: {
+        color: '#ff0000',
+    },
 }));
 
 /**
@@ -933,6 +936,9 @@ export default function Environments() {
                                     onClick={() => toggleOpenConfirmDelete(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
+                                    disabled={allEnvRevision && allEnvRevision.filter(
+                                        (o1) => o1.id === allRevisions[revision].id,
+                                    ).length !== 0}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -972,6 +978,9 @@ export default function Environments() {
                                     onClick={() => toggleOpenConfirmDelete(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
+                                    disabled={allEnvRevision && allEnvRevision.filter(
+                                        (o1) => o1.id === allRevisions[revision].id,
+                                    ).length !== 0}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1118,6 +1127,16 @@ export default function Environments() {
                                 {parseInt(lastRevisionCount, 0) + 1}
                             </span>
                         </Typography>
+                        { allRevisions && allRevisions.length === revisionCount && (
+                            <Typography variant='body' align='left' className={classes.warningText}>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.select.rev.warning'
+                                    defaultMessage={'Please delete a revision as '
+                                    + 'the number of revisions have reached a maximum of {count}'}
+                                    values={{ count: revisionCount }}
+                                />
+                            </Typography>
+                        )}
                         { allRevisions && allRevisions.length === revisionCount && (
                             <Box mb={3}>
                                 <TextField
@@ -1486,6 +1505,16 @@ export default function Environments() {
                                 {parseInt(lastRevisionCount, 0) + 1}
                             </span>
                         </Typography>
+                        { allRevisions && allRevisions.length === revisionCount && (
+                            <Typography variant='body' align='left' className={classes.warningText}>
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.Environments.select.rev.warning'
+                                    defaultMessage={'Please delete a revision as '
+                                    + 'the number of revisions have reached a maximum of {count}'}
+                                    values={{ count: revisionCount }}
+                                />
+                            </Typography>
+                        )}
                         { allRevisions && allRevisions.length === revisionCount && (
                             <Box mb={3}>
                                 <TextField
