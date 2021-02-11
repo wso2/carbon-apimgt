@@ -488,6 +488,9 @@ public final class APIConstants {
     public static final String OVERVIEW_ELEMENT = "overview";
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
+    public static final String ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN = OAUTH_CONFIGS + "EnableCertificateBoundAccessToken";
+    public static final String DIGEST = "x5t#S256";
+    public static final String CNF = "cnf";
 
     //documentation rxt
 

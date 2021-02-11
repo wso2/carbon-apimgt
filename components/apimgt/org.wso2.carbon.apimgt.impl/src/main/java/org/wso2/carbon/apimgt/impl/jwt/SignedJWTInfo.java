@@ -18,8 +18,18 @@
 
 package org.wso2.carbon.apimgt.impl.jwt;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.clients.Util;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.Serializable;
 
@@ -32,6 +42,8 @@ public class SignedJWTInfo implements Serializable {
     private SignedJWT signedJWT;
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
+    private String certificateThumbprint; //holder of key certificate bound access token
+    private String encodedClientCertificate; //holder of key certificate cnf
 
     public enum ValidationStatus {
         NOT_VALIDATED, INVALID, VALID
@@ -84,5 +96,53 @@ public class SignedJWTInfo implements Serializable {
 
     public void setValidationStatus(ValidationStatus validationStatus) {
         this.validationStatus = validationStatus;
+    }
+
+    public void setEncodedClientCertificate(String encodedClientCertificate) {
+
+        this.encodedClientCertificate = encodedClientCertificate;
+    }
+
+    public String getCertificateThumbprint() {
+
+        return certificateThumbprint;
+    }
+
+    public String getEncodedClientCertificate() {
+
+        return encodedClientCertificate;
+    }
+
+    public void setCertificateThumbprint(String certificateThumbprint) {
+
+        this.certificateThumbprint = certificateThumbprint;
+    }
+
+    public boolean isValidHoKToken() { //certificate bound access token
+
+        if (isCertificateBoundAccessTokenEnabled()) {
+            if (StringUtils.isNotEmpty(getEncodedClientCertificate()) && StringUtils.isNotEmpty(getCertificateThumbprint())) {
+                JsonObject jsonElem = new JsonParser().parse(getCertificateThumbprint()).getAsJsonObject();
+                if (null != jsonElem) {
+                    return jsonElem.get(APIConstants.DIGEST) != null && jsonElem.get(APIConstants.DIGEST).toString().
+                            equalsIgnoreCase(getEncodedClientCertificate());
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isCertificateBoundAccessTokenEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            String firstProperty = config
+                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
+            return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
     }
 }

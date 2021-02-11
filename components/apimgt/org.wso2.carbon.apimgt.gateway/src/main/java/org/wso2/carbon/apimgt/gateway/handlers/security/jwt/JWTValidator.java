@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.jwt;
 
+import com.hazelcast.internal.json.JsonObject;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
 import org.apache.axis2.Constants;
@@ -30,6 +31,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -51,12 +53,15 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.cache.Cache;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -113,12 +118,38 @@ public class JWTValidator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-
-        String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        String httpMethod = (String) axis2MsgContext.getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
+//        String thumbprint = null;
+        String thumbprint = "\"x5t#S256\": \"bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2\"";
+        try {
+            thumbprint = signedJWTInfo.getSignedJWT().getJWTClaimsSet().getStringClaim("cnf");
+        } catch (ParseException e) {
+            log.error("Error while paring JWT claims. " + GatewayUtils.getMaskedToken(jwtHeader));
+        }
+        signedJWTInfo.setCertificateThumbprint(thumbprint);
+        try {
+
+            X509Certificate clientCertificate = Utils.getClientCertificate(axis2MsgContext);
+            if (clientCertificate != null) {
+                byte[] encoded = org.apache.commons.codec.binary.Base64.encodeBase64(clientCertificate.getEncoded());
+                String base64EncodedString =
+                        APIConstants.BEGIN_CERTIFICATE_STRING
+                                .concat(new String(encoded)).concat("\n")
+                                .concat(APIConstants.END_CERTIFICATE_STRING);
+                base64EncodedString = org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
+                signedJWTInfo.setEncodedClientCertificate(base64EncodedString);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while obtaining client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
+        } catch (CertificateEncodingException e) {
+            log.error("Error while encoding client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
+
+        }
         if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
                 if (log.isDebugEnabled()) {
