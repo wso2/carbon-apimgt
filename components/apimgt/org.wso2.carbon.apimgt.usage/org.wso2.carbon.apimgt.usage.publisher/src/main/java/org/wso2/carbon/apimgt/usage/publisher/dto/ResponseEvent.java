@@ -29,8 +29,7 @@ public class ResponseEvent extends AnalyticsEvent {
     private long backendLatency;
     private long requestMediationLatency;
     private long responseMediationLatency;
-    private String userAgent;
-    private String platform;
+    private String userAgentHeader;
 
     public String getApiMethod() {
         return apiMethod;
@@ -96,19 +95,15 @@ public class ResponseEvent extends AnalyticsEvent {
         this.responseMediationLatency = responseMediationLatency;
     }
 
-    public String getUserAgent() {
-        return userAgent;
+    public boolean isResponseCacheHit() {
+        return responseCacheHit;
     }
 
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
+    public String getUserAgentHeader() {
+        return userAgentHeader;
     }
 
-    public String getPlatform() {
-        return platform;
-    }
-
-    public void setPlatform(String platform) {
-        this.platform = platform;
+    public void setUserAgentHeader(String userAgentHeader) {
+        this.userAgentHeader = userAgentHeader;
     }
 }

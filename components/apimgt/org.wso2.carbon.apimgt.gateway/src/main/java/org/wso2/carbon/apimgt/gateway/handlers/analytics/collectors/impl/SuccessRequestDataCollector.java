@@ -58,12 +58,13 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         boolean isCacheHit = messageContext.getPropertyKeySet().contains(Constants.CACHED_RESPONSE_KEY);
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        ResponseEvent responseEvent = new ResponseEvent();
+
         if (authContext != null) {
             if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
-                authContext.setApplicationName(Constants.ANONYMOUS_VALUE);
-                authContext.setApplicationId(Constants.ANONYMOUS_VALUE);
-                authContext.setSubscriber(Constants.ANONYMOUS_VALUE);
-                authContext.setKeyType(Constants.ANONYMOUS_VALUE);
+                this.setAnonymousApp(responseEvent);
+            } else {
+                this.setApplicationData(authContext, responseEvent);
             }
         } else {
             log.warn("Ignore API request without authentication context.");
@@ -95,8 +96,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
             return;
         }
 
-        ResponseEvent responseEvent = new ResponseEvent();
-        setApplicationData(authContext, responseEvent);
+
         responseEvent.setCorrelationId(UUID.randomUUID().toString());
         responseEvent.setApiId(api.getUuid());
         responseEvent.setApiType(api.getApiType());
@@ -110,7 +110,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
 
         responseEvent.setRegionId(Constants.REGION_ID);
         responseEvent.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-        responseEvent.setUserAgent(userAgent);
+        responseEvent.setUserAgentHeader(userAgent);
         responseEvent.setProxyResponseCode(proxyResponseCode);
         responseEvent.setTargetResponseCode(targetResponseCode);
         responseEvent.setResponseCacheHit(isCacheHit);
@@ -119,8 +119,6 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         responseEvent.setRequestMediationLatency(requestMediationLatency);
         responseEvent.setResponseMediationLatency(responseMediationLatency);
 
-        responseEvent.setUserAgent(Constants.UNKNOWN_VALUE);
-        responseEvent.setPlatform(Constants.UNKNOWN_VALUE);
         responseEvent.setDeploymentId(Constants.DEPLOYMENT_ID);
         responseEvent.setEventType(Constants.SUCCESS_EVENT_TYPE);
         long requestInTime = getRequestTime(messageContext);
