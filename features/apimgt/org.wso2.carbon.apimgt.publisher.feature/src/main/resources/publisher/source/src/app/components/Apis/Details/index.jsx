@@ -536,8 +536,8 @@ class Details extends Component {
                         <Divider />
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.Design.Time.Overview',
-                                defaultMessage: 'Design configuration',
+                                id: 'Apis.Details.index.portal.configuration',
+                                defaultMessage: 'Portal Configuration',
                             })}
                             head='valueOnly'
 
@@ -573,8 +573,8 @@ class Details extends Component {
                         <Divider />
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.Gateway.Config',
-                                defaultMessage: 'Gateway configuration',
+                                id: 'Apis.Details.index.api.Config',
+                                defaultMessage: 'API configuration',
                             })}
                             head='valueOnly'
 
