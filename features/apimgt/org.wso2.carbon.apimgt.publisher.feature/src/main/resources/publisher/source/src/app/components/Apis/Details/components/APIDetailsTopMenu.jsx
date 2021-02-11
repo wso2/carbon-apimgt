@@ -251,20 +251,12 @@ const APIDetailsTopMenu = (props) => {
                     margin='dense'
                     variant='outlined'
                 >
-                    <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
-                        <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
-                            <FormattedMessage
-                                id='Apis.Details.components.APIDetailsTopMenu.current.api'
-                                defaultMessage='Current API'
-                            />
-                        </Link>
-                    </MenuItem>
                     {!isAPIProduct ? (
                         <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
                             <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
                                 <FormattedMessage
-                                    id='Apis.Details.components.APIDetailsTopMenu.working.copy'
-                                    defaultMessage='Working Copy'
+                                    id='Apis.Details.components.APIDetailsTopMenu.current.api'
+                                    defaultMessage='Current API'
                                 />
                             </Link>
                         </MenuItem>
@@ -274,8 +266,8 @@ const APIDetailsTopMenu = (props) => {
                                 ? api.revisionedApiProductId : api.id) + '/overview'}
                             >
                                 <FormattedMessage
-                                    id='Apis.Details.components.APIDetailsTopMenu.working.copy'
-                                    defaultMessage='Working Copy'
+                                    id='Apis.Details.components.APIDetailsTopMenu.current.api'
+                                    defaultMessage='Current API'
                                 />
                             </Link>
                         </MenuItem>
