@@ -25,7 +25,12 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.*;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.AuthFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.MethodNotAllowedFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.ResourceNotFoundFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.TargetFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.ThrottledFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.UnclassifiedFaultDataCollector;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.FaultDataCollector;
@@ -58,7 +63,12 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
     public void collectData(MessageContext messageContext) {
         log.debug("Handling faulty analytics types");
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-        FaultyEvent faultyEvent = getFaultyEvent(messageContext);
+        API api = getAPIMetaData(messageContext);
+        if (api == null) {
+            log.error("API not found and ignore publishing event.");
+            return;
+        }
+        FaultyEvent faultyEvent = getFaultyEvent(messageContext, api);
 
         if (AnalyticsUtils.isAuthFaultRequest(errorCode)) {
             handleAuthFaultRequest(messageContext, faultyEvent);
@@ -99,7 +109,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         unclassifiedFaultDataCollector.collectFaultData(messageContext, faultyEvent);
     }
 
-    private FaultyEvent getFaultyEvent(MessageContext messageContext) {
+    private FaultyEvent getFaultyEvent(MessageContext messageContext, API api) {
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
         String errorMessage = (String) messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
@@ -111,10 +121,6 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
             proxyResponseCode = Integer.parseInt((String) clientResponseCodeObj);
         }
 
-        API api = getAPIMetaData(messageContext);
-        if (api == null) {
-            log.error("API not found and ignore publishing event.");
-        }
         FaultyEvent event = new FaultyEvent();
         event.setCorrelationId(UUID.randomUUID().toString());
         event.setErrorCode(errorCode);

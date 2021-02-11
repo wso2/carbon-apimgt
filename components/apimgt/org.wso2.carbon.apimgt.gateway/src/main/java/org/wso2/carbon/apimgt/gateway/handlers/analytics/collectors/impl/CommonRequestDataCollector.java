@@ -39,7 +39,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 public class CommonRequestDataCollector {
     private static final Log log = LogFactory.getLog(AnalyticsUtils.class);
 
-    public static API getAPIMetaData(MessageContext messageContext) {
+    public API getAPIMetaData(MessageContext messageContext) {
         String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);

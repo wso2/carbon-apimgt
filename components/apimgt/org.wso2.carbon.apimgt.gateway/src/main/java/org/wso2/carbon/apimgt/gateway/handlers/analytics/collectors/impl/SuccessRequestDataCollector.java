@@ -92,6 +92,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         API api = getAPIMetaData(messageContext);
         if (api == null) {
             log.error("API not found and ignore publishing event.");
+            return;
         }
 
         ResponseEvent responseEvent = new ResponseEvent();
