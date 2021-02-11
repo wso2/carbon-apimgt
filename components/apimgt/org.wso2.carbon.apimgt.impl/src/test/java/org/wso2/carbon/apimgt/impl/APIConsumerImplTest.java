@@ -800,8 +800,8 @@ public class APIConsumerImplTest {
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
-        assertEquals(1, apiConsumer.addApplication(application, "userID"));
+        Mockito.when(apiMgtDAO.addApplication(application, "userID","testorg")).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
 
     @Test
@@ -813,8 +813,8 @@ public class APIConsumerImplTest {
         PowerMockito.when(application.getSubscriber()).thenReturn(new Subscriber("User1"));
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);
-        assertEquals(1, apiConsumer.addApplication(application, "userID"));
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
+        assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
 
     @Test
@@ -940,12 +940,12 @@ public class APIConsumerImplTest {
         Application[] applications = new Application[] { new Application(1), new Application(2) };
         Mockito.when(apiMgtDAO
                 .getApplicationsWithPagination((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
-                        Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(applications);
+                        Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                        Mockito.anyString())).thenReturn(applications);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Assert.assertEquals(
                 apiConsumer.getApplicationsWithPagination(new Subscriber("sub1"), "1", 0, 5,
-                        "", "", "ASC").length, 2);
+                        "", "", "ASC", "testorg").length, 2);
     }
 
     @Test

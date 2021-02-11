@@ -4627,6 +4627,7 @@ public class ApiMgtDAO {
      * @param search     The search string.
      * @param sortOrder  The sort order.
      * @param sortColumn The sort column.
+     * @param organizationId Identifier of an organization
      * @return Application[] The array of applications.
      * @throws APIManagementException
      */
@@ -4695,6 +4696,7 @@ public class ApiMgtDAO {
                     prepStmt.setString(++noOfParams, tenantDomain);
                     prepStmt.setString(++noOfParams, subscriber.getName());
                     prepStmt.setString(++noOfParams, tenantDomain + '/' + groupingId);
+                    prepStmt.setString(++noOfParams, organizationId);
                     prepStmt.setString(++noOfParams, "%" + search + "%");
                     prepStmt.setInt(++noOfParams, start);
                     prepStmt.setInt(++noOfParams, offset);
@@ -4702,16 +4704,18 @@ public class ApiMgtDAO {
                     prepStmt = connection.prepareStatement(sqlQuery);
                     prepStmt.setString(1, groupingId);
                     prepStmt.setString(2, subscriber.getName());
-                    prepStmt.setString(3, "%" + search + "%");
-                    prepStmt.setInt(4, start);
-                    prepStmt.setInt(5, offset);
+                    prepStmt.setString(3, organizationId);
+                    prepStmt.setString(4, "%" + search + "%");
+                    prepStmt.setInt(5, start);
+                    prepStmt.setInt(6, offset);
                 }
             } else {
                 prepStmt = connection.prepareStatement(sqlQuery);
                 prepStmt.setString(1, subscriber.getName());
-                prepStmt.setString(2, "%" + search + "%");
-                prepStmt.setInt(3, start);
-                prepStmt.setInt(4, offset);
+                prepStmt.setString(2, organizationId);
+                prepStmt.setString(3, "%" + search + "%");
+                prepStmt.setInt(4, start);
+                prepStmt.setInt(5, offset);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Query: " + sqlQuery);
