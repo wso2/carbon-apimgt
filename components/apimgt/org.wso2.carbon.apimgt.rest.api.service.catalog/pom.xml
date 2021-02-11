@@ -247,7 +247,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#service-catalog</warName>
+                    <warName>api#am#service-catalog#v0</warName>
                 </configuration>
             </plugin>
             <plugin>
