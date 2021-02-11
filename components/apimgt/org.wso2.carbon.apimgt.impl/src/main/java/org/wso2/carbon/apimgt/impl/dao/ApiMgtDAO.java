@@ -5726,6 +5726,14 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Returns whether a given API Name already exists
+     *
+     * @param apiName          Name of the API
+     * @param organizationId   Identifier of an Organization
+     * @return true/false
+     * @throws APIManagementException if failed to get API Names
+     */
     public List<String> getAPIVersionsMatchingApiNameAndOrganization(String apiName, String organizationId)
             throws APIManagementException {
 
@@ -7231,7 +7239,7 @@ public class ApiMgtDAO {
      * Check the given api name is already available in the api table under given Organization
      *
      * @param apiName         candidate api name
-     * @param oraganizationId UUID of the oragnization
+     * @param organizationId UUID of the oragnization
      * @return true if the name is already available
      * @throws APIManagementException
      */
@@ -10213,6 +10221,44 @@ public class ApiMgtDAO {
             handleException("Failed to count contexts which match " + contextTemplate, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether a given API Context already exists
+     *
+     * @param contextTemplate  Requested context template
+     * @param organizationId   Identifier of an Organization
+     * @return true/false
+     * @throws APIManagementException if failed to get API Contexts
+     */
+    public boolean isDuplicateContextTemplateMatchesOrganization(String contextTemplate, String organizationId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection
+                     .prepareStatement(SQLConstants.GET_CONTEXT_TEMPLATE_COUNT_SQL_MATCHES_ORGANIZATION)) {
+            boolean initialAutoCommit = connection.getAutoCommit();
+            ResultSet resultSet = null;
+            try {
+                connection.setAutoCommit(false);
+                ps.setString(1, contextTemplate.toLowerCase());
+                ps.setString(2, organizationId);
+
+                resultSet = ps.executeQuery();
+                if (resultSet.next()) {
+                    int count = resultSet.getInt("CTX_COUNT");
+                    return count > 0;
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                APIMgtDBUtil.rollbackConnection(connection, "Failed to rollback in getting count matches context " +
+                        "and organization", e );
+            } finally {
+                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to count contexts which match " + contextTemplate + " for the oraganization : "
+                    + organizationId, e);
         }
         return false;
     }
@@ -16276,8 +16322,8 @@ public class ApiMgtDAO {
     /**
      * Remove an API revision Deployment mapping record to the database
      *
-     * @param apiRevisionId          uuid of the revision
-     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @param apiUUID         uuid of the API
+     * @param deployments     deployments of the API
      * @throws APIManagementException if an error occurs when adding a new API revision
      */
     public void removeAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
