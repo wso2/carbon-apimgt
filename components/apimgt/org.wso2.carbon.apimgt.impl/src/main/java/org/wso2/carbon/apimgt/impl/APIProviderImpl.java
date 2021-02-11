@@ -5724,7 +5724,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 updatedProductSwagger);
         saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
         apiProduct.setDefinition(updatedProductSwagger);
-        APIGatewayManager.getInstance().deployToGateway(apiProduct, tenantDomain);
     }
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
@@ -9926,7 +9925,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Restore a provided API Revision as the working copy of the API
+     * Restore a provided API Revision as the current API of the API
      *
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
