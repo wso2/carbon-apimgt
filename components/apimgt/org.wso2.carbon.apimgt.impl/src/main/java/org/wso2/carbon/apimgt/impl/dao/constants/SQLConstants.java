@@ -3702,8 +3702,8 @@ public class SQLConstants {
         public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE AM_WEBHOOKS_SUBSCRIPTION SET " +
                 "HUB_SECRET = ?, HUB_LEASE_SECONDS = ?, UPDATED_AT = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
         public static final String DELETE_IF_EXISTS_SUBSCRIBER =
-                "DELETE FROM AM_WEBHOOKS_SUBSCRIPTION WHERE API_UUID = ?, APPLICATION_ID = ?, TENANT_DOMAIN = ?, " +
-                        "HUB_CALLBACK_URL = ?, HUB_TOPIC = ?";
+                "DELETE FROM AM_WEBHOOKS_SUBSCRIPTION WHERE API_UUID = ? AND APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND " +
+                        "HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
         public static final String ADD_UNSUBSCRIPTION =
                 "INSERT INTO AM_WEBHOOKS_UNSUBSCRIPTION (API_UUID, APPLICATION_ID, TENANT_DOMAIN, " +
                         "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, ADDED_AT) VALUES (?,?,?,?,?,?,?,?)";
