@@ -535,6 +535,18 @@ public interface APIManager {
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
 
     /**
+     * Check if a given context template already exists in an organization
+     *
+     * @param contextTemplate - The contextTemplate to be checked for
+     *                        <p>
+     *                        Ex: /foo/{version}/bar
+     *                        </p>
+     * @return boolean - true if the template exists, false otherwise.
+     * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
+     */
+    boolean isDuplicateContextTemplateMatchingOrganization(String contextTemplate, String orgId) throws APIManagementException;
+
+    /**
      * get a set of API names that matches given context template
      *
      * @param contextTemplate context in the payload
