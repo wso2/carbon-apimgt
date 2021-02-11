@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -151,7 +152,19 @@ public class EndpointAdminServiceProxy {
     }
 
     public String getEndpoint(String endpointName) throws EndpointAdminException {
-        return endpointAdmin.getEndpointConfiguration(endpointName);
+        boolean tenantFlowStarted = false;
+        try {
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+                tenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            return endpointAdmin.getEndpointConfiguration(endpointName);
+        } finally {
+            if (tenantFlowStarted){
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     public boolean isEndpointExist(String endpointName)

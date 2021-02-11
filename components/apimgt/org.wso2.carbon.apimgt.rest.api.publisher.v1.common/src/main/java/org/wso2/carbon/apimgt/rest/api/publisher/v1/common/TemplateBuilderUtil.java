@@ -420,7 +420,7 @@ public class TemplateBuilderUtil {
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
                                                       APIDTO apidto, String extractedFolderPath)
-            throws APIManagementException, XMLStreamException, APITemplateException, CertificateManagementException {
+            throws APIManagementException, XMLStreamException, APITemplateException {
 
         List<ClientCertificateDTO> clientCertificatesDTOList =
                 ImportUtils.retrieveClientCertificates(extractedFolderPath);

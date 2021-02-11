@@ -5899,7 +5899,7 @@ public final class APIUtil {
      */
     public static String getSequenceExtensionName(API api) {
 
-        return api.getId().getProviderName() + "--" + api.getId().getApiName() + ":v" + api.getId().getVersion();
+        return api.getId().getApiName() + ":v" + api.getId().getVersion();
     }
 
     /**
@@ -5908,9 +5908,9 @@ public final class APIUtil {
      *
      * @return
      */
-    public static String getSequenceExtensionName(String provider, String name, String version) {
+    public static String getSequenceExtensionName(String name, String version) {
 
-        return provider + "--" + name + ":v" + version;
+        return name + ":v" + version;
     }
 
     /**

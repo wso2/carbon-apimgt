@@ -24,15 +24,19 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import kafka.api.ApiUtils;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.context.OperationContext;
+import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.InOutAxisOperation;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -40,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
@@ -47,7 +52,6 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
@@ -69,13 +73,12 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.rest.api.APIData;
-import org.wso2.carbon.rest.api.RestApiAdminUtils;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -523,14 +526,14 @@ public class GatewayUtils {
         return hostname;
     }
 
-    public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+    public static String getQualifiedApiName(String apiName, String version) {
 
-        return apiProviderName + "--" + apiName + ":v" + version;
+        return apiName + ":v" + version;
     }
 
-    public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+    public static String getQualifiedDefaultApiName(String apiName) {
 
-        return apiProviderName + "--" + apiName;
+        return  apiName;
     }
 
     /**
@@ -1061,99 +1064,109 @@ public class GatewayUtils {
 
     public static List<String> retrieveDeployedSequences(String apiName, String version, String tenantDomain)
             throws AxisFault {
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        List<String> deployedSequences = new ArrayList<>();
-        if (tenantSubscriptionStore != null) {
-            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
-            if (retrievedAPI != null) {
-                String inSequenceExtensionName = APIUtil.getSequenceExtensionName(retrievedAPI.getApiProvider(),
-                        retrievedAPI.getApiName(), retrievedAPI.getApiVersion()) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
-                String outSequenceExtensionName = APIUtil.getSequenceExtensionName(retrievedAPI.getApiProvider(),
-                        retrievedAPI.getApiName(), retrievedAPI.getApiVersion()) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
-                String faultSequenceExtensionName = APIUtil.getSequenceExtensionName(retrievedAPI.getApiProvider(),
-                        retrievedAPI.getApiName(), retrievedAPI.getApiVersion()) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-                SequenceAdminServiceProxy sequenceAdminServiceProxy = new SequenceAdminServiceProxy(tenantDomain);
-                if (sequenceAdminServiceProxy.isExistingSequence(inSequenceExtensionName)) {
-                    OMElement sequence = sequenceAdminServiceProxy.getSequence(inSequenceExtensionName);
-                    deployedSequences.add(sequence.toString());
-                }
-                if (sequenceAdminServiceProxy.isExistingSequence(outSequenceExtensionName)) {
-                    OMElement sequence = sequenceAdminServiceProxy.getSequence(outSequenceExtensionName);
-                    deployedSequences.add(sequence.toString());
-                }
-                if (sequenceAdminServiceProxy.isExistingSequence(faultSequenceExtensionName)) {
-                    OMElement sequence = sequenceAdminServiceProxy.getSequence(faultSequenceExtensionName);
-                    deployedSequences.add(sequence.toString());
-                }
+        try{
+            List<String> deployedSequences = new ArrayList<>();
+            String inSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+            String outSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+            String faultSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+            SequenceAdminServiceProxy sequenceAdminServiceProxy = new SequenceAdminServiceProxy(tenantDomain);
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            if (sequenceAdminServiceProxy.isExistingSequence(inSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(inSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
             }
+            if (sequenceAdminServiceProxy.isExistingSequence(outSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(outSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            if (sequenceAdminServiceProxy.isExistingSequence(faultSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(faultSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            return deployedSequences;
+        }finally {
+            MessageContext.destroyCurrentMessageContext();
         }
-        return deployedSequences;
     }
 
     public static List<String> retrieveDeployedLocalEntries(String apiName, String version, String tenantDomain)
             throws AxisFault {
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        List<String> deployedLocalEntries = new ArrayList<>();
-        if (tenantSubscriptionStore != null) {
-            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
-            if (retrievedAPI != null) {
-                LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
-                String localEntryKey = retrievedAPI.getUuid();
-                if (APIConstants.GRAPHQL_API.equals(retrievedAPI.getApiType())) {
-                    localEntryKey = retrievedAPI.getUuid().concat(APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION);
-                }
-                if (localEntryServiceProxy.isEntryExists(localEntryKey)) {
-                    OMElement entry = localEntryServiceProxy.getEntry(localEntryKey);
-                    deployedLocalEntries.add(entry.toString());
+        try {
+            SubscriptionDataStore tenantSubscriptionStore =
+                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+            List<String> deployedLocalEntries = new ArrayList<>();
+            if (tenantSubscriptionStore != null) {
+                API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+                if (retrievedAPI != null) {
+                    MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+                    LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
+                    String localEntryKey = retrievedAPI.getUuid();
+                    if (APIConstants.GRAPHQL_API.equals(retrievedAPI.getApiType())) {
+                        localEntryKey = retrievedAPI.getUuid().concat(APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION);
+                    }
+                    if (localEntryServiceProxy.isEntryExists(localEntryKey)) {
+                        OMElement entry = localEntryServiceProxy.getEntry(localEntryKey);
+                        deployedLocalEntries.add(entry.toString());
+                    }
                 }
             }
+            return deployedLocalEntries;
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
         }
-        return deployedLocalEntries;
     }
 
     public static List<String> retrieveDeployedEndpoints(String apiName, String version, String tenantDomain)
-            throws EndpointAdminException {
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+            throws AxisFault {
         List<String> deployedEndpoints = new ArrayList<>();
-        if (tenantSubscriptionStore != null) {
-            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
-            if (retrievedAPI != null) {
-                EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
-                String productionEndpointKey = apiName.concat("--v").concat(version).concat(
-                        "_APIproductionEndpoint");
-                String sandboxEndpointKey = apiName.concat("--v").concat(version).concat(
-                        "_APIsandboxEndpoint");
-                if (endpointAdminServiceProxy.isEndpointExist(productionEndpointKey)) {
-                    String entry = endpointAdminServiceProxy.getEndpoint(productionEndpointKey);
-                    deployedEndpoints.add(entry);
-                }
-                if (endpointAdminServiceProxy.isEndpointExist(sandboxEndpointKey)) {
-                    String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
-                    deployedEndpoints.add(entry);
-                }
+        try{
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+            String productionEndpointKey = apiName.concat("--v").concat(version).concat("_APIproductionEndpoint");
+            String sandboxEndpointKey = apiName.concat("--v").concat(version).concat("_APIsandboxEndpoint");
+            if (endpointAdminServiceProxy.isEndpointExist(productionEndpointKey)) {
+                String entry = endpointAdminServiceProxy.getEndpoint(productionEndpointKey);
+                deployedEndpoints.add(entry);
             }
+            if (endpointAdminServiceProxy.isEndpointExist(sandboxEndpointKey)) {
+                String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
+                deployedEndpoints.add(entry);
+            }
+        }finally {
+            MessageContext.destroyCurrentMessageContext();
         }
+
         return deployedEndpoints;
     }
 
     public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain) throws AxisFault {
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if (tenantSubscriptionStore != null) {
-            API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
-            if (retrievedAPI != null) {
-                RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
-                String qualifiedName = GatewayUtils.getQualifiedApiName(retrievedAPI.getApiProvider(), apiName,
-                        version);
-                OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
-                if (api != null) {
-                    return api.toString();
-                }
+        try{
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
+            String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
+            if (api != null) {
+                return api.toString();
             }
+            return null;
+        }finally {
+            MessageContext.destroyCurrentMessageContext();
         }
-        return null;
     }
+
+    public static org.apache.axis2.context.MessageContext createAxis2MessageContext() throws AxisFault {
+        AxisService axisService = new AxisService();
+        axisService.addParameter("adminService",true);
+        org.apache.axis2.context.MessageContext axis2MsgCtx = new org.apache.axis2.context.MessageContext();
+        axis2MsgCtx.setMessageID(UIDGenerator.generateURNString());
+        axis2MsgCtx.setConfigurationContext(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext());
+        axis2MsgCtx.setProperty(org.apache.axis2.context.MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
+        axis2MsgCtx.setServerSide(true);
+        axis2MsgCtx.setAxisService(axisService);
+        return axis2MsgCtx;
+    }
+
 }
