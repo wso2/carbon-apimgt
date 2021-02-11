@@ -61,7 +61,7 @@ public class OASYamlApi {
 
             @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported") })
 
-    public Response swaggerYamlGet() throws APIManagementException {
+    public Response oasYamlGet() throws APIManagementException {
         try {
             if (openAPIDef == null) {
                 synchronized (LOCK_SERVICE_CATALOG_OPENAPI_DEF) {
