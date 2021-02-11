@@ -3673,7 +3673,7 @@ paths:
             Version of the API
           schema:
             type: string
-        - name: revision
+        - name: revisionNumber
           in: query
           description: |
             Revision number of the API artifact
@@ -3700,6 +3700,13 @@ paths:
             Preserve API Status on export
           schema:
             type: boolean
+        - name: latestRevision
+          in: query
+          description: |
+            Export the latest revision of the API
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: |

@@ -3498,8 +3498,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
-                                        String providerName,
-            String format, Boolean preserveStatus, MessageContext messageContext) {
+                                        String providerName, String format, Boolean preserveStatus,
+                                        Boolean exportLatestRevision, MessageContext messageContext) {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -3511,7 +3511,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             File file = importExportAPI.exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus,
-                    exportFormat, true, true);
+                    exportFormat, true, true, exportLatestRevision);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
@@ -4054,6 +4054,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
         }
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
@@ -4106,6 +4109,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
         }
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
@@ -4145,6 +4151,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         if (revisionId == null && revisionNum != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
         }
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         apiProvider.restoreAPIRevision(apiId, revisionId, tenantDomain);

@@ -48,7 +48,8 @@ public interface ImportExportAPI {
      */
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
                           boolean preserveStatus, ExportFormat format, boolean preserveDocs,
-                          boolean preserveCredentials) throws APIManagementException, APIImportExportException;
+                          boolean preserveCredentials, boolean exportLatestRevision)
+            throws APIManagementException, APIImportExportException;
 
 
     /**
