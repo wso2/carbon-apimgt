@@ -146,8 +146,7 @@ public class JWTValidator {
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-//        String thumbprint = null;
-        String thumbprint = "\"x5t#S256\": \"bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2\"";
+        String thumbprint = null;
         try {
             thumbprint = signedJWTInfo.getSignedJWT().getJWTClaimsSet().getStringClaim("cnf");
         } catch (ParseException e) {
