@@ -105,6 +105,11 @@ export default function ApiCreateAsyncAPI(props) {
             name: 'ws',
             displayName: 'WebSocket',
             description: 'WebSocket'
+        },
+        {
+            name: 'sse',
+            displayName: 'SSE',
+            description: 'Server Sent Events'
         }
     ];
 
