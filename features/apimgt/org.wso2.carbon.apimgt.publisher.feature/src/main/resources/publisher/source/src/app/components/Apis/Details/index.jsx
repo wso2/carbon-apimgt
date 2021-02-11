@@ -419,11 +419,13 @@ class Details extends Component {
         if (!isEmpty(updatedProperties)) {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
-        } else {
+        } else if (!isAPIProduct) {
             // Just like calling noArg `setState()` will just trigger a re-render without modifying the state,
             // Calling `updateAPI()` without args wil return the API without any update.
             // Just sync-up the api state with backend
             promisedUpdate = API.get(api.id);
+        } else if (isAPIProduct) {
+            promisedUpdate = APIProduct.get(api.id);
         }
         return promisedUpdate
             .then((updatedAPI) => {

@@ -672,7 +672,7 @@ class APIProduct extends Resource {
      * */
     restoreProductRevision(apiProductId, revisionId) {
         const promiseRestoreRevision = this.client
-            then(client => {
+            .then(client => {
                 return client.apis['API Product Revisions'].restoreAPIProductRevision(
                     {   
                         apiProductId: apiProductId,

@@ -288,8 +288,8 @@ export default function Environments() {
         revisionCount = 5;
     }
     const [selectedMgLabel, setSelectedMgLabel] = useState([api.labels ? [...api.labels] : []]);
-    const [selectedDeployments, setSelectedDeployments] = useState([api.deploymentEnvironments ? 
-        [...api.deploymentEnvironments] : []]);
+    const [selectedDeployments, setSelectedDeployments] = useState([api.deploymentEnvironments
+        ? [...api.deploymentEnvironments] : []]);
     const restApi = new API();
     const restProductApi = new APIProduct();
     const [allDeployments, setAllDeployments] = useState([]);
@@ -434,51 +434,51 @@ export default function Environments() {
     function deleteRevision(revisionId, revisionName) {
         const lastRev = checkIfDeletingLastRevision(allRevisions, revisionName);
         if (api.apiType === API.CONSTS.APIProduct) {
-        const promisedDelete = restProductApi.deleteProductRevision(api.id, revisionId)
-            .then(() => {
-                Alert.info(intl.formatMessage({
-                    defaultMessage: 'Revision Deleted Successfully',
-                    id: 'Apis.Details.Environments.Environments.revision.delete.success',
-                }));
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error(intl.formatMessage({
-                        defaultMessage: 'Something went wrong while deleting the revision',
-                        id: 'Apis.Details.Environments.Environments.revision.delete.error',
+            restProductApi.deleteProductRevision(api.id, revisionId)
+                .then(() => {
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Revision Deleted Successfully',
+                        id: 'Apis.Details.Environments.Environments.revision.delete.success',
                     }));
-                }
-            }).finally(() => {
-                restProductApi.getProductRevisions(api.id).then((result) => {
-                    setRevisions(result.body.list);
-                    extractLastRevisionNumber(result.body.list, lastRev);
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error(intl.formatMessage({
+                            defaultMessage: 'Something went wrong while deleting the revision',
+                            id: 'Apis.Details.Environments.Environments.revision.delete.error',
+                        }));
+                    }
+                }).finally(() => {
+                    restProductApi.getProductRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                        extractLastRevisionNumber(result.body.list, lastRev);
+                    });
                 });
-            });
         } else {
-            const promisedDelete1 = restApi.deleteRevision(api.id, revisionId)
-            .then(() => {
-                Alert.info(intl.formatMessage({
-                    defaultMessage: 'Revision Deleted Successfully',
-                    id: 'Apis.Details.Environments.Environments.revision.delete.success',
-                }));
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error(intl.formatMessage({
-                        defaultMessage: 'Something went wrong while deleting the revision',
-                        id: 'Apis.Details.Environments.Environments.revision.delete.error',
+            restApi.deleteRevision(api.id, revisionId)
+                .then(() => {
+                    Alert.info(intl.formatMessage({
+                        defaultMessage: 'Revision Deleted Successfully',
+                        id: 'Apis.Details.Environments.Environments.revision.delete.success',
                     }));
-                }
-            }).finally(() => {
-                restApi.getRevisions(api.id).then((result) => {
-                    setRevisions(result.body.list);
-                    extractLastRevisionNumber(result.body.list, lastRev);
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error(intl.formatMessage({
+                            defaultMessage: 'Something went wrong while deleting the revision',
+                            id: 'Apis.Details.Environments.Environments.revision.delete.error',
+                        }));
+                    }
+                }).finally(() => {
+                    restApi.getRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                        extractLastRevisionNumber(result.body.list, lastRev);
+                    });
                 });
-            });
         }
     }
 
@@ -489,8 +489,8 @@ export default function Environments() {
      */
     function createRevision(body) {
         if (api.apiType === API.CONSTS.APIProduct) {
-            const promisedCreate = restProductApi.createProductRevision(api.id, body)
-                .then((response) => {
+            restProductApi.createProductRevision(api.id, body)
+                .then(() => {
                     Alert.info('Revision Created Successfully');
                 })
                 .catch((error) => {
@@ -507,7 +507,7 @@ export default function Environments() {
                     });
                 });
         } else {
-            const promisedCreate1 = api.createRevision(api.id, body)
+            api.createRevision(api.id, body)
                 .then(() => {
                     Alert.info('Revision Created Successfully');
                 })
@@ -628,19 +628,19 @@ export default function Environments() {
                 });
         } else {
             restProductApi.undeployProductRevision(api.id, revisionId, body)
-            .then(() => {
-                Alert.info('Revision Undeployed Successfully');
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while undeploying the revision');
-                }
-                console.error(error);
-            }).finally(() => {
-                updateAPI();
-            });
+                .then(() => {
+                    Alert.info('Revision Undeployed Successfully');
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error('Something went wrong while undeploying the revision');
+                    }
+                    console.error(error);
+                }).finally(() => {
+                    updateAPI();
+                });
         }
     }
 
@@ -667,7 +667,7 @@ export default function Environments() {
                     console.error(error);
                 }).finally(() => {
                     updateAPI();
-            });
+                });
         } else {
             restProductApi.deployProductRevision(api.id, revisionId, body)
                 .then(() => {
@@ -682,7 +682,7 @@ export default function Environments() {
                     console.error(error);
                 }).finally(() => {
                     updateAPI();
-            });
+                });
         }
     }
 
@@ -695,77 +695,77 @@ export default function Environments() {
             description,
         };
         if (api.apiType !== API.CONSTS.APIProduct) {
-        restApi.createRevision(api.id, body)
-            .then((response) => {
-                Alert.info('Revision Created Successfully');
-                const body1 = [];
-                for (let i = 0; i < envList.length; i++) {
-                    body1.push({
-                        name: envList[i],
-                        displayOnDevportal: true,
-                    });
-                }
-                restApi.deployRevision(api.id, response.body.id, body1)
-                    .then(() => {
-                        Alert.info('Revision Deployed Successfully');
-                    })
-                    .catch((error) => {
-                        if (error.response) {
-                            Alert.error(error.response.body.description);
-                        } else {
-                            Alert.error('Something went wrong while deploying the revision');
-                        }
-                        console.error(error);
-                    });
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while creating the revision');
-                }
-                console.error(error);
-            })
-            .finally(() => {
-                updateAPI();
-            });
-        setOpenDeployPopup(false);
+            restApi.createRevision(api.id, body)
+                .then((response) => {
+                    Alert.info('Revision Created Successfully');
+                    const body1 = [];
+                    for (let i = 0; i < envList.length; i++) {
+                        body1.push({
+                            name: envList[i],
+                            displayOnDevportal: true,
+                        });
+                    }
+                    restApi.deployRevision(api.id, response.body.id, body1)
+                        .then(() => {
+                            Alert.info('Revision Deployed Successfully');
+                        })
+                        .catch((error) => {
+                            if (error.response) {
+                                Alert.error(error.response.body.description);
+                            } else {
+                                Alert.error('Something went wrong while deploying the revision');
+                            }
+                            console.error(error);
+                        });
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error('Something went wrong while creating the revision');
+                    }
+                    console.error(error);
+                })
+                .finally(() => {
+                    updateAPI();
+                });
+            setOpenDeployPopup(false);
         } else {
             restProductApi.createProductRevision(api.id, body)
-            .then((response) => {
-                Alert.info('Revision Created Successfully');
-                const body1 = [];
-                for (let i = 0; i < envList.length; i++) {
-                    body1.push({
-                        name: envList[i],
-                        displayOnDevportal: true,
-                    });
-                }
-                restProductApi.deployProductRevision(api.id, response.body.id, body1)
-                    .then(() => {
-                        Alert.info('Revision Deployed Successfully');
-                    })
-                    .catch((error) => {
-                        if (error.response) {
-                            Alert.error(error.response.body.description);
-                        } else {
-                            Alert.error('Something went wrong while deploying the revision');
-                        }
-                        console.error(error);
-                    });
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while creating the revision');
-                }
-                console.error(error);
-            })
-            .finally(() => {
-                updateAPI();
-            });
-        setOpenDeployPopup(false);
+                .then((response) => {
+                    Alert.info('Revision Created Successfully');
+                    const body1 = [];
+                    for (let i = 0; i < envList.length; i++) {
+                        body1.push({
+                            name: envList[i],
+                            displayOnDevportal: true,
+                        });
+                    }
+                    restProductApi.deployProductRevision(api.id, response.body.id, body1)
+                        .then(() => {
+                            Alert.info('Revision Deployed Successfully');
+                        })
+                        .catch((error) => {
+                            if (error.response) {
+                                Alert.error(error.response.body.description);
+                            } else {
+                                Alert.error('Something went wrong while deploying the revision');
+                            }
+                            console.error(error);
+                        });
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error('Something went wrong while creating the revision');
+                    }
+                    console.error(error);
+                })
+                .finally(() => {
+                    updateAPI();
+                });
+            setOpenDeployPopup(false);
         }
     }
 
@@ -828,7 +828,7 @@ export default function Environments() {
                 />
             )}
             title={(
-            <FormattedMessage
+                <FormattedMessage
                     id='Apis.Details.Environments.Environments.revision.restore.confirm.title'
                     defaultMessage='Confirm Restore'
                 />
