@@ -234,57 +234,119 @@ class Topics extends Component {
 
     loadTopicMetaData() {
         const {asyncAPI, topics} = this.state;
+        console.log(asyncAPI);
         topics.map((topic) => {
             asyncAPI.channelNames().map((name) => {
                 let channel = asyncAPI.channel(name)
                 if (topic.name === name) {
-                    if (channel.hasPublish()) {
-                        topic.description = channel.publish().message()._json["x-parser-message-name"]
-                        for (let i in channel.publish().message().payload().properties()) {
-                            topic.payload.properties.push({
-                                name: i,
-                                type: channel.publish().message().payload().properties()[i]._json.type,
-                                advanced: '',
-                                description: '',
-                                editable: false,
-                                new: false
-                            })
-                            if (channel.publish().message().payload().properties()[i]._json.type === "object") {
-                                for (let j in channel.publish().message().payload().properties()[i].properties()) {
-                                    topic.payload.properties.push({
-                                        name: i + " / " + j,
-                                        type: channel.publish().message().payload().properties()[i].properties()[j]._json.type,
-                                        advanced: '',
-                                        description: '',
-                                        editable: false,
-                                        new: false
-                                    })
+                    if (channel.hasPublish() && topic.mode === "PUBLISH") {
+                        let pubMessage = null;
+                        if (!channel.publish().hasMultipleMessages()) {
+                            pubMessage = channel.publish().message()
+                            topic.description = pubMessage.uid()
+                            for (let i in pubMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: pubMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false
+                                })
+                                if (pubMessage.payload().properties()[i].type() === "object") {
+                                    for (let j in pubMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + " / " + j,
+                                            type: pubMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false
+                                        })
+                                    }
+                                }
+                            }
+                        } else {
+                            console.log("pub")
+                            console.log(channel.publish().messages()[0])
+                            pubMessage = channel.publish().messages()[0]
+                            topic.description = pubMessage.uid()
+                            for (let i in pubMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: pubMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false
+                                })
+                                if (pubMessage.payload().properties()[i].type() === "object") {
+                                    for (let j in pubMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + " / " + j,
+                                            type: pubMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false
+                                        })
+                                    }
                                 }
                             }
                         }
                     }
-                    if (channel.hasSubscribe()) {
-                        //console.log(channel.subscribe().message().payload().properties())
-                        topic.description = channel.subscribe().message()._json["x-parser-message-name"]
-                        for (let i in channel.subscribe().message().payload().properties()) {
-                            topic.payload.properties.push({
-                                name: i,
-                                type: channel.subscribe().message().payload().properties()[i]._json.type,
-                                advanced: '',
-                                description: '',
-                                editable: false,
-                                new: false
-                            })
-                            if (channel.subscribe().message().payload().properties()[i]._json.type === "object") {
-                                for (let j in channel.subscribe().message().payload().properties()[i].properties()) {
-                                    topic.payload.properties.push({
-                                        name: i + " / " + j,
-                                        type: channel.subscribe().message().payload().properties()[i].properties()[j]._json.type,
-                                        advanced: '',
-                                        description: '',
-                                        editable: false,
-                                        new: false
-                                    })
+                    if (channel.hasSubscribe() && topic.mode === "SUBSCRIBE") {
+                        let subMessage = null;
+                        if (!channel.subscribe().hasMultipleMessages()) {
+                            subMessage = channel.subscribe().message()
+                            topic.description = subMessage.uid()
+                            for (let i in subMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: subMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false
+                                })
+                                if (subMessage.payload().properties()[i].type() === "object") {
+                                    for (let j in subMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + " / " + j,
+                                            type: subMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false
+                                        })
+                                    }
+                                }
+                            }
+                        } else {
+                            console.log("sub")
+                            console.log(channel.subscribe().messages()[0])
+                            subMessage = channel.subscribe().messages()[0]
+                            topic.description = subMessage.uid()
+                            for (let i in subMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: subMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false
+                                })
+                                if (subMessage.payload().properties()[i].type() === "object") {
+                                    for (let j in subMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + " / " + j,
+                                            type: subMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false
+                                        })
+                                    }
                                 }
                             }
                         }
@@ -619,15 +681,27 @@ class Topics extends Component {
             if (name === topic.name) {
                 if (topic.mode === "SUBSCRIBE") {
                     if (channel.hasSubscribe()){
-                        if (channel.subscribe().message() !== null) {
-                            schema = channel.subscribe().message().payload();
+                        if (!channel.subscribe().hasMultipleMessages()){
+                            if (channel.subscribe().message() !== null) {
+                                schema = channel.subscribe().message().payload();
+                            }
+                        } else {
+                            if (channel.subscribe().messages()[0] !== null) {
+                                schema = channel.subscribe().messages()[0].payload();
+                            }
                         }
                     }
                 }
                 if (topic.mode === "PUBLISH") {
                     if (channel.hasPublish()){
-                        if (channel.publish().message() !== null) {
-                            schema = channel.publish().message().payload();
+                        if (!channel.publish().hasMultipleMessages()){
+                            if (channel.publish().message() !== null) {
+                                schema = channel.publish().message().payload();
+                            }
+                        } else {
+                            if (channel.publish().messages()[0] !== null) {
+                                schema = channel.publish().messages()[0].payload();
+                            }
                         }
                     }
                 }
