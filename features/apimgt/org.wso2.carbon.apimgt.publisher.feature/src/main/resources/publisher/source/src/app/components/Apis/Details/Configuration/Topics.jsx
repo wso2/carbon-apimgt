@@ -327,8 +327,8 @@ class Topics extends Component {
 
     buildCallbackURL(topic) {
         const { api } = this.props;
-        const { protocol, host, port } = this.gatewayConfigs;
-            return `https://{GATEWAY_HOST}:9091/${api.name.toLowerCase()}/${api.version}/`
+        // const { protocol, host, port } = this.gatewayConfigs;
+            return `https://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
                 + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
             // return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
             //     `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
