@@ -340,9 +340,10 @@ public class ServiceCatalogDAO {
             rs = ps.executeQuery();
             if (rs.next()) {
                 ServiceEntry serviceEntry = new ServiceEntry();
-                serviceEntry.setUuid(rs.getString("UUID"));
-                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                serviceEntry.setUuid(rs.getString(APIConstants.ServiceCatalogConstants.SERVICE_UUID));
+                serviceEntry.setMetadata(rs.getBinaryStream(APIConstants.ServiceCatalogConstants.METADATA));
+                serviceEntry.setEndpointDef(rs.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION));
                 return serviceEntry;
             }
         } catch (SQLException e) {
@@ -381,28 +382,10 @@ public class ServiceCatalogDAO {
             ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             if (rs.next()) {
-                ServiceEntry serviceEntry = new ServiceEntry();
-
-                serviceEntry.setUuid(rs.getString("UUID"));
-                serviceEntry.setKey(rs.getString("SERVICE_KEY"));
-                serviceEntry.setMd5(rs.getString("MD5"));
-                serviceEntry.setName(rs.getString("ENTRY_NAME"));
-                serviceEntry.setDisplayName(rs.getString("DISPLAY_NAME"));
-                serviceEntry.setVersion(rs.getString("ENTRY_VERSION"));
-                serviceEntry.setServiceUrl(rs.getString("SERVICE_URL"));
-                serviceEntry.setDescription(rs.getString("DESCRIPTION"));
-                serviceEntry.setDefinitionType(ServiceEntry.DefinitionType
-                            .valueOf(rs.getString("DEFINITION_TYPE")));
-                serviceEntry.setDefUrl(rs.getString("DEFINITION_URL"));
-                serviceEntry.setSecurityType(ServiceEntry.SecurityType
-                        .valueOf(rs.getString("SECURITY_TYPE")));
-                serviceEntry.setMutualSSLEnabled(rs.getBoolean("MUTUAL_SSL_ENABLED"));
-                serviceEntry.setCreatedTime(rs.getTimestamp("CREATED_TIME"));
-                serviceEntry.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME"));
-                serviceEntry.setCreatedBy(rs.getString("CREATED_BY"));
-                serviceEntry.setUpdatedBy(rs.getString("UPDATED_BY"));
-                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                ServiceEntry serviceEntry = getServiceParams(rs, false);
+                serviceEntry.setMetadata(rs.getBinaryStream(APIConstants.ServiceCatalogConstants.METADATA));
+                serviceEntry.setEndpointDef(rs.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION));
                 return serviceEntry;
             }
         } catch (SQLException e) {
@@ -445,9 +428,10 @@ public class ServiceCatalogDAO {
             rs = ps.executeQuery();
             if (rs.next()) {
                 ServiceEntry serviceEntry = new ServiceEntry();
-                serviceEntry.setUuid(rs.getString("UUID"));
-                serviceEntry.setMetadata(rs.getBinaryStream("METADATA"));
-                serviceEntry.setEndpointDef(rs.getBinaryStream("ENDPOINT_DEFINITION"));
+                serviceEntry.setUuid(rs.getString(APIConstants.ServiceCatalogConstants.SERVICE_UUID));
+                serviceEntry.setMetadata(rs.getBinaryStream(APIConstants.ServiceCatalogConstants.METADATA));
+                serviceEntry.setEndpointDef(rs.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION));
                 return serviceEntry;
             }
         } catch (SQLException e) {
@@ -594,9 +578,8 @@ public class ServiceCatalogDAO {
     }
 
     private ServiceEntry getServiceParams(ResultSet resultSet, boolean shrink) throws APIManagementException {
-
+        ServiceEntry service = new ServiceEntry();
         try {
-            ServiceEntry service = new ServiceEntry();
             service.setUuid(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_UUID));
             service.setName(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_NAME));
             service.setKey(resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
@@ -624,7 +607,7 @@ public class ServiceCatalogDAO {
             return service;
         } catch (SQLException e) {
             handleException("Error while setting service parameters", e);
+            return null;
         }
-        return null;
     }
 }
