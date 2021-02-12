@@ -142,12 +142,70 @@ class EditScope extends React.Component {
         this.handleScopeDisplayNameInput = this.handleScopeDisplayNameInput.bind(this);
     }
 
-
     /**
      * @inheritdoc
      */
     componentDidMount() {
         this.getScope();
+    }
+
+    /**
+     * Hadnling role addition.
+     * @param {any} role The role that needs to be added.
+     * @memberof EditScope
+     */
+    handleRoleAddition(role) {
+        const { validRoles, invalidRoles } = this.state;
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise
+            .then(() => {
+                this.setState({
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
+                });
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
+    }
+
+    /**
+         * Handle api scope addition event
+         * @param {any} event Button Click event
+         * @memberof EditScope
+         */
+    handleInputs(event) {
+        if (Array.isArray(event)) {
+            const { sharedScope } = this.state;
+            sharedScope.bindings = event;
+            this.setState({
+                sharedScope,
+            });
+        } else {
+            const input = event.target;
+            const { sharedScope } = this.state;
+            sharedScope[input.id] = input.value;
+            this.setState({
+                sharedScope,
+            });
+        }
+    }
+
+    /**
+     * Handle scope display name input.
+     * @param {any} target The id and value of the target.
+     * @memberof EditScope
+     */
+    handleScopeDisplayNameInput({ target: { id, value } }) {
+        this.validateScopeDisplayName(id, value);
     }
 
     /**
@@ -196,28 +254,6 @@ class EditScope extends React.Component {
     };
 
     /**
-     * Handle api scope addition event
-     * @param {any} event Button Click event
-     * @memberof EditScope
-     */
-    handleInputs(event) {
-        if (Array.isArray(event)) {
-            const { sharedScope } = this.state;
-            sharedScope.bindings = event;
-            this.setState({
-                sharedScope,
-            });
-        } else {
-            const input = event.target;
-            const { sharedScope } = this.state;
-            sharedScope[input.id] = input.value;
-            this.setState({
-                sharedScope,
-            });
-        }
-    }
-
-    /**
      * Update scope
      * @memberof EditScope
      */
@@ -251,34 +287,6 @@ class EditScope extends React.Component {
                 Alert.error(description);
             }
         });
-    }
-
-    /**
-     * Hadnling role addition.
-     * @param {any} role The role that needs to be added.
-     * @memberof EditScope
-     */
-    handleRoleAddition(role) {
-        const { validRoles, invalidRoles } = this.state;
-        const promise = APIValidation.role.validate(base64url.encode(role));
-        promise
-            .then(() => {
-                this.setState({
-                    roleValidity: true,
-                    validRoles: [...validRoles, role],
-                });
-            })
-            .catch((error) => {
-                if (error.status === 404) {
-                    this.setState({
-                        roleValidity: false,
-                        invalidRoles: [...invalidRoles, role],
-                    });
-                } else {
-                    Alert.error('Error when validating role: ' + role);
-                    console.error('Error when validating role ' + error);
-                }
-            });
     }
 
     /**
@@ -327,15 +335,6 @@ class EditScope extends React.Component {
             sharedScope,
         });
         return valid[id].invalid;
-    }
-
-    /**
-     * Handle scope display name input.
-     * @param {any} target The id and value of the target.
-     * @memberof EditScope
-     */
-    handleScopeDisplayNameInput({ target: { id, value } }) {
-        this.validateScopeDisplayName(id, value);
     }
 
     /**
@@ -527,7 +526,7 @@ class EditScope extends React.Component {
 
 EditScope.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }),
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,

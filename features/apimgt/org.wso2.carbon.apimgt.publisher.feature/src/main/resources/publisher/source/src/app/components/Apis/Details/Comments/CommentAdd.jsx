@@ -74,15 +74,6 @@ class CommentAdd extends React.Component {
     }
 
     /**
-     * Handles the comment text when input changes
-     * @param {Object} {target} target element
-     * @memberof CommentAdd
-     */
-    inputChange({ target }) {
-        this.setState({ commentText: target.value, currentLength: target.value.length });
-    }
-
-    /**
      * Hides the component to add a new comment when cancelled
      * @memberof CommentAdd
      */
@@ -98,15 +89,6 @@ class CommentAdd extends React.Component {
      */
     handleCategoryChange(event) {
         this.setState({ category: event.target.value });
-    }
-
-    /**
-     * Filters the comment to add the reply
-     * @memberof CommentAdd
-     */
-    filterCommentToAddReply(commentToFilter) {
-        const { parentCommentId } = this.props;
-        return commentToFilter.commentId === parentCommentId;
     }
 
     /**
@@ -157,6 +139,24 @@ class CommentAdd extends React.Component {
     }
 
     /**
+     * Filters the comment to add the reply
+     * @memberof CommentAdd
+     */
+    filterCommentToAddReply(commentToFilter) {
+        const { parentCommentId } = this.props;
+        return commentToFilter.commentId === parentCommentId;
+    }
+
+    /**
+     * Handles the comment text when input changes
+     * @param {Object} {target} target element
+     * @memberof CommentAdd
+     */
+    inputChange({ target }) {
+        this.setState({ commentText: target.value, currentLength: target.value.length });
+    }
+
+    /**
      * Render method of the component
      * @returns {React.Component} Comment html component
      * @memberof CommentAdd
@@ -195,7 +195,7 @@ class CommentAdd extends React.Component {
                     <Grid container spacing={2}>
                         <Grid item>
                             <Button variant='contained' color='primary' onClick={() => this.handleClickAddComment()}>
-                  Add Comment
+                                Add Comment
                             </Button>
                         </Grid>
                         {cancelButton
