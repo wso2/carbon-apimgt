@@ -204,51 +204,11 @@ public class APIGatewayManager {
         sendDeploymentEvent(api, tenantDomain, gatewaysToPublish);
     }
 
-    public void deployToGateway(APIProduct api, String tenantDomain) throws APIManagementException {
-
-        String apiId = api.getUuid();
-        APIProductIdentifier apiIdentifier = api.getId();
-        Set<String> environments = api.getEnvironments();
-        List<Label> gatewayLabels = api.getGatewayLabels();
-        Set<String> gateways = new HashSet<>();
-        if (gatewayLabels != null) {
-            for (Label gatewayLabel : gatewayLabels) {
-                gateways.add(gatewayLabel.getName());
-            }
-        }
-        if (environments != null) {
-            Map<String, Environment> apiGatewayEnvironments =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments();
-            for (String environment : environments) {
-                if (apiGatewayEnvironments != null) {
-                    if (apiGatewayEnvironments.containsKey(environment)) {
-                        gateways.add(environment);
-                    }
-                }
-            }
-        }
-        try {
-            File artifact = ServiceReferenceHolder.getInstance().getImportExportService()
-                    .exportAPIProduct(apiId, null, null, null, ExportFormat.JSON, true, false, true);
-            GatewayArtifactsMgtDAO.getInstance().addGatewayAPIArtifactAndMetaData(apiId,apiIdentifier.getName(),
-                    apiIdentifier.getVersion(),APIConstants.API_PRODUCT_REVISION,tenantDomain,
-                    APIConstants.API_PRODUCT,artifact);
-            if (artifactSaver != null){
-                artifactSaver
-                        .saveArtifact(apiId, apiIdentifier.getName(), apiIdentifier.getVersion(), APIConstants.API_PRODUCT_REVISION,
-                                tenantDomain, artifact);
-            }
-            GatewayArtifactsMgtDAO.getInstance()
-                    .addAndRemovePublishedGatewayLabels(apiId, APIConstants.API_PRODUCT_REVISION, gateways);
-
-        } catch (APIManagementException | APIImportExportException | ArtifactSynchronizerException e) {
-            throw new APIManagementException("API " + api.getId() + "couldn't get deployed", e);
-        }
+    public void deployToGateway(APIProduct api, String tenantDomain, Set<String> gatewaysToPublish) {
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }
-        sendDeploymentEvent(api, tenantDomain, gateways);
+        sendDeploymentEvent(api, tenantDomain, gatewaysToPublish);
     }
 
     public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove) {
