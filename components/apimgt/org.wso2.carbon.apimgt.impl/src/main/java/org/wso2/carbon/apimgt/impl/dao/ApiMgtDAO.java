@@ -8199,13 +8199,20 @@ public class ApiMgtDAO {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
-
+        int id = -1;
+        id = getAPIID(identifier, connection);
+        if (id == -1) {
+            String msg = "Could not load API record for: " + identifier.getName();
+            log.error(msg);
+            throw new APIManagementException(msg);
+        }
         String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(deleteCommentQuery);
-            prepStmt.setString(1, commentId);
+            prepStmt.setInt(1, id);
+            prepStmt.setString(2, commentId);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {

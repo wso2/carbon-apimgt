@@ -392,13 +392,25 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException {
+
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
-
-            apiConsumer.deleteComment(apiIdentifier, commentId);
-            return Response.ok("The comment has been deleted").build();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                if ( username.equals("admin") || comment.getUser().equals(username)) {
+                    apiConsumer.deleteComment(apiIdentifier, commentId);
+                    return Response.ok("The comment has been deleted").build();
+                } else {
+                    return null;
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
