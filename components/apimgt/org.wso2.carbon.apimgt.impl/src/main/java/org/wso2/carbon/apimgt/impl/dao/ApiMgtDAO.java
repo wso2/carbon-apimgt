@@ -5832,6 +5832,10 @@ public class ApiMgtDAO {
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
             }
+            String serviceKey = api.getServiceInfo("serviceKey");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                addAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), tenantId, connection);
+            }
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -7292,7 +7296,7 @@ public class ApiMgtDAO {
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
-
+        String deleteAPIServiceMappingQuery = SQLConstants.DELETE_API_SERVICE_MAPPING_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7309,6 +7313,11 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, id);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
+
+            prepStmt = connection.prepareStatement(deleteAPIServiceMappingQuery);
+            prepStmt.setString(1, apiId.getUUID());
+            prepStmt.execute();
+            prepStmt.close();
 
             prepStmt = connection.prepareStatement(deleteSubscriptionQuery);
             prepStmt.setInt(1, id);
@@ -17105,34 +17114,19 @@ public class ApiMgtDAO {
             preparedStatement.setString(1, api.getUuid());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    api.setServiceInfo("id", resultSet.getString("SERVICE_KEY"));
+                    JSONObject serviceInfo = new JSONObject();
+                    serviceInfo.put("id", resultSet.getString("SERVICE_KEY"));
                     if (resultSet.getString("SERVICE_MD5").equals(resultSet
                             .getString("API_SERVICE_MD5"))) {
-                        api.setServiceInfo("outdated", "false");
+                        serviceInfo.put("outdated", false);
                     } else {
-                        api.setServiceInfo("outdated", "true");
+                        serviceInfo.put("outdated", true);
                     }
+                    api.setServiceInfo(serviceInfo);
                 }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving the service status associated the API with id " + api.getUuid(), e);
-        }
-    }
-
-    /**
-     * Add API Service Mapping in AM_API_SERVICE_MAPPING
-     * @param apiId Unique Identifier of the API
-     * @param serviceKey Unique Key of the service
-     * @param md5sum MD5 SUM of the Service
-     *
-     * @throws APIManagementException
-     */
-    public void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId) throws
-            APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            addAPIServiceMapping(apiId, serviceKey, md5sum, tenantId, connection);
-        } catch (SQLException e) {
-            handleException("Error while adding API Service Mapping" , e);
         }
     }
 
@@ -17166,22 +17160,23 @@ public class ApiMgtDAO {
         return serviceKey;
     }
 
-//    /**
-//     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
-//     * @param apiId
-//     * @param serviceId
-//     * @param md5
-//     * @throws APIManagementException
-//     */
-//    public void updateAPIServiceMapping(String apiId, String serviceId, String md5) throws APIManagementException {
-//        try (Connection connection = APIMgtDBUtil.getConnection();
-//             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_SERVICE_MAPPING_SQL)) {
-//            statement.setString(1, apiId);
-//            statement.setString(2, serviceId);
-//            statement.execute();
-//            addAPIServiceMapping(apiId, serviceId, md5, connection);
-//        } catch (SQLException e) {
-//            handleException("Error while updating API Service Mapping for API with ID " + apiId, e);
-//        }
-//    }
+    /**
+     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
+     * @param apiId Unique Identifier of API
+     * @param serviceKey Unique key of the Service
+     * @param md5 MD5 value of the Service
+     * @throws APIManagementException
+     */
+    public void updateAPIServiceMapping(String apiId, String serviceKey, String md5, int tenantId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_API_SERVICE_MAPPING_SQL)) {
+            statement.setString(1, apiId);
+            statement.setString(2, serviceKey);
+            statement.execute();
+            addAPIServiceMapping(apiId, serviceKey, md5, tenantId, connection);
+        } catch (SQLException e) {
+            handleException("Error while updating API Service Mapping for API with ID " + apiId, e);
+        }
+    }
 }

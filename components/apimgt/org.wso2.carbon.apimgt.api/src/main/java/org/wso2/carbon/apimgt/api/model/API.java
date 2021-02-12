@@ -239,6 +239,8 @@ public class API implements Serializable {
 
     public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
 
+    public void setServiceInfo(JSONObject serviceInfo) { this.serviceInfo = serviceInfo; }
+
     public String getServiceInfo(String key) {
         if (serviceInfo != null && serviceInfo.get(key) != null) {
             return serviceInfo.get(key).toString();

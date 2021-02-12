@@ -928,7 +928,11 @@ public class PublisherCommonUtils {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
-        apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        if (isServiceAPI) {
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+        } else {
+            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        }
         Set<URITemplate> uriTemplates = null;
         uriTemplates = oasParser.getURITemplates(apiDefinition);
 
@@ -959,11 +963,7 @@ public class PublisherCommonUtils {
                             existingAPI.getId().getVersion()));
         }
 
-        if (isServiceAPI) {
-            mergeURITemplates(existingAPI.getUriTemplates(), uriTemplates);
-        } else {
-            existingAPI.setUriTemplates(uriTemplates);
-        }
+        existingAPI.setUriTemplates(uriTemplates);
         existingAPI.setScopes(scopes);
         PublisherCommonUtils.validateScopes(existingAPI);
 
@@ -980,11 +980,6 @@ public class PublisherCommonUtils {
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
-    private static void mergeURITemplates(Set<URITemplate> existingResources, Set<URITemplate> newResources) {
-        for (URITemplate uriTemplate : newResources) {
-
-        }
-    }
     /**
      * Add GraphQL schema
      *
