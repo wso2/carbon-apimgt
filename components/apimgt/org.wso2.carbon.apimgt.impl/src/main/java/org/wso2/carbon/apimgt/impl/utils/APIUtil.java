@@ -7850,34 +7850,6 @@ public final class APIUtil {
     }
 
     /**
-     * Extract the provider of the API from name
-     *
-     * @param apiVersion   - API Name with version
-     * @param tenantDomain - tenant domain of the API
-     * @return API publisher name
-     */
-    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
-
-        int index = apiVersion.indexOf("--");
-        if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        String apiProvider;
-        if (index != -1) {
-            apiProvider = apiVersion.substring(0, index);
-            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
-                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-            if (!apiProvider.endsWith(tenantDomain)) {
-                apiProvider = apiProvider + '@' + tenantDomain;
-            }
-            return apiProvider;
-        }
-        return null;
-    }
-
-    /**
      * Get the API Provider name by giving the api name version and the tenant which it belongs to
      *
      * @param apiName    Name of the API

@@ -132,23 +132,7 @@ public class APIUtilTest {
         Assert.assertEquals(apiName, "map");
     }
 
-    @Test
-    public void testGetAPIProviderFromRESTAPI() throws Exception {
 
-        String restAPI = "admin--map";
-        String providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, null);
-
-        Assert.assertEquals(providerName, "admin@carbon.super");
-
-        restAPI = "user@test.com--map";
-        providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, "test.com");
-        Assert.assertEquals(providerName, "user@test.com");
-
-        restAPI = "user-AT-test.com--map";
-        providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, "test.com");
-        Assert.assertEquals(providerName, "user@test.com");
-
-    }
 
     @Test
     public void testIsValidURL() throws Exception {

@@ -1176,4 +1176,41 @@ public class GatewayUtils {
         return axis2MsgCtx;
     }
 
+    public static String getAPINameFromContextAndVersion(String apiContext, String apiVersion, String tenantDomain) {
+
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
+            if (api != null) {
+                return api.getApiName();
+            }
+        }
+        return null;
+    }
+
+    public static String getApiProviderFromContextAndVersion(String context, String apiVersion, String tenantDomain) {
+
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            API api = tenantSubscriptionStore.getApiByContextAndVersion(context, apiVersion);
+            if (api != null) {
+                return api.getApiProvider();
+            }
+        }
+        return null;
+    }
+
+    public static API getAPI(org.apache.synapse.MessageContext messageContext) {
+
+        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+        if (tenantSubscriptionStore != null) {
+            return tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+        }
+        return null;
+    }
 }
