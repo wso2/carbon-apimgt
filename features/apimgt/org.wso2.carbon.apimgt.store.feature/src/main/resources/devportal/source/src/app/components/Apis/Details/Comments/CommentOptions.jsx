@@ -89,11 +89,9 @@ class CommentOptions extends React.Component {
      * @param {any} index Index of comment in the array
      * @memberof CommentOptions
      */
-    showAddComment(index) {
-        const { editIndex, showAddComment } = this.props;
-        if (editIndex === -1) {
-            showAddComment(index);
-        }
+    showAddComment(replyId) {
+        const { showAddComment } = this.props;
+        showAddComment(replyId);
     }
 
     /**
@@ -151,7 +149,7 @@ class CommentOptions extends React.Component {
         return (
             <Grid container className={classes.verticalSpace} key={comment.id}>
                 {/* only the comment owner or admin can delete a comment */}
-                {AuthManager.getUser() && (comment.createdBy === AuthManager.getUser().name) && [
+                {AuthManager.getUser() && (AuthManager.getUser().name === ('admin' || comment.createdBy)) && [
                         <Grid item key='key-delete'>
                             <Button
                                 size='small'
@@ -168,12 +166,12 @@ class CommentOptions extends React.Component {
 
                     ]}
 
-                {comment.parentCommentId == null && [
+                {comment.replyTo == null && [
                     <Grid item key='key-reply'>
                         <Button
                             size='small'
-                            className={editIndex === -1 ? classes.link : classes.disable}
-                            onClick={() => this.showAddComment(index)}
+                            className={classes.link}
+                            onClick={() => this.showAddComment(comment.id)}
                             color='primary'
                         >
                             <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />

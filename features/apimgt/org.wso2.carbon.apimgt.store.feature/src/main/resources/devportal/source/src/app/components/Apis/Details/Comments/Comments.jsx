@@ -288,7 +288,7 @@ class Comments extends Component {
                                     apiId={api.id}
                                     commentsUpdate={this.updateCommentList}
                                     allComments={allComments}
-                                    parentCommentId={null}
+                                    replyTo={null}
                                     cancelButton
                                 />
                             </div>
