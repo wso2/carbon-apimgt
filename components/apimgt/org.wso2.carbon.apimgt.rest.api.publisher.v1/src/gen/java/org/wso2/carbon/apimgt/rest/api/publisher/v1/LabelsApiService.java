@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface LabelsApiService {
-      public Response labelsGet(MessageContext messageContext) throws APIManagementException;
+      public Response getLabels(MessageContext messageContext) throws APIManagementException;
 }

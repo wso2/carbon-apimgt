@@ -43,7 +43,7 @@ RuntimeArtifactsApiService delegate = new RuntimeArtifactsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of runtime Artifacts", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response runtimeArtifactsGet( @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "**Search condition**.  type of gateway ")  @QueryParam("type") String type) throws APIManagementException{
-        return delegate.runtimeArtifactsGet(apiId, gatewayLabel, type, securityContext);
+    public Response runtimeArtifactsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "**Search condition**.  type of gateway ")  @QueryParam("type") String type) throws APIManagementException{
+        return delegate.runtimeArtifactsGet(xWSO2Tenant, apiId, gatewayLabel, type, securityContext);
     }
 }

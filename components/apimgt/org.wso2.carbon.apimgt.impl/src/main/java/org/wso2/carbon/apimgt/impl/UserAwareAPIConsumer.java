@@ -143,7 +143,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         } else {
             identifier = apiTypeWrapper.getApi().getId();
         }
-        checkAccessControlPermission(identifier);
+        //TO-DO Commented to since need to work for monodb should be move to registry persistent impl
+//        checkAccessControlPermission(identifier);
         return apiTypeWrapper;
     }
 

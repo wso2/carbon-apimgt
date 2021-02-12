@@ -67,6 +67,11 @@ module.exports = {
                 '@babel/plugin-syntax-dynamic-import',
                 ['@babel/plugin-transform-spread'],
                 '@babel/plugin-proposal-object-rest-spread',
+                "formatjs",
+                {
+                    "idInterpolationPattern": "[sha512:contenthash:base64:6]",
+                    "ast": true
+                }
             ],
         },
     },

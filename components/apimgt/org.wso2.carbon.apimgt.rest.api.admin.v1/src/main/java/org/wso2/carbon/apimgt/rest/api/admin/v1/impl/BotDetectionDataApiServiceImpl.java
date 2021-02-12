@@ -39,9 +39,9 @@ public class BotDetectionDataApiServiceImpl implements BotDetectionDataApiServic
     /**
      * Get all bot detected data
      *
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return list of all bot detected data
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when retrieving bot detection data
      */
     public Response getBotDetectionData(MessageContext messageContext) throws APIManagementException {
 

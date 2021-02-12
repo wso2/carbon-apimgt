@@ -75,6 +75,8 @@ public final class APIConstants {
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
+    public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
+
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
     public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
@@ -208,6 +210,7 @@ public final class APIConstants {
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
+    public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.yml";
 
     public static final String API_ICON_IMAGE = "icon";
 
@@ -593,6 +596,8 @@ public final class APIConstants {
     public static final String DELEM_COMMA = ",";
     public static final String DELEM_UNDERSCORE = "_";
     public static final String CHAR_ASTERIX = "*";
+    public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
+    public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
 
     public static class TokenStatus {
 
@@ -909,6 +914,8 @@ public final class APIConstants {
 
     public static final String API_ANALYTICS = "Analytics.";
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
+    public static final String API_ANALYTICS_REPORTER_CLASS = API_ANALYTICS + "ReporterClass";
+    public static final String API_ANALYTICS_PROPERTIES = API_ANALYTICS + "Properties";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
     public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
@@ -1030,6 +1037,7 @@ public final class APIConstants {
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";
     public static final String WORKFLOW_CACHE_NAME = "workflowCache";
+    public static final String LC_CACHE_NAME = "lcCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
@@ -1720,6 +1728,7 @@ public final class APIConstants {
     public static final String EVENT_TYPE = "eventType";
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_PAYLOAD = "event";
+    public static final String EVENT_PAYLOAD_DATA = "payloadData";
 
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
@@ -1747,7 +1756,7 @@ public final class APIConstants {
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP"};
-
+    public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1924,7 +1933,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS, GRAPHQL
+        HTTP, WS, GRAPHQL, WEBSUB, SSE
     }
 
     public static final String API_TYPE_SOAP = "SOAP";
@@ -2120,7 +2129,7 @@ public final class APIConstants {
 
     public static class RestApiConstants {
 
-        public static final String REST_API_DEFAULT_VERSION = "v1";
+        public static final String REST_API_DEFAULT_VERSION = "v2";
         public static final String REST_API_OLD_VERSION = "v0.17";
         public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
@@ -2377,7 +2386,9 @@ public final class APIConstants {
         APPLICATION_REGISTRATION,
         POLICY,
         SUBSCRIPTIONS,
-        SCOPE
+        SCOPE,
+        CERTIFICATE,
+        GA_CONFIG
     }
 
     // Supported Event Types
@@ -2398,9 +2409,13 @@ public final class APIConstants {
         SUBSCRIPTIONS_DELETE,
         DEPLOY_API_IN_GATEWAY,
         REMOVE_API_FROM_GATEWAY,
+        REMOVE_APPLICATION_KEYMAPPING,
         SCOPE_CREATE,
         SCOPE_UPDATE,
-        SCOPE_DELETE
+        SCOPE_DELETE,
+        ENDPOINT_CERTIFICATE_ADD,
+        ENDPOINT_CERTIFICATE_REMOVE,
+        GA_CONFIG_UPDATE
     }
 
     public static class GatewayArtifactSynchronizer {
@@ -2420,9 +2435,8 @@ public final class APIConstants {
         public static final String GATEWAY_INSTRUCTION_PUBLISH = "Publish";
         public static final String GATEWAY_INSTRUCTION_REMOVE = "Remove";
         public static final String GATEWAY_INSTRUCTION_ANY = "ANY";
-        public static final String SYNAPSE_ARTIFACTS = "/synapse-artifacts";
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
-        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/gateway-synapse-artifacts";
+        public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
         public static final String DATA_RETRIEVAL_MODE= "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
@@ -2475,4 +2489,53 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_MAX_LENGTH_PROPERTY = "passwordPolicy.max.length";
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
+
+    public class SkipListConstants {
+
+        public static final String SKIP_LIST_CONFIG = "SkipList";
+        public static final String SKIPPED_APIS = "APIS";
+        public static final String SKIPPED_API = "API";
+        public static final String SKIPPED_ENDPOINTS = "Endpoints";
+        public static final String SKIPPED_ENDPOINT = "Endpoint";
+        public static final String SKIPPED_SEQUENCE = "Sequence";
+        public static final String SKIPPED_SEQUENCES = "Sequences";
+        public static final String SKIPPED_LOCAL_ENTRIES = "LocalEntries";
+        public static final String SKIPPED_LOCAL_ENTRY = "LocalEntry";
+    }
+
+    public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
+    public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
+
+    // Constants related to Service Catalog
+    public static final String METADATA_FILE_NAME = "metadata";
+    public static final String METADATA_FILE = "metadata.yaml";
+    public static final String DEFINITION_FILE = "oas.yaml";
+    public static final String KEY_SEPARATOR = "-";
+    public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
+    public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
+    public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
+    public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
+    
+    public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+
+    public static class ServiceCatalogConstants {
+        public static final String SERVICE_UUID = "UUID";
+        public static final String SERVICE_NAME = "SERVICE_NAME";
+        public static final String SERVICE_KEY = "SERVICE_KEY";
+        public static final String MD5 = "MD5";
+        public static final String SERVICE_VERSION = "SERVICE_VERSION";
+        public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
+        public static final String SERVICE_URL = "SERVICE_URL";
+        public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
+        public static final String DEFINITION_URL = "DEFINITION_URL";
+        public static final String DESCRIPTION = "DESCRIPTION";
+        public static final String SECURITY_TYPE = "SECURITY_TYPE";
+        public static final String MUTUAL_SSL_ENABLED = "MUTUAL_SSL_ENABLED";
+        public static final String CREATED_TIME = "CREATED_TIME";
+        public static final String LAST_UPDATED_TIME = "LAST_UPDATED_TIME";
+        public static final String CREATED_BY = "CREATED_BY";
+        public static final String UPDATED_BY = "UPDATED_BY";
+        public static final String METADATA = "METADATA";
+        public static final String SERVICE_DEFINITION = "SERVICE_DEFINITION";
+    }
 }

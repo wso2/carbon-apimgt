@@ -814,7 +814,7 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
-            ExportUtils.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
+            CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
@@ -875,7 +875,7 @@ public class APIControllerUtil {
         //generate meta-data yaml file
         String metadataFilePath = pathToArchive + ImportExportConstants.ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
-            ExportUtils.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
+            CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
                     ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, updatedCertsArray);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
