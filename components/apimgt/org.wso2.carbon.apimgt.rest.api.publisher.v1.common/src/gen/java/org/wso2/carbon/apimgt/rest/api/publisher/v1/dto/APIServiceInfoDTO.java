@@ -20,24 +20,24 @@ import javax.validation.Valid;
 
 public class APIServiceInfoDTO   {
   
-    private String id = null;
+    private String key = null;
     private Boolean outdated = null;
 
   /**
    **/
-  public APIServiceInfoDTO id(String id) {
-    this.id = id;
+  public APIServiceInfoDTO key(String key) {
+    this.key = key;
     return this;
   }
 
   
-  @ApiModelProperty(example = "36d4988b-f4ea-46d1-bfd8-38bc1fc5a118", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
+  @ApiModelProperty(example = "PetStore-1.0.0", value = "")
+  @JsonProperty("key")
+  public String getKey() {
+    return key;
   }
-  public void setId(String id) {
-    this.id = id;
+  public void setKey(String key) {
+    this.key = key;
   }
 
   /**
@@ -67,13 +67,13 @@ public class APIServiceInfoDTO   {
       return false;
     }
     APIServiceInfoDTO apIServiceInfo = (APIServiceInfoDTO) o;
-    return Objects.equals(id, apIServiceInfo.id) &&
+    return Objects.equals(key, apIServiceInfo.key) &&
         Objects.equals(outdated, apIServiceInfo.outdated);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, outdated);
+    return Objects.hash(key, outdated);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class APIServiceInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIServiceInfoDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    outdated: ").append(toIndentedString(outdated)).append("\n");
     sb.append("}");
     return sb.toString();

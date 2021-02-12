@@ -1492,6 +1492,7 @@ public class OAS3Parser extends APIDefinition {
 
     @Override
     public String copyVendorExtensions(String existingOASContent, String updatedOASContent) {
+
         OpenAPI existingOpenAPI = getOpenAPI(existingOASContent);
         OpenAPI updatedOpenAPI = getOpenAPI(updatedOASContent);
         Paths updatedPaths = updatedOpenAPI.getPaths();
@@ -1524,7 +1525,7 @@ public class OAS3Parser extends APIDefinition {
                             List<SecurityRequirement> securityRequirements = existingEntry.getValue().getSecurity();
                             List<SecurityRequirement> updatedRequirements = new ArrayList<>();
                             if (securityRequirements != null) {
-                                for (SecurityRequirement requirement: securityRequirements) {
+                                for (SecurityRequirement requirement : securityRequirements) {
                                     List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
                                     if (scopes != null) {
                                         updatedRequirements.add(requirement);

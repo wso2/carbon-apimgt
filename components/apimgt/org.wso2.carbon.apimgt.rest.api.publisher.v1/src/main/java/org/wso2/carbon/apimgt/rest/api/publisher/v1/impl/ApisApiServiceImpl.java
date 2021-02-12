@@ -4179,6 +4179,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
             API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+            String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            api.setEndpointConfig(endpointConfig);
+            JSONObject serviceInfo = new JSONObject();
+            serviceInfo.put("key", service.getKey());
+            serviceInfo.put("md5", service.getMd5());
+            api.setServiceInfo(serviceInfo);
+            API updatedApi = apiProvider.updateAPI(api, originalAPI);
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
                 Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null,
@@ -4193,10 +4201,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
                         "API using the service type " + service.getDefinitionType(), log);
             }
-            String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
-            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            api.setEndpointConfig(endpointConfig);
-            API updatedApi = apiProvider.updateAPI(api, originalAPI);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
@@ -4209,7 +4213,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
-                                                Attachment fileDetail, ServiceEntry service) {
+                                           Attachment fileDetail, ServiceEntry service) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {

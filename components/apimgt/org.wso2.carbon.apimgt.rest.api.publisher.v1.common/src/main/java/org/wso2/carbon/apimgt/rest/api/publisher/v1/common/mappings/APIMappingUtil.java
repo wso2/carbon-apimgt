@@ -886,10 +886,10 @@ public class APIMappingUtil {
         } else {
             dto.setResponseCachingEnabled(Boolean.FALSE);
         }
-        String serviceId = model.getServiceInfo("id");
-        if (StringUtils.isNotEmpty(serviceId)) {
+        String serviceKey = model.getServiceInfo("key");
+        if (StringUtils.isNotEmpty(serviceKey)) {
             APIServiceInfoDTO apiServiceInfoDTO = new APIServiceInfoDTO();
-            apiServiceInfoDTO.setId(serviceId);
+            apiServiceInfoDTO.setKey(serviceKey);
             apiServiceInfoDTO.setOutdated(Boolean.parseBoolean(model.getServiceInfo("outdated")));
             dto.setServiceInfo(apiServiceInfoDTO);
         }

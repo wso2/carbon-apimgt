@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -3178,8 +3177,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
         if (existingAPI == null) {
-            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
-                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, existingApiId));
+            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
         }
         if (newVersion.equals(existingAPI.getId().getVersion())) {
             throw new APIMgtResourceAlreadyExistsException(

@@ -1367,6 +1367,7 @@ public class OAS2Parser extends APIDefinition {
     @Override
     public String copyVendorExtensions(String existingSwaggerContent, String updatedSwaggerContent)
             throws APIManagementException {
+
         Swagger existingSwagger = getSwagger(existingSwaggerContent);
         Swagger updatedSwagger = getSwagger(updatedSwaggerContent);
         Map<String, Path> existingPaths = existingSwagger.getPaths();
@@ -1406,7 +1407,7 @@ public class OAS2Parser extends APIDefinition {
                                 securityRequirementsAreEmpty = true;
                             }
                             if (securityRequirements != null) {
-                                for (Map<String, List<String>> requirement: securityRequirements) {
+                                for (Map<String, List<String>> requirement : securityRequirements) {
                                     List<String> scopes = requirement.get(SWAGGER_SECURITY_SCHEMA_KEY);
                                     if (scopes != null) {
                                         updatedRequirements.add(requirement);
