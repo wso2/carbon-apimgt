@@ -31,12 +31,8 @@ import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.clustering.ClusteringAgent;
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.OperationContext;
-import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.InOutAxisOperation;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -44,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
@@ -53,8 +48,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -62,7 +58,6 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -73,8 +68,6 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
-import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -91,7 +84,15 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -533,7 +534,7 @@ public class GatewayUtils {
 
     public static String getQualifiedDefaultApiName(String apiName) {
 
-        return  apiName;
+        return apiName;
     }
 
     /**
@@ -1064,7 +1065,8 @@ public class GatewayUtils {
 
     public static List<String> retrieveDeployedSequences(String apiName, String version, String tenantDomain)
             throws AxisFault {
-        try{
+
+        try {
             List<String> deployedSequences = new ArrayList<>();
             String inSequenceExtensionName =
                     APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
@@ -1087,13 +1089,14 @@ public class GatewayUtils {
                 deployedSequences.add(sequence.toString());
             }
             return deployedSequences;
-        }finally {
+        } finally {
             MessageContext.destroyCurrentMessageContext();
         }
     }
 
     public static List<String> retrieveDeployedLocalEntries(String apiName, String version, String tenantDomain)
             throws AxisFault {
+
         try {
             SubscriptionDataStore tenantSubscriptionStore =
                     SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
@@ -1121,8 +1124,9 @@ public class GatewayUtils {
 
     public static List<String> retrieveDeployedEndpoints(String apiName, String version, String tenantDomain)
             throws AxisFault {
+
         List<String> deployedEndpoints = new ArrayList<>();
-        try{
+        try {
             MessageContext.setCurrentMessageContext(createAxis2MessageContext());
             EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
             String productionEndpointKey = apiName.concat("--v").concat(version).concat("_APIproductionEndpoint");
@@ -1135,7 +1139,7 @@ public class GatewayUtils {
                 String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
                 deployedEndpoints.add(entry);
             }
-        }finally {
+        } finally {
             MessageContext.destroyCurrentMessageContext();
         }
 
@@ -1143,7 +1147,8 @@ public class GatewayUtils {
     }
 
     public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain) throws AxisFault {
-        try{
+
+        try {
             MessageContext.setCurrentMessageContext(createAxis2MessageContext());
             RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
             String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
@@ -1152,17 +1157,19 @@ public class GatewayUtils {
                 return api.toString();
             }
             return null;
-        }finally {
+        } finally {
             MessageContext.destroyCurrentMessageContext();
         }
     }
 
     public static org.apache.axis2.context.MessageContext createAxis2MessageContext() throws AxisFault {
+
         AxisService axisService = new AxisService();
-        axisService.addParameter("adminService",true);
+        axisService.addParameter("adminService", true);
         org.apache.axis2.context.MessageContext axis2MsgCtx = new org.apache.axis2.context.MessageContext();
         axis2MsgCtx.setMessageID(UIDGenerator.generateURNString());
-        axis2MsgCtx.setConfigurationContext(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext());
+        axis2MsgCtx.setConfigurationContext(ServiceReferenceHolder.getInstance()
+                .getConfigurationContextService().getServerConfigContext());
         axis2MsgCtx.setProperty(org.apache.axis2.context.MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
         axis2MsgCtx.setServerSide(true);
         axis2MsgCtx.setAxisService(axisService);

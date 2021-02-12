@@ -49,7 +49,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * This class contains the methods used to retrieve artifacts from a storage and deploy and undeploy the API in gateway
@@ -76,6 +81,7 @@ public class InMemoryAPIDeployer {
      * @return True if API artifact retrieved from the storage and successfully deployed without any error. else false
      */
     public boolean deployAPI(String apiId, Set<String> gatewayLabels) throws ArtifactSynchronizerException {
+
         String labelString = String.join("|", gatewayLabels);
         String encodedString = Base64.encodeBase64URLSafeString(labelString.getBytes());
         if (artifactRetriever != null) {
@@ -121,7 +127,7 @@ public class InMemoryAPIDeployer {
      * false
      */
     public boolean deployAllAPIsAtGatewayStartup(Set<String> assignedGatewayLabels, String tenantDomain) throws
-            ArtifactSynchronizerException {
+                                                                                                         ArtifactSynchronizerException {
 
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             if (artifactRetriever != null) {
@@ -144,7 +150,7 @@ public class InMemoryAPIDeployer {
                                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                             }
                         } catch (AxisFault axisFault) {
-                            log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ",axisFault);
+                            log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                         }
                     }
 
@@ -156,7 +162,7 @@ public class InMemoryAPIDeployer {
                     String msg = "Error  deploying APIs to the Gateway ";
                     log.error(msg, e);
                     throw new ArtifactSynchronizerException(msg, e);
-                }finally {
+                } finally {
                     MessageContext.destroyCurrentMessageContext();
                     PrivilegedCarbonContext.endTenantFlow();
                 }
@@ -293,7 +299,7 @@ public class InMemoryAPIDeployer {
             }
         } catch (AxisFault axisFault) {
             throw new ArtifactSynchronizerException("Error while unDeploying api ", axisFault);
-        }finally {
+        } finally {
             MessageContext.destroyCurrentMessageContext();
         }
     }
@@ -369,6 +375,7 @@ public class InMemoryAPIDeployer {
     }
 
     public void reDeployAPI(String apiName, String version, String tenantDomain) throws ArtifactSynchronizerException {
+
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
@@ -382,15 +389,13 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getUuid()
                                 , gatewayLabels, apiName, version, retrievedAPI.getApiProvider(),
                                 retrievedAPI.getApiType(), retrievedAPI.getContext());
-                if (APIConstants.API_PRODUCT.equals(retrievedAPI.getApiType())) {
-                    // todo: (tharindua) add associated Apis.
-                }
                 deployAPI(deployAPIInGatewayEvent);
             }
         }
     }
 
     public void unDeployAPI(String apiName, String version, String tenantDomain) throws ArtifactSynchronizerException {
+
         SubscriptionDataStore tenantSubscriptionStore =
                 SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
@@ -404,9 +409,6 @@ public class InMemoryAPIDeployer {
                                 retrievedAPI.getUuid()
                                 , gatewayLabels, apiName, version, retrievedAPI.getApiProvider(),
                                 retrievedAPI.getApiType(), retrievedAPI.getContext());
-                if (APIConstants.API_PRODUCT.equals(retrievedAPI.getApiType())) {
-                    // todo: (tharindua) add associated Apis.
-                }
                 unDeployAPI(deployAPIInGatewayEvent);
             }
         }

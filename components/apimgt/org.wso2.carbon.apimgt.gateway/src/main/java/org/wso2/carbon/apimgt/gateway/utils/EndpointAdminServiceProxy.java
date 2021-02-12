@@ -144,24 +144,26 @@ public class EndpointAdminServiceProxy {
 
     public List<String> getEndpoints(String endpointName)
             throws EndpointAdminException {
-            String endPoints= endpointAdmin.getEndpointConfiguration(endpointName);
-            if (endPoints != null) {
-                return Arrays.asList(endPoints);
-            }
-            return null;
+
+        String endPoints = endpointAdmin.getEndpointConfiguration(endpointName);
+        if (endPoints != null) {
+            return Arrays.asList(endPoints);
+        }
+        return null;
     }
 
     public String getEndpoint(String endpointName) throws EndpointAdminException {
+
         boolean tenantFlowStarted = false;
         try {
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 tenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             return endpointAdmin.getEndpointConfiguration(endpointName);
         } finally {
-            if (tenantFlowStarted){
+            if (tenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }

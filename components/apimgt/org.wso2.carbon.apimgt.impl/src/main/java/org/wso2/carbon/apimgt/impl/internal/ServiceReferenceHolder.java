@@ -244,7 +244,9 @@ public class ServiceReferenceHolder {
 
         return gatewayArtifactGeneratorMap.get(type);
     }
-    public Set<String> getGatewayArtifactGeneratorTypes(){
+
+    public Set<String> getGatewayArtifactGeneratorTypes() {
+
         return gatewayArtifactGeneratorMap.keySet();
     }
 }
