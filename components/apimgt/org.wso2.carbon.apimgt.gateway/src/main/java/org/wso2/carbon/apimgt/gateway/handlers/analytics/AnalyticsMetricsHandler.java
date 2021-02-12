@@ -66,6 +66,10 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
+        if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
+            return true;
+        }
         dataCollector.collectData(messageContext);
         return true;
     }
