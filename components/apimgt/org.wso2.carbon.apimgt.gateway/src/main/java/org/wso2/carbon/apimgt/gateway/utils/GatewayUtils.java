@@ -648,7 +648,7 @@ public class GatewayUtils {
                     .setApplicationId(
                             String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
             authContext.setApplicationUUID(
-                    String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_UUID)));
+                    String.valueOf(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID)));
             authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
             authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
             authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
