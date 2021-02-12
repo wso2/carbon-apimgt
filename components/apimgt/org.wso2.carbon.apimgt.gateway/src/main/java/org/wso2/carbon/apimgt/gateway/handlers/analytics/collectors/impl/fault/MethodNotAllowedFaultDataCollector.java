@@ -20,31 +20,29 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.usage.publisher.impl.FaultyRequestDataPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
 
 /**
- * Auth faulty request data collector
+ * Method not allowed faulty request data collector
  */
-public class AuthFaultDataCollector extends AbstractFaultDataCollector {
-    private static final Log log = LogFactory.getLog(AuthFaultDataCollector.class);
+public class MethodNotAllowedFaultDataCollector extends AbstractFaultDataCollector {
+    private static final Log log = LogFactory.getLog(TargetFaultDataCollector.class);
 
-    public AuthFaultDataCollector() {
+    public MethodNotAllowedFaultDataCollector() {
         this(new FaultyRequestDataPublisher());
     }
 
-    public AuthFaultDataCollector(RequestDataPublisher processor) {
-        super(FAULT_EVENT_TYPE.AUTH, processor);
+    public MethodNotAllowedFaultDataCollector(RequestDataPublisher processor) {
+        super(FAULT_EVENT_TYPE.METHOD_NOT_ALLOWED, processor);
     }
 
     @Override
     public void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent) {
-        log.debug("handling auth failure analytics events");
-
-        this.setUnknownApp(faultyEvent);
-
+        log.debug("handling method not allowed failure analytics events");
+        setUnknownApp(faultyEvent);
         this.processRequest(faultyEvent);
     }
 }

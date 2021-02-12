@@ -565,6 +565,7 @@ public class GatewayUtils {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
@@ -646,6 +647,8 @@ public class GatewayUtils {
             authContext
                     .setApplicationId(
                             String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+            authContext.setApplicationUUID(
+                    String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_UUID)));
             authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
             authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
             authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
