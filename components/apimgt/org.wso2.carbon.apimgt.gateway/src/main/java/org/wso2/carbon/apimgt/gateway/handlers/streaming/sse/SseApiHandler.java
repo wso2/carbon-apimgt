@@ -45,6 +45,8 @@ public class SseApiHandler extends APIAuthenticationHandler {
         axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         boolean isAuthenticated = super.handleRequest(synCtx);
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
+        synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
+                           true);
         prepareThrottleData(synCtx);
         publishSubscriptionEvent(synCtx);
         return isAuthenticated;
@@ -58,7 +60,7 @@ public class SseApiHandler extends APIAuthenticationHandler {
     }
 
     private void publishSubscriptionEvent(MessageContext synCtx) {
-        dataCollector.collectData(synCtx);
+     //   dataCollector.collectData(synCtx);
     }
 
 }
