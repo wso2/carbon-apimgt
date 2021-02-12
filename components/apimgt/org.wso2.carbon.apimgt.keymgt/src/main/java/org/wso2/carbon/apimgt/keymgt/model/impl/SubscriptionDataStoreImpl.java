@@ -579,10 +579,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         try {
             API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
-            apiMap.put(api.getCacheKey(), newAPI);
-            String key = newAPI.getApiName().concat(":").concat(newAPI.getApiVersion());
-            apiNameVersionMap.put(key,newAPI);
-            apiByUUIDMap.put(newAPI.getUuid(), newAPI);
+            if (newAPI != null) {
+                apiMap.put(api.getCacheKey(), newAPI);
+                String key = newAPI.getApiName().concat(":").concat(newAPI.getApiVersion());
+                apiNameVersionMap.put(key, newAPI);
+                apiByUUIDMap.put(newAPI.getUuid(), newAPI);
+            }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
         }

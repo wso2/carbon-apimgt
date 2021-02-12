@@ -264,7 +264,7 @@ public class InMemoryAPIDeployer {
                 gatewayAPIDTO.setProvider(gatewayEvent.getProvider());
                 gatewayAPIDTO.setTenantDomain(gatewayEvent.getTenantDomain());
                 gatewayAPIDTO.setOverride(true);
-                gatewayAPIDTO.setApiId(gatewayEvent.getApiId());
+                gatewayAPIDTO.setApiId(gatewayEvent.getUuid());
                 setClientCertificatesToRemoveIntoGatewayDTO(gatewayAPIDTO);
                 if (APIConstants.API_PRODUCT.equals(gatewayEvent.getApiType())) {
                     gatewayAPIDTO.setOverride(false);
@@ -284,7 +284,7 @@ public class InMemoryAPIDeployer {
                     if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
                         gatewayAPIDTO.setLocalEntriesToBeRemove(
                                 org.wso2.carbon.apimgt.impl.utils.GatewayUtils
-                                        .addStringToList(gatewayEvent.getApiId().concat(
+                                        .addStringToList(gatewayEvent.getUuid().concat(
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     }
                     GatewayUtils.setEndpointsToBeRemoved(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion(),
@@ -293,9 +293,9 @@ public class InMemoryAPIDeployer {
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
                         GatewayUtils
-                                .addStringToList(gatewayEvent.getApiId(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
+                                .addStringToList(gatewayEvent.getUuid(), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
-                DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getApiId());
+                DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
             }
         } catch (AxisFault axisFault) {
             throw new ArtifactSynchronizerException("Error while unDeploying api ", axisFault);
@@ -371,7 +371,7 @@ public class InMemoryAPIDeployer {
             throws ArtifactSynchronizerException {
 
         unDeployAPI(gatewayEvent);
-        deployAPI(gatewayEvent.getApiId(), gatewayEvent.getGatewayLabels());
+        deployAPI(gatewayEvent.getUuid(), gatewayEvent.getGatewayLabels());
     }
 
     public void reDeployAPI(String apiName, String version, String tenantDomain) throws ArtifactSynchronizerException {
@@ -386,8 +386,8 @@ public class InMemoryAPIDeployer {
                 DeployAPIInGatewayEvent deployAPIInGatewayEvent =
                         new DeployAPIInGatewayEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                                retrievedAPI.getUuid()
-                                , gatewayLabels, apiName, version, retrievedAPI.getApiProvider(),
+                                retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
+                                retrievedAPI.getApiProvider(),
                                 retrievedAPI.getApiType(), retrievedAPI.getContext());
                 deployAPI(deployAPIInGatewayEvent);
             }
@@ -406,9 +406,8 @@ public class InMemoryAPIDeployer {
                 DeployAPIInGatewayEvent deployAPIInGatewayEvent =
                         new DeployAPIInGatewayEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                                 APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(), tenantDomain,
-                                retrievedAPI.getUuid()
-                                , gatewayLabels, apiName, version, retrievedAPI.getApiProvider(),
-                                retrievedAPI.getApiType(), retrievedAPI.getContext());
+                                retrievedAPI.getApiId(), retrievedAPI.getUuid(), gatewayLabels, apiName, version,
+                                retrievedAPI.getApiProvider(), retrievedAPI.getApiType(), retrievedAPI.getContext());
                 unDeployAPI(deployAPIInGatewayEvent);
             }
         }
