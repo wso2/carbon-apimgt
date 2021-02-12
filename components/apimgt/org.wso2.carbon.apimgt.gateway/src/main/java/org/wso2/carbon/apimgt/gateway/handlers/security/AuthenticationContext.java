@@ -48,6 +48,7 @@ public class AuthenticationContext {
     private String apiName;
     private String apiPublisher;
     private String apiVersion;
+    private String issuer;
 
     public List<String> getThrottlingDataList() {
         return throttlingDataList;
@@ -234,6 +235,14 @@ public class AuthenticationContext {
 
     public void setApiVersion(String apiVersion) {
         this.apiVersion = apiVersion;
+    }
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
     }
     
 }

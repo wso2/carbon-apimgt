@@ -84,11 +84,10 @@ public class LogsHandler extends AbstractSynapseHandler {
         if (isEnabled()) {
             try {
                 apiTo = LogUtils.getTo(messageContext);
-                return true;
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -110,6 +109,10 @@ public class LogsHandler extends AbstractSynapseHandler {
                 messageContext.setProperty(SRC_ID_HEADER, SrcIdHeader);
                 messageContext.setProperty(APP_ID_HEADER, applIdHeader);
                 messageContext.setProperty(UUID_HEADER, uuIdHeader);
+
+                if (MDC.get(APIConstants.CORRELATION_ID) != null) {
+                    correlationIdHeader = (String) MDC.get(APIConstants.CORRELATION_ID);
+                }
                 messageContext.setProperty(CORRELATION_ID_HEADER, correlationIdHeader);
                 apiName = LogUtils.getAPIName(messageContext);
                 apiCTX = LogUtils.getAPICtx(messageContext);
@@ -119,11 +122,10 @@ public class LogsHandler extends AbstractSynapseHandler {
                 apiRestReqFullPath = LogUtils.getRestReqFullPath(messageContext);
                 apiMsgUUID = (String) messageContext.getMessageID();
                 apiRsrcCacheKey = LogUtils.getResourceCacheKey(messageContext);
-                return true;
             } catch (Exception e) {
                 log.error(REQUEST_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -133,7 +135,7 @@ public class LogsHandler extends AbstractSynapseHandler {
             // default API would have the property LoggedResponse as true.
             String defaultAPI = (String) messageContext.getProperty("DefaultAPI");
             if ("true".equals(defaultAPI)) {
-                return true;
+                log.debug("Default API is invoked");
             } else {
                 try {
                     long responseTime = getResponseTime(messageContext);
@@ -154,13 +156,11 @@ public class LogsHandler extends AbstractSynapseHandler {
                             + "|" + applIdHeader + "|" + uuIdHeader + "|" + requestSize
                             + "|" + responseSize + "|" + apiResponseSC + "|"
                             + applicationName + "|" + apiConsumerKey + "|" + responseTime);
-                    MDC.remove(APIConstants.CORRELATION_ID);
-                    return true;
                 } catch (Exception e) {
                     log.error(RESPONSE_EVENT_PUBLICATION_ERROR + e.getMessage(), e);
+                    return false;
                 }
             }
-            return false;
         }
         return true;
     }

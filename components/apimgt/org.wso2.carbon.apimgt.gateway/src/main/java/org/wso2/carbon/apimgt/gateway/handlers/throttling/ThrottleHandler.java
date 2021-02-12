@@ -501,6 +501,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * false to notify error with handler
      */
     public boolean handleRequest(MessageContext messageContext) {
+        if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
+            log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
+                    "has not been initialised");
+            return true;
+        }
 
         Timer timer3 = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));

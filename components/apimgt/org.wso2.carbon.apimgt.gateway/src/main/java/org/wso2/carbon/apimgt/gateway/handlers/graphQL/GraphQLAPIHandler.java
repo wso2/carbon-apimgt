@@ -21,7 +21,6 @@ import graphql.language.Definition;
 import graphql.language.Document;
 import graphql.language.Field;
 import graphql.language.OperationDefinition;
-import graphql.language.OperationDefinition.Operation;
 import graphql.language.Selection;
 import graphql.parser.InvalidSyntaxException;
 import graphql.parser.Parser;
@@ -59,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.apache.axis2.Constants.Configuration.*;
@@ -66,6 +66,7 @@ import static org.apache.axis2.Constants.Configuration.*;
 public class GraphQLAPIHandler extends AbstractHandler {
 
     private static final String QUERY_PATH_STRING = "/?query=";
+    private static final String QUERY_PAYLOAD_STRING = "query";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String HTTP_VERB = "HTTP_VERB";
@@ -109,8 +110,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 } else {
                     RelayUtils.buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
-                    if (body != null && body.getFirstElement() != null) {
-                        payload = body.getFirstElement().getText();
+                    if (body != null && body.getChildrenWithName(QName.valueOf(QUERY_PAYLOAD_STRING)) != null){
+                        payload = body.getFirstChildWithName(QName.valueOf(QUERY_PAYLOAD_STRING)).getText();
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("Invalid query parameter " + queryParams[0]);

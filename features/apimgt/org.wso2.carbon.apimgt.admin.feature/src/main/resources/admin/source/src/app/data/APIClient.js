@@ -114,7 +114,9 @@ class APIClient {
      */
     _fixSpec(spec) {
         const updatedSpec = spec;
-        updatedSpec.host = this.environment.host;
+        const url = new URL(spec.servers[0].url);
+        url.host = this.environment.host;
+        updatedSpec.servers[0].url = String(url);
         return updatedSpec;
     }
 

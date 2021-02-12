@@ -18,33 +18,21 @@
 
 package org.wso2.carbon.apimgt.impl.notifier;
 
-import com.google.gson.Gson;
-import org.apache.commons.codec.binary.Base64;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
  * The default Application Registration notification service implementation in which Application Registration creation
  * events are published to gateway.
  */
-public class ApplicationRegistrationNotifier implements Notifier {
+public class ApplicationRegistrationNotifier extends AbstractNotifier {
+
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        try {
-            ApplicationRegistrationEvent appRegEvent = (ApplicationRegistrationEvent) event;
-            byte[] bytesEncoded = Base64.encodeBase64(new Gson().toJson(appRegEvent).getBytes());
-            Object[] objects = new Object[]{appRegEvent.getType(), appRegEvent.getTimeStamp(), new String(bytesEncoded)};
-            org.wso2.carbon.databridge.commons.Event payload = new org.wso2.carbon.databridge.commons.Event(
-                    APIConstants.NOTIFICATION_STREAM_ID, System.currentTimeMillis(),
-                    null, null, objects);
-            APIUtil.publishEventToEventHub(null, payload);
-            return true;
-        } catch (Exception e) {
-            throw new NotifierException(e);
-        }
+
+        publishEventToEventHub(event);
+        return true;
     }
 
     @Override

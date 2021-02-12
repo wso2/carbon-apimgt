@@ -165,9 +165,12 @@ function AddEdit(props) {
                         id: 'Throttling.Advanced.AddEdit.empty.error',
                         defaultMessage: ' contains white spaces.',
                     })}`;
+                } else if (/[^A-Za-z0-9]/.test(fieldValue)) {
+                    error = `Policy name ${intl.formatMessage({
+                        id: 'Throttling.Advanced.AddEdit.special.characters.error',
+                        defaultMessage: ' contains invalid characters.',
+                    })}`;
                 }
-                break;
-            case 'description':
                 break;
             case 'requestCount':
             case 'dataAmount':
@@ -248,9 +251,15 @@ function AddEdit(props) {
         promiseAPICall.then((msg) => {
             Alert.success(`${policyName} ${msg}`);
             history.push('/throttling/advanced/');
-        }).catch((e) => {
-            Alert.error(e);
-        }).finaly(() => {
+        }).catch((error) => {
+            const { response, message } = error;
+            if (response && response.body) {
+                Alert.error(response.body.description);
+            } else if (message) {
+                Alert.error(message);
+            }
+            return null;
+        }).finally(() => {
             setSaving(false);
         });
         return true;

@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.API;
+import org.apache.synapse.api.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
-import org.apache.synapse.rest.Resource;
-import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.apache.synapse.api.Resource;
+import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
@@ -59,6 +60,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.cache.Cache;
@@ -344,7 +346,11 @@ public class APIKeyValidator {
         ArrayList<String> resourceArray = null;
 
         if (electedResource != null) {
-            resourceArray = new ArrayList<>(Arrays.asList(electedResource.split(",")));
+            if (APIConstants.GRAPHQL_API.equalsIgnoreCase((String)synCtx.getProperty(APIConstants.API_TYPE))) {
+                resourceArray = new ArrayList<>(Arrays.asList(electedResource.split(",")));
+            } else {
+                resourceArray = new ArrayList<>(Arrays.asList(electedResource));
+            }
         }
 
         String requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
@@ -767,5 +773,9 @@ public class APIKeyValidator {
     public boolean validateScopes(TokenValidationContext tokenValidationContext, String tenantDomain)
             throws APISecurityException {
         return dataStore.validateScopes(tokenValidationContext, tenantDomain);
+    }
+
+    public Map<String, Scope> retrieveScopes(String tenantDomain) {
+        return dataStore.retrieveScopes(tenantDomain);
     }
 }

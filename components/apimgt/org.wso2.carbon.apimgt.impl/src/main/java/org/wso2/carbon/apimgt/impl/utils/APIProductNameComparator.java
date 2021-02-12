@@ -29,17 +29,17 @@ import java.util.Comparator;
 public class APIProductNameComparator implements Comparator<APIProduct>, Serializable {
 
     public int compare(APIProduct product1, APIProduct product2) {
-        if (product1.getId().getProviderName().equalsIgnoreCase(product2.getId().getProviderName())) {
-            if (product1.getId().getName().equals(product2.getId().getName())) {
-                //only compare version
-                return product1.getId().getVersion().compareToIgnoreCase(product2.getId().getVersion());
+        if (product1.getId().getName().equalsIgnoreCase(product2.getId().getName())) {
+            if (product1.getId().getVersion().equals(product2.getId().getVersion())) {
+                //only compare APIProduct provider name
+                return product1.getId().getProviderName().compareToIgnoreCase(product2.getId().getProviderName());
             } else {
-                //only compare APIProduct name
-                return product1.getId().getName().compareToIgnoreCase(product2.getId().getName());
+                //only compare APIProduct version
+                return product1.getId().getVersion().compareToIgnoreCase(product2.getId().getVersion());
             }
         } else {
-            //only compare provider name
-            return product1.getId().getProviderName().compareToIgnoreCase(product2.getId().getProviderName());
+            //only compare APIProduct name
+            return product1.getId().getName().compareToIgnoreCase(product2.getId().getName());
         }
     }
 }

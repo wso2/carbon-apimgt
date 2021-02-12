@@ -181,15 +181,19 @@ const suggestions = {
     apiOnly: [
         {
             label: 'API Gateways',
-            route: 'environments',
+            route: 'deployments',
         },
         {
             label: 'Microgateway Labels',
-            route: 'environments',
+            route: 'deployments',
         },
         {
             label: 'Environments',
-            route: 'environments',
+            route: 'deployments',
+        },
+        {
+            label: 'Deployments',
+            route: 'deployments',
         },
         {
             label: 'Lifecycle',
@@ -489,15 +493,19 @@ const suggestions = {
         },
         {
             label: 'Environments',
-            route: 'environments',
+            route: 'deployments',
+        },
+        {
+            label: 'Deployments',
+            route: 'deployments',
         },
         {
             label: 'API Gateways',
-            route: 'environments',
+            route: 'deployments',
         },
         {
             label: 'Microgateway Labels',
-            route: 'environments',
+            route: 'deployments',
         },
         {
             label: 'Lifecycle',

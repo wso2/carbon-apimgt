@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -116,7 +117,7 @@ public class SwaggerData {
     private String transportType;
     private String security;
     private String apiLevelPolicy;
-    private Set<Resource> resources = new HashSet<>();
+    private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
 
     public SwaggerData(API api) {

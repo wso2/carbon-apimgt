@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
@@ -13,15 +15,18 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class AlertsInfoResponseDTO   {
   
-    private List<AlertDTO> alerts = new ArrayList<>();
-    private List<String> emailList = new ArrayList<>();
-    private List<AlertConfigDTO> failedConfigurations = new ArrayList<>();
+    private List<AlertDTO> alerts = new ArrayList<AlertDTO>();
+    private List<String> emailList = new ArrayList<String>();
+    private List<AlertConfigDTO> failedConfigurations = new ArrayList<AlertConfigDTO>();
 
   /**
    **/
@@ -32,6 +37,7 @@ public class AlertsInfoResponseDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("alerts")
   public List<AlertDTO> getAlerts() {
     return alerts;
@@ -48,7 +54,7 @@ public class AlertsInfoResponseDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"abc@gmail.com\"]", value = "")
   @JsonProperty("emailList")
   public List<String> getEmailList() {
     return emailList;
@@ -66,6 +72,7 @@ public class AlertsInfoResponseDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("failedConfigurations")
   public List<AlertConfigDTO> getFailedConfigurations() {
     return failedConfigurations;

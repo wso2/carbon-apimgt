@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -157,13 +158,11 @@ public class APIExportUtil {
             exportAPIMetaInformation(archivePath, apiToReturn, registry, exportFormat, provider);
             
             //export mTLS authentication related certificates
-            if(provider.isClientCertificateBasedAuthenticationConfigured()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Exporting client certificates.");
-                }
-                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
-                APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
+            ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
+            APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve API Documentation for API: " + apiIDToReturn.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiIDToReturn.getVersion();
@@ -492,6 +491,9 @@ public class APIExportUtil {
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         //Remove unnecessary data from exported Api
         cleanApiDataToExport(apiToReturn);
+        // Get only the subscription tier names of the API, rather than retrieving the whole object array
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
+        Set<String> availableSubscriptionTierNames = APIAndAPIProductCommonUtil.getAvailableTierNames(apiTypeWrapper);
 
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -525,7 +527,8 @@ public class APIExportUtil {
                     apiToReturn.setUriTemplates(new LinkedHashSet<>());
                 }
                 APIIdentifier apiIdentifier = apiToReturn.getId();
-                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                String tenantDomain = MultitenantUtils.getTenantDomain(apiIdentifier.getProviderName());
+                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
                 APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
                 String formattedSwaggerJson = parser.getOASDefinitionForPublisher(apiToReturn, apiSwagger);
 
@@ -547,6 +550,12 @@ public class APIExportUtil {
             }
 
             String apiInJson = gson.toJson(apiToReturn);
+            JSONParser jsonParser = new JSONParser();
+            org.json.simple.JSONObject apiJsonObject = (org.json.simple.JSONObject) jsonParser.parse(apiInJson);
+            apiJsonObject.remove(APIConstants.SUBSCRIPTION_TIERS);
+            apiJsonObject.put(APIConstants.SUBSCRIPTION_TIERS, availableSubscriptionTierNames);
+            apiInJson = gson.toJson(apiJsonObject);
+
             switch (exportFormat) {
                 case JSON:
                     CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
@@ -565,6 +574,9 @@ public class APIExportUtil {
             String errorMessage = "Error while retrieving saving as YAML for API: " + apiToReturn.getId().getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiToReturn.getId().getVersion();
             throw new APIImportExportException(errorMessage, e);
+        } catch (ParseException e) {
+            String msg = "ParseException thrown when parsing API config";
+            throw new APIManagementException(msg, e);
         }
     }
 

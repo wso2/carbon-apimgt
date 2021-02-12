@@ -532,7 +532,7 @@ export default function RuntimeConfiguration() {
                     <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
                         <Grid item>
                             <Button
-                                disabled={isUpdating
+                                disabled={isUpdating || api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
                                     || isRestricted(['apim:api_create'], api))}
                                 type='submit'

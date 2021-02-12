@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Joi from '@hapi/joi';
@@ -45,10 +45,16 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
+    switch (field) {
+        case 'name':
+        case 'description':
+        case 'hosts':
+            return { ...state, [field]: value };
+        case 'editDetails':
+            return value;
+        default:
+            return state;
+    }
 }
 
 /**
@@ -62,11 +68,11 @@ function AddEditMGLabel(props) {
     } = props;
     const classes = useStyles();
 
-    const [id, SetId] = useState();
-    const initialState = {
+    const [initialState, setInitialState] = useState({
         description: '',
         hosts: [],
-    };
+    });
+    const [editMode, setIsEditMode] = useState(false);
 
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description, hosts } = state;
@@ -74,6 +80,12 @@ function AddEditMGLabel(props) {
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
+    useEffect(() => {
+        setInitialState({
+            description: '',
+            hosts: [],
+        });
+    }, []);
 
     const handleHostValidation = (hostName) => {
         if (hostName === undefined) {
@@ -155,16 +167,16 @@ function AddEditMGLabel(props) {
         }
         const restApi = new API();
         let promiseAPICall;
-        if (id) {
+        if (dataRow) {
             // assign the update promise to the promiseAPICall
-            promiseAPICall = restApi.updateMicrogatewayLabel(id, name.trim(), description, hosts);
+            promiseAPICall = restApi.updateMicrogatewayLabel(dataRow.id, name.trim(), description, hosts);
         } else {
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.addMicrogatewayLabel(name.trim(), description, hosts);
         }
 
         return promiseAPICall.then(() => {
-            if (id) {
+            if (dataRow) {
                 return (
                     <FormattedMessage
                         id='AdminPages.Gateways.AddEdit.form.info.edit.successful'
@@ -196,10 +208,16 @@ function AddEditMGLabel(props) {
 
     const dialogOpenCallback = () => {
         if (dataRow) {
-            SetId(dataRow.id);
-            dispatch({ field: 'name', value: dataRow.name });
-            dispatch({ field: 'description', value: dataRow.description });
-            dispatch({ field: 'hosts', value: dataRow.accessUrls });
+            const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
+            setIsEditMode(true);
+            dispatch({
+                field: 'editDetails',
+                value: {
+                    name: originalName,
+                    description: originalDescription,
+                    hosts: originalHosts,
+                },
+            });
         }
     };
 
@@ -234,7 +252,7 @@ function AddEditMGLabel(props) {
                     error={hasErrors('name', name)}
                     helperText={hasErrors('name', name) || 'Name of the Gateway label'}
                     variant='outlined'
-                    disabled={id}
+                    disabled={editMode}
                 />
                 <TextField
                     margin='dense'
@@ -247,7 +265,7 @@ function AddEditMGLabel(props) {
                     helperText='Description of the Gateway label'
                     variant='outlined'
                 />
-                {(id)
+                {(editMode)
                     ? (
                         <ListInput
                             onInputListChange={handleHostChange}

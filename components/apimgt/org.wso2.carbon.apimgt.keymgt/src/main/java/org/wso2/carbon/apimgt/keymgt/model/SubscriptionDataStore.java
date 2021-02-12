@@ -17,13 +17,18 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model;
 
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
+
+import java.util.Map;
 
 /**
  * A Facade for obtaining Subscription related Data.
@@ -56,6 +61,14 @@ public interface SubscriptionDataStore {
      */
     API getApiByContextAndVersion(String context, String version);
 
+
+    /**
+     * Get API by UUID.
+     *
+     * @param apiUUID UUID of API
+     * @return {@link API} entry represented by Context and Version.
+     */
+    API getAPIByUUID(String apiUUID);
     /**
      * Gets Subscription by ID
      *
@@ -99,6 +112,8 @@ public interface SubscriptionDataStore {
     
     void addOrUpdateAPIWithUrlTemplates(API api);
 
+    void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event);
+
     void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
     
     void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy);
@@ -126,5 +141,13 @@ public interface SubscriptionDataStore {
     boolean isApiPoliciesInitialized();
 
     API getDefaultApiByContext(String context);
+
+    void addOrUpdateScope(Scope scope);
+
+    void deleteScope(Scope scope);
+
+    Map<String, Scope> getScopesByTenant(String tenantDomain);
+
+    boolean isScopesInitialized();
 }
 

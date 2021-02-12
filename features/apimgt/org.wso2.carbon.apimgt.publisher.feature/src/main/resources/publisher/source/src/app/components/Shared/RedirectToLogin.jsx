@@ -83,3 +83,4 @@ class RedirectToLogin extends React.Component {
 }
 
 export default RedirectToLogin;
+export const doRedirectToLogin = RedirectToLogin;

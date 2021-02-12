@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -40,8 +41,8 @@ public class SubscriberAlertsAPIUtils {
      * @return ApplicationName of the application if exists, otherwise null.
      * */
     public static String getApplicationNameById(int applicationId) throws APIManagementException {
-        String userName = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(userName);
         Application application = apiConsumer.getApplicationById(applicationId, userName, null);
         return application != null ? application.getName() : null;
     }
@@ -52,8 +53,8 @@ public class SubscriberAlertsAPIUtils {
      * @param applicationName The application name.
      * */
     public static int getApplicationIdByName(String applicationName) throws APIManagementException {
-        String userName = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(userName);
         Application application = apiConsumer.getApplicationsByName(userName, applicationName, null);
         return application != null ? application.getId() : null;
     }
@@ -65,7 +66,7 @@ public class SubscriberAlertsAPIUtils {
      * @return true if the validation is successful. Error response otherwise.
      * */
     public static boolean validateConfigParameters(String configId) {
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
         if (parameters.length != 3) {
@@ -75,7 +76,7 @@ public class SubscriberAlertsAPIUtils {
         }
 
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(userName);
             if (!apiConsumer.isApiNameExist(parameters[0])) {
                 RestApiUtil.handleBadRequest("Invalid API Name", log);
             }

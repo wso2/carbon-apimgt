@@ -234,6 +234,9 @@ public class RegularExpressionProtector extends AbstractMediator {
         if (enabledCheckPathParam) {
             String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
             try {
+                if (queryParams == null) {
+                    return false;
+                }
                 parameter = URLDecoder.decode(queryParams, APIMgtGatewayConstants.UTF8);
             } catch (UnsupportedEncodingException e) {
                 String message = "Error occurred while decoding the query/path parameters: " + parameter;

@@ -22,33 +22,28 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.LabelMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.LabelMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
 
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 
 public class LabelsApiServiceImpl implements LabelsApiService {
 
     private static final Log log = LogFactory.getLog(LabelsApiServiceImpl.class);
 
-    public Response labelsGet(MessageContext messageContext) {
+    public Response getLabels(MessageContext messageContext) {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             List<Label> labelList = apiProvider.getAllLabels(tenantDomain);
             LabelListDTO labelListDTO =
                     LabelMappingUtil.fromLabelListToLabelListDTO(labelList);

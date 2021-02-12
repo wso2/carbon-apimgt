@@ -30,11 +30,11 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
+import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.TenantKeyManagerDto;
-import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
@@ -118,16 +118,6 @@ public class KeyManagerHolder {
 
     }
 
-    /**
-     * This method will take hardcoded class name from api-manager.xml file and will return that class's instance.
-     * This class should be implementation class of keyManager.
-     *
-     * @return keyManager instance.
-     */
-    public static KeyManager getKeyManagerInstance(String tenantDomain) {
-
-        return getKeyManagerInstance(tenantDomain, APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-    }
 
     public static Map<String, KeyManagerDto> getTenantKeyManagers(String tenantDomain) {
 

@@ -163,7 +163,7 @@ class ViewToken extends React.Component {
                     <Typography component='p'>
                         <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.please.copy.help'
-                            defaultMessage={'Please copy this generated token value as it will be displayed only for'
+                            defaultMessage={'If the token type is JWT or API Key, please copy this generated token value as it will be displayed only for'
                             + ' the current browser session. '
                             + '( The token will not be visible in the UI after the page is refreshed. )'}
                         />

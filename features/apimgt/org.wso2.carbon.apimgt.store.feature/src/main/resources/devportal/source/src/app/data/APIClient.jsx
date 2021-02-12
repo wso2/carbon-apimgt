@@ -25,7 +25,8 @@ import AuthManager from './AuthManager';
 import Utils from './Utils';
 
 /**
- * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
+ * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Developer Portal,
+ * ect ..)
  * it's highly unlikely to change the REST API Swagger definition (swagger.json) file on the fly,
  * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
  */
@@ -45,14 +46,15 @@ class APIClient {
         };
 
         SwaggerClient.http.withCredentials = true;
-        const promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL(), requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; } });
+        const promisedResolve = SwaggerClient.resolve({
+            url: Utils.getSwaggerURL(),
+            requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; }
+        });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then((resolved) => {
             const argsv = Object.assign(
-                args,
                 {
                     spec: this._fixSpec(resolved.spec),
-                    authorizations,
                     requestInterceptor: this._getRequestInterceptor(),
                     responseInterceptor: this._getResponseInterceptor(),
                 },
@@ -115,7 +117,9 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.host;
+        const url = new URL(spec.servers[0].url);
+        url.host = this.host;
+        spec.servers[0].url = String(url);
         spec.security = [{ OAuth2Security: ['apim:api_subscribe'] }];
         return spec;
     }

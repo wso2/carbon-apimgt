@@ -26,7 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.UUID;
 
 /**
  * This class represents the JSON Web Token generator.
@@ -68,7 +70,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
-    
+
     private static final String NONE = "NONE";
 
     private static volatile long ttl = -1L;
@@ -83,7 +85,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public AbstractJWTGenerator() {
 
-        JWTConfigurationDto jwtConfigurationDto =
+        ExtendedJWTConfigurationDto jwtConfigurationDto =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                         .getJwtConfigurationDto();
 
@@ -212,7 +214,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
             JWTClaimsSet.Builder jwtClaimsSetBuilder = new JWTClaimsSet.Builder();
 
-            if(standardClaims != null) {
+            if (standardClaims != null) {
                 Iterator<String> it = new TreeSet(standardClaims.keySet()).iterator();
                 while (it.hasNext()) {
                     String claimURI = it.next();
@@ -244,6 +246,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                         jwtClaimsSetBuilder.claim(claimURI, claimVal);
                     }
                 }
+                //Adding JTI standard claim
+                jwtClaimsSetBuilder.jwtID(UUID.randomUUID().toString());
             }
             return jwtClaimsSetBuilder.build().toJSONObject().toJSONString();
         }
@@ -283,17 +287,19 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 String apimKeyCacheExpiry = config.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
 
                 if (apimKeyCacheExpiry != null) {
-                    ttl = Long.parseLong(apimKeyCacheExpiry);
+                    //added one minute buffer to the expiry time to avoid inconsistencies happen during cache expiry
+                    //task time
+                    ttl = Long.parseLong(apimKeyCacheExpiry) + Long.valueOf(60);
                 } else {
-                    ttl = Long.valueOf(900);
+                    ttl = Long.valueOf(960);
                 }
             } else {
                 String ttlValue = config.getFirstProperty(APIConstants.JWT_EXPIRY_TIME);
                 if (ttlValue != null) {
-                    ttl = Long.parseLong(ttlValue);
+                    ttl = Long.parseLong(ttlValue) + Long.valueOf(60);
                 } else {
                     //15 * 60 (convert 15 minutes to seconds)
-                    ttl = Long.valueOf(900);
+                    ttl = Long.valueOf(960);
                 }
             }
             return ttl;

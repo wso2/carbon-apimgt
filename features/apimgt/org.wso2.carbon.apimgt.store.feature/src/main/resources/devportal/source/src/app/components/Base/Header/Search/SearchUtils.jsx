@@ -170,7 +170,7 @@ function getSuggestionValue(suggestion) {
 function buildSearchQuery(searchText, lcstate) {
     searchText = (searchText && !searchText.includes(':')) ? 'content:' + searchText : searchText;
     return lcstate
-        ? (searchText + ' status:' + lcstate).trim().toLowerCase() : searchText.trim().toLowerCase();
+        ? (searchText + ' status:' + lcstate).trim().toLowerCase() : searchText.trim();
 }
 
 /**

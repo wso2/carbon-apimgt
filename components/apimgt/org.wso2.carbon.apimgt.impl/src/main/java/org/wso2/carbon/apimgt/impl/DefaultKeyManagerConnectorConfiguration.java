@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidatorImpl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,8 +57,28 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
 
     @Override
     public List<ConfigurationDto> getApplicationConfigurations() {
-
-        return Collections.emptyList();
+        List<ConfigurationDto> applicationConfigurationsList = new ArrayList();
+        applicationConfigurationsList
+                .add(new ConfigurationDto(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
+                        "Application Access Token Expiry Time ", "input", "Type Application Access Token Expiry Time " +
+                        "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
+                        Collections.EMPTY_LIST, false));
+        applicationConfigurationsList
+                .add(new ConfigurationDto(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
+                        "User Access Token Expiry Time ", "input", "Type User Access Token Expiry Time " +
+                        "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
+                        Collections.EMPTY_LIST, false));
+        applicationConfigurationsList
+                .add(new ConfigurationDto(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
+                        "Refresh Token Expiry Time ", "input", "Type Refresh Token Expiry Time " +
+                        "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
+                        Collections.EMPTY_LIST, false));
+        applicationConfigurationsList
+                .add(new ConfigurationDto(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,
+                        "Id Token Expiry Time", "input", "Type ID Token Expiry Time " +
+                        "in seconds ", APIConstants.KeyManager.NOT_APPLICABLE_VALUE, false, false,
+                        Collections.EMPTY_LIST, false));
+        return applicationConfigurationsList;
     }
 
     @Override

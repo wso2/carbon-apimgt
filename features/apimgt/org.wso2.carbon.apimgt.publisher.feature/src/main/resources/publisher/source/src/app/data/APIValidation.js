@@ -139,6 +139,10 @@ const definition = {
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Context ' + getMessage(error.type, 60) }));
         }),
+    documentName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+        .error((errors) => {
+            return errors.map((error) => ({ ...error, message: 'Document name ' + getMessage(error.type, 50) }));
+        }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
     url: Joi.string().uri({ scheme: ['http', 'https'] }).error((errors) => {

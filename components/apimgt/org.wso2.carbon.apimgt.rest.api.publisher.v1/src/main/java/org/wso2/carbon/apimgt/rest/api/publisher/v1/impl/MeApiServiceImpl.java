@@ -22,6 +22,7 @@ import java.util.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -43,7 +44,7 @@ public class MeApiServiceImpl implements MeApiService {
      */
     public Response validateUserRole(String roleId, MessageContext messageContext) {
 
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isUserInRole = false;
 
         if (roleId != null) {

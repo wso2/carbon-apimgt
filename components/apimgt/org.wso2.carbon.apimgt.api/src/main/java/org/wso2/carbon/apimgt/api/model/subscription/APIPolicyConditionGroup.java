@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api.model.subscription;
 
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,7 @@ public class APIPolicyConditionGroup {
 
     private int policyId = -1;
     private String quotaType;
+    private QuotaPolicy quotaPolicy;
     private int conditionGroupId = -1;
     private List<ConditionDTO> conditionDTOS;
 
@@ -102,6 +104,14 @@ public class APIPolicyConditionGroup {
         return conditionGroup.policyId == policyId &&
                 conditionGroup.conditionGroupId == conditionGroupId;
 
+    }
+
+    public QuotaPolicy getQuotaPolicy() {
+        return quotaPolicy;
+    }
+
+    public void setQuotaPolicy(QuotaPolicy quotaPolicy) {
+        this.quotaPolicy = quotaPolicy;
     }
 
     @Override

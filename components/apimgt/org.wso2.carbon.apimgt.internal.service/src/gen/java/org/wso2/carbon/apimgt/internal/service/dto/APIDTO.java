@@ -12,12 +12,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 
 
 public class APIDTO   {
   
+    private String uuid = null;
     private Integer apiId = null;
     private String provider = null;
     private String name = null;
@@ -27,6 +29,24 @@ public class APIDTO   {
     private String apiType = null;
     private Boolean isDefaultVersion = null;
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
+
+  /**
+   * UUID of API
+   **/
+  public APIDTO uuid(String uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "UUID of API")
+  @JsonProperty("uuid")
+  public String getUuid() {
+    return uuid;
+  }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
   /**
    **/
@@ -198,7 +218,8 @@ public class APIDTO   {
       return false;
     }
     APIDTO API = (APIDTO) o;
-    return Objects.equals(apiId, API.apiId) &&
+    return Objects.equals(uuid, API.uuid) &&
+        Objects.equals(apiId, API.apiId) &&
         Objects.equals(provider, API.provider) &&
         Objects.equals(name, API.name) &&
         Objects.equals(version, API.version) &&
@@ -211,7 +232,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
+    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, isDefaultVersion, urlMappings);
   }
 
   @Override
@@ -219,6 +240,7 @@ public class APIDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
     
+    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");

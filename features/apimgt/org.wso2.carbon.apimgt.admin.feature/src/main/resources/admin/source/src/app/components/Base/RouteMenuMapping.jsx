@@ -201,14 +201,14 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.keymanagers.items.Adding',
-                    defaultMessage: 'Add KeyManager',
+                    defaultMessage: 'Add Key Manager',
                 }),
                 path: '/settings/key-managers/create',
             },
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.keymanagers.items.Editing',
-                    defaultMessage: 'Edit KeyManager',
+                    defaultMessage: 'Edit Key Manager',
                 }),
                 path: '/settings/key-managers/(.*?)$',
             },

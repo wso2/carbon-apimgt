@@ -154,7 +154,12 @@ class AuthManager {
      * @memberof AuthManager
      */
     static isNotPublisher() {
-        return !AuthManager.getUser().scopes.includes('apim:api_publish'); // TODO: make this scope name configurable
+        if (AuthManager.getUser() === null) {
+            return false;
+        } else {
+            return !AuthManager.getUser().scopes.includes('apim:api_publish');
+            // TODO: make this scope name configurable
+        }
     }
 
     /**
@@ -164,7 +169,7 @@ class AuthManager {
      */
     static isRestricted(scopesAllowedToEdit, api = {}) {
         // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === 'APIPRODUCT') {
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else {

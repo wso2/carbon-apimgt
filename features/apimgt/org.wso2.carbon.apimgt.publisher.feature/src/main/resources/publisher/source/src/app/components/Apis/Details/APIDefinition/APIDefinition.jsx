@@ -85,6 +85,14 @@ const styles = (theme) => ({
     progressLoader: {
         marginLeft: theme.spacing(1),
     },
+    updateApiWarning: {
+        marginLeft: theme.spacing(5),
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+        borderColor: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
+    warningIconStyle: {
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
 });
 /**
  * This component holds the functionality of viewing the api definition content of an api. The initial view is a
@@ -365,10 +373,16 @@ class APIDefinition extends React.Component {
             })
             .catch((err) => {
                 console.log(err);
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
-                    defaultMessage: 'Error occurred while updating the API Definition',
-                }));
+                const { response: { body: { description, message } } } = err;
+                if (description && message) {
+                    Alert.error(`${message} ${description}`);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                        defaultMessage: 'Error occurred while updating the API Definition',
+                    }));
+                }
+
                 this.setState({ isUpdating: false });
             });
     }
@@ -381,7 +395,10 @@ class APIDefinition extends React.Component {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
             securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
         } = this.state;
-        const { classes, resourceNotFountMessage, api } = this.props;
+        const {
+            classes, resourceNotFountMessage, api,
+        } = this.props;
+
         let downloadLink;
         let fileName;
         let isGraphQL = 0;
@@ -430,7 +447,7 @@ class APIDefinition extends React.Component {
                                 size='small'
                                 className={classes.button}
                                 onClick={this.openEditor}
-                                disabled={isRestricted(['apim:api_create'], api)}
+                                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                             >
                                 <EditRounded className={classes.buttonIcon} />
                                 <FormattedMessage

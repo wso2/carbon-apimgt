@@ -394,7 +394,7 @@ class Operations extends React.Component {
                         <Button
                             variant='contained'
                             color='primary'
-                            disabled={isSaving}
+                            disabled={isSaving || api.isRevision}
                             className={classes.buttonMain}
                             onClick={this.updateOperations}
                         >

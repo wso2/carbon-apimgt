@@ -26,7 +26,8 @@ const DefaultConfigurations = {
             lineHeight: 2,
         },
         h4: {
-            fontWeight: 200,
+            fontWeight: 400,
+            fontSize: '1.3rem'
         },
     },
     custom: {
@@ -42,8 +43,8 @@ const DefaultConfigurations = {
         },
         appBar: {
             logo: '/site/public/images/logo.svg', // You can set the url to an external image also ( ex: https://dummyimage.com/208x19/66aad1/ffffff&text=testlogo)
-            logoHeight: 19,
-            logoWidth: 208,
+            logoHeight: 34,
+            logoWidth: 'auto',
             background: '#0fa2db',
             backgroundImage: '/site/public/images/appbarBack.png',
             searchInputBackground: '#fff',
@@ -63,19 +64,20 @@ const DefaultConfigurations = {
             leftMenuActive: '#00597f',
             leftMenuActiveSubmenu: '#0d1723',
             activeBackground: '#191e46',
-            rootIconVisible: true,
+            rootIconVisible: false,
             rootIconSize: 42,
             rootIconTextVisible: false,
             rootBackground: '#000',
         },
         infoBar: {
-            height: 70,
+            height: 120,
             background: '#ffffff',
             showThumbnail: true,
-            starColor: '#f6bf21', // By default the opasite color of infoBar.background is derived. From here you can override it.
+            starColor: '#f6bf21', // Rating star color
+            starColorEmpty: '#cfcfcf', // Rating star color empty state
             sliderBackground: '#ffffff',
-            iconOddColor: '#347eff',
-            iconEvenColor: '#89b4ff',
+            iconOddColor: '#d3d3d3',
+            iconEvenColor: '#c3c3c3',
             listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
             tagChipBackground: '#7dd7f5',
         },
@@ -114,6 +116,7 @@ const DefaultConfigurations = {
         },
         thumbnail: {
             width: 240,
+            height: 140,
             contentPictureOverlap: false,
             iconColor: 'rgba(0, 0, 0, 0.38)',
             listViewIconSize: 20,
@@ -249,6 +252,7 @@ const DefaultConfigurations = {
             showTryout: true,
             showDocuments: true,
             showSdks: true,
+            showAsyncSpecification: true,
             onlyShowSdks: [], // You can put an array of strings to enable only a given set of sdks. Leave empty to show all. ex: ['java','javascript']
             sdkBackground: '#ffffff',
             swaggerUIBackground: '#efefef',
@@ -322,7 +326,7 @@ const DefaultConfigurations = {
             This is the config for the public teant store.
             Set "active: false" to redirect the teant user to the url
             given by redirectToIfInactive. It will also hide the link
-            GO TO PUBLIC DEV PORTAL link at the header.
+            SWITCH DEV PORTALS link at the header.
         */
        publicTenantStore: {
             active: true,

@@ -307,6 +307,7 @@ class ThumbnailView extends Component {
         this.setState({ uploading: true });
         const {
             api: { apiType, id },
+            setImageUpdate,
         } = this.props;
         const promisedThumbnail = apiType === Api.CONSTS.APIProduct
             ? new APIProduct().addAPIProductThumbnail(id, file)
@@ -329,6 +330,7 @@ class ThumbnailView extends Component {
                         backgroundIndex: cState.backgroundIndexUpdate,
                     }));
                 }
+                setImageUpdate();
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -361,7 +363,7 @@ class ThumbnailView extends Component {
      */
     render() {
         const {
-            api, classes, width, height, isEditable, theme, intl,
+            api, classes, width, height, isEditable, theme, intl, imageUpdate,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
@@ -392,6 +394,7 @@ class ThumbnailView extends Component {
                     api={api}
                     width={width}
                     height={height}
+                    imageUpdate={imageUpdate}
                 />
 
                 <Dialog
@@ -631,10 +634,13 @@ ThumbnailView.defaultProps = {
     height: 190,
     width: 250,
     isEditable: false,
+    setImageUpdate: () => {},
 };
 
 ThumbnailView.propTypes = {
     api: PropTypes.shape({}).isRequired,
+    setImageUpdate: PropTypes.shape({}),
+    imageUpdate: PropTypes.number.isRequired,
     classes: PropTypes.shape({}).isRequired,
     height: PropTypes.number,
     width: PropTypes.number,

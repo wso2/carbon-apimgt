@@ -79,12 +79,15 @@ const BaseThumbnail = (props) => {
         category: categoryProp,
         isEditable,
         onClick,
+        imageUpdate,
     } = props;
-    const { apiType, id, type } = api;
+    const {
+        apiType, id, type,
+    } = api;
     const classes = useStyles();
     const [iconJson, setIconJson] = useState({});
     const {
-        selectedIcon,
+        key,
         color,
         backgroundIndex,
         category,
@@ -109,8 +112,7 @@ const BaseThumbnail = (props) => {
      *
      * @memberof ThumbnailView
      */
-
-    useEffect(() => {
+    const loadImageData = () => {
         if (type !== 'DOC') {
             const promisedThumbnail = apiType === Api.CONSTS.APIProduct
                 ? new APIProduct().getAPIProductThumbnail(id)
@@ -119,6 +121,7 @@ const BaseThumbnail = (props) => {
             promisedThumbnail.then((response) => {
                 if (response && response.data) {
                     if (response.headers['content-type'] === 'application/json') {
+                        setThumbnail(null);
                         setIconJson(JSON.parse(response.data));
                     } else if (response && response.data.size > 0) {
                         const url = windowURL.createObjectURL(response.data);
@@ -128,8 +131,16 @@ const BaseThumbnail = (props) => {
             }).finally(() => {
                 setImageLoaded(true);
             });
+        } else {
+            setImageLoaded(true);
         }
+    };
+    useEffect(() => {
+        loadImageData();
     }, []);
+    useEffect(() => {
+        loadImageData();
+    }, [imageUpdate]);
     if (!imageLoaded) {
         return (
             <div className='image-load-frame'>
@@ -153,7 +164,7 @@ const BaseThumbnail = (props) => {
                 height={height}
                 api={api}
                 fixedIcon={{
-                    key: selectedIcon,
+                    key: key || selectedIconProp,
                     color,
                     backgroundIndex,
                     category,
@@ -195,5 +206,6 @@ BaseThumbnail.propTypes = {
     height: PropTypes.number,
     width: PropTypes.number,
     isEditable: PropTypes.bool,
+    imageUpdate: PropTypes.number.isRequired,
 };
 export default BaseThumbnail;

@@ -27,20 +27,22 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiProductsApiService {
-      public Response apiProductsApiProductIdDelete(String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(String apiProductId, String documentId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsDocumentIdDelete(String apiProductId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsDocumentIdGet(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsDocumentIdPut(String apiProductId, String documentId, DocumentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsGet(String apiProductId, Integer limit, Integer offset, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdDocumentsPost(String apiProductId, DocumentDTO body, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdIsOutdatedGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdPut(String apiProductId, APIProductDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdThumbnailPut(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsPost(APIProductDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response addAPIProductDocument(String apiProductId, DocumentDTO documentDTO, MessageContext messageContext) throws APIManagementException;
+      public Response addAPIProductDocumentContent(String apiProductId, String documentId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
+      public Response createAPIProduct(APIProductDTO apIProductDTO, MessageContext messageContext) throws APIManagementException;
+      public Response deleteAPIProduct(String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response deleteAPIProductDocument(String apiProductId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response exportAPIProduct(String name, String version, String providerName, String format, Boolean preserveStatus, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProduct(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductDocument(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductDocumentContent(String apiProductId, String documentId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductDocuments(String apiProductId, Integer limit, Integer offset, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductSwagger(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIProductThumbnail(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAllAPIProducts(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getIsAPIProductOutdated(String apiProductId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIProduct(String apiProductId, APIProductDTO apIProductDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIProductDocument(String apiProductId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIProductThumbnail(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }

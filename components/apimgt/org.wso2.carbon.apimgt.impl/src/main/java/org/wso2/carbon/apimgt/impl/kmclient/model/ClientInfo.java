@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.impl.kmclient.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ClientInfo {
@@ -45,7 +44,14 @@ public class ClientInfo {
     private String presetClientSecret;
     @SerializedName("ext_application_owner")
     private String application_owner;
-
+    @SerializedName("ext_application_token_lifetime")
+    private Long applicationAccessTokenLifeTime;
+    @SerializedName("ext_user_token_lifetime")
+    private Long userAccessTokenLifeTime;
+    @SerializedName("ext_refresh_token_lifetime")
+    private Long refreshTokenLifeTime;
+    @SerializedName("ext_id_token_lifetime")
+    private Long idTokenLifeTime;
     public String getClientId() {
 
         return clientId;
@@ -144,5 +150,45 @@ public class ClientInfo {
     public void setApplication_owner(String application_owner) {
 
         this.application_owner = application_owner;
+    }
+
+    public Long getApplicationAccessTokenLifeTime() {
+
+        return applicationAccessTokenLifeTime;
+    }
+
+    public void setApplicationAccessTokenLifeTime(Long applicationAccessTokenLifeTime) {
+
+        this.applicationAccessTokenLifeTime = applicationAccessTokenLifeTime;
+    }
+
+    public Long getUserAccessTokenLifeTime() {
+
+        return userAccessTokenLifeTime;
+    }
+
+    public void setUserAccessTokenLifeTime(Long userAccessTokenLifeTime) {
+
+        this.userAccessTokenLifeTime = userAccessTokenLifeTime;
+    }
+
+    public Long getRefreshTokenLifeTime() {
+
+        return refreshTokenLifeTime;
+    }
+
+    public void setRefreshTokenLifeTime(Long refreshTokenLifeTime) {
+
+        this.refreshTokenLifeTime = refreshTokenLifeTime;
+    }
+
+    public Long getIdTokenLifeTime() {
+
+        return idTokenLifeTime;
+    }
+
+    public void setIdTokenLifeTime(Long idTokenLifeTime) {
+
+        this.idTokenLifeTime = idTokenLifeTime;
     }
 }

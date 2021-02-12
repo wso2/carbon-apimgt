@@ -31,7 +31,7 @@ import { generateStatic } from '@stoplight/prism-http/dist/mocker/generator/JSON
  */
 export default async function getMockedModel(modelName) {
     const swagger = await apiDef;
-    return generateStatic(swagger.definitions[modelName]);
+    return generateStatic(swagger.components.schemas[modelName]);
 }
 
 /**
@@ -42,7 +42,7 @@ export default async function getMockedModel(modelName) {
  */
 export async function getAllScopes() {
     const swagger = await apiDef;
-    return Object.keys(swagger.securityDefinitions.OAuth2Security.scopes);
+    return Object.keys(swagger.components.securitySchemes.OAuth2Security.flows.password.scopes);
 }
 
 /**

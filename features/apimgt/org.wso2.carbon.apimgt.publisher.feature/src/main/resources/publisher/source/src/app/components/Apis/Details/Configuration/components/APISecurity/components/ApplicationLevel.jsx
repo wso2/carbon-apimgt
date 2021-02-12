@@ -23,7 +23,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -86,7 +86,7 @@ export default function ApplicationLevel(props) {
     const classes = useStyles();
     let mandatoryValue = null;
     let hasResourceWithSecurity;
-    if (apiFromContext.apiType === 'APIProduct') {
+    if (apiFromContext.apiType === API.CONSTS.APIProduct) {
         const apiList = apiFromContext.apis;
         for (const apiInProduct in apiList) {
             if (Object.prototype.hasOwnProperty.call(apiList, apiInProduct)) {
@@ -101,27 +101,22 @@ export default function ApplicationLevel(props) {
     } else {
         hasResourceWithSecurity = apiFromContext.operations.findIndex((op) => op.authType !== 'None') > -1;
     }
-    if (hasResourceWithSecurity) {
-        mandatoryValue = 'optional';
-        // If not Oauth2, Basic auth or ApiKey security is selected, no mandatory values should be pre-selected
-        if (!(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH)
-            || securityScheme.includes(API_SECURITY_API_KEY))) {
-            mandatoryValue = null;
-        } else if (!securityScheme.includes(API_SECURITY_MUTUAL_SSL)) {
-            mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
-        } else if (securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
-            mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
-        }
-    } else if (securityScheme.length > 0) {
-        configDispatcher({
-            action: 'securityScheme',
-            event: { checked: false, value: DEFAULT_API_SECURITY_OAUTH2 },
-        });
+
+    mandatoryValue = 'optional';
+    // If not Oauth2, Basic auth or ApiKey security is selected, no mandatory values should be pre-selected
+    if (!(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH)
+        || securityScheme.includes(API_SECURITY_API_KEY))) {
+        mandatoryValue = null;
+    } else if (!securityScheme.includes(API_SECURITY_MUTUAL_SSL)) {
+        mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
+    } else if (securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+        mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
     }
+
     return (
         <>
             <Grid item xs={12}>
-                <ExpansionPanel className={classes.expansionPanel}>
+                <WrappedExpansionPanel className={classes.expansionPanel} id='applicationLevel'>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.subHeading} variant='h6'>
                             <FormattedMessage
@@ -155,8 +150,7 @@ export default function ApplicationLevel(props) {
                             <FormControlLabel
                                 control={(
                                     <Checkbox
-                                        disabled={isRestricted(['apim:api_create'], apiFromContext)
-                                        || !hasResourceWithSecurity}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                         checked={securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)}
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
@@ -171,8 +165,7 @@ export default function ApplicationLevel(props) {
                             <FormControlLabel
                                 control={(
                                     <Checkbox
-                                        disabled={isRestricted(['apim:api_create'], apiFromContext)
-                                        || !hasResourceWithSecurity}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                         checked={securityScheme.includes(API_SECURITY_BASIC_AUTH)}
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
@@ -188,8 +181,7 @@ export default function ApplicationLevel(props) {
                                 control={(
                                     <Checkbox
                                         checked={securityScheme.includes(API_SECURITY_API_KEY)}
-                                        disabled={isRestricted(['apim:api_create'], apiFromContext)
-                                        || !hasResourceWithSecurity}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
                                             event: { checked, value },
@@ -264,7 +256,7 @@ export default function ApplicationLevel(props) {
                             )}
                         </FormControl>
                     </ExpansionPanelDetails>
-                </ExpansionPanel>
+                </WrappedExpansionPanel>
             </Grid>
         </>
     );

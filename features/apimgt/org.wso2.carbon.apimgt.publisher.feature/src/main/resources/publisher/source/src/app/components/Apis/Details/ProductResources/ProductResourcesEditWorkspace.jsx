@@ -327,7 +327,7 @@ function ProductResourcesEdit(props) {
             newApiResources = inputApiResources;
         }
         const {
-            target, verb, apiId, name,
+            target, verb, apiId, name, version,
         } = resourceToAdd;
         const newResource = {
             id: null,
@@ -378,6 +378,7 @@ function ProductResourcesEdit(props) {
                 name,
                 apiId,
                 operations: [newResource],
+                version,
             });
         }
         // When we are adding the resources in a loop we do not care about the return but we simply set the state here.
@@ -417,6 +418,7 @@ function ProductResourcesEdit(props) {
                             verb: innerKey,
                             apiId: selectedApi.id,
                             name: selectedApi.name,
+                            version: selectedApi.version,
                         },
                         'add',
                         newApiResources,
@@ -642,6 +644,7 @@ function ProductResourcesEdit(props) {
                                                                             verb: innerKey,
                                                                             apiId: selectedApi.id,
                                                                             name: selectedApi.name,
+                                                                            version: selectedApi.version,
                                                                         },
                                                                         'add',
                                                                     )}
@@ -663,6 +666,7 @@ function ProductResourcesEdit(props) {
                                                                                     verb: innerKey,
                                                                                     apiId: selectedApi.id,
                                                                                     name: selectedApi.name,
+                                                                                    version: selectedApi.version,
                                                                                 },
                                                                                 'add',
                                                                             )}
@@ -713,7 +717,11 @@ function ProductResourcesEdit(props) {
                                             const apiResource = apiResources[key];
                                             return (
                                                 <div key={apiResource.name}>
-                                                    <div className={classes.treeItemMain}>{apiResource.name}</div>
+                                                    <div className={classes.treeItemMain}>
+                                                        {apiResource.name}
+                                                        {' - '}
+                                                        {apiResource.version}
+                                                    </div>
                                                     <div className={classes.treeItemMainWrapper}>
                                                         {Object.keys(apiResource.operations).map((innerKey) => {
                                                             const operation = apiResource.operations[innerKey];
@@ -736,6 +744,7 @@ function ProductResourcesEdit(props) {
                                                                                 verb,
                                                                                 apiId: apiResource.apiId,
                                                                                 name: apiResource.name,
+                                                                                version: apiResource.version,
                                                                             },
                                                                             'remove',
                                                                         )}

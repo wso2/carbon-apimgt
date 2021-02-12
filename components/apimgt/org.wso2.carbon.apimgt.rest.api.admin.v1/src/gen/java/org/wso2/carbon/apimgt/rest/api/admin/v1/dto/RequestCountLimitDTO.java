@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RequestCountLimitAllOfDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitBaseDTO;
 import javax.validation.constraints.*;
 
@@ -10,7 +13,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -67,7 +73,7 @@ public class RequestCountLimitDTO   {
   }
 
   
-  @ApiModelProperty(example = "1000", required = true, value = "Maximum number of requests allowed")
+  @ApiModelProperty(example = "30", required = true, value = "Maximum number of requests allowed")
   @JsonProperty("requestCount")
   @NotNull
   public Long getRequestCount() {

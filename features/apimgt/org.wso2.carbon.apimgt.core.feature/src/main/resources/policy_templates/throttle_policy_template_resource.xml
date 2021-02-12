@@ -6,7 +6,7 @@ str:concat(resourceKey,'_${pipeline}')##
 #end
 ###generate rule
 #macro( getRule $policy)
-${policy.getTenantDomain()}_resource_${policy.getPolicyName()}_${pipeline}##
+${policy.getTenantDomain()}_resource_${policy.getName()}_${pipeline}##
 #end
 
 @Plan:name('#getRule($policy)')
@@ -19,12 +19,12 @@ define stream RequestStream (messageID string, appKey string, appTier string, su
 define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long, evaluatedConditions string);
 
 FROM RequestStream
-SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap,"$evaluatedConditions" as evaluatedConditions
+SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap,"$evaluatedConditions" as evaluatedConditions
 INSERT INTO EligibilityStream;
 
 #if($quotaPolicy != "")
 FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
-#if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
+#if($quotaPolicy.getQuotaType() == $REQUEST_COUNT_TYPE)
 select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
 #else
 select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey

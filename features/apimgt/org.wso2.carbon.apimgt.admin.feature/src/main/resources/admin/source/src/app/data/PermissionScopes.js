@@ -69,7 +69,7 @@ class Permissions extends Resource {
 
         const apiClient = new APIClientFactory().getAPIClient().client;
         return apiClient.then((client) => {
-            return client.apis['System Scopes'].updateRolesForScope({ body: scopeMapping });
+            return client.apis['System Scopes'].updateRolesForScope({}, { requestBody: scopeMapping });
         });
     }
 
@@ -99,7 +99,7 @@ class Permissions extends Resource {
         const roleAliasesMapping = { count: updatedRoleAliases.length, list: updatedRoleAliases };
         const apiClient = new APIClientFactory().getAPIClient().client;
         return apiClient.then((client) => {
-            return client.apis['System Scopes'].put_system_scopes_role_aliases({ body: roleAliasesMapping });
+            return client.apis['System Scopes'].put_system_scopes_role_aliases({}, { requestBody: roleAliasesMapping });
         });
     }
 }

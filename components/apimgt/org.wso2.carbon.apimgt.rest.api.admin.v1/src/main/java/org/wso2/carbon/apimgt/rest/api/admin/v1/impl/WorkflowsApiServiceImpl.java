@@ -34,7 +34,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.WorkflowMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -63,7 +64,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
         try {
             Workflow workflow;
             String status = "CREATED";
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIAdmin apiAdmin = new APIAdminImpl();
             workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
             workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
@@ -86,10 +87,11 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @return
      */
     @Override
-    public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType, MessageContext messageContext) throws APIManagementException {
+    public Response workflowsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String workflowType,
+                                 MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         WorkflowListDTO workflowListDTO;
         try {
             Workflow[] workflows;
@@ -134,7 +136,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                                                       MessageContext messageContext) {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         boolean isTenantFlowStarted = false;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomainOfUser = MultitenantUtils.getTenantDomain(username);
         try {
             if (workflowReferenceId == null) {

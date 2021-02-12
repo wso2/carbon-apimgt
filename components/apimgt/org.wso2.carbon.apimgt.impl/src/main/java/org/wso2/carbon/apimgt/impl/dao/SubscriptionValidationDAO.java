@@ -24,16 +24,23 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -41,6 +48,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,28 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
-
-    /*
-     * This method can be used to retrieve all the APIs in the database
-     *
-     * @return {@link List<API> List of APIs}
-     * */
-    public List<API> getAllApis() {
-
-        List<API> apiList = new ArrayList<>();
-        try (
-                Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APIS_SQL);
-                ResultSet resultSet = ps.executeQuery();
-        ) {
-            populateAPIList(resultSet, apiList);
-
-        } catch (SQLException e) {
-            log.error("Error in loading Apis : ", e);
-        }
-
-        return apiList;
-    }
 
     /*
      * This method can be used to retrieve all the Subscriptions in the database
@@ -163,7 +149,8 @@ public class SubscriptionValidationDAO {
 
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
+                PreparedStatement ps = conn
+                        .prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_AM_KEY_MAPPINGS_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
 
@@ -183,89 +170,206 @@ public class SubscriptionValidationDAO {
      * */
     public List<SubscriptionPolicy> getAllSubscriptionPolicies() {
 
-        List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_SUBSCRIPTION_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateSubscriptionPolicyList(subscriptionPolicies, resultSet);
+            return populateSubscriptionPolicyList(resultSet);
 
         } catch (SQLException e) {
             log.error("Error in loading Subscription policies : ", e);
         }
 
-        return subscriptionPolicies;
+        return null;
     }
 
-    private void populateSubscriptionPolicyList(List<SubscriptionPolicy> subscriptionPolicies, ResultSet resultSet)
+    private List<SubscriptionPolicy> populateSubscriptionPolicyList(ResultSet resultSet)
             throws SQLException {
 
-        if (subscriptionPolicies != null && resultSet != null) {
+        List<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
+
+        if (resultSet != null) {
             while (resultSet.next()) {
                 SubscriptionPolicy subscriptionPolicyDTO = new SubscriptionPolicy();
 
-                subscriptionPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                subscriptionPolicyDTO.setName(resultSet.getString("POLICY_NAME"));
-                subscriptionPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                subscriptionPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                subscriptionPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                subscriptionPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_POLICY_NAME));
+                subscriptionPolicyDTO.setQuotaType(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                subscriptionPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(subscriptionPolicyDTO.getTenantId());
+                subscriptionPolicyDTO.setTenantDomain(tenantDomain);
 
-                subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
-                subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
-                subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
-                subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
+                subscriptionPolicyDTO.setRateLimitCount(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                subscriptionPolicyDTO.setRateLimitTimeUnit(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subscriptionPolicyDTO.setStopOnQuotaReach(resultSet.getBoolean(
+                        ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                subscriptionPolicyDTO.setGraphQLMaxDepth(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                subscriptionPolicyDTO.setGraphQLMaxComplexity(resultSet.getInt(
+                        ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+                setCommonProperties(subscriptionPolicyDTO, resultSet);
 
                 subscriptionPolicies.add(subscriptionPolicyDTO);
             }
         }
+        return subscriptionPolicies;
     }
 
     /*
-     * This method can be used to retrieve all the ApplicationPolicys in the database
+     * This method can be used to retrieve all the ApplicationPolicies in the database
      *
      * @return {@link List<ApplicationPolicy>}
      * */
     public List<ApplicationPolicy> getAllApplicationPolicies() {
 
-        List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
                         conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATION_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateApplicationPolicyList(applicationPolicies, resultSet);
+            return populateApplicationPolicyList(resultSet);
 
         } catch (SQLException e) {
             log.error("Error in loading application policies : ", e);
         }
 
-        return applicationPolicies;
+        return null;
     }
 
     /*
-     * This method can be used to retrieve all the ApplicationPolicys in the database
+     * This method can be used to retrieve all the Api Policies in the database
      *
-     * @return {@link List<ApplicationPolicy>}
+     * @return {@link List<ApiPolicy>}
      * */
     public List<APIPolicy> getAllApiPolicies() {
 
-        List<APIPolicy> applicationPolicies = new ArrayList<>();
         try (
                 Connection conn = APIMgtDBUtil.getConnection();
                 PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_APPLICATION_POLICIES_SQL);
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_API_POLICIES_SQL);
                 ResultSet resultSet = ps.executeQuery();
         ) {
-            populateApiPolicyList(applicationPolicies, resultSet);
+            return populateApiPolicyList(resultSet);
 
         } catch (SQLException e) {
-            log.error("Error in loading application policies : ", e);
+            log.error("Error in loading api policies : ", e);
         }
 
-        return applicationPolicies;
+        return null;
+    }
+
+    public List<GlobalPolicy> getAllGlobalPolicies() {
+
+        try (
+                Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_ALL_GLOBAL_POLICIES_SQL);
+                ResultSet resultSet = ps.executeQuery();
+        ) {
+            return populateGlobalPolicyList(resultSet);
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies : ", e);
+        }
+
+        return null;
+    }
+
+    public List<GlobalPolicy> getAllGlobalPolicies(String tenantDomain) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_GLOBAL_POLICIES_SQL)) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading Global Policies for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setInt(1, tenantId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                return populateGlobalPolicyList(resultSet);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies for tenantId : " + tenantDomain, e);
+        }
+
+        return null;
+    }
+
+    public GlobalPolicy getGlobalPolicyByNameForTenant(String policyName, String tenantDomain) {
+
+        try (Connection conn = APIMgtDBUtil.getConnection();
+             PreparedStatement ps =
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_GLOBAL_POLICY_SQL)) {
+            int tenantId = 0;
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            } catch (UserStoreException e) {
+                log.error("Error in loading Global Policy for tenantDomain : " + tenantDomain, e);
+            }
+            ps.setString(1, policyName);
+            ps.setInt(2, tenantId);
+
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    GlobalPolicy globalPolicyDTO = new GlobalPolicy();
+                    globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                    globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    globalPolicyDTO.setTenantDomain(tenantDomain);
+                    globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                    InputStream siddhiQueryBlob =
+                            resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                    String siddhiQuery = null;
+                    if (siddhiQueryBlob != null) {
+                        siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                    }
+                    globalPolicyDTO.setSiddhiQuery(siddhiQuery);
+
+                    return globalPolicyDTO;
+                }
+            }
+
+        } catch (SQLException e) {
+            log.error("Error in loading global policies by policyId : " + policyName + " of " + policyName, e);
+        }
+
+        return null;
+    }
+
+    private List<GlobalPolicy> populateGlobalPolicyList(ResultSet resultSet) throws SQLException {
+
+        List<GlobalPolicy> globalPolicies = new ArrayList<>();
+        if (resultSet != null) {
+            while (resultSet.next()) {
+                GlobalPolicy globalPolicyDTO = new GlobalPolicy();
+                globalPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                globalPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                globalPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(globalPolicyDTO.getTenantId());
+                globalPolicyDTO.setTenantDomain(tenantDomain);
+                globalPolicyDTO.setKeyTemplate(resultSet.getString(ThrottlePolicyConstants.COLUMN_KEY_TEMPLATE));
+                InputStream siddhiQueryBlob = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_SIDDHI_QUERY);
+                String siddhiQuery = null;
+                if (siddhiQueryBlob != null) {
+                    siddhiQuery = APIMgtDBUtil.getStringFromInputStream(siddhiQueryBlob);
+                }
+                globalPolicyDTO.setSiddhiQuery(siddhiQuery);
+                globalPolicies.add(globalPolicyDTO);
+            }
+        }
+        return globalPolicies;
     }
 
     /*
@@ -274,148 +378,63 @@ public class SubscriptionValidationDAO {
      * @param tenantId : unique identifier of tenant
      * @return {@link List<API>}
      * */
-    public List<API> getAllApis(String tenantDomain) {
-        String query;
-        String contextSearchString;
+    public List<API> getAllApis(String organization) {
 
-        if (tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-            query = SubscriptionValidationSQLConstants.GET_ST_APIS_SQL;
-            contextSearchString = APIConstants.TENANT_PREFIX + "%";
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
-            query = SubscriptionValidationSQLConstants.GET_TENANT_APIS_SQL;
-            contextSearchString = APIConstants.TENANT_PREFIX + tenantDomain + "%";
+            sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
 
         List<API> apiList = new ArrayList<>();
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setString(1, contextSearchString);
-            ps.setString(2, contextSearchString);
-
-            try (ResultSet resultSet = ps.executeQuery()) {
-                populateAPIList(resultSet, apiList);
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, organization);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        String version = resultSet.getString("API_VERSION");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                            apiList.add(api);
+                        } else {
+                            if (StringUtils.isNotEmpty(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                api.setEnvironment(deploymentName);
+                                api.setRevision(revision);
+                                apiList.add(api);
+                            }
+                        }
+                    }
+                }
             }
 
         } catch (SQLException e) {
-            log.error("Error in loading Apis for tenantId : " + tenantDomain, e);
+            log.error("Error in loading APIs for organization : " + organization, e);
         }
-
         return apiList;
     }
 
-    /*
-     * This method can be used to retrieve an API in the database
-     *
-     * @param apiId : unique identifier of an API
-     * @return {@link API}
-     * */
-    public API getApi(String version, String context) {
-
-        API api = null;
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_API_SQL + " UNION "
-                        + SubscriptionValidationSQLConstants.GET_API_PRODUCT_SQL)) {
-            ps.setString(1, version);
-            ps.setString(2, context);
-            ps.setString(3, version);
-            ps.setString(4, context);
-
-            try (ResultSet resultSet = ps.executeQuery()) {
-                Map<Integer, API> temp = new ConcurrentHashMap<>();
-                while (resultSet.next()) {
-                    int apiId = resultSet.getInt("API_ID");
-                    api = temp.get(apiId);
-                    if (api == null) {
-                        api = new API();
-                        api.setApiId(apiId);
-                        api.setProvider(resultSet.getString("API_PROVIDER"));
-                        api.setName(resultSet.getString("API_NAME"));
-                        api.setPolicy(resultSet.getString("API_TIER"));
-                        String apiVersionFromDB = resultSet.getString("API_VERSION");
-                        api.setVersion(apiVersionFromDB);
-                        api.setContext(resultSet.getString("CONTEXT"));
-                        String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                        if (apiVersionFromDB != null) {
-                            api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
-                        }
-                        temp.put(apiId, api);
-                    }
-                    String urlPattern = resultSet.getString("URL_PATTERN");
-                    String httpMethod = resultSet.getString("HTTP_METHOD");
-                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
-                    if (urlMapping == null) {
-                        urlMapping = new URLMapping();
-                        urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-                        urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                        urlMapping.setHttpMethod(httpMethod);
-                        urlMapping.setUrlPattern(urlPattern);
-                        api.addResource(urlMapping);
-                    }
-                    String scopeName = resultSet.getString("SCOPE_NAME");
-                    if (StringUtils.isNotEmpty(scopeName)) {
-                        urlMapping.addScope(scopeName);
-                    }
-                }
-            }
-
-        } catch (SQLException e) {
-            log.error("Error in loading API for api : " + context + " : " + version, e);
-        }
-
-        return api;
-    }
-
-    private void populateAPIList(ResultSet resultSet, List<API> apiList) throws SQLException {
-
-        Map<Integer, API> temp = new ConcurrentHashMap<>();
-        Map<Integer, URLMapping> tempUrls = new ConcurrentHashMap<>();
-        while (resultSet.next()) {
-            int apiId = resultSet.getInt("API_ID");
-            String apiType = resultSet.getString("API_TYPE");
-            API api = temp.get(apiId);
-            if (api == null) {
-                api = new API();
-                api.setApiId(apiId);
-                api.setProvider(resultSet.getString("API_PROVIDER"));
-                api.setName(resultSet.getString("API_NAME"));
-                api.setPolicy(resultSet.getString("API_TIER"));
-                String apiVersionFromDB = resultSet.getString("API_VERSION");
-                api.setVersion(apiVersionFromDB);
-                api.setContext(resultSet.getString("CONTEXT"));
-                String publishedDefaultVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
-                if (apiVersionFromDB != null) {
-                    api.setIsDefaultVersion(apiVersionFromDB.equals(publishedDefaultVersion));
-                }
-                api.setApiType(apiType);
-                temp.put(apiId, api);
-                tempUrls = new ConcurrentHashMap<>();
-                apiList.add(api);
-            }
-            createURLMapping(resultSet, tempUrls, api);
-        }
-    }
-
-    private void createURLMapping(ResultSet resultSet, Map<Integer, URLMapping> tempUrls, API api) throws SQLException {
-
-        int urlId = resultSet.getInt("URL_MAPPING_ID");
-        URLMapping urlMapping;
-        urlMapping = tempUrls.get(urlId);
-        if (urlMapping == null) {
-            urlMapping = new URLMapping();
-            urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-            urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-            urlMapping.setThrottlingPolicy(resultSet.getString("RES_TIER"));
-
-            urlMapping.setUrlPattern(resultSet.getString("URL_PATTERN"));
-            tempUrls.put(urlId, urlMapping);
-            api.addResource(urlMapping);
-        }
-        String scopeName = resultSet.getString("SCOPE_NAME");
-        if (StringUtils.isNotEmpty(scopeName)) {
-            urlMapping.addScope(scopeName);
-        }
-
-    }
     /*
      * This method can be used to retrieve all the APIs of a given tesanat in the database
      *
@@ -544,7 +563,6 @@ public class SubscriptionValidationDAO {
      * */
     public List<SubscriptionPolicy> getAllSubscriptionPolicies(String tenantDomain) {
 
-        ArrayList<SubscriptionPolicy> subscriptionPolicies = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_SUBSCRIPTION_POLICIES_SQL)) {
@@ -558,14 +576,14 @@ public class SubscriptionValidationDAO {
             ps.setInt(1, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                populateSubscriptionPolicyList(subscriptionPolicies, resultSet);
+                return populateSubscriptionPolicyList(resultSet);
             }
 
         } catch (SQLException e) {
             log.error("Error in loading Subscription Policies for tenanatId : " + tenantDomain, e);
         }
 
-        return subscriptionPolicies;
+        return null;
     }
 
     /*
@@ -574,10 +592,9 @@ public class SubscriptionValidationDAO {
      * */
     public List<ApplicationPolicy> getAllApplicationPolicies(String tenantDomain) {
 
-        ArrayList<ApplicationPolicy> applicationPolicies = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_APPLICATION_POLICIES_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -588,29 +605,35 @@ public class SubscriptionValidationDAO {
             ps.setInt(1, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                populateApplicationPolicyList(applicationPolicies, resultSet);
+                return populateApplicationPolicyList(resultSet);
             }
 
         } catch (SQLException e) {
             log.error("Error in loading application policies for tenantId : " + tenantDomain, e);
         }
 
-        return applicationPolicies;
+        return null;
     }
 
-    private void populateApplicationPolicyList(List<ApplicationPolicy> applicationPolicies, ResultSet resultSet)
+    private List<ApplicationPolicy> populateApplicationPolicyList(ResultSet resultSet)
             throws SQLException {
 
-        if (applicationPolicies != null && resultSet != null) {
+        List<ApplicationPolicy> applicationPolicies = new ArrayList<>();
+        if (resultSet != null) {
             while (resultSet.next()) {
                 ApplicationPolicy applicationPolicyDTO = new ApplicationPolicy();
-                applicationPolicyDTO.setId(resultSet.getInt("POLICY_ID"));
-                applicationPolicyDTO.setName(resultSet.getString("NAME"));
-                applicationPolicyDTO.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                applicationPolicyDTO.setTenantId(resultSet.getInt("TENANT_ID"));
+                applicationPolicyDTO.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                applicationPolicyDTO.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                applicationPolicyDTO
+                        .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                applicationPolicyDTO.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                String tenantDomain = APIUtil.getTenantDomainFromTenantId(applicationPolicyDTO.getTenantId());
+                applicationPolicyDTO.setTenantDomain(tenantDomain);
+                setCommonProperties(applicationPolicyDTO, resultSet);
                 applicationPolicies.add(applicationPolicyDTO);
             }
         }
+        return applicationPolicies;
     }
 
     /*
@@ -619,7 +642,6 @@ public class SubscriptionValidationDAO {
      * */
     public List<APIPolicy> getAllApiPolicies(String tenantDomain) {
 
-        ArrayList<APIPolicy> apiPolicies = new ArrayList<>();
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICIES_SQL)) {
@@ -633,37 +655,43 @@ public class SubscriptionValidationDAO {
             ps.setInt(1, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                populateApiPolicyList(apiPolicies, resultSet);
+                return populateApiPolicyList(resultSet);
             }
 
         } catch (SQLException e) {
             log.error("Error in loading api policies for tenantId : " + tenantDomain, e);
         }
 
-        return apiPolicies;
+        return null;
     }
 
-    private void populateApiPolicyList(List<APIPolicy> apiPolicies, ResultSet resultSet)
+    private List<APIPolicy> populateApiPolicyList(ResultSet resultSet)
             throws SQLException {
 
+        List<APIPolicy> apiPolicies = new ArrayList<>();
         Map<Integer, APIPolicy> temp = new ConcurrentHashMap<>();
-        if (apiPolicies != null && resultSet != null) {
+        if (resultSet != null) {
             while (resultSet.next()) {
-                int policyId = resultSet.getInt("POLICY_ID");
+                int policyId = resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID);
                 APIPolicy apiPolicy = temp.get(policyId);
                 if (apiPolicy == null) {
                     apiPolicy = new APIPolicy();
                     apiPolicy.setId(policyId);
-                    apiPolicy.setName(resultSet.getString("NAME"));
-                    apiPolicy.setQuotaType(resultSet.getString("DEFAULT_QUOTA_TYPE"));
-                    apiPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
-                    apiPolicy.setApplicableLevel(resultSet.getString("APPLICABLE_LEVEL"));
+                    apiPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    apiPolicy.setQuotaType(
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_DEFAULT_QUOTA_POLICY_TYPE));
+                    apiPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    String tenantDomain = APIUtil.getTenantDomainFromTenantId(apiPolicy.getTenantId());
+                    apiPolicy.setTenantDomain(tenantDomain);
+                    apiPolicy.setApplicableLevel(resultSet.getString(ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                    setCommonProperties(apiPolicy, resultSet);
                     apiPolicies.add(apiPolicy);
                 }
                 APIPolicyConditionGroup apiPolicyConditionGroup = new APIPolicyConditionGroup();
-                int conditionGroup = resultSet.getInt("CONDITION_GROUP_ID");
+                int conditionGroup = resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONDITION_ID);
                 apiPolicyConditionGroup.setConditionGroupId(conditionGroup);
-                apiPolicyConditionGroup.setQuotaType(resultSet.getString("QUOTA_TYPE"));
+                apiPolicyConditionGroup
+                        .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 apiPolicyConditionGroup.setPolicyId(policyId);
                 ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
                 ConditionGroupDTO conditionGroupDTO = null;
@@ -674,10 +702,12 @@ public class SubscriptionValidationDAO {
                 }
                 ConditionDTO[] conditionDTOS = conditionGroupDTO.getConditions();
                 apiPolicyConditionGroup.setConditionDTOS(Arrays.asList(conditionDTOS));
+                setCommonProperties(apiPolicyConditionGroup, resultSet);
                 apiPolicy.addConditionGroup(apiPolicyConditionGroup);
                 temp.put(policyId, apiPolicy);
             }
         }
+        return apiPolicies;
     }
 
     /*
@@ -742,7 +772,7 @@ public class SubscriptionValidationDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL)) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_APPLICATION_POLICY_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -757,10 +787,13 @@ public class SubscriptionValidationDAO {
                 if (resultSet.next()) {
                     ApplicationPolicy applicationPolicy = new ApplicationPolicy();
 
-                    applicationPolicy.setId(resultSet.getInt("POLICY_ID"));
-                    applicationPolicy.setName(resultSet.getString("NAME"));
-                    applicationPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                    applicationPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                    applicationPolicy.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                    applicationPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                    applicationPolicy
+                            .setQuotaType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                    applicationPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                    applicationPolicy.setTenantDomain(tenantDomain);
+                    setCommonProperties(applicationPolicy, resultSet);
 
                     return applicationPolicy;
                 }
@@ -778,10 +811,11 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationPolicy}
      * */
     public APIPolicy getApiPolicyByNameForTenant(String policyName, String tenantDomain) {
+
         APIPolicy policy = null;
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                        conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL)) {
+                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_TENANT_API_POLICY_SQL)) {
             int tenantId = 0;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -793,8 +827,7 @@ public class SubscriptionValidationDAO {
             ps.setString(2, policyName);
 
             try (ResultSet resultSet = ps.executeQuery()) {
-                List<APIPolicy> apiPolicies = new ArrayList<APIPolicy>();
-                populateApiPolicyList(apiPolicies, resultSet);
+                List<APIPolicy> apiPolicies = populateApiPolicyList(resultSet);
                 if (!apiPolicies.isEmpty()) {
                     policy = apiPolicies.get(0);
                 }
@@ -831,16 +864,25 @@ public class SubscriptionValidationDAO {
                     if (resultSet.next()) {
                         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy();
 
-                        subscriptionPolicy.setId(resultSet.getInt("POLICY_ID"));
-                        subscriptionPolicy.setName(resultSet.getString("POLICY_NAME"));
-                        subscriptionPolicy.setQuotaType(resultSet.getString("QUOTA_TYPE"));
-                        subscriptionPolicy.setTenantId(resultSet.getInt("TENANT_ID"));
+                        subscriptionPolicy.setId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
+                        subscriptionPolicy.setName(resultSet.getString(ThrottlePolicyConstants.COLUMN_POLICY_NAME));
+                        subscriptionPolicy.setQuotaType(resultSet.getString(
+                                ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+                        subscriptionPolicy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+                        subscriptionPolicy.setTenantDomain(APIUtil.getTenantDomainFromTenantId(tenantId));
 
-                        subscriptionPolicy.setRateLimitCount(resultSet.getInt("RATE_LIMIT_COUNT"));
-                        subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString("RATE_LIMIT_TIME_UNIT"));
-                        subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean("STOP_ON_QUOTA_REACH"));
-                        subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt("MAX_DEPTH"));
-                        subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt("MAX_COMPLEXITY"));
+                        subscriptionPolicy.setRateLimitCount(resultSet.getInt(
+                                ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                        subscriptionPolicy.setRateLimitTimeUnit(resultSet.getString(
+                                ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                        subscriptionPolicy.setStopOnQuotaReach(resultSet.getBoolean(
+                                ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                        subscriptionPolicy.setGraphQLMaxDepth(resultSet.getInt(
+                                ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
+                        subscriptionPolicy.setGraphQLMaxComplexity(resultSet.getInt(
+                                ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+
+                        setCommonProperties(subscriptionPolicy, resultSet);
                         return subscriptionPolicy;
                     }
                 }
@@ -852,33 +894,57 @@ public class SubscriptionValidationDAO {
         return null;
     }
 
-    /*
-     * @param appId : ApplicationId
-     * @param keyType : Type of the key ex: PRODUCTION
-     * @return {@link ApplicationKeyMapping}
-     *
-     * */
-    public ApplicationKeyMapping getApplicationKeyMapping(int appId, String keyType) {
+    private void setCommonProperties(Policy policy, ResultSet resultSet) throws SQLException {
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_SQL)) {
-            ps.setInt(1, appId);
-            ps.setString(2, keyType);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        String prefix = "";
 
-            try (ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
-                    ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
-                    keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
-                    keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
-                    keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                    return keyMapping;
-                }
-            }
-
-        } catch (SQLException e) {
-            log.error("Error in loading  Application Key Mapping for appId : " + appId + " type : " + keyType, e);
+        if (policy instanceof APIPolicy) {
+            prefix = "DEFAULT_";
         }
-        return null;
+
+        quotaPolicy.setType(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (quotaPolicy.getType() != null) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                RequestCountLimit reqLimit = new RequestCountLimit();
+                reqLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                reqLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                reqLimit.setRequestCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+                quotaPolicy.setLimit(reqLimit);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                BandwidthLimit bandLimit = new BandwidthLimit();
+                bandLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                bandLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+                bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+                quotaPolicy.setLimit(bandLimit);
+            }
+            policy.setQuotaPolicy(quotaPolicy);
+        }
+    }
+
+    private void setCommonProperties(APIPolicyConditionGroup apiPolicyConditionGroup, ResultSet resultSet)
+            throws SQLException {
+
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
+        if (quotaPolicy.getType() != null) {
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                RequestCountLimit reqLimit = new RequestCountLimit();
+                reqLimit.setUnitTime(resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                reqLimit.setTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                reqLimit.setRequestCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
+                quotaPolicy.setLimit(reqLimit);
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+                BandwidthLimit bandLimit = new BandwidthLimit();
+                bandLimit.setUnitTime(resultSet.getInt(ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                bandLimit.setTimeUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                bandLimit.setDataAmount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_QUOTA));
+                bandLimit.setDataUnit(resultSet.getString(ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
+                quotaPolicy.setLimit(bandLimit);
+            }
+            apiPolicyConditionGroup.setQuotaPolicy(quotaPolicy);
+        }
     }
 
     /*
@@ -886,13 +952,13 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationKeyMapping}
      *
      * */
-    public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey) {
+    public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey, String keymanager) {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL)) {
             ps.setString(1, consumerKey);
-
+            ps.setString(2, keymanager);
             try (ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
                     ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
@@ -910,75 +976,249 @@ public class SubscriptionValidationDAO {
         return null;
     }
 
-    /*
-     * This method can be used to retrieve all the URLMappings in the database
-     *
-     * @return {@link List<URLMapping>}
-     * */
-    public List<URLMapping> getAllURLMappings() {
+    public List<API> getAllApis(String organization, String deployment) {
 
-        List<URLMapping> urlMappings = new ArrayList<>();
-        String sql = SubscriptionValidationSQLConstants.GET_ALL_API_URL_MAPPING_SQL;
-
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet resultSet = ps.executeQuery()) {
-
-            while (resultSet.next()) {
-                URLMapping urlMapping = new URLMapping();
-                urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-                urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
-                urlMappings.add(urlMapping);
-            }
-        } catch (SQLException e) {
-            log.error("Error in loading URLMappings : ", e);
-        }
-
-        return urlMappings;
-    }
-
-    /*
-     * This method can be used to retrieve all the URLMappings of a given tenant in the database
-     *
-     * @param tenantId : tenant Id
-     * @return {@link List<URLMapping>}
-     * */
-    public List<URLMapping> getAllURLMappings(int tenantId) {
-
-        List<URLMapping> urlMappings = new ArrayList<>();
-        String sql = SubscriptionValidationSQLConstants.GET_TENANT_API_URL_MAPPING_SQL;
-        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        String contextParam = null;
-        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
-            sql = SubscriptionValidationSQLConstants.GET_ST_API_URL_MAPPING_SQL;
-            contextParam = "%/t/%";
-        } else if (tenantId > 0) {
-            contextParam = "%" + tenantDomain + "%";
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
         } else {
-            sql = SubscriptionValidationSQLConstants.GET_ALL_API_URL_MAPPING_SQL;
+            sql = sql.concat("WHERE AM_API.CONTEXT LIKE '/t/" + organization + "%'");
         }
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-        ) {
-            if (contextParam != null) {
-                ps.setString(1, contextParam);
-            }
-
-            try (ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
-                    URLMapping urlMapping = new URLMapping();
-                    urlMapping.setAuthScheme(resultSet.getString("AUTH_SCHEME"));
-                    urlMapping.setHttpMethod(resultSet.getString("HTTP_METHOD"));
-                    urlMapping.setThrottlingPolicy(resultSet.getString("POLICY"));
-                    urlMappings.add(urlMapping);
+        List<API> apiList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        String version = resultSet.getString("API_VERSION");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                        } else {
+                            if (deployment.equals(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                apiList.add(api);
+                            }
+                        }
+                    }
                 }
             }
         } catch (SQLException e) {
-            log.error("Error in loading URLMappings for tenantId : " + tenantId, e);
+            log.error("Error in loading APIs for api : " + deployment, e);
         }
-
-        return urlMappings;
+        return apiList;
     }
 
+    private void attachURlMappingDetailsOfApiProduct(Connection connection, API api) throws SQLException {
+
+        String sql = "SELECT AM_API_URL_MAPPING.URL_MAPPING_ID,AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING" +
+                ".AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
+                "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN " +
+                "AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING.URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING" +
+                ".URL_MAPPING_ID " +
+                "WHERE AM_API_URL_MAPPING.URL_MAPPING_ID IN (SELECT URL_MAPPING_ID FROM AM_API_PRODUCT_MAPPING WHERE " +
+                "API_ID= ? )";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, api.getApiId());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    String authScheme = resultSet.getString("AUTH_SCHEME");
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String throttlingTier = resultSet.getString("THROTTLING_TIER");
+                    String scopeName = resultSet.getString("SCOPE_NAME");
+                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                    if (urlMapping == null) {
+                        urlMapping = new URLMapping();
+                        urlMapping.setAuthScheme(authScheme);
+                        urlMapping.setHttpMethod(httpMethod);
+                        urlMapping.setThrottlingPolicy(throttlingTier);
+                        urlMapping.setUrlPattern(urlPattern);
+                    }
+                    if (StringUtils.isNotEmpty(scopeName)) {
+                        urlMapping.addScope(scopeName);
+                    }
+                    api.addResource(urlMapping);
+                }
+            }
+        }
+    }
+
+    public API getAPIByContextAndVersion(String context, String version, String deployment) {
+
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.CONTEXT = ? " +
+                "AND AM_API.API_VERSION= ?";
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, context);
+                preparedStatement.setString(2, version);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                            return api;
+                        } else {
+                            if (deployment.equals(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                return api;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading API for api : " + context + " : " + version, e);
+        }
+        return null;
+    }
+
+    private void attachURLMappingDetails(Connection connection, String revisionId, API api) throws SQLException {
+
+        String sql =
+                "SELECT AM_API_URL_MAPPING.HTTP_METHOD,AM_API_URL_MAPPING" +
+                        ".AUTH_SCHEME,AM_API_URL_MAPPING.URL_PATTERN,AM_API_URL_MAPPING.THROTTLING_TIER," +
+                        "AM_API_RESOURCE_SCOPE_MAPPING.SCOPE_NAME FROM AM_API_URL_MAPPING LEFT JOIN " +
+                        "AM_API_RESOURCE_SCOPE_MAPPING ON AM_API_URL_MAPPING" +
+                        ".URL_MAPPING_ID=AM_API_RESOURCE_SCOPE_MAPPING.URL_MAPPING_ID WHERE AM_API_URL_MAPPING" +
+                        ".API_ID=? AND AM_API_URL_MAPPING.REVISION_UUID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, api.getApiId());
+            preparedStatement.setString(2, revisionId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String httpMethod = resultSet.getString("HTTP_METHOD");
+                    String authScheme = resultSet.getString("AUTH_SCHEME");
+                    String urlPattern = resultSet.getString("URL_PATTERN");
+                    String throttlingTier = resultSet.getString("THROTTLING_TIER");
+                    String scopeName = resultSet.getString("SCOPE_NAME");
+                    URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
+                    if (urlMapping == null) {
+                        urlMapping = new URLMapping();
+                        urlMapping.setAuthScheme(authScheme);
+                        urlMapping.setHttpMethod(httpMethod);
+                        urlMapping.setThrottlingPolicy(throttlingTier);
+                        urlMapping.setUrlPattern(urlPattern);
+                    }
+                    if (StringUtils.isNotEmpty(scopeName)) {
+                        urlMapping.addScope(scopeName);
+                    }
+                    api.addResource(urlMapping);
+                }
+            }
+        }
+    }
+
+    private boolean isAPIDefaultVersion(Connection connection, String provider, String name, String version)
+            throws SQLException {
+
+        String sql = "SELECT PUBLISHED_DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND " +
+                "API_PROVIDER = ? AND PUBLISHED_DEFAULT_API_VERSION = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, provider);
+            preparedStatement.setString(3, version);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    public API getApiByUUID(String apiId, String deployment, String organization) {
+
+
+        String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
+                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.API_UUID = ? ";
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+            sql = sql.concat("AND AM_API.CONTEXT NOT LIKE /t/%");
+        } else {
+            sql = sql.concat("AND AM_API.CONTEXT LIKE /t/" + organization + "%");
+        }
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, apiId);
+                preparedStatement.setString(2, deployment);
+                if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
+                    preparedStatement.setString(3, "");
+                } else {
+                    preparedStatement.setString(3, "/t/" + organization);
+                }
+
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiType = resultSet.getString("API_TYPE");
+                        String version = resultSet.getString("API_VERSION");
+                        API api = new API();
+                        String provider = resultSet.getString("API_PROVIDER");
+                        String name = resultSet.getString("API_NAME");
+                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiId(resultSet.getInt("API_ID"));
+                        api.setVersion(version);
+                        api.setProvider(provider);
+                        api.setName(name);
+                        api.setApiType(apiType);
+                        api.setPolicy(resultSet.getString("API_TIER"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        String revision = resultSet.getString("REVISION_UUID");
+                        api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        if (APIConstants.API_PRODUCT.equals(apiType)) {
+                            attachURlMappingDetailsOfApiProduct(connection, api);
+                            return api;
+                        } else {
+                            if (deployment.equals(deploymentName)) {
+                                attachURLMappingDetails(connection, revision, api);
+                                return api;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error in loading API for api : " + apiId + " : " + deployment, e);
+        }
+        return null;
+    }
 }

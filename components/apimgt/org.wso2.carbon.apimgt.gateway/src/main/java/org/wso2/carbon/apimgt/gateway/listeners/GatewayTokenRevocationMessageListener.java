@@ -18,21 +18,16 @@
 
 package org.wso2.carbon.apimgt.gateway.listeners;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.Topic;
+import javax.jms.*;
 
 public class GatewayTokenRevocationMessageListener implements MessageListener {
 
@@ -46,27 +41,22 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
                 Topic jmsDestination = (Topic) message.getJMSDestination();
-                if (message instanceof MapMessage) {
-                    MapMessage mapMessage = (MapMessage) message;
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    Enumeration enumeration = mapMessage.getMapNames();
-                    while (enumeration.hasMoreElements()) {
-                        String key = (String) enumeration.nextElement();
-                        map.put(key, mapMessage.getObject(key));
-                    }
+                if (message instanceof TextMessage) {
+                    String textMessage = ((TextMessage) message).getText();
+                    JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                            path(APIConstants.EVENT_PAYLOAD_DATA);
+
                     if (APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.REVOKED_TOKEN_KEY) !=
-                                null) {
+                        if (payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText() != null) {
                             /*
                              * This message contains revoked token data
                              * revokedToken - Revoked Token which should be removed from the cache
                              * expiryTime - ExpiryTime of the token if token is JWT, otherwise expiry is set to 0
                              */
-                            handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY),
-                                    (Long) map.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME),
-                                    (String) map.get(APIConstants.REVOKED_TOKEN_TYPE));
+                            handleRevokedTokenMessage(payloadData.get(APIConstants.REVOKED_TOKEN_KEY).asText(),
+                                    payloadData.get(APIConstants.REVOKED_TOKEN_EXPIRY_TIME).asLong(),
+                                    payloadData.get(APIConstants.REVOKED_TOKEN_TYPE).asText());
                         }
-
                     }
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
@@ -74,7 +64,7 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
         }
     }

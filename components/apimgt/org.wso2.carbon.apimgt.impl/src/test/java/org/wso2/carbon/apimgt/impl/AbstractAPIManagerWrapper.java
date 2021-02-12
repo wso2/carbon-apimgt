@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -33,6 +35,8 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.API_PROVIDER;
 import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_NAME;
 import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_VERSION;
+
+import java.util.Map;
 
 public class AbstractAPIManagerWrapper extends AbstractAPIManager {
 
@@ -73,6 +77,12 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     public AbstractAPIManagerWrapper(ApiMgtDAO apiMgtDAO) throws APIManagementException {
         this.apiMgtDAO = apiMgtDAO;
     }
+    public AbstractAPIManagerWrapper(ScopesDAO scopesDAO) throws APIManagementException {
+        this.scopesDAO = scopesDAO;
+    }
+    public AbstractAPIManagerWrapper(APIPersistence persistance) throws APIManagementException {
+        this.apiPersistenceInstance = persistance;
+    }
 
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
             Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO) throws APIManagementException {
@@ -81,6 +91,17 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.tenantManager = tenantManager;
         this.registryService = registryService;
         this.apiMgtDAO = apiMgtDAO;
+    }
+
+    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
+                                     Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO, APIPersistence persistance)
+            throws APIManagementException {
+        this.genericArtifactManager = genericArtifactManager;
+        this.registry = registry;
+        this.tenantManager = tenantManager;
+        this.registryService = registryService;
+        this.apiMgtDAO = apiMgtDAO;
+        this.apiPersistenceInstance = persistance;
     }
 
     @Override
@@ -101,9 +122,7 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    protected TenantManager getTenantManager() {
-        return tenantManager;
-    }
+    protected TenantManager getTenantManager() {return tenantManager;}
 
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         try {
@@ -172,6 +191,26 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
 
     @Override
     public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedContent(String searchQuery, String tenantDomain, int start, int end)
+            throws APIManagementException {
+        // TODO Auto-generated method stub
         return null;
     }
 }

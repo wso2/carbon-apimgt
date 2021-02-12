@@ -36,6 +36,7 @@ import Icon from '@material-ui/core/Icon';
 import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Error from '@material-ui/core/SvgIcon/SvgIcon';
+import Api from 'AppData/api';
 
 const styles = (theme) => ({
     root: {
@@ -101,12 +102,17 @@ const styles = (theme) => ({
     },
 });
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Create new scopes for an API
  * @class CreateScope
  * @extends {Component}
  */
 class EditScope extends React.Component {
+    /**
+     * constructor
+     * @param {JSON} props parent props.
+     */
     constructor(props) {
         super(props);
         // this.api = new Api();
@@ -126,6 +132,7 @@ class EditScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
+        this.validateScopeDisplayName = this.validateScopeDisplayName.bind(this);
     }
 
 
@@ -177,10 +184,11 @@ class EditScope extends React.Component {
         apiScope.scope = {
             id: originalScope.id,
             name: originalScope.name,
+            displayName: originalScope.displayName,
             description: originalScope.description,
             bindings: validRoles,
         };
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         const scopes = api.scopes.map((scopeObj) => {
             if (scopeObj.scope.name === apiScope.scope.name) {
                 return apiScope;
@@ -197,8 +205,7 @@ class EditScope extends React.Component {
             }));
             const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
             history.push(redirectURL);
-        });
-        promisedApiUpdate.catch((error) => {
+        }).catch((error) => {
             const { response } = error;
             if (response.body) {
                 const { description } = response.body;
@@ -207,6 +214,10 @@ class EditScope extends React.Component {
         });
     }
 
+    /**
+     * Handle Role Addition.
+     * @param {string} role The first number.
+     */
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
         const promise = APIValidation.role.validate(base64url.encode(role));
@@ -230,12 +241,17 @@ class EditScope extends React.Component {
             });
     }
 
+    /**
+     * validate Scope Description.
+     * @param {JSON} event click event object.
+     */
     validateScopeDescription({ target: { value } }) {
         const { apiScope } = this.state;
         const originalScope = apiScope.scope;
         apiScope.scope = {
             id: originalScope.id,
             name: originalScope.name,
+            displayName: originalScope.displayName,
             description: value,
             bindings: originalScope.bindings,
         };
@@ -244,6 +260,30 @@ class EditScope extends React.Component {
         });
     }
 
+    /**
+     * validate Scope Display Name.
+     * @param {JSON} event click event object.
+     */
+    validateScopeDisplayName({ target: { value } }) {
+        const { apiScope } = this.state;
+        const originalScope = apiScope.scope;
+        apiScope.scope = {
+            id: originalScope.id,
+            name: originalScope.name,
+            displayName: value,
+            description: originalScope.description,
+            bindings: originalScope.bindings,
+        };
+        this.setState({
+            apiScope,
+        });
+    }
+
+
+    /**
+     * Render.
+     * @returns {JSX} rendered component.
+     */
     render() {
         const { classes, api, isAPIProduct } = this.props;
         const {
@@ -295,6 +335,27 @@ class EditScope extends React.Component {
                                         value={apiScope.scope.name}
                                         onChange={this.handleScopeNameInput}
                                         disabled
+                                    />
+                                </FormControl>
+                                <FormControl margin='normal'>
+                                    <TextField
+                                        id='displayName'
+                                        label='Display Name'
+                                        placeholder='Scope Display Name'
+                                        helperText={(
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.short.description.name'
+                                                defaultMessage='Enter Scope Name ( E.g.,: creator )'
+                                            />
+                                        )}
+                                        fullWidth
+                                        margin='normal'
+                                        variant='outlined'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        value={apiScope.scope.displayName || ''}
+                                        onChange={this.validateScopeDisplayName}
                                     />
                                 </FormControl>
                                 <FormControl margin='normal'>
@@ -372,7 +433,7 @@ class EditScope extends React.Component {
                                         variant='contained'
                                         color='primary'
                                         onClick={this.updateScope}
-                                        disabled={invalidRoles.length !== 0}
+                                        disabled={invalidRoles.length !== 0 || api.isRevision}
                                         className={classes.saveButton}
                                     >
                                         <FormattedMessage

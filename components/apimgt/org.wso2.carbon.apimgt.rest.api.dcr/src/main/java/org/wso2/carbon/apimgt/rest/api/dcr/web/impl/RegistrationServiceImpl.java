@@ -26,11 +26,12 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.RegistrationProfile;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
@@ -99,7 +100,25 @@ public class RegistrationServiceImpl implements RegistrationService {
             OAuthApplicationInfo returnedAPP;
             String loggedInUserTenantDomain;
             String owner = profile.getOwner();
-            String authUserName = RestApiUtil.getLoggedInUsername();
+            String authUserName = RestApiCommonUtil.getLoggedInUsername();
+
+            //If user is in a secondory userstore, update the owner of the application with
+            //correct domain
+            if (owner != null && authUserName != null) {
+                int index = authUserName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+                int ownerIndex = owner.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
+                if (index > 0 && ownerIndex < 0) {
+                    if (!UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME
+                            .equalsIgnoreCase(authUserName.substring(0, index))
+                            && owner.equals(authUserName.substring(index + 1))) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Update profile user name :" + owner + " with " + authUserName);
+                        }
+                        owner = authUserName;
+                        profile.setOwner(owner);
+                    }
+                }
+            }
 
             //Validates if the application owner and logged in username is same.
             if (authUserName != null && ((authUserName.equals(owner))|| isUserSuperAdmin(authUserName))) {
@@ -143,7 +162,7 @@ public class RegistrationServiceImpl implements RegistrationService {
                 if (!authUserName.equals(owner)){
                     loggedInUserTenantDomain = MultitenantUtils.getTenantDomain(owner);
                 }else{
-                    loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+                    loggedInUserTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 }
                 String userId = (String) oauthApplicationInfo.getParameter(OAUTH_CLIENT_USERNAME);
                 String userNameForSP = MultitenantUtils.getTenantAwareUsername(userId);

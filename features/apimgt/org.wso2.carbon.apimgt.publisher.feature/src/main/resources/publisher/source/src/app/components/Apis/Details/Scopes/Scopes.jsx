@@ -105,7 +105,7 @@ class Scopes extends React.Component {
         const {
             intl, classes, api,
         } = this.props;
-        const urlPrefix = (api.apiType === 'APIProduct') ? 'api-products' : 'apis';
+        const urlPrefix = (api.apiType === Api.CONSTS.APIProduct) ? 'api-products' : 'apis';
         const { scopes } = api;
         const url = `/${urlPrefix}/${api.id}/scopes/create`;
         const editUrl = `/${urlPrefix}/${api.id}/scopes/edit`;
@@ -174,7 +174,7 @@ class Scopes extends React.Component {
                                         <td>
                                             <Link
                                                 to={
-                                                    !isRestricted(['apim:api_create'], api) && {
+                                                    !isRestricted(['apim:api_create'], api) && !api.isRevision && {
                                                         pathname: editUrl,
                                                         state: {
                                                             scopeName,
@@ -186,7 +186,7 @@ class Scopes extends React.Component {
                                                     disabled={isRestricted(
                                                         ['apim:api_create'],
                                                         api,
-                                                    )}
+                                                    ) || api.isRevision}
                                                 >
                                                     <Icon>edit</Icon>
                                                     <FormattedMessage
@@ -292,12 +292,12 @@ class Scopes extends React.Component {
                                 />
                             </Typography>
                             <div className={classes.actions}>
-                                <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                                     <Button
                                         variant='contained'
                                         color='primary'
                                         className={classes.button}
-                                        disabled={isRestricted(['apim:api_create'], api)}
+                                        disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                                     >
                                         <FormattedMessage
                                             id='Apis.Details.Scopes.Scopes.create.scopes.button'
@@ -335,11 +335,11 @@ class Scopes extends React.Component {
                             <HelpOutlineIcon fontSize='small' />
                         </IconButton>
                     </Tooltip>
-                    <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                    <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                         <Button
                             size='small'
                             className={classes.button}
-                            disabled={isRestricted(['apim:api_create'], api)}
+                            disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                         >
                             <AddCircle className={classes.buttonIcon} />
                             <FormattedMessage

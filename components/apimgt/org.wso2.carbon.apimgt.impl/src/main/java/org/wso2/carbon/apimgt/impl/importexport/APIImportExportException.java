@@ -18,11 +18,23 @@
 
 package org.wso2.carbon.apimgt.impl.importexport;
 
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+
 /**
  * This is the class to represent APIImportException. This exception is used to indicate the
  * exceptions that might be occurred during API import process.
  */
 public class APIImportExportException extends Exception {
+
+    private ErrorHandler errorHandler;
+
+    /**
+     * Get error handler object.
+     * @return ErrorHandler
+     */
+    public ErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
 
     public APIImportExportException(String errorMessage) {
         super(errorMessage);
@@ -32,4 +44,25 @@ public class APIImportExportException extends Exception {
         super(msg, e);
     }
 
+    /**
+     * This is a default constructor where you can pass error code to error DTO
+     *
+     * @param msg  Error message
+     * @param code Exception code that need to pass to the error DTO
+     */
+    public APIImportExportException(String msg, ErrorHandler code) {
+        super(msg);
+        this.errorHandler = code;
+    }
+
+    /**
+     * This is a default constructor where you can pass error code to error DTO
+     * @param message Error message
+     * @param cause throwable object.
+     * @param code Exception code that need to pass to the error DTO
+     */
+    public APIImportExportException(String message, Throwable cause, ErrorHandler code) {
+        super(message, cause);
+        this.errorHandler = code;
+    }
 }

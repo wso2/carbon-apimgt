@@ -23,9 +23,22 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -80,6 +93,38 @@ public class ApplicationImportExportManager {
             String errorMsg = "Provided Application Owner is Invalid";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
+        }
+    }
+
+    /**
+     * This method validates the existence of the Application level throttling tier of Application
+     *
+     * @param application application
+     * @throws APIManagementException
+     */
+    public void validateApplicationThrottlingPolicy(Application application) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating tier defined in the Application");
+        }
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        ApplicationPolicy[] appPolicies = (ApplicationPolicy[]) apiProvider.getPolicies(userName,
+                PolicyConstants.POLICY_LEVEL_APP);
+        if (appPolicies != null || appPolicies.length > 0) {
+            String applicationLevelPolicy = application.getTier();
+            // To store whether the policy is available in the instance
+            Boolean policyFound = false;
+            for (ApplicationPolicy policy : appPolicies) {
+                if (StringUtils.equals(policy.getPolicyName(), applicationLevelPolicy)) {
+                    policyFound = true;
+                    break;
+                }
+            }
+            if (!policyFound) {
+                String message = "Invalid Application level throttling tier " + applicationLevelPolicy +
+                        " found in application definition";
+                throw new APIManagementException(message);
+            }
         }
     }
 

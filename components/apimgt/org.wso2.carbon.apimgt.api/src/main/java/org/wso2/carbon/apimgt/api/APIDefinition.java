@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,11 +114,11 @@ public abstract class APIDefinition {
      * @return a structured uri template map using provided Swagger Data Resource Paths
      */
     public Map<String, Map<String, SwaggerData.Resource>> getResourceMap(SwaggerData swaggerData) {
-        Map<String, Map<String, SwaggerData.Resource>> uriTemplateMap = new HashMap<>();
+        Map<String, Map<String, SwaggerData.Resource>> uriTemplateMap = new LinkedHashMap<>();
         for (SwaggerData.Resource resource : swaggerData.getResources()) {
             Map<String, SwaggerData.Resource> resources = uriTemplateMap.get(resource.getPath());
             if (resources == null) {
-                resources = new HashMap<>();
+                resources = new LinkedHashMap<>();
                 uriTemplateMap.put(resource.getPath(), resources);
             }
             resources.put(resource.getVerb().toUpperCase(), resource);
@@ -182,7 +183,7 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     public abstract String getOASVersion(String oasDefinition) throws APIManagementException;
-    
+
     public abstract String getOASDefinitionWithTierContentAwareProperty(String oasDefinition,
             List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException;
 
@@ -196,6 +197,17 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * This method returns OAS definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in OAS file
+     *
+     * @param swaggerContent String
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
+    public abstract String injectMgwThrottlingExtensionsToDefault(String swaggerContent)
+            throws APIManagementException;
+
+    /**
      * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param swaggerContent String
@@ -203,5 +215,16 @@ public abstract class APIDefinition {
      * @return API
      */
     public abstract API setExtensionsToAPI(String swaggerContent, API api)
+            throws APIManagementException;
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    public abstract String processDisableSecurityExtension(String swaggerContent)
             throws APIManagementException;
 }

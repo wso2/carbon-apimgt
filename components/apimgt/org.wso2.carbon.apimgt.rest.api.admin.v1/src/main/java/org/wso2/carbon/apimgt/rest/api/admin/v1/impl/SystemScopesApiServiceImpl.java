@@ -11,15 +11,15 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SystemScopesMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -28,8 +28,6 @@ import java.util.Base64;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 
 public class SystemScopesApiServiceImpl implements SystemScopesApiService {
 
@@ -43,7 +41,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         boolean existence;
 
         if (username == null) {
-            existence = apiAdmin.isScopeExists(RestApiUtil.getLoggedInUsername(), decodedScope);
+            existence = apiAdmin.isScopeExists(RestApiCommonUtil.getLoggedInUsername(), decodedScope);
             if (existence) {
                 scopeSettingsDTO.setName(decodedScope);
             } else {
@@ -65,7 +63,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
     public Response systemScopesGet(MessageContext messageContext) {
         try {
             Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
-                    .getTenantDomain(RestApiUtil.getLoggedInUsername()));
+                    .getTenantDomain(RestApiCommonUtil.getLoggedInUsername()));
             ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
             return Response.ok().entity(scopeListDTO).build();
         } catch (APIManagementException e) {
@@ -78,16 +76,16 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
     public Response updateRolesForScope(ScopeListDTO body, MessageContext messageContext)
             throws APIManagementException {
         JSONObject newScopeRoleJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
-        APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiUtil.getLoggedInUsername());
+        APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiCommonUtil.getLoggedInUsername());
         Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
-                .getTenantDomain(RestApiUtil.getLoggedInUsername()));
+                .getTenantDomain(RestApiCommonUtil.getLoggedInUsername()));
         ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
         return Response.ok().entity(scopeListDTO).build();
     }
 
     @Override
     public Response systemScopesRoleAliasesGet(MessageContext messageContext) throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(RestApiUtil.getLoggedInUsername());
+        String tenantDomain = MultitenantUtils.getTenantDomain(RestApiCommonUtil.getLoggedInUsername());
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
         JSONObject roleMapping = (JSONObject) tenantConfig.get(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
@@ -103,7 +101,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             throws APIManagementException {
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
         JSONObject newRoleMappingJson = SystemScopesMappingUtil.createJsonObjectOfRoleMapping(body);
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         APIUtil.updateTenantConfRoleAliasMapping(newRoleMappingJson, username);
         JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);

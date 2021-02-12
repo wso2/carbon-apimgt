@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigurator;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.AlertsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigInfoDTO;
@@ -45,7 +46,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     @Override
     public Response addAlertConfig(String alertType, String configurationId, AlertConfigInfoDTO body,
             MessageContext messageContext) {
-        String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
+        String tenantAwareUserName = RestApiCommonUtil.getLoggedInUsername();
         SubscriberAlertsAPIUtils.validateConfigParameters(configurationId);
         if (body == null) {
             RestApiUtil.handleBadRequest("Configuration should not be empty", log);
@@ -65,7 +66,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     @Override
     public Response deleteAlertConfig(String alertType, String configurationId,
             MessageContext messageContext) {
-        String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
+        String tenantAwareUserName = RestApiCommonUtil.getLoggedInUsername();
         SubscriberAlertsAPIUtils.validateConfigParameters(configurationId);
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
@@ -81,7 +82,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
 
     @Override
     public Response getAllAlertConfigs(String alertType, MessageContext messageContext) {
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             List<Map<String, String>> alertConfigList = storeAlertConfigurator

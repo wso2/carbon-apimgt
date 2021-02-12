@@ -24,17 +24,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
@@ -51,20 +46,19 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -79,7 +73,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -89,7 +82,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
@@ -97,33 +89,13 @@ import javax.ws.rs.core.Response;
 
 public class RestApiUtil {
 
-    private static final Log log = LogFactory.getLog(RestApiUtil.class);
+    public static final Log log = LogFactory.getLog(RestApiUtil.class);
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
+    private static Set<URITemplate> serviceCatalogAPIResourceMappings;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> uriToHttpMethodsMap;
     private static Dictionary<org.wso2.uri.template.URITemplate, List<String>> ETagSkipListURIToHttpMethodsMap;
-    public static final ThreadLocal userThreadLocal = new ThreadLocal();
-
-    public static void setThreadLocalRequestedTenant(String user) {
-        userThreadLocal.set(user);
-    }
-
-    public static void unsetThreadLocalRequestedTenant() {
-        userThreadLocal.remove();
-    }
-
-    public static String getThreadLocalRequestedTenant() {
-        return (String)userThreadLocal.get();
-    }
-
-    public static APIProvider getLoggedInUserProvider() throws APIManagementException {
-        return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
-    }
-
-    public static APIProvider getProvider(String username) throws APIManagementException {
-        return APIManagerFactory.getInstance().getAPIProvider(username);
-    }
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
         ErrorDTO errorDTO = new ErrorDTO();
@@ -199,62 +171,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Check whether the specified apiId is of type UUID
-     *
-     * @param apiId api identifier
-     * @return true if apiId is of type UUID, false otherwise
-     */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static boolean isUUID(String apiId) {
-        try {
-            UUID.fromString(apiId);
-            return true;
-        } catch (IllegalArgumentException e) {
-            if (log.isDebugEnabled()) {
-                log.debug(apiId + " is not a valid UUID");
-            }
-            return false;
-        }
-
-    }
-
-    /**
-     * Url validator, Allow any url with https and http.
-     * Allow any url without fully qualified domain
-     *
-     * @param url Url as string
-     * @return boolean type stating validated or not
-     */
-    public static boolean isURL(String url) {
-
-        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(url);
-        return matcher.matches();
-
-    }
-
-    public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
-        return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
-    }
-
-    /** Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
-     *
-     * @return an APIConsumer which is corresponding to the current logged in user
-     * @throws APIManagementException
-     */
-    public static APIConsumer getLoggedInUserConsumer() throws APIManagementException {
-        return APIManagerFactory.getInstance().getAPIConsumer(getLoggedInUsername());
-    }
-
-    public static String getLoggedInUsername() {
-        return CarbonContext.getThreadLocalCarbonContext().getUsername();
-    }
-
-    public static String getLoggedInUserTenantDomain() {
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-    }
-
-    /**
      * Create a JAXRS Response object based on the provided ResourceFile
      *
      * @param fileNameWithoutExtension Filename without the extension. The extension is determined from the method
@@ -282,16 +198,12 @@ public class RestApiUtil {
      */
     @SuppressWarnings("unchecked")
     public static String getLoggedInUserGroupId() {
-        String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
             loginInfoJsonObj.put("user", username);
-            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                loginInfoJsonObj.put("isSuperTenant", true);
-            } else {
-                loginInfoJsonObj.put("isSuperTenant", false);
-            }
+            loginInfoJsonObj.put("isSuperTenant", tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
             String loginInfoString = loginInfoJsonObj.toJSONString();
             String[] groupIdArr = getGroupIds(loginInfoString);
             String groupId = "";
@@ -320,33 +232,13 @@ public class RestApiUtil {
     }
 
     /**
-     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an
-     * APIMgtAuthorizationFailedException
-     *
-     * @param apiIdentifier API Identifier
-     * @throws APIMgtAuthorizationFailedException
-     */
-    public static void validateUserTenantWithAPIIdentifier(APIIdentifier apiIdentifier)
-            throws APIMgtAuthorizationFailedException {
-        String username = RestApiUtil.getLoggedInUsername();
-        String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
-        String loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        if (!providerTenantDomain.equals(loggedInUserTenantDomain)) {
-            String errorMsg = "User " + username + " is not allowed to access " + apiIdentifier.toString()
-                    + " as it belongs to a different tenant : " + providerTenantDomain;
-            throw new APIMgtAuthorizationFailedException(errorMsg);
-        }
-    }
-
-    /**
      * Returns the requested tenant according to the input x-tenant-header
      *
      * @return requested tenant domain
      */
     public static String getRequestedTenantDomain(String xTenantHeader) {
         if (StringUtils.isEmpty(xTenantHeader)) {
-            return getLoggedInUserTenantDomain();
+            return RestApiCommonUtil.getLoggedInUserTenantDomain();
         } else {
             return xTenantHeader;
         }
@@ -378,19 +270,6 @@ public class RestApiUtil {
         } finally {
             IOUtils.closeQuietly(outFileStream);
         }
-    }
-
-    /**
-     * Returns date in RFC3339 format.
-     * Example: 2008-11-13T12:23:30-08:00
-     *
-     * @param date Date object
-     * @return date string in RFC3339 format.
-     */
-    public static String getRFC3339Date(Date date) {
-        DateTimeFormatter jodaDateTimeFormatter = ISODateTimeFormat.dateTime();
-        DateTime dateTime = new DateTime(date);
-        return jodaDateTimeFormatter.print(dateTime);
     }
 
     /**
@@ -618,6 +497,21 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToMetaInfoIsCorrupted(Throwable e) {
         return detailedMessageMatches(e, "Error while reading API meta information from path");
+    }
+
+    /**
+     * Check if the specified throwable e is happened as the provided throttling policy is missing
+     *
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the provided throttling policy is missing, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToProvidedThrottlingPolicyMissing(Throwable e) {
+        return detailedMessageMatches(e, "Invalid x-throttling tier") ||
+                detailedMessageMatches(e, "Invalid API level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Product level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Subscription level throttling tier") ||
+                detailedMessageMatches(e, "Invalid Application level throttling tier") ;
     }
 
     /**
@@ -1036,259 +930,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are specified
-     *
-     * @param offset current starting index
-     * @param limit current max records
-     * @param size maximum index possible
-     * @return the next/previous offset/limit parameters as a hash-map
-     */
-    public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
-        Map<String, Integer> result = new HashMap<>();
-        if (offset >= size || offset < 0)
-            return result;
-
-        int start = offset;
-        int end = offset + limit - 1;
-
-        int nextStart = end + 1;
-        if (nextStart < size) {
-            result.put(RestApiConstants.PAGINATION_NEXT_OFFSET, nextStart);
-            result.put(RestApiConstants.PAGINATION_NEXT_LIMIT, limit);
-        }
-
-        int previousEnd = start - 1;
-        int previousStart = previousEnd - limit + 1;
-
-        if (previousEnd >= 0) {
-            if (previousStart < 0) {
-                result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, 0);
-                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
-            } else {
-                result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, previousStart);
-                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
-            }
-        }
-        return result;
-    }
-
-    /** Returns the paginated url for APIs API
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @param query search query value
-     * @return constructed paginated url
-     */
-    public static String getAPIPaginatedURL(Integer offset, Integer limit, String query) {
-        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for Applications API
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @param groupId groupId of the Application
-     * @return constructed paginated url
-     */
-    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
-        groupId = groupId == null ? "" : groupId;
-        String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for admin  /Applications API
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getApplicationPaginatedURL(Integer offset, Integer limit) {
-        String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for subscriptions for a particular API identifier
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @param apiId API Identifier
-     * @param groupId groupId of the Application
-     * @return constructed paginated url
-     */
-    public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId,
-            String groupId) {
-        groupId = groupId == null ? "" : groupId;
-        String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
-        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for subscriptions for a particular application
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @param applicationId application id
-     * @return constructed paginated url
-     */
-    public static String getSubscriptionPaginatedURLForApplicationId(Integer offset, Integer limit,
-            String applicationId) {
-        String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APPLICATIONID;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.APPLICATIONID_PARAM, applicationId);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for documentations
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
-        String paginatedURL = RestApiConstants.DOCUMENTS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for API ratings
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getRatingPaginatedURL(Integer offset, Integer limit, String apiId) {
-        String paginatedURL = RestApiConstants.RATINGS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for tiers
-     *
-     * @param tierLevel tier level (api/application or resource)
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getTiersPaginatedURL(String tierLevel, Integer offset, Integer limit) {
-        String paginatedURL = RestApiConstants.TIERS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.TIER_LEVEL_PARAM, tierLevel);
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for tags
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getTagsPaginatedURL(Integer offset, Integer limit) {
-        String paginatedURL = RestApiConstants.TAGS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        return paginatedURL;
-    }
-
-    /**
-     * Returns the paginated URL for scopes.
-     *
-     * @param offset starting index
-     * @param limit  max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getScopesPaginatedURL(Integer offset, Integer limit) {
-
-        String paginatedURL = RestApiConstants.SCOPES_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for tags
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getResourcePathPaginatedURL(Integer offset, Integer limit) {
-        String paginatedURL = RestApiConstants.RESOURCE_PATH_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for APIProducts API
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @param query search query value
-     * @return constructed paginated url
-     */
-    public static String getAPIProductPaginatedURL(Integer offset, Integer limit, String query) {
-        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
-        return paginatedURL;
-    }
-
-    /** Returns the paginated url for product documentations
-     *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @return constructed paginated url
-     */
-    public static String getProductDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
-        String paginatedURL = RestApiConstants.PRODUCT_DOCUMENTS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
-        return paginatedURL;
-    }
-
-    /**
-     * Checks whether the list of tiers are valid given the all valid tiers
-     *
-     * @param allTiers All defined tiers
-     * @param currentTiers tiers to check if they are a subset of defined tiers
-     * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
-     */
-    public static List<String> getInvalidTierNames(Set<Tier> allTiers, List<String> currentTiers) {
-        List<String> invalidTiers = new ArrayList<>();
-        for (String tierName : currentTiers) {
-            boolean isTierValid = false;
-            for (Tier definedTier : allTiers) {
-                if (tierName.equals(definedTier.getName())) {
-                    isTierValid = true;
-                    break;
-                }
-            }
-            if (!isTierValid) {
-                invalidTiers.add(tierName);
-            }
-        }
-        return invalidTiers;
-    }
-
-    /**
      * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
      *
      * @param tiers    Tier Collection
@@ -1340,7 +981,7 @@ public class RestApiUtil {
                             .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
                 } else {
                     definition = IOUtils
-                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                            .toString(RestApiUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
                 }
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
@@ -1387,6 +1028,36 @@ public class RestApiUtil {
                 log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return publisherResourceMappings;
+        }
+    }
+
+    /**
+     * This is static method to return URI Templates map of Service Catalog REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with Service Catalog REST API
+     */
+    public static Set<URITemplate> getServiceCatalogAPIResourceMapping() {
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
+                RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL, "v0"));
+
+        if (serviceCatalogAPIResourceMappings != null) {
+            return serviceCatalogAPIResourceMappings;
+        } else {
+            try {
+                String definition;
+                definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/service-catalog-api.yaml"), "UTF-8");
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                serviceCatalogAPIResourceMappings = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
+            }
+            return serviceCatalogAPIResourceMappings;
         }
     }
 
@@ -1602,7 +1273,7 @@ public class RestApiUtil {
         } catch (UserStoreException e) {
             RestApiUtil.handleInternalServerError("Error in getting the super tenant domain", e, log);
         }
-        boolean isSuperTenantUser = RestApiUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
+        boolean isSuperTenantUser = RestApiCommonUtil.getLoggedInUserTenantDomain().equals(superTenantDomain);
         if (!isSuperTenantUser) {
             String errorMsg = "Cross Tenant resource access is not allowed for this request. User " + username +
                     " is not allowed to access resources in " + targetTenantDomain + " as the requester is not a super " +
@@ -1652,16 +1323,18 @@ public class RestApiUtil {
         //get URI templates using the base path in the request
         if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
             uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION);
         } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
             uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_DEVELOPER_PORTAL_VERSION);
         } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0)) {
             uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_0);
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_1)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT_FULL)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping(RestApiConstants.REST_API_ADMIN_VERSION);
+        } else if (basePath.contains(RestApiConstants.REST_API_SERVICE_CATALOG_CONTEXT_FULL)) {
+            uriTemplates = RestApiUtil.getServiceCatalogAPIResourceMapping();
         }
         return uriTemplates;
     }
@@ -1674,7 +1347,7 @@ public class RestApiUtil {
     public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
         Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/store-api.yaml"};
+        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml"};
         for (String fileName : fileNameArray) {
             String definition = null;
             try {

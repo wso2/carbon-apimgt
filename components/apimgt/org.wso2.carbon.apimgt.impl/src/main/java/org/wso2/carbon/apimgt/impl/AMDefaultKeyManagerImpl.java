@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import feign.Feign;
 import feign.Response;
 import feign.auth.BasicAuthRequestInterceptor;
@@ -60,7 +61,6 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.ScopeClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TenantHeaderInterceptor;
 import org.wso2.carbon.apimgt.impl.kmclient.model.TokenInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.UserClient;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.user.core.UserCoreConstants;
@@ -74,7 +74,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,8 +89,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
     private AuthClient authClient;
-    private AuthClient revokeClient;
-    private AccessTokenGenerator accessTokenGenerator;
     private ScopeClient scopeClient;
     private UserClient userClient;
 
@@ -109,6 +106,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         String applicationName = oAuthApplicationInfo.getClientName();
+        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
@@ -116,21 +114,22 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
-                    getTenantAwareUsername(userId)), applicationName, keyType);
+            oauthClientName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), oauthClientName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application creation.");
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Trying to create OAuth application :" + applicationName);
+            log.debug("Trying to create OAuth application : " + oauthClientName + " for application: " + applicationName
+                    + " and key type: " + keyType);
         }
 
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
 
-        ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, false);
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, false);
         ClientInfo createdClient;
 
         try {
@@ -143,7 +142,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return oAuthApplicationInfo;
 
         } catch (KeyManagerClientException e) {
-            handleException("Cannot create OAuth application  : " + applicationName, e);
+            handleException(
+                    "Can not create OAuth application  : " + oauthClientName + " for application: " + applicationName
+                            + " and key type: " + keyType, e);
             return null;
         }
     }
@@ -162,7 +163,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         ClientInfo clientInfo = new ClientInfo();
         JSONObject infoJson = new JSONObject(info.getJsonString());
-        String applicationOwner =  (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+        String applicationOwner = (String) info.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         if (infoJson.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
             // this is done as there are instances where the grant string begins with a comma character.
             String grantString = infoJson.getString(ApplicationConstants.OAUTH_CLIENT_GRANT);
@@ -199,6 +200,68 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 clientInfo.setPresetClientSecret(info.getClientSecret());
             }
         }
+        Object parameter = info.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+        Map<String, Object> additionalProperties = new HashMap<>();
+        if (parameter instanceof String) {
+            additionalProperties = new Gson().fromJson((String) parameter, Map.class);
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setApplicationAccessTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setUserAccessTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setRefreshTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+        if (additionalProperties.containsKey(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME)) {
+            Object expiryTimeObject =
+                    additionalProperties.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME);
+            if (expiryTimeObject instanceof String) {
+                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
+                    try {
+                        long expiry = Long.parseLong((String) expiryTimeObject);
+                        clientInfo.setIdTokenLifeTime(expiry);
+                    } catch (NumberFormatException e) {
+                        // No need to throw as its due to not a number sent.
+                    }
+                }
+            }
+        }
+
         return clientInfo;
     }
 
@@ -209,6 +272,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
+        String oauthClientName = APIUtil.getApplicationUUID(applicationName, userId);
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
@@ -221,8 +285,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 userId = userId.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
             // Construct the application name subsequent to replacing email domain separator
-            applicationName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
-                    getTenantAwareUsername(userId)), applicationName, keyType);
+            oauthClientName = String.format("%s_%s_%s", APIUtil.replaceEmailDomain(MultitenantUtils.
+                    getTenantAwareUsername(userId)), oauthClientName, keyType);
         } else {
             throw new APIManagementException("Missing required information for OAuth application update.");
         }
@@ -232,10 +296,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("CallBackURL : " + oAuthApplicationInfo.getCallBackURL());
         }
         if (log.isDebugEnabled() && applicationName != null) {
-            log.debug("Client Name : " + applicationName);
+            log.debug("Client Name : " + oauthClientName);
         }
 
-        ClientInfo request = createClientInfo(oAuthApplicationInfo, applicationName, true);
+        ClientInfo request = createClientInfo(oAuthApplicationInfo, oauthClientName, true);
         ClientInfo createdClient;
         try {
             createdClient = dcrClient.updateApplication(oAuthApplicationInfo.getClientId(), request);
@@ -316,14 +380,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         TokenInfo tokenResponse;
 
         try {
-            if (tokenRequest.getValidityPeriod() != 0) {
-                String definedValidityPeriod = Long.toString(tokenRequest.getValidityPeriod());
-                tokenResponse = authClient.generateWithValidityPeriod(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes, definedValidityPeriod);
-            } else {
-                tokenResponse = authClient.generate(tokenRequest.getClientId(),
-                        tokenRequest.getClientSecret(), GRANT_TYPE_VALUE, scopes);
-            }
+            tokenResponse = authClient.generate(tokenRequest.getClientId(), tokenRequest.getClientSecret(),
+                    GRANT_TYPE_VALUE, scopes);
         } catch (KeyManagerClientException e) {
             throw new APIManagementException("Error occurred while calling token endpoint!", e);
         }
@@ -370,8 +428,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
             tokenInfo.setTokenValid(true);
             if (introspectInfo.getIat() > 0 && introspectInfo.getExpiry() > 0) {
-                long validityPeriod = introspectInfo.getExpiry() - introspectInfo.getIat();
-                tokenInfo.setValidityPeriod(validityPeriod * 1000L);
+                if (introspectInfo.getExpiry() != Long.MAX_VALUE) {
+                    long validityPeriod = introspectInfo.getExpiry() - introspectInfo.getIat();
+                    tokenInfo.setValidityPeriod(validityPeriod * 1000L);
+                } else {
+                    tokenInfo.setValidityPeriod(Long.MAX_VALUE);
+                }
                 tokenInfo.setIssuedTime(introspectInfo.getIat() * 1000L);
             }
             if (StringUtils.isNotEmpty(introspectInfo.getScope())) {
@@ -470,6 +532,16 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT)).replace(",", " "));
         }
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
+        Map<String,Object> additionalProperties = new HashMap<>();
+        additionalProperties.put(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
+                appResponse.getApplicationAccessTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
+                appResponse.getUserAccessTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
+                appResponse.getRefreshTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,appResponse.getIdTokenLifeTime());
+
+        oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
     }
 
@@ -633,19 +705,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public Map<String, Set<Scope>> getScopesForAPIS(String apiIdsString)
             throws APIManagementException {
 
-        Map<String, Set<Scope>> apiToScopeMapping = new HashMap<>();
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        Map<String, Set<String>> apiToScopeKeyMapping = apiMgtDAO.getScopesForAPIS(apiIdsString);
-        for (String apiId : apiToScopeKeyMapping.keySet()) {
-            Set<Scope> apiScopes = new LinkedHashSet<>();
-            Set<String> scopeKeys = apiToScopeKeyMapping.get(apiId);
-            for (String scopeKey : scopeKeys) {
-                Scope scope = getScopeByName(scopeKey);
-                apiScopes.add(scope);
-            }
-            apiToScopeMapping.put(apiId, apiScopes);
-        }
-        return apiToScopeMapping;
+        return null;
     }
 
     /**
@@ -662,8 +722,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         scopeDTO.setName(scopeKey);
         scopeDTO.setDisplayName(scope.getName());
         scopeDTO.setDescription(scope.getDescription());
-        if (scope.getRoles() != null) {
-            scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+        if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
+            scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
         }
         try (Response response = scopeClient.registerScope(scopeDTO)) {
             if (response.status() != HttpStatus.SC_CREATED) {
@@ -672,7 +732,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         " Status: " + response.status() + " . Error Response: " + responseString);
             }
         } catch (KeyManagerClientException e) {
-            handleException("Can not scope : " + scopeKey, e);
+            handleException("Cannot register scope : " + scopeKey, e);
         }
     }
 
@@ -707,7 +767,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         try {
             scopeDTO = scopeClient.getScopeByName(name);
         } catch (KeyManagerClientException ex) {
-            handleException("Can read scope : " + name, ex);
+            handleException("Cannot read scope : " + name, ex);
         }
         return fromDTOToScope(scopeDTO);
     }
@@ -724,7 +784,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         scope.setName(scopeDTO.getDisplayName());
         scope.setKey(scopeDTO.getName());
         scope.setDescription(scopeDTO.getDescription());
-        scope.setRoles(String.join(",", scopeDTO.getBindings()));
+        scope.setRoles((scopeDTO.getBindings() != null && !scopeDTO.getBindings().isEmpty())
+                ? String.join(",", scopeDTO.getBindings()) : StringUtils.EMPTY);
         return scope;
     }
 
@@ -865,8 +926,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             ScopeDTO scopeDTO = new ScopeDTO();
             scopeDTO.setDisplayName(scope.getName());
             scopeDTO.setDescription(scope.getDescription());
-            if (scope.getRoles() != null) {
-                scopeDTO.setBindings(Arrays.asList(scope.getRoles().split(",")));
+            if (StringUtils.isNotBlank(scope.getRoles()) && scope.getRoles().trim().split(",").length > 0) {
+                scopeDTO.setBindings(Arrays.asList(scope.getRoles().trim().split(",")));
             }
             scopeClient.updateScope(scopeDTO, scope.getKey());
         } catch (KeyManagerClientException e) {

@@ -73,7 +73,7 @@ export default function ListBlacklistThrottlingPolicies() {
                         <Link
                             target='_blank'
                             href={Configurations.app.docUrl
-            + 'learn/rate-limiting/blacklisting-whitelisting/#blacklisting-requests'}
+            + 'learn/rate-limiting/access-control/#denying-requests'}
                         >
                             <ListItemText primary={(
                                 <FormattedMessage

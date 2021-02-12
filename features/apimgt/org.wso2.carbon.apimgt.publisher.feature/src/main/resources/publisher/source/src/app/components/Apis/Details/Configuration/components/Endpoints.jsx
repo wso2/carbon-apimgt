@@ -20,7 +20,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -99,7 +99,7 @@ function Endpoints(props) {
 
     return (
         <>
-            <ExpansionPanel className={classes.expansionPanel} defaultExpanded>
+            <WrappedExpansionPanel className={classes.expansionPanel} defaultExpanded id='endpoints'>
                 <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography className={classes.subHeading} variant='h6'>
                         <FormattedMessage
@@ -216,7 +216,7 @@ function Endpoints(props) {
                         </Link>
                     </Box>
                 </ExpansionPanelDetails>
-            </ExpansionPanel>
+            </WrappedExpansionPanel>
         </>
     );
 }

@@ -21,8 +21,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -105,6 +105,27 @@ public class DefaultJWTTransformer implements JWTTransformer {
     public void loadConfiguration(TokenIssuerDto tokenIssuerConfiguration) {
 
         this.tokenIssuer = tokenIssuerConfiguration;
+    }
+
+    /**
+     * Returns whether the token type is Application or not by checking if 'aut' claim is APPLICATION or not. If 'aut'
+     * claim is not present, returns null.
+     *
+     * @param jwtClaimsSet JWT Claim set
+     * @return Boolean whether Application token type or not
+     */
+    @Override
+    public Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        try {
+            if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_USER_TYPE) != null) {
+                String aut = jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_USER_TYPE);
+                return StringUtils.equalsIgnoreCase(aut, APIConstants.JwtTokenConstants.APPLICATION);
+            }
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while parsing JWT claims", e);
+        }
+        return null;
     }
 
 }

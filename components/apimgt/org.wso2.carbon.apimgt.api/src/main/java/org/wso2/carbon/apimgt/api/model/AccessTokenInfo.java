@@ -51,6 +51,17 @@ public class AccessTokenInfo {
     private int errorcode;
 
     private String endUserName;
+    private String keyManager;
+
+    public String getKeyManager() {
+
+        return keyManager;
+    }
+
+    public void setKeyManager(String keyManager) {
+
+        this.keyManager = keyManager;
+    }
 
     public String[] getScopes() {
         return scope;

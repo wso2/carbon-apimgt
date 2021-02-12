@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -121,11 +123,39 @@ public class RestApiAdminUtils {
      */
     public static void validateThrottlePolicyNameProperty(String policyName)
             throws APIManagementException {
-
+        String propertyName = "policyName";
+        Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
+        Matcher matcher = pattern.matcher(policyName);
         if (StringUtils.isBlank(policyName)) {
-            String propertyName = "policyName";
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+        }
+
+        if (matcher.find()) {
+            throw new APIManagementException(propertyName +
+                    " property value of payload cannot contain invalid characters",
+                    ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, propertyName));
+        }
+    }
+
+    public static void validateIPAddress(String ipAddress) throws APIManagementException {
+        String ip4 = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
+                "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+        String ip6 = "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:)" +
+                "{1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}" +
+                "(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}" +
+                "(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)" +
+                "|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0," +
+                "1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:(" +
+                "(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
+
+        Pattern ip4Pattern = Pattern.compile(ip4);
+        Pattern ip6Pattern = Pattern.compile(ip6);
+        Matcher ip4Matcher = ip4Pattern.matcher(ipAddress);
+        Matcher ip6Matcher = ip6Pattern.matcher(ipAddress);
+        boolean result = !ip4Matcher.find() && !ip6Matcher.find();
+        if (result) {
+            throw new APIManagementException(ipAddress + " is an invalid ip address format");
         }
     }
 
@@ -176,7 +206,6 @@ public class RestApiAdminUtils {
         InputStream themeContent = null;
         File tenantThemeDirectory;
         File backupDirectory = null;
-
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
         try {
@@ -203,18 +232,15 @@ public class RestApiAdminUtils {
                 String tempPath = getTenantThemeBackupDirectoryPath(tenantDomain);
                 backupDirectory = new File(tempPath);
                 FileUtils.copyDirectory(tenantThemeDirectory, backupDirectory);
-
                 //remove existing files inside the directory
                 FileUtils.cleanDirectory(tenantThemeDirectory);
             }
-
             //get the zip file content
             zipInputStream = new ZipInputStream(themeContent);
             //get the zipped file list entry
             ZipEntry zipEntry = zipInputStream.getNextEntry();
 
             while (zipEntry != null) {
-
                 String fileName = zipEntry.getName();
                 APIUtil.validateFileName(fileName);
                 File newFile = new File(outputFolder + File.separator + fileName);
@@ -225,7 +251,6 @@ public class RestApiAdminUtils {
                             "Attempt to upload invalid zip archive with file at " + fileName + ". File path is " +
                                     "outside target directory");
                 }
-
                 if (zipEntry.isDirectory()) {
                     if (!newFile.exists()) {
                         boolean status = newFile.mkdir();
@@ -240,12 +265,10 @@ public class RestApiAdminUtils {
                         //else you will hit FileNotFoundException for compressed folder
                         new File(newFile.getParent()).mkdirs();
                         FileOutputStream fileOutputStream = new FileOutputStream(newFile);
-
                         int len;
                         while ((len = zipInputStream.read(buffer)) > 0) {
                             fileOutputStream.write(buffer, 0, len);
                         }
-
                         fileOutputStream.close();
                     } else {
                         APIUtil.handleException(

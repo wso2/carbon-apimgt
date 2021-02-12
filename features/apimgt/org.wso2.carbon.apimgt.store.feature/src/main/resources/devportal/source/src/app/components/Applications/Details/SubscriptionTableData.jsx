@@ -386,7 +386,7 @@ class SubscriptionTableData extends React.Component {
                                 </Button>
                             </DialogActions>
                         </Dialog>
-                    <Invoice subscriptionId={subscriptionId} isMonetizedAPI={isMonetizedAPI} isDynamicUsagePolicy={isDynamicUsagePolicy} />
+                    { isMonetizedAPI && <Invoice subscriptionId={subscriptionId} isDynamicUsagePolicy={isDynamicUsagePolicy} /> }
                 </TableCell>
             </TableRow>
         );

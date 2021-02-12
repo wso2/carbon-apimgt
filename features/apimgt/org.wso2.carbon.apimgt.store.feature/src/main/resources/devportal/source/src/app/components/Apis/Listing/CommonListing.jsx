@@ -179,6 +179,8 @@ class CommonListing extends React.Component {
                 this.showToggle = false;
             }
             defaultApiView = defaultApiView[0];
+        } else {
+            defaultApiView = localStorage.getItem('portal.listType') || defaultApiView;
         }
         this.state = {
             listType: defaultApiView,
@@ -196,6 +198,7 @@ class CommonListing extends React.Component {
      * @memberof CommonListing
      */
     setListType = (value) => {
+        localStorage.setItem('portal.listType', value);
         this.setState({ listType: value });
     };
 

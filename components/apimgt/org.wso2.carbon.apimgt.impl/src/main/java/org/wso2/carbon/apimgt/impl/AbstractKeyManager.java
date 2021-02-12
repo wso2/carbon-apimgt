@@ -35,6 +35,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
@@ -102,6 +103,11 @@ public abstract class AbstractKeyManager implements KeyManager {
         return null;
     }
 
+    @Override
+    public boolean registerNewResource(API api, Map resourceAttributes) throws APIManagementException {
+
+        return true;
+    }
 
     /**
      * This method will accept json String and will do the json parse will set oAuth application properties to OAuthApplicationInfo object.

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -37,7 +38,11 @@ public class SubscriptionPoliciesApiServiceImpl implements SubscriptionPoliciesA
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
         if (StringUtils.isNotEmpty(xWSO2Tenant)) {
-            if (StringUtils.isNotEmpty(policyName)) {
+            if (APIConstants.CHAR_ASTERIX.equals(xWSO2Tenant)) {
+                return Response.ok().entity(SubscriptionValidationDataUtil.
+                        fromSubscriptionPolicyToSubscriptionPolicyListDTO(subscriptionValidationDAO.
+                                getAllSubscriptionPolicies())).build();
+            } else if (StringUtils.isNotEmpty(policyName)) {
                 List<SubscriptionPolicy> model = new ArrayList<>();
                 SubscriptionPolicy subscriptionPolicy = subscriptionValidationDAO.getSubscriptionPolicyByNameForTenant(
                         policyName, xWSO2Tenant);

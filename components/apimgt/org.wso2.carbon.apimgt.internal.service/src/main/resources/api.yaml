@@ -176,6 +176,12 @@ paths:
         This will provide access to apis in database.
       parameters:
         - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
         - name: context
           in: query
           description: |
@@ -187,6 +193,12 @@ paths:
           description: |
             **Search condition**.
              versio  of the api
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the APIs
           type: string
         - $ref: "#/parameters/Accept"
       tags:
@@ -326,6 +338,30 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /global-policies:
+    get:
+      summary: Get all Global throttling policies
+      description: |
+        This will provide access to global throttling policies in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: policyName
+          in: query
+          description: |
+            **Search condition**.
+             Global policy name
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of global policies in the database
+          schema:
+            $ref: '#/definitions/GlobalPolicyList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /application-key-mappings:
     get:
       summary: Get all application key mappings
@@ -339,6 +375,13 @@ paths:
             **Search condition**.
              Consumer Key of the application
           type: string
+        - name: keymanager
+          in: query
+          description: |
+            **Search condition**.
+             KeyManager associated to consumer_key of the application
+          type: string
+
       tags:
         - Subscription Validation
       responses:
@@ -350,12 +393,38 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /synapse-artifacts:
+  /scopes:
     get:
-      summary: Get all the synapse artifacts for a given API UUID and gateway label
+      summary: Get all scopes.
       description: |
-        This will provide access to synapse artifacts in database.
+        This will provide access to the Scopes created in database.
       parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: scopeKey
+          in: query
+          description: |
+            **Search condition**.
+             Scope Key
+          type: string
+      tags:
+        - Subscription Validation
+      responses:
+        200:
+          description: An array of Scopes in Database.
+          schema:
+            $ref: '#/definitions/ScopesList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /runtime-artifacts:
+    get:
+      summary: Get all the runtime artifacts for a given API UUID and gateway label
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
         - name: apiId
           in: query
           description: |
@@ -366,48 +435,68 @@ paths:
           in: query
           description: |
             **Search condition**.
-             label associated with the API
+             label associated with the APIs
           type: string
-        - name: gatewayInstruction
+        - name: type
           in: query
           description: |
             **Search condition**.
-             Publish/Remove
+             type of gateway
           type: string
       tags:
-        - Retrieving Synapse artifacts
+        - Retrieving Runtime artifacts
       responses:
         200:
-          description: String of gatewayRuntimeArtifacts
-          schema:
-            type: string
+          description: List of runtime Artifacts
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /gateway-synapse-artifacts:
+  /endpoint-certificates:
     get:
-      summary: Get all synapse artifacts for a given gateway label
+      summary: Get all the endpoint certificates for given alias.
       description: |
-        This will provide access to the synapse artifacts in database.
+        This will provide access to
       parameters:
-        - name: gatewayLabel
+        - $ref: '#/parameters/requestedTenant'
+        - name: alias
           in: query
           description: |
             **Search condition**.
-             label associated with the API
+              Alias
           type: string
       tags:
-        - Retrieving All Synapse artifacts
+        - Retrieving Runtime artifacts
       responses:
         200:
-          description: An array of gatewayRuntimeArtifacts
-          schema:
-            $ref: '#/definitions/SynapseArtifactList'
+          description: List of endpoint certificates
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /ga-config:
+    get:
+      summary: Get Google analytics config related to tenant.
+      description: |
+        This will provide access to runtime artifacts in database.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+      tags:
+        - Retrieving Runtime artifacts
+      responses:
+        200:
+          description: google analytics configuration
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
   /synapse-attributes:
     get:
       summary: Get API UUID and label associated with it
@@ -623,6 +712,9 @@ definitions:
   #-----------------------------------------------------
   API:
     properties:
+      uuid:
+        type: string
+        description: UUID of API
       apiId:
         type: integer
       provider:
@@ -832,6 +924,43 @@ definitions:
       keyManager:
         type: string
 
+  #-----------------------------------------------------
+  # The Scopes List resource
+  #-----------------------------------------------------
+  ScopesList:
+    title: Scopes List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Scopes returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Scope'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  #-----------------------------------------------------
+  # The Scope resource
+  #-----------------------------------------------------
+  Scope:
+    properties:
+      name:
+        type: string
+      displayName:
+        type: string
+      description:
+        type: string
+      roles:
+        type: array
+        items:
+          type: string
+
+
+
+
+
   #---------------------  --------------------------------
   # The Throttle Policy resource
   #-----------------------------------------------------
@@ -841,6 +970,8 @@ definitions:
         type: integer
       tenantId:
         type: integer
+      tenantDomain:
+        type: string
       name:
         type: string
       quotaType:
@@ -876,6 +1007,8 @@ definitions:
             type: string
           stopOnQuotaReach:
             type: boolean
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
 
   #-----------------------------------------------------
   # The GraphQL Query resource
@@ -914,6 +1047,9 @@ definitions:
   ApplicationPolicy:
     allOf:
       - $ref: '#/definitions/Policy'
+    properties:
+      defaultLimit:
+        $ref: '#/definitions/ThrottleLimit'
   #-----------------------------------------------------
   # The Api Policy List resource
   #-----------------------------------------------------
@@ -945,6 +1081,8 @@ definitions:
               $ref: '#/definitions/ApiPolicyConditionGroup'
           applicableLevel:
             type: string
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
 
   #-----------------------------------------------------
   # The API Policy Condition  Group resource
@@ -961,6 +1099,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Condition'
+      defaultLimit:
+        $ref: '#/definitions/ThrottleLimit'
 
   #-----------------------------------------------------
   # The Throttle Policy Condition resource
@@ -975,6 +1115,36 @@ definitions:
         type: string
       isInverted:
         type: boolean
+  #-----------------------------------------------------
+  # The Global Policy List resource
+  #-----------------------------------------------------
+  GlobalPolicyList:
+    title: Global Policy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Global Policies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/GlobalPolicy'
+      pagination:
+        $ref: '#/definitions/Pagination'
+
+  #-----------------------------------------------------
+  # The Global Policy resource
+  #-----------------------------------------------------
+  GlobalPolicy:
+    allOf:
+      - $ref: '#/definitions/Policy'
+      - properties:
+          siddhiQuery:
+            type: string
+          keyTemplate:
+            type: string
+
   #-----------------------------------------------------
   # The URL Mapping resource
   #-----------------------------------------------------
@@ -1017,3 +1187,75 @@ definitions:
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+
+  #-----------------------------------------------------
+  # The Throttling Limit Base resource
+  #-----------------------------------------------------
+  ThrottleLimitBase:
+    title: Throttle Limit Base
+    required:
+      - timeUnit
+      - unitTime
+    properties:
+      timeUnit:
+        type: string
+        description: Unit of the time. Allowed values are "sec", "min", "hour", "day"
+        example: min
+      unitTime:
+        type: integer
+        default: 0
+        description: Time limit that the throttling limit applies.
+        example: 10
+
+  #-----------------------------------------------------
+  # The Throttling Limit resource
+  #-----------------------------------------------------
+  ThrottleLimit:
+    title: Throttle Limit
+    required:
+      - type
+    properties:
+      quotaType:
+        type: string
+      requestCount:
+        $ref: '#/definitions/RequestCountLimit'
+      bandwidth:
+        $ref: '#/definitions/BandwidthLimit'
+
+  #-----------------------------------------------------
+  # The Throttling Bandwidth Limit resource
+  #-----------------------------------------------------
+  BandwidthLimit:
+    title: Bandwidth Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - dataAmount
+          - dataUnit
+        properties:
+          dataAmount:
+            type: integer
+            format: int64
+            description: Amount of data allowed to be transfered
+            example: 1000
+          dataUnit:
+            type: string
+            description: Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
+            example: KB
+
+  #-----------------------------------------------------
+  # The Throttling Request Count Limit resource
+  #-----------------------------------------------------
+  RequestCountLimit:
+    title: Request Count Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - requestCount
+        properties:
+          requestCount:
+            type: integer
+            format: int64
+            description: Maximum number of requests allowed
+            example: 1000
+

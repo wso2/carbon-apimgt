@@ -18,21 +18,40 @@
 /* eslint no-param-reassign: ["error", { "props": false }] */
 /* eslint-disable react/jsx-no-bind */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import { injectIntl } from 'react-intl';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import Configurations from 'Config';
 
+const propertyDisplaySuffix = Configurations.app.propertyDisplaySuffix || '__display';
 const useStyles = makeStyles(() => ({
     link: {
         cursor: 'pointer',
+    },
+    checkBoxStyles: {
+        whiteSpace: 'nowrap',
+        marginLeft: 0,
+        paddingLeft: 0,
+    },
+    colorPrimary: {
+        marginLeft: 0,
+        paddingLeft: 0,
+    },
+    cancelButton: {
+        marginLeft: 4,
     },
 }));
 
@@ -43,46 +62,61 @@ const useStyles = makeStyles(() => ({
 function EditableRow(props) {
     const {
         oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl, setEditing, isRestricted, api,
+        isKeyword, validateEmpty,
     } = props;
-    const [newKey, setKey] = useState(oldKey);
+    const [newKey, setKey] = useState(oldKey.indexOf(propertyDisplaySuffix) !== -1
+        ? oldKey.replace(propertyDisplaySuffix, '')
+        : oldKey);
     const [newValue, setValue] = useState(oldValue);
     const [editMode, setEditMode] = useState(false);
+    const [isVisibleInStore, setIsVisibleInStore] = useState(oldKey.indexOf(propertyDisplaySuffix) !== -1);
+    const iff = (condition, then, otherwise) => (condition ? then : otherwise);
 
-    const updateEditMode = function () {
+    const resetText = () => {
+        setIsVisibleInStore(oldKey.indexOf(propertyDisplaySuffix) !== -1);
+        setKey(oldKey);
+        setValue(oldValue);
+    };
+    useEffect(() => {
+        resetText();
+    }, [oldKey, oldValue]);
+
+    const updateEditMode = () => {
         setEditMode(!editMode);
         setEditing(true);
+        resetText();
     };
     const handleKeyChange = (event) => {
         const { value } = event.target;
-        setKey(value);
+        setKey(isVisibleInStore ? value + propertyDisplaySuffix : value);
     };
     const handleValueChange = (event) => {
         const { value } = event.target;
         setValue(value);
     };
-    const validateEmpty = function (itemValue) {
-        if (itemValue === null) {
-            return false;
-        } else if (itemValue === '') {
-            return true;
-        } else {
-            return false;
-        }
-    };
-    const saveRow = function () {
+    const saveRow = () => {
         const oldRow = { oldKey, oldValue };
         const newRow = { newKey: newKey || oldKey, newValue: newValue || oldValue };
-        handleUpdateList(oldRow, newRow);
-        setEditMode(false);
-        setEditing(false);
+        if (handleUpdateList(oldRow, newRow)) {
+            setEditMode(false);
+            setEditing(false);
+        }
     };
-    const deleteRow = function () {
+    const deleteRow = () => {
         handleDelete(apiAdditionalProperties, oldKey);
     };
-    const handleKeyDown = function (e) {
+    const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             saveRow();
         }
+    };
+    const handleChangeVisibleInStore = (event) => {
+        if (event.target.checked) {
+            setKey(newKey + propertyDisplaySuffix);
+        } else {
+            setKey(newKey.indexOf(propertyDisplaySuffix) !== -1 ? newKey.replace(propertyDisplaySuffix, '') : newKey);
+        }
+        setIsVisibleInStore(event.target.checked);
     };
     const classes = useStyles();
 
@@ -98,60 +132,121 @@ function EditableRow(props) {
                             id: 'Apis.Details.Properties.Properties.editable.row.property.name',
                             defaultMessage: 'Property Name',
                         })}
-                        margin='normal'
+                        margin='dense'
                         variant='outlined'
                         className={classes.addProperty}
-                        value={newKey}
+                        value={newKey.indexOf(propertyDisplaySuffix) !== -1
+                            ? newKey.replace(propertyDisplaySuffix, '')
+                            : newKey}
                         onChange={handleKeyChange}
                         onKeyDown={handleKeyDown}
-                        error={validateEmpty(newKey)}
+                        helperText={validateEmpty(newKey) ? ''
+                            : iff(isKeyword(newKey), intl.formatMessage({
+                                id: `Apis.Details.Properties.Properties.
+                                show.add.property.invalid.error`,
+                                defaultMessage: 'Invalid property name',
+                            }), '')}
+                        error={validateEmpty(newKey) || isKeyword(newKey)}
                     />
                 </TableCell>
             ) : (
-                <TableCell>{oldKey}</TableCell>
+                <TableCell>
+                    {oldKey.indexOf(propertyDisplaySuffix) !== -1
+                        ? oldKey.replace(propertyDisplaySuffix, '') : oldKey}
+                </TableCell>
             )}
             {editMode ? (
-                <TableCell>
-                    <TextField
-                        fullWidth
-                        required
-                        id='outlined-required'
-                        label={intl.formatMessage({
-                            id: 'Apis.Details.Properties.Properties.editable.row.edit.mode.property.name',
-                            defaultMessage: 'Property Name',
-                        })}
-                        margin='normal'
-                        variant='outlined'
-                        className={classes.addProperty}
-                        value={newValue}
-                        onChange={handleValueChange}
-                        onKeyDown={handleKeyDown}
-                        error={validateEmpty(newValue)}
-                    />
-                </TableCell>
+                <>
+                    <TableCell>
+                        <TextField
+                            fullWidth
+                            required
+                            id='outlined-required'
+                            label={intl.formatMessage({
+                                id: 'Apis.Details.Properties.Properties.editable.row.edit.mode.property.value',
+                                defaultMessage: 'Property Value',
+                            })}
+                            margin='dense'
+                            variant='outlined'
+                            className={classes.addProperty}
+                            value={newValue}
+                            onChange={handleValueChange}
+                            onKeyDown={handleKeyDown}
+                            error={validateEmpty(newValue)}
+                        />
+                    </TableCell>
+                    <TableCell>
+                        <FormControlLabel
+                            control={(
+                                <Checkbox
+                                    checked={isVisibleInStore}
+                                    onChange={handleChangeVisibleInStore}
+                                    name='checkedB'
+                                    color='primary'
+                                />
+                            )}
+                            label={intl.formatMessage({
+                                id: 'Apis.Details.Properties.Properties.editable.show.in.devporal',
+                                defaultMessage: 'Show in devportal',
+                            })}
+                            classes={{ root: classes.checkBoxStyles, colorPrimary: classes.colorPrimary }}
+                        />
+                    </TableCell>
+                </>
             ) : (
-                <TableCell>{oldValue}</TableCell>
+                <>
+                    <TableCell>
+                        <Box display='inline-block' minWidth={150}>
+                            {oldValue}
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        {isVisibleInStore && (
+                            <Box display='flex' alignItems='center'>
+                                <VisibilityIcon />
+                                <Box ml={1} display='inline-block'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Properties.Properties.editable.visible.in.store'
+                                        defaultMessage='Visible in devportal'
+                                    />
+                                </Box>
+                            </Box>
+                        )}
+                    </TableCell>
+                </>
             )}
             <TableCell align='right'>
                 {editMode ? (
                     <>
-                        <IconButton
-                            className={classes.link}
-                            aria-label='save'
+                        <Button
+                            color='primary'
                             onClick={saveRow}
-                            onKeyDown={() => {}}
-                            disabled={validateEmpty(newKey) || validateEmpty(newValue)}
-                            color='inherit'
+                            onKeyDown={() => { }}
+                            variant='contained'
                         >
-                            <SaveIcon className={classes.buttonIcon} />
-                        </IconButton>
+                            <Typography variant='caption' component='div'>
+                                <FormattedMessage
+                                    id='Apis.Details.Properties.Properties.editable.update'
+                                    defaultMessage='Update'
+                                />
+                            </Typography>
+                        </Button>
+                        <Button onClick={updateEditMode} className={classes.cancelButton}>
+                            <Typography variant='caption' component='div'>
+                                <FormattedMessage
+                                    id='Apis.Details.Properties.Properties.editable.cancel'
+                                    defaultMessage='Cancel'
+                                />
+                            </Typography>
+                        </Button>
+
                     </>
                 ) : (
                     <IconButton
                         className={classes.link}
                         aria-label='edit'
                         onClick={updateEditMode}
-                        onKeyDown={() => {}}
+                        onKeyDown={() => { }}
                         color='inherit'
                         disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                     >
@@ -162,7 +257,7 @@ function EditableRow(props) {
                     className={classes.link}
                     aria-label='remove'
                     onClick={deleteRow}
-                    onKeyDown={() => {}}
+                    onKeyDown={() => { }}
                     color='inherit'
                     disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                 >

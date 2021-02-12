@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 
@@ -11,7 +13,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -22,6 +27,7 @@ public class ThrottlePolicyDTO   {
     private String displayName = null;
     private String description = null;
     private Boolean isDeployed = false;
+    private String type = null;
 
   /**
    * Id of policy
@@ -50,10 +56,10 @@ public class ThrottlePolicyDTO   {
   }
 
   
-  @ApiModelProperty(example = "Policy1", required = true, value = "Name of policy")
+  @ApiModelProperty(example = "30PerMin", required = true, value = "Name of policy")
   @JsonProperty("policyName")
   @NotNull
-  public String getPolicyName() {
+ @Size(min=1,max=60)  public String getPolicyName() {
     return policyName;
   }
   public void setPolicyName(String policyName) {
@@ -69,9 +75,9 @@ public class ThrottlePolicyDTO   {
   }
 
   
-  @ApiModelProperty(value = "Display name of the policy")
+  @ApiModelProperty(example = "30PerMin", value = "Display name of the policy")
   @JsonProperty("displayName")
-  public String getDisplayName() {
+ @Size(max=512)  public String getDisplayName() {
     return displayName;
   }
   public void setDisplayName(String displayName) {
@@ -87,9 +93,9 @@ public class ThrottlePolicyDTO   {
   }
 
   
-  @ApiModelProperty(value = "Description of the policy")
+  @ApiModelProperty(example = "Allows 30 request per minute", value = "Description of the policy")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
@@ -114,6 +120,24 @@ public class ThrottlePolicyDTO   {
     this.isDeployed = isDeployed;
   }
 
+  /**
+   * Indicates the type of throttle policy
+   **/
+  public ThrottlePolicyDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Indicates the type of throttle policy")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -128,12 +152,13 @@ public class ThrottlePolicyDTO   {
         Objects.equals(policyName, throttlePolicy.policyName) &&
         Objects.equals(displayName, throttlePolicy.displayName) &&
         Objects.equals(description, throttlePolicy.description) &&
-        Objects.equals(isDeployed, throttlePolicy.isDeployed);
+        Objects.equals(isDeployed, throttlePolicy.isDeployed) &&
+        Objects.equals(type, throttlePolicy.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, displayName, description, isDeployed);
+    return Objects.hash(policyId, policyName, displayName, description, isDeployed, type);
   }
 
   @Override
@@ -146,6 +171,7 @@ public class ThrottlePolicyDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isDeployed: ").append(toIndentedString(isDeployed)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
   }

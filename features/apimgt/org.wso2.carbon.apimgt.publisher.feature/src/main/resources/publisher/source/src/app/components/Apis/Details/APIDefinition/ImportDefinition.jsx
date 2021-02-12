@@ -310,7 +310,7 @@ export default function ImportDefinition(props) {
                 size='small'
                 className={classes.button}
                 onClick={handleAPIDefinitionImportOpen}
-                disabled={isRestricted(['apim:api_create'], api)}
+                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
             >
                 <CloudUploadRounded className={classes.buttonIcon} />
                 {btnText}
@@ -335,7 +335,7 @@ export default function ImportDefinition(props) {
                         onClick={importDefinition}
                         variant='contained'
                         color='primary'
-                        disabled={!apiInputs.isFormValid || isImporting}
+                        disabled={!apiInputs.isFormValid || isImporting || api.isRevision}
                     >
                         <FormattedMessage
                             id='Apis.Details.APIDefinition.APIDefinition.import.definition.import'

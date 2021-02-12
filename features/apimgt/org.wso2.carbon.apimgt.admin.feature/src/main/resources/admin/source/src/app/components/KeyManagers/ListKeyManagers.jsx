@@ -99,12 +99,12 @@ export default function ListKeyManagers() {
     const addButtonProps = {
         triggerButtonText: intl.formatMessage({
             id: 'KeyManagers.ListKeyManagers.List.addButtonProps.triggerButtonText',
-            defaultMessage: 'Add KeyManager',
+            defaultMessage: 'Add Key Manager',
         }),
         /* This title is what as the title of the popup dialog box */
         title: intl.formatMessage({
             id: 'KeyManagers.ListKeyManagers.List.addButtonProps.title',
-            defaultMessage: 'Add KeyManager',
+            defaultMessage: 'Add Key Manager',
         }),
     };
     const pageProps = {
@@ -119,7 +119,7 @@ export default function ListKeyManagers() {
             <Button variant='contained' color='primary' size='small'>
                 <FormattedMessage
                     id='KeyManagers.ListKeyManagers.addButtonProps.triggerButtonText'
-                    defaultMessage='Add KeyManager'
+                    defaultMessage='Add Key Manager'
                 />
             </Button>
         </RouterLink>

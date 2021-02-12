@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
@@ -56,8 +57,11 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             if (!enabled) {
                 return true;
             }
-            long requestTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants.
-                    REQUEST_START_TIME));
+            String reqTime = (String) messageContext.getProperty(APIMgtGatewayConstants.REQUEST_START_TIME);
+            long requestTime = 0L;
+            if (StringUtils.isNotEmpty(reqTime)) {
+                requestTime = Long.parseLong(reqTime);
+            }
             String keyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
             String correlationID = GatewayUtils.getAndSetCorrelationID(messageContext);
 

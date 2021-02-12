@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.api.model.subscription;
 
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 
 /**
  * Top level entity for representing a Throttling Policy.
@@ -33,6 +34,8 @@ public class Policy implements CacheableEntity<String> {
     private int tenantId = -1;
     private String name = null;
     private String quotaType = null;
+    private QuotaPolicy quotaPolicy;
+    private String tenantDomain;
 
     public int getId() {
 
@@ -88,5 +91,21 @@ public class Policy implements CacheableEntity<String> {
     public static String getPolicyCacheKey(String tierName, int tenantId) {
 
         return tierName + DELEM_PERIOD + tenantId;
+    }
+
+    public QuotaPolicy getQuotaPolicy() {
+        return quotaPolicy;
+    }
+
+    public void setQuotaPolicy(QuotaPolicy quotaPolicy) {
+        this.quotaPolicy = quotaPolicy;
+    }
+
+    public String getTenantDomain() {
+        return tenantDomain;
+    }
+
+    public void setTenantDomain(String tenantDomain) {
+        this.tenantDomain = tenantDomain;
     }
 }

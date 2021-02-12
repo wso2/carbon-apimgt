@@ -19,8 +19,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.WorkflowListDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,17 +87,17 @@ public class WorkflowMappingUtil {
 
     public static void setPaginationParams(WorkflowListDTO workflowListDTO, Integer limit, Integer offset, int length) {
 
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, length);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, length);
         String paginatedPrevious = "";
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }

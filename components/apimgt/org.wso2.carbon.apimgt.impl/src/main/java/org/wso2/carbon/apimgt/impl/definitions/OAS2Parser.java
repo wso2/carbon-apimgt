@@ -380,6 +380,14 @@ public class OAS2Parser extends APIDefinition {
                         template.setMediationScript(mediationScript);
                         template.setMediationScripts(template.getHTTPVerb(), mediationScript);
                     }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                        template.setAmznResourceName((String)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                    }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                        template.setAmznResourceTimeout(((Long)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                    }
                 }
                 urlTemplates.add(template);
             }
@@ -595,7 +603,31 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isEmpty(swaggerObj.getInfo().getVersion())) {
             swaggerObj.getInfo().setVersion(swaggerData.getVersion());
         }
+        preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
         return getSwaggerJsonString(swaggerObj);
+    }
+
+    /**
+     * Preserve and rearrange the Swagger definition according to the resource path order of the updating API payload.
+     *
+     * @param swaggerData Updating API swagger data
+     * @param swaggerObj  Updated Swagger definition
+     */
+    private void preserveResourcePathOrderFromAPI(SwaggerData swaggerData, Swagger swaggerObj) {
+
+        Set<String> orderedResourcePaths = new LinkedHashSet<>();
+        Map<String, Path> orderedSwaggerPaths = new LinkedHashMap<>();
+        // Iterate the URI template order given in the updating API payload (Swagger Data) and rearrange resource paths
+        // order in OpenAPI with relevance to the first matching resource path item from the swagger data path list.
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            String path = resource.getPath();
+            if (!orderedResourcePaths.contains(path)) {
+                orderedResourcePaths.add(path);
+                // Get the resource path item for the path from existing Swagger
+                orderedSwaggerPaths.put(path, swaggerObj.getPath(path));
+            }
+        }
+        swaggerObj.setPaths(orderedSwaggerPaths);
     }
 
     /**
@@ -824,7 +856,9 @@ public class OAS2Parser extends APIDefinition {
             for (Scope scope : scopes) {
                 String description = scope.getDescription() != null ? scope.getDescription() : "";
                 oAuth2Definition.addScope(scope.getKey(), description);
-                scopeBindings.put(scope.getKey(), scope.getRoles());
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                scopeBindings.put(scope.getKey(), roles);
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -1304,6 +1338,33 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
+     * This method returns swagger definition which replaced X-WSO2-throttling-tier extension comes from
+     * mgw with X-throttling-tier extensions in swagger file(Swagger version 2)
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String injectMgwThrottlingExtensionsToDefault(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        Map<String, Path> paths = swagger.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getVendorExtensions();
+                if (extensions != null && extensions.containsKey(APIConstants.X_WSO2_THROTTLING_TIER)) {
+                    Object tier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+                    extensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, tier);
+                }
+            }
+        }
+        return getSwaggerJsonString(swagger);
+    }
+
+    /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param swagger swagger definition
      * @return
@@ -1325,7 +1386,9 @@ public class OAS2Parser extends APIDefinition {
         if (scopes != null && !scopes.isEmpty()) {
             for (Scope scope : scopes) {
                 oAuth2Definition.addScope(scope.getKey(), scope.getDescription());
-                scopeBindings.put(scope.getKey(), scope.getRoles());
+                String roles = (StringUtils.isNotBlank(scope.getRoles())
+                        && scope.getRoles().trim().split(",").length > 0) ? scope.getRoles() : StringUtils.EMPTY;
+                scopeBindings.put(scope.getKey(), roles);
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
@@ -1472,6 +1535,31 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(authHeader)) {
             api.setAuthorizationHeader(authHeader);
         }
+        //Setup application Security
+        List<String> applicationSecurity = OASParserUtil.getApplicationSecurityTypes(extensions);
+        Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
+        if (!applicationSecurity.isEmpty()) {
+            String securityList = api.getApiSecurity();
+            securityList = securityList == null ? "" : securityList;
+            for (String securityType : applicationSecurity) {
+                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType) &&
+                        !securityList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                    securityList = securityList + "," + APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+                }
+                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType) &&
+                        !securityList.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_BASIC_AUTH;
+                }
+                if (APIConstants.API_SECURITY_API_KEY.equals(securityType) &&
+                        !securityList.contains(APIConstants.API_SECURITY_API_KEY)) {
+                    securityList = securityList + "," + APIConstants.API_SECURITY_API_KEY;
+                }
+            }
+            if (!(isOptional || securityList.contains(APIConstants.MANDATORY))) {
+                securityList = securityList + "," + APIConstants.MANDATORY;
+            }
+            api.setApiSecurity(securityList);
+        }
         //Setup mutualSSL configuration
         String mutualSSL = OASParserUtil.getMutualSSLEnabledFromSwagger(extensions);
         if (StringUtils.isNotBlank(mutualSSL)) {
@@ -1479,10 +1567,13 @@ public class OAS2Parser extends APIDefinition {
             if (StringUtils.isBlank(securityList)) {
                 securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
             }
-            if (APIConstants.OPTIONAL.equals(mutualSSL)) {
+            if (APIConstants.OPTIONAL.equals(mutualSSL) &&
+                    !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
-                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
+            } else if (APIConstants.MANDATORY.equals(mutualSSL) &&
+                    !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)){
+                securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
+                        APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
             api.setApiSecurity(securityList);
         }
@@ -1511,8 +1602,55 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(throttleTier)) {
             api.setApiLevelPolicy(throttleTier);
         }
-
         return api;
+    }
+
+    /**
+     * This method will extractX-WSO2-disable-security extension provided in API level
+     * by mgw and inject that extension to all resources in OAS file
+     *
+     * @param swaggerContent String
+     * @return String
+     * @throws APIManagementException
+     */
+    @Override
+    public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException {
+        Swagger swagger = getSwagger(swaggerContent);
+        Map<String, Object> apiExtensions = swagger.getVendorExtensions();
+        if (apiExtensions == null) {
+            return swaggerContent;
+        }
+        //Check Disable Security is enabled in API level
+        boolean apiLevelDisableSecurity = OASParserUtil.getDisableSecurity(apiExtensions);
+        Map<String, Path> paths = swagger.getPaths();
+        for (String pathKey : paths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = paths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> entry : operationsMap.entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> resourceExtensions = operation.getVendorExtensions();
+                boolean extensionsAreEmpty = false;
+                if (apiLevelDisableSecurity) {
+                    if (resourceExtensions == null) {
+                        resourceExtensions = new HashMap<>();
+                        extensionsAreEmpty = true;
+                    }
+                    resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    if (extensionsAreEmpty) {
+                        operation.setVendorExtensions(resourceExtensions);
+                    }
+                } else if (resourceExtensions != null && resourceExtensions
+                        .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+                    //Check Disable Security is enabled in resource level
+                    boolean resourceLevelDisableSecurity = Boolean
+                            .parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+                    if (resourceLevelDisableSecurity) {
+                        resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
+                    }
+                }
+            }
+        }
+
+        return getSwaggerJsonString(swagger);
     }
 
 }

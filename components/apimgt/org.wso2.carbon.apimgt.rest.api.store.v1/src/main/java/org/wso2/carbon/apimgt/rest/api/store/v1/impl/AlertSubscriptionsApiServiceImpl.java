@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigManager;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertConfigurator;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.AlertSubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertDTO;
@@ -48,7 +49,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     @Override
     public Response getSubscribedAlertTypes(MessageContext messageContext) {
 
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(userName);
 
         try {
@@ -99,7 +100,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
         } catch (AlertManagementException e) {
             Response.status(Response.Status.BAD_REQUEST).entity("Analytics not enabled").build();
         }
-        String userName = RestApiUtil.getLoggedInUsername();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(userName);
 
         List<String> emailsList = body.getEmailList();
@@ -143,7 +144,8 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     }
 
     public Response unsubscribeAllAlerts(MessageContext messageContext) {
-        String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(RestApiUtil.getLoggedInUsername());
+        String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(
+                RestApiCommonUtil.getLoggedInUsername());
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             storeAlertConfigurator.unsubscribe(tenantAwareUserName);

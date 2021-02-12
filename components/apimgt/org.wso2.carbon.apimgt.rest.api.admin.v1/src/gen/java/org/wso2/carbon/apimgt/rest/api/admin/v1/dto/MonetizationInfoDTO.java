@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,47 +14,48 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
 public class MonetizationInfoDTO   {
   
 
-@XmlType(name="MonetizationPlanEnum")
-@XmlEnum(String.class)
-public enum MonetizationPlanEnum {
+    @XmlType(name="MonetizationPlanEnum")
+    @XmlEnum(String.class)
+    public enum MonetizationPlanEnum {
+        FIXEDRATE("FIXEDRATE"),
+        DYNAMICRATE("DYNAMICRATE");
+        private String value;
 
-    @XmlEnumValue("FixedRate") FIXEDRATE(String.valueOf("FixedRate")), @XmlEnumValue("DynamicRate") DYNAMICRATE(String.valueOf("DynamicRate"));
-
-
-    private String value;
-
-    MonetizationPlanEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static MonetizationPlanEnum fromValue(String v) {
-        for (MonetizationPlanEnum b : MonetizationPlanEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
+        MonetizationPlanEnum (String v) {
+            value = v;
         }
-        return null;
-    }
-}
 
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static MonetizationPlanEnum fromValue(String v) {
+            for (MonetizationPlanEnum b : MonetizationPlanEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
     private MonetizationPlanEnum monetizationPlan = null;
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, String> properties = new HashMap<String, String>();
 
   /**
    * Flag to indicate the monetization plan

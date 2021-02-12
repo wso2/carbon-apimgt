@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
@@ -115,7 +116,7 @@ public interface SubscriptionDataLoader {
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
      */
-    public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException;
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keyManager) throws DataLoadingException;
 
     /**
      * Retrieve {@link API} object.
@@ -152,4 +153,5 @@ public interface SubscriptionDataLoader {
      */
     public ApiPolicy getAPIPolicy(String policyName, String tenantDomain) throws DataLoadingException;
 
+    List<Scope> loadAllScopes(String tenantDomain) throws DataLoadingException;
 }

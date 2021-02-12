@@ -177,7 +177,7 @@ function getSuggestionValue(suggestion) {
  * @returns {string}
  */
 function buildSearchQuery(searchText) {
-    const inputValue = searchText.trim().toLowerCase();
+    const inputValue = searchText.trim();
     return SearchParser.parse(inputValue);
 }
 

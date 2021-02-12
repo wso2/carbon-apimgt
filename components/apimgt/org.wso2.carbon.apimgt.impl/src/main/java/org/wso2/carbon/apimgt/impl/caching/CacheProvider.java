@@ -40,6 +40,13 @@ public class CacheProvider {
     }
 
     /**
+     * @return gateway key cache
+     */
+    public static Cache getGatewayIntrospectCache() {
+        return getCache(APIConstants.GATEWAY_INTROSPECT_CACHE_NAME);
+    }
+
+    /**
      * @return gateway token cache
      */
     public static Cache getGatewayTokenCache() {
@@ -316,6 +323,22 @@ public class CacheProvider {
     }
 
     /**
+     * Create and return GATEWAY_SIGNED_JWT_CACHE
+     */
+    public static Cache createIntrospectionCache() {
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants
+                    .GATEWAY_INTROSPECT_CACHE_NAME, Long.parseLong(apimGWCacheExpiry), Long.parseLong
+                    (apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants
+                    .GATEWAY_INTROSPECT_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
      * Create and return basic authenticated resource request cache
      */
     public static Cache createGatewayBasicAuthResourceCache() {
@@ -477,6 +500,8 @@ public class CacheProvider {
                 getRecommendationsCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .removeCache(CacheProvider.getGatewaySignedJWTParseCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .removeCache(CacheProvider.getGatewayIntrospectCache().getName());
     }
 
 }

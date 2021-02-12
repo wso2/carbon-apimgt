@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsIdentityProviderDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -71,7 +72,7 @@ public class SettingsMappingUtil {
                 Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_CHANGE_PASSWORD));
         settingsDTO.setIsPasswordChangeEnabled(enableChangePassword);
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
@@ -150,7 +151,7 @@ public class SettingsMappingUtil {
         String definition = null;
         try {
             definition = IOUtils
-                    .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                    .toString(RestApiUtil.class.getResourceAsStream("/devportal-api.yaml"), "UTF-8");
         } catch (IOException e) {
             log.error("Error while reading the swagger definition", e);
         }

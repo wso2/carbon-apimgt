@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -52,9 +53,9 @@ public class SwaggerYamlApi {
     @GET
     @Consumes({ "text/yaml" })
     @Produces({ "text/yaml" })
-    @io.swagger.annotations.ApiOperation(value = "Get Swagger Definition", notes = "Get Swagger Definition of Admin REST API.", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "Get Swagger Definition", notes = "Get OAS of Admin REST API.", response = Void.class)
     @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSwagger Definition is returned."),
+            @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\n OAS is returned."),
 
             @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource."),
 
@@ -67,7 +68,7 @@ public class SwaggerYamlApi {
                     if (openAPIDef == null) {
                         String definition = IOUtils
                                 .toString(this.getClass().getResourceAsStream("/admin-api.yaml"), "UTF-8");
-                        openAPIDef = new OAS2Parser().removeExamplesFromSwagger(definition);
+                        openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
                     }
                 }
             }
@@ -85,7 +86,7 @@ public class SwaggerYamlApi {
             */
             return Response.ok().entity(openAPIDef).build();
         } catch (IOException e) { 
-            String errorMessage = "Error while retrieving the swagger definition of the Admin API";
+            String errorMessage = "Error while retrieving the OAS of the Admin API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

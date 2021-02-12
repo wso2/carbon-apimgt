@@ -159,4 +159,14 @@ public class EndpointAdminServiceProxy {
             return endpointAdmin.isEndpointExistForTenant(endpointName, tenantDomain);
         }
     }
+
+    public String[] getEndpoints() throws AxisFault {
+
+        try {
+            return endpointAdmin.getEndPointsNames();
+        } catch (EndpointAdminException e) {
+            throw new AxisFault("Error while retrieving endpoints" + e.getMessage(), e);
+        }
+
+    }
 }

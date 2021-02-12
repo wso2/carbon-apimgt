@@ -110,12 +110,17 @@ const styles = (theme) => ({
     },
 });
 
+// eslint-disable-next-line valid-jsdoc
 /**
  * Create new scopes for an API
  * @class CreateScope
  * @extends {Component}
  */
 class CreateScope extends React.Component {
+    /**
+     * constructor
+     * @param {JSON} props parent props.
+     */
     constructor(props) {
         super(props);
         this.api = new Api();
@@ -126,6 +131,10 @@ class CreateScope extends React.Component {
             error: '',
         };
         valid.description = {
+            invalid: false,
+            error: '',
+        };
+        valid.displayName = {
             invalid: false,
             error: '',
         };
@@ -142,6 +151,7 @@ class CreateScope extends React.Component {
         this.validateScopeName = this.validateScopeName.bind(this);
         this.handleScopeNameInput = this.handleScopeNameInput.bind(this);
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
+        this.validateScopeDisplayName = this.validateScopeDisplayName.bind(this);
         this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
@@ -160,6 +170,10 @@ class CreateScope extends React.Component {
         }
     };
 
+    /**
+     * Handle Role Addition.
+     * @param {string} role The first number.
+     */
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
         const promise = APIValidation.role.validate(base64url.encode(role));
@@ -183,6 +197,10 @@ class CreateScope extends React.Component {
             });
     }
 
+    /**
+     * validate Scope Description.
+     * @param {JSON} event click event object.
+     */
     validateScopeDescription({ target: { id, value } }) {
         const { valid, apiScope } = this.state;
         const { intl } = this.props;
@@ -190,7 +208,7 @@ class CreateScope extends React.Component {
         if (value && value.length !== '' && value.length >= 512) {
             valid[id].invalid = true;
             valid[id].error = intl.formatMessage({
-                id: 'Scopes.Create.Scope.description.length.exceeded',
+                id: 'Scopes.Create.Scope.displayName.length.exceeded',
                 defaultMessage: 'Exceeds maximum length limit of 512 characters',
             });
         } else {
@@ -203,12 +221,42 @@ class CreateScope extends React.Component {
         });
     }
 
+    /**
+     * validate Scope Display Name.
+     * @param {JSON} event click event object.
+     */
+    validateScopeDisplayName({ target: { id, value } }) {
+        const { valid, apiScope } = this.state;
+        const { intl } = this.props;
+        apiScope[id] = value;
+        if (value && value.length !== '' && value.length >= 512) {
+            valid[id].invalid = true;
+            valid[id].error = intl.formatMessage({
+                id: 'Scopes.Create.Scope.display.name.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 512 characters',
+            });
+        } else {
+            valid[id].invalid = false;
+            valid[id].error = '';
+        }
+        this.setState({
+            valid,
+            apiScope,
+        });
+    }
+
+    /**
+     * validate Scope Name.
+     * @param {string} id click event object.
+     * @param {string} value click event object.
+     * @returns {boolean} valid state
+     */
     validateScopeName(id, value) {
         const { valid, apiScope } = this.state;
         const {
             api: { scopes },
         } = this.props;
-
+        const { intl } = this.props;
         apiScope[id] = value;
         valid[id].invalid = !(value && value.length > 0);
         // length validation
@@ -217,7 +265,10 @@ class CreateScope extends React.Component {
         }
         valid[id].invalid = !(value && value.length <= 60);
         if (valid[id].invalid) {
-            valid[id].error = 'Scope name cannot be more than 60 characters';
+            valid[id].error = intl.formatMessage({
+                id: 'Scopes.Create.Scope.name.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 60 characters',
+            });
         }
 
         if (/\s/.test(value)) {
@@ -277,7 +328,7 @@ class CreateScope extends React.Component {
         const {
             intl, api, history, updateAPI,
         } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -321,19 +372,21 @@ class CreateScope extends React.Component {
             });
     }
 
+    /**
+     * Handle ScopeName Input.
+     * @param {JSON} event click event.
+     */
     handleScopeNameInput({ target: { id, value } }) {
         this.validateScopeName(id, value);
     }
 
     /**
-     *
-     *
-     * @returns
-     * @memberof CreateScope
+     * Render.
+     * @returns {JSX} rendered component.
      */
     render() {
         const { classes, api } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/scopes`;
         const {
             roleValidity, validRoles, invalidRoles, scopeAddDisabled,
@@ -394,6 +447,32 @@ class CreateScope extends React.Component {
                                         }}
                                         value={this.state.apiScope.name || ''}
                                         onChange={this.handleScopeNameInput}
+                                    />
+                                </FormControl>
+                                <FormControl margin='normal'>
+                                    <TextField
+                                        id='displayName'
+                                        label='Display Name'
+                                        placeholder='Scope Display Name'
+                                        error={this.state.valid.displayName.invalid}
+                                        helperText={
+                                            this.state.valid.displayName.invalid ? (
+                                                this.state.valid.displayName.error
+                                            ) : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.CreateScope.short.description.name'
+                                                    defaultMessage='Enter Scope Name ( E.g.,: creator )'
+                                                />
+                                            )
+                                        }
+                                        fullWidth
+                                        margin='normal'
+                                        variant='outlined'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        value={this.state.apiScope.displayName || ''}
+                                        onChange={this.validateScopeDisplayName}
                                     />
                                 </FormControl>
                                 <FormControl margin='normal' classes={{ root: classes.descriptionForm }}>
@@ -481,6 +560,7 @@ class CreateScope extends React.Component {
                                             || this.state.valid.name.invalid
                                             || invalidRoles.length !== 0
                                             || scopeAddDisabled
+                                            || api.isRevision
                                             || this.state.valid.description.invalid
                                         }
                                         className={classes.saveButton}

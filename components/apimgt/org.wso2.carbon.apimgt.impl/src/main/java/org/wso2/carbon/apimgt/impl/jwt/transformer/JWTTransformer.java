@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.impl.jwt.transformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
 
 import java.util.List;
 
@@ -58,4 +58,17 @@ public interface JWTTransformer {
     public String getIssuer();
 
     public void loadConfiguration(TokenIssuerDto tokenIssuerConfiguration);
+
+    /**
+     * This method used to retrieve whether authorized user type of the JWT token is Application or not. The default
+     * implementation returns null.
+     *
+     * @param jwtClaimsSet jwtClaimSet from given JWT
+     * @return transformed JWT Claims
+     * @throws APIManagementException if an error occurs while retrieving whether token type is Application
+     */
+    default Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+
+        return null;
+    }
 }

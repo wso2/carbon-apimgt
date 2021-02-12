@@ -44,9 +44,10 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
-import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -54,8 +55,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -66,6 +67,7 @@ import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.BufferedInputStream;
@@ -78,6 +80,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -556,7 +559,7 @@ public class GatewayUtils {
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
         authContext.setApiKey(jti);
-        authContext.setUsername(jwtValidationInfo.getUser());
+        authContext.setUsername(getEndUserFromJWTValidationInfo(jwtValidationInfo, apiKeyValidationInfoDTO));
 
         if (apiKeyValidationInfoDTO != null) {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
@@ -577,6 +580,9 @@ public class GatewayUtils {
         }
         if (isOauth) {
             authContext.setConsumerKey(jwtValidationInfo.getConsumerKey());
+            if (jwtValidationInfo.getIssuer() != null) {
+                authContext.setIssuer(jwtValidationInfo.getIssuer());
+            }
         }
         // Set JWT token sent to the backend
         if (StringUtils.isNotEmpty(endUserToken)) {
@@ -584,6 +590,35 @@ public class GatewayUtils {
         }
 
         return authContext;
+    }
+
+    /**
+     * This method returns the end username from the JWTValidationInfo.
+     * If isAppToken true subscriber username from APIKeyValidationInfoDTO with tenant domain is returned as end
+     * username.
+     * If false, tenant domain of the subscriber is appended to the username from JWTValidationInfo.
+     * If null, same username from JWTValidation info is returned as it is.
+     *
+     * @param jwtValidationInfo       JWTValidationInfo
+     * @param apiKeyValidationInfoDTO APIKeyValidationInfoDTO
+     * @return String end username
+     */
+    private static String getEndUserFromJWTValidationInfo(JWTValidationInfo jwtValidationInfo,
+                                                          APIKeyValidationInfoDTO apiKeyValidationInfoDTO) {
+
+        Boolean isAppToken = jwtValidationInfo.getAppToken();
+        String endUsername = jwtValidationInfo.getUser();
+        if (isAppToken != null) {
+            if (isAppToken) {
+                endUsername = apiKeyValidationInfoDTO.getSubscriber();
+                if (!APIConstants.SUPER_TENANT_DOMAIN.equals(apiKeyValidationInfoDTO.getSubscriberTenantDomain())) {
+                    return endUsername;
+                }
+            }
+            return endUsername + UserCoreConstants.TENANT_DOMAIN_COMBINER
+                    + apiKeyValidationInfoDTO.getSubscriberTenantDomain();
+        }
+        return endUsername;
     }
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
@@ -896,18 +931,21 @@ public class GatewayUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        jwtInfoDto.setMessageContext(null);
+        //jwtInfoDto.setMessageContext(null);
         jwtInfoDto.setApicontext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
-        constructJWTContent(apiKeyValidationInfoDTO, jwtInfoDto);
+        constructJWTContent(null, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
     }
 
-    private static void constructJWTContent(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
+    private static void constructJWTContent(JSONObject subscribedAPI,
+                                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO, JWTInfoDto jwtInfoDto) {
 
         if (jwtInfoDto.getJwtValidationInfo() != null) {
-            jwtInfoDto.setEnduser(jwtInfoDto.getJwtValidationInfo().getUser());
+            jwtInfoDto.setEnduser(getEndUserFromJWTValidationInfo(jwtInfoDto.getJwtValidationInfo(),
+                    apiKeyValidationInfoDTO));
         }
+
         if (apiKeyValidationInfoDTO != null) {
             jwtInfoDto.setApplicationid(apiKeyValidationInfoDTO.getApplicationId());
             jwtInfoDto.setApplicationname(apiKeyValidationInfoDTO.getApplicationName());
@@ -920,21 +958,43 @@ public class GatewayUtils {
                     APIUtil.getTenantIdFromTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain()));
             jwtInfoDto.setApplicationuuid(apiKeyValidationInfoDTO.getApplicationUUID());
             jwtInfoDto.setAppAttributes(apiKeyValidationInfoDTO.getAppAttributes());
+        } else if (subscribedAPI != null) {
+            // If the user is subscribed to the API
+            String apiName = subscribedAPI.getAsString(APIConstants.JwtTokenConstants.API_NAME);
+            jwtInfoDto.setApiName(apiName);
+            String subscriptionTier = subscribedAPI.getAsString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
+            String subscriptionTenantDomain =
+                    subscribedAPI.getAsString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN);
+            jwtInfoDto.setSubscriptionTier(subscriptionTier);
+            jwtInfoDto.setEndusertenantid(APIUtil.getTenantIdFromTenantDomain(subscriptionTenantDomain));
+
+            Map<String, Object> claims = jwtInfoDto.getJwtValidationInfo().getClaims();
+            if (claims.get(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+                JSONObject
+                        applicationObj = (JSONObject) claims.get(APIConstants.JwtTokenConstants.APPLICATION);
+                jwtInfoDto.setApplicationid(
+                        String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+                jwtInfoDto
+                        .setApplicationname(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
+                jwtInfoDto
+                        .setApplicationtier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
+                jwtInfoDto.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+            }
         }
     }
 
-    public static JWTInfoDto generateJWTInfoDto(JWTValidationInfo jwtValidationInfo,
+    public static JWTInfoDto generateJWTInfoDto(JSONObject subscribedAPI, JWTValidationInfo jwtValidationInfo,
                                                 APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                                 org.apache.synapse.MessageContext synCtx) {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        jwtInfoDto.setMessageContext(synCtx);
+        //jwtInfoDto.setMessageContext(synCtx);
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         jwtInfoDto.setApicontext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
-        constructJWTContent(apiKeyValidationInfoDTO, jwtInfoDto);
+        constructJWTContent(subscribedAPI, apiKeyValidationInfoDTO, jwtInfoDto);
         return jwtInfoDto;
     }
 
@@ -994,4 +1054,5 @@ public class GatewayUtils {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
         }
     }
+
 }

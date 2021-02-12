@@ -31,7 +31,7 @@ import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
-
+import Configurations from 'Config';
 import LifeCycleImage from './LifeCycleImage';
 import CheckboxLabels from './CheckboxLabels';
 import LifecyclePending from './LifecyclePending';
@@ -223,7 +223,10 @@ class LifeCycleUpdate extends Component {
                 ) : (
                     <Grid item xs={12}>
                         {theme.custom.lifeCycleImage ? (
-                            <img src={theme.custom.lifeCycleImage} alt='life cycles' />
+                            <img
+                                src={Configurations.app.context + theme.custom.lifeCycleImage}
+                                alt='life cycles'
+                            />
                         ) : (
                             <Grid container spacing={3}>
                                 <Grid item xs={8}>
@@ -272,7 +275,8 @@ class LifeCycleUpdate extends Component {
                             this occurs in states where have allowed re-publishing in prototype and published sates */
                                     return (
                                         <Button
-                                            disabled={transitionState.disabled || this.state.isUpdating}
+                                            disabled={transitionState.disabled
+                                                || this.state.isUpdating || api.isRevision}
                                             variant='contained'
                                             color='primary'
                                             className={classes.stateButton}

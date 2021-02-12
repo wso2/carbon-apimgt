@@ -64,7 +64,7 @@ public class BlockingConditionMappingUtil {
 
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(blockCondition.getUUID());
-        dto.setConditionType(blockCondition.getConditionType());
+        dto.setConditionType(BlockingConditionDTO.ConditionTypeEnum.fromValue(blockCondition.getConditionType()));
         if (APIConstants.BLOCKING_CONDITIONS_API.equals(blockCondition.getConditionType()) ||
                 APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(blockCondition.getConditionType()) ||
                 APIConstants.BLOCKING_CONDITIONS_USER.equals(blockCondition.getConditionType())) {

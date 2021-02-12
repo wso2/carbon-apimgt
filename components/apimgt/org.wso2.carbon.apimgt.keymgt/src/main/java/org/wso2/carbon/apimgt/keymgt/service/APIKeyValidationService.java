@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Condition;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
@@ -57,6 +58,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -109,18 +111,19 @@ public class APIKeyValidationService {
             if (axis2MessageContext != null) {
                 MessageContext responseMessageContext = axis2MessageContext.getOperationContext().
                         getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                if (log.isDebugEnabled()) {
-                    List headersList = new ArrayList();
-                    Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                    if (headers != null && headers instanceof Map) {
-                        headersMap = (Map) headers;
-                        activityID = (String) headersMap.get("activityID");
+                if (responseMessageContext != null) {
+                    if (log.isDebugEnabled()) {
+                        List headersList = new ArrayList();
+                        Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        if (headers != null && headers instanceof Map) {
+                            headersMap = (Map) headers;
+                            activityID = (String) headersMap.get("activityID");
+                        }
+                        if(headersMap != null) {
+                            headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
+                        }
+                        responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                     }
-                    if(headersMap != null) {
-                        headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
-                    }
-
-                    responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                 }
             }
         } catch (AxisFault axisFault) {
@@ -518,7 +521,7 @@ public class APIKeyValidationService {
      * authorized, tier information will be <pre>null</pre>
      */
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
-                                                        String tenantDomain,String keyManager)
+                                                        String tenantDomain, String keyManager)
             throws APIKeyMgtException, APIManagementException {
 
         KeyValidationHandler keyValidationHandler =
@@ -541,5 +544,15 @@ public class APIKeyValidationService {
         KeyValidationHandler keyValidationHandler =
                 ServiceReferenceHolder.getInstance().getKeyValidationHandler(tenantDomain);
         return keyValidationHandler.validateScopes(tokenValidationContext);
+    }
+
+    public Map<String, Scope> retrieveScopes(String tenantDomain) {
+
+        SubscriptionDataStore subscriptionDataStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (subscriptionDataStore == null) {
+            return new HashMap<>();
+        }
+        return subscriptionDataStore.getScopesByTenant(tenantDomain);
     }
 }

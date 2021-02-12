@@ -32,7 +32,6 @@ import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
-import TablePagination from '@material-ui/core/TablePagination';
 import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
@@ -41,6 +40,7 @@ import Grid from '@material-ui/core/Grid';
 import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
+import Box from '@material-ui/core/Box';
 import Delete from '../Delete/Delete';
 import Usage from '../Usage/Usage';
 
@@ -51,6 +51,22 @@ const styles = (theme) => ({
         '& > div[class^="MuiPaper-root-"]': {
             boxShadow: 'none',
             backgroundColor: 'transparent',
+        },
+    },
+    table: {
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        '& > td[class^=MUIDataTableBodyCell-cellHide-]': {
+            display: 'none',
+        },
+        '& .MUIDataTableBodyCell-cellHide-793': {
+            display: 'none',
+        },
+        '& td': {
+            wordBreak: 'break-word',
+        },
+        '& th': {
+            minWidth: '150px',
         },
     },
     root: {
@@ -70,6 +86,8 @@ const styles = (theme) => ({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: theme.spacing(2),
+        marginLeft: 'auto',
+        marginRight: 'auto',
     },
     mainTitle: {
         paddingLeft: 0,
@@ -202,15 +220,7 @@ class Listing extends React.Component {
         super(props);
         this.api_uuid = props.match.params.api_uuid;
         this.api_data = props.api;
-        this.state = {
-            scopes: null,
-            totalScopes: 0,
-            page: 0,
-            rowsPerPage: 5,
-            rowsPerPageOptions: [5, 10, 25, 50, 100],
-        };
-        this.handleChangePage = this.handleChangePage.bind(this);
-        this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+        this.state = { scopes: null, page: 0 };
         this.fetchScopeData = this.fetchScopeData.bind(this);
     }
 
@@ -228,14 +238,13 @@ class Listing extends React.Component {
      * @memberof ScopesTable
      */
     fetchScopeData() {
-        const { page, rowsPerPage } = this.state;
-        const promisedScopes = API.getAllScopes(page * rowsPerPage, rowsPerPage);
+        const { page } = this.state;
+        const promisedScopes = API.getAllScopes(page * 2000, 2000);
 
         promisedScopes
             .then((response) => {
                 this.setState({
                     scopes: response.body.list,
-                    totalScopes: response.body.pagination.total,
                 });
             })
             .catch((errorMessage) => {
@@ -245,32 +254,12 @@ class Listing extends React.Component {
     }
 
     /**
-     * handleChangePage handle change in selected page
-     *
-     * @param {any} page selected page
-     * */
-    handleChangePage(page) {
-        this.setState({ page }, this.fetchScopeData);
-    }
-
-    /**
-     * handleChangeRowsPerPage handle change in rows per page
-     *
-     * @param {any} event rows per page change event
-     * */
-    handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchScopeData);
-    }
-
-    /**
      * Render Scopes section
      * @returns {React.Component} React Component
      * @memberof Scopes
      */
     render() {
-        const {
-            scopes, page, rowsPerPage, totalScopes, rowsPerPageOptions,
-        } = this.state;
+        const { scopes } = this.state;
         const {
             intl, classes,
         } = this.props;
@@ -327,18 +316,14 @@ class Listing extends React.Component {
                             const scopeName = tableMeta.rowData[1];
                             const usageCount = tableMeta.rowData[5];
                             return (
-                                <table className={classes.actionTable}>
-                                    <tr>
-                                        <td>
-                                            <Usage
-                                                scopeName={scopeName}
-                                                scopeId={scopeId}
-                                                usageCount={usageCount}
-                                            />
-                                        </td>
-                                        <td>
-                                            <Link
-                                                to={!isRestricted(['apim:shared_scope_manage'])
+                                <Box display='flex' flexDirection='column'>
+                                    <Usage
+                                        scopeName={scopeName}
+                                        scopeId={scopeId}
+                                        usageCount={usageCount}
+                                    />
+                                    <Link
+                                        to={!isRestricted(['apim:shared_scope_manage'])
                                                     && {
                                                         pathname: editUrl,
                                                         state: {
@@ -346,27 +331,23 @@ class Listing extends React.Component {
                                                             scopeId,
                                                         },
                                                     }}
-                                                className={isRestricted(['apim:shared_scope_manage'])
-                                                    ? classes.disableLink : ''}
-                                            >
-                                                <Button disabled={isRestricted(['apim:shared_scope_manage'])}>
-                                                    <Icon>edit</Icon>
-                                                    <FormattedMessage
-                                                        id='Scopes.Listing.Listing.scopes.text.editor.edit'
-                                                        defaultMessage='Edit'
-                                                    />
-                                                </Button>
-                                            </Link>
-                                        </td>
-                                        <td>
-                                            <Delete
-                                                scopeName={scopeName}
-                                                scopeId={scopeId}
-                                                fetchScopeData={this.fetchScopeData}
+                                        className={isRestricted(['apim:shared_scope_manage'])
+                                            ? classes.disableLink : ''}
+                                    >
+                                        <Button disabled={isRestricted(['apim:shared_scope_manage'])}>
+                                            <Icon>edit</Icon>
+                                            <FormattedMessage
+                                                id='Scopes.Listing.Listing.scopes.text.editor.edit'
+                                                defaultMessage='Edit'
                                             />
-                                        </td>
-                                    </tr>
-                                </table>
+                                        </Button>
+                                    </Link>
+                                    <Delete
+                                        scopeName={scopeName}
+                                        scopeId={scopeId}
+                                        fetchScopeData={this.fetchScopeData}
+                                    />
+                                </Box>
                             );
                         }
                         return false;
@@ -392,20 +373,7 @@ class Listing extends React.Component {
             download: false,
             viewColumns: false,
             customToolbar: false,
-            customFooter: () => {
-                return (
-                    <TablePagination
-                        rowsPerPageOptions={rowsPerPageOptions}
-                        colSpan={6}
-                        count={totalScopes}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onChangePage={this.handleChangePage}
-                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                        ActionsComponent={ScopeTablePagination}
-                    />
-                );
-            },
+            rowsPerPageOptions: [5, 10, 25, 50, 100],
         };
 
         if (!scopes) {
@@ -468,7 +436,7 @@ class Listing extends React.Component {
 
         return (
             <div className={classes.heading}>
-                <div className={classes.titleWrapper}>
+                <Grid className={classes.titleWrapper} xs={12} sm={12} md={11} lg={11} item>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Scopes.Listing.Listing.heading.scope.heading'
@@ -504,9 +472,10 @@ class Listing extends React.Component {
                             </Typography>
                         </Grid>
                     )}
-                </div>
-
-                <MUIDataTable title={false} data={scopesList} columns={columns} options={options} />
+                </Grid>
+                <Grid className={classes.table} xs={12} sm={12} md={11} lg={11} item>
+                    <MUIDataTable title={false} data={scopesList} columns={columns} options={options} />
+                </Grid>
             </div>
         );
     }

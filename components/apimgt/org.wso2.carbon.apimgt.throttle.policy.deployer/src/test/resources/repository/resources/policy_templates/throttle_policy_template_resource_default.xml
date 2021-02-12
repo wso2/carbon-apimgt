@@ -1,0 +1,37 @@
+###################################  macros  #######################################
+##
+###generate key
+#macro( getKey )##
+str:concat(resourceKey,'_default')##
+#end
+###generate rule
+#macro( getRule $policy)
+${policy.getTenantDomain()}_resource_${policy.getName()}_default##
+#end
+
+@Plan:name('#getRule($policy)')
+@Plan:description('ExecutionPlan for #getRule($policy)')
+
+@Import('org.wso2.throttle.processed.request.stream:1.0.0')
+define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
+
+@Export('org.wso2.throttle.globalThrottle.stream:1.1.0')
+define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long,evaluatedConditions string);
+
+FROM RequestStream
+SELECT messageID, (apiTenant == '$policy.getTenantDomain()' and resourceTier == '${policy.getName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap,"$evaluatedConditions" as evaluatedConditions
+INSERT INTO EligibilityStream;
+
+#if($quotaPolicy != "")
+FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
+#if($quotaPolicy.getQuotaType() == $REQUEST_COUNT_TYPE)
+select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+#else
+select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getDataAmount()) as isThrottled, expiryTimeStamp,evaluatedConditions group by throttleKey
+#end
+INSERT ALL EVENTS into ResultStream;
+#end
+
+from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)
+select *
+insert into GlobalThrottleStream;

@@ -238,11 +238,31 @@ public class SessionDataPublisherImpl extends AbstractAuthenticationDataPublishe
         String username = UserCoreUtil.addTenantDomainToEntry(tenantAwareusername, tenantDomain);
         String userStoreDomain = authenticatedUser.getUserStoreDomain();
         Set<String> clientIds;
+        SystemApplicationDTO[] systemApplicationDTOS;
+        SystemApplicationDAO systemApplicationDAO = new SystemApplicationDAO();
+        Set<String> systemAppClientIds = new HashSet<>();
         try {
             clientIds = OAuthTokenPersistenceFactory.getInstance().getTokenManagementDAO()
                     .getAllTimeAuthorizedClientIds(authenticatedUser);
         } catch (IdentityOAuth2Exception e) {
             throw handleError("Error occurred while retrieving apps authorized by User ID : " + username, e);
+        }
+        try {
+            systemApplicationDTOS = systemApplicationDAO.getApplications(tenantDomain);
+            if (systemApplicationDTOS.length < 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug("The tenant: " + tenantDomain + " doesn't have any system apps");
+                }
+            } else {
+                for (SystemApplicationDTO applicationDTO : systemApplicationDTOS) {
+                    systemAppClientIds.add(applicationDTO.getConsumerKey());
+                }
+            }
+        } catch (APIMgtDAOException e) {
+            log.error("Error thrown while retrieving system applications for the tenant domain " + tenantDomain, e);
+        }
+        if (clientIds.containsAll(systemAppClientIds)) {
+            clientIds = systemAppClientIds;
         }
         Set<OAuthConsumerAppDTO> appDTOs = new HashSet<>();
         for (String clientId : clientIds) {

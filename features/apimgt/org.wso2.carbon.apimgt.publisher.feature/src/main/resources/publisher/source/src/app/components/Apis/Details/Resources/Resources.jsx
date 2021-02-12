@@ -29,7 +29,7 @@ import Banner from 'AppComponents/Shared/Banner';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-import SwaggerParser from 'swagger-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 import { isRestricted } from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
 import Operation from './components/Operation';
@@ -185,7 +185,9 @@ export default function Resources(props) {
                         && securityDefScopes[selectedScope] !== '') {
                         let scopeDescription = '';
                         if (selectedScope in sharedScopesByName) {
-                            scopeDescription = sharedScopesByName[selectedScope].scope.description;
+                            if (sharedScopesByName[selectedScope].scope.description !== null) {
+                                scopeDescription = sharedScopesByName[selectedScope].scope.description;
+                            }
                             securityDefScopes[selectedScope] = scopeDescription;
                         }
                         setSecurityDefScopes(securityDefScopes);

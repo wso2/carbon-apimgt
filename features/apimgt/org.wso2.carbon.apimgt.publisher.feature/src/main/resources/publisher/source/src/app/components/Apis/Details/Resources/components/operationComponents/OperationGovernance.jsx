@@ -19,6 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
 import Divider from '@material-ui/core/Divider';
@@ -34,6 +35,7 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import { Link } from 'react-router-dom';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { getOperationScopes } from '../../operationUtils';
 
@@ -53,7 +55,9 @@ export default function OperationGovernance(props) {
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
     const filteredApiScopes = api.scopes.filter((sharedScope) => !sharedScope.shared);
     const intl = useIntl();
-
+    const scrollToTop = () => {
+        document.querySelector('#react-root').scrollTop = 195;
+    };
     return (
         <>
             <Grid item xs={12} md={12}>
@@ -111,96 +115,114 @@ export default function OperationGovernance(props) {
             </Grid>
             <Grid item md={1} />
             <Grid item md={5}>
-                <TextField
-                    id='operation_rate_limiting_policy'
-                    select
-                    fullWidth={!isOperationRateLimiting}
-                    SelectProps={{
-                        autoWidth: true,
-                        IconComponent: isOperationRateLimiting ? ArrowDropDownIcon : 'span',
-                    }}
-                    disabled={disableUpdate || !isOperationRateLimiting}
-                    label={
-                        isOperationRateLimiting
-                            ? intl.formatMessage({
-                                id: 'Apis.Details.Resources.components.operationComponents.'
+                <Box display='flex' flexDirection='row' alignItems='flex-start'>
+                    <TextField
+                        id='operation_rate_limiting_policy'
+                        select
+                        fullWidth={!isOperationRateLimiting}
+                        SelectProps={{
+                            autoWidth: true,
+                            IconComponent: isOperationRateLimiting ? ArrowDropDownIcon : 'span',
+                        }}
+                        disabled={disableUpdate || !isOperationRateLimiting}
+                        label={
+                            isOperationRateLimiting
+                                ? intl.formatMessage({
+                                    id: 'Apis.Details.Resources.components.operationComponents.'
                                 + 'OperationGovernance.rate.limiting.policy',
-                                defaultMessage: 'Rate limiting policy',
-                            })
-                            : (
-                                <div>
-                                    <FormattedMessage
-                                        id={'Apis.Details.Resources.components.operationComponents.'
+                                    defaultMessage: 'Rate limiting policy',
+                                })
+                                : (
+                                    <div>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
                             + 'OperationGovernance.rate.limiting.governed.by'}
-                                        defaultMessage='Rate limiting is governed by '
-                                    />
-                                    <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
-                                        <FormattedMessage
-                                            id={'Apis.Details.Resources.components.operationComponents.'
+                                            defaultMessage='Rate limiting is governed by '
+                                        />
+                                        <Box
+                                            fontWeight='fontWeightBold'
+                                            display='inline'
+                                            color='primary.main'
+                                            cursor='pointer'
+                                        >
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents.'
                             + 'OperationGovernance.rate.limiting.API.level'}
-                                            defaultMessage='API Level'
-                                        />
-                                    </Box>
-                                </div>
-                            )
-                    }
-                    value={
-                        isOperationRateLimiting && operation['x-throttling-tier'] ? operation['x-throttling-tier'] : ''
-                    }
-                    onChange={({ target: { value } }) => operationsDispatcher({
-                        action: 'throttlingPolicy',
-                        data: { target, verb, value },
-                    })}
-                    helperText={
-                        isOperationRateLimiting
-                            ? intl.formatMessage({
-                                id: 'Apis.Details.Resources.components.operationComponents.'
+                                                defaultMessage='API Level'
+                                            />
+                                        </Box>
+                                    </div>
+                                )
+                        }
+                        value={
+                            isOperationRateLimiting
+                            && operation['x-throttling-tier']
+                                ? operation['x-throttling-tier']
+                                : ''
+                        }
+                        onChange={({ target: { value } }) => operationsDispatcher({
+                            action: 'throttlingPolicy',
+                            data: { target, verb, value },
+                        })}
+                        helperText={
+                            isOperationRateLimiting
+                                ? intl.formatMessage({
+                                    id: 'Apis.Details.Resources.components.operationComponents.'
                                 + 'OperationGovernance.rate.limiting.policy.select',
-                                defaultMessage: 'Select a rate limit policy for this operation',
-                            })
-                            : (
-                                <span>
-                                    <FormattedMessage
-                                        id={'Apis.Details.Resources.components.operationComponents.'
+                                    defaultMessage: 'Select a rate limit policy for this operation',
+                                })
+                                : (
+                                    <span>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
                             + 'OperationGovernance.rate.limiting.helperText.section1'}
-                                        defaultMessage='Use '
-                                    />
-                                    <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
-                                        <FormattedMessage
-                                            id={'Apis.Details.Resources.components.operationComponents.'
+                                            defaultMessage='Use '
+                                        />
+                                        <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents.'
                             + 'OperationGovernance.rate.limiting.helperText.section2'}
-                                            defaultMessage='Operation Level'
-                                        />
-                                    </Box>
-                                    <FormattedMessage
-                                        id={'Apis.Details.Resources.components.operationComponents.'
-                            + 'OperationGovernance.rate.limiting.helperText.section3'}
-                                        defaultMessage=' rate limiting to '
-                                    />
-                                    <b>
+                                                defaultMessage='Operation Level'
+                                            />
+                                        </Box>
                                         <FormattedMessage
                                             id={'Apis.Details.Resources.components.operationComponents.'
-                            + 'OperationGovernance.rate.limiting.helperText.section4'}
-                                            defaultMessage='enable'
+                            + 'OperationGovernance.rate.limiting.helperText.section3'}
+                                            defaultMessage=' rate limiting to '
                                         />
-                                    </b>
-                                    <FormattedMessage
-                                        id={'Apis.Details.Resources.components.operationComponents.'
+                                        <b>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.helperText.section4'}
+                                                defaultMessage='enable'
+                                            />
+                                        </b>
+                                        <FormattedMessage
+                                            id={'Apis.Details.Resources.components.operationComponents.'
                             + 'OperationGovernance.rate.limiting.helperText.section5'}
-                                        defaultMessage=' rate limiting per operation'
-                                    />
-                                </span>
-                            )
-                    }
-                    margin='dense'
-                    variant='outlined'
-                >
-                    {operationRateLimits.map((rateLimit) => (
-                        <MenuItem key={rateLimit.name} value={rateLimit.name}>
-                            {rateLimit.displayName}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                                            defaultMessage=' rate limiting per operation'
+                                        />
+                                    </span>
+                                )
+                        }
+                        margin='dense'
+                        variant='outlined'
+                    >
+                        {operationRateLimits.map((rateLimit) => (
+                            <MenuItem key={rateLimit.name} value={rateLimit.name}>
+                                {rateLimit.displayName}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <Button onClick={scrollToTop}>
+                        <FormattedMessage
+                            id={'Apis.Details.Resources.components.operationComponents.'
+                            + 'OperationGovernance.rate.limiting.button.text'}
+                            defaultMessage='Toggle per api rate limiting'
+                        />
+                        <ExpandLessIcon />
+                    </Button>
+                </Box>
             </Grid>
             <Grid item md={6} />
             <Grid item md={1} />

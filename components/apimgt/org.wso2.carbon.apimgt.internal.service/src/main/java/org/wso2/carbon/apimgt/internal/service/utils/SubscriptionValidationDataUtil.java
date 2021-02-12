@@ -18,14 +18,23 @@
 
 package org.wso2.carbon.apimgt.internal.service.utils;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
@@ -40,13 +49,20 @@ import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
@@ -61,6 +77,7 @@ public class SubscriptionValidationDataUtil {
         APIDTO apidto = null;
         if (model != null) {
             apidto = new APIDTO();
+            apidto.setUuid(model.getApiUUID());
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
             apidto.setName(model.getName());
@@ -91,6 +108,7 @@ public class SubscriptionValidationDataUtil {
         APIListDTO apiListdto = new APIListDTO();
         if (model != null) {
             APIDTO apidto = new APIDTO();
+            apidto.setUuid(model.getApiUUID());
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
             apidto.setContext(model.getContext());
@@ -204,10 +222,11 @@ public class SubscriptionValidationDataUtil {
                 subscriptionPolicyDTO.setGraphQLMaxDepth(subscriptionPolicyModel.getGraphQLMaxDepth());
                 subscriptionPolicyDTO.setGraphQLMaxComplexity(subscriptionPolicyModel.getGraphQLMaxComplexity());
                 subscriptionPolicyDTO.setTenantId(subscriptionPolicyModel.getTenantId());
+                subscriptionPolicyDTO.setTenantDomain(subscriptionPolicyModel.getTenantDomain());
                 subscriptionPolicyDTO.setRateLimitCount(subscriptionPolicyModel.getRateLimitCount());
                 subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicyModel.isStopOnQuotaReach());
                 subscriptionPolicyDTO.setRateLimitTimeUnit(subscriptionPolicyModel.getRateLimitTimeUnit());
-
+                subscriptionPolicyDTO.setDefaultLimit(getThrottleLimitDTO(subscriptionPolicyModel));
                 subscriptionPolicyListDTO.getList().add(subscriptionPolicyDTO);
 
             }
@@ -217,6 +236,82 @@ public class SubscriptionValidationDataUtil {
             subscriptionPolicyListDTO.setCount(0);
         }
         return subscriptionPolicyListDTO;
+    }
+
+    /**
+     * Converts a quota policy object of a policy into a Throttle Limit DTO object
+     *
+     * @param policy policy model object
+     * @return Throttle Limit DTO
+     */
+    private static ThrottleLimitDTO getThrottleLimitDTO(Policy policy) {
+
+        QuotaPolicy quotaPolicy = policy.getQuotaPolicy();
+        ThrottleLimitDTO defaultLimit = new ThrottleLimitDTO();
+        defaultLimit.setQuotaType(quotaPolicy.getType());
+        if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
+            RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
+            defaultLimit.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
+            BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
+            defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+        }
+        return defaultLimit;
+    }
+
+    /**
+     * Converts a quota policy object of a condition group into a Throttle Limit DTO object
+     *
+     * @param apiPolicyConditionGroup condition group model object
+     * @return Throttle Limit DTO
+     */
+    private static ThrottleLimitDTO getThrottleLimitDTO(APIPolicyConditionGroup apiPolicyConditionGroup) {
+
+        QuotaPolicy quotaPolicy = apiPolicyConditionGroup.getQuotaPolicy();
+        if (quotaPolicy != null) {
+            ThrottleLimitDTO defaultLimit = new ThrottleLimitDTO();
+            defaultLimit.setQuotaType(quotaPolicy.getType());
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(quotaPolicy.getType())) {
+                RequestCountLimit requestCountLimit = (RequestCountLimit) quotaPolicy.getLimit();
+                defaultLimit.setRequestCount(fromRequestCountLimitToDTO(requestCountLimit));
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
+                BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
+                defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+            }
+            return defaultLimit;
+        }
+        return null;
+    }
+
+    /**
+     * Converts a Bandwidth Limit model object into a Bandwidth Limit DTO object
+     *
+     * @param bandwidthLimit Bandwidth Limit model object
+     * @return Bandwidth Limit DTO object derived from model
+     */
+    private static BandwidthLimitDTO fromBandwidthLimitToDTO(BandwidthLimit bandwidthLimit) {
+
+        BandwidthLimitDTO dto = new BandwidthLimitDTO();
+        dto.setTimeUnit(bandwidthLimit.getTimeUnit());
+        dto.setUnitTime(bandwidthLimit.getUnitTime());
+        dto.setDataAmount(bandwidthLimit.getDataAmount());
+        dto.setDataUnit(bandwidthLimit.getDataUnit());
+        return dto;
+    }
+
+    /**
+     * Converts a Request Count Limit model object into a Request Count Limit DTO object
+     *
+     * @param requestCountLimit Request Count Limit model object
+     * @return Request Count DTO object derived from model
+     */
+    private static RequestCountLimitDTO fromRequestCountLimitToDTO(RequestCountLimit requestCountLimit) {
+
+        RequestCountLimitDTO dto = new RequestCountLimitDTO();
+        dto.setTimeUnit(requestCountLimit.getTimeUnit());
+        dto.setUnitTime(requestCountLimit.getUnitTime());
+        dto.setRequestCount(requestCountLimit.getRequestCount());
+        return dto;
     }
 
     public static ApplicationPolicyListDTO fromApplicationPolicyToApplicationPolicyListDTO(List<ApplicationPolicy> model) {
@@ -229,6 +324,8 @@ public class SubscriptionValidationDataUtil {
                 applicationPolicyDTO.setName(applicationPolicyModel.getName());
                 applicationPolicyDTO.setQuotaType(applicationPolicyModel.getQuotaType());
                 applicationPolicyDTO.setTenantId(applicationPolicyModel.getTenantId());
+                applicationPolicyDTO.setTenantDomain(applicationPolicyModel.getTenantDomain());
+                applicationPolicyDTO.setDefaultLimit(getThrottleLimitDTO(applicationPolicyModel));
 
                 applicationPolicyListDTO.getList().add(applicationPolicyDTO);
 
@@ -250,7 +347,9 @@ public class SubscriptionValidationDataUtil {
                 policyDTO.setName(apiPolicyModel.getName());
                 policyDTO.setQuotaType(apiPolicyModel.getQuotaType());
                 policyDTO.setTenantId(apiPolicyModel.getTenantId());
+                policyDTO.setTenantDomain(apiPolicyModel.getTenantDomain());
                 policyDTO.setApplicableLevel(apiPolicyModel.getApplicableLevel());
+                policyDTO.setDefaultLimit(getThrottleLimitDTO(apiPolicyModel));
                 apiPolicyListDTO.getList().add(policyDTO);
 
                 List<APIPolicyConditionGroup> retrievedGroups = apiPolicyModel.getConditionGroups();
@@ -259,6 +358,7 @@ public class SubscriptionValidationDataUtil {
                     ApiPolicyConditionGroupDTO group = new ApiPolicyConditionGroupDTO();
                     group.setConditionGroupId(retGroup.getConditionGroupId());
                     group.setQuotaType(retGroup.getQuotaType());
+                    group.setDefaultLimit(getThrottleLimitDTO(retGroup));
                     group.setPolicyId(retGroup.getPolicyId());
 
                     List<org.wso2.carbon.apimgt.internal.service.dto.ConditionDTO> condition = 
@@ -310,7 +410,7 @@ public class SubscriptionValidationDataUtil {
 
     public static String validateTenantDomain(String xWSO2Tenant, MessageContext messageContext) {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (xWSO2Tenant == null) {
             return tenantDomain;
         } else {
@@ -323,4 +423,54 @@ public class SubscriptionValidationDataUtil {
 
     }
 
+    public static ScopesListDTO fromScopeListToScopeDtoList(List<Scope> model) {
+
+        ScopesListDTO scopesListDTO = new ScopesListDTO();
+        List<ScopeDTO> scopeDTOList = new ArrayList<>();
+        for (Scope scope : model) {
+            scopeDTOList.add(fromScopeToScopeDto(scope));
+        }
+        scopesListDTO.setList(scopeDTOList);
+        scopesListDTO.setCount(scopeDTOList.size());
+        return scopesListDTO;
+    }
+
+    private static ScopeDTO fromScopeToScopeDto(Scope scope) {
+        ScopeDTO scopeDTO = new ScopeDTO();
+        scopeDTO.setName(scope.getKey());
+        scopeDTO.setDisplayName(scope.getName());
+        scopeDTO.setDescription(scope.getDescription());
+        String roles = scope.getRoles();
+        if (StringUtils.isNotEmpty(roles) && roles.trim().length() > 0) {
+            scopeDTO.setRoles(Arrays.asList(roles.split(",")));
+        }
+        return scopeDTO;
+    }
+
+    /**
+     * Converts a list of global policy objects into a global policy list DTO object
+     *
+     * @param globalPolicies list of global policy objects
+     * @return global policy list DTO
+     */
+    public static GlobalPolicyListDTO fromGlobalPolicyToGlobalPolicyListDTO(List<GlobalPolicy> globalPolicies) {
+        GlobalPolicyListDTO globalPolicyListDTO = new GlobalPolicyListDTO();
+        if (globalPolicies != null) {
+            for (GlobalPolicy globalPolicy : globalPolicies) {
+                GlobalPolicyDTO globalPolicyDTO = new GlobalPolicyDTO();
+                globalPolicyDTO.setId(globalPolicy.getId());
+                globalPolicyDTO.setName(globalPolicy.getName());
+                globalPolicyDTO.setTenantId(globalPolicy.getTenantId());
+                globalPolicyDTO.setTenantDomain(globalPolicy.getTenantDomain());
+                globalPolicyDTO.setSiddhiQuery(globalPolicy.getSiddhiQuery());
+                globalPolicyDTO.setKeyTemplate(globalPolicy.getKeyTemplate());
+
+                globalPolicyListDTO.getList().add(globalPolicyDTO);
+            }
+            globalPolicyListDTO.setCount(globalPolicies.size());
+        } else {
+            globalPolicyListDTO.setCount(0);
+        }
+        return globalPolicyListDTO;
+    }
 }

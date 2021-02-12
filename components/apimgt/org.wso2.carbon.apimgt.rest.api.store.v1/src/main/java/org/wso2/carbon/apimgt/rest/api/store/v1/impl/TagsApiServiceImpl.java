@@ -26,10 +26,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.TagMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -58,8 +59,8 @@ public class TagsApiServiceImpl implements TagsApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
-            String username = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             tagSet = apiConsumer.getAllTags(requestedTenantDomain);
             if (tagSet != null) {
                 tagList.addAll(tagSet);

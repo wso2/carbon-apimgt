@@ -234,7 +234,7 @@ function View(props) {
                     <Paper className={classes.paper}>
                         {doc.sourceType === 'MARKDOWN' && (
                             <Suspense fallback={<CircularProgress />}>
-                                <ReactMarkdown source={code} />
+                                <ReactMarkdown escapeHtml={false} source={code} />
                             </Suspense>
                         )}
                         {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}

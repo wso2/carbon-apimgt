@@ -31,6 +31,7 @@ import org.slf4j.MDC;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class provides AspectJ configurations
@@ -126,8 +127,13 @@ public class MethodTimeLogger
                         (Map) messageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                 if (headers != null) {
                     String correlationId = (String) headers.get(APIConstants.AM_ACTIVITY_ID);
-                    if (correlationId != null) {
+                    if (StringUtils.isNotEmpty(correlationId)) {
                         MDC.put(APIConstants.CORRELATION_ID, correlationId);
+                    }
+                    if (StringUtils.isEmpty(MDC.get(APIConstants.CORRELATION_ID))) {
+                        correlationId = UUID.randomUUID().toString();
+                        MDC.put(APIConstants.CORRELATION_ID, correlationId);
+                        headers.put(APIConstants.AM_ACTIVITY_ID, correlationId);
                     }
                 }
             }

@@ -55,10 +55,18 @@ public class APIIdentifier implements Serializable, Identifier {
         this.tier = tier;
     }
 
+    @Default
     public APIIdentifier(String providerName, String apiName, String version) {
         this.providerName = providerName;
         this.apiName = apiName;
         this.version = version;
+    }
+
+    public APIIdentifier(String providerName, String apiName, String version, String uuid) {
+        this.providerName = providerName;
+        this.apiName = apiName;
+        this.version = version;
+        this.uuid = uuid;
     }
 
     public APIIdentifier(String apiId) throws APIManagementException {
@@ -123,8 +131,12 @@ public class APIIdentifier implements Serializable, Identifier {
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

@@ -38,24 +38,14 @@ class APIClient {
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
         SwaggerClient.http.withCredentials = true;
-        const promisedResolve = new Promise((resolve) => {
-            /**
-             * If `__swaggerSpec` contains the parsed swagger spec , We resolve the promise with that value
-             * else use worker message event handler to get the parsed spec from worker
-             * `__swaggerWorker` is the worker object initialized by
-             * `/source/src/app/webWorkers/swaggerWorkerInit.js`
-             */
-            /* eslint-disable no-underscore-dangle */
-            if (window.__swaggerSpec) {
-                resolve(window.__swaggerSpec);
-            } else {
-                window.__swaggerWorker.addEventListener('message', ({ data }) => {
-                    resolve(data);
-                });
-            }
-        });
-        APIClient.spec = promisedResolve;
-        this._client = promisedResolve.then((resolved) => {
+        if (!APIClient.spec) {
+            SwaggerClient.http.withCredentials = true;
+            APIClient.spec = SwaggerClient.resolve({
+                url: Utils.getSwaggerURL(),
+                requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; },
+            });
+        }
+        this._client = APIClient.spec.then((resolved) => {
             const argsv = Object.assign(args, {
                 spec: this._fixSpec(resolved.spec),
                 requestInterceptor: this._getRequestInterceptor(),
@@ -124,7 +114,9 @@ class APIClient {
      */
     _fixSpec(spec) {
         const updatedSpec = spec;
-        updatedSpec.host = this.environment.host;
+        const url = new URL(spec.servers[0].url);
+        url.host = this.environment.host;
+        updatedSpec.servers[0].url = String(url);
         return updatedSpec;
     }
 

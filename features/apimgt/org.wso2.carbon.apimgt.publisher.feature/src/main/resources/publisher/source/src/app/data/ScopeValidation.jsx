@@ -53,6 +53,11 @@ const resourcePath = {
     LABLES: '/labels',
     WORKFLOW: '/workflows/{workflowReferenceId}',
     SERVICE_DISCOVERY: '/external-resources/services',
+    SERVICES: '/services',
+    SINGLE_SERVICE: '/services/{serviceId}',
+    SINGLE_SERVICE_DEFINITION: '/services/{serviceId}/definition',
+    IMPORT_SERVICE: '/services/import',
+    EXPORT_SERVICE: '/services/export',
 };
 
 const resourceMethod = {
@@ -60,6 +65,7 @@ const resourceMethod = {
     PUT: 'put',
     GET: 'get',
     DELETE: 'delete',
+    HEAD: 'head',
 };
 
 /**

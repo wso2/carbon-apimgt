@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptio
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BotDetectionAlertSubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.AlertsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.BotDetectionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -59,7 +60,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      */
     public Response getSubscribedAlertTypes(MessageContext messageContext) {
 
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiUtil.getLoggedInUsername());
+        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
         try {
             AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                     .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
@@ -108,7 +109,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             RestApiUtil.handleBadRequest("Alert list should not be empty", log);
         }
 
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiUtil.getLoggedInUsername());
+        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
         try {
 
             AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
@@ -152,7 +153,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      */
     @Override public Response unsubscribeAllAlerts(MessageContext messageContext) {
 
-        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiUtil.getLoggedInUsername());
+        String fullyQualifiedUsername = getFullyQualifiedUsername(RestApiCommonUtil.getLoggedInUsername());
         try {
             AdminAlertConfigurator adminAlertConfigurator = (AdminAlertConfigurator) AlertConfigManager.getInstance()
                     .getAlertConfigurator(AlertMgtConstants.ADMIN_DASHBOARD_AGENT);
@@ -169,7 +170,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     /**
      * Retrieve a list of bot detection alert subscriptions
      *
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return list of bot detection alert subscriptions
      * @throws APIManagementException if an error occurs when retrieving bot detection alert subscriptions
      */
@@ -187,7 +188,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * Subscribe for bot detection alerts
      *
      * @param body           email to be registered for the subscription
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return alert subscription DTO containing the uuid of the subscription and the registered email
      * @throws APIManagementException if an error occurs when subscribing for bot detection alerts
      */
@@ -220,7 +221,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * Unsubscribe from bot detection alerts
      *
      * @param uuid           uuid of the subscription
-     * @param messageContext
+     * @param messageContext CXF Message Context
      * @return 200 OK response if the subscription is deleted successfully
      * @throws APIManagementException if an error occurs when un-subscribing from bot detection alerts
      */
@@ -245,7 +246,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
      * @return
      */
     private String getFullyQualifiedUsername(String username) {
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(RestApiUtil.getLoggedInUserTenantDomain())) {
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(RestApiCommonUtil.getLoggedInUserTenantDomain())) {
             return username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         return username;
