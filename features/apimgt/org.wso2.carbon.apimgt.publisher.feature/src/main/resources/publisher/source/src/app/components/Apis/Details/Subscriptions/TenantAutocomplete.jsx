@@ -180,6 +180,7 @@ function DownshiftMultiple(props) {
         setTenantList(newSelectedItem);
     };
 
+
     return (
         <Downshift
             id='downshift-multiple'
@@ -261,6 +262,9 @@ DownshiftMultiple.propTypes = {
         type: PropTypes.string,
         inputType: PropTypes.string,
     }).isRequired,
+    api: PropTypes.shape({
+        policies: PropTypes.array,
+    }).isRequired,
     tenantList: PropTypes.shape([]).isRequired,
 };
 
@@ -270,7 +274,7 @@ DownshiftMultiple.propTypes = {
 export default function IntegrationDownshift(props) {
     const classes = useStyles();
     const [suggestions, setsuggestions] = useState({});
-    const { setTenantList, tenantList } = props;
+    const { setTenantList, api, tenantList } = props;
 
     const restApi = new API();
 
@@ -291,6 +295,7 @@ export default function IntegrationDownshift(props) {
                 suggestions={suggestions}
                 tenantList={tenantList}
                 setTenantList={setTenantList}
+                api={api}
             />
             <div className={classes.divider} />
         </div>
@@ -301,6 +306,9 @@ IntegrationDownshift.propTypes = {
     setTenantList: PropTypes.shape({
         type: PropTypes.string,
         inputType: PropTypes.string,
+    }).isRequired,
+    api: PropTypes.shape({
+        policies: PropTypes.array,
     }).isRequired,
     tenantList: PropTypes.shape([]).isRequired,
 };

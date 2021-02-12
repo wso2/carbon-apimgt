@@ -281,7 +281,7 @@ function Configuration(props) {
                             {(api.visibility && api.visibility === 'PRIVATE')
                                 ? (
                                     <>
-                                        Visible to my domain
+                                    Visible to my domain
                                     </>
                                 )
                                 : (

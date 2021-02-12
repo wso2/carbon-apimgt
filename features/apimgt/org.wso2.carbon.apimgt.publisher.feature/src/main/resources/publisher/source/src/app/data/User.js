@@ -166,6 +166,7 @@ export default class User {
         };
     }
 
+
     /**
      * Return the Publisher application information
      *  Client ID: Service provider client id

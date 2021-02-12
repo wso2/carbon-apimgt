@@ -42,7 +42,7 @@ export default function DescriptionAndSummary(props) {
                     {' '}
                     {'&'}
                     {' '}
-                    Description
+Description
                     <Divider variant='middle' />
                 </Typography>
             </Grid>

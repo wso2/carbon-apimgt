@@ -176,6 +176,7 @@ export default function GraphQLQueryAnalysis(props) {
             });
     }, []);
 
+
     /**
     * Edit Custom Complexity Values
     */

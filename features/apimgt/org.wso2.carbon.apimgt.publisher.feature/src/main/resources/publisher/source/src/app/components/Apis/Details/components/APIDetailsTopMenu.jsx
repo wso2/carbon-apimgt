@@ -38,6 +38,7 @@ import API from 'AppData/api';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
+
 const styles = (theme) => ({
     root: {
         height: 70,
@@ -110,6 +111,7 @@ const styles = (theme) => ({
         color: 'red',
     },
 });
+
 
 const APIDetailsTopMenu = (props) => {
     const {
@@ -313,6 +315,7 @@ APIDetailsTopMenu.propTypes = {
     isAPIProduct: PropTypes.bool.isRequired,
     imageUpdate: PropTypes.number.isRequired,
 };
+
 
 // export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
 

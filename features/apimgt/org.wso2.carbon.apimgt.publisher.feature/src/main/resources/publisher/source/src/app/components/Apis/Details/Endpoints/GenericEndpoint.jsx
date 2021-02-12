@@ -176,7 +176,7 @@ function GenericEndpoint(props) {
                                         ? <CircularProgress size={20} />
                                         : (
                                             <Icon>
-                                                check_circle
+                                        check_circle
                                             </Icon>
                                         )}
                                 </IconButton>
@@ -192,7 +192,7 @@ function GenericEndpoint(props) {
                                             disabled={(isRestricted(['apim:api_create'], api))}
                                         >
                                             <Icon>
-                                                settings
+                                            settings
                                             </Icon>
                                         </IconButton>
                                         <IconButton
@@ -202,7 +202,7 @@ function GenericEndpoint(props) {
                                             disabled={(isRestricted(['apim:api_create'], api))}
                                         >
                                             <Icon>
-                                                security
+                                            security
                                             </Icon>
                                         </IconButton>
                                     </>

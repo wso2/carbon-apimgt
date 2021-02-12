@@ -50,6 +50,7 @@ const ErrorPage = (props) => {
     );
 };
 
+
 ErrorPage.propTypes = {
     errorCode: PropTypes.string.isRequired,
 };

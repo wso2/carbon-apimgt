@@ -87,7 +87,7 @@ class MenuButton extends React.Component {
                 >
                     {children}
                     {' '}
-                    ▼
+▼
                 </Button>
                 <Popper
                     open={open}

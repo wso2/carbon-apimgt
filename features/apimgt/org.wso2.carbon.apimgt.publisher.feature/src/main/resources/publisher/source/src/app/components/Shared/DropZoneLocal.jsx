@@ -125,6 +125,6 @@ DropZoneLocal.propTypes = {
     onDrop: PropTypes.func,
     accept: PropTypes.string,
     showFilesList: PropTypes.bool,
-    children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.shape({}))]),
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
     error: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
 };

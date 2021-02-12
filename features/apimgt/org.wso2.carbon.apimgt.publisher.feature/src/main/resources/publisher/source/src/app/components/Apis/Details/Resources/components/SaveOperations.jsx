@@ -85,7 +85,7 @@ export default function SaveOperations(props) {
                             }}
                             color='error'
                         >
-                            RESET
+                        RESET
                         </Button>
                     </Box>
                 </DialogActions>

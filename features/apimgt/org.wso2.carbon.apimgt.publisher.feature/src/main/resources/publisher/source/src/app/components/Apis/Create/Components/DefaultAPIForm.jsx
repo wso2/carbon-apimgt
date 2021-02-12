@@ -441,7 +441,7 @@ export default function DefaultAPIForm(props) {
                                                 ? <CircularProgress size={20} />
                                                 : (
                                                     <Icon>
-                                                        check_circle
+                                                check_circle
                                                     </Icon>
                                                 )}
                                         </IconButton>
@@ -457,7 +457,7 @@ export default function DefaultAPIForm(props) {
                     <Typography variant='caption' display='block' gutterBottom>
                         <sup style={{ color: 'red' }}>*</sup>
                         {' '}
-                        Mandatory fields
+Mandatory fields
                     </Typography>
                 </Grid>
             </Grid>

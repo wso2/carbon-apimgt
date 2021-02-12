@@ -247,6 +247,7 @@ export default function MicroGateway(props) {
                                                             style={{ backgroundColor: '#15B8CF' }}
                                                         />
                                                         <Button
+
                                                             className={classes.button1}
                                                             variant='outlined'
                                                             disabled={api.isRevision}

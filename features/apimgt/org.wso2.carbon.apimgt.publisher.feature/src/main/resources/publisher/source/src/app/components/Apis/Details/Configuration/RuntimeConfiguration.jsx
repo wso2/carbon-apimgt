@@ -335,6 +335,7 @@ export default function RuntimeConfiguration() {
         setFaultPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
 
+
     /**
      * Update the GraphQL Query Complexity Values
      */

@@ -34,6 +34,7 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import UnexpectedError from 'AppComponents/Base/Errors/UnexpectedError';
 import LoginDenied from './app/LoginDenied';
 
+
 const ProtectedApp = lazy(() => import('./app/ProtectedApp' /* webpackChunkName: "ProtectedApps" */));
 
 /**
@@ -158,8 +159,8 @@ class Publisher extends React.Component {
         let checkSessionURL;
         if (user) {
             checkSessionURL = Configurations.idp.checkSessionEndpoint + '?client_id='
-                + user.getAppInfo().clientId + '&redirect_uri=https://' + window.location.host
-                + Configurations.app.context + '/services/auth/callback/login';
+            + user.getAppInfo().clientId + '&redirect_uri=https://' + window.location.host
+            + Configurations.app.context + '/services/auth/callback/login';
         }
 
         return (
