@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 //import org.wso2.carbon.graphql.api.devportal.modules.APIDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.TimeDTO;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
@@ -30,9 +31,10 @@ public class APIDTOData {
 
 
    public static final String GET_API_TYPE = "SELECT API.API_TYPE FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_CREATED_TIME = "SELECT API.CREATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
-    public static final String GET_API_UPDATED_TIME = "SELECT API.UPDATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
+//    public static final String GET_API_CREATED_TIME = "SELECT API.CREATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
+//    public static final String GET_API_UPDATED_TIME = "SELECT API.UPDATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
 
+    public static final String GET_API_TIME_DETAILS = "SELECT API.CREATED_TIME,API.UPDATED_TIME FROM AM_API API WHERE API.API_UUID = ? ";
 
     public String getApiType(String Id){
         String type = null;
@@ -50,38 +52,57 @@ public class APIDTOData {
         }
         return type;
     }
-    public String getApiCreatedTime(String Id){
-        String createdTime = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_API_CREATED_TIME)) {
-            statement.setString(1, Id);
+//    public String getApiCreatedTime(String Id){
+//        String createdTime = null;
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection.prepareStatement(GET_API_CREATED_TIME)) {
+//            statement.setString(1, Id);
+//
+//            ResultSet resultSet = statement.executeQuery();
+//
+//            while (resultSet.next()) {
+//                createdTime = resultSet.getString("CREATED_TIME");
+//            }
+//        } catch (SQLException e) {
+//
+//        }
+//        return createdTime;
+//    }
 
-            ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                createdTime = resultSet.getString("CREATED_TIME");
-            }
-        } catch (SQLException e) {
-
-        }
-        return createdTime;
-    }
-    public String getApiLastUpdateTime(String Id){
+    public TimeDTO getApiTimeDetails(String Id){
+        String createTime = null;
         String lastUpdate = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_API_UPDATED_TIME)) {
+             PreparedStatement statement = connection.prepareStatement(GET_API_TIME_DETAILS)) {
             statement.setString(1, Id);
 
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
+                createTime = resultSet.getString("CREATED_TIME");
                 lastUpdate = resultSet.getString("UPDATED_TIME");
             }
         } catch (SQLException e) {
 
         }
-        return lastUpdate;
+        return new TimeDTO(createTime,lastUpdate);
     }
+//    public String getApiLastUpdateTime(String Id){
+//        String lastUpdate = null;
+//        try (Connection connection = APIMgtDBUtil.getConnection();
+//             PreparedStatement statement = connection.prepareStatement(GET_API_UPDATED_TIME)) {
+//            statement.setString(1, Id);
+//
+//            ResultSet resultSet = statement.executeQuery();
+//
+//            while (resultSet.next()) {
+//                lastUpdate = resultSet.getString("UPDATED_TIME");
+//            }
+//        } catch (SQLException e) {
+//
+//        }
+//        return lastUpdate;
+//    }
     public String getApiDefinition(String Id) throws OASPersistenceException {
 
 

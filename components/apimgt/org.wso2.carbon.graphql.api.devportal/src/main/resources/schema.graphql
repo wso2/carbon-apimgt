@@ -33,8 +33,12 @@ type Api{
     categories:String
     keyManagers:String!
     advertiseInfo:Advertise
-    createdTime:String!
-    lastUpdate:String!
+    timeDetails:TimeDetails
+}
+
+type TimeDetails{
+    createdTime:String
+    lastUpdate:String
 }
 type Tag{
     value:String

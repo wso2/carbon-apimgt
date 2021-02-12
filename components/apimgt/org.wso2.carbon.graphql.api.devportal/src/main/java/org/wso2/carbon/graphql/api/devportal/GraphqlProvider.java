@@ -61,8 +61,8 @@ public class GraphqlProvider {
         return RuntimeWiring.newRuntimeWiring()
                 .type(queryApi())
                 .type(queryApiTags())
-                .type(ApiCreateTimeDataFetcher())
-                .type(ApiUpdateTimeDataFetcher())
+//                .type(ApiCreateTimeDataFetcher())
+//                .type(ApiUpdateTimeDataFetcher())
                 .type(ApiDefinitionDataFetcher())
                 .type(ApiRatingDataFetcher())
                 .type(OperationInformationDataFetcher())
@@ -80,6 +80,7 @@ public class GraphqlProvider {
                 .type(APIURLsDataFetcher())
                 .type(DefaultAPIURLsDataFetcher())
                 .type(QueryApiListing())
+                .type(ApiTimeDetailsDataFetcher())
                 .build();
     }
 
@@ -96,14 +97,18 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getTags", tagSevice.getTagsData());
     }
-    private TypeRuntimeWiring.Builder ApiCreateTimeDataFetcher(){
+    private TypeRuntimeWiring.Builder ApiTimeDetailsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("createdTime",apiService.getApiCreatedTime());
+                .dataFetcher("timeDetails",apiService.getApiTimeDetails());
     }
-    private TypeRuntimeWiring.Builder ApiUpdateTimeDataFetcher(){
-        return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("lastUpdate",apiService.getApiUpdatedTime());
-    }
+//    private TypeRuntimeWiring.Builder ApiCreateTimeDataFetcher(){
+//        return TypeRuntimeWiring.newTypeWiring("Api")
+//                .dataFetcher("createdTime",apiService.getApiCreatedTime());
+//    }
+//    private TypeRuntimeWiring.Builder ApiUpdateTimeDataFetcher(){
+//        return TypeRuntimeWiring.newTypeWiring("Api")
+//                .dataFetcher("lastUpdate",apiService.getApiUpdatedTime());
+//    }
     private TypeRuntimeWiring.Builder ApiDefinitionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiDefinition",apiService.getApiDefinition());

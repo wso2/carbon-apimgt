@@ -108,14 +108,4 @@ public class TierData {
 
     }
 
-    static Map<String, TierNameDTO> humanData = new LinkedHashMap<>();
-
-    static {
-        humanData.put("1000", new TierNameDTO("1","Gold"));
-        humanData.put("1001", new TierNameDTO("2","Silver"));
-    }
-
-    public static Object getCharacterData(String Id) {
-        return humanData.get(Id);
-    }
 }
