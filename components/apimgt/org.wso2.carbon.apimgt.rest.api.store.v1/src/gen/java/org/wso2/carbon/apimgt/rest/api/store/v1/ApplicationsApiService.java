@@ -38,9 +38,9 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApplicationsApiService {
       public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(String applicationId, String keyType, String ifMatch, APIKeyGenerateRequestDTO apIKeyGenerateRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdApiKeysKeyTypeRevokePost(String applicationId, String keyType, String ifMatch, APIKeyRevokeRequestDTO apIKeyRevokeRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdDelete(String applicationId, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO, String organizationId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdGet(String applicationId, String organizationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysGet(String applicationId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId, String keyType, ApplicationTokenGenerateRequestDTO applicationTokenGenerateRequestDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
@@ -54,7 +54,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String keyMappingId, String organizationId, String groupId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId, String keyMappingId, ApplicationKeyDTO applicationKeyDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO applicationDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO applicationDTO, String organizationId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format, MessageContext messageContext) throws APIManagementException;
       public Response applicationsGet(String groupId, String organizationId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, String organizationId, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, MessageContext messageContext) throws APIManagementException;

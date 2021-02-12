@@ -361,7 +361,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the required application object
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdGet(String applicationId, String organizationId, String ifNoneMatch,
+                                                 MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -416,7 +417,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the updated application object
      */
     @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String organizationId, String ifMatch, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -669,7 +670,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 200 Response if successfully deleted the application
      */
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdDelete(String applicationId, String organizationId, String ifMatch, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);

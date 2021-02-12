@@ -1235,6 +1235,7 @@ paths:
         This operation can be used to retrieve details of an individual application specifying the application id in the URI.
       parameters:
         - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -1284,6 +1285,7 @@ paths:
         This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response.
       parameters:
         - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: |
@@ -1343,6 +1345,7 @@ paths:
         This operation can be used to remove an application specifying its id.
       parameters:
         - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/If-Match'
       responses:
         200:

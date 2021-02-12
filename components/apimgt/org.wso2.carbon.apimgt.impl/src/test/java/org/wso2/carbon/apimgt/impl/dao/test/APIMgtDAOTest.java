@@ -358,7 +358,7 @@ public class APIMgtDAOTest {
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         apiMgtDAO.addSubscriber(subscriber, null);
         Application application = new Application("testApplication", subscriber);
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), null);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
         assertTrue(applicationId > 0);
         this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication", subscriber.getName
@@ -390,7 +390,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscriber(subscriber, "org2");
         Application application = new Application("testApplication3", subscriber);
         application.setGroupId("org2");
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), null);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
         assertTrue(applicationId > 0);
         this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication3", null, "org2"));
