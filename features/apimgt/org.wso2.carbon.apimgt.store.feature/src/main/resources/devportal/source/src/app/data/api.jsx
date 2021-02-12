@@ -338,12 +338,12 @@ export default class API extends Resource {
      * @param apiId apiId of the api to which the comment is added
      * @param comment comment text
      */
-    addComment(apiId, comment) {
+    addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
             const payload = { apiId };
             return client.apis.Comments.addCommentToAPI(
                 payload,
-                { requestBody: comment },
+                { requestBody: comment, replyTo },
                 this._requestMetaData()
             );
         });
@@ -368,7 +368,7 @@ export default class API extends Resource {
                             createdTime: "2021-02-02 16:33:43.236",
                             createdBy: "admin",
                             category: "general",
-                            parentCommentId: null,
+                            replyTo: null,
                             entryPoint: "publisher",
                             commenterInfo: {
                                 firstName: "John",
@@ -384,7 +384,7 @@ export default class API extends Resource {
                                             createdTime: "2021-02-04 16:33:43.236",
                                             createdBy: "user1",
                                             category: "general",
-                                            parentCommentId: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
+                                            replyTo: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
                                             entryPoint: "devportal",
                                             commenterInfo: {
                                                 firstName: "Jane",
@@ -408,7 +408,7 @@ export default class API extends Resource {
                             createdTime: "2021-02-02 16:33:43.236",
                             createdBy: "admin",
                             category: "general",
-                            parentCommentId: null,
+                            replyTo: null,
                             entryPoint: "publisher",
                             commenterInfo: {
                                 firstName: "",
@@ -424,7 +424,7 @@ export default class API extends Resource {
                                         createdTime: "2021-02-03 16:33:43.236",
                                         createdBy: "user1",
                                         category: "general",
-                                        parentCommentId: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
+                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
                                         entryPoint: "devportal",
                                         commenterInfo: {
                                             firstName: "John",
@@ -448,7 +448,7 @@ export default class API extends Resource {
                             createdTime: "2021-02-02 16:33:43.236",
                             createdBy: "admin",
                             category: "general",
-                            parentCommentId: null,
+                            replyTo: null,
                             entryPoint: "publisher",
                             commenterInfo: {
                                 firstName: "John",
@@ -464,7 +464,7 @@ export default class API extends Resource {
                                             createdTime: "2021-02-03 16:33:43.236",
                                             createdBy: "user1",
                                             category: "general",
-                                            parentCommentId: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
+                                            replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
                                             entryPoint: "devportal",
                                             commenterInfo: {
                                                 firstName: "Jane",
@@ -478,7 +478,7 @@ export default class API extends Resource {
                                             createdTime: "2021-02-04 16:33:43.236",
                                             createdBy: "admin",
                                             category: "general",
-                                            parentCommentId: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
+                                            replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
                                             entryPoint: "devportal",
                                             commenterInfo: {
                                                 firstName: "John",

@@ -75,7 +75,6 @@ class CommentAdd extends React.Component {
         super(props);
         this.state = {
             content: '',
-            replyIndex: -1,
             currentLength: 0,
         };
         this.inputChange = this.inputChange.bind(this);
@@ -99,9 +98,9 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        this.setState({ content: '', replyIndex: -1 });
-        // const { toggleShowReply } = this.props;
-        // toggleShowReply();
+        this.setState({ content: '' });
+        const { handleShowReply } = this.props;
+        handleShowReply(-1);
     }
 
     /**
@@ -109,8 +108,8 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     filterCommentToAddReply(commentToFilter) {
-        const { parentCommentId } = this.props;
-        return commentToFilter.id === parentCommentId;
+        const { replyTo } = this.props;
+        return commentToFilter.id === replyTo;
     }
 
     /**
@@ -119,7 +118,7 @@ class CommentAdd extends React.Component {
      */
     handleClickAddComment() {
         const {
-            apiId, allComments, commentsUpdate, intl, parentCommentId,
+            apiId, allComments, commentsUpdate, intl, replyTo, handleShowReply,
         } = this.props;
         const { content } = this.state;
         const Api = new API();
@@ -133,7 +132,7 @@ class CommentAdd extends React.Component {
                 .then((newComment) => {
                     this.setState({ content: '' });
                     const addedComment = newComment.body;
-                    if (parentCommentId === null) {
+                    if (replyTo === null) {
                         allComments.push(addedComment);
                     } else {
                         const index = allComments.findIndex(this.filterCommentToAddReply)
@@ -160,6 +159,7 @@ class CommentAdd extends React.Component {
             }));
         }
         this.setState({ currentLength: 0 });
+        handleShowReply(-1);
     }
 
     /**
@@ -173,7 +173,7 @@ class CommentAdd extends React.Component {
         } = this.props;
         const { content, currentLength } = this.state;
         return (
-            <Grid container spacing={3} className={classes.contentWrapper}>
+            <Grid container spacing={1} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
                     <div className={classes.commentAddWrapper}>
                         <InputLabel htmlFor="standard-multiline-flexible">
@@ -218,7 +218,7 @@ class CommentAdd extends React.Component {
                         </Grid>
                         {cancelButton && (
                             <Grid item>
-                                <Button onClick={() => this.handleClickCancel()} className={classes.button}>
+                                <Button onClick={() => this.handleClickCancel(-1)} className={classes.button}>
                                     <FormattedMessage
                                         id='Apis.Details.Comments.CommentAdd.btn.cancel'
                                         defaultMessage='Cancel'
@@ -234,8 +234,8 @@ class CommentAdd extends React.Component {
 }
 
 CommentAdd.defaultProps = {
-    parentCommentId: null,
-    toggleShowReply: null,
+    replyTo: null,
+    handleShowReply: null,
     commentsUpdate: null,
 };
 
@@ -243,8 +243,8 @@ CommentAdd.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     cancelButton: PropTypes.bool.isRequired,
     apiId: PropTypes.string.isRequired,
-    parentCommentId: PropTypes.string,
-    toggleShowReply: PropTypes.func,
+    replyTo: PropTypes.string,
+    handleShowReply: PropTypes.func,
     commentsUpdate: PropTypes.func,
     allComments: PropTypes.instanceOf(Array).isRequired,
     intl: PropTypes.shape({
