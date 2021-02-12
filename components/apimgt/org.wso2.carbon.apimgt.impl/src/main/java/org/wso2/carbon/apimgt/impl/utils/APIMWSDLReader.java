@@ -1025,7 +1025,7 @@ public class APIMWSDLReader {
      * @return WSDL validation response
      * @throws APIMgtWSDLException if error occurred while retrieving WSDL info
      */
-    private static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor processor)
+    public static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor processor)
             throws APIMgtWSDLException {
         WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
         if (processor.hasError()) {

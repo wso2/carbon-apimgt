@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -25,9 +24,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.IOException;
 
@@ -35,9 +32,9 @@ import java.io.IOException;
 public class URLValidationInterceptor extends AbstractPhaseInterceptor<Message> {
 
     private static final Log log = LogFactory.getLog(URLValidationInterceptor.class);
-    private static String majorVersion = "v1";
+    private static String majorVersion = "v2";
     //TODO: Get latest version from swagger
-    private static String latestVersion = "v1.2";
+    private static String latestVersion = "v2";
     private String pathSeparator = "/";
     private final String BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
     private final String PATH_INFO = "org.apache.cxf.message.Message.PATH_INFO";

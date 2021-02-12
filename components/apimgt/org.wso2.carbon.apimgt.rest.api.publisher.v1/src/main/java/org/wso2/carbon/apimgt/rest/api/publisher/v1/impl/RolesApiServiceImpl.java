@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.RolesApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -43,7 +44,7 @@ public class RolesApiServiceImpl implements RolesApiService {
      */
     public Response validateSystemRole(String roleId, MessageContext messageContext) {
         Boolean isRoleExist = false;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         if (roleId != null) {
             try {
                 String roleName =  new String(Base64.getUrlDecoder().decode(roleId));

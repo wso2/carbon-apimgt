@@ -406,7 +406,7 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             if (
-                                tableMeta.rowData[9].businessOwner
+                                tableMeta.rowData[9] && tableMeta.rowData[9].businessOwner
                             ) {
                                 return (
                                     <>
@@ -419,10 +419,14 @@ class ApiTableView extends React.Component {
                             } else {
                                 return (
                                     <>
-                                        <div>{value}</div>
-                                        <Typography variant='caption'>
-                                            <FormattedMessage defaultMessage='(Provider)' id='Apis.Listing.ApiTableView.provider.caption' />
-                                        </Typography>
+                                        {value &&
+                                        <>
+                                            <div>{value}</div>
+                                            <Typography variant='caption'>
+                                                <FormattedMessage defaultMessage='(Provider)' id='Apis.Listing.ApiTableView.provider.caption' />
+                                            </Typography>
+                                        </>
+                                        }
                                     </>
                                 );
                             }
@@ -520,7 +524,8 @@ class ApiTableView extends React.Component {
                     if (artifact.type === 'DOC') {
                         return <tr key={rowIndex}><td><DocThumb doc={artifact} /></td></tr>;
                     } else {
-                        return <tr key={rowIndex}><td><ApiThumb api={artifact} /></td></tr>;
+                        return <tr key={rowIndex}><td><ApiThumb api={artifact} customHeight={theme.custom.thumbnail.height}
+                        customWidth={theme.custom.thumbnail.width} /></td></tr>;
                     }
                 }
                 return <span />;

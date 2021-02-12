@@ -43,7 +43,7 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.rest.API;
+import org.apache.synapse.api.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -328,6 +329,43 @@ public class Utils {
     }
 
     /**
+     * Removes the apikey that was cached in the tenant's cache space and adds it to the invalid apiKey token cache.
+     *
+     * @param tokenIdentifier        - Token Identifier to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the apikey should be removed.
+     */
+    public static void invalidateApiKeyInTenantCache(String tokenIdentifier, String cachedTenantDomain) {
+        //If the apiKey is cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Removing cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+            }
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(cachedTenantDomain, true);
+                removeCacheEntryFromGatewayAPiKeyCache(tokenIdentifier);
+                putInvalidApiKeyEntryIntoInvalidApiKeyCache(tokenIdentifier, cachedTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+                }
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Add a token identifier to the invalid apikey cache of the given tenant domain
+     *
+     * @param tokenIdentifier   Token identifier to be added to the invalid token cache
+     * @param tenantDomain  Tenant domain of the apikey
+     */
+    public static void putInvalidApiKeyEntryIntoInvalidApiKeyCache(String tokenIdentifier, String tenantDomain) {
+        CacheProvider.getInvalidGatewayApiKeyCache().put(tokenIdentifier, tenantDomain);
+    }
+
+    /**
      * Remove a token from gateway token cache
      *
      * @param key Access token which should be removed from the cache
@@ -369,6 +407,16 @@ public class Utils {
                 .getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
     }
 
+    /**
+     * Get the tenant domain of a cached api key
+     *
+     * @param token Cached access token
+     * @return Tenant domain
+     */
+    public static String getApiKeyCachedTenantDomain(String token) {
+        return (String) CacheProvider.getGatewayApiKeyCache().get(token);
+    }
+
     public static String getClientCertificateHeader() {
 
         APIManagerConfiguration apiManagerConfiguration =
@@ -395,22 +443,32 @@ public class Utils {
             certificateFromMessageContext = certs[0];
         }
         if (headers.containsKey(Utils.getClientCertificateHeader())) {
-
             try {
                 if (!isClientCertificateValidationEnabled() || APIUtil
                         .isCertificateExistsInTrustStore(certificateFromMessageContext)){
-                    String base64EncodedCertificate = (String) headers.get(Utils.getClientCertificateHeader());
-                    if (base64EncodedCertificate != null) {
-                        base64EncodedCertificate = URLDecoder.decode(base64EncodedCertificate).
-                                replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                                .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
-
-                        byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
+                    String certificate = (String) headers.get(Utils.getClientCertificateHeader());
+                    byte[] bytes;
+                    if (certificate != null) {
+                        if (!isClientCertificateEncoded()) {
+                            certificate = certificate
+                                    .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                                    .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING_SPACE, "")
+                                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                            certificate = certificate.replaceAll(" ", "\n");
+                            certificate = APIConstants.BEGIN_CERTIFICATE_STRING + certificate
+                                    + APIConstants.END_CERTIFICATE_STRING;
+                            bytes = certificate.getBytes();
+                        } else {
+                            certificate = URLDecoder.decode(certificate)
+                                    .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                            bytes = Base64.decodeBase64(certificate);
+                        }
                         try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
                             X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
                             if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
                                 return x509Certificate;
-                            }else{
+                            } else {
                                 log.debug("Certificate in Header didn't exist in truststore");
                                 return null;
                             }
@@ -420,18 +478,16 @@ public class Utils {
                             throw new APIManagementException(msg, e);
                         }
                     }
-
                 }
             } catch (APIManagementException e) {
                 String msg = "Error while validating into Certificate Existence";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
-
             }
-
         }
         return certificateFromMessageContext;
     }
+
     private static boolean isClientCertificateValidationEnabled() {
 
         APIManagerConfiguration apiManagerConfiguration =
@@ -442,6 +498,21 @@ public class Utils {
             return Boolean.parseBoolean(firstProperty);
         }
         return false;
+    }
+
+    private static boolean isClientCertificateEncoded() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null) {
+            String firstProperty = apiManagerConfiguration
+                    .getFirstProperty(APIConstants.MutualSSL.CLIENT_CERTIFICATE_ENCODE);
+            if (firstProperty != null) {
+                return Boolean.parseBoolean(firstProperty);
+            } else {
+                return true;
+            }
+        }
+        return true;
     }
 
     /**

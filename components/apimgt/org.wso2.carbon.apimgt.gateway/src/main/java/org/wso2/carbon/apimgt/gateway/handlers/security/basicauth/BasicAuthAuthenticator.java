@@ -251,7 +251,7 @@ public class BasicAuthAuthenticator implements Authenticator {
             boolean scopesValid = false;
             try {
                 scopesValid = basicAuthCredentialValidator
-                        .validateScopes(username,  openAPI, synCtx, basicAuthValidationInfoObj.getUserRoleList());
+                        .validateScopes(username,  openAPI, synCtx, basicAuthValidationInfoObj);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }

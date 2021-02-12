@@ -29,7 +29,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -58,7 +59,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
     public Response importTenantTheme(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
             throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             String errorMessage = "Super Tenant " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME +
                     " is not allowed to import a tenant theme";
@@ -86,7 +87,7 @@ public class TenantThemeApiServiceImpl implements TenantThemeApiService {
     @Override
     public Response exportTenantTheme(MessageContext messageContext) throws APIManagementException {
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         APIAdminImpl apiAdmin = new APIAdminImpl();
         if (!apiAdmin.isTenantThemeExist(tenantId)) {

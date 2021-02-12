@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -94,7 +94,12 @@ const AppConfiguration = (props) => {
         setSelectedValue(currentTarget.value);
         handleChange('additionalProperties', event);
     }
-
+    /**
+     * Update the state when new props are available
+     */
+    useEffect(() => {
+        setSelectedValue(previousValue);
+    }, [previousValue])
     return (
         <>
             <TableRow>

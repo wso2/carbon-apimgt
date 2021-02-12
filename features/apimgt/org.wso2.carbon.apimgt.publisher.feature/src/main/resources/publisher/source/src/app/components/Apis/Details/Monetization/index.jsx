@@ -68,30 +68,6 @@ class Monetization extends Component {
         this.getMonetizationData();
     }
 
-    getMonetizationData() {
-        const { api } = this.props;
-        if (api.apiType === 'APIProduct') {
-            const apiProduct = new APIProduct(api.name, api.context, api.policies);
-            apiProduct.getSettings().then((settings) => {
-                if (settings.monetizationAttributes != null) {
-                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
-                }
-            });
-            apiProduct.getMonetization(this.props.api.id).then((status) => {
-                this.setState({ monStatus: status.enabled });
-            });
-        } else {
-            api.getSettings().then((settings) => {
-                if (settings.monetizationAttributes != null) {
-                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
-                }
-            });
-            api.getMonetization(this.props.api.id).then((status) => {
-                this.setState({ monStatus: status.enabled });
-            });
-        }
-    }
-
     handleChange = (event) => {
         this.setState({ monStatus: event.target.checked });
     };
@@ -110,7 +86,7 @@ class Monetization extends Component {
      */
     handleSubmit() {
         const { api, intl } = this.props;
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === API.CONSTS.APIProduct) {
             const properties = this.state.property;
             const enabled = this.state.monStatus;
             const body = {
@@ -176,6 +152,30 @@ class Monetization extends Component {
                         defaultMessage: 'Something went wrong while configuring monetization',
                     }));
                 }
+            });
+        }
+    }
+
+    getMonetizationData() {
+        const { api } = this.props;
+        if (api.apiType === API.CONSTS.APIProduct) {
+            const apiProduct = new APIProduct(api.name, api.context, api.policies);
+            apiProduct.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            apiProduct.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
+            });
+        } else {
+            api.getSettings().then((settings) => {
+                if (settings.monetizationAttributes != null) {
+                    this.setState({ monetizationAttributes: settings.monetizationAttributes });
+                }
+            });
+            api.getMonetization(this.props.api.id).then((status) => {
+                this.setState({ monStatus: status.enabled });
             });
         }
     }
@@ -287,6 +287,7 @@ class Monetization extends Component {
                             color='primary'
                             variant='contained'
                             className={classes.button}
+                            disabled={api.isRevision}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Monetization.Index.save'

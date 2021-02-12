@@ -9,7 +9,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.*;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ThrottlingPolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -124,8 +125,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
             if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
                 Map<String, Tier> apiTierMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, requestedTenantDomain);
                 if (apiTierMap != null) {
-                    String username = RestApiUtil.getLoggedInUsername();
-                    APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+                    String username = RestApiCommonUtil.getLoggedInUsername();
+                    APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
                     Set<TierPermission> tierPermissions = apiConsumer.getTierPermissions();
                     for (TierPermission tierPermission : tierPermissions) {

@@ -156,7 +156,6 @@ class CreateScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
-
     handleRoleDeletion = (role) => {
         const { validRoles, invalidRoles } = this.state;
         if (invalidRoles.includes(role)) {
@@ -169,6 +168,14 @@ class CreateScope extends React.Component {
             this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
         }
     };
+
+    /**
+     * Handle ScopeName Input.
+     * @param {JSON} event click event.
+     */
+    handleScopeNameInput({ target: { id, value } }) {
+        this.validateScopeName(id, value);
+    }
 
     /**
      * Handle Role Addition.
@@ -328,7 +335,7 @@ class CreateScope extends React.Component {
         const {
             intl, api, history, updateAPI,
         } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -373,20 +380,12 @@ class CreateScope extends React.Component {
     }
 
     /**
-     * Handle ScopeName Input.
-     * @param {JSON} event click event.
-     */
-    handleScopeNameInput({ target: { id, value } }) {
-        this.validateScopeName(id, value);
-    }
-
-    /**
      * Render.
      * @returns {JSX} rendered component.
      */
     render() {
         const { classes, api } = this.props;
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
         const url = `/${urlPrefix}/${api.id}/scopes`;
         const {
             roleValidity, validRoles, invalidRoles, scopeAddDisabled,
@@ -560,6 +559,7 @@ class CreateScope extends React.Component {
                                             || this.state.valid.name.invalid
                                             || invalidRoles.length !== 0
                                             || scopeAddDisabled
+                                            || api.isRevision
                                             || this.state.valid.description.invalid
                                         }
                                         className={classes.saveButton}
@@ -599,7 +599,7 @@ class CreateScope extends React.Component {
 
 CreateScope.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }),
     api: PropTypes.shape({
         id: PropTypes.string,

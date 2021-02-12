@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
@@ -48,8 +49,8 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     public Response settingsGet(String xWSO2Tenant, MessageContext messageContext)
             throws APIManagementException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             boolean monetizationEnabled = apiConsumer.isMonetizationEnabled(requestedTenantDomain);
             boolean recommendationEnabled = apiConsumer.isRecommendationEnabled(requestedTenantDomain);
@@ -70,7 +71,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
 
     @Override
     public Response settingsApplicationAttributesGet(String ifNoneMatch, MessageContext messageContext) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             List<ApplicationAttributeDTO> applicationAttributeDTOList = new ArrayList<>();

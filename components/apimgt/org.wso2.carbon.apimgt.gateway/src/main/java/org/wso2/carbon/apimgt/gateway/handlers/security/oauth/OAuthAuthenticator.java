@@ -43,7 +43,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -112,7 +112,7 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     @MethodStats
-    public AuthenticationResponse authenticate(MessageContext synCtx) {
+    public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
         boolean isJwtToken = false;
         String accessToken = null;
         boolean defaultVersionInvoked = false;
@@ -172,6 +172,7 @@ public class OAuthAuthenticator implements Authenticator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -289,6 +290,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationName(null);
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
+            synCtx.setProperty("API_NAME", apiName.substring(apiName.indexOf("--") + 2, apiName.indexOf(":")));
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return new AuthenticationResponse(true, isMandatory, false, 0, null);
         } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {

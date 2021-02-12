@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -53,8 +52,9 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
@@ -63,7 +63,9 @@ import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -116,15 +118,10 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -200,9 +197,12 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new PolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new DeployAPIInGatewayNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new ScopesNotifier(), null);
-
+            bundleContext.registerService(Notifier.class.getName(), new CertificateNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(),new GoogleAnalyticsNotifier(),null);
             APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
+            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
+            analyticsConfiguration.setAPIManagerConfiguration(configuration);
             registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
             registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
@@ -216,8 +216,7 @@ public class APIManagerComponent {
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
             // when ServiceDataPublisherAdmin is set.
-            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            analyticsConfiguration.setAPIManagerConfiguration(configuration);
+
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_APPLICATION_DATA_LOCATION), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + "/trunk"), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_APPLICATION_DATA_LOCATION), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
@@ -265,10 +264,12 @@ public class APIManagerComponent {
             SQLConstantManagerFactory.initializeSQLConstantManager();
             // Initialize PasswordResolver
             PasswordResolverFactory.initializePasswordResolver();
+
             boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
             if (analyticsEnabled) {
                 ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
             }
+
             APIUtil.init();
 
             // Activating UserPostSelfRegistration handler componeAPITemplateBuilderImplnt
@@ -282,22 +283,6 @@ public class APIManagerComponent {
 
             // Read the trust store
             ServerConfiguration config = CarbonUtils.getServerConfiguration();
-            String trustStorePassword = config.getFirstProperty(APIConstants.TRUST_STORE_PASSWORD);
-            String trustStoreLocation = config.getFirstProperty(APIConstants.TRUST_STORE_LOCATION);
-            if (trustStoreLocation != null && trustStorePassword != null) {
-                File trustStoreFile = new File(trustStoreLocation);
-                try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
-                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
-                    CertificateReLoaderUtil.setLastUpdatedTimeStamp(trustStoreFile.lastModified());
-                    CertificateReLoaderUtil.startCertificateReLoader();
-                    ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
-                } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
-                    log.error("Error in loading trust store.", e);
-                }
-            } else {
-                log.error("Error in loading trust store. Configurations are not set.");
-            }
 
             //Initialize product REST API token caches
             CacheProvider.createRESTAPITokenCache();
@@ -313,12 +298,6 @@ public class APIManagerComponent {
             configureRecommendationEventPublisherProperties();
             setupAccessTokenGenerator();
 
-            if (configuration.getGatewayArtifactSynchronizerProperties().isSaveArtifactsEnabled()) {
-                if (APIConstants.GatewayArtifactSynchronizer.DB_SAVER_NAME
-                        .equals(configuration.getGatewayArtifactSynchronizerProperties().getSaverName())) {
-                    bundleContext.registerService(ArtifactSaver.class.getName(), new DBSaver(), null);
-                }
-            }
             if (configuration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled()) {
                 if (APIConstants.GatewayArtifactSynchronizer.DB_RETRIEVER_NAME
                         .equals(configuration.getGatewayArtifactSynchronizerProperties().getRetrieverName())) {
@@ -339,7 +318,7 @@ public class APIManagerComponent {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating API manager component");
         }
-        CertificateReLoaderUtil.shutDownCertificateReLoader();
+
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
         org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
@@ -894,31 +873,37 @@ public class APIManagerComponent {
     @Reference(
             name = "gateway.artifact.saver",
             service = ArtifactSaver.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "removeArtifactSaver")
-    protected void addArtifactSaver (ArtifactSaver artifactSaver) {
-
-        GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getGatewayArtifactSynchronizerProperties();
-
-        if (gatewayArtifactSynchronizerProperties.isSaveArtifactsEnabled()
-                && gatewayArtifactSynchronizerProperties.getSaverName().equals(artifactSaver.getName())) {
-            ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
-
-            try {
-                ServiceReferenceHolder.getInstance().getArtifactSaver().init();
-            } catch (Exception e) {
-                log.error("Error connecting with the Artifact Saver");
-                removeArtifactSaver(null);
-            }
+    protected void addArtifactSaver(ArtifactSaver artifactSaver) {
+        ServiceReferenceHolder.getInstance().setArtifactSaver(artifactSaver);
+        try {
+            ServiceReferenceHolder.getInstance().getArtifactSaver().init();
+        } catch (Exception e) {
+            log.error("Error connecting with the Artifact Saver");
+            removeArtifactSaver(null);
         }
     }
 
     protected void removeArtifactSaver(ArtifactSaver artifactSaver) {
         ServiceReferenceHolder.getInstance().getArtifactSaver().disconnect();
         ServiceReferenceHolder.getInstance().setArtifactSaver(null);
+    }
+
+    @Reference(
+            name = "import.export.implementation",
+            service = ImportExportAPI.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetImportExportService")
+    protected void setImportExportService (ImportExportAPI importExportService) {
+
+        ServiceReferenceHolder.getInstance().setImportExportAPI(importExportService);
+    }
+
+    protected void unsetImportExportService(ImportExportAPI importExportAPI) {
+        ServiceReferenceHolder.getInstance().setImportExportAPI(null);
     }
 
     /**
@@ -960,6 +945,20 @@ public class APIManagerComponent {
         } else {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
+    }
+    @Reference(
+            name = "artifactGenerator.service",
+            service = GatewayArtifactGenerator.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeGatewayArtifactGenerator")
+    protected void addGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
+
+        ServiceReferenceHolder.getInstance().addGatewayArtifactGenerator(gatewayArtifactGenerator);
+    }
+
+    protected void removeGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
+        ServiceReferenceHolder.getInstance().removeGatewayArtifactGenerator(gatewayArtifactGenerator);
     }
 }
 

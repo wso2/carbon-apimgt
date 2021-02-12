@@ -108,7 +108,7 @@ const config = {
         Settings: 'Settings',
     },
     plugins: [
-        new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] }),
+        new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: ['!gotoSymbol'] }),
         new CleanWebpackPlugin(),
         new ManifestPlugin(),
     ],

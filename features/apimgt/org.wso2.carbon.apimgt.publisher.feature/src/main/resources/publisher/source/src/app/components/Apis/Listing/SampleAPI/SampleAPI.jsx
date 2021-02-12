@@ -17,46 +17,15 @@
  */
 
 import React, { Component } from 'react';
-
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import Redirect from 'react-router-dom/Redirect';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { withStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
-import Create from '@material-ui/icons/Create';
-import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
-
+import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
-import APICreateMenu from '../components/APICreateMenu';
+import APICreateMenu from 'AppComponents/Apis/Listing/components/APICreateMenu';
 import getSampleSwagger from './SamplePetStore.js';
-
-const styles = (theme) => ({
-    buttonProgress: {
-        color: green[500],
-        position: 'relative',
-    },
-    headline: {
-        paddingTop: theme.spacing(1.25),
-        paddingLeft: theme.spacing(2.5),
-    },
-    head: {
-        paddingBottom: theme.spacing(2),
-        fontWeight: 200,
-    },
-    content: {
-        paddingBottom: theme.spacing(2),
-    },
-    buttonLeft: {
-        marginRight: theme.spacing(1),
-    },
-});
-
 /**
  * Show Initial Welcome card if no APIs are available to list
  * Handle deploying a sample API (Create and Publish)
@@ -86,8 +55,14 @@ class SampleAPI extends Component {
      *Handle onClick event for `Deploy Sample API` Button
      * @memberof SampleAPI
      */
-    handleDeploySample() {
+    handleDeploySample(e) {
+        e.preventDefault();
         const { intl } = this.props;
+        const restApi = new API();
+        let settings;
+        restApi.getSettings().then((response) => {
+            settings = response;
+        });
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
@@ -100,6 +75,54 @@ class SampleAPI extends Component {
         });
         if (!AuthManager.isNotPublisher()) {
             swaggerUpdatePromise.then((sampleAPI) => {
+                const body = {
+                    description: 'Initial Revision',
+                };
+                restApi.createRevision(sampleAPI.id, body)
+                    .then((api1) => {
+                        const revisionId = api1.body.id;
+                        const envList = settings.environment.map((env) => env.name);
+                        const body1 = [];
+                        if (envList && envList.length > 0) {
+                            if (envList.includes('Default')) {
+                                body1.push({
+                                    name: 'Default',
+                                    displayOnDevportal: true,
+                                });
+                            } else {
+                                body1.push({
+                                    name: envList[0],
+                                    displayOnDevportal: true,
+                                });
+                            }
+                        }
+                        restApi.deployRevision(sampleAPI.id, revisionId, body1)
+                            .then(() => {
+                                Alert.info('API Revision Deployed Successfully');
+                            })
+                            .catch((error) => {
+                                if (error.response) {
+                                    Alert.error(error.response.body.description);
+                                } else {
+                                    const message = 'Something went wrong while deploying the API Revision';
+                                    Alert.error(intl.formatMessage({
+                                        id: 'Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision',
+                                        defaultMessage: message,
+                                    }));
+                                }
+                            });
+                    })
+                    .catch((error) => {
+                        if (error.response) {
+                            Alert.error(error.response.body.description);
+                        } else {
+                            const message = 'Something went wrong while creating the API Revision';
+                            Alert.error(intl.formatMessage({
+                                id: 'Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision',
+                                defaultMessage: message,
+                            }));
+                        }
+                    });
                 sampleAPI.publish()
                     .then(() => {
                         this.setState({ published: true, api: sampleAPI });
@@ -215,60 +238,23 @@ class SampleAPI extends Component {
      */
     render() {
         const { published, api, deploying } = this.state;
-        const { classes } = this.props;
 
         if (published && api) {
             const url = '/apis/' + api.id + '/overview';
             return <Redirect to={url} />;
         }
         return (
-            <InlineMessage type='info' height={140}>
-                <div className={classes.contentWrapper}>
-                    <Typography variant='h5' component='h3' className={classes.head}>
-                        <FormattedMessage
-                            id='welcome.to.wso2.api.manager'
-                            defaultMessage='Welcome to WSO2 API Manager'
-                        />
-                    </Typography>
-                    <Typography component='p' className={classes.content}>
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPI.SampleAPI.description'
-                            defaultMessage={
-                                'WSO2 API Publisher enables API providers to'
-                                + ' publish APIs, share documentation, provision API keys and gather feedback'
-                                + ' on features, quality and usage. To get started, Create an API'
-                                + ' or Publish a sample API.'
-                            }
-                        />
-                    </Typography>
-                    <div className={classes.actions}>
-                        <APICreateMenu buttonProps={{
-                            size: 'small',
-                            color: 'primary',
-                            variant: 'contained',
-                            className: classes.buttonLeft,
-                        }}
-                        >
-                            <Create />
-                            <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
-                        </APICreateMenu>
-                        {!AuthManager.isNotCreator()
-                            && (
-                                <Button
-                                    size='small'
-                                    color='primary'
-                                    disabled={deploying}
-                                    variant='contained'
-                                    onClick={this.handleDeploySample}
-                                >
-                                    <GetApp />
-                                    <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
-                                    {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
-                                </Button>
-                            )}
-                    </div>
-                </div>
-            </InlineMessage>
+            <Grid container spacing={3}>
+                <Grid item xs={12} />
+                {/*
+            Following two grids control the placement of whole create page
+            For centering the content better use `container` props, but instead used an empty grid item for flexibility
+             */}
+                <Grid item sm={0} md={2} />
+                <Grid item sm={12} md={8}>
+                    <APICreateMenu deploying={deploying} handleDeploySample={this.handleDeploySample} />
+                </Grid>
+            </Grid>
         );
     }
 }
@@ -278,4 +264,4 @@ SampleAPI.propTypes = {
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(SampleAPI));
+export default injectIntl(SampleAPI);

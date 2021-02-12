@@ -172,8 +172,6 @@ function AddEdit(props) {
                     })}`;
                 }
                 break;
-            case 'description':
-                break;
             case 'requestCount':
                 if (fieldValue === '') {
                     error = `Request Count ${intl.formatMessage({

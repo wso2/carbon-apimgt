@@ -20,20 +20,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeSettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.SettingsMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
 import javax.ws.rs.core.Response;
-import java.util.Map;
 
 public class SettingsApiServiceImpl implements SettingsApiService {
 
@@ -49,7 +44,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
     @Override
     public Response settingsGet(MessageContext messageContext) throws APIManagementException {
 
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiCommonUtil.getLoggedInUsername();
             boolean isUserAvailable = false;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equalsIgnoreCase(username)) {
                 isUserAvailable = true;
