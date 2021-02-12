@@ -950,7 +950,7 @@ public class APIManagerComponent {
     }
 
     /**
-     * Initialize the ExtensionListener Service dependency
+     * Initialize the ExtensionListener Service dependency.
      *
      * @param extensionListener {@link ExtensionListener} service reference
      */
@@ -966,7 +966,7 @@ public class APIManagerComponent {
     }
 
     /**
-     * De-reference the ExtensionListener service
+     * De-reference the ExtensionListener service.
      *
      * @param extensionListener {@link ExtensionListener} service reference
      */
