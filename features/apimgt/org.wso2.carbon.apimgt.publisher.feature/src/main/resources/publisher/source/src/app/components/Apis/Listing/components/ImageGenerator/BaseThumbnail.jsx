@@ -67,6 +67,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
 const windowURL = window.URL || window.webkitURL;
 
 const BaseThumbnail = (props) => {

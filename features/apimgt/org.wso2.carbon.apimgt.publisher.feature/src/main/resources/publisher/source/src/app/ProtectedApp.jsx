@@ -112,20 +112,26 @@ export default class Protected extends Component {
     }
 
     /**
-     * Handle iframe message
-     * @param {event} e Event
+     * Generate page title from theme config.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
      */
-    handleMessage(e) {
-        if (e.data === 'changed') {
-            window.location = Configurations.app.context + '/services/auth/login?not-Login';
-        }
+    getTitle(localTheme) {
+        const {
+            custom: {
+                title: {
+                    prefix, sufix,
+                },
+            },
+        } = localTheme;
+        return (prefix + sufix);
     }
 
     /**
-         * Load Theme file.
-         *
-         * @param {string} tenant tenant name
-         */
+     * Load Theme file.
+     *
+     * @param {string} tenant tenant name
+     */
     setTenantTheme(tenant) {
         if (tenant && tenant !== '' && tenant !== 'carbon.super') {
             fetch(`${Configurations.app.context}/site/public/tenant_themes/${tenant}/apim-publisher/defaultTheme.json`)
@@ -153,19 +159,13 @@ export default class Protected extends Component {
     }
 
     /**
-         * Generate page title from theme config.
-         * @param {object} theme object.
-         * @returns {JSX} link dom tag.
-         */
-    getTitle(localTheme) {
-        const {
-            custom: {
-                title: {
-                    prefix, sufix,
-                },
-            },
-        } = localTheme;
-        return (prefix + sufix);
+     * Handle iframe message
+     * @param {event} e Event
+     */
+    handleMessage(e) {
+        if (e.data === 'changed') {
+            window.location = Configurations.app.context + '/services/auth/login?not-Login';
+        }
     }
 
     /**
@@ -181,6 +181,7 @@ export default class Protected extends Component {
             }, Configurations.app.singleLogout.timeout);
         }
     }
+
 
     /**
      * @returns {React.Component} @inheritDoc
@@ -221,7 +222,7 @@ export default class Protected extends Component {
                                         <Route path='/api-products' component={DeferredAPIs} />
                                         <Route path='/scopes' component={Scopes} />
                                         <Route path='/settings' component={SettingsBase} />
-                                        {enableServiceCatalog
+                                        { enableServiceCatalog
                                             && <Route path='/service-catalog' component={ServiceCatalogComponent} />}
                                         <Route component={ResourceNotFound} />
                                     </Switch>

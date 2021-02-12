@@ -156,6 +156,7 @@ class CreateScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
+
     /**
      * Hadnling role deletion.
      * @param {any} role The role that needs to be deleted.
@@ -203,104 +204,28 @@ class CreateScope extends React.Component {
     }
 
     /**
-     * Handle scope name input.
+     * Validate scope details.
      * @param {any} target The id and value of the target.
      * @memberof CreateScope
      */
-    handleScopeNameInput({ target: { id, value } }) {
-        this.validateScopeName(id, value);
-    }
-
-    /**
-     * Handle scope display name input.
-     * @param {any} target The id and value of the target.
-     * @memberof CreateScope
-     */
-    handleScopeDisplayNameInput({ target: { id, value } }) {
-        this.validateScopeDisplayName(id, value);
-    }
-
-    /**
-     * Add new scope
-     * @memberof CreateScope
-     */
-    addScope() {
-        const {
-            intl, history,
-        } = this.props;
-        const {
-            sharedScope, validRoles,
-        } = this.state;
-        if (this.validateScopeName('name', sharedScope.name)
-            || this.validateScopeDisplayName('displayName', sharedScope.displayName)) {
-            // return status of the validation
-            return;
-        }
-        sharedScope.bindings = validRoles;
-
-        const promisedScopeAdd = this.api.addSharedScope(sharedScope);
-        this.setState({ scopeAddDisabled: true });
-        promisedScopeAdd
-            .then(() => {
-                Alert.info(intl.formatMessage({
-                    id: 'Scopes.Create.CreateScope.scope.added.successfully',
-                    defaultMessage: 'Scope added successfully',
-                }));
-                const { apiScopes } = this.state;
-                const redirectURL = '/scopes/';
-                history.push(redirectURL);
-                this.setState({
-                    apiScopes,
-                    sharedScope: {},
-                    validRoles: [],
-                });
-            })
-            .catch((error) => {
-                const { response } = error;
-                if (response.body) {
-                    const { description } = response.body;
-                    Alert.error(description);
-                }
-            })
-            .finally(() => {
-                this.setState({ scopeAddDisabled: false });
-            });
-    }
-
-    /**
-     * Scope display name validation.
-     * @param {any} id The id of the scope name.
-     * @param {any} value The value of the scope name.
-     * @returns {boolean} whether the scope name is validated.
-     * @memberof CreateScope
-     */
-    validateScopeDisplayName(id, value) {
+    validateScopeDetails({ target: { id, value } }) {
         const { valid, sharedScope } = this.state;
         const { intl } = this.props;
         sharedScope[id] = value;
-        valid[id].invalid = !(value && value.length > 0);
-        if (valid[id].invalid) {
-            valid[id].error = 'Scope display name cannot be empty';
-        }
-        valid[id].invalid = !(value && value.length <= 255);
-        if (valid[id].invalid) {
-            valid[id].error = intl.formatMessage({
-                id: 'Scopes.Create.Scope.displayName.length.exceeded',
-                defaultMessage: 'Exceeds maximum length limit of 255 characters',
-            });
-        }
-        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
+        if (value && value.length !== '' && value.length >= 512) {
             valid[id].invalid = true;
-            valid[id].error = 'Field contains special characters';
-        }
-        if (!valid[id].invalid) {
+            valid[id].error = intl.formatMessage({
+                id: 'Scopes.Create.Scope.description.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 512 characters',
+            });
+        } else {
+            valid[id].invalid = false;
             valid[id].error = '';
         }
         this.setState({
             valid,
             sharedScope,
         });
-        return valid[id].invalid;
     }
 
     /**
@@ -368,28 +293,104 @@ class CreateScope extends React.Component {
     }
 
     /**
- * Validate scope details.
- * @param {any} target The id and value of the target.
- * @memberof CreateScope
- */
-    validateScopeDetails({ target: { id, value } }) {
+     * Scope display name validation.
+     * @param {any} id The id of the scope name.
+     * @param {any} value The value of the scope name.
+     * @returns {boolean} whether the scope name is validated.
+     * @memberof CreateScope
+     */
+    validateScopeDisplayName(id, value) {
         const { valid, sharedScope } = this.state;
         const { intl } = this.props;
         sharedScope[id] = value;
-        if (value && value.length !== '' && value.length >= 512) {
-            valid[id].invalid = true;
+        valid[id].invalid = !(value && value.length > 0);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope display name cannot be empty';
+        }
+        valid[id].invalid = !(value && value.length <= 255);
+        if (valid[id].invalid) {
             valid[id].error = intl.formatMessage({
-                id: 'Scopes.Create.Scope.description.length.exceeded',
-                defaultMessage: 'Exceeds maximum length limit of 512 characters',
+                id: 'Scopes.Create.Scope.displayName.length.exceeded',
+                defaultMessage: 'Exceeds maximum length limit of 255 characters',
             });
-        } else {
-            valid[id].invalid = false;
+        }
+        if (!valid[id].invalid && /[!@#$%^&*(),?"{}[\]|<>\t\n]|(^apim:)/i.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
             valid[id].error = '';
         }
         this.setState({
             valid,
             sharedScope,
         });
+        return valid[id].invalid;
+    }
+
+    /**
+     * Add new scope
+     * @memberof CreateScope
+     */
+    addScope() {
+        const {
+            intl, history,
+        } = this.props;
+        const {
+            sharedScope, validRoles,
+        } = this.state;
+        if (this.validateScopeName('name', sharedScope.name)
+            || this.validateScopeDisplayName('displayName', sharedScope.displayName)) {
+            // return status of the validation
+            return;
+        }
+        sharedScope.bindings = validRoles;
+
+        const promisedScopeAdd = this.api.addSharedScope(sharedScope);
+        this.setState({ scopeAddDisabled: true });
+        promisedScopeAdd
+            .then(() => {
+                Alert.info(intl.formatMessage({
+                    id: 'Scopes.Create.CreateScope.scope.added.successfully',
+                    defaultMessage: 'Scope added successfully',
+                }));
+                const { apiScopes } = this.state;
+                const redirectURL = '/scopes/';
+                history.push(redirectURL);
+                this.setState({
+                    apiScopes,
+                    sharedScope: {},
+                    validRoles: [],
+                });
+            })
+            .catch((error) => {
+                const { response } = error;
+                if (response.body) {
+                    const { description } = response.body;
+                    Alert.error(description);
+                }
+            })
+            .finally(() => {
+                this.setState({ scopeAddDisabled: false });
+            });
+    }
+
+    /**
+     * Handle scope name input.
+     * @param {any} target The id and value of the target.
+     * @memberof CreateScope
+     */
+    handleScopeNameInput({ target: { id, value } }) {
+        this.validateScopeName(id, value);
+    }
+
+    /**
+     * Handle scope display name input.
+     * @param {any} target The id and value of the target.
+     * @memberof CreateScope
+     */
+    handleScopeDisplayNameInput({ target: { id, value } }) {
+        this.validateScopeDisplayName(id, value);
     }
 
     /**
@@ -610,7 +611,7 @@ class CreateScope extends React.Component {
 
 CreateScope.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.shape({}),
+        params: PropTypes.object,
     }),
     api: PropTypes.shape({
         id: PropTypes.string,

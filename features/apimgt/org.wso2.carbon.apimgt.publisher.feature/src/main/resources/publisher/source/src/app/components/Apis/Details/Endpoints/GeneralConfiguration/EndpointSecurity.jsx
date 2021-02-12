@@ -388,6 +388,7 @@ function EndpointSecurity(props) {
                             </TextField>
                         </Grid>
 
+
                         {(endpointSecurityInfo.grantType === 'CLIENT_CREDENTIALS'
                         || endpointSecurityInfo.grantType === 'PASSWORD') && (
                             <>

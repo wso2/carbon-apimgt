@@ -205,6 +205,16 @@ class ThumbnailView extends Component {
     }
 
     /**
+     * Event listener for file drop on the dropzone
+     *
+     * @param {File} acceptedFile dropped file
+     */
+    onDrop(acceptedFile) {
+        this.setState({ file: acceptedFile });
+    }
+
+
+    /**
      * @param {SyntheticEvent} e React event object
      */
     handleClick = (action, intl) => () => {
@@ -248,6 +258,7 @@ class ThumbnailView extends Component {
         }
     };
 
+
     handleChange = (event, selectedTab) => {
         this.setState({ selectedTab });
     };
@@ -256,9 +267,18 @@ class ThumbnailView extends Component {
         this.setState({ [name]: event.target.value });
     };
 
+    selectIcon = (selectedIconUpdate) => {
+        this.setState({ selectedIconUpdate });
+    };
+
     handleChangeComplete = (colorUpdate) => {
         this.setState({ colorUpdate: colorUpdate.hex });
     };
+
+    selectBackground = (backgroundIndexUpdate) => {
+        this.setState({ backgroundIndexUpdate });
+    };
+
 
     /**
      * Handle modal close event
@@ -276,23 +296,6 @@ class ThumbnailView extends Component {
             selectedIconUpdate: cState.selectedIcon,
         }));
     }
-
-    /**
-     * Event listener for file drop on the dropzone
-     *
-     * @param {File} acceptedFile dropped file
-     */
-    onDrop(acceptedFile) {
-        this.setState({ file: acceptedFile });
-    }
-
-    selectIcon = (selectedIconUpdate) => {
-        this.setState({ selectedIconUpdate });
-    };
-
-    selectBackground = (backgroundIndexUpdate) => {
-        this.setState({ backgroundIndexUpdate });
-    };
 
     /**
      * Add new thumbnail image to an API

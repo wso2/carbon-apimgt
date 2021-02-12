@@ -180,6 +180,7 @@ const APICreateMenu = (props) => {
                                     </Box>
                                 )}
 
+
                             </Box>
 
                         </Grid>
@@ -367,7 +368,7 @@ APICreateMenu.defaultProps = {
     deploying: null,
 };
 APICreateMenu.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.shape({}))]).isRequired,
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]).isRequired,
     handleDeploySample: PropTypes.func,
     deploying: PropTypes.bool,
 };

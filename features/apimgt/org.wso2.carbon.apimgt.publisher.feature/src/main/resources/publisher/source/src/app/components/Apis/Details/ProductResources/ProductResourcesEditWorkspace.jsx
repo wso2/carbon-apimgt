@@ -176,6 +176,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
 /**
  *
  *
@@ -652,7 +653,7 @@ function ProductResourcesEdit(props) {
                                                                 <ListItemSecondaryAction>
                                                                     {methodObj.allreadyAdded && (
                                                                         <Icon className={classes.inactiveIcon}>
-                                                                            chevron_right
+                                                                        chevron_right
                                                                         </Icon>
                                                                     )}
                                                                     {!methodObj.allreadyAdded && (

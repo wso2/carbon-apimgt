@@ -295,6 +295,7 @@ class Utils {
         }
     }
 
+
     /**
      * Force file download in browser
      *

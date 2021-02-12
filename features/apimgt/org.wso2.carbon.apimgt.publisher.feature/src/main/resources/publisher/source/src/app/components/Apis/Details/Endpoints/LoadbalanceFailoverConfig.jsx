@@ -279,7 +279,7 @@ function LoadbalanceFailoverConfig(props) {
                                             onClick={() => setLBConfigOpen(true)}
                                         >
                                             <Icon>
-                                                settings
+                                            settings
                                             </Icon>
                                         </IconButton>
                                     </div>

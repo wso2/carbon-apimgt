@@ -46,6 +46,7 @@ import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 
+
 const styles = (theme) => ({
     alertsWrapper: {
         padding: theme.spacing(2),
@@ -406,7 +407,7 @@ const Alerts = (props) => {
                                                         color='default'
                                                     >
                                                         {isInProgress.unSubscribing && <CircularProgress size={15} />}
-                                                        Cancel
+                                                    Cancel
                                                     </Button>
                                                 </Link>
                                             </Grid>

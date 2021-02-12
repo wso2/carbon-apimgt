@@ -483,7 +483,7 @@ class Listing extends React.Component {
 
 Listing.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.shape({}),
+        params: PropTypes.object,
     }),
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,

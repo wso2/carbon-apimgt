@@ -88,6 +88,56 @@ class Comment extends React.Component {
     }
 
     /**
+     * Genereates unique keys for comments
+     * @memberof Comment
+     */
+    getKey() {
+        return this.keyCount++;
+    }
+
+    /**
+     * Filters the comments to be remained
+     * @memberof Comment
+     */
+    filterRemainingComments(commentToFilter) {
+        const { deleteComment } = this.state;
+        return commentToFilter.commentId !== deleteComment.commentId;
+    }
+
+    /**
+     * Filters the comments to be deleted
+     * @memberof Comment
+     */
+    filterCommentToDelete(commentToFilter) {
+        const { deleteComment } = this.state;
+        return commentToFilter.commentId === deleteComment.parentCommentId;
+    }
+
+    /**
+     * Shows the component to add a new comment
+     * @param {any} index Index of comment in the array
+     * @memberof Comment
+     */
+    showAddComment(index) {
+        const { editIndex } = this.state;
+        if (editIndex === -1) {
+            this.setState({ replyIndex: index });
+        }
+    }
+
+    /**
+     * Shows the component to edit a comment
+     * @param {any} index Index of comment in the array
+     * @memberof Comment
+     */
+    showEditComment(index) {
+        const { editIndex } = this.state;
+        if (editIndex === -1) {
+            this.setState({ editIndex: index });
+        }
+    }
+
+    /**
      * Hides the component to edit a comment
      * @param {any} index Index of comment in the array
      * @memberof Comment
@@ -171,56 +221,6 @@ class Comment extends React.Component {
                     Alert.error(`Something went wrong while deleting comment - ${commentIdOfCommentToDelete}`);
                 }
             });
-    }
-
-    /**
-     * Genereates unique keys for comments
-     * @memberof Comment
-     */
-    getKey() {
-        return this.keyCount++;
-    }
-
-    /**
-     * Shows the component to add a new comment
-     * @param {any} index Index of comment in the array
-     * @memberof Comment
-     */
-    showAddComment(index) {
-        const { editIndex } = this.state;
-        if (editIndex === -1) {
-            this.setState({ replyIndex: index });
-        }
-    }
-
-    /**
-     * Shows the component to edit a comment
-     * @param {any} index Index of comment in the array
-     * @memberof Comment
-     */
-    showEditComment(index) {
-        const { editIndex } = this.state;
-        if (editIndex === -1) {
-            this.setState({ editIndex: index });
-        }
-    }
-
-    /**
-     * Filters the comments to be remained
-     * @memberof Comment
-     */
-    filterRemainingComments(commentToFilter) {
-        const { deleteComment } = this.state;
-        return commentToFilter.commentId !== deleteComment.commentId;
-    }
-
-    /**
-     * Filters the comments to be deleted
-     * @memberof Comment
-     */
-    filterCommentToDelete(commentToFilter) {
-        const { deleteComment } = this.state;
-        return commentToFilter.commentId === deleteComment.parentCommentId;
     }
 
     /**

@@ -46,6 +46,7 @@ function withAPI(WrappedComponent) {
     return HOCWithAPI;
 }
 
+
 /**
  * Provide current api object and method updateAPI function to update it. To be used with hooks
  *

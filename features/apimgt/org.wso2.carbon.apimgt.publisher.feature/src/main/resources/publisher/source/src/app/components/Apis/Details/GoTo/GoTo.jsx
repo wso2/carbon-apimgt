@@ -200,6 +200,7 @@ function getSuggestions(value, isAPIProduct, isGraphQL, { showEmpty = false } = 
         });
 }
 
+
 /**
  * Method to render the GoTo search feature
  * @param {*} props props param

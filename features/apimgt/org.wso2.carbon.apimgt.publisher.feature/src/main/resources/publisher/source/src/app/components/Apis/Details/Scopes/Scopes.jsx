@@ -371,7 +371,7 @@ class Scopes extends React.Component {
 
 Scopes.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.shape({}),
+        params: PropTypes.object,
     }),
     api: PropTypes.instanceOf(Object).isRequired,
     classes: PropTypes.shape({}).isRequired,

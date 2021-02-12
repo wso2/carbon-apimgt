@@ -28,6 +28,7 @@ import { Link } from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
+
 const useStyles = makeStyles((theme) => ({
     head: {
         paddingBottom: theme.spacing(2),

@@ -40,6 +40,7 @@ export default class Resource {
         };
     }
 
+
     /**
      * Check whether current resource is of type APIProduct
      *

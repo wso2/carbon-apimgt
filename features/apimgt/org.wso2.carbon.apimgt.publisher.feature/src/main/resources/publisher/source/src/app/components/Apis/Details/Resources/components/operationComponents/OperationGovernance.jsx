@@ -39,6 +39,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { getOperationScopes } from '../../operationUtils';
 
+
 /**
  *
  * Renders the security , throttling policies and scopes selection section in the operation collapsed page

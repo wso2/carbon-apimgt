@@ -129,6 +129,7 @@ const styles = (theme) => ({
     },
 });
 
+
 /**
  * This Component hosts the API Security Audit Component
  * More specifically, rendering of the Security Audit
@@ -682,7 +683,7 @@ class APISecurityAudit extends Component {
                                                             target='_blank'
                                                             rel='noopener noreferrer'
                                                         >
-                                                            detailed Report
+                                                        detailed Report
                                                         </a>
                                                     </b>),
                                                 afterLinkText: ' from 42Crunch',
@@ -756,8 +757,9 @@ class APISecurityAudit extends Component {
                                                             <FormattedMessage
                                                                 id={'Apis.Details.APIDefinition'
                                                                 + '.AuditApi.OverallCriticality'}
-                                                                defaultMessage={'{overallCriticalityText}'
-                                                                + ' {overallCriticality}'}
+                                                                defaultMessage={
+                                                                    '{overallCriticalityText} {overallCriticality}'
+                                                                }
                                                                 values={{
                                                                     overallCriticalityText: (
                                                                         <strong>Overall Severity:</strong>
@@ -830,8 +832,8 @@ class APISecurityAudit extends Component {
                                                             values={{
                                                                 securitySummary: (
                                                                     <strong>
-                                                                        Security -
-                                                                        (
+                                                                    Security -
+                                                                    (
                                                                         {
                                                                             this.roundScore(reportObject.security.score)
                                                                         }
@@ -859,8 +861,8 @@ class APISecurityAudit extends Component {
                                                             values={{
                                                                 dataValidationSummary: (
                                                                     <strong>
-                                                                        Data Validation -
-                                                                        (
+                                                                    Data Validation -
+                                                                    (
                                                                         {this.roundScore(reportObject.data.score)}
                                                                         {' '}
                                                                         / 70)

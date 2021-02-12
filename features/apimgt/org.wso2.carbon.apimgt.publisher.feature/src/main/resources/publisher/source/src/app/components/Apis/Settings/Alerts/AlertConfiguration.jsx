@@ -388,7 +388,7 @@ const AlertConfiguration = (props) => {
                                                         ? <CircularProgress size={15} />
                                                         : (
                                                             <Icon>
-                                                                delete
+                                                        delete
                                                             </Icon>
                                                         )}
                                                 </IconButton>

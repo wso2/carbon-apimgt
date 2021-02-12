@@ -144,7 +144,7 @@ class SubscriptionPoliciesManage extends Component {
 SubscriptionPoliciesManage.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-    api: PropTypes.shape({ policies: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
+    api: PropTypes.shape({ policies: PropTypes.array }).isRequired,
     setPolices: PropTypes.func.isRequired,
     policies: PropTypes.shape({}).isRequired,
 };
