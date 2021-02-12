@@ -22,6 +22,5 @@ package org.wso2.carbon.apimgt.gateway.extension.listener.model;
  */
 public enum ExtensionResponseStatus {
     RETURN_RESPONSE,
-    RETURN_ERROR,
     CONTINUE
 }

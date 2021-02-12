@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -45,7 +44,7 @@ import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.MsgInfoDTO;
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler.SynapsePayloadHandlerFactory;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler.SynapsePayloadHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -147,20 +146,20 @@ public class ExtensionListenerUtil {
     private static RequestContextDTO generateRequestContextDTO(MessageContext messageContext) {
 
         RequestContextDTO requestDTO = new RequestContextDTO();
-        MsgInfoDTO msgInfoDTO = generateRequestMessageInfoDTO(messageContext);
+        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
         APIRequestInfoDTO apiRequestInfoDTO = generateAPIInfoDTO(messageContext);
         requestDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestDTO.setMsgInfo(msgInfoDTO);
         requestDTO.setCustomProperty(getCustomPropertyMapFromMsgContext(messageContext));
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Object sslCertObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
-        javax.security.cert.X509Certificate clientCert = null;
-        if (sslCertObject != null) {
-            javax.security.cert.X509Certificate[] certs = (X509Certificate[]) sslCertObject;
-            clientCert = certs[0];
+        Object sslCertsObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+        javax.security.cert.X509Certificate[] clientCerts = null;
+        if (sslCertsObject != null) {
+            javax.security.cert.X509Certificate[] certs = (X509Certificate[]) sslCertsObject;
+            clientCerts = certs;
         }
-        requestDTO.setClientCert(clientCert);
+        requestDTO.setClientCert(clientCerts);
         return requestDTO;
     }
 
@@ -173,7 +172,7 @@ public class ExtensionListenerUtil {
     private static ResponseContextDTO generateResponseContextDTO(MessageContext messageContext) {
 
         ResponseContextDTO responseContextDTO = new ResponseContextDTO();
-        MsgInfoDTO msgInfoDTO = generateResponseMessageInfoDTO(messageContext);
+        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
         APIRequestInfoDTO apiRequestInfoDTO = generateAPIInfoDTO(messageContext);
         responseContextDTO.setApiRequestInfo(apiRequestInfoDTO);
         responseContextDTO.setMsgInfo(msgInfoDTO);
@@ -202,33 +201,6 @@ public class ExtensionListenerUtil {
     }
 
     /**
-     * Generates MsgInfoDTO object using Request MessageContext.
-     *
-     * @param messageContext Synapse MessageContext
-     * @return MsgInfoDTO
-     */
-    private static MsgInfoDTO generateRequestMessageInfoDTO(MessageContext messageContext) {
-
-        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
-        msgInfoDTO.setHttpMethod((String) (((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(Constants.Configuration.HTTP_METHOD)));
-        return msgInfoDTO;
-    }
-
-    /**
-     * Generates MsgInfoDTO object using Response MessageContext.
-     *
-     * @param messageContext Synapse MessageContext
-     * @return MsgInfoDTO
-     */
-    private static MsgInfoDTO generateResponseMessageInfoDTO(MessageContext messageContext) {
-
-        MsgInfoDTO msgInfoDTO = generateMessageInfo(messageContext);
-        msgInfoDTO.setHttpMethod((String) messageContext.getProperty(RESTConstants.REST_METHOD));
-        return msgInfoDTO;
-    }
-
-    /**
      * Populate common MsgInfoDTO properties for both Request and Response from MessageContext.
      *
      * @param messageContext Synapse MessageContext
@@ -239,10 +211,13 @@ public class ExtensionListenerUtil {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         msgInfoDTO.setHeaders(getAxis2TransportHeaders(axis2MC));
-        msgInfoDTO.setElectedResource(GatewayUtils.extractResource(messageContext));
+        msgInfoDTO.setResource(GatewayUtils.extractResource(messageContext));
+        msgInfoDTO.setElectedResource((String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
         //Add a payload handler instance for the current message context to consume the payload later
-        msgInfoDTO.setPayloadHandler(SynapsePayloadHandlerFactory.getInstance().buildPayloadHandler(messageContext));
+        msgInfoDTO.setPayloadHandler(new SynapsePayloadHandler(messageContext));
         msgInfoDTO.setMessageId(axis2MC.getLogCorrelationID());
+        msgInfoDTO.setHttpMethod((String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(APIMgtGatewayConstants.HTTP_METHOD));
         return msgInfoDTO;
     }
 
@@ -271,6 +246,7 @@ public class ExtensionListenerUtil {
         // handle payload
         processResponsePayload(extensionResponseDTO, messageContext);
         // set customProperty map to send in throttle stream
+        //TODO:null check property map
         messageContext
                 .setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionResponseDTO.getCustomProperty());
         // set Http Response status code
@@ -334,8 +310,7 @@ public class ExtensionListenerUtil {
                 log.debug("Continuing the handler flow " + axis2MC.getLogIDString());
             }
             return true;
-        } else if (ExtensionResponseStatus.RETURN_ERROR.toString().equals(responseStatus) ||
-                ExtensionResponseStatus.RETURN_RESPONSE.toString().equals(responseStatus)) {
+        } else if (ExtensionResponseStatus.RETURN_RESPONSE.toString().equals(responseStatus)) {
             // This property need to be set to avoid sending the content in pass-through pipe (request message)
             // as the response.
             axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
@@ -345,18 +320,6 @@ public class ExtensionListenerUtil {
                 // In case of an error it is logged and the process is continued because we have set a message in
                 // the payload.
                 log.error("Error occurred while discarding the message " + axis2MC.getLogIDString(), axisFault);
-            }
-            if (ExtensionResponseStatus.RETURN_ERROR.toString().equals(responseStatus)) {
-                // Break the handler flow invoke the custom error handler specified by the user and return
-                Mediator sequence = null;
-                if (StringUtils.isNotBlank(customErrorHandler)) {
-                    sequence = messageContext.getSequence(customErrorHandler);
-                }
-                if (sequence != null && !sequence.mediate(messageContext)) {
-                    // If needed user should be able to prevent the rest of the fault handling logic from getting
-                    // executed
-                    return false;
-                }
             }
             //break the handler flow and return back from the existing handler phase
             if (log.isDebugEnabled()) {

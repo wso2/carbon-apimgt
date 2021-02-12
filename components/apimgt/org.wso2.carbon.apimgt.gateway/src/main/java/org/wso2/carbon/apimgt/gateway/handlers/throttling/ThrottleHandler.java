@@ -502,9 +502,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      * false to notify error with handler
      */
     public boolean handleRequest(MessageContext messageContext) {
-        if (!ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
-            return false;
-        }
+
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
                     "has not been initialised");
@@ -522,6 +520,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             throttleLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
         }
         long executionStartTime = System.currentTimeMillis();
+        if (!ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
+            return false;
+        }
         try {
             boolean throttleResponse = doThrottle(messageContext);
             if (!ExtensionListenerUtil.postProcessRequest(messageContext, type)) {

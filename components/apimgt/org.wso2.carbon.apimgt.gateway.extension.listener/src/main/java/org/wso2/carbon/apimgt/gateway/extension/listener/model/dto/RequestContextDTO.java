@@ -31,7 +31,7 @@ public class RequestContextDTO {
     // invoked API request information
     APIRequestInfoDTO apiRequestInfo;
     // client certificate from transport level
-    javax.security.cert.X509Certificate clientCert;
+    javax.security.cert.X509Certificate[] clientCerts;
     // custom property map used to populate customProperty key template value
     Map<String, Object> customProperty;
 
@@ -55,14 +55,14 @@ public class RequestContextDTO {
         this.apiRequestInfo = apiRequestInfo;
     }
 
-    public X509Certificate getClientCert() {
+    public X509Certificate[] getClientCert() {
 
-        return clientCert;
+        return clientCerts;
     }
 
-    public void setClientCert(javax.security.cert.X509Certificate clientCert) {
+    public void setClientCert(javax.security.cert.X509Certificate[] clientCerts) {
 
-        this.clientCert = clientCert;
+        this.clientCerts = clientCerts;
     }
 
     public Map<String, Object> getCustomProperty() {

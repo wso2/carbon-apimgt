@@ -43,7 +43,7 @@ public class SynapsePayloadHandler implements PayloadHandler {
     private static final Log log = LogFactory.getLog(SynapsePayloadHandler.class);
     private MessageContext messageContext;
 
-    SynapsePayloadHandler(MessageContext messageContext) {
+    public SynapsePayloadHandler(MessageContext messageContext) {
 
         this.messageContext = messageContext;
     }

@@ -30,6 +30,9 @@ public class MsgInfoDTO {
     Map<String, String> headers;
     // Reference object to consume payload if needed
     PayloadHandler payloadHandler;
+    // invoked resource
+    String resource;
+    // resource template
     String electedResource;
     String httpMethod;
     // Unique Id to identify the message
@@ -55,14 +58,14 @@ public class MsgInfoDTO {
         this.headers = headers;
     }
 
-    public String getElectedResource() {
+    public String getResource() {
 
-        return electedResource;
+        return resource;
     }
 
-    public void setElectedResource(String electedResource) {
+    public void setResource(String resource) {
 
-        this.electedResource = electedResource;
+        this.resource = resource;
     }
 
     public String getHttpMethod() {
@@ -83,6 +86,16 @@ public class MsgInfoDTO {
     public void setMessageId(String messageId) {
 
         this.messageId = messageId;
+    }
+
+    public String getElectedResource() {
+
+        return electedResource;
+    }
+
+    public void setElectedResource(String electedResource) {
+
+        this.electedResource = electedResource;
     }
 }
 

@@ -313,32 +313,32 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
-            TracingSpan keySpan = null;
-            if (Util.tracingEnabled()) {
-                TracingSpan responseLatencySpan =
-                        (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
-                TracingTracer tracer = Util.getGlobalTracer();
-                keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
-                messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
-                org.apache.axis2.context.MessageContext axis2MC =
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-                axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+        TracingSpan keySpan = null;
+        if (Util.tracingEnabled()) {
+            TracingSpan responseLatencySpan =
+                    (TracingSpan) messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
+            TracingTracer tracer = Util.getGlobalTracer();
+            keySpan = Util.startSpan(APIMgtGatewayConstants.KEY_VALIDATION, responseLatencySpan, tracer);
+            messageContext.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+            org.apache.axis2.context.MessageContext axis2MC =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axis2MC.setProperty(APIMgtGatewayConstants.KEY_VALIDATION, keySpan);
+        }
+
+        Timer.Context context = startMetricTimer();
+        long startTime = System.nanoTime();
+        long endTime;
+        long difference;
+
+        try {
+            if (isAnalyticsEnabled()) {
+                long currentTime = System.currentTimeMillis();
+                messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }
 
-            Timer.Context context = startMetricTimer();
-            long startTime = System.nanoTime();
-            long endTime;
-            long difference;
+            messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
 
-            try {
-                if (isAnalyticsEnabled()) {
-                    long currentTime = System.currentTimeMillis();
-                    messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
-                }
-
-                messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
-
+            if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
                 if (authenticators.isEmpty()) {
                     initializeAuthenticators();
                 }
@@ -352,12 +352,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         log.debug("Authentication of message context failed", e);
                     }
                 }
-            } catch (APISecurityException e) {
+            }
+        } catch (APISecurityException e) {
 
-                if (Util.tracingEnabled() && keySpan != null) {
-                    Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
-                }
-                if (log.isDebugEnabled()) {
+            if (Util.tracingEnabled() && keySpan != null) {
+                Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
+            }
+            if (log.isDebugEnabled()) {
                     // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                     // to all the gateway calls that is happening.
                     endTime = System.nanoTime();
@@ -382,16 +383,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
 
                 handleAuthFailure(messageContext, e);
-            } finally {
-                if (Util.tracingEnabled()) {
-                    Util.finishSpan(keySpan);
-                }
-                messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
-                        TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
-                stopMetricTimer(context);
-
+        } finally {
+            if (Util.tracingEnabled()) {
+                Util.finishSpan(keySpan);
             }
-            ExtensionListenerUtil.postProcessRequest(messageContext, type);
+            messageContext.setProperty(APIMgtGatewayConstants.SECURITY_LATENCY,
+                    TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
+            stopMetricTimer(context);
+
         }
         return false;
     }
