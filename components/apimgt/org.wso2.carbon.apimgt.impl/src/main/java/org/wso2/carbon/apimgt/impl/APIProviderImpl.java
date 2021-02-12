@@ -2910,46 +2910,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return claimMap;
     }
 
-    private void publishToGateway(APIProduct apiProduct) throws APIManagementException {
-
-        String tenantDomain;
-        APIProductIdentifier apiProductId = apiProduct.getId();
-
-        String provider = apiProductId.getProviderName();
-        if (provider.contains("AT")) {
-            provider = provider.replace("-AT-", "@");
-            tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        } else {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-
-        Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
-        List<APIIdentifier> apisWithoutEndpoints = new ArrayList<>();
-
-        for (API api : associatedAPIs) {
-            String endpointConfig = api.getEndpointConfig();
-
-            if (StringUtils.isEmpty(endpointConfig)) {
-                apisWithoutEndpoints.add(api.getId());
-            }
-        }
-
-        if (!apisWithoutEndpoints.isEmpty()) {
-            throw new APIManagementException("Cannot publish API Product: " + apiProductId + " to gateway",
-                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
-                            apisWithoutEndpoints.toString()));
-        }
-        gatewayManager.deployToGateway(apiProduct, tenantDomain);
-        if (log.isDebugEnabled()) {
-            String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
-                    + " published to gateway";
-            log.debug(logMessage);
-        }
-    }
-
-
     private Set<API> getAssociatedAPIs(APIProduct apiProduct) throws APIManagementException {
         List<APIProductResource> productResources = apiProduct.getProductResources();
 
@@ -10064,7 +10024,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayArtifactsMgtDAO
                     .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiProductIdentifier.getName(),
                     apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
-                            APIConstants.HTTP_PROTOCOL, artifact);
+                            APIConstants.API_PRODUCT, artifact);
             if (artifactSaver != null) {
                 artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
                         apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, artifact);
@@ -10091,6 +10051,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         APIProduct product = getAPIProductbyUUID(apiRevisionId, tenantDomain);
+        product.setUuid(apiProductId);
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
@@ -10113,7 +10074,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
-            gatewayManager.deployToGateway(product, tenantDomain);
+            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
         }
 
     }
@@ -10133,6 +10094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
         }
         APIProduct product = getAPIProductbyUUID(apiRevisionId, tenantDomain);
+        product.setUuid(apiProductId);
         Set<String> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
@@ -10197,6 +10159,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIProductRevision(apiRevision);
+        gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
             try {
                 artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
