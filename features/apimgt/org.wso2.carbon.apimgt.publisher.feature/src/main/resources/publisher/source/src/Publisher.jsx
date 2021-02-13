@@ -161,7 +161,6 @@ class Publisher extends React.Component {
                 + user.getAppInfo().clientId + '&redirect_uri=https://' + window.location.host
                 + Configurations.app.context + '/services/auth/callback/login';
         }
-
         return (
             <IntlProvider locale={locale} messages={messages}>
                 <PublisherRootErrorBoundary appName='Publisher Application'>
