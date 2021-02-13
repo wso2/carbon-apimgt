@@ -156,7 +156,6 @@ class CreateScope extends React.Component {
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
-
     handleRoleDeletion = (role) => {
         const { validRoles, invalidRoles } = this.state;
         if (invalidRoles.includes(role)) {
@@ -169,6 +168,14 @@ class CreateScope extends React.Component {
             this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
         }
     };
+
+    /**
+     * Handle ScopeName Input.
+     * @param {JSON} event click event.
+     */
+    handleScopeNameInput({ target: { id, value } }) {
+        this.validateScopeName(id, value);
+    }
 
     /**
      * Handle Role Addition.
@@ -370,14 +377,6 @@ class CreateScope extends React.Component {
             .finally(() => {
                 this.setState({ scopeAddDisabled: false });
             });
-    }
-
-    /**
-     * Handle ScopeName Input.
-     * @param {JSON} event click event.
-     */
-    handleScopeNameInput({ target: { id, value } }) {
-        this.validateScopeName(id, value);
     }
 
     /**
@@ -600,7 +599,7 @@ class CreateScope extends React.Component {
 
 CreateScope.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }),
     api: PropTypes.shape({
         id: PropTypes.string,

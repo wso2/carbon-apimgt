@@ -82,15 +82,6 @@ class CommentEdit extends React.Component {
     }
 
     /**
-     * Handles the comment text when input changes
-     * @param {Object} {target} target element
-     * @memberof CommentEdit
-     */
-    inputChange({ target }) {
-        this.setState({ commentText: target.value, currentLength: target.value.length });
-    }
-
-    /**
      * Hides the component to edit a comment when cancelled
      * @memberof CommentEdit
      */
@@ -107,24 +98,6 @@ class CommentEdit extends React.Component {
      */
     handleCategoryChange(event) {
         this.setState({ category: event.target.value });
-    }
-
-    /**
-     * Filters the comment to update
-     * @memberof CommentAdd
-     */
-    filterCommentToUpdate(commentToFilter) {
-        const { comment } = this.props;
-        return commentToFilter.commentId === comment.commentId;
-    }
-
-    /**
-     * Filters the comment to update
-     * @memberof CommentAdd
-     */
-    filterCommentToUpdateReply(commentToFilter) {
-        const { comment } = this.props;
-        return commentToFilter.commentId === comment.parentCommentId;
     }
 
     /**
@@ -170,6 +143,33 @@ class CommentEdit extends React.Component {
         } else {
             Alert.error('You cannot enter a blank comment');
         }
+    }
+
+    /**
+     * Filters the comment to update
+     * @memberof CommentAdd
+     */
+    filterCommentToUpdate(commentToFilter) {
+        const { comment } = this.props;
+        return commentToFilter.commentId === comment.commentId;
+    }
+
+    /**
+     * Filters the comment to update
+     * @memberof CommentAdd
+     */
+    filterCommentToUpdateReply(commentToFilter) {
+        const { comment } = this.props;
+        return commentToFilter.commentId === comment.parentCommentId;
+    }
+
+    /**
+     * Handles the comment text when input changes
+     * @param {Object} {target} target element
+     * @memberof CommentEdit
+     */
+    inputChange({ target }) {
+        this.setState({ commentText: target.value, currentLength: target.value.length });
     }
 
     /**

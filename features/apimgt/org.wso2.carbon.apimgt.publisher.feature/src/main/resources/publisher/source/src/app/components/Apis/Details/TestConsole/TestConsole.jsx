@@ -321,7 +321,6 @@ class TestConsole extends React.Component {
         this.setState({ keys });
     }
 
-
     handleClick = () => {
         const { apiObj } = this.props;
         this.setState({ loading: true });
@@ -393,7 +392,6 @@ class TestConsole extends React.Component {
             return sandboxAccessToken;
         }
     }
-
 
     /**
      * Load the access token for given key type

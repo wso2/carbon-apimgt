@@ -36,7 +36,6 @@ import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 
-
 const useStyles = makeStyles((theme) => ({
     expansionPanel: {
         marginBottom: theme.spacing(3),
