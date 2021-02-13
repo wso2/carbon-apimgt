@@ -600,6 +600,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
     public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
+    public static final String API_TYPE_WS = "WS";
 
     public static class TokenStatus {
 
@@ -1249,6 +1250,8 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> SSE_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+    public static final Set<String> WS_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
@@ -1975,6 +1978,7 @@ public final class APIConstants {
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";

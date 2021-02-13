@@ -21,7 +21,7 @@ import javax.validation.Valid;
 
 
 public class APIOperationsDTO   {
-  
+
     private String id = null;
     private String target = null;
     private String verb = null;
@@ -41,7 +41,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "postapiresource", value = "")
   @JsonProperty("id")
   public String getId() {
@@ -58,7 +58,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "/order/{orderId}", value = "")
   @JsonProperty("target")
   public String getTarget() {
@@ -75,7 +75,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "POST", value = "")
   @JsonProperty("verb")
   public String getVerb() {
@@ -92,7 +92,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "Application & Application User", value = "")
   @JsonProperty("authType")
   public String getAuthType() {
@@ -109,7 +109,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "Unlimited", value = "")
   @JsonProperty("throttlingPolicy")
   public String getThrottlingPolicy() {
@@ -126,7 +126,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("scopes")
   public List<String> getScopes() {
@@ -143,7 +143,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "[]", value = "")
   @JsonProperty("usedProductIds")
   public List<String> getUsedProductIds() {
@@ -160,7 +160,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("amznResourceName")
   public String getAmznResourceName() {
@@ -177,7 +177,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("amznResourceTimeout")
   public Integer getAmznResourceTimeout() {
@@ -194,7 +194,7 @@ public class APIOperationsDTO   {
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("payloadSchema")
   public String getPayloadSchema() {
@@ -210,7 +210,6 @@ public class APIOperationsDTO   {
     this.uriMapping = uriMapping;
     return this;
   }
-
 
   @ApiModelProperty(value = "")
   @JsonProperty("uriMapping")
@@ -253,7 +252,7 @@ public class APIOperationsDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIOperationsDTO {\n");
-    
+
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    verb: ").append(toIndentedString(verb)).append("\n");

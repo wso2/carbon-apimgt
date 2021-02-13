@@ -405,18 +405,6 @@ class Details extends Component {
                 );
             case 'WS':
             case 'WEBSUB':
-                return (
-                    <>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.topics',
-                                defaultMessage: 'Topics',
-                            })}
-                            to={pathPrefix + 'topics'}
-                            Icon={<ResourcesIcon />}
-                        />
-                    </>
-                );
             case 'SSE':
                 return (
                     <>
@@ -657,7 +645,7 @@ class Details extends Component {
                             )}
                             {this.getLeftMenuItemForResourcesByType(api.type)}
                             {this.getLeftMenuItemForDefinitionByType(api.type)}
-                            {!isAPIProduct && (
+                            {!isAPIProduct && api.type !== 'WEBSUB' && (
                                 <LeftMenuItem
                                     text={intl.formatMessage({
                                         id: 'Apis.Details.index.endpoints',
