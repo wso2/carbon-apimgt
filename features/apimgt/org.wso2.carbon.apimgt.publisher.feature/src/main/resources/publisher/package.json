@@ -6,7 +6,7 @@
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
-        "build:prod": "rimraf site/public/dist/ && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --mode=\"production\"",
+        "build:prod": "rimraf site/public/dist/ && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "rimraf site/public/dist/ && cross-env NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
         "lint": "eslint --ignore-pattern '*.test.js' --ignore-pattern '*.test.jsx' --quiet -c .eslintrc.js --ext .jsx,.js source",
