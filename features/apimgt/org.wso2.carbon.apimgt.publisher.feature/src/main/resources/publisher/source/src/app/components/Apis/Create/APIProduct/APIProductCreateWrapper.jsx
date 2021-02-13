@@ -199,6 +199,57 @@ export default function ApiProductCreateWrapper(props) {
             .saveProduct(apiData)
             .then((apiProduct) => {
                 Alert.info('API Product created successfully');
+                const body = {
+                    description: 'Initial Revision',
+                };
+                newAPIProduct.createProductRevision(apiProduct.id, body)
+                    .then((api1) => {
+                        const revisionId = api1.body.id;
+                        Alert.info('API Revision created successfully');
+                        const envList = settings.environment.map((env) => env.name);
+                        const body1 = [];
+                        if (envList && envList.length > 0) {
+                            if (envList.includes('Default')) {
+                                body1.push({
+                                    name: 'Default',
+                                    displayOnDevportal: true,
+                                });
+                            } else {
+                                body1.push({
+                                    name: envList[0],
+                                    displayOnDevportal: true,
+                                });
+                            }
+                        }
+                        newAPIProduct.deployProductRevision(apiProduct.id, revisionId, body1)
+                            .then(() => {
+                                Alert.info('API Revision Deployed Successfully');
+                            })
+                            .catch((error) => {
+                                if (error.response) {
+                                    Alert.error(error.response.body.description);
+                                } else {
+                                    const message = 'Something went wrong while deploying the API Revision';
+                                    Alert.error(intl.formatMessage({
+                                        id: 'Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision',
+                                        defaultMessage: message,
+                                    }));
+                                }
+                                console.error(error);
+                            });
+                    })
+                    .catch((error) => {
+                        if (error.response) {
+                            Alert.error(error.response.body.description);
+                        } else {
+                            const message = 'Something went wrong while creating the API Revision';
+                            Alert.error(intl.formatMessage({
+                                id: 'Apis.APIProductCreateWrapper.error.errorMessage.create.revision',
+                                defaultMessage: message,
+                            }));
+                        }
+                        console.error(error);
+                    });
                 history.push(`/api-products/${apiProduct.id}/overview`);
             })
             .catch((error) => {

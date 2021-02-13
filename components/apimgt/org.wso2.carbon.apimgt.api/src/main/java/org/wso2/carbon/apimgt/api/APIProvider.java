@@ -1808,4 +1808,52 @@ public interface APIProvider extends APIManager {
      */
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
+    /**
+     * Adds a new APIRevision to an existing API Product
+     *
+     * @param apiRevision APIRevision
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    String addAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API Product
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void addAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
+                                         List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Undeploy revision from provided gateway environments
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void undeployAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
+                                              List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Restore a provided API Product Revision as the working copy of the API Product
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to restore APIRevision
+     */
+    void restoreAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
+
+    /**
+     * Delete an API Product Revision
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to delete APIRevision
+     */
+    void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
+
 }

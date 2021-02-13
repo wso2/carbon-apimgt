@@ -1,6 +1,8 @@
 {
   "APis.Details.tryout.help.main": "",
   "Api.category.dropdown.tooltip": "",
+  "Apis.APIProductCreateWrapper.error.errorMessage.create.revision": "",
+  "Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision": "",
   "Apis.Create.APIProduct.APIProductCreateWrapper.back": "",
   "Apis.Create.APIProduct.APIProductCreateWrapper.cancel": "",
   "Apis.Create.APIProduct.APIProductCreateWrapper.defineProvide": "",

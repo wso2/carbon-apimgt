@@ -2910,46 +2910,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return claimMap;
     }
 
-    private void publishToGateway(APIProduct apiProduct) throws APIManagementException {
-
-        String tenantDomain;
-        APIProductIdentifier apiProductId = apiProduct.getId();
-
-        String provider = apiProductId.getProviderName();
-        if (provider.contains("AT")) {
-            provider = provider.replace("-AT-", "@");
-            tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        } else {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-
-        Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
-        List<APIIdentifier> apisWithoutEndpoints = new ArrayList<>();
-
-        for (API api : associatedAPIs) {
-            String endpointConfig = api.getEndpointConfig();
-
-            if (StringUtils.isEmpty(endpointConfig)) {
-                apisWithoutEndpoints.add(api.getId());
-            }
-        }
-
-        if (!apisWithoutEndpoints.isEmpty()) {
-            throw new APIManagementException("Cannot publish API Product: " + apiProductId + " to gateway",
-                    ExceptionCodes.from(ExceptionCodes.API_PRODUCT_RESOURCE_ENDPOINT_UNDEFINED, apiProductId.toString(),
-                            apisWithoutEndpoints.toString()));
-        }
-        gatewayManager.deployToGateway(apiProduct, tenantDomain);
-        if (log.isDebugEnabled()) {
-            String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
-                    + " published to gateway";
-            log.debug(logMessage);
-        }
-    }
-
-
     private Set<API> getAssociatedAPIs(APIProduct apiProduct) throws APIManagementException {
         List<APIProductResource> productResources = apiProduct.getProductResources();
 
@@ -4429,6 +4389,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void deleteAPIProductRevisions(String apiProductUUID) throws APIManagementException {
+        List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiProductUUID);
+        for (APIRevision apiRevision : apiRevisionList) {
+            if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+                undeployAPIProductRevisionDeployment(apiProductUUID, apiRevision.getRevisionUUID(), apiRevision.getApiRevisionDeploymentList());
+            }
+            deleteAPIProductRevision(apiProductUUID, apiRevision.getRevisionUUID());
+        }
+    }
+
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException {
         return searchAPIDoc(registry, tenantId, username, searchTerm);
     }
@@ -5714,7 +5684,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 updatedProductSwagger);
         saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
         apiProduct.setDefinition(updatedProductSwagger);
-        APIGatewayManager.getInstance().deployToGateway(apiProduct, tenantDomain);
     }
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
@@ -7632,10 +7601,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
     }
 
-    protected void removeFromGateway(APIProduct apiProduct, String tenantDomain) throws APIManagementException {
+    protected void removeFromGateway(APIProduct apiProduct, String tenantDomain, Set<APIRevisionDeployment> gatewaysToRemove,
+                                     Set<String> gatewaysToAdd)
+            throws APIManagementException {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
-        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs);
+        Set<String> environmentsToRemove = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : gatewaysToRemove) {
+            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
+        }
+        environmentsToRemove.removeAll(gatewaysToAdd);
+        gatewayManager.unDeployFromGateway(apiProduct, tenantDomain, associatedAPIs, environmentsToRemove);
     }
 
     protected int getTenantId(String tenantDomain) throws UserStoreException {
@@ -8194,10 +8170,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIProductResource> productResources = product.getProductResources();
 
         //Only publish to gateways if the state is in Published state and has atleast one resource
-        if("PUBLISHED".equals(product.getState()) && !productResources.isEmpty()) {
-            publishToGateway(product);
-        }
-
     }
 
     public void deleteAPIProduct(APIProduct apiProduct) throws APIManagementException {
@@ -8220,12 +8192,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
-            if (gatewayExists && "Synapse".equals(gatewayType)) {
-                removeFromGateway(apiProduct, tenantDomain);
-
-            } else {
-                log.debug("Gateway is not existed for the current API Provider");
-            }
+            deleteAPIProductRevisions(apiProduct.getUuid());
 
             apiPersistenceInstance.deleteAPIProduct(
                     new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain()),
@@ -8324,11 +8291,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-
-        if (resources.size() > 0) {
-            publishToGateway(product);
-        }
-
         APIProduct oldApi = getAPIProductbyUUID(product.getUuid(),
                 CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
         Gson gson = new Gson();
@@ -8357,7 +8319,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //todo : check whether permissions need to be updated and pass it along
         updateApiProductArtifact(product, true, true);
         apiMgtDAO.updateAPIProduct(product, userNameWithoutChange);
-
 
         return apiToProductResourceMapping;
     }
@@ -9215,7 +9176,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (publisherAPIProduct != null) {
                 APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
                 product.setID(new APIProductIdentifier(publisherAPIProduct.getProviderName(),
-                        publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion()));
+                        publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion(), uuid));
                 checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
                         product.getAccessControlRoles());
                 populateAPIProductInformation(uuid, requestedTenantDomain, org, product);
@@ -9924,7 +9885,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Restore a provided API Revision as the working copy of the API
+     * Restore a provided API Revision as the current API of the API
      *
      * @param apiId API UUID
      * @param apiRevisionId API Revision UUID
@@ -9949,7 +9910,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision);
     }
@@ -9987,9 +9948,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPersistenceInstance.deleteAPIRevision(new Organization(tenantDomain),
                     apiIdentifier.getUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
-            String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
+            String errorMessage = "Failed to delete registry artifacts";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
@@ -9998,6 +9959,211 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiIdentifier.getApiName(),
                         apiIdentifier.getVersion(),
                         apiRevision.getRevisionUUID(), tenantDomain);
+            } catch (ArtifactSynchronizerException e) {
+                log.error("Error while deleting Runtime artifacts from artifact Store", e);
+            }
+        }
+    }
+
+    @Override
+    public String addAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+        int revisionCountPerAPI = apiMgtDAO.getRevisionCountByAPI(apiRevision.getApiUUID());
+        if (revisionCountPerAPI > 4) {
+            String errorMessage = "Maximum number of revisions per API Product has reached. " +
+                    "Need to remove stale revision to create a new Revision for API Product with id:"
+                    + apiRevision.getApiUUID();
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED,
+                    apiRevision.getApiUUID()));
+        }
+        List<Integer> idList = revisionIDList.get(apiRevision.getApiUUID());
+        if (idList == null) {
+            idList = new ArrayList<>();
+        }
+        int maxId = 0;
+        for (int id : idList) {
+            if (maxId < id) {
+                maxId = id;
+            }
+        }
+
+        int revisionId;
+        int revisionIdStored = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID());
+        if (maxId < revisionIdStored) {
+            revisionId = revisionIdStored + 1;
+        } else {
+            revisionId = maxId +1 ;
+        }
+        apiRevision.setId(revisionId);
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiRevision.getApiUUID(), ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiRevision.getApiUUID()));
+        }
+        apiProductIdentifier.setUUID(apiRevision.getApiUUID());
+        String revisionUUID;
+        try {
+            revisionUUID = apiPersistenceInstance.addAPIRevision(new Organization(tenantDomain),
+                    apiProductIdentifier.getUUID(), revisionId);
+        } catch (APIPersistenceException e) {
+            String errorMessage = "Failed to add revision registry artifacts";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+        }
+        if (StringUtils.isEmpty(revisionUUID)) {
+            String errorMessage = "Failed to retrieve revision uuid";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+        }
+        apiRevision.setRevisionUUID(revisionUUID);
+        apiMgtDAO.addAPIProductRevision(apiRevision);
+        idList.add(revisionId);
+        revisionIDList.put(apiRevision.getApiUUID(),idList);
+        try {
+            File artifact = importExportAPI
+                    .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
+                            false, true);
+            gatewayArtifactsMgtDAO
+                    .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiProductIdentifier.getName(),
+                    apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
+                            APIConstants.API_PRODUCT, artifact);
+            if (artifactSaver != null) {
+                artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
+                        apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, artifact);
+            }
+        } catch (APIImportExportException|ArtifactSynchronizerException e) {
+            throw new APIManagementException("Error while Store the Revision Artifact",
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+        }
+        return revisionUUID;
+    }
+
+    @Override
+    public void addAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
+                                                List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException {
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiProductId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiProductId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        APIProduct product = getAPIProductbyUUID(apiRevisionId, tenantDomain);
+        product.setUuid(apiProductId);
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
+                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        Set<String> environmentsToAdd = new HashSet<>();
+        Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
+                if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                        apiRevisionDeployment.getDeployment())) {
+                    environmentsToRemove.add(currentapiRevisionDeployment);
+                }
+            }
+            environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+        }
+        if (environmentsToRemove.size() > 0) {
+            apiMgtDAO.removeAPIRevisionDeployment(apiProductId,environmentsToRemove);
+            removeFromGateway(product, tenantDomain, environmentsToRemove, environmentsToAdd);
+        }
+        GatewayArtifactsMgtDAO.getInstance()
+                .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+        if (environmentsToAdd.size() > 0) {
+            gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
+        }
+
+    }
+
+    @Override
+    public void undeployAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
+                                                     List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException {
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiProductId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiProductId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        APIProduct product = getAPIProductbyUUID(apiRevisionId, tenantDomain);
+        product.setUuid(apiProductId);
+        Set<String> environmentsToRemove = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            environmentsToRemove.add(apiRevisionDeployment.getDeployment());
+        }
+        product.setEnvironments(environmentsToRemove);
+        removeFromGateway(product, tenantDomain, new HashSet<>(apiRevisionDeployments),Collections.emptySet());
+        apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+        GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId);
+    }
+
+    @Override
+    public void restoreAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException {
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiProductId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiProductId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        apiProductIdentifier.setUUID(apiProductId);
+        try {
+            apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
+                    apiProductIdentifier.getUUID(), apiRevision.getId());
+        } catch (APIPersistenceException e) {
+            String errorMessage = "Failed to restore registry artifacts";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
+        }
+        apiMgtDAO.restoreAPIProductRevision(apiRevision);
+    }
+
+    @Override
+    public void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException {
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiProductId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiProductId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = getAPIRevisionDeploymentList(apiRevisionId);
+        if (apiRevisionDeploymentsResponse.size() != 0) {
+            String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway." +
+                    "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "
+                    + apiRevision.getRevisionUUID();
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
+        }
+        apiProductIdentifier.setUUID(apiProductId);
+        try {
+            apiPersistenceInstance.deleteAPIRevision(new Organization(tenantDomain),
+                    apiProductIdentifier.getUUID(), apiRevision.getId());
+        } catch (APIPersistenceException e) {
+            String errorMessage = "Failed to delete registry artifacts";
+            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
+        }
+        apiMgtDAO.deleteAPIProductRevision(apiRevision);
+        gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
+        if (artifactSaver != null) {
+            try {
+                artifactSaver.removeArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
+                        apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error while deleting Runtime artifacts from artifact Store", e);
             }
