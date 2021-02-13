@@ -89,6 +89,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String createdTime;
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
+    private Map<String, String> wsUriMapping;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
         return soapToRestSequences;
@@ -528,6 +529,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setLastUpdated(String lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
     }
 
     @Override
