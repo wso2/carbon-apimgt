@@ -21,10 +21,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponseEvent;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.usage.publisher.RequestDataPublisher;
@@ -34,14 +34,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.time.Clock;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
  * Success request data collector
  */
-public class SuccessRequestDataCollector implements RequestDataCollector {
+public class SuccessRequestDataCollector extends CommonRequestDataCollector implements RequestDataCollector {
     private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);
     private RequestDataPublisher processor;
 
@@ -57,32 +55,21 @@ public class SuccessRequestDataCollector implements RequestDataCollector {
         log.debug("Handling success analytics types");
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
-        String apiName = (String) messageContext.getProperty(APIMgtGatewayConstants.API);
-        String apiUuid = (String) messageContext.getProperty(APIMgtGatewayConstants.API_UUID_PROPERTY);
-        String apiCreator = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         boolean isCacheHit = messageContext.getPropertyKeySet().contains(Constants.CACHED_RESPONSE_KEY);
 
-        long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
-        long responseTime = System.currentTimeMillis() - requestInTime;
-        long backendLatency = (Long) messageContext.getProperty(Constants.BACKEND_LATENCY_PROPERTY);
-
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        ResponseEvent responseEvent = new ResponseEvent();
+
         if (authContext != null) {
             if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
-                authContext.setApplicationName(Constants.ANONYMOUS_VALUE);
-                authContext.setApplicationId(Constants.ANONYMOUS_VALUE);
-                authContext.setSubscriber(Constants.ANONYMOUS_VALUE);
-                authContext.setKeyType(Constants.ANONYMOUS_VALUE);
+                this.setAnonymousApp(responseEvent);
+            } else {
+                this.setApplicationData(authContext, responseEvent);
             }
         } else {
             log.warn("Ignore API request without authentication context.");
             return;
         }
-        String applicationName = authContext.getApplicationName();
-        String applicationId = authContext.getApplicationId();
-        String applicationOwner = authContext.getSubscriber();
-        String keyType = authContext.getKeyType();
 
         String endpointAddress = (String) messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         int targetResponseCode = (Integer) messageContext.getProperty(Constants.BACKEND_RESPONSE_CODE);
@@ -97,39 +84,46 @@ public class SuccessRequestDataCollector implements RequestDataCollector {
         }
 
         String userAgent = (String) messageContext.getProperty(Constants.USER_AGENT_PROPERTY);
-        long reqMediationLatency = AnalyticsUtils.getRequestMediationLatency(messageContext);
-        long resMediationLatency = AnalyticsUtils.getResponseMediationLatency(messageContext);
 
-        ResponseEvent responseEvent = new ResponseEvent();
+        long backendLatency = getBackendLatency(messageContext);
+        long responseLatency = getResponseLatency(messageContext);
+        long requestMediationLatency = getRequestMediationLatency(messageContext);
+        long responseMediationLatency = getResponseMediationLatency(messageContext);
+
+        API api = getAPIMetaData(messageContext);
+        if (api == null) {
+            log.error("API not found and ignore publishing event.");
+            return;
+        }
+
+
         responseEvent.setCorrelationId(UUID.randomUUID().toString());
-        responseEvent.setKeyType(keyType);
-        responseEvent.setApiId(apiUuid);
-        responseEvent.setApiName(apiName);
-        responseEvent.setApiVersion(apiVersion);
-        responseEvent.setApiCreator(apiCreator);
+        responseEvent.setApiId(api.getUuid());
+        responseEvent.setApiType(api.getApiType());
+        responseEvent.setApiName(api.getApiName());
+        responseEvent.setApiVersion(api.getApiVersion());
+        responseEvent.setApiCreator(api.getApiProvider());
         responseEvent.setApiMethod(httpMethod);
-        responseEvent.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiCreator));
+        responseEvent.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(api.getApiProvider()));
         responseEvent.setApiResourceTemplate(apiResourceTemplate);
         responseEvent.setDestination(endpointAddress);
-        responseEvent.setApplicationId(applicationId);
-        responseEvent.setApplicationName(applicationName);
-        responseEvent.setApplicationOwner(applicationOwner);
 
         responseEvent.setRegionId(Constants.REGION_ID);
         responseEvent.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-        responseEvent.setUserAgent(userAgent);
-        responseEvent.setProxyResponseCode(String.valueOf(proxyResponseCode));
-        responseEvent.setTargetResponseCode(String.valueOf(targetResponseCode));
-        responseEvent.setResponseCacheHit(String.valueOf(isCacheHit));
-        responseEvent.setResponseLatency(String.valueOf(responseTime));
-        responseEvent.setBackendLatency(String.valueOf(backendLatency));
-        responseEvent.setRequestMediationLatency(String.valueOf(reqMediationLatency));
-        responseEvent.setResponseMediationLatency(String.valueOf(resMediationLatency));
+        responseEvent.setUserAgentHeader(userAgent);
+        responseEvent.setProxyResponseCode(proxyResponseCode);
+        responseEvent.setTargetResponseCode(targetResponseCode);
+        responseEvent.setResponseCacheHit(isCacheHit);
+        responseEvent.setResponseLatency(responseLatency);
+        responseEvent.setBackendLatency(backendLatency);
+        responseEvent.setRequestMediationLatency(requestMediationLatency);
+        responseEvent.setResponseMediationLatency(responseMediationLatency);
+
         responseEvent.setDeploymentId(Constants.DEPLOYMENT_ID);
         responseEvent.setEventType(Constants.SUCCESS_EVENT_TYPE);
-
-        OffsetDateTime time = OffsetDateTime.now(Clock.systemUTC());
-        responseEvent.setRequestTimestamp(time.toString());
+        long requestInTime = getRequestTime(messageContext);
+        String offsetDateTime = AnalyticsUtils.getTimeInISO(requestInTime);
+        responseEvent.setRequestTimestamp(offsetDateTime);
 
         this.processor.publish(responseEvent);
     }

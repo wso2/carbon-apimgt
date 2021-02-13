@@ -18,20 +18,11 @@
 package org.wso2.carbon.apimgt.usage.publisher.impl;
 
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
-import org.wso2.carbon.apimgt.usage.publisher.dto.AnalyticsEvent;
-
-import java.util.Map;
 
 /**
  * Fault event publisher implementation.
  */
 public class FaultyRequestDataPublisher extends AbstractRequestDataPublisher {
-
-    @Override
-    public void publish(AnalyticsEvent analyticsEvent) {
-        Map<String, String> responseEventMap = mapper.convertValue(analyticsEvent, mapTypeRef);
-        this.publishData(responseEventMap);
-    }
 
     @Override
     public CounterMetric getCounterMetric() {

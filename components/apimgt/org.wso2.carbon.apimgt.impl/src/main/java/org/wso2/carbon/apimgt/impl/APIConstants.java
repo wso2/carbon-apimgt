@@ -2523,10 +2523,10 @@ public final class APIConstants {
 
     public static class ServiceCatalogConstants {
         public static final String SERVICE_UUID = "UUID";
-        public static final String SERVICE_NAME = "ENTRY_NAME";
+        public static final String SERVICE_NAME = "SERVICE_NAME";
         public static final String SERVICE_KEY = "SERVICE_KEY";
         public static final String MD5 = "MD5";
-        public static final String SERVICE_VERSION = "ENTRY_VERSION";
+        public static final String SERVICE_VERSION = "SERVICE_VERSION";
         public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
         public static final String SERVICE_URL = "SERVICE_URL";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
@@ -2538,5 +2538,7 @@ public final class APIConstants {
         public static final String LAST_UPDATED_TIME = "LAST_UPDATED_TIME";
         public static final String CREATED_BY = "CREATED_BY";
         public static final String UPDATED_BY = "UPDATED_BY";
+        public static final String METADATA = "METADATA";
+        public static final String SERVICE_DEFINITION = "SERVICE_DEFINITION";
     }
 }

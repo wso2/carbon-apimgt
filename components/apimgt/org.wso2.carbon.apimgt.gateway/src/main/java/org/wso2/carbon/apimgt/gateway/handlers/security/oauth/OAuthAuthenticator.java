@@ -43,7 +43,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -112,7 +112,7 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     @MethodStats
-    public AuthenticationResponse authenticate(MessageContext synCtx) {
+    public AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException {
         boolean isJwtToken = false;
         String accessToken = null;
         boolean defaultVersionInvoked = false;
@@ -289,6 +289,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
+            authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
             synCtx.setProperty("API_NAME", apiName.substring(apiName.indexOf("--") + 2, apiName.indexOf(":")));
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
@@ -367,6 +368,7 @@ public class OAuthAuthenticator implements Authenticator {
             }
             authContext.setCallerToken(info.getEndUserToken());
             authContext.setApplicationId(info.getApplicationId());
+            authContext.setApplicationUUID(info.getApplicationUUID());
             authContext.setApplicationName(info.getApplicationName());
             authContext.setApplicationTier(info.getApplicationTier());
             authContext.setSubscriber(info.getSubscriber());

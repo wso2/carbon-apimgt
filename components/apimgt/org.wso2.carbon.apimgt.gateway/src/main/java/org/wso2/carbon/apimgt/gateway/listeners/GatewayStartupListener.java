@@ -240,7 +240,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
             webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
         }
-
     }
 
     @Override

@@ -21,19 +21,18 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 /**
  * Implementation of the util methods
  */
 public class AnalyticsUtils {
-    private static final String ANALYTICS_REQUEST_TYPE = "analytics_request_type";
-    private static final String THROTTLED_OUT_REQUEST = "throttled_out_request";
 
     public static boolean isAuthFaultRequest(int errorCode) {
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
@@ -46,21 +45,9 @@ public class AnalyticsUtils {
     }
 
     public static boolean isTargetFaultRequest(int errorCode) {
-        return errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END;
-    }
-
-    public static FAULT_EVENT_TYPE getFaultyType(MessageContext messageContext) {
-        int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-        if (isAuthFaultRequest(errorCode)) {
-            return FAULT_EVENT_TYPE.AUTH;
-        } else if (isThrottledFaultRequest(errorCode)) {
-            return FAULT_EVENT_TYPE.THROTTLED;
-        } else if (isTargetFaultRequest(errorCode)) {
-            return FAULT_EVENT_TYPE.TARGET_CONNECTIVITY;
-        } else {
-            return FAULT_EVENT_TYPE.OTHER;
-        }
+        return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
+                || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
     }
 
     public static boolean isFaultRequest(MessageContext messageContext) {
@@ -104,16 +91,9 @@ public class AnalyticsUtils {
         return (String) headers.get(APIConstants.USER_AGENT);
     }
 
-    public static long getRequestMediationLatency(MessageContext messageContext) {
-
-        Object reqMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY);
-        return reqMediationLatency == null ? 0 : ((Number) reqMediationLatency).longValue();
+    public static String getTimeInISO(long time) {
+        OffsetDateTime offsetDateTime = OffsetDateTime
+                .ofInstant(Instant.ofEpochMilli(time), ZoneOffset.UTC.normalized());
+        return offsetDateTime.toString();
     }
-
-    public static long getResponseMediationLatency(MessageContext messageContext) {
-
-        Object resMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY);
-        return resMediationLatency == null ? 0 : ((Number) resMediationLatency).longValue();
-    }
-
 }
