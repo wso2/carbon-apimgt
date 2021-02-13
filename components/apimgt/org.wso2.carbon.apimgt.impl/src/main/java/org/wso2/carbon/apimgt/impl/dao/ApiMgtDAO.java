@@ -1358,7 +1358,10 @@ public class ApiMgtDAO {
                 Subscription subscription = new Subscription();
                 subscription.setApiUuid(resultSet.getString("API_UUID"));
                 subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
-                subscription.setLastDelivery(new Date(resultSet.getTimestamp("DELIVERED_AT").getTime()));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
                 subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
                 subscription.setTopic(resultSet.getString("HUB_TOPIC"));
                 subscription.setAppID(resultSet.getString("APPLICATION_ID"));
@@ -1397,7 +1400,10 @@ public class ApiMgtDAO {
                 Subscription subscription = new Subscription();
                 subscription.setApiUuid(resultSet.getString("API_UUID"));
                 subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
-                subscription.setLastDelivery(new Date(resultSet.getTimestamp("DELIVERED_AT").getTime()));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
                 subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
                 subscription.setTopic(resultSet.getString("HUB_TOPIC"));
                 subscription.setAppID(resultSet.getString("APPLICATION_ID"));

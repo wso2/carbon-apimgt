@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WebhookSubscriptionDTO;
 import javax.validation.constraints.*;
 
 
@@ -22,22 +22,22 @@ import javax.validation.Valid;
 
 
 
-public class TopicSubscriptionListDTO   {
+public class WebhookSubscriptionListDTO   {
   
     private Integer count = null;
-    private List<TopicSubscriptionDTO> list = new ArrayList<TopicSubscriptionDTO>();
+    private List<WebhookSubscriptionDTO> list = new ArrayList<WebhookSubscriptionDTO>();
     private PaginationDTO pagination = null;
 
   /**
-   * Number of topic subscriptions returned. 
+   * Number of webhook subscriptions returned. 
    **/
-  public TopicSubscriptionListDTO count(Integer count) {
+  public WebhookSubscriptionListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of topic subscriptions returned. ")
+  @ApiModelProperty(example = "1", value = "Number of webhook subscriptions returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -48,7 +48,7 @@ public class TopicSubscriptionListDTO   {
 
   /**
    **/
-  public TopicSubscriptionListDTO list(List<TopicSubscriptionDTO> list) {
+  public WebhookSubscriptionListDTO list(List<WebhookSubscriptionDTO> list) {
     this.list = list;
     return this;
   }
@@ -57,16 +57,16 @@ public class TopicSubscriptionListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<TopicSubscriptionDTO> getList() {
+  public List<WebhookSubscriptionDTO> getList() {
     return list;
   }
-  public void setList(List<TopicSubscriptionDTO> list) {
+  public void setList(List<WebhookSubscriptionDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public TopicSubscriptionListDTO pagination(PaginationDTO pagination) {
+  public WebhookSubscriptionListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -91,10 +91,10 @@ public class TopicSubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TopicSubscriptionListDTO topicSubscriptionList = (TopicSubscriptionListDTO) o;
-    return Objects.equals(count, topicSubscriptionList.count) &&
-        Objects.equals(list, topicSubscriptionList.list) &&
-        Objects.equals(pagination, topicSubscriptionList.pagination);
+    WebhookSubscriptionListDTO webhookSubscriptionList = (WebhookSubscriptionListDTO) o;
+    return Objects.equals(count, webhookSubscriptionList.count) &&
+        Objects.equals(list, webhookSubscriptionList.list) &&
+        Objects.equals(pagination, webhookSubscriptionList.pagination);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class TopicSubscriptionListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TopicSubscriptionListDTO {\n");
+    sb.append("class WebhookSubscriptionListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
