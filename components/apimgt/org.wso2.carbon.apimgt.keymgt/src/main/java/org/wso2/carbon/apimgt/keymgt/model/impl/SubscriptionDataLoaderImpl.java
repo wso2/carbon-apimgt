@@ -302,7 +302,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             for (String gatewayLabel : gatewayLabels) {
                 String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
                         "&version=" + version + "&gatewayLabel=" + getEncodedLabel(gatewayLabel);
-                API api = new API();
+                API api = null;
                 String responseString;
                 try {
                     responseString = invokeService(apisEP, null);

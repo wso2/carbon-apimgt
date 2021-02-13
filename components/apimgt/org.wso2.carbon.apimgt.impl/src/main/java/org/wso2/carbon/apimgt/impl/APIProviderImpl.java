@@ -5964,7 +5964,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
                         sendEmailNotification(api);
                     }
-
+                    // if retired Delete Existing Gateway Deployments.
+                    if (APIConstants.RETIRED.equals(targetStatus)){
+                        deleteAPIRevisions(uuid,tenantDomain);
+                    }
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                         apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
