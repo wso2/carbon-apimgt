@@ -297,6 +297,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -9870,8 +9871,23 @@ public final class APIUtil {
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
     }
 
-    public static Map<String, Environment> getEnvironments() {
+    public static Map<String, Environment> getEnvironments() throws APIManagementException {
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        // get dynamic gateway environments read from database
+        Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(tenantDomain).stream()
+                .map(Environment::newFromModel).collect(Collectors.toMap(Environment::getName, env -> env));
 
+        // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
+        Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
+        allEnvironments.putAll(envFromDB);
+        return allEnvironments;
+    }
+
+    /**
+     * Get gateway environments defined in the configuration: api-manager.xml
+     * @return map of configured environments against environment name
+     */
+    public static Map<String, Environment> getReadOnlyEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
@@ -11868,6 +11884,7 @@ public final class APIUtil {
         if (environment != null) {
             return environment;
         }
+        // TODO: (renuka) Do we need to check for following label lookup
         Label label =
                 ApiMgtDAO.getInstance().getLabelDetailByLabelAndTenantDomain(name, tenantDomain);
         if (label != null) {

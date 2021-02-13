@@ -16,17 +16,20 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import joptsimple.internal.Strings;
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Environment implements Serializable {
+public class Environment extends org.wso2.carbon.apimgt.api.model.Environment implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private String type = APIConstants.GATEWAY_ENV_TYPE_HYBRID;
-    
-    private String name;
     
     private String serverURL;
     
@@ -38,9 +41,19 @@ public class Environment implements Serializable {
 
     private String websocketGatewayEndpoint;
 
-    private String description;
-
     private boolean isDefault;
+
+    public static Environment newFromModel(org.wso2.carbon.apimgt.api.model.Environment env){
+        Environment object = new Environment();
+        object.setId(env.getId());
+        object.setUuid(env.getUuid());
+        object.setName(env.getName());
+        object.setDisplayName(env.getDisplayName());
+        object.setDescription(env.getDescription());
+        object.setVhosts(env.getVhosts());
+        object.setReadOnly(env.isReadOnly());
+        return object;
+    }
 
     public boolean isDefault() {
         return isDefault;
@@ -68,14 +81,6 @@ public class Environment implements Serializable {
 
     private boolean showInConsole;
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getType() {
         return type;
     }
@@ -84,12 +89,10 @@ public class Environment implements Serializable {
         this.type = type;
     }
 
-    public String getName() {
-        return name;
-    }
-
+    @Override
     public void setName(String name) {
-        this.name = name;
+        super.setName(name);
+        super.setUuid(name);
     }
 
     public String getServerURL() {
@@ -124,6 +127,28 @@ public class Environment implements Serializable {
         this.apiGatewayEndpoint = apiGatewayEndpoint;
     }
 
+    public void setVhosts(List<VHost> vhosts) {
+        // set gateway endpoint if it is empty
+        if (StringUtils.isEmpty(getApiGatewayEndpoint()) && StringUtils.isEmpty(getWebsocketGatewayEndpoint()) && !vhosts.isEmpty()) {
+            VHost vhost = vhosts.get(0);
+            String endpointFormat = "%s%s:%s%s"; // {protocol}://{host}:{port}/{context}
+
+            String httpContext = StringUtils.isEmpty(vhost.getHttpContext()) ? "" : "/" + vhost.getHttpContext();
+            String gwHttpEndpoint = String.format(endpointFormat, APIConstants.HTTP_PROTOCOL_URL_PREFIX,
+                    vhost.getHost(), vhost.getHttpPort(), httpContext);
+            String gwHttpsEndpoint = String.format(endpointFormat, APIConstants.HTTPS_PROTOCOL_URL_PREFIX,
+                    vhost.getHost(), vhost.getHttpsPort(), httpContext);
+            setApiGatewayEndpoint(gwHttpsEndpoint + "," + gwHttpEndpoint);
+
+            String gwWsEndpoint = String.format(endpointFormat, APIConstants.WS_PROTOCOL_URL_PREFIX,
+                    vhost.getHost(), vhost.getWsPort(), "");
+            String gwWssEndpoint = String.format(endpointFormat, APIConstants.WSS_PROTOCOL_URL_PREFIX,
+                    vhost.getHost(), vhost.getWssPort(), "");
+            setWebsocketGatewayEndpoint(gwWssEndpoint + "," + gwWsEndpoint);
+        }
+        super.setVhosts(vhosts);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -131,7 +156,7 @@ public class Environment implements Serializable {
 
         Environment that = (Environment) o;
 
-        if (!name.equals(that.getName())) return false;
+        if (!getName().equals(that.getName())) return false;
         if (!type.equals(that.getType())) return false;
 
         return true;
@@ -140,6 +165,6 @@ public class Environment implements Serializable {
     @Override
     public int hashCode() {
         int result = type.hashCode();
-        return  31 * result + name.hashCode();
+        return  31 * result + getName().hashCode();
     }
 }

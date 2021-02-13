@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -66,6 +67,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
@@ -13840,6 +13842,254 @@ public class ApiMgtDAO {
             handleException("Failed to update label : ", e);
         }
         return label;
+    }
+
+    /**
+     * Returns the Environments List for the TenantId.
+     *
+     * @param tenantDomain The tenant domain.
+     * @return List of Environments.
+     */
+    public List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException {
+        List<Environment> envList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_TENANT_SQL)) {
+            prepStmt.setString(1, tenantDomain);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String uuid = rs.getString("UUID");
+                    String name = rs.getString("NAME");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+
+                    Environment env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                    envList.add(env);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environments in tenant domain: " + tenantDomain, e);
+        }
+        return envList;
+    }
+
+    /**
+     * Returns the Environment for the uuid in the tenant domain.
+     *
+     * @param tenantDomain the tenant domain to look environment
+     * @param uuid UUID of the environment
+     * @return Gateway environment with given UUID
+     */
+    public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+        Environment env = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL)) {
+            prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(2, uuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String name = rs.getString("NAME");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+
+                    env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environment in tenant domain:" + tenantDomain, e);
+        }
+        return env;
+    }
+
+    /**
+     * Add an Environment
+     *
+     * @param tenantDomain tenant domain
+     * @param environment Environment
+     * @return added Environment
+     * @throws APIManagementException if failed to add environment
+     */
+    public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        environment.setUuid(uuid);
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement prepStmt = conn.prepareStatement(SQLConstants.INSERT_ENVIRONMENT_SQL,
+                    new String[]{"ID"})){
+                prepStmt.setString(1, uuid);
+                prepStmt.setString(2, environment.getName());
+                prepStmt.setString(3, tenantDomain);
+                prepStmt.setString(4, environment.getDisplayName());
+                prepStmt.setString(5, environment.getDescription());
+                prepStmt.executeUpdate();
+
+                ResultSet rs = prepStmt.getGeneratedKeys();
+                int id = -1;
+                if (rs.next()) {
+                    id = rs.getInt(1);
+                }
+                addGatewayVhosts(conn, id, environment.getVhosts());
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to add VHost: " + uuid, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add VHost: " + uuid, e);
+        }
+        return environment;
+    }
+
+    /**
+     * Add VHost assigned to gateway environment
+     *
+     * @param connection connection
+     * @param id Environment ID in the databse
+     * @param vhosts list of VHosts assigned to the environment
+     * @throws APIManagementException if falied to add VHosts
+     */
+    private void addGatewayVhosts(Connection connection, int id, List<VHost> vhosts) throws
+            APIManagementException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.INSERT_GATEWAY_VHOSTS_SQL)) {
+            for (VHost vhost : vhosts) {
+                prepStmt.setInt(1, id);
+                prepStmt.setString(2, vhost.getHost());
+                prepStmt.setString(3, vhost.getHttpContext());
+                prepStmt.setString(4, vhost.getHttpPort().toString());
+                prepStmt.setString(5, vhost.getHttpsPort().toString());
+                prepStmt.setString(6, vhost.getWsPort().toString());
+                prepStmt.setString(7, vhost.getWssPort().toString());
+                prepStmt.addBatch();
+            }
+            prepStmt.executeBatch();
+        } catch (SQLException e) {
+            handleException("Failed to add VHosts for environment ID: " + id, e);
+        }
+    }
+
+    /**
+     * Whether an Environment exists in the tenant domain with the given name
+     *
+     * @param tenantDomain tenant domain
+     * @param envName environment name
+     * @return whether an Environment exist or not
+     * @throws APIManagementException if failed to find
+     */
+    public boolean isEnvironmentNameExist(String tenantDomain, String envName) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_NAME_COUNT_BY_TENANT_SQL)) {
+            prepStmt.setString(1, envName);
+            prepStmt.setString(2, tenantDomain);
+
+            int envCount = 0;
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    envCount = rs.getInt("ENVIRONMENT_COUNT");
+                }
+            }
+            return envCount > 0;
+        } catch (SQLException e) {
+            handleException("Failed to get Environment count of " + tenantDomain, e);
+        }
+        return false;
+    }
+
+    /**
+     * Returns a list of vhosts belongs to the gateway environments
+     *
+     * @param connection DB connection
+     * @param envId Environment id.
+     * @return list of vhosts belongs to the gateway environments.
+     */
+    private List<VHost> getVhostGatewayEnvironments(Connection connection, Integer envId) throws APIManagementException {
+        List<VHost> vhosts = new ArrayList<>();
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_VHOSTS_BY_ID_SQL)) {
+            prepStmt.setInt(1, envId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String host = rs.getString("HOST");
+                    String httpContext = rs.getString("HTTP_CONTEXT");
+                    Integer httpPort = rs.getInt("HTTP_PORT");
+                    Integer httpsPort = rs.getInt("HTTPS_PORT");
+                    Integer wsPort = rs.getInt("WS_PORT");
+                    Integer wssPort = rs.getInt("WSS_PORT");
+
+                    VHost vhost = new VHost();
+                    vhost.setHost(host);
+                    vhost.setHttpContext(httpContext);
+                    vhost.setHttpPort(httpPort);
+                    vhost.setHttpsPort(httpsPort);
+                    vhost.setWsPort(wsPort);
+                    vhost.setWssPort(wssPort);
+                    vhosts.add(vhost);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get gateway environments list of VHost: " , e);
+        }
+        return vhosts;
+    }
+
+    /**
+     * Delete an Environment
+     *
+     * @param uuid UUID of the environment
+     * @throws APIManagementException if failed to delete environment
+     */
+    public void deleteEnvironment(String uuid) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_ENVIRONMENT_SQL)) {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, uuid);
+                prepStmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete Environment", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete Environment", e);
+        }
+    }
+
+    /**
+     * Update Gateway Environment
+     *
+     * @param environment Environment to be updated
+     * @return Updated Environment
+     * @throws APIManagementException if failed to updated Environment
+     */
+    public Environment updateEnvironment(Environment environment) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, environment.getDisplayName());
+                prepStmt.setString(2, environment.getDescription());
+                prepStmt.setString(3, environment.getUuid());
+                prepStmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to update Environment", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to update Environment", e);
+        }
+        return environment;
     }
 
     private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId, int tenantId)

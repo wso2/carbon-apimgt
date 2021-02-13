@@ -4777,10 +4777,18 @@ components:
         host:
           maxLength: 255
           minLength: 1
-          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123)
-          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
+          # ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
+          pattern: '^(((\*[\.-])?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))|((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))([\.-]\*)?|\*)$'
           type: string
           example: mg.wso2.com
+        httpContext:
+          maxLength: 255
+          minLength: 0
+          # TODO (renuka) check this regex: not allowed: (_ .) and allowed: (- /)
+          pattern: '^\/?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])*$'
+          type: string
+          example: pets
         httpPort:
           type: integer
           example: 80

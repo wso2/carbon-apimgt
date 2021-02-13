@@ -21,6 +21,7 @@ import javax.validation.Valid;
 public class VHostDTO   {
   
     private String host = null;
+    private String httpContext = null;
     private Integer httpPort = null;
     private Integer httpsPort = null;
     private Integer wsPort = null;
@@ -37,11 +38,28 @@ public class VHostDTO   {
   @ApiModelProperty(example = "mg.wso2.com", required = true, value = "")
   @JsonProperty("host")
   @NotNull
- @Pattern(regexp="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$") @Size(min=1,max=255)  public String getHost() {
+ @Pattern(regexp="^(((\\*[\\.-])?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))|((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))([\\.-]\\*)?|\\*)$") @Size(min=1,max=255)  public String getHost() {
     return host;
   }
   public void setHost(String host) {
     this.host = host;
+  }
+
+  /**
+   **/
+  public VHostDTO httpContext(String httpContext) {
+    this.httpContext = httpContext;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "pets", value = "")
+  @JsonProperty("httpContext")
+ @Pattern(regexp="^/?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])*$") @Size(min=0,max=255)  public String getHttpContext() {
+    return httpContext;
+  }
+  public void setHttpContext(String httpContext) {
+    this.httpContext = httpContext;
   }
 
   /**
@@ -123,6 +141,7 @@ public class VHostDTO   {
     }
     VHostDTO vhost = (VHostDTO) o;
     return Objects.equals(host, vhost.host) &&
+        Objects.equals(httpContext, vhost.httpContext) &&
         Objects.equals(httpPort, vhost.httpPort) &&
         Objects.equals(httpsPort, vhost.httpsPort) &&
         Objects.equals(wsPort, vhost.wsPort) &&
@@ -131,7 +150,7 @@ public class VHostDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(host, httpPort, httpsPort, wsPort, wssPort);
+    return Objects.hash(host, httpContext, httpPort, httpsPort, wsPort, wssPort);
   }
 
   @Override
@@ -140,6 +159,7 @@ public class VHostDTO   {
     sb.append("class VHostDTO {\n");
     
     sb.append("    host: ").append(toIndentedString(host)).append("\n");
+    sb.append("    httpContext: ").append(toIndentedString(httpContext)).append("\n");
     sb.append("    httpPort: ").append(toIndentedString(httpPort)).append("\n");
     sb.append("    httpsPort: ").append(toIndentedString(httpsPort)).append("\n");
     sb.append("    wsPort: ").append(toIndentedString(wsPort)).append("\n");

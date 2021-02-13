@@ -400,6 +400,7 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setDescription("");
                     }
+                    environment.setReadOnly(true);
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {

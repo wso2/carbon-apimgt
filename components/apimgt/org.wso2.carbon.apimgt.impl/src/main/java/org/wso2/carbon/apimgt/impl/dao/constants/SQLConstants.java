@@ -3088,6 +3088,34 @@ public class SQLConstants {
 
     public static final String UPDATE_LABEL_SQL = "UPDATE AM_LABELS SET NAME = ?, DESCRIPTION = ?  WHERE LABEL_ID = ?";
 
+    /** Environment related constants **/
+
+    public static final String GET_ENVIRONMENT_BY_TENANT_SQL = "SELECT * FROM AM_GATEWAY_ENVIRONMENT " +
+            "WHERE TENANT_DOMAIN = ?";
+
+    public static final String GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL = "SELECT * FROM AM_GATEWAY_ENVIRONMENT " +
+            "WHERE TENANT_DOMAIN = ? AND UUID = ?";
+
+    public static final String GET_ENVIRONMENT_NAME_COUNT_BY_TENANT_SQL =
+            "SELECT COUNT(ID) AS ENVIRONMENT_COUNT FROM AM_GATEWAY_ENVIRONMENT " +
+                    "WHERE LOWER(NAME) = LOWER(?) AND TENANT_DOMAIN = ?";
+
+    public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
+            "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION) " +
+            "VALUES (?,?,?,?,?)";
+
+    public static final String INSERT_GATEWAY_VHOSTS_SQL = "INSERT INTO " +
+            "AM_GW_VHOST (GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT) " +
+            "VALUES (?,?,?,?,?,?,?)";
+
+    public static final String GET_ENVIRONMENT_VHOSTS_BY_ID_SQL = "SELECT * FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
+
+    public static final String DELETE_ENVIRONMENT_SQL = "DELETE FROM AM_GATEWAY_ENVIRONMENT WHERE UUID = ?";
+
+    public static final String UPDATE_ENVIRONMENT_SQL = "UPDATE AM_GATEWAY_ENVIRONMENT " +
+            "SET DISPLAY_NAME = ?, DESCRIPTION = ? " +
+            "WHERE UUID = ?";
+
     public static final String DELETE_API_PRODUCT_SQL =
             "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
                     + APIConstants.API_PRODUCT + "'";

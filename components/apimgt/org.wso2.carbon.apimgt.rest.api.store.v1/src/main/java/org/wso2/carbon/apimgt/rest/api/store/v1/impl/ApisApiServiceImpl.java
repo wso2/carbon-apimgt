@@ -937,7 +937,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (selectedEnvironment == null) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT,
                         environmentName));
             }
             ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
