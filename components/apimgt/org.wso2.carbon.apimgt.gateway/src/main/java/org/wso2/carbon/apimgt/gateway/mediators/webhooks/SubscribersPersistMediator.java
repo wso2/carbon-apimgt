@@ -29,6 +29,10 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -48,6 +52,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
     private String secret;
     private String mode;
     private String leaseSeconds;
+    private final RequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -65,6 +70,8 @@ public class SubscribersPersistMediator extends AbstractMediator {
                     UNSUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()))) {
                 handleException("Invalid Entry for hub.mode", messageContext);
             }
+            //todo add authentication context to the payload data for throttling
+            AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
             String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
             String apiKey = WebhooksUtl.generateAPIKey(messageContext, tenantDomain);
             String applicationID = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID);
@@ -92,11 +99,13 @@ public class SubscribersPersistMediator extends AbstractMediator {
                 log.debug("Successfully submitted the request for persist subscription with status code: "
                         + statusCode);
             }
+            //dataCollector.collectData(messageContext);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Failed to submit the request for persist subscription with status code: " + statusCode);
             }
             String response = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+            //dataCollector.collectData(messageContext);
             handleException(response, messageContext);
         }
     }
