@@ -1894,8 +1894,8 @@ public class SQLConstants {
 
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
-            "CREATED_TIME, API_TIER, API_TYPE, API_UUID)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+            "CREATED_TIME, API_TIER, API_TYPE, API_UUID,STATUS)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_DEFAULT_VERSION_SQL =
             "SELECT DEFAULT_API_VERSION FROM AM_API_DEFAULT_VERSION WHERE API_NAME= ? AND API_PROVIDER= ? ";
@@ -3290,6 +3290,8 @@ public class SQLConstants {
                     "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
                     " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID AND " +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
+    public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

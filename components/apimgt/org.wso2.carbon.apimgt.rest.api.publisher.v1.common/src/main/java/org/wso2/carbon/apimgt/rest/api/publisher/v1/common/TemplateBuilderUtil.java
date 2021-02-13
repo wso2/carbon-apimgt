@@ -725,31 +725,6 @@ public class TemplateBuilderUtil {
         }
     }
 
-    /**
-     * To deploy client certificate in given API environment.
-     *
-     * @param identifier  Relevant API ID.
-     * @param tenantDomain Tenant domain.
-     * @throws CertificateManagementException Certificate Management Exception.
-     */
-    private static void setClientCertificatesToBeAdded(APIIdentifier identifier, String tenantDomain,
-                                                       GatewayAPIDTO gatewayAPIDTO)
-            throws CertificateManagementException {
-
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                .getClientCertificates(tenantId, null, identifier);
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
-                GatewayContentDTO clientCertificate = new GatewayContentDTO();
-                clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
-                clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
-            }
-        }
-    }
-
     private static GatewayContentDTO[] addGatewayContentToList(GatewayContentDTO gatewayContentDTO,
                                                                GatewayContentDTO[] gatewayContents) {
 
