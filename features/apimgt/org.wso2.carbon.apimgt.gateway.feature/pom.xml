@@ -112,6 +112,10 @@
             <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.gateway.common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
             <artifactId>ehcache</artifactId>
         </dependency>
@@ -304,6 +308,7 @@
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
                                 <bundleDef>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jedis:${servicemix.bundles.jedis.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.common:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

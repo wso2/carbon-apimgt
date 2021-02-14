@@ -9,6 +9,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.wso2.carbon.apimgt.gateway.common</artifactId>
+    <packaging>bundle</packaging>
+
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -38,5 +40,36 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.am.analytics.publisher</groupId>
+            <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Private-Package>
+                        </Private-Package>
+                        <Export-Package>
+                            org.wso2.carbon.apimgt.gateway.common.*;version="${carbon.apimgt.version}",
+                        </Export-Package>
+                        <Import-Package>
+                            com.google.gson.annotations.*,
+                            org.apache.commons.logging.*,
+                            org.wso2.am.analytics.publisher.*;version="${analytics.event.publisher.client.version.range}",
+                            *;resolution:=optional
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
