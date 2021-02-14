@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -116,6 +117,8 @@ public class API implements Serializable {
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -951,6 +954,14 @@ public class API implements Serializable {
 
     public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
         this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
     }
 
     public String getApiLevelPolicy() {
