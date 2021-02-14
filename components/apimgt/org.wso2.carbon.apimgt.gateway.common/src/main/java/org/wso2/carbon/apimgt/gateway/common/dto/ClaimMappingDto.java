@@ -27,7 +27,6 @@ import java.util.Objects;
  * Data holder for claim mappings.
  */
 public class ClaimMappingDto implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     @SerializedName("remoteClaim")
