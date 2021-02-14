@@ -28,6 +28,7 @@ public class Topic implements Serializable {
 
     private String name;
     private String apiId;
+    private String type;
 
     public String getName() {
 
@@ -47,5 +48,15 @@ public class Topic implements Serializable {
     public void setApiId(String apiId) {
 
         this.apiId = apiId;
+    }
+
+    public String getType() {
+
+        return type;
+    }
+
+    public void setType(String type) {
+
+        this.type = type;
     }
 }

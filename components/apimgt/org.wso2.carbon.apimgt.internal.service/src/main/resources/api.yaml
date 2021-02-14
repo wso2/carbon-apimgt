@@ -556,6 +556,30 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /webhooks-subscriptions:
+    get:
+      summary: Get webhooks subscriptions
+      description: |
+        This will provide list of webhooks subscriptions from the database.
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
+          type: string
+          required: true
+      tags:
+        - Retrieving webhooks subscriptions
+      responses:
+        200:
+          description: An array of webhooks subscriptions
+          schema:
+            $ref: '#/definitions/webhooksSubscriptionsList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /notify:
     post:
       summary: Push notification events into nodes.

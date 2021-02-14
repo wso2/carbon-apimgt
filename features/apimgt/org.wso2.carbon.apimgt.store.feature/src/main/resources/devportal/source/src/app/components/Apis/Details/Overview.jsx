@@ -35,6 +35,7 @@ import { app } from 'Settings';
 import { ApiContext } from './ApiContext';
 import Resources from './Resources';
 import Operations from './Operations';
+import Topics from './Topics';
 import Comments from './Comments/Comments';
 import Sdk from './Sdk';
 import OverviewDocuments from './OverviewDocuments';
@@ -239,22 +240,34 @@ function Overview(props) {
             });
     }, []);
     const getResourcesForAPIs = (apiType, apiObject) => {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <Operations api={apiObject} />;
-            case 'WS':
-                return '';
-            default:
-                return <Resources api={apiObject} />;
+        if (isAsyncApi(apiType)) {
+            return <Topics api={apiObject}/>
+        } else {
+            switch (apiType) {
+                case 'GRAPHQL':
+                    return <Operations api={apiObject}/>;
+                case 'WS':
+                    return '';
+                default:
+                    return <Resources api={apiObject}/>;
+            }
         }
     };
 
+    const isAsyncApi = (apiType) => {
+        return (apiType && (apiType === 'WS' || apiType === 'WEBSUB' || apiType === 'SSE'));
+    };
+
     const getTitleForAPIOperationType = (apiType) => {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations' />;
-            default:
-                return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources' />;
+        if (isAsyncApi(apiType)) {
+            return <FormattedMessage id='Apis.Details.Overview.topics.title' defaultMessage='Topics'/>;
+        } else {
+            switch (apiType) {
+                case 'GRAPHQL':
+                    return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations'/>;
+                default:
+                    return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources'/>;
+            }
         }
     };
     if (overviewDocOverride) {
@@ -285,7 +298,7 @@ function Overview(props) {
                     </Paper>
                 </Grid>
                 {/* Resources */}
-                {api.type !== 'WS' && showTryout && (
+                {showTryout && (
                     <Grid item lg={4} md={6} xs={12}>
                         <Paper elevation={0} className={classes.overviewPaper}>
                             <Typography variant='subtitle2' className={classes.sectionTitle}>
@@ -297,7 +310,7 @@ function Overview(props) {
                                 {getResourcesForAPIs(api.type, api)}
                             </Box>
                             <Box>
-                                {!api.advertiseInfo.advertised && (
+                                {!api.advertiseInfo.advertised && api.type !== 'WS' && api.type !== 'WEBSUB' && api.type !== 'SSE' && (
                                     <>
                                         <Divider />
                                         <Link to={'/apis/' + api.id + '/test'} className={classes.button}>

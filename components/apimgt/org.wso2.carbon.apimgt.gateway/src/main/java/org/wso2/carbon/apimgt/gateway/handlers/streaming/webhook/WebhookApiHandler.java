@@ -28,6 +28,7 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -37,6 +38,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
+
 /**
  * Handler used for web hook apis. This handler retrieves the topic name, to which subscription request is coming and
  * will set it to the synapse msg context.
@@ -44,7 +47,7 @@ import java.net.URLDecoder;
  * {@code
  * <handler class="org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler">
  *     <property name="eventReceiverResourcePath" value="/webhooks_events_receiver_resource"/>
- *     <property name="topicQueryParamName" value="hub.secret"/>
+ *     <property name="topicQueryParamName" value="hub.topic"/>
  * </handler>
  * }
  * </pre>
@@ -52,13 +55,10 @@ import java.net.URLDecoder;
 public class WebhookApiHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(WebhookApiHandler.class);
-    private static final String DEFAULT_TOPIC_QUERY_PARAM_NAME = "hub.secret";
     private static final String EMPTY_STRING = "";
-    private static final String WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER = "_web_hook_subscription_failure_handler";
-    private static final String DEFAULT_SUBSCRIPTION_RESOURCE_PATH = "/webhooks_events_receiver_resource";
 
-    private String eventReceiverResourcePath = DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
-    private String topicQueryParamName = DEFAULT_TOPIC_QUERY_PARAM_NAME;
+    private String eventReceiverResourcePath = APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
+    private String topicQueryParamName = APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME;
 
     @Override
     public boolean handleRequest(MessageContext synCtx) {
@@ -71,6 +71,11 @@ public class WebhookApiHandler extends AbstractHandler {
                 handleFailure(synCtx, "Topic name not found for web hook subscription request");
                 return false;
             }
+            org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
+            synCtx.setProperty(APIConstants.HTTP_VERB, httpVerb);
+            axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+            synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_WEBSUB);
             synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, topicName);
         }
         return true;
@@ -132,7 +137,8 @@ public class WebhookApiHandler extends AbstractHandler {
 
         OMElement payload = getFaultPayload(errorDescription);
         Utils.setFaultPayload(messageContext, payload);
-        Mediator sequence = messageContext.getSequence(WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
+        Mediator sequence =
+                messageContext.getSequence(APIConstants.WebHookProperties.WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }

@@ -16,12 +16,16 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.websocket;
+package org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket;
 
-public class WebSocketApiException extends Exception {
+public class WebSocketApiConstants {
 
-    public WebSocketApiException(String message) {
-        super(message);
+    WebSocketApiConstants() {
     }
 
+    public static final String WEBSOCKET_DUMMY_HTTP_METHOD_NAME = "WS";
+    public static final String WS_ENDPOINT_NAME = "WebSocketInboundEndpoint";
+    public static final String WS_SECURED_ENDPOINT_NAME = "SecureWebSocketEP";
+    public static final String URL_SEPARATOR = "/";
+    public static final String DEFAULT_RESOURCE_NAME = "/_default_resource_of_api_";
 }

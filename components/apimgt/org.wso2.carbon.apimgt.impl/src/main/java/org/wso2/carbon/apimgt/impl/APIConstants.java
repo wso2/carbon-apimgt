@@ -599,6 +599,7 @@ public final class APIConstants {
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
 
     public static class TokenStatus {
 
@@ -1146,6 +1147,14 @@ public final class APIConstants {
         private CORSHeaders() {
 
         }
+    }
+
+    public static class WebHookProperties {
+        public static final String DEFAULT_TOPIC_QUERY_PARAM_NAME = "hub.topic";
+        public static final String WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER = "_web_hook_subscription_failure_handler";
+        public static final String DEFAULT_SUBSCRIPTION_RESOURCE_PATH = "/webhooks_events_receiver_resource";
+        public static final String EVENT_RECEIVING_RESOURCE_PATH = "eventReceivingResourcePath";
+        public static final String TOPIC_QUERY_PARAM_NAME = "topicQueryParamName";
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";

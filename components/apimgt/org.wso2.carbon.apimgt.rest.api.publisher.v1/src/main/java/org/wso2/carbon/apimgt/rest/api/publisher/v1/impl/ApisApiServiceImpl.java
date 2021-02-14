@@ -4292,19 +4292,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         //validate websocket url and change type of the API in APIDTO
-        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
+        /*if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
             apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDTOFromProperties.setTransport(websocketTransports);
-        }
+        }*/
 
         //Only WS type APIs should be allowed
-        if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
+        /*if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
             throw RestApiUtil.buildBadRequestException("The API's type should only be WebSocket when "+
                     "importing an AsyncAPI specification");
-        }
+        }*/
 
         //Import the API and Definition
         try {
@@ -4314,6 +4314,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             String definitionToAdd = validationResponse.getJsonContent();
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
+
+            //load topics from AsyncAPI
+            if (APIDTO.TypeEnum.WEBSUB.equals(apiDTOFromProperties.getType())){
+                try {
+                    apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
+                } catch (FaultGatewaysException e) {
+                    e.printStackTrace();
+                }
+            }
 
             APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());
