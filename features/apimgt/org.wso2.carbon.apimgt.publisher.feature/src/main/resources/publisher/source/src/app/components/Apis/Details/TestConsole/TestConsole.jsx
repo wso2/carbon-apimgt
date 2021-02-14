@@ -32,7 +32,7 @@ import { TryOutController, SwaggerUI } from 'developer_portal';
 import Button from '@material-ui/core/Button';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import uuid from 'uuid/v4';
+import Utils from 'AppData/Utils';
 import Alert from 'AppComponents/Shared/Alert';
 
 /**
@@ -331,7 +331,7 @@ class TestConsole extends React.Component {
             const getResponse = values[1];
             const apiData = getResponse;
             apiData.enableStore = false;
-            const token = uuid();
+            const token = Utils.generateUUID();
             apiData.testKey = token;
             this.context.updateAPI({ enableStore: false, testKey: token });
         }).catch((error) => {
