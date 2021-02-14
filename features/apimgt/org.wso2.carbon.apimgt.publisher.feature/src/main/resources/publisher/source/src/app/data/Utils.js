@@ -188,11 +188,16 @@ class Utils {
      * Generate UUID V4 Source https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
      */
     static generateUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            // Disable the no bitwise rule as this is a `very rare` usage of bitwise logic operators
+            // eslint-disable-next-line no-bitwise
+            const r = Math.random() * 16 | 0; const
+            // eslint-disable-next-line no-bitwise
+                v = c === 'x' ? r : (r & (0x3 | 0x8));
             return v.toString(16);
         });
     }
+
     /**
      *
      * Get service catalog swagger definition URL
