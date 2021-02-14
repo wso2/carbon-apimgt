@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -117,6 +118,7 @@ public class API implements Serializable {
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
     private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -956,6 +958,14 @@ public class API implements Serializable {
 
     public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
         return webSocketTopicMappingConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
     }
 
     public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
