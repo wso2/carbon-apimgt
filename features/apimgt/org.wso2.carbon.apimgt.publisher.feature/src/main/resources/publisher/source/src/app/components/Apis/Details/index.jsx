@@ -625,7 +625,6 @@ class Details extends Component {
                                 Icon={<SubscriptionsIcon />}
                             />
 
-
                             {!api.isWebSocket() && !isAPIProduct && (
                                 <LeftMenuItem
                                     text={intl.formatMessage({
@@ -890,13 +889,13 @@ Details.propTypes = {
         footeremaillink: PropTypes.string,
     }).isRequired,
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.shape({
