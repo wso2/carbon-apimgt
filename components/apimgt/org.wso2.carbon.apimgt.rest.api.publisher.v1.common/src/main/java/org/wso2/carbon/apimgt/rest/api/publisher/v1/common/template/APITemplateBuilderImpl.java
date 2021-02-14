@@ -130,7 +130,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             if (api != null) {
                 t = velocityengine.getTemplate(getTemplatePath());
 
-                if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
+                if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+                    context.put("topicMappings", this.api.getWebSocketTopicMappingConfiguration().getMappings());
+                } else if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
                     String signingAlgorithm = api.getWebsubSubscriptionConfiguration().getSigningAlgorithm();
                     context.put("signingAlgorithm", signingAlgorithm.toLowerCase() + "=");
                     context.put("secret", api.getWebsubSubscriptionConfiguration().getSecret());
@@ -287,6 +289,50 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
+
+            Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
+
+            template.merge(context, writer);
+
+        } catch (Exception e) {
+            log.error("Velocity Error");
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
+
+    @Override
+    public String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey,
+                                                              String endpointUrl)
+            throws APITemplateException {
+        StringWriter writer = new StringWriter();
+
+        try {
+            ConfigContext configcontext = new APIConfigContext(this.api);
+            configcontext = new EndpointBckConfigContext(configcontext, api);
+            configcontext = new EndpointConfigContext(configcontext, api);
+            configcontext = new TemplateUtilContext(configcontext);
+
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+
+            context.internalGetKeys();
+
+            VelocityEngine velocityengine = new VelocityEngine();
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+            }
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
+
+            context.put("type", endpointType + "_endpoints");
+            context.put("websocketResourceKey", resourceKey);
+            context.put("endpointUrl", endpointUrl);
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 

@@ -116,6 +116,7 @@ public class API implements Serializable {
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
 
     private String responseCache;
     private int cacheTimeout;
@@ -951,6 +952,14 @@ public class API implements Serializable {
 
     public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
         this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
     }
 
     public String getApiLevelPolicy() {

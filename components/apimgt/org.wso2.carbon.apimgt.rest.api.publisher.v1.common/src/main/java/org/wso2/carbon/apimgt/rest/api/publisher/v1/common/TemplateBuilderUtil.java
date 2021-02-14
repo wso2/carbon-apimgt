@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
@@ -44,6 +45,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUt
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -52,6 +54,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -661,17 +664,74 @@ public class TemplateBuilderUtil {
         setCustomSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
         setClientCertificatesToBeAdded(tenantDomain, gatewayAPIDTO, clientCertificatesDTOList);
 
+        org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
+        String sandboxEndpointUrl = endpointConfiguration.getJSONObject("sandbox_endpoints").getString("url");
+        String productionEndpointUrl = endpointConfiguration.getJSONObject("production_endpoints").getString("url");
+
+        if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+            Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
+            for (APIOperationsDTO operation : apidto.getOperations()) {
+                String key = operation.getTarget();
+                String mapping = operation.getUriMapping();
+                Map<String, String> endpoints = new HashMap<>();
+                endpoints.put("sandbox",  Paths.get(sandboxEndpointUrl, mapping).toString());
+                endpoints.put("production", Paths.get(productionEndpointUrl, mapping).toString());
+                perTopicMappings.put(key, endpoints);
+            }
+
+            api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
+
+
+
+// TODO REMOVE
+//            // TODO set this from UI
+//            HashMap<String, Map<String, String>> lasanthasMap = new HashMap<>();
+//
+////            HashMap<String, String> roomsEndpoints = new HashMap<>();
+////            roomsEndpoints.put("production", "http://localhost:9090/rooms?room={uri.var.roomID}");
+////            roomsEndpoints.put("sandbox", "http://localhost:9090/rooms?room={uri.var.roomID}");
+//
+//            HashMap<String, String> lobbyEndpoints = new HashMap<>();
+//            lobbyEndpoints.put("production", "http://localhost:9090/rooms?room=common");
+//            lobbyEndpoints.put("sandbox", "http://localhost:9090/rooms?room=common");
+//
+////            lasanthasMap.put("/rooms/{roomID}", roomsEndpoints);
+////            lasanthasMap.put("/lobby", lobbyEndpoints);
+//            lasanthasMap.put("/*", lobbyEndpoints);
+//            api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(lasanthasMap));
+//
+//
+//
+//
+//            // TODO set this from UI. beware:
+//            // - ws instead of http
+//            // - prod and sandbox EPs should be present (we refer what types are present, and render prod&|sandbox
+//            String currentEpConfig = api.getEndpointConfig();
+//            String newEpConfig = currentEpConfig.replace("\"http\"", "\"ws\"");
+//            api.setEndpointConfig(newEpConfig);
+
+//            setWebsocketTopicResourceKeys(api);
+        }
+
         //Add the API
         if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
             String prototypeScriptAPI = builder.getConfigStringForPrototypeScriptAPI(environment);
             gatewayAPIDTO.setApiDefinition(prototypeScriptAPI);
         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
+            boolean isWsApi = APIConstants.APITransportType.WS.toString().equals(api.getType());
+            if (isWsApi) {
+                addWebsocketTopicResourceKeys(api);
+            }
             String apiConfig = builder.getConfigStringForTemplate(environment);
             gatewayAPIDTO.setApiDefinition(apiConfig);
             org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
             if (!endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
                     .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
-                addEndpoints(api, builder, gatewayAPIDTO);
+                if (!isWsApi) {
+                    addEndpoints(api, builder, gatewayAPIDTO);
+                } else {
+                    addWebSocketResourceEndpoints(api, builder, gatewayAPIDTO);
+                }
             }
         }
 
@@ -820,6 +880,54 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setEndpointEntriesToBeAdd(addGatewayContentToList(endpoint,
                     gatewayAPIDTO.getEndpointEntriesToBeAdd()));
         }
+    }
+
+    private static void addWebsocketTopicResourceKeys(API api) {
+        WebSocketTopicMappingConfiguration mappingsConfig = api.getWebSocketTopicMappingConfiguration();
+        for (String topic : mappingsConfig.getMappings().keySet()) {
+            mappingsConfig.setResourceKey(topic, getWebsocketResourceKey(topic));
+        }
+    }
+
+    private static String getWebsocketResourceKey(String topic) {
+        String resourceKey;
+        if (topic.contains("{") || (topic.contains("*") && !topic.endsWith("/*"))) {
+            resourceKey = "template_" + topic;
+        } else {
+            resourceKey = "mapping_" + topic;
+        }
+        return resourceKey.replaceAll("/", "_")
+                .replaceAll("\\{", "(")
+                .replaceAll("}", ")")
+                .replaceAll("\\*", "wildcard");
+    }
+
+    private static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
+            throws APITemplateException, XMLStreamException {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        Map<String, Map<String, String>> topicMappings = api.getWebSocketTopicMappingConfiguration().getMappings();
+        List<GatewayContentDTO> endpointsToAdd = new ArrayList<>();
+        for (URITemplate resource : uriTemplates) {
+            String topic = resource.getUriTemplate();
+            Map<String, String> endpoints = topicMappings.get(topic);
+            // Production and Sandbox endpoints
+            for (Map.Entry<String, String> endpointData : endpoints.entrySet()) {
+                if (!"resourceKey".equals(endpointData.getKey())) {
+                    String endpointType = endpointData.getKey();
+                    String endpointUrl = endpointData.getValue();
+
+                    String endpointConfigContext = builder.getConfigStringForWebSocketEndpointTemplate(
+                            endpointType, getWebsocketResourceKey(topic), endpointUrl);
+                    GatewayContentDTO endpoint = new GatewayContentDTO();
+                    // For WS APIs, resource type is not applicable,
+                    // so we can just use the uriTemplate/uriMapping to identify the resource
+                    endpoint.setName(getEndpointName(endpointConfigContext));
+                    endpoint.setContent(endpointConfigContext);
+                    endpointsToAdd.add(endpoint);
+                }
+            }
+        }
+        gatewayAPIDTO.setEndpointEntriesToBeAdd(endpointsToAdd.toArray(new GatewayContentDTO[endpointsToAdd.size()])); // TODO endpointname is not reflected in content. Check
     }
 
     /**
