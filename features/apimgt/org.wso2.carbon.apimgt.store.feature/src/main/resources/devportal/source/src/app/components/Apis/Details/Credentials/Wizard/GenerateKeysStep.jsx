@@ -173,7 +173,7 @@ const generateKeysStep = (props) => {
                 // Setting key request
                 try {
                     const newKeyRequest = { ...keyRequest };
-                    newKeyRequest.keyManager = selectedKeyManager.name;
+                    newKeyRequest.keyManager = selectedKeyManager.id;
                     newKeyRequest.supportedGrantTypes = selectedKeyManager.availableGrantTypes;
                     if (selectedKeyManager.availableGrantTypes.includes('implicit')
                         || selectedKeyManager.availableGrantTypes.includes('authorization_code')) {

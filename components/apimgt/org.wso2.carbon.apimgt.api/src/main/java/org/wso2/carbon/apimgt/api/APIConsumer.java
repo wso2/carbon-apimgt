@@ -529,7 +529,8 @@ public interface APIConsumer extends APIManager {
                                                                  String callbackUrl, String[] allowedDomains,
                                                                  String validityTime,
                                                                  String tokenScope, String groupingId,
-                                                                 String jsonString, String keyManagerName)
+                                                                 String jsonString, String keyManagerName,
+                                                                 String tenantDomain)
             throws APIManagementException;
 
     /**
@@ -933,6 +934,8 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
+    Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
+
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 
     /**
@@ -985,6 +988,9 @@ public interface APIConsumer extends APIManager {
     boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
 
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
+            throws APIManagementException;
+
+    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
             throws APIManagementException;
 
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
