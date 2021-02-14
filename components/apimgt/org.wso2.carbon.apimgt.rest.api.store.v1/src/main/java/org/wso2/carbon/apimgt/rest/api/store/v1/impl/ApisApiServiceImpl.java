@@ -255,7 +255,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setEntryPoint("devPortal");
             comment.setUser(username);
             comment.setApiId(apiId);
-            //Comment comment = CommentMappingUtil.fromAddCommentDTOToComment(addCommentDTO, parentCommentID, username, apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
             Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
@@ -313,13 +312,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, limit, offset);
 
             if (comment != null) {
