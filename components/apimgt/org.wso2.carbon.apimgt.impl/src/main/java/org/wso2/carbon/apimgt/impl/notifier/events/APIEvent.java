@@ -27,14 +27,17 @@ public class APIEvent extends Event {
 
     private String apiName;
     private int apiId;
+    private String uuid;
     private String apiVersion;
     private String apiContext;
     private String apiProvider;
     private String apiType;
     private String apiStatus;
 
-    public APIEvent(String apiName, String apiVersion, String apiProvider,
-                    String apiType, String apiStatus) {
+    public APIEvent(String uuid, String apiName, String apiVersion, String apiProvider, String apiType,
+                    String apiStatus) {
+
+        this.uuid = uuid;
         this.apiName = apiName;
         this.apiVersion = apiVersion;
         this.apiProvider = apiProvider;
@@ -42,13 +45,15 @@ public class APIEvent extends Event {
         this.apiStatus = apiStatus;
     }
 
-    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName, int apiId,
-                    String apiVersion, String apiType, String apiContext, String apiProvider, String apiStatus) {
+    public APIEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, String apiName,
+                    int apiId, String uuid, String apiVersion, String apiType, String apiContext, String apiProvider,
+                    String apiStatus) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
         this.tenantId = tenantId;
         this.apiId = apiId;
+        this.uuid = uuid;
         this.apiVersion = apiVersion;
         this.apiName = apiName;
         this.apiType = apiType;
@@ -60,24 +65,22 @@ public class APIEvent extends Event {
 
     @Override
     public String toString() {
+
         return "APIEvent{" +
                 "apiName='" + apiName + '\'' +
                 ", apiId=" + apiId +
+                ", uuid='" + uuid + '\'' +
                 ", apiVersion='" + apiVersion + '\'' +
                 ", apiContext='" + apiContext + '\'' +
-                ", apiStatus='" + apiStatus + '\'' +
                 ", apiProvider='" + apiProvider + '\'' +
                 ", apiType='" + apiType + '\'' +
-                ", eventId='" + eventId + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", type='" + type + '\'' +
-                ", tenantId=" + tenantId + '\'' +
-                ", tenantDomain=" + tenantDomain +
+                ", apiStatus='" + apiStatus + '\'' +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) return true;
         if (!(o instanceof APIEvent)) return false;
         APIEvent apiEvent = (APIEvent) o;
@@ -92,63 +95,88 @@ public class APIEvent extends Event {
 
     @Override
     public int hashCode() {
+
         return Objects.hash(getApiName(), getApiId(), getApiVersion(), getApiContext(), getApiStatus(),
                 getApiProvider(), getApiType());
     }
 
     public String getApiName() {
+
         return apiName;
     }
 
     public void setApiName(String apiName) {
+
         this.apiName = apiName;
     }
 
     public int getApiId() {
+
         return apiId;
     }
 
     public void setApiId(int apiId) {
+
         this.apiId = apiId;
     }
 
     public String getApiVersion() {
+
         return apiVersion;
     }
 
     public void setApiVersion(String apiVersion) {
+
         this.apiVersion = apiVersion;
     }
 
     public String getApiContext() {
+
         return apiContext;
     }
 
     public void setApiContext(String apiContext) {
+
         this.apiContext = apiContext;
     }
 
     public String getApiProvider() {
+
         return apiProvider;
     }
 
     public void setApiProvider(String apiProvider) {
+
         this.apiProvider = apiProvider;
     }
 
     public String getApiType() {
+
         return apiType;
     }
 
     public void setApiType(String apiType) {
+
         this.apiType = apiType;
     }
 
     public String getApiStatus() {
+
         return apiStatus;
     }
 
     public void setApiStatus(String apiStatus) {
+
         this.apiStatus = apiStatus;
+    }
+
+    public String getUuid() {
+
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+
+        this.uuid = uuid;
     }
 }

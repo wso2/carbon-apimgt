@@ -356,37 +356,6 @@ public interface APIProvider extends APIManager {
     void updateWsdlFromUrl(API api) throws APIManagementException;
 
     /**
-     * Change the lifecycle state of the specified API
-     *
-     * @param api The API whose status to be updated
-     * @param status New status of the API
-     * @param userId User performing the API state change
-     * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
-     * */
-    void changeAPIStatus(API api, String status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Change the lifecycle state of the specified API
-     *
-     * @param api The API whose status to be updated
-     * @param status New status of the API
-     * @param userId User performing the API state change
-     * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
-     * */
-    void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException;
-
-
-    boolean updateAPIStatus(APIIdentifier apiId, String status,boolean publishToGateway,boolean deprecateOldVersions,
-                            boolean makeKeysForwardCompatible)
-            throws APIManagementException, FaultGatewaysException;
-
-    /**
      * Locate any API keys issued for the previous versions of the given API, which are
      * currently in the PUBLISHED state and make those API keys compatible with this
      * version of the API
