@@ -59,26 +59,6 @@ public class CommentMappingUtil {
         commentDTO.setParentCommentId(comment.getParentCommentID());
         commentDTO.setEntryPoint(comment.getEntryPoint());
         commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(new Comment[comment.getReplies().size()]), 30, 0, false));
-//        List<CommentDTO> replieslist = new ArrayList<CommentDTO>();
-//        for (Comment reply : comment.getReplies()){
-//            CommentDTO commentDTOOfReply = new CommentDTO();
-//            commentDTOOfReply.setId(reply.getId());
-//            commentDTOOfReply.setContent(reply.getText());
-//            commentDTOOfReply.setCreatedBy(reply.getUser());
-//            commentDTOOfReply.setCreatedTime(reply.getCreatedTime().toString());
-//            if (reply.getUpdatedTime()!=null){
-//                commentDTOOfReply.setUpdatedTime(reply.getUpdatedTime().toString());
-//            }
-//            commentDTOOfReply.setUpdatedBy(reply.getUpdatedBy());
-//            commentDTOOfReply.setCategory(reply.getCategory());
-//            commentDTOOfReply.setParentCommentId(reply.getParentCommentID());
-//            commentDTOOfReply.setEntryPoint(reply.getEntryPoint());
-//            replieslist.add(commentDTOOfReply);
-//        }
-//        CommentListDTO commentListDTO = new CommentListDTO();
-//        commentListDTO.setList(replieslist);
-//        commentListDTO.setCount(replieslist.size());
-//        commentDTO.setReplies(commentListDTO);
         return commentDTO;
     }
 
@@ -133,25 +113,6 @@ public class CommentMappingUtil {
         comment.setApiId(apiId);
         return comment;
     }
-//    /**
-//     * Converts a AddCommentDTO to a Comment object
-//     *
-//     * @param addCommentDTO AddCommentDTO body
-//     * @param parentCommentID Parent Comment ID
-//     * @param username username of the consumer
-//     * @param apiId    API ID
-//     * @return Comment object
-//     */
-//    public static Comment fromAddCommentDTOToComment(AddCommentDTO addCommentDTO, String parentCommentID, String username, String apiId) {
-//        Comment comment = new Comment();
-//        comment.setText(addCommentDTO.getContent());
-//        comment.setCategory(addCommentDTO.getCategory());
-//        comment.setParentCommentID(parentCommentID);
-//        comment.setEntryPoint("devPortal");
-//        comment.setUser(username);
-//        comment.setApiId(apiId);
-//        return comment;
-//    }
     /**
      * Wraps a List of Comments to a CommentListDTO
      *

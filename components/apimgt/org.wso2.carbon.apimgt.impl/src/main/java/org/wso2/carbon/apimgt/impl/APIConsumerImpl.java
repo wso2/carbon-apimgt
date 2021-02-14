@@ -3552,9 +3552,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(identifier);
+        return apiMgtDAO.getComments(identifier, parentCommentID);
     }
 
     @Override

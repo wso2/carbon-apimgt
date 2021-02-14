@@ -445,16 +445,19 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param identifier Api identifier
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
      *
-     * @param identifier API identifier
+     * @param apiTypeWrapper Api Type Wrapper
      * @param commentId Comment ID
+     * @param limit
+     * @param offset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
@@ -462,6 +465,7 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param apiTypeWrapper Api type wrapper
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
