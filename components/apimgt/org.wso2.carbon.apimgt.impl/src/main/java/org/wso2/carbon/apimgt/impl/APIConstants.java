@@ -664,6 +664,8 @@ public final class APIConstants {
     }
 
     public static final String API_GATEWAY = "APIGateway.";
+    public static final String API_GATEWAY_NAME = "Name";
+    public static final String API_GATEWAY_DISPLAY_NAME = "DisplayName";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
@@ -671,6 +673,14 @@ public final class APIConstants {
     public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
+    public static final String API_GATEWAY_VIRTUAL_HOST = "VirtualHost";
+    public static final String API_GATEWAY_VIRTUAL_HOST_NAME = "Host";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTP_CONTEXT = "HttpContext";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTP_PORT = "HttpPort";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTPS_PORT = "HttpsPort";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WS_PORT = "WsPort";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WSS_PORT = "WssPort";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 

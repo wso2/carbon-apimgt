@@ -79,7 +79,7 @@ public class Environment extends org.wso2.carbon.apimgt.api.model.Environment im
         this.showInConsole = showInConsole;
     }
 
-    private boolean showInConsole;
+    private boolean showInConsole = true;
 
     public String getType() {
         return type;

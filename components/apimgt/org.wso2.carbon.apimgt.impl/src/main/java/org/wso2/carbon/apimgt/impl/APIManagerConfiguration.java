@@ -31,6 +31,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -371,7 +373,14 @@ public class APIManagerConfiguration {
                         environment.setDefault(false);
                     }
                     environment.setName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName("Name")).getText()));
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_NAME)).getText()));
+                    environment.setDisplayName(APIUtil.replaceSystemProperty(
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+                    if (StringUtils.isEmpty(environment.getDisplayName())) {
+                        environment.setDisplayName(environment.getName());
+                    }
                     environment.setServerURL(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_SERVER_URL)).getText()));
@@ -402,6 +411,33 @@ public class APIManagerConfiguration {
                         environment.setDescription("");
                     }
                     environment.setReadOnly(true);
+                    List<VHost> vhosts = new LinkedList<>();
+                    environment.setVhosts(vhosts);
+                    Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
+                            APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
+                                    APIConstants.API_GATEWAY_VIRTUAL_HOST);
+                    while (vhostIterator.hasNext()) {
+                        VHost vhost = new VHost();
+                        OMElement vhostElem = (OMElement) vhostIterator.next();
+                        vhost.setHost(APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_NAME)).getText()));
+                        vhost.setHttpContext(APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_CONTEXT)).getText()));
+                        vhost.setHttpPort(Integer.parseInt(APIUtil.replaceSystemProperty(
+                                vhostElem.getFirstChildWithName(new QName(
+                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_PORT)).getText())));
+                        vhost.setHttpsPort(Integer.parseInt(APIUtil.replaceSystemProperty(
+                                vhostElem.getFirstChildWithName(new QName(
+                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_PORT)).getText())));
+                        vhost.setWsPort(Integer.parseInt(APIUtil.replaceSystemProperty(
+                                vhostElem.getFirstChildWithName(new QName(
+                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_PORT)).getText())));
+                        vhost.setWssPort(Integer.parseInt(APIUtil.replaceSystemProperty(
+                                vhostElem.getFirstChildWithName(new QName(
+                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_PORT)).getText())));
+                        vhosts.add(vhost);
+                    }
+
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
