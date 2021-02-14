@@ -21,6 +21,7 @@ public class DeployResponseDTO   {
     @XmlEnum(String.class)
     public enum DeployStatusEnum {
         DEPLOYED("DEPLOYED"),
+        UNDEPLOYED("UNDEPLOYED"),
         ERROR("ERROR");
         private String value;
 

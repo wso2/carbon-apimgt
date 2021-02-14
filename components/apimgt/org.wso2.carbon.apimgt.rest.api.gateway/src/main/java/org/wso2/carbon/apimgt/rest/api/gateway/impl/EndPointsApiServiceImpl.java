@@ -18,43 +18,35 @@
 
 package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.EndPointsApiService;
 import org.wso2.carbon.apimgt.rest.api.gateway.dto.EndpointsDTO;
-import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-
-import javax.ws.rs.core.Response;
 
 import java.util.List;
+import javax.ws.rs.core.Response;
 
 public class EndPointsApiServiceImpl implements EndPointsApiService {
 
     private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response endPointsGet(String apiName, String version, String tenantDomain, MessageContext messageContext) {
+    public Response endPointsGet(String apiName, String version, String tenantDomain, MessageContext messageContext)
+            throws APIManagementException {
+
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
 
-        try {
-
-            List<String> deployedLocalEntries = GatewayUtils.retrieveDeployedEndpoints(apiName, version,
-                    tenantDomain);
-            if (debugEnabled) {
-                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
-            }
-            EndpointsDTO endpointsDTO = new EndpointsDTO();
-            endpointsDTO.endpoints(deployedLocalEntries);
-            return Response.ok().entity(endpointsDTO).build();
-        } catch (AxisFault e) {
-            String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-            log.error(errorMessage, e);
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        List<String> deployedEndpoints = GatewayUtils.retrieveDeployedEndpoints(apiName, version,
+                tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
+        EndpointsDTO endpointsDTO = new EndpointsDTO();
+        endpointsDTO.endpoints(deployedEndpoints);
+        return Response.ok().entity(endpointsDTO).build();
     }
 }

@@ -22,6 +22,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.dto.LocalEntryDTO;
@@ -36,24 +37,18 @@ public class LocalEntryApiServiceImpl implements LocalEntryApiService {
     private static final Log log = LogFactory.getLog(LocalEntryApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response localEntryGet(String apiName, String version, String tenantDomain, MessageContext messageContext) {
+    public Response localEntryGet(String apiName, String version, String tenantDomain, MessageContext messageContext)
+            throws APIManagementException {
+
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
 
-        try {
-
-            List<String> deployedLocalEntries = GatewayUtils.retrieveDeployedLocalEntries(apiName, version,
-                    tenantDomain);
-            if (debugEnabled) {
-                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
-            }
-            LocalEntryDTO localEntryDTO = new LocalEntryDTO();
-            localEntryDTO.localEntries(deployedLocalEntries);
-            return Response.ok().entity(localEntryDTO).build();
-        } catch (AxisFault e) {
-            String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-            log.error(errorMessage, e);
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        List<String> deployedLocalEntries = GatewayUtils.retrieveDeployedLocalEntries(apiName, version,
+                tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
+        LocalEntryDTO localEntryDTO = new LocalEntryDTO();
+        localEntryDTO.localEntries(deployedLocalEntries);
+        return Response.ok().entity(localEntryDTO).build();
     }
 }

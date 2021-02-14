@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.SequenceApiService;
@@ -37,23 +38,16 @@ public class SequenceApiServiceImpl implements SequenceApiService {
     private static final Log log = LogFactory.getLog(SequenceApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext) {
+    public Response sequenceGet(String apiName, String version, String tenantDomain, MessageContext messageContext)
+            throws APIManagementException {
+
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
-
-        try {
-
-            List<String> deployedSequences = GatewayUtils.retrieveDeployedSequences(apiName, version, tenantDomain);
-            if (debugEnabled) {
-                log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
-            }
-            SequencesDTO sequencesDTO = new SequencesDTO();
-            sequencesDTO.sequences(deployedSequences);
-            return Response.ok().entity(sequencesDTO).build();
-        } catch (AxisFault e) {
-            String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-            log.error(errorMessage, e);
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        List<String> deployedSequences = GatewayUtils.retrieveDeployedSequences(apiName, version, tenantDomain);
+        if (debugEnabled) {
+            log.debug("Retrieved Artifacts for " + apiName + " from eventhub");
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
+        SequencesDTO sequencesDTO = new SequencesDTO();
+        sequencesDTO.sequences(deployedSequences);
+        return Response.ok().entity(sequencesDTO).build();
     }
 }

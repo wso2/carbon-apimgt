@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.UndeployApiApiService;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.rest.api.gateway.dto.DeployResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -44,7 +45,10 @@ public class UndeployApiApiServiceImpl implements UndeployApiApiService {
             if (debugEnabled) {
                 log.debug("Successfully undeployed " + apiName + " in gateway");
             }
-            return Response.ok().entity(apiName + " Undeployed from the gateway").build();
+            DeployResponseDTO deployResponseDTO = new DeployResponseDTO();
+            deployResponseDTO.setDeployStatus(DeployResponseDTO.DeployStatusEnum.UNDEPLOYED);
+            deployResponseDTO.setJsonPayload(apiName + " Undeployed from the gateway");
+            return Response.ok().entity(deployResponseDTO).build();
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);

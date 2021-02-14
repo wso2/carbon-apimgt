@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.RedeployApiApiService;
+import org.wso2.carbon.apimgt.rest.api.gateway.dto.DeployResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 
@@ -34,15 +35,18 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
 
     public Response redeployApiPost(String apiName, String version, String tenantDomain,
                                     MessageContext messageContext) {
+
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
         InMemoryAPIDeployer inMemoryApiDeployer = new InMemoryAPIDeployer();
-        boolean status = false;
         try {
             inMemoryApiDeployer.reDeployAPI(apiName, version, tenantDomain);
             if (debugEnabled) {
                 log.debug("Successfully deployed " + apiName + " in gateway");
             }
-            return Response.ok().entity(apiName + " redeployed successfully in the Gateway").build();
+            DeployResponseDTO responseDTO = new DeployResponseDTO();
+            responseDTO.setDeployStatus(DeployResponseDTO.DeployStatusEnum.DEPLOYED);
+            responseDTO.setJsonPayload(apiName + " redeployed from the gateway");
+            return Response.ok().entity(responseDTO).build();
         } catch (ArtifactSynchronizerException e) {
             String errorMessage = "Error in fetching artifacts from storage";
             log.error(errorMessage, e);

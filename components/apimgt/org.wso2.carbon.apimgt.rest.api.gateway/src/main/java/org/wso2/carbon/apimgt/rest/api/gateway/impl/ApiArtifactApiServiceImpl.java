@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.gateway.ApiArtifactApiService;
@@ -38,19 +39,14 @@ public class ApiArtifactApiServiceImpl implements ApiArtifactApiService {
 
     @Override
     public Response apiArtifactGet(String apiName, String version, String tenantDomain,
-                                   MessageContext messageContext) {
+                                   MessageContext messageContext) throws APIManagementException {
+
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
-        try {
-            String api = GatewayUtils.retrieveDeployedAPI(apiName, version, tenantDomain);
-            if (StringUtils.isNotEmpty(api)) {
-                APIArtifactDTO apiArtifactDTO = new APIArtifactDTO();
-                apiArtifactDTO.api(api);
-                return Response.ok().entity(apiArtifactDTO).build();
-            }
-        } catch (AxisFault axisFault) {
-            String errorMessage = "Error in fetching deployed artifacts from Synapse Configuration";
-            log.error(errorMessage, axisFault);
-            RestApiUtil.handleInternalServerError(errorMessage, axisFault, log);
+        String api = GatewayUtils.retrieveDeployedAPI(apiName, version, tenantDomain);
+        if (StringUtils.isNotEmpty(api)) {
+            APIArtifactDTO apiArtifactDTO = new APIArtifactDTO();
+            apiArtifactDTO.api(api);
+            return Response.ok().entity(apiArtifactDTO).build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }

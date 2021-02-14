@@ -47,6 +47,8 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
@@ -68,6 +70,7 @@ import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -1064,7 +1067,7 @@ public class GatewayUtils {
     }
 
     public static List<String> retrieveDeployedSequences(String apiName, String version, String tenantDomain)
-            throws AxisFault {
+            throws APIManagementException {
 
         try {
             List<String> deployedSequences = new ArrayList<>();
@@ -1089,13 +1092,16 @@ public class GatewayUtils {
                 deployedSequences.add(sequence.toString());
             }
             return deployedSequences;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving Deployed Sequences", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
         } finally {
             MessageContext.destroyCurrentMessageContext();
         }
     }
 
     public static List<String> retrieveDeployedLocalEntries(String apiName, String version, String tenantDomain)
-            throws AxisFault {
+            throws APIManagementException {
 
         try {
             SubscriptionDataStore tenantSubscriptionStore =
@@ -1117,13 +1123,16 @@ public class GatewayUtils {
                 }
             }
             return deployedLocalEntries;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving LocalEntries", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
         } finally {
             MessageContext.destroyCurrentMessageContext();
         }
     }
 
     public static List<String> retrieveDeployedEndpoints(String apiName, String version, String tenantDomain)
-            throws AxisFault {
+            throws APIManagementException {
 
         List<String> deployedEndpoints = new ArrayList<>();
         try {
@@ -1139,6 +1148,9 @@ public class GatewayUtils {
                 String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
                 deployedEndpoints.add(entry);
             }
+        } catch (AxisFault e) {
+            throw new APIManagementException("Error in fetching deployed endpoints from Synapse Configuration", e,
+                    ExceptionCodes.INTERNAL_ERROR);
         } finally {
             MessageContext.destroyCurrentMessageContext();
         }
@@ -1146,7 +1158,8 @@ public class GatewayUtils {
         return deployedEndpoints;
     }
 
-    public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain) throws AxisFault {
+    public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
 
         try {
             MessageContext.setCurrentMessageContext(createAxis2MessageContext());
@@ -1157,6 +1170,9 @@ public class GatewayUtils {
                 return api.toString();
             }
             return null;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving API Artifacts", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
         } finally {
             MessageContext.destroyCurrentMessageContext();
         }
