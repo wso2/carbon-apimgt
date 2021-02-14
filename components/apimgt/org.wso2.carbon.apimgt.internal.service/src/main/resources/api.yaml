@@ -443,6 +443,18 @@ paths:
             **Search condition**.
              type of gateway
           type: string
+        - name: name
+          in: query
+          description: |
+            **Search condition**.
+             name of API
+          type: string
+        - name: version
+          in: query
+          description: |
+            **Search condition**.
+             version of API
+          type: string
       tags:
         - Retrieving Runtime artifacts
       responses:

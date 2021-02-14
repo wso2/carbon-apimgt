@@ -340,7 +340,6 @@ public class APIKeyValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-        String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String electedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         ArrayList<String> resourceArray = null;

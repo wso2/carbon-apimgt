@@ -422,7 +422,14 @@ public class OASParserUtil {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
                             Content content = parameter.getContent();
-                            extractReferenceFromContent(content, context);
+                            if (content != null) {
+                                extractReferenceFromContent(content, context);
+                            } else {
+                                String ref = parameter.get$ref();
+                                if (ref != null) {
+                                    extractReferenceWithoutSchema(ref, context);
+                                }
+                            }
                         }
                     }
                 }
@@ -609,9 +616,17 @@ public class OASParserUtil {
     private static void setRefOfParameters(List<Parameter> parameters, SwaggerUpdateContext context) {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
-                String ref = parameter.getSchema().get$ref();
-                if (ref != null) {
-                    addToReferenceObjectMap(ref, context);
+                Schema schema = parameter.getSchema();
+                if (schema != null) {
+                    String ref = schema.get$ref();
+                    if (ref != null) {
+                        addToReferenceObjectMap(ref, context);
+                    }
+                } else {
+                    String ref = parameter.get$ref();
+                    if (ref != null) {
+                        extractReferenceWithoutSchema(ref, context);
+                    }
                 }
             }
         }
@@ -624,6 +639,12 @@ public class OASParserUtil {
 
                 extractReferenceFromSchema(schema, context);
             }
+        }
+    }
+
+    private static void extractReferenceWithoutSchema(String reference, SwaggerUpdateContext context) {
+        if (reference != null) {
+            addToReferenceObjectMap(reference, context);
         }
     }
 

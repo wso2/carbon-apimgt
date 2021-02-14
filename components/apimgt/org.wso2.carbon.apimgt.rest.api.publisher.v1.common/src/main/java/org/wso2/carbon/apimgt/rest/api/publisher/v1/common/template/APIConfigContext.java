@@ -108,7 +108,7 @@ public class APIConfigContext extends ConfigContext {
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
         APIProductIdentifier id = apiProduct.getId();
         //set the api name version and context
-        context.put("apiName", PRODUCT_PREFIX + "--" + id.getName());
+        context.put("apiName", id.getName());
         context.put("apiVersion", "1.0.0");
 
         // We set the context pattern now to support plugable version strategy
@@ -142,6 +142,6 @@ public class APIConfigContext extends ConfigContext {
     }
 
     public String getAPIName(API api) {
-        return api.getId().getProviderName() + "--" + api.getId().getApiName();
+        return api.getId().getApiName();
     }
 }

@@ -26,8 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 
-import static org.apache.synapse.rest.RESTConstants.SYNAPSE_REST_API;
-
 
 public class APIMgtThrottleUsageHandlerTest {
     @Test
@@ -42,7 +40,6 @@ public class APIMgtThrottleUsageHandlerTest {
         authContext.setApiKey("ac-def");
         authContext.setUsername("admin");
         Mockito.when(messageContext.getProperty("__API_AUTH_CONTEXT")).thenReturn(authContext);
-        Mockito.when(messageContext.getProperty(SYNAPSE_REST_API)).thenReturn("admin--api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
