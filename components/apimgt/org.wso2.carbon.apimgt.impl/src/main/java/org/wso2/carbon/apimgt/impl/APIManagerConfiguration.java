@@ -413,6 +413,7 @@ public class APIManagerConfiguration {
                     environment.setReadOnly(true);
                     List<VHost> vhosts = new LinkedList<>();
                     environment.setVhosts(vhosts);
+                    environment.setEndpointsAsVhost();
                     Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
                             APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
                                     APIConstants.API_GATEWAY_VIRTUAL_HOST);

@@ -1602,8 +1602,12 @@ public final class APIConstants {
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
 
+    public static final String WSS_PROTOCOL = "wss";
+    public static final String WS_PROTOCOL = "ws";
     public static final String WS_PROTOCOL_URL_PREFIX = "ws://";
     public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
+    public static final int WSS_PROTOCOL_PORT = 8099;
+    public static final int WS_PROTOCOL_PORT = 9099;
 
     public static final String EMAIL_TRANSPORT = "mailto";
 
