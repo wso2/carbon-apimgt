@@ -661,18 +661,19 @@ public class TemplateBuilderUtil {
         setCustomSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
         setClientCertificatesToBeAdded(tenantDomain, gatewayAPIDTO, clientCertificatesDTOList);
 
-        org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
-        String sandboxEndpointUrl = endpointConfiguration.getJSONObject("sandbox_endpoints").getString("url");
-        String productionEndpointUrl = endpointConfiguration.getJSONObject("production_endpoints").getString("url");
-
         if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+            org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
+            String sandboxEndpointUrl = endpointConfiguration.getJSONObject("sandbox_endpoints").getString("url");
+            String productionEndpointUrl = endpointConfiguration.getJSONObject("production_endpoints").getString("url");
+
             Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
             for (APIOperationsDTO operation : apidto.getOperations()) {
                 String key = operation.getTarget();
-                String mapping = operation.getUriMapping();
+                String mapping = operation.getUriMapping() == null ? "" : operation.getUriMapping();
                 Map<String, String> endpoints = new HashMap<>();
-                endpoints.put("sandbox",  Paths.get(sandboxEndpointUrl, mapping).toString());
-                endpoints.put("production", Paths.get(productionEndpointUrl, mapping).toString());
+                // TODO: Need to fix the following line
+                endpoints.put("sandbox",  sandboxEndpointUrl + mapping);
+                endpoints.put("production", productionEndpointUrl + mapping);
                 perTopicMappings.put(key, endpoints);
             }
 

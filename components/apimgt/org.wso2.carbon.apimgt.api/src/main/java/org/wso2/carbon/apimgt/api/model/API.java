@@ -118,7 +118,6 @@ public class API implements Serializable {
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
     private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
-    private Map<String, String> wsUriMapping;
 
     private Map<String, String> wsUriMapping;
 
