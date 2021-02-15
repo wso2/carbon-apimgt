@@ -23,7 +23,7 @@ import React, {
     Suspense,
 } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -45,7 +45,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
-import Listing from 'AppComponents/ServiceCatalog/Listing/Listing';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
 import YAML from 'js-yaml';
@@ -154,43 +153,52 @@ function Overview(props) {
     const { match, history } = props;
     const serviceId = match.params.service_uuid;
     const [service, setService] = useState(null);
-    const [notFound, setNotFound] = useState(true);
+    const [notFound, setNotFound] = useState(false);
     const [serviceDefinition, setServiceDefinition] = useState({});
     const [openReadOnlyDefinition, setOpenReadOnlyDefinition] = useState(false);
     const [format, setFormat] = useState('yaml');
     const [convertTo, setConvertTo] = useState(null);
+    const theme = useTheme();
+    const {
+        graphqlIcon,
+        restApiIcon,
+        soapApiIcon,
+        streamingApiIcon,
+    } = theme.custom.landingPageIcons;
 
     // Get Service Details
     const getService = () => {
         const promisedService = ServiceCatalog.getServiceById(serviceId);
         promisedService.then((data) => {
             setService(data);
-            setNotFound(false);
-        }).catch(() => {
+        }).catch((error) => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error while loading service',
                 id: 'ServiceCatalog.Listing.Overview.error.loading.service',
             }));
+            const { status } = error;
+            if (status === 404) {
+                setNotFound(true);
+            }
         });
         return null;
     };
 
     /**
-     * Export Service as a zipped archive
-     * @param {string} serviceName The name of the service
-     * @param {string} serviceVersion Version of the service
-     * @returns {zip} Zip file containing the Service.
+     * Download Service Definition
+     * @param {string} serviceKey The service key.
+     * @returns {Object} Service Definition File.
      */
-    function exportService(serviceName, serviceVersion) {
-        return ServiceCatalog.exportService(serviceName, serviceVersion).then((zipFile) => {
-            return Utils.forceDownload(zipFile);
+    function downloadServiceDefinition(serviceKey) {
+        return ServiceCatalog.getServiceDefinition(serviceKey).then((file) => {
+            return Utils.forceDownload(file);
         }).catch((error) => {
             if (error.response) {
                 Alert.error(error.response.body.description);
             } else {
                 Alert.error(intl.formatMessage({
-                    id: 'ServiceCatalog.Listing.Overview.download.service.zip.error',
-                    defaultMessage: 'Something went wrong while downloading the Service.',
+                    id: 'ServiceCatalog.Listing.Overview.download.service.error',
+                    defaultMessage: 'Something went wrong while downloading the Service Definition.',
                 }));
             }
         });
@@ -285,43 +293,17 @@ function Overview(props) {
     }
 
     const getDefinitionTypeDisplayName = (definitionType) => {
-        switch (definitionType) {
-            case 'OAS2':
-                return Listing.CONST.OAS2;
-            case 'OAS3':
-                return Listing.CONST.OAS3;
-            case 'WSDL1':
-                return Listing.CONST.WSDL1;
-            case 'WSDL2':
-                return Listing.CONST.WSDL2;
-            case 'GRAPHQL_SDL':
-                return Listing.CONST.GRAPHQL_SDL;
-            case 'ASYNC_API':
-                return Listing.CONST.ASYNC_API;
-            default:
-                return definitionType;
-        }
+        return Configurations.serviceCatalogDefinitionTypes[definitionType] || definitionType;
     };
 
     const getSecurityTypeDisplayName = (securityType) => {
-        switch (securityType) {
-            case 'BASIC':
-                return Listing.CONST.BASIC;
-            case 'DIGEST':
-                return Listing.CONST.DIGEST;
-            case 'OAUTH2':
-                return Listing.CONST.OAUTH2;
-            case 'NONE':
-                return Listing.CONST.NONE;
-            default:
-                return securityType;
-        }
+        return Configurations.serviceCatalogSecurityTypes[securityType] || securityType;
     };
 
     let serviceTypeIcon = (
         <img
             className={classes.preview}
-            src={Configurations.app.context + '/site/public/images/restAPIIcon.png'}
+            src={Configurations.app.context + restApiIcon}
             alt='Type API'
         />
     );
@@ -338,7 +320,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/swaggerIcon.svg'}
+                    src={Configurations.app.context + restApiIcon}
                     alt='Type Rest API'
                 />
             </Tooltip>
@@ -356,7 +338,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/graphqlIcon.svg'}
+                    src={Configurations.app.context + graphqlIcon}
                     alt='Type GraphQL API'
                 />
             </Tooltip>
@@ -374,7 +356,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/asyncAPIIcon.jpeg'}
+                    src={Configurations.app.context + streamingApiIcon}
                     alt='Type Async API'
                 />
             </Tooltip>
@@ -392,7 +374,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/restAPIIcon.png'}
+                    src={Configurations.app.context + soapApiIcon}
                     alt='Type SOAP API'
                 />
             </Tooltip>
@@ -428,54 +410,53 @@ function Overview(props) {
                 </Box>
                 <Paper elevation={1} className={classes.paperStyle}>
                     <Box px={8} py={5}>
-                        <div>
-                            <Grid container spacing={1}>
-                                <Grid item md={10}>
-                                    <div className={classes.contentTopBarStyle}>
-                                        {serviceTypeIcon}
-                                        <div className={classes.topBarDetailsSectionStyle}>
-                                            <div className={classes.versionBarStyle}>
-                                                <Typography className={classes.heading} variant='h5'>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.display.name'
-                                                        defaultMessage='{serviceDisplayName}'
-                                                        values={{ serviceDisplayName: service.displayName }}
-                                                    />
-                                                </Typography>
-                                            </div>
-                                            <div className={classes.versionBarStyle}>
-                                                <LocalOfferOutlinedIcon />
-                                                <Typography className={classes.versionStyle}>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.service.version'
-                                                        defaultMessage='{serviceVersion}'
-                                                        values={{ serviceVersion: service.version }}
-                                                    />
-                                                </Typography>
-                                            </div>
-                                            <Usages
-                                                usageNumber={service.usage}
-                                                serviceDisplayName={service.displayName}
-                                                serviceId={service.id}
-                                                isOverview
-                                                classes={classes}
-                                            />
+                        <Grid container spacing={1}>
+                            <Grid item md={10}>
+                                <div className={classes.contentTopBarStyle}>
+                                    {serviceTypeIcon}
+                                    <div className={classes.topBarDetailsSectionStyle}>
+                                        <div className={classes.versionBarStyle}>
+                                            <Typography className={classes.heading} variant='h5'>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Overview.display.name'
+                                                    defaultMessage='{serviceDisplayName}'
+                                                    values={{ serviceDisplayName: service.displayName }}
+                                                />
+                                            </Typography>
                                         </div>
-                                    </div>
-                                </Grid>
-                                <Grid item md={2}>
-                                    <Box display='flex' flexDirection='column'>
-                                        <CreateApi
-                                            history={history}
-                                            serviceId={service.id}
+                                        <div className={classes.versionBarStyle}>
+                                            <LocalOfferOutlinedIcon />
+                                            <Typography className={classes.versionStyle}>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Overview.service.version'
+                                                    defaultMessage='{serviceVersion}'
+                                                    values={{ serviceVersion: service.version }}
+                                                />
+                                            </Typography>
+                                        </div>
+                                        <Usages
+                                            usageNumber={service.usage}
                                             serviceDisplayName={service.displayName}
-                                            definitionType={service.definitionType}
+                                            serviceId={service.id}
                                             isOverview
+                                            classes={classes}
                                         />
-                                    </Box>
-                                </Grid>
+                                    </div>
+                                </div>
                             </Grid>
-                        </div>
+                            <Grid item md={2}>
+                                <Box display='flex' flexDirection='column'>
+                                    <CreateApi
+                                        history={history}
+                                        serviceId={service.id}
+                                        serviceDisplayName={service.displayName}
+                                        serviceVersion={service.version}
+                                        serviceUrl={service.serviceUrl}
+                                        isOverview
+                                    />
+                                </Box>
+                            </Grid>
+                        </Grid>
                         <div className={classes.bodyStyle}>
                             <Grid container spacing={1}>
                                 { (service.description && service.description !== '') && (
@@ -544,9 +525,8 @@ function Overview(props) {
                                                     <div className={classes.downloadServiceGroup}>
                                                         <Button
                                                             onClick={
-                                                                () => exportService(
-                                                                    service.displayName,
-                                                                    service.version,
+                                                                () => downloadServiceDefinition(
+                                                                    service.serviceKey,
                                                                 )
                                                             }
                                                             color='primary'
