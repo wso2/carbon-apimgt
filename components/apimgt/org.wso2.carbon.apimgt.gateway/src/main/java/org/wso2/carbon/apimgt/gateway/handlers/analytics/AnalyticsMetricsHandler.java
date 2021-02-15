@@ -74,7 +74,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
       
         AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        dataCollector.collectData(messageContext);
+        dataCollector.collectData();
         return true;
     }
 

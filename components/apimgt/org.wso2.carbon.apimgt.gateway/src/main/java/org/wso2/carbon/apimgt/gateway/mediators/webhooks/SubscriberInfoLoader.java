@@ -20,13 +20,10 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.List;
 
@@ -35,7 +32,7 @@ import java.util.List;
  */
 public class SubscriberInfoLoader extends AbstractMediator {
 
-    private final RequestDataCollector dataCollector = new GenericRequestDataCollector();
+    //private final GenericRequestDataCollector dataCollector = null;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -44,9 +41,6 @@ public class SubscriberInfoLoader extends AbstractMediator {
         int index = (Integer) messageContext.getProperty(APIConstants.CLONED_ITERATION_INDEX_PROPERTY);
         WebhooksDTO subscriber = subscribersList.get(index - 1);
         if (subscriber != null) {
-//            if (!doThrottle(subscriber, messageContext)) {
-//                return false;
-//            }
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY, subscriber.getCallbackURL());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_SECRET_PROPERTY, subscriber.getSecret());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_APPLICATION_ID_PROPERTY, subscriber.getAppID());
@@ -60,7 +54,7 @@ public class SubscriberInfoLoader extends AbstractMediator {
                 null);
         if (isThrottled) {
             if (APIUtil.isAnalyticsEnabled()) {
-               dataCollector.collectData(messageContext);
+               //dataCollector.collectData();
             }
             return false;
         }
@@ -75,7 +69,7 @@ public class SubscriberInfoLoader extends AbstractMediator {
             return true;
         }
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
-        dataCollector.collectData(messageContext);
+        //dataCollector.collectData();
         return true;
     }
 }

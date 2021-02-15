@@ -426,7 +426,6 @@ public enum ExceptionCodes implements ErrorHandler {
 
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
             "Gateway type not found available Gateway types : " + "%s");
-
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

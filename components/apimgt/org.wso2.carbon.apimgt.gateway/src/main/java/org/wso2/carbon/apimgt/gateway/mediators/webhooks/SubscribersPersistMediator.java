@@ -29,8 +29,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtl;
@@ -52,7 +52,6 @@ public class SubscribersPersistMediator extends AbstractMediator {
     private String secret;
     private String mode;
     private String leaseSeconds;
-    private final RequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean mediate(MessageContext messageContext) {
