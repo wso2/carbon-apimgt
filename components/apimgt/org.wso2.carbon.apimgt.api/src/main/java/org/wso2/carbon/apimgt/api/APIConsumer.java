@@ -481,6 +481,16 @@ public interface APIConsumer extends APIManager {
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
 
     /**
+     * This method is to delete a comment.
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @return boolean
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
+
+    /**
      * Adds an application
      *
      * @param application Application

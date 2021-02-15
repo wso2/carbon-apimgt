@@ -3573,6 +3573,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.deleteComment(identifier, commentId);
     }
 
+    @Override
+    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+    }
     /**
      * Add a new Application from the store.
      * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}

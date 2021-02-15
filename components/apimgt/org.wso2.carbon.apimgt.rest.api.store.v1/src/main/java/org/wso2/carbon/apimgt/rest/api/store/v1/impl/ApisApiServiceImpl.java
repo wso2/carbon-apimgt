@@ -394,9 +394,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
                 if ( username.equals("admin") || comment.getUser().equals(username)) {
-                    apiConsumer.deleteComment(apiIdentifier, commentId);
-                    return Response.ok("The comment has been deleted").build();
+                    if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
+                        return Response.ok("The comment has been deleted").build();
+                    } else {
+                        // Proper error responses should be added
+                        return null;
+                    }
                 } else {
+                    // Proper error responses should be added
                     return null;
                 }
             } else {
