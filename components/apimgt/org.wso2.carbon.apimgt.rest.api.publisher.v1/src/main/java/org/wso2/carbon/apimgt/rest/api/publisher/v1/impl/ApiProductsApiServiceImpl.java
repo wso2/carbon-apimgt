@@ -912,16 +912,27 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     @Override
     public Response undeployAPIProductRevision(String apiProductId, String revisionId, String revisionNumber,
+                                               Boolean allEnvironments,
                                                List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                                MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId == null && revisionNumber != null) {
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiProductId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
+        }
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
-            APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-            apiRevisionDeployment.setRevisionUUID(revisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
-            apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
-            apiRevisionDeployments.add(apiRevisionDeployment);
+        if (allEnvironments) {
+            apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        } else {
+            for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
+                APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                apiRevisionDeployment.setRevisionUUID(revisionId);
+                apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
+                apiRevisionDeployments.add(apiRevisionDeployment);
+            }
         }
         apiProvider.undeployAPIProductRevisionDeployment(apiProductId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
