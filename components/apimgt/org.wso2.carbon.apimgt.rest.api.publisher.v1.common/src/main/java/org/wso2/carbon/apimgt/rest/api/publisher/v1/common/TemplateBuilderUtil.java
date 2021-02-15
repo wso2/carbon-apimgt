@@ -661,54 +661,9 @@ public class TemplateBuilderUtil {
         setCustomSequencesToBeAdded(api, gatewayAPIDTO, extractedPath, apidto);
         setClientCertificatesToBeAdded(tenantDomain, gatewayAPIDTO, clientCertificatesDTOList);
 
-        if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-            org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
-            String sandboxEndpointUrl = endpointConfiguration.getJSONObject("sandbox_endpoints").getString("url");
-            String productionEndpointUrl = endpointConfiguration.getJSONObject("production_endpoints").getString("url");
-
-            Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
-            for (APIOperationsDTO operation : apidto.getOperations()) {
-                String key = operation.getTarget();
-                String mapping = operation.getUriMapping() == null ? "" : operation.getUriMapping();
-                Map<String, String> endpoints = new HashMap<>();
-                // TODO: Need to fix the following line
-                endpoints.put("sandbox",  sandboxEndpointUrl + mapping);
-                endpoints.put("production", productionEndpointUrl + mapping);
-                perTopicMappings.put(key, endpoints);
-            }
-
-            api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
-
-
-
-// TODO REMOVE
-//            // TODO set this from UI
-//            HashMap<String, Map<String, String>> lasanthasMap = new HashMap<>();
-//
-////            HashMap<String, String> roomsEndpoints = new HashMap<>();
-////            roomsEndpoints.put("production", "http://localhost:9090/rooms?room={uri.var.roomID}");
-////            roomsEndpoints.put("sandbox", "http://localhost:9090/rooms?room={uri.var.roomID}");
-//
-//            HashMap<String, String> lobbyEndpoints = new HashMap<>();
-//            lobbyEndpoints.put("production", "http://localhost:9090/rooms?room=common");
-//            lobbyEndpoints.put("sandbox", "http://localhost:9090/rooms?room=common");
-//
-////            lasanthasMap.put("/rooms/{roomID}", roomsEndpoints);
-////            lasanthasMap.put("/lobby", lobbyEndpoints);
-//            lasanthasMap.put("/*", lobbyEndpoints);
-//            api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(lasanthasMap));
-//
-//
-//
-//
-//            // TODO set this from UI. beware:
-//            // - ws instead of http
-//            // - prod and sandbox EPs should be present (we refer what types are present, and render prod&|sandbox
-//            String currentEpConfig = api.getEndpointConfig();
-//            String newEpConfig = currentEpConfig.replace("\"http\"", "\"ws\"");
-//            api.setEndpointConfig(newEpConfig);
-
-//            setWebsocketTopicResourceKeys(api);
+        boolean isWsApi = APIConstants.APITransportType.WS.toString().equals(api.getType());
+        if (isWsApi) {
+            addWebsocketTopicMappings(api, apidto);
         }
 
         //Add the API
@@ -716,10 +671,6 @@ public class TemplateBuilderUtil {
             String prototypeScriptAPI = builder.getConfigStringForPrototypeScriptAPI(environment);
             gatewayAPIDTO.setApiDefinition(prototypeScriptAPI);
         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
-            boolean isWsApi = APIConstants.APITransportType.WS.toString().equals(api.getType());
-            if (isWsApi) {
-                addWebsocketTopicResourceKeys(api);
-            }
             String apiConfig = builder.getConfigStringForTemplate(environment);
             gatewayAPIDTO.setApiDefinition(apiConfig);
             org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
@@ -739,6 +690,28 @@ public class TemplateBuilderUtil {
         }
         setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
         return gatewayAPIDTO;
+    }
+
+    private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
+        org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
+        String sandboxEndpointUrl =
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
+        String productionEndpointUrl =
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
+
+        Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
+        for (APIOperationsDTO operation : apidto.getOperations()) {
+            String key = operation.getTarget();
+            String mapping = operation.getUriMapping() == null ? "" :
+                    Paths.get("/", operation.getUriMapping()).toString();
+            Map<String, String> endpoints = new HashMap<>();
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
+            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            perTopicMappings.put(key, endpoints);
+        }
+
+        api.setWebSocketTopicMappingConfiguration(new WebSocketTopicMappingConfiguration(perTopicMappings));
+        addWebsocketTopicResourceKeys(api);
     }
 
     private static void setCustomSequencesToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO, String extractedPath,

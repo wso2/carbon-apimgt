@@ -243,7 +243,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             Template t = velocityengine.getTemplate(this.getDefaultAPITemplatePath());
 
             if (APIConstants.APITransportType.WS.toString().equals(this.api.getType())) {
-                context.put("defaultVersionUrlMapping", "default_resource_of_api_" + this.api.getId().getVersion());
+                context.put("defaultVersionUrlMapping", "/_default_resource_of_api_" + this.api.getId().getVersion());
             }
 
             t.merge(context, writer);
