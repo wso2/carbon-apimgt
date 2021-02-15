@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Date;
@@ -435,7 +436,6 @@ public class RestApiCommonUtil {
         return matcher.matches();
 
     }
-
     /**
      * This method retrieves the AsyncAPI Definition for an API to be displayed
      * @param api API
@@ -444,5 +444,20 @@ public class RestApiCommonUtil {
     public static String retrieveAsyncAPIDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
         return apiProvider.getAsyncAPIDefinition(api.getId());
+    }
+
+    public static String getValidateTenantDomain(String xWSO2Tenant) {
+
+        String tenantDomain = getLoggedInUserTenantDomain();
+        if (xWSO2Tenant == null) {
+            return tenantDomain;
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return xWSO2Tenant;
+            } else {
+                return tenantDomain;
+            }
+        }
+
     }
 }

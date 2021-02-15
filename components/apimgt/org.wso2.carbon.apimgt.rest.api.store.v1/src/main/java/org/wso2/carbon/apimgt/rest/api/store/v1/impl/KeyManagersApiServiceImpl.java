@@ -29,11 +29,6 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         try {
             List<KeyManagerConfigurationDTO> keyManagerConfigurations =
                     apiAdmin.getKeyManagerConfigurationsByTenant(tenantDomain);
-            for (KeyManagerConfigurationDTO keyManagerConfiguration : keyManagerConfigurations) {
-                if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
-                    APIUtil.setTokenAndRevokeEndpointsToDevPortal(keyManagerConfiguration);
-                }
-            }
             return Response.ok(KeyManagerMappingUtil.toKeyManagerListDto(keyManagerConfigurations)).build();
         } catch (APIManagementException e) {
             RestApiUtil

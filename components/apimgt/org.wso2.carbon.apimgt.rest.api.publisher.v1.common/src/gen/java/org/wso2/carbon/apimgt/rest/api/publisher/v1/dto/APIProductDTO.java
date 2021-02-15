@@ -70,6 +70,9 @@ return null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableStore = null;
     private String testKey = null;
+    private Boolean isRevision = null;
+    private String revisionedApiProductId = null;
+    private Integer revisionId = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
 
@@ -398,6 +401,58 @@ return null;
   }
   public void setTestKey(String testKey) {
     this.testKey = testKey;
+  }
+
+  /**
+   **/
+  public APIProductDTO isRevision(Boolean isRevision) {
+    this.isRevision = isRevision;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isRevision")
+  public Boolean isIsRevision() {
+    return isRevision;
+  }
+  public void setIsRevision(Boolean isRevision) {
+    this.isRevision = isRevision;
+  }
+
+  /**
+   * UUID of the api product registry artifact 
+   **/
+  public APIProductDTO revisionedApiProductId(String revisionedApiProductId) {
+    this.revisionedApiProductId = revisionedApiProductId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the api product registry artifact ")
+  @JsonProperty("revisionedApiProductId")
+  public String getRevisionedApiProductId() {
+    return revisionedApiProductId;
+  }
+  public void setRevisionedApiProductId(String revisionedApiProductId) {
+    this.revisionedApiProductId = revisionedApiProductId;
+  }
+
+  /**
+   **/
+  public APIProductDTO revisionId(Integer revisionId) {
+    this.revisionId = revisionId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("revisionId")
+  public Integer getRevisionId() {
+    return revisionId;
+  }
+  public void setRevisionId(Integer revisionId) {
+    this.revisionId = revisionId;
   }
 
   /**
@@ -881,6 +936,9 @@ return null;
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
         Objects.equals(enableStore, apIProduct.enableStore) &&
         Objects.equals(testKey, apIProduct.testKey) &&
+        Objects.equals(isRevision, apIProduct.isRevision) &&
+        Objects.equals(revisionedApiProductId, apIProduct.revisionedApiProductId) &&
+        Objects.equals(revisionId, apIProduct.revisionId) &&
         Objects.equals(responseCachingEnabled, apIProduct.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, apIProduct.cacheTimeout) &&
         Objects.equals(visibility, apIProduct.visibility) &&
@@ -911,7 +969,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, testKey, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, testKey, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -929,6 +987,9 @@ return null;
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
     sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
+    sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
+    sb.append("    revisionedApiProductId: ").append(toIndentedString(revisionedApiProductId)).append("\n");
+    sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");

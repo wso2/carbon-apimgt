@@ -3530,7 +3530,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param preserveStatus Preserve API status on export
      * @return
      */
-    @Override public Response exportAPI(String apiId, String name, String version, String providerName,
+    @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
+                                        String providerName,
             String format, Boolean preserveStatus, MessageContext messageContext) {
 
         //If not specified status is preserved by default
@@ -3542,8 +3543,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ExportFormat.YAML;
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            File file = importExportAPI
-                    .exportAPI(apiId, name, version, providerName, preserveStatus, exportFormat, true, true);
+            File file = importExportAPI.exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus,
+                    exportFormat, true, true);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
@@ -3634,7 +3635,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException when error occurred while trying to import the API
      */
     @Override public Response importAPI(InputStream fileInputStream, Attachment fileDetail,
-            Boolean preserveProvider, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+            Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;
 
@@ -3644,7 +3645,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-        importExportAPI.importAPI(fileInputStream, preserveProvider, overwrite, tokenScopes);
+        importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite, tokenScopes);
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
 
@@ -3993,6 +3994,28 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * Retrieve available revisions of an API from the identifier info provided.
+     *
+     * @param name              API Name
+     * @param version           API version
+     * @param provider          provider
+     * @param query             query for filtering based on deployed or not
+     * @param messageContext    message context object
+     * @return response containing list of API revisions
+     */
+    @Override
+    public Response getAPIRevisionsWithAPIName(String name, String version, String provider, String query,
+                                               MessageContext messageContext) throws APIManagementException {
+
+        if (provider == null) {
+            provider = RestApiCommonUtil.getLoggedInUsername();
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+        String apiUuid = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+        return getAPIRevisions(apiUuid, query, messageContext);
     }
 
     /**

@@ -138,9 +138,9 @@ import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.service.ContentBasedSearchService;
 import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
 import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -3729,7 +3729,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         // TODO try to use a single query to get info from db
         // Ratings
-        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId, null);
+        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
         // api level tier
         String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);

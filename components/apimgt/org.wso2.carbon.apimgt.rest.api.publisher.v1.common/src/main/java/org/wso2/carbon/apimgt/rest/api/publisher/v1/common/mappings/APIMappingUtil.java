@@ -2101,6 +2101,10 @@ public class APIMappingUtil {
         productDto.setEnableStore(product.isEnableStore());
         productDto.setTestKey(product.getTestKey());
 
+        productDto.setIsRevision(product.isRevision());
+        productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
+        productDto.setRevisionId(product.getRevisionId());
+
         if (APIConstants.ENABLED.equals(product.getResponseCache())) {
             productDto.setResponseCachingEnabled(Boolean.TRUE);
         } else {

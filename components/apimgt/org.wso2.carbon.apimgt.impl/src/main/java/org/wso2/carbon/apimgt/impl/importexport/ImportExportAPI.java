@@ -37,6 +37,7 @@ public interface ImportExportAPI {
      * @param apiId          UUID of API.
      * @param name           name of API.
      * @param version        version of API.
+     * @param revisionNum    revision number.
      * @param providerName   provider of API.
      * @param preserveStatus Preserve API status on export
      * @param format         Format of output documents. Can be YAML or JSON
@@ -45,8 +46,9 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
-    public File exportAPI(String apiId, String name, String version, String providerName, boolean preserveStatus,
-            ExportFormat format, boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException;
+    public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
+                          boolean preserveStatus, ExportFormat format, boolean preserveDocs,
+                          boolean preserveCredentials) throws APIManagementException, APIImportExportException;
 
 
     /**
@@ -62,6 +64,22 @@ public interface ImportExportAPI {
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
+                          boolean preserveDocs, boolean preserveCredentials)
+            throws APIManagementException, APIImportExportException;
+
+    /**
+     * Used to export API Product artifact
+     *
+     * @param apiId          UUID of API Product.
+     * @param revisionUUID UUID of revision.
+     * @param preserveStatus Preserve API status on export
+     * @param format         Format of output documents. Can be YAML or JSON
+     * @param preserveDocs   Preserve documentation on Export.
+     * @return API artifact.
+     * @throws APIManagementException
+     * @throws APIImportExportException
+     */
+    public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                           boolean preserveDocs, boolean preserveCredentials)
             throws APIManagementException, APIImportExportException;
 
@@ -92,7 +110,8 @@ public interface ImportExportAPI {
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
      */
-    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean overwrite, String[] tokenScopes)
+    public API importAPI(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+                         Boolean overwrite, String[] tokenScopes)
             throws APIManagementException;
 
     /**

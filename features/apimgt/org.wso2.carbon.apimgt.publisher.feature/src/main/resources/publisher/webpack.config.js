@@ -20,7 +20,9 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
 const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const config = {
     entry: {
@@ -97,7 +99,7 @@ const config = {
             },
             {
                 test: /\.(woff|woff2|eot|ttf|svg)$/,
-                loader: 'url-loader?limit=100000',
+                use: { loader: 'url-loader?limit=100000' },
             },
         ],
     },
@@ -108,9 +110,15 @@ const config = {
         Settings: 'Settings',
     },
     plugins: [
-        new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: [] }),
+        new MonacoWebpackPlugin({ languages: ['xml', 'json', 'yaml'], features: ['!gotoSymbol'] }),
         new CleanWebpackPlugin(),
-        new ManifestPlugin(),
+        new WebpackManifestPlugin(),
+        new ESLintPlugin({
+            extensions: ['js', 'ts', 'jsx'],
+            failOnError: true,
+            quiet: true,
+            exclude: ['/devportal/', 'node_modules'],
+        }),
     ],
 };
 
@@ -134,7 +142,6 @@ if (process.env.NODE_ENV === 'development') {
 
 module.exports = function (env) {
     if (env && env.analysis) {
-        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
         config.plugins.push(new BundleAnalyzerPlugin());
     }
     return config;

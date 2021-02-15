@@ -411,7 +411,9 @@
         <MapExistingAuthApps>{{apim.devportal.enable_key_provisioning}}</MapExistingAuthApps>
 
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
+        <APIKeyKeystore>{{apim.devportal.api_key_keystore}}</APIKeyKeystore>
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
+        <ApiKeyGeneratorImpl>{{apim.devportal.api_key_generator_impl}}</ApiKeyGeneratorImpl>
 
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
@@ -643,6 +645,10 @@
             </AllowedURI>
             <AllowedURI>
                 <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/service-catalog/{service-catalog-version}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
@@ -1226,16 +1232,7 @@
         {% endif %}
         <SkipList>
         <APIS>
-        <API>_AuthenticationEPAPI_.xml</API>
-        <API>_AuthorizeAPI_.xml</API>
-        <API>_CommonAuthAPI_.xml</API>
-        <API>_LoginContextAPI_.xml</API>
-        <API>_OIDCAPI_.xml</API>
-        <API>_OpenIDConfigAPI_.xml</API>
-        <API>_OpenService_.xml</API>
-        <API>_RevokeAPI_.xml</API>
-        <API>_TokenAPI_.xml</API>
-        <API>_UserInfoAPI_.xml</API>
+            <API>_OpenService_.xml</API>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.apis is defined %}
             {%- for api in apim.sync_runtime_artifacts.gateway.skip_list.apis -%}
             <API>{{api}}</API>

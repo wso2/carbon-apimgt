@@ -85,10 +85,6 @@ class BusinessInformation extends React.Component {
         this.isValidTechnicalOwnerEmail = true;
     }
 
-    isValid = () => {
-        return (this.isValidBusinessOwnerEmail && this.isValidTechnicalOwnerEmail && this.isFormUpdated);
-    }
-
     handleChange = (name) => (event) => {
         let { value } = event.target;
         const { checked } = event.target;
@@ -127,6 +123,10 @@ class BusinessInformation extends React.Component {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         };
         updateAPI({ businessInformation });
+    }
+
+    isValid = () => {
+        return (this.isValidBusinessOwnerEmail && this.isValidTechnicalOwnerEmail && this.isFormUpdated);
     }
 
     /**

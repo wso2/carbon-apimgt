@@ -265,7 +265,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @return whether authenticated or not
      * @throws APISecurityException if authentication fails
      */
-    private boolean validateOAuthHeader(FullHttpRequest req, String matchingResource) throws APISecurityException {
+
+    private boolean validateOAuthHeader(FullHttpRequest req) throws APISecurityException, APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
