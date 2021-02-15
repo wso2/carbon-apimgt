@@ -41,9 +41,6 @@ public class SubscriberInfoLoader extends AbstractMediator {
         int index = (Integer) messageContext.getProperty(APIConstants.CLONED_ITERATION_INDEX_PROPERTY);
         WebhooksDTO subscriber = subscribersList.get(index - 1);
         if (subscriber != null) {
-//            if (!doThrottle(subscriber, messageContext)) {
-//                return false;
-//            }
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY, subscriber.getCallbackURL());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_SECRET_PROPERTY, subscriber.getSecret());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_APPLICATION_ID_PROPERTY, subscriber.getAppID());

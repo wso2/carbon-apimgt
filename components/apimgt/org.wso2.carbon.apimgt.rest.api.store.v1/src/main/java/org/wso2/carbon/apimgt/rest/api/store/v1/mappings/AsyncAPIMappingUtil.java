@@ -22,8 +22,8 @@ import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicSubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicSubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WebhookSubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WebhookSubscriptionListDTO;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This class is responsible for Mapping Webhook API topic related entities to
- * REST API topic related DTOs.
+ * This class is responsible for Mapping Async API related entities to
+ * REST API related DTOs.
  */
-public class TopicMappingUtil {
+public class AsyncAPIMappingUtil {
 
     /**
      * Converts Set of Topic objects to DTO.
@@ -70,6 +70,7 @@ public class TopicMappingUtil {
         TopicDTO topicDTO = new TopicDTO();
         topicDTO.setApiId(topic.getApiId());
         topicDTO.setName(topic.getName());
+        topicDTO.setType(topic.getType());
         return topicDTO;
     }
 
@@ -77,40 +78,40 @@ public class TopicMappingUtil {
      * Converts Set of Subscription objects to SubscriptionListDTO.
      *
      * @param subscriptions Set of Subscription objects
-     * @return SubscriptionListDTO containing SubscriptionDTOs
+     * @return WebhookSubscriptionListDTO containing SubscriptionDTOs
      */
-    public static TopicSubscriptionListDTO fromSubscriptionListToDTO(Set<Subscription> subscriptions) {
-        TopicSubscriptionListDTO topicSubscriptionListDTO = new TopicSubscriptionListDTO();
-        List<TopicSubscriptionDTO> subscriptionDTOs = topicSubscriptionListDTO.getList();
-        topicSubscriptionListDTO.setCount(subscriptions.size());
+    public static WebhookSubscriptionListDTO fromSubscriptionListToDTO(Set<Subscription> subscriptions) {
+        WebhookSubscriptionListDTO webhookSubscriptionListDTO = new WebhookSubscriptionListDTO();
+        List<WebhookSubscriptionDTO> subscriptionDTOs = webhookSubscriptionListDTO.getList();
+        webhookSubscriptionListDTO.setCount(subscriptions.size());
 
         if (subscriptionDTOs == null) {
             subscriptionDTOs = new ArrayList<>();
-            topicSubscriptionListDTO.setList(subscriptionDTOs);
+            webhookSubscriptionListDTO.setList(subscriptionDTOs);
         }
 
         for (Subscription subscription: subscriptions) {
             subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
         }
-        return topicSubscriptionListDTO;
+        return webhookSubscriptionListDTO;
     }
 
     /**
      * Converts a Subscription object to DTO.
      *
      * @param subscription Subscription object
-     * @return SubscriptionDTO object
+     * @return WebhookSubscriptionDTO object
      */
-    public static TopicSubscriptionDTO fromSubscriptionToDTO(Subscription subscription) {
+    public static WebhookSubscriptionDTO fromSubscriptionToDTO(Subscription subscription) {
 
-        TopicSubscriptionDTO topicSubscriptionDTO = new TopicSubscriptionDTO();
-        topicSubscriptionDTO.setTopic(subscription.getTopic());
-        topicSubscriptionDTO.setApiId(subscription.getApiUuid());
-        topicSubscriptionDTO.setAppId(subscription.getAppID());
-        topicSubscriptionDTO.setCallBackUrl(subscription.getCallback());
-        topicSubscriptionDTO.setDeliveryTime(getDateAsString(subscription.getLastDelivery()));
-        topicSubscriptionDTO.setDeliveryStatus(subscription.getLastDeliveryState());
-        return topicSubscriptionDTO;
+        WebhookSubscriptionDTO webhookSubscriptionDTO = new WebhookSubscriptionDTO();
+        webhookSubscriptionDTO.setTopic(subscription.getTopic());
+        webhookSubscriptionDTO.setApiId(subscription.getApiUuid());
+        webhookSubscriptionDTO.setAppId(subscription.getAppID());
+        webhookSubscriptionDTO.setCallBackUrl(subscription.getCallback());
+        webhookSubscriptionDTO.setDeliveryTime(getDateAsString(subscription.getLastDelivery()));
+        webhookSubscriptionDTO.setDeliveryStatus(subscription.getLastDeliveryState());
+        return webhookSubscriptionDTO;
     }
 
     /**
@@ -121,7 +122,10 @@ public class TopicMappingUtil {
      */
     private static String getDateAsString(Date date) {
         // do not change this format. It is binding to the format specified in the dev portal.
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        return dateFormat.format(date);
+        if (date != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            return dateFormat.format(date);
+        }
+        return null;
     }
 }

@@ -436,6 +436,7 @@ public class RestApiCommonUtil {
         return matcher.matches();
 
     }
+
     /**
      * This method retrieves the AsyncAPI Definition for an API to be displayed
      * @param api API
@@ -460,4 +461,5 @@ public class RestApiCommonUtil {
         }
 
     }
+
 }

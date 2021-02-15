@@ -125,19 +125,6 @@ const config = {
 // Note: for more info about monaco plugin: https://github.com/Microsoft/monaco-editor-webpack-plugin
 if (process.env.NODE_ENV === 'development') {
     config.watch = true;
-} else if (process.env.NODE_ENV === 'production') {
-    /* ESLint will only run in production build to increase the continues build(watch) time in the development mode */
-    // const esLintLoader = {
-    //     enforce: 'pre',
-    //     test: /\.(js|jsx)$/,
-    //     loader: 'eslint-loader',
-    //     exclude: /devportal/,
-    //     options: {
-    //         failOnError: true,
-    //         quiet: true,
-    //     },
-    // };
-    // config.module.rules.push(esLintLoader);
 }
 
 module.exports = function (env) {

@@ -1787,6 +1787,7 @@ public interface APIProvider extends APIManager {
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
     /**
+<<<<<<<<< Temporary merge branch 1
      * This method updates the AsyncApi definition in registry
      *
      * @param api   API

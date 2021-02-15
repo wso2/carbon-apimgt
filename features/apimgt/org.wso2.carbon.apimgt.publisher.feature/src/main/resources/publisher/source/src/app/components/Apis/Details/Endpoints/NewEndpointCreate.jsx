@@ -165,7 +165,7 @@ function NewEndpointCreate(props) {
         },
     ];
 
-    let eligibleTypes = endpointTypes.filter((type) => !type.disabled.includes(apiType)).map((type) => {
+    const eligibleTypes = endpointTypes.filter((type) => !type.disabled.includes(apiType)).map((type) => {
         return type;
     });
 

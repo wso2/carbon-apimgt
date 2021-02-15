@@ -9339,6 +9339,9 @@ components:
         payloadSchema:
           type: string
           example: ""
+        uriMapping:
+          type: string
+          example: ""
     ScopeList:
       title: Scope List
       type: object

@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class TopicSubscriptionDTO   {
+public class WebhookSubscriptionDTO   {
   
     private String apiId = null;
     private String appId = null;
@@ -29,7 +29,7 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO apiId(String apiId) {
+  public WebhookSubscriptionDTO apiId(String apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -46,7 +46,7 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO appId(String appId) {
+  public WebhookSubscriptionDTO appId(String appId) {
     this.appId = appId;
     return this;
   }
@@ -63,7 +63,7 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO topic(String topic) {
+  public WebhookSubscriptionDTO topic(String topic) {
     this.topic = topic;
     return this;
   }
@@ -80,7 +80,7 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO callBackUrl(String callBackUrl) {
+  public WebhookSubscriptionDTO callBackUrl(String callBackUrl) {
     this.callBackUrl = callBackUrl;
     return this;
   }
@@ -97,7 +97,7 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO deliveryTime(String deliveryTime) {
+  public WebhookSubscriptionDTO deliveryTime(String deliveryTime) {
     this.deliveryTime = deliveryTime;
     return this;
   }
@@ -114,7 +114,7 @@ public class TopicSubscriptionDTO   {
 
   /**
    **/
-  public TopicSubscriptionDTO deliveryStatus(Integer deliveryStatus) {
+  public WebhookSubscriptionDTO deliveryStatus(Integer deliveryStatus) {
     this.deliveryStatus = deliveryStatus;
     return this;
   }
@@ -138,13 +138,13 @@ public class TopicSubscriptionDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TopicSubscriptionDTO topicSubscription = (TopicSubscriptionDTO) o;
-    return Objects.equals(apiId, topicSubscription.apiId) &&
-        Objects.equals(appId, topicSubscription.appId) &&
-        Objects.equals(topic, topicSubscription.topic) &&
-        Objects.equals(callBackUrl, topicSubscription.callBackUrl) &&
-        Objects.equals(deliveryTime, topicSubscription.deliveryTime) &&
-        Objects.equals(deliveryStatus, topicSubscription.deliveryStatus);
+    WebhookSubscriptionDTO webhookSubscription = (WebhookSubscriptionDTO) o;
+    return Objects.equals(apiId, webhookSubscription.apiId) &&
+        Objects.equals(appId, webhookSubscription.appId) &&
+        Objects.equals(topic, webhookSubscription.topic) &&
+        Objects.equals(callBackUrl, webhookSubscription.callBackUrl) &&
+        Objects.equals(deliveryTime, webhookSubscription.deliveryTime) &&
+        Objects.equals(deliveryStatus, webhookSubscription.deliveryStatus);
   }
 
   @Override
@@ -155,7 +155,7 @@ public class TopicSubscriptionDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TopicSubscriptionDTO {\n");
+    sb.append("class WebhookSubscriptionDTO {\n");
     
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");

@@ -599,6 +599,8 @@ public final class APIConstants {
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
+    public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
+    public static final String API_TYPE_WS = "WS";
 
     public static class TokenStatus {
 
@@ -1150,6 +1152,14 @@ public final class APIConstants {
         }
     }
 
+    public static class WebHookProperties {
+        public static final String DEFAULT_TOPIC_QUERY_PARAM_NAME = "hub.topic";
+        public static final String WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER = "_web_hook_subscription_failure_handler";
+        public static final String DEFAULT_SUBSCRIPTION_RESOURCE_PATH = "/webhooks_events_receiver_resource";
+        public static final String EVENT_RECEIVING_RESOURCE_PATH = "eventReceiverResourcePath";
+        public static final String TOPIC_QUERY_PARAM_NAME = "topicQueryParamName";
+    }
+
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
     public static final String ENABLE_PER_TENANT_SERVICE_PROVIDER_CREATION = "EnablePerTenantServiceProviderCreation";
     public static final String DISABLE_DEFAULT_APPLICATION_CREATION = "DisableDefaultApplicationCreation";
@@ -1242,6 +1252,8 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> SSE_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+    public static final Set<String> WS_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
@@ -1965,8 +1977,12 @@ public final class APIConstants {
 
     public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
     public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+    public static final String[] SSE_DEFAULT_METHODS = {"get"};
+    public static final String[] WS_DEFAULT_METHODS = {"post"};
+    public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";

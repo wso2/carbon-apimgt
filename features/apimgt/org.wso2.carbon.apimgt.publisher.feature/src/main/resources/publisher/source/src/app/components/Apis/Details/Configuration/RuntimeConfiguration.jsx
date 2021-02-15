@@ -52,7 +52,7 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import Subscription from './components/Subscription'
+import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -297,6 +297,7 @@ export default function RuntimeConfiguration() {
     }
     const { api, updateAPI } = useContext(APIContext);
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
+    const isWebSub = api.type === 'WEBSUB';
     api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
         secret: '',
         signingAlgorithm: '',
@@ -541,10 +542,12 @@ export default function RuntimeConfiguration() {
                             />
                         </Typography>
                         <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
-                            {!api.isAPIProduct() && !isAsyncAPI && (
+                            {!api.isAPIProduct() && (
                                 <>
-                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
-                                    { api.type !== 'WEBSUB' && (
+                                    {!isAsyncAPI && (
+                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                    )}
+                                    { !isWebSub && (
                                         <Endpoints api={api} />
                                     )}
                                 </>

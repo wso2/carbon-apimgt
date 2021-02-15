@@ -59,7 +59,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -95,10 +95,10 @@ import java.util.Set;
 import java.util.UUID;
 import javax.cache.Cache;
 
-import static org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
-import static org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiConstants.URL_SEPARATOR;
-import static org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
-import static org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.URL_SEPARATOR;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME;
 
 /**
  * This is a handler which is actually embedded to the netty pipeline which does operations such as
@@ -265,8 +265,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @return whether authenticated or not
      * @throws APISecurityException if authentication fails
      */
-
-    private boolean validateOAuthHeader(FullHttpRequest req, String matchingResource) throws APISecurityException, APIManagementException {
+    private boolean validateOAuthHeader(FullHttpRequest req, String matchingResource) throws APISecurityException,
+            APIManagementException  {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);

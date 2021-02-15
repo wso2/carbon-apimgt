@@ -16,12 +16,19 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.websocket;
+package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 
-public class WebSocketApiException extends Exception {
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 
-    public WebSocketApiException(String message) {
-        super(message);
+/**
+ * Holder for throttling data.
+ */
+public class ThrottleDTO {
+
+    private AuthenticationContext authenticationContext;
+
+    public ThrottleDTO(AuthenticationContext context) {
+
+        this.authenticationContext = context;
     }
-
 }
