@@ -162,13 +162,6 @@ class Topics extends Component {
             isSaving: false,
         };
 
-        // TODO: Get the host and the port from suitable location
-        this.gatewayConfigs = {
-            protocol: 'http',
-            host: 'gateway-endpoint',
-            port: 9021,
-        };
-
         this.updateOperations = this.updateOperations.bind(this);
         this.handleCancelSave = this.handleCancelSave.bind(this);
         this.handleAddTopic = this.handleAddTopic.bind(this);
@@ -194,7 +187,6 @@ class Topics extends Component {
                     console.error(err);
                 }
                 else {
-                    //console.log(schema);
                     this.setState({
                         resolvedDefinition: schema,
                         definition: response.body
@@ -220,6 +212,7 @@ class Topics extends Component {
                 mode: op.verb,
                 description: '',
                 scopes: [],
+                uriMapping: op.uriMapping,
                 payload: {
                     type: 'object',
                     properties: this.extractProperties(op.payloadSchema),
@@ -378,6 +371,7 @@ class Topics extends Component {
                 payloadSchema: JSON.stringify({
                     properties: topic.payload.properties
                 }),
+                uriMapping: topic.uriMapping,
             };
         });
         this.props.updateAPI({ operations }).finally(() => this.setState({ isSaving: false }));
@@ -389,11 +383,8 @@ class Topics extends Component {
 
     buildCallbackURL(topic) {
         const { api } = this.props;
-        // const { protocol, host, port } = this.gatewayConfigs;
             return `https://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
                 + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
-            // return `${protocol}://${host}:${port}/${api.name.toLowerCase()}/${api.version}/` +
-            //     `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
     }
 
     handleAddTopic(topic) {
@@ -770,6 +761,33 @@ class Topics extends Component {
                                             />
                                         </Grid>
                                     )}
+                                    {api.type === 'WS' && (
+                                        <Grid item>
+                                            <TextField
+                                                autoFocus
+                                                fullWidth
+                                                id='topic-description'
+                                                label={(
+                                                    <>
+                                                        <FormattedMessage
+                                                            id='Apis.Create.Components.DefaultAPIForm.urlmapping'
+                                                            defaultMessage='URL Mapping'
+                                                        />
+                                                    </>
+                                                )}
+                                                value={topic.uriMapping}
+                                                helperText='URL mapping for the WebSocket API'
+                                                name='url-mapping'
+                                                margin='normal'
+                                                variant='outlined'
+                                                onChange={(e) => {
+                                                    const topics = [...this.state.topics];
+                                                    topics[i].uriMapping = e.target.value;
+                                                    this.setState({ topics });
+                                                }}
+                                            />
+                                        </Grid>
+                                    )}
                                     <Grid item>
                                         <TextField
                                             autoFocus
@@ -985,7 +1003,6 @@ class Topics extends Component {
             </>
         );
     }
-
 }
 
 Topics.propTypes = {

@@ -251,6 +251,15 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
         model.setUriTemplates(uriTemplates);
 
+        // wsUriMapping
+        if (dto.getType().toString().equals(APIConstants.API_TYPE_WS)) {
+            Map<String, String> wsUriMapping = new HashMap<>();
+            for (APIOperationsDTO operationsDTO : dto.getOperations()) {
+                wsUriMapping.put(operationsDTO.getVerb() + "_" + operationsDTO.getTarget(), operationsDTO.getUriMapping());
+            }
+            model.setWsUriMapping(wsUriMapping);
+        }
+
         if (dto.getTags() != null) {
             Set<String> apiTags = new HashSet<>(dto.getTags());
             model.addTags(apiTags);
@@ -1471,9 +1480,11 @@ public class APIMappingUtil {
                 template.setAmznResourceName(amznResourceName);
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
-                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) ||
-                    (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) || (APIConstants.SSE_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())
+                    || (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.SSE_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.WS_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -1505,6 +1516,9 @@ public class APIMappingUtil {
                             + "' is invalid");
                 } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
                     handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else if (APIConstants.API_TYPE_WS.equals(model.getType())) {
+                    handleException("The WEBSOCKET operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
                             + "' is invalid");
                 } else {
                     handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
@@ -1977,6 +1991,11 @@ public class APIMappingUtil {
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
             APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+
+            if (api.getType().equals(APIConstants.API_TYPE_WS)) {
+                String uriMapping = api.getWsUriMapping().get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
+                operationsDTO.setUriMapping(uriMapping);
+            }
             operationsDTOList.add(operationsDTO);
         }
 
@@ -2041,6 +2060,8 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.WEBSUB_SUPPORTED_METHODS;
         } else if (apiType.equals(APIConstants.API_TYPE_SSE)) {
             supportedMethods = APIConstants.SSE_SUPPORTED_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_WS)) {
+            supportedMethods = APIConstants.WS_SUPPORTED_METHODS;
         } else {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
@@ -2102,6 +2123,10 @@ public class APIMappingUtil {
         productDto.setEnableSchemaValidation(product.isEnabledSchemaValidation());
         productDto.setEnableStore(product.isEnableStore());
         productDto.setTestKey(product.getTestKey());
+
+        productDto.setIsRevision(product.isRevision());
+        productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
+        productDto.setRevisionId(product.getRevisionId());
 
         if (APIConstants.ENABLED.equals(product.getResponseCache())) {
             productDto.setResponseCachingEnabled(Boolean.TRUE);

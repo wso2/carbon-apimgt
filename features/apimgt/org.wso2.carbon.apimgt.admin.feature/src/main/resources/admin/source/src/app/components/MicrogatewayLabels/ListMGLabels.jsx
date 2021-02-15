@@ -84,7 +84,7 @@ export default function ListMGLabels() {
                 defaultMessage: 'Gateway Host(s)',
             }),
             options: {
-                sort: true,
+                sort: false,
                 customBodyRender: (value) => {
                     return (
                         value.map((host) => (

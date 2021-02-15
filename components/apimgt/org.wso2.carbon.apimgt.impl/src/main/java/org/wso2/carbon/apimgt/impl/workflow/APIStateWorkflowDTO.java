@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
 public class APIStateWorkflowDTO extends WorkflowDTO{
-	
+    private String apiUUID;
     private String apiCurrentState;
     private String apiLCAction;
     private String scope;
@@ -110,5 +110,15 @@ public class APIStateWorkflowDTO extends WorkflowDTO{
 
     public void setApiType(String apiType) {
         this.apiType = apiType;
+    }
+
+    public String getApiUUID() {
+
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+
+        this.apiUUID = apiUUID;
     }
 }

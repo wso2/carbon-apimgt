@@ -600,6 +600,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
     public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
+    public static final String API_TYPE_WS = "WS";
 
     public static class TokenStatus {
 
@@ -1249,6 +1250,8 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> SSE_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
+    public static final Set<String> WS_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
 
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
@@ -1975,6 +1978,7 @@ public final class APIConstants {
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
@@ -2600,10 +2604,10 @@ public final class APIConstants {
 
     public static class ServiceCatalogConstants {
         public static final String SERVICE_UUID = "UUID";
-        public static final String SERVICE_NAME = "ENTRY_NAME";
+        public static final String SERVICE_NAME = "SERVICE_NAME";
         public static final String SERVICE_KEY = "SERVICE_KEY";
         public static final String MD5 = "MD5";
-        public static final String SERVICE_VERSION = "ENTRY_VERSION";
+        public static final String SERVICE_VERSION = "SERVICE_VERSION";
         public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
         public static final String SERVICE_URL = "SERVICE_URL";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
@@ -2615,5 +2619,7 @@ public final class APIConstants {
         public static final String LAST_UPDATED_TIME = "LAST_UPDATED_TIME";
         public static final String CREATED_BY = "CREATED_BY";
         public static final String UPDATED_BY = "UPDATED_BY";
+        public static final String METADATA = "METADATA";
+        public static final String SERVICE_DEFINITION = "SERVICE_DEFINITION";
     }
 }

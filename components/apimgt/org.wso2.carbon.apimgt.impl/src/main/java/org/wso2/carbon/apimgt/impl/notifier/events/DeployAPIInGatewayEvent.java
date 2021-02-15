@@ -5,7 +5,8 @@ import java.util.Set;
 
 public class DeployAPIInGatewayEvent extends Event {
 
-    private String apiId;
+    private int apiId;
+    private String uuid;
     private String name;
     private String version;
     private String provider;
@@ -14,9 +15,10 @@ public class DeployAPIInGatewayEvent extends Event {
     private Set<APIEvent> associatedApis;
     private String context;
 
-    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, String apiId,
-                                   Set<String> gatewayLabels, String name, String version, String provider,
+    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
+                                   String uuid, Set<String> gatewayLabels, String name, String version, String provider,
                                    String apiType, String context, Set<APIEvent> associatedApis) {
+        this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -33,10 +35,24 @@ public class DeployAPIInGatewayEvent extends Event {
         this.associatedApis = associatedApis;
     }
 
-    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, String apiId,
-                                   Set<String> gatewayLabels, String name, String version, String provider,
+    /**
+     *
+     * @param eventId
+     * @param timestamp
+     * @param type
+     * @param tenantDomain
+     * @param apiId
+     * @param gatewayLabels
+     * @param name
+     * @param version
+     * @param provider
+     * @param apiType
+     * @param context
+     */
+    public DeployAPIInGatewayEvent(String eventId, long timestamp, String type, String tenantDomain, int apiId,
+                                   String uuid, Set<String> gatewayLabels, String name, String version, String provider,
                                    String apiType, String context) {
-
+        this.uuid = uuid;
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -64,12 +80,12 @@ public class DeployAPIInGatewayEvent extends Event {
         this.gatewayLabels = gatewayLabels;
     }
 
-    public String getApiId() {
+    public int getApiId() {
 
         return apiId;
     }
 
-    public void setApiId(String apiId) {
+    public void setApiId(int apiId) {
 
         this.apiId = apiId;
     }
@@ -128,5 +144,15 @@ public class DeployAPIInGatewayEvent extends Event {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getUuid() {
+
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+
+        this.uuid = uuid;
     }
 }

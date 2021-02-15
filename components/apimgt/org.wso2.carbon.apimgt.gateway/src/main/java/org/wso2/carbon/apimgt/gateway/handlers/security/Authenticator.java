@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 /**
  * Interface through which API consumers are authenticated. An implementation of this interface
@@ -52,7 +53,7 @@ public interface Authenticator {
      * @param synCtx The message to be authenticated
      * @return an AuthenticationResponse object which contains the authentication status
      */
-    AuthenticationResponse authenticate(MessageContext synCtx);
+    AuthenticationResponse authenticate(MessageContext synCtx) throws APIManagementException;
 
     /**
      * Returns a string representation of the authentication challenge imposed by this

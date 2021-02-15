@@ -22,47 +22,53 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.AnalyticsUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.AuthFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.MethodNotAllowedFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.ResourceNotFoundFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.TargetFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.ThrottledFaultDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.UnclassifiedFaultDataCollector;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.FaultDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.AuthFaultDataCollector;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.TargetFaultDataCollector;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault.ThrottledFaultDataCollector;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.time.Clock;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
  * Faulty request data collector
  */
-public class FaultyRequestDataCollector implements RequestDataCollector {
+public class FaultyRequestDataCollector extends CommonRequestDataCollector implements RequestDataCollector {
     private static final Log log = LogFactory.getLog(FaultyRequestDataCollector.class);
     private FaultDataCollector authDataCollector;
     private FaultDataCollector throttledDataCollector;
     private FaultDataCollector targetDataCollector;
+    private FaultDataCollector resourceNotFoundDataCollector;
+    private FaultDataCollector methodNotAllowedDataCollector;
+    private FaultDataCollector unclassifiedFaultDataCollector;
 
     public FaultyRequestDataCollector() {
-        this(new AuthFaultDataCollector(), new ThrottledFaultDataCollector(), new TargetFaultDataCollector());
-    }
-
-    public FaultyRequestDataCollector(FaultDataCollector authDataCollector, FaultDataCollector throttledDataCollector,
-            FaultDataCollector targetDataCollector) {
-        this.authDataCollector = authDataCollector;
-        this.throttledDataCollector = throttledDataCollector;
-        this.targetDataCollector = targetDataCollector;
+        this.authDataCollector = new AuthFaultDataCollector();
+        this.throttledDataCollector = new ThrottledFaultDataCollector();
+        this.targetDataCollector = new TargetFaultDataCollector();
+        this.resourceNotFoundDataCollector = new ResourceNotFoundFaultDataCollector();
+        this.methodNotAllowedDataCollector = new MethodNotAllowedFaultDataCollector();
+        this.unclassifiedFaultDataCollector = new UnclassifiedFaultDataCollector();
     }
 
     public void collectData(MessageContext messageContext) {
         log.debug("Handling faulty analytics types");
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-        FaultyEvent faultyEvent = getFaultyEvent(messageContext);
+        API api = getAPIMetaData(messageContext);
+        if (api == null) {
+            log.error("API not found and ignore publishing event.");
+            return;
+        }
+        FaultyEvent faultyEvent = getFaultyEvent(messageContext, api);
 
         if (AnalyticsUtils.isAuthFaultRequest(errorCode)) {
             handleAuthFaultRequest(messageContext, faultyEvent);
@@ -70,6 +76,10 @@ public class FaultyRequestDataCollector implements RequestDataCollector {
             handleThrottledFaultRequest(messageContext, faultyEvent);
         } else if (AnalyticsUtils.isTargetFaultRequest(errorCode)) {
             handleTargetFaultRequest(messageContext, faultyEvent);
+        } else if (AnalyticsUtils.isResourceNotFound(messageContext)) {
+            handleResourceNotFoundFaultRequest(messageContext, faultyEvent);
+        } else if (AnalyticsUtils.isMethodNotAllowed(messageContext)) {
+            handleMethodNotAllowedFaultRequest(messageContext, faultyEvent);
         } else {
             handleOtherFaultRequest(messageContext, faultyEvent);
         }
@@ -87,14 +97,21 @@ public class FaultyRequestDataCollector implements RequestDataCollector {
         targetDataCollector.collectFaultData(messageContext, faultyEvent);
     }
 
-    private void handleOtherFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
-        log.debug("Skip other faulty analytics types");
+    private void handleResourceNotFoundFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
+        resourceNotFoundDataCollector.collectFaultData(messageContext, faultyEvent);
     }
 
-    private FaultyEvent getFaultyEvent(MessageContext messageContext) {
+    private void handleMethodNotAllowedFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
+        methodNotAllowedDataCollector.collectFaultData(messageContext, faultyEvent);
+    }
+
+    private void handleOtherFaultRequest(MessageContext messageContext, FaultyEvent faultyEvent) {
+        unclassifiedFaultDataCollector.collectFaultData(messageContext, faultyEvent);
+    }
+
+    private FaultyEvent getFaultyEvent(MessageContext messageContext, API api) {
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
         String errorMessage = (String) messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
-        String apiUUID = (String) messageContext.getProperty(APIMgtGatewayConstants.API_UUID_PROPERTY);
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
         int proxyResponseCode;
@@ -104,40 +121,25 @@ public class FaultyRequestDataCollector implements RequestDataCollector {
             proxyResponseCode = Integer.parseInt((String) clientResponseCodeObj);
         }
 
-        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-        String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-        if (apiPublisher == null) {
-            int ind = apiVersion.indexOf("--");
-            apiPublisher = apiVersion.substring(0, ind);
-            if (apiPublisher.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiPublisher = apiPublisher
-                        .replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT, APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-        }
-        int index = apiVersion.indexOf("--");
-        if (index != -1) {
-            apiVersion = apiVersion.substring(index + 2);
-        }
-        String apiName = apiVersion.split(":v")[0];
-        apiVersion = apiVersion.split(":v")[1];
-
         FaultyEvent event = new FaultyEvent();
         event.setCorrelationId(UUID.randomUUID().toString());
-        event.setErrorCode(String.valueOf(errorCode));
+        event.setErrorCode(errorCode);
         event.setErrorMessage(errorMessage);
-        event.setApiId(apiUUID);
-        event.setApiName(apiName);
-        event.setApiVersion(apiVersion);
-        event.setApiCreator(apiPublisher);
-        event.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));
+        event.setApiId(api.getUuid());
+        event.setApiType(api.getApiType());
+        event.setApiName(api.getApiName());
+        event.setApiVersion(api.getApiVersion());
+        event.setApiCreator(api.getApiProvider());
+        event.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(api.getApiProvider()));
         event.setRegionId(Constants.REGION_ID);
         event.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-        event.setProxyResponseCode(String.valueOf(proxyResponseCode));
-        event.setTargetResponseCode(Constants.UNKNOWN_VALUE);
+        event.setProxyResponseCode(proxyResponseCode);
+        event.setTargetResponseCode(Constants.UNKNOWN_INT_VALUE);
         event.setDeploymentId(Constants.DEPLOYMENT_ID);
         event.setEventType(Constants.FAULTY_EVENT_TYPE);
-        OffsetDateTime time = OffsetDateTime.now(Clock.systemUTC());
-        event.setRequestTimestamp(time.toString());
+        long requestInTime = getRequestTime(messageContext);
+        String offsetDateTime = AnalyticsUtils.getTimeInISO(requestInTime);
+        event.setRequestTimestamp(offsetDateTime);
 
         return event;
     }

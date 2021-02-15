@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
  */
 public class FaultyEvent extends AnalyticsEvent {
     private String errorType;
-    private String errorCode;
+    private int errorCode;
     private String errorMessage;
 
     public String getErrorType() {
@@ -33,11 +33,11 @@ public class FaultyEvent extends AnalyticsEvent {
         this.errorType = errorType;
     }
 
-    public String getErrorCode() {
+    public int getErrorCode() {
         return errorCode;
     }
 
-    public void setErrorCode(String errorCode) {
+    public void setErrorCode(int errorCode) {
         this.errorCode = errorCode;
     }
 

@@ -56,8 +56,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        messageContext.setProperty(Constants.BACKEND_LATENCY_PROPERTY, (System.currentTimeMillis() - backendStartTime));
+        messageContext.setProperty(Constants.BACKEND_END_TIME_PROPERTY, System.currentTimeMillis());
         Object responseCode = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
         messageContext.setProperty(Constants.BACKEND_RESPONSE_CODE, responseCode);
@@ -66,6 +65,10 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
+        if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
+            return true;
+        }
         dataCollector.collectData(messageContext);
         return true;
     }

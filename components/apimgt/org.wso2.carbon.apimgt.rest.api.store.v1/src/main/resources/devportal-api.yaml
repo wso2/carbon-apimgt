@@ -1005,6 +1005,44 @@ paths:
       x-examples:
         $ref: docs/examples/apis/comment_id-comments.yaml#/delete
 
+  /apis/{apiId}/topics:
+    get:
+      tags:
+      - Topics
+      summary: |
+        Get a list of available topics for a given async API
+      description: |
+        This operation will provide a list of topics available for a given Async API, based on the provided API ID.
+      parameters:
+      - $ref: '#/components/parameters/apiId'
+      - $ref: '#/components/parameters/requestedTenant'
+      responses:
+        200:
+          description: |
+            OK.
+            Topic list returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicList'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+      - OAuth2Security: []
+      x-code-samples:
+      - lang: Curl
+        source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
+
   /apis/{apiId}/subscription-policies:
     get:
       tags:
@@ -2808,48 +2846,10 @@ paths:
   ######################################################
   # The Web hook API topic details
   ######################################################
-  /topics/{apiId}:
-    get:
-      tags:
-      - Topics
-      summary: |
-        Get a list of available topics for a given async API
-      description: |
-        This operation will provide a list of topics available for a given Async API, based on the provided API ID.
-      parameters:
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/requestedTenant'
-      responses:
-        200:
-          description: |
-            OK.
-            Topic list returned.
-          headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TopicList'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-      - OAuth2Security: []
-      x-code-samples:
-      - lang: Curl
-        source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
-
-  /topics/subscriptions:
+  /webhooks/subscriptions:
       get:
         tags:
-        - Topics
+        - Webhooks
         summary: |
           Get available web hook subscriptions for a given application.
         description: |
@@ -2874,7 +2874,7 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/TopicSubscriptionList'
+                  $ref: '#/components/schemas/WebhookSubscriptionList'
           404:
             $ref: '#/components/responses/NotFound'
           500:
@@ -2884,7 +2884,7 @@ paths:
         x-code-samples:
         - lang: Curl
           source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
+            "https://localhost:9443/api/am/store/v1/webhooks/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
 
   ######################################################
   # The Developer Portal settings List
@@ -4158,23 +4158,23 @@ components:
         type:
           type: string
           example: publisher
-    TopicSubscriptionList:
-      title: Subscribed Topic List
+    WebhookSubscriptionList:
+      title: Subscribed Webhook List
       type: object
       properties:
         count:
           type: integer
           description: |
-            Number of topic subscriptions returned.
+            Number of webhook subscriptions returned.
           example: 1
         list:
           type: array
           items:
-            $ref: '#/components/schemas/TopicSubscription'
+            $ref: '#/components/schemas/WebhookSubscription'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    TopicSubscription:
-      title: Topic Subscription
+    WebhookSubscription:
+      title: Webhook Subscription
       type: object
       properties:
         apiId:
