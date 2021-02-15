@@ -356,37 +356,6 @@ public interface APIProvider extends APIManager {
     void updateWsdlFromUrl(API api) throws APIManagementException;
 
     /**
-     * Change the lifecycle state of the specified API
-     *
-     * @param api The API whose status to be updated
-     * @param status New status of the API
-     * @param userId User performing the API state change
-     * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
-     * */
-    void changeAPIStatus(API api, String status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException;
-
-    /**
-     * Change the lifecycle state of the specified API
-     *
-     * @param api The API whose status to be updated
-     * @param status New status of the API
-     * @param userId User performing the API state change
-     * @param updateGatewayConfig Whether the changes should be pushed to the API gateway or not
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
-     * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
-     * */
-    void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException;
-
-
-    boolean updateAPIStatus(APIIdentifier apiId, String status,boolean publishToGateway,boolean deprecateOldVersions,
-                            boolean makeKeysForwardCompatible)
-            throws APIManagementException, FaultGatewaysException;
-
-    /**
      * Locate any API keys issued for the previous versions of the given API, which are
      * currently in the PUBLISHED state and make those API keys compatible with this
      * version of the API
@@ -1723,6 +1692,25 @@ public interface APIProvider extends APIManager {
     APIRevision getAPIRevision(String revisionUUID) throws APIManagementException;
 
     /**
+     * Get the revision UUID from the Revision no and API UUID
+     *
+     * @param revisionNum   No of the revision
+     * @param apiUUID       API  UUID
+     * @return UUID of the revision
+     * @throws APIManagementException if failed to get the API revision uuid
+     */
+    String getAPIRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException;
+
+    /**
+     * Get the earliest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID API UUID
+     * @return Earliest revision's UUID
+     * @throws APIManagementException if failed to get the revision
+     */
+    String getEarliestRevisionUUID(String apiUUID) throws APIManagementException;
+
+    /**
      * Get a List of API Revisions related to provided API UUID
      *
      * @param apiUUID API  UUID
@@ -1788,5 +1776,53 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to delete APIRevision
      */
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevision to an existing API Product
+     *
+     * @param apiRevision APIRevision
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    String addAPIProductRevision(APIRevision apiRevision) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API Product
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void addAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
+                                         List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Undeploy revision from provided gateway environments
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void undeployAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
+                                              List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+
+    /**
+     * Restore a provided API Product Revision as the working copy of the API Product
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to restore APIRevision
+     */
+    void restoreAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
+
+    /**
+     * Delete an API Product Revision
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @throws APIManagementException if failed to delete APIRevision
+     */
+    void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
 
 }

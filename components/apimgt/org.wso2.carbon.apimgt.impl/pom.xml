@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.194-SNAPSHOT</version>
+        <version>6.8.213-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -456,7 +456,7 @@
                                     <classpath>
                                         <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql" />
+                                    <fileset file="${basedir}/../../../features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/sql/h2.sql" />
                                     <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql" />
                                 </sql>
                                 <echo message="##################### END ########################" />

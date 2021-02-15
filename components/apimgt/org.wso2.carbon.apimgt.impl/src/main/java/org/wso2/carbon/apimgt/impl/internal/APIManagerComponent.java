@@ -896,7 +896,7 @@ public class APIManagerComponent {
     @Reference(
             name = "import.export.implementation",
             service = ImportExportAPI.class,
-            cardinality = ReferenceCardinality.MANDATORY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetImportExportService")
     protected void setImportExportService (ImportExportAPI importExportService) {

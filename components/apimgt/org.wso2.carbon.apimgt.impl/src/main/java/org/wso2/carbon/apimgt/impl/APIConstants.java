@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -778,6 +778,8 @@ public final class APIConstants {
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
+    public static final String API_STORE_API_KEY_GENERATOR_IMPL = API_STORE + "ApiKeyGeneratorImpl";
+    public static final String API_STORE_API_KEY_SIGN_KEY_STORE = API_STORE + "APIKeyKeystore";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
@@ -1922,6 +1924,8 @@ public final class APIConstants {
         public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
         public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
         public static final String AUTHORIZED_USER_TYPE = "aut";
+        public static final String ISSUER_IDENTIFIER = "iss";
+        public static final String END_USERNAME = "sub";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -2121,7 +2125,10 @@ public final class APIConstants {
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
     public static final String TENANT_STATE_INACTIVE = "INACTIVE";
 
+    public static final String DEFAULT_API_KEY_SIGN_KEY_STORE = "InternalKeyStore";
     public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+    public static final String DEFAULT_API_KEY_GENERATOR_IMPL = "org.wso2.carbon.apimgt.impl.token" +
+            ".DefaultApiKeyGenerator";
 
     //Constants for user API ratings
     public static final String API_ID = "apiId";
@@ -2517,15 +2524,15 @@ public final class APIConstants {
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";
     public static final String MAP_KEY_VERIFIED_EXISTING_SERVICE = "verified";
     public static final String MAP_KEY_HASH_NOT_CHANGED_EXISTING_SERVICE = "notChanged";
-    
+
     public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
 
     public static class ServiceCatalogConstants {
         public static final String SERVICE_UUID = "UUID";
-        public static final String SERVICE_NAME = "ENTRY_NAME";
+        public static final String SERVICE_NAME = "SERVICE_NAME";
         public static final String SERVICE_KEY = "SERVICE_KEY";
         public static final String MD5 = "MD5";
-        public static final String SERVICE_VERSION = "ENTRY_VERSION";
+        public static final String SERVICE_VERSION = "SERVICE_VERSION";
         public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
         public static final String SERVICE_URL = "SERVICE_URL";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
@@ -2537,5 +2544,16 @@ public final class APIConstants {
         public static final String LAST_UPDATED_TIME = "LAST_UPDATED_TIME";
         public static final String CREATED_BY = "CREATED_BY";
         public static final String UPDATED_BY = "UPDATED_BY";
+        public static final String METADATA = "METADATA";
+        public static final String SERVICE_DEFINITION = "SERVICE_DEFINITION";
+    }
+
+    public static class KeyStoreManagement {
+        public static final String KeyStoreName = "KeyStoreName";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_FILE = "Security.KeyStoreName.Location";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_PASSWORD = "Security.KeyStoreName.Password";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS = "Security.KeyStoreName.KeyAlias";
+        public static final String SERVER_APIKEYSIGN_KEYSTORE_TYPE = "Security.KeyStoreName.Type";
+        public static final String SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD = "Security.KeyStoreName.KeyPassword";
     }
 }

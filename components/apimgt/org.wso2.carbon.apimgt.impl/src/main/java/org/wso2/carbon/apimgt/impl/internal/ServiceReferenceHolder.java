@@ -39,6 +39,7 @@ import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ServiceReferenceHolder {
 
@@ -260,5 +261,10 @@ public class ServiceReferenceHolder {
     public ExtensionListener getExtensionListener(String type) {
 
         return extensionListenerMap.get(type);
+    }
+
+    public Set<String> getGatewayArtifactGeneratorTypes() {
+
+        return gatewayArtifactGeneratorMap.keySet();
     }
 }
