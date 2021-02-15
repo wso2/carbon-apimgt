@@ -422,7 +422,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
-    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status");
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
 
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
             "Gateway type not found available Gateway types : " + "%s");

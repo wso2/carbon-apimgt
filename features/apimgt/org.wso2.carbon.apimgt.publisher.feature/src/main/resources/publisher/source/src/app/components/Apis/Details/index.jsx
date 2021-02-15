@@ -719,8 +719,8 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!isAPIProduct && <Divider />}
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI && !isRestricted(['apim:api_publish'],
-                            api) && api.lifeCycleStatus !== 'PUBLISHED' && (
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
+                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.Tryout',

@@ -273,7 +273,6 @@ export default function ProvideAsyncAPI(props) {
                                                 id='Apis.Create.AsyncAPI.Steps.ProvideAsyncAPI.Input.file.dropzone'
                                                 defaultMessage={'Drag & Drop AsyncAPI File '
                                                 + 'here {break} or {break} Browse files'}
-
                                                 values={{ break: <br /> }}
                                             />,
                                             <Button
