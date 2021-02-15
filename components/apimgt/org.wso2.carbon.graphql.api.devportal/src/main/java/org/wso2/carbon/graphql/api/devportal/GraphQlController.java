@@ -39,7 +39,9 @@ public class GraphQlController {
 
                 DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
                 DataLoader<String, Object> timeDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
+                //DataLoader<String, Object> tierDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
                 dataLoaderRegistry.register("times", timeDataLoader);
+                //dataLoaderRegistry.register("tierdata", tierDataLoader);
 
                 executionInputBuilder.dataLoaderRegistry(dataLoaderRegistry);
                 executionInputBuilder.context(dataLoaderRegistry);
