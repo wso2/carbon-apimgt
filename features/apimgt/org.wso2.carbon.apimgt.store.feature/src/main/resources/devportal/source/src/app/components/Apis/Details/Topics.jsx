@@ -45,9 +45,6 @@ const styles = theme => ({
     heading: {
         marginRight: 20,
         color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
-    },
-    tcell: {
-        padding: '0x',
     }
 });
 
@@ -72,10 +69,8 @@ class Topics extends React.Component {
      */
     componentDidMount() {
         const {api} = this.props;
-        let promisedApi = null;
-
         const apiClient = new Api();
-        promisedApi = apiClient.getAllTopics(api.id);
+        let promisedApi = apiClient.getAllTopics(api.id);
 
         promisedApi
             .then((response) => {
@@ -111,15 +106,14 @@ class Topics extends React.Component {
         if (!topics) {
             return <div>loading...</div>;
         }
-        const { classes } = this.props;
         return (
-            <Box display='flex' flexDirection='row' style={{minHeight:'200px'}}>
+            <Box display='flex' flexDirection='row'>
                 <Table>
                     {topics && topics.length !== 0 && topics.map(topic => (
                         <TableRow style={{borderStyle: 'hidden', padding:'0px'}} key={topic.name}>
                             <TableCell style={{padding:'0px'}}>
                                 <Typography component='p' variant='body2'>
-                                    {topic.name}
+                                    <b>{topic.name}</b> - {topic.type.toLowerCase()}
                                 </Typography>
                             </TableCell>
                         </TableRow>

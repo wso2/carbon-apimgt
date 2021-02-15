@@ -566,6 +566,18 @@
           "description" : "**Search condition**.\n type of gateway\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "name",
+          "in" : "query",
+          "description" : "**Search condition**.\n name of API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "**Search condition**.\n version of API\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {

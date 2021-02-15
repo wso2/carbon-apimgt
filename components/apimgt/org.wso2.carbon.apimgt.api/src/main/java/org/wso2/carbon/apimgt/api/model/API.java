@@ -99,7 +99,7 @@ public class API implements Serializable {
     private String inSequence;
     private String outSequence;
     private String faultSequence;
-
+    
     private Mediation inSequenceMediation;
     private Mediation outSequenceMediation;
     private Mediation faultSequenceMediation;
@@ -127,7 +127,7 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
-
+    
     private List<SOAPToRestSequence> soapToRestSequences;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
@@ -266,7 +266,7 @@ public class API implements Serializable {
     public void setMonetizationStatus(boolean monetizationStatus) {
         this.isMonetizationEnabled = monetizationStatus;
     }
-
+    
     /**
      * This method is used to get the properties related to monetization
      *
@@ -394,7 +394,7 @@ public class API implements Serializable {
     public String getUUID() {
         return uuid;
     }
-
+    
     @Deprecated
     public void setUUID(String uuid) {
         this.uuid = uuid;
@@ -406,8 +406,8 @@ public class API implements Serializable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
+    } 
+    
     public String getProductionMaxTps() {
         return productionMaxTps;
     }
@@ -561,12 +561,12 @@ public class API implements Serializable {
     public Set<String> getTags() {
         return Collections.unmodifiableSet(tags);
     }
-
+    
     @Deprecated
     public void addTags(Set<String> tags) {
         this.tags.addAll(tags);
     }
-
+    
     public void setTags(Set<String> tags) {
         this.tags.addAll(tags);
     }
@@ -619,7 +619,7 @@ public class API implements Serializable {
 
     public void setAvailableTiers(Set<Tier> availableTiers) {
         this.availableTiers.addAll(availableTiers);
-    }
+    } 
     /**
      * Removes all Tiers from the API object.
      */
@@ -961,16 +961,16 @@ public class API implements Serializable {
         return webSocketTopicMappingConfiguration;
     }
 
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
+    }
+
     public Map<String, String> getWsUriMapping() {
         return wsUriMapping;
     }
 
     public void setWsUriMapping(Map<String, String> wsUriMapping) {
         this.wsUriMapping = wsUriMapping;
-    }
-
-    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
-        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
     }
 
     public String getApiLevelPolicy() {
@@ -1178,7 +1178,7 @@ public class API implements Serializable {
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
     }
-
+    
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;
     }

@@ -35,6 +35,7 @@ public class AuthenticationContext {
     private String keyType;
     private String callerToken;
     private String applicationId;
+    private String applicationUUID;
     private String applicationName;
     private String consumerKey;
     private String subscriber;
@@ -244,5 +245,12 @@ public class AuthenticationContext {
     public void setIssuer(String issuer) {
         this.issuer = issuer;
     }
-    
+
+    public String getApplicationUUID() {
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+        this.applicationUUID = applicationUUID;
+    }
 }

@@ -191,6 +191,20 @@ class APIDefinition extends React.Component {
             });
     }
 
+    /**
+     * Handles the yes button action of the save api definition confirmation dialog box.
+     */
+    handleOk() {
+        const { swaggerModified } = this.state;
+        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+    }
+
+    /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+     */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
 
     /**
       * Set isAuditApiClicked to true when Audit API is clicked
@@ -309,6 +323,15 @@ class APIDefinition extends React.Component {
      */
     getConvertToFormat(format) {
         return format === 'json' ? 'yaml' : 'json';
+    }
+
+    /**
+     * Method to set the state for opening the swagger editor drawer.
+     * Swagger editor loads the definition content from the local storage. Hence we set the swagger content to the
+     * local storage.
+     * */
+    openEditor() {
+        this.setState({ openEditor: true });
     }
 
     /**
@@ -793,10 +816,10 @@ APIDefinition.propTypes = {
         apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     resourceNotFountMessage: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,

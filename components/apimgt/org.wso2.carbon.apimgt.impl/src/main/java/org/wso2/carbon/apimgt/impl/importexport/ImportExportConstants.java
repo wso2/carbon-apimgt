@@ -286,4 +286,11 @@ public final class ImportExportConstants {
     public static final String DEPLOYMENT_DIRECTORY= File.separator + DEPLOYMENT_DIRECTORY_NAME;
     public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
     public static final String API_PARAMS_FILE_NAME = "api_params.yaml";
+
+    // Location of the deployments file
+    public static final String DEPLOYMENT_INFO_LOCATION = File.separator + "deployment_environments";
+    public static final String DEPLOYMENT_ENVIRONMENTS = "deploymentEnvironments";
+    public static final String DEPLOYMENT_NAME = "deploymentEnvironment";
+    public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
+
 }

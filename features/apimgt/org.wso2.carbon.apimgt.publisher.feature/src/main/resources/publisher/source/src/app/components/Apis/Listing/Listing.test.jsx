@@ -31,7 +31,6 @@ import SampleAPI from './SampleAPI/SampleAPI';
 import Listing from './Listing';
 import TableView from './TableView/TableView';
 
-
 const mockedGetUser = jest.fn();
 AuthManager.getUser = mockedGetUser.bind(AuthManager);
 
