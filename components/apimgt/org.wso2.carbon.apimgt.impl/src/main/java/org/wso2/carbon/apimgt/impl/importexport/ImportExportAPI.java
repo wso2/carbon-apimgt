@@ -98,8 +98,10 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
-    public File exportAPIProduct(String apiId, String name, String version, String providerName, ExportFormat format,
-            boolean preserveStatus, boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException;
+    public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
+                                 ExportFormat format,boolean preserveStatus, boolean preserveDocs,
+                                 boolean preserveCredentials, boolean exportLatestRevision)
+            throws APIManagementException, APIImportExportException;
 
     /**
      * Used to import an API artifact.
@@ -130,7 +132,7 @@ public interface ImportExportAPI {
      * @return Imported API Product
      * @throws APIManagementException If there is an error in importing an API Product
      */
-    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
+    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
             Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
             throws APIManagementException;
 }
