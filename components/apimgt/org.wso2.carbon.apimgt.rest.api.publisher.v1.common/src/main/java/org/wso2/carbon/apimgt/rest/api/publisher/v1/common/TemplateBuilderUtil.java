@@ -873,7 +873,7 @@ public class TemplateBuilderUtil {
                 }
             }
         }
-        gatewayAPIDTO.setEndpointEntriesToBeAdd(endpointsToAdd.toArray(new GatewayContentDTO[endpointsToAdd.size()])); // TODO endpointname is not reflected in content. Check
+        gatewayAPIDTO.setEndpointEntriesToBeAdd(endpointsToAdd.toArray(new GatewayContentDTO[endpointsToAdd.size()]));
     }
 
     /**
