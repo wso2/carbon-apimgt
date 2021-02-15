@@ -34,14 +34,15 @@ public interface ImportExportAPI {
     /**
      * Used to export API artifact
      *
-     * @param apiId          UUID of API.
-     * @param name           name of API.
-     * @param version        version of API.
-     * @param revisionNum    revision number.
-     * @param providerName   provider of API.
-     * @param preserveStatus Preserve API status on export
-     * @param format         Format of output documents. Can be YAML or JSON
-     * @param preserveDocs   Preserve documentation on Export.
+     * @param apiId                 UUID of API.
+     * @param name                  name of API.
+     * @param version               version of API.
+     * @param revisionNum           revision number.
+     * @param providerName          provider of API.
+     * @param preserveStatus        Preserve API status on export
+     * @param format                Format of output documents. Can be YAML or JSON
+     * @param preserveDocs          Preserve documentation on Export.
+     * @param exportLatestRevision  Export the latest revision.
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
@@ -87,13 +88,15 @@ public interface ImportExportAPI {
     /**
      * Used to export API product artifact.
      *
-     * @param apiId          UUID of API.
-     * @param name           name of API.
-     * @param version        version of API.
-     * @param providerName   provider of API.
-     * @param format         Format of output documents. Can be YAML or JSON
-     * @param preserveStatus Preserve API status on export
-     * @param preserveDocs   Preserve documentation on Export.
+     * @param apiId                 UUID of API.
+     * @param name                  name of API.
+     * @param version               version of API.
+     * @param providerName          provider of API.
+     * @param revisionNum           Revision number.
+     * @param format                Format of output documents. Can be YAML or JSON
+     * @param preserveStatus        Preserve API status on export
+     * @param preserveDocs          Preserve documentation on Export.
+     * @param exportLatestRevision  Export the most recent revision.
      * @return APIProduct Artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
@@ -109,6 +112,8 @@ public interface ImportExportAPI {
      * @param fileInputStream  Input stream from the REST request
      *                         (This will not be null when importing dependent APIs with API Products)
      * @param preserveProvider Decision to keep or replace the provider
+     * @param rotateRevision   If the maximum revision number reached, undeploy the earliest revision and create
+     *                         a new revision
      * @param overwrite        Whether to update the API or not
      * @return Imported API
      * @throws APIManagementException If there is an error in importing an API
@@ -123,6 +128,8 @@ public interface ImportExportAPI {
      * @param fileInputStream     Input stream from the REST request
      *                            (This will not be null when importing dependent APIs with API Products)
      * @param preserveProvider    User choice to keep or replace the API Product provider
+     * @param rotateRevision      If the maximum revision number reached, undeploy the earliest revision and create
+     *                            a new revision
      * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already
      *                            existing API Products.
      * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already
@@ -133,6 +140,7 @@ public interface ImportExportAPI {
      * @throws APIManagementException If there is an error in importing an API Product
      */
     public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
-            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+                                       Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs,
+                                       String[] tokenScopes)
             throws APIManagementException;
 }

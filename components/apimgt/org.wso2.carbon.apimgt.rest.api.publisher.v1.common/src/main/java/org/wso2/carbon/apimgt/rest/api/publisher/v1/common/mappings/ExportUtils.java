@@ -655,7 +655,7 @@ public class ExportUtils {
      * Retrieve the deployed gateway environments and store those in the archive directory.
      *
      * @param archivePath  File path to export the endpoint certificates
-     * @param apiID        UUID of the API
+     * @param apiID        UUID of the API/ API Product
      * @param exportFormat Export format of file
      * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting gateway environments

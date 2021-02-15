@@ -696,6 +696,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @param fileInputStream     UploadedInputStream input stream from the REST request
      * @param fileDetail          File details as Attachment
      * @param preserveProvider    User choice to keep or replace the API Product provider
+     * @param rotateRevision      If the maximum revision number reached, undeploy the earliest revision and create a
+     *                            new revision
      * @param importAPIs          Whether to import the dependent APIs or not.
      * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already existing API Products.
      * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.

@@ -737,12 +737,13 @@ public class ImportUtils {
     /**
      * Retrieve the deployment information from the file
      *
-     * @param pathToArchive Path to API archive
+     * @param pathToArchive Path to API/API Product archive
      * @return a JSONArray of the deployed gateway environments
      * @throws APIManagementException If an error occurs while reading the file
      */
     private static JSONArray retrieveDeploymentLabelsFromArchive(String pathToArchive, boolean dependentAPIFromProduct)
             throws APIManagementException {
+
         try {
             //If the artifact is a dependent API from a API Product, instead of the artifact's deployment environments,
             //products deployment environments are used.
