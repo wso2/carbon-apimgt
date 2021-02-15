@@ -348,12 +348,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException{
-        return null;
-    }
-
-
-    @Override
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
@@ -376,6 +370,56 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comments content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException{
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                if ( comment.getUser().equals(username)) {
+                    boolean commentEdited = false;
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment.getCategory()))){
+                        comment.setCategory(patchRequestBodyDTO.getCategory());
+                        commentEdited = true;
+                    }
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment.getText()))){
+                        comment.setText(patchRequestBodyDTO.getContent());
+                        commentEdited = true;
+                    }
+                    if (commentEdited){
+                        if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)){
+                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+
+                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                            URI uri = new URI(uriString);
+                            return Response.created(uri).entity(commentDTO).build();
+                        }
+                    }
+                } else {
+                    // Proper error responses should be added
+                    return null;
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location for API " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
