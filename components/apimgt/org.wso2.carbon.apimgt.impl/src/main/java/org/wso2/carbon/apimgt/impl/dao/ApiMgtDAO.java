@@ -8119,9 +8119,54 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Edit a comment
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @param comment Comment object
+     * @throws APIManagementException
+     */
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException{
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        int id = -1;
+        String editCommentQuery = SQLConstants.EDIT_COMMENT; //"UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ?, UPDATED_TIME = ?, CATEGORY = ? WHERE AM_API_COMMENTS.API_ID = ? AND AM_API_COMMENTS.COMMENT_ID = ?";
+        Identifier identifier; // "DELETE FROM AM_API_COMMENTS WHERE AM_API_COMMENTS.API_ID = ? AND AM_API_COMMENTS.COMMENT_ID = ?"
+        try {
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(editCommentQuery);
+            prepStmt.setString(1, comment.getText());
+            prepStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
+            prepStmt.setString(3, comment.getCategory());
+            prepStmt.setInt(4, id);
+            prepStmt.setString(5, commentId);
+            prepStmt.execute();
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            handleException("Error while editing comment " + commentId + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+        return false;
+    }
+
+    /**
      * Delete a comment
      *
-     * @param ApiTypeWrapper API Type Wrapper
+     * @param apiTypeWrapper API Type Wrapper
      * @param commentId Comment ID
      * @throws APIManagementException
      */
