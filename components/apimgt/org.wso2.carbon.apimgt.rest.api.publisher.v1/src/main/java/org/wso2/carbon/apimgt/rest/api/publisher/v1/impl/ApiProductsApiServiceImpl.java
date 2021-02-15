@@ -621,9 +621,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response exportAPIProduct(String name, String version, String providerName, String format,
-                                         Boolean preserveStatus, MessageContext messageContext)
-            throws APIManagementException {
+    public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber,
+                                     String format, Boolean preserveStatus, Boolean exportLatestRevision,
+                                     MessageContext messageContext) throws APIManagementException {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -634,8 +634,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
             File file =
-                    importExportAPI.exportAPIProduct(null, name, version, providerName, exportFormat, preserveStatus,
-                            true, true);
+                    importExportAPI.exportAPIProduct(null, name, version, providerName, revisionNumber, exportFormat,
+                            preserveStatus, true, true, exportLatestRevision);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
@@ -704,8 +704,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @throws APIManagementException
      */
     @Override public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
-            Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs,
-            MessageContext messageContext) throws APIManagementException {
+            Boolean preserveProvider, Boolean rotateRevision, Boolean importAPIs, Boolean overwriteAPIProduct,
+            Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException {
         // If importAPIs flag is not set, the default value is false
         importAPIs = importAPIs == null ? false : importAPIs;
 
@@ -740,8 +740,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
 
-        importExportAPI.importAPIProduct(fileInputStream, preserveProvider, overwriteAPIProduct, overwriteAPIs, importAPIs,
-                        tokenScopes);
+        importExportAPI.importAPIProduct(fileInputStream, preserveProvider, rotateRevision, overwriteAPIProduct,
+                overwriteAPIs, importAPIs, tokenScopes);
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
     }
 
@@ -911,7 +911,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response undeployAPIProductRevision(String apiProductId, String revisionId,
+    public Response undeployAPIProductRevision(String apiProductId, String revisionId, String revisionNumber,
                                                List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                                MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
