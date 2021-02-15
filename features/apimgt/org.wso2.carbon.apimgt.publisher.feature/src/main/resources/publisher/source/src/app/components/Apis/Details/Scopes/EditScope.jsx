@@ -135,7 +135,6 @@ class EditScope extends React.Component {
         this.validateScopeDisplayName = this.validateScopeDisplayName.bind(this);
     }
 
-
     handleRoleDeletion = (role) => {
         const { validRoles, invalidRoles } = this.state;
         if (invalidRoles.includes(role)) {
@@ -169,6 +168,33 @@ class EditScope extends React.Component {
                 apiScope,
             });
         }
+    }
+
+    /**
+     * Handle Role Addition.
+     * @param {string} role The first number.
+     */
+    handleRoleAddition(role) {
+        const { validRoles, invalidRoles } = this.state;
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise
+            .then(() => {
+                this.setState({
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
+                });
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
     }
 
     /**
@@ -215,33 +241,6 @@ class EditScope extends React.Component {
     }
 
     /**
-     * Handle Role Addition.
-     * @param {string} role The first number.
-     */
-    handleRoleAddition(role) {
-        const { validRoles, invalidRoles } = this.state;
-        const promise = APIValidation.role.validate(base64url.encode(role));
-        promise
-            .then(() => {
-                this.setState({
-                    roleValidity: true,
-                    validRoles: [...validRoles, role],
-                });
-            })
-            .catch((error) => {
-                if (error.status === 404) {
-                    this.setState({
-                        roleValidity: false,
-                        invalidRoles: [...invalidRoles, role],
-                    });
-                } else {
-                    Alert.error('Error when validating role: ' + role);
-                    console.error('Error when validating role ' + error);
-                }
-            });
-    }
-
-    /**
      * validate Scope Description.
      * @param {JSON} event click event object.
      */
@@ -278,7 +277,6 @@ class EditScope extends React.Component {
             apiScope,
         });
     }
-
 
     /**
      * Render.
@@ -461,7 +459,7 @@ class EditScope extends React.Component {
 
 EditScope.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }),
     api: PropTypes.shape({
         id: PropTypes.string,

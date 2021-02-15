@@ -145,7 +145,6 @@ class AuthManager {
         return !AuthManager.getUser().scopes.includes('apim:api_create');
     }
 
-
     /**
      *
      * Check whether the current user has Internal/publisher role or not

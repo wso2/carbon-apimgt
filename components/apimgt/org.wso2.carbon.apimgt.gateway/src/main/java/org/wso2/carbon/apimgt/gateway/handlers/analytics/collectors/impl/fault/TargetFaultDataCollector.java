@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.usage.publisher.impl.FaultyRequestDataPublisher;
@@ -47,27 +46,16 @@ public class TargetFaultDataCollector extends AbstractFaultDataCollector {
     public void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent) {
         log.debug("handling target failure analytics events");
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
-        if (authContext != null) {
-            if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
-                authContext.setApplicationName(Constants.ANONYMOUS_VALUE);
-                authContext.setApplicationId(Constants.ANONYMOUS_VALUE);
-                authContext.setSubscriber(Constants.ANONYMOUS_VALUE);
-                authContext.setKeyType(Constants.ANONYMOUS_VALUE);
-            }
-        } else {
+        if (authContext == null) {
             log.warn("Ignore API request without authentication context.");
             return;
         }
-        String applicationName = authContext.getApplicationName();
-        String applicationId = authContext.getApplicationId();
-        String applicationOwner = authContext.getSubscriber();
-        String keyType = authContext.getKeyType();
 
-        faultyEvent.setApplicationId(applicationId);
-        faultyEvent.setApplicationName(applicationName);
-        faultyEvent.setKeyType(keyType);
-        faultyEvent.setApplicationOwner(applicationOwner);
-
+        if (APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername())) {
+            this.setAnonymousApp(faultyEvent);
+        } else {
+            setApplicationData(authContext, faultyEvent);
+        }
         this.processRequest(faultyEvent);
     }
 }

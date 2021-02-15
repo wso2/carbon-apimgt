@@ -21,14 +21,16 @@ package org.wso2.carbon.apimgt.gateway.common.util;
 import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.JWTSignatureAlg;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 
 /**
  * Helper class for util related to jwt generation.
@@ -97,7 +99,7 @@ public final class JWTUtil {
             jwtHeader.append("}");
             return jwtHeader.toString();
 
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException | CertificateEncodingException | UnsupportedEncodingException e) {
             throw new JWTGeneratorException("Error in generating public certificate thumbprint", e);
         }
     }

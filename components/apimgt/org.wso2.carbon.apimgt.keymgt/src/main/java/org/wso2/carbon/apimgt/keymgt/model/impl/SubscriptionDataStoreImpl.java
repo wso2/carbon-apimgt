@@ -70,6 +70,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
     private Map<String, API> apiMap;
+    private Map<String,API> apiNameVersionMap;
     private Map<String, API> apiByUUIDMap;
     private Map<String, ApiPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
@@ -109,6 +110,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
         this.scopesMap = new ConcurrentHashMap<>();
+        this.apiNameVersionMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();
     }
 
@@ -223,6 +225,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    public API getApiByNameAndVersion(String name, String version) {
+        String key = name + DELEM_PERIOD + version;
+        return apiNameVersionMap.get(key);
+    }
+
+    @Override
     public API getAPIByUUID(String apiUUID) {
 
         return apiByUUIDMap.get(apiUUID);
@@ -299,6 +307,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                         apiByUUIDMap.clear();
                         for (API api : apiList) {
                             apiByUUIDMap.put(api.getUuid(), api);
+                            String key = api.getApiName().concat(":").concat(api.getApiVersion());
+                            apiNameVersionMap.put(key, api);
                         }
                         apisInitialized = true;
                         return apiList;
@@ -558,7 +568,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void addOrUpdateAPI(API api) {
-
+        String key = api.getApiName().concat(":").concat(api.getApiVersion());
+        apiByUUIDMap.put(api.getUuid(),api);
+        apiNameVersionMap.put(key, api);
         apiMap.put(api.getCacheKey(), api);
     }
 
@@ -567,7 +579,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         try {
             API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
-            apiMap.put(api.getCacheKey(), newAPI);
+            if (newAPI != null) {
+                apiMap.put(api.getCacheKey(), newAPI);
+                String key = newAPI.getApiName().concat(":").concat(newAPI.getApiVersion());
+                apiNameVersionMap.put(key, newAPI);
+                apiByUUIDMap.put(newAPI.getUuid(), newAPI);
+            }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
         }
@@ -576,7 +593,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void removeAPI(API api) {
-
+        String key = api.getApiName().concat(":").concat(api.getApiVersion());
+        apiByUUIDMap.remove(api.getUuid());
+        apiNameVersionMap.remove(key);
         apiMap.remove(api.getCacheKey());
     }
 
@@ -699,10 +718,10 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 clearResourceCache(api, event.getTenantDomain());
             }
             if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
-                apiMap.remove(event.getContext() + ":" + event.getVersion());
+                removeAPI(api);
             } else {
                 API newAPI = new SubscriptionDataLoaderImpl().getApi(event.getContext(), event.getVersion());
-                apiMap.put(newAPI.getCacheKey(), newAPI);
+                addOrUpdateAPI(newAPI);
             }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
