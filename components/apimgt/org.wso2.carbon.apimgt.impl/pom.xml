@@ -418,7 +418,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.gateway.common</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -632,7 +632,7 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.gateway.common</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
@@ -2089,5 +2089,6 @@
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
         <analytics.event.publisher.client.version>0.4.0</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[0.4.0,1.0.0)</analytics.event.publisher.client.version.range>
+        <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
     </properties>
 </project>
