@@ -881,7 +881,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Add Comment
+              title: Post request body
               type: object
               properties:
                 content:
@@ -894,6 +894,8 @@ paths:
                   description: |
                     Category of the comment
                   example: general
+              required:
+                - content
         required: true
       responses:
         201:
@@ -946,8 +948,8 @@ paths:
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/includeCommenterInfo'
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/replyLimit'
+        - $ref: '#/components/parameters/replyOffset'
       responses:
         200:
           description: |
@@ -989,7 +991,7 @@ paths:
       x-examples:
         $ref: docs/examples/apis/comment_id-comments.yaml#/get
 
-    put:
+    patch:
       tags:
         - Comments
       summary: Edit a comment
@@ -1005,7 +1007,7 @@ paths:
         content:
           application/json:
             schema:
-              title: Update Comment
+              title: Patch request body
               type: object
               properties:
                 content:
@@ -1094,7 +1096,7 @@ paths:
         - Comments
       summary: Get replies of a comment
       description: |
-        Get the individual comment given by a username for a certain API.
+        Get replies of a comment
       operationId: getRepliesOfComment
       parameters:
         - $ref: '#/components/parameters/commentId'
@@ -4512,6 +4514,7 @@ components:
         createdTime:
           type: string
           readOnly: true
+          example : 2021-02-11-09:57:25
         createdBy:
           type: string
           readOnly: true
@@ -4519,6 +4522,7 @@ components:
         updatedTime:
           type: string
           readOnly: true
+          example : 2021-02-12-19:57:25
         updatedBy:
           type: string
           readOnly: true
@@ -4528,8 +4532,10 @@ components:
           default: general
         parentCommentId:
           type: string
+          example: 6f38aea2-f41e-4ac9-b3f2-a9493d00ba97
         entryPoint:
           type: string
+          enum: [devPortal, publisher]
         commenterInfo:
           $ref: '#/components/schemas/CommenterInfo'
         replies:
@@ -5760,7 +5766,7 @@ components:
             error: []
   parameters:
     parentCommentID:
-      name: parentCommentID
+      name: replyTo
       in: query
       description: |
         ID of the perent comment.
@@ -5944,6 +5950,22 @@ components:
       in: query
       description: |
         Starting point within the complete list of items qualified.
+      schema:
+        type: integer
+        default: 0
+    replyLimit:
+      name: replyLimit
+      in: query
+      description: |
+        Maximum size of replies array to return.
+      schema:
+        type: integer
+        default: 25
+    replyOffset:
+      name: replyOffset
+      in: query
+      description: |
+        Starting point within the complete list of replies.
       schema:
         type: integer
         default: 0

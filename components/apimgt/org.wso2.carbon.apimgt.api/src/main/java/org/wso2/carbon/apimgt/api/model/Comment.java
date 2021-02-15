@@ -42,10 +42,7 @@ public class Comment {
     private String parentCommentID;
     private String entryPoint;
     private String category;
-//    private CommentList replies;
     private List<Comment> replies = new ArrayList<Comment>();
-
-//    List<Comment> commentList = new ArrayList<Comment>();
 
     public List<Comment> getReplies(){return this.replies; }
 

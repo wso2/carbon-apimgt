@@ -30,7 +30,38 @@ public class CommentDTO   {
     private String updatedBy = null;
     private String category = "general";
     private String parentCommentId = null;
-    private String entryPoint = null;
+
+    @XmlType(name="EntryPointEnum")
+    @XmlEnum(String.class)
+    public enum EntryPointEnum {
+        DEVPORTAL("devPortal"),
+        PUBLISHER("publisher");
+        private String value;
+
+        EntryPointEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static EntryPointEnum fromValue(String v) {
+            for (EntryPointEnum b : EntryPointEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private EntryPointEnum entryPoint = null;
     private CommenterInfoDTO commenterInfo = null;
     private CommentListDTO replies = null;
 
@@ -77,7 +108,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "2021-02-11-09:57:25", value = "")
   @JsonProperty("createdTime")
   public String getCreatedTime() {
     return createdTime;
@@ -111,7 +142,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "2021-02-12-19:57:25", value = "")
   @JsonProperty("updatedTime")
   public String getUpdatedTime() {
     return updatedTime;
@@ -162,7 +193,7 @@ public class CommentDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "6f38aea2-f41e-4ac9-b3f2-a9493d00ba97", value = "")
   @JsonProperty("parentCommentId")
   public String getParentCommentId() {
     return parentCommentId;
@@ -173,7 +204,7 @@ public class CommentDTO   {
 
   /**
    **/
-  public CommentDTO entryPoint(String entryPoint) {
+  public CommentDTO entryPoint(EntryPointEnum entryPoint) {
     this.entryPoint = entryPoint;
     return this;
   }
@@ -181,10 +212,10 @@ public class CommentDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("entryPoint")
-  public String getEntryPoint() {
+  public EntryPointEnum getEntryPoint() {
     return entryPoint;
   }
-  public void setEntryPoint(String entryPoint) {
+  public void setEntryPoint(EntryPointEnum entryPoint) {
     this.entryPoint = entryPoint;
   }
 

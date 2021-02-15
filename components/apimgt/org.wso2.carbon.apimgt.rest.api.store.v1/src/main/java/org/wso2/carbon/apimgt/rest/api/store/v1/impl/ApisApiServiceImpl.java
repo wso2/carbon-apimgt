@@ -238,7 +238,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, AddCommentDTO addCommentDTO, String parentCommentID, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -251,9 +251,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 identifier = apiTypeWrapper.getApi().getId();
             }
             Comment comment = new Comment();
-            comment.setText(addCommentDTO.getContent());
-            comment.setCategory(addCommentDTO.getCategory());
-            comment.setParentCommentID(parentCommentID);
+            comment.setText(postRequestBodyDTO.getContent());
+            comment.setCategory(postRequestBodyDTO.getCategory());
+            comment.setParentCommentID(replyTo);
             comment.setEntryPoint("devPortal");
             comment.setUser(username);
             comment.setApiId(apiId);
@@ -350,9 +350,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response editCommentOfAPI(String commentId, String apiId, UpdateCommentDTO updateCommentDTO, MessageContext messageContext) throws APIManagementException{
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException{
         return null;
     }
+
 
     @Override
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException{
