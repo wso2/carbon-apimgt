@@ -397,8 +397,9 @@ export default function CustomizedSteppers() {
                                 variant='contained'
                                 color='primary'
                                 onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable) || api.isRevision
-                                        || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
+                                disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
+                                    || api.isRevision || AuthManager.isNotPublisher()
+                                    || api.workflowStatus === 'CREATED'}
                             >
                                 Publish
                                 {isUpdating && <CircularProgress size={20} />}
@@ -466,7 +467,7 @@ export default function CustomizedSteppers() {
                     <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
                         <div className={`${classes.pointerMiddle} ${step2Class}`}>
                             <Box p={2} borderLeft='0' borderRight='0'>
-                                { api.type !== 'WEBSUB' &&  (
+                                { api.type !== 'WEBSUB' && (
                                     <Tooltip
                                         title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
                                         placement='top'
