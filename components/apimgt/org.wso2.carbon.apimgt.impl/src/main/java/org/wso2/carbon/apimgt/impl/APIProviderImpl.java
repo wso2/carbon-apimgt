@@ -3269,7 +3269,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return newAPI;
     }
 
-    public String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException {
+    public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
         return apiMgtDAO.retrieveServiceKeyByApiId(apiId, tenantId);
     }
 

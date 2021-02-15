@@ -3399,9 +3399,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             int tenantId = APIUtil.getTenantId(username);
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
-                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
                 API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+                String serviceKey = apiProvider.retrieveServiceKeyByApiId(existingAPI.getId().getId(), tenantId);
+                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
                 if (existingAPI == null) {
                     throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
                             ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
@@ -4175,12 +4175,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantId(username);
         try {
-            String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
+            API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String serviceKey = apiProvider.retrieveServiceKeyByApiId(originalAPI.getId().getId(), tenantId);
             ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-            API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
             String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
-            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             api.setEndpointConfig(endpointConfig);
             JSONObject serviceInfo = new JSONObject();
             serviceInfo.put("key", service.getKey());

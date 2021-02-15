@@ -5833,7 +5833,7 @@ public class ApiMgtDAO {
             }
             String serviceKey = api.getServiceInfo("serviceKey");
             if (StringUtils.isNotEmpty(serviceKey)) {
-                addAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), tenantId, connection);
+                addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -17107,14 +17107,15 @@ public class ApiMgtDAO {
     /**
      * Retrieve Service Info and Set it to API
      *
-     * @param api API object
+     * @param api API Object
+     * @param apiId Internal Unique API Id
      * @throws APIManagementException
      */
-    public void setServiceStatusInfoToAPI(API api) throws APIManagementException {
+    public void setServiceStatusInfoToAPI(API api, int apiId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
-                     .GET_MD5_VALUE_OF_SERVICE_BY_API_UUID_SQL)) {
-            preparedStatement.setString(1, api.getUuid());
+                     .GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL)) {
+            preparedStatement.setInt(1, apiId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     JSONObject serviceInfo = new JSONObject();
@@ -17129,16 +17130,16 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Error while retrieving the service status associated with the API with id "
-                    + api.getUuid(), e);
+            handleException("Error while retrieving the service status associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
         }
     }
 
-    private void addAPIServiceMapping(String apiId, String serviceKey, String md5sum, int tenantId,
+    private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
                                       Connection connection) throws SQLException {
         String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
-            preparedStatement.setString(1, apiId);
+            preparedStatement.setInt(1, apiId);
             preparedStatement.setString(2, serviceKey);
             preparedStatement.setString(3, md5sum);
             preparedStatement.setInt(4, tenantId);
@@ -17154,12 +17155,12 @@ public class ApiMgtDAO {
      * @return Service Key
      * @throws APIManagementException
      */
-    public String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException {
+    public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
         String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
         String serviceKey = StringUtils.EMPTY;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
-            preparedStatement.setString(1, apiId);
+            preparedStatement.setInt(1, apiId);
             preparedStatement.setInt(2, tenantId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
