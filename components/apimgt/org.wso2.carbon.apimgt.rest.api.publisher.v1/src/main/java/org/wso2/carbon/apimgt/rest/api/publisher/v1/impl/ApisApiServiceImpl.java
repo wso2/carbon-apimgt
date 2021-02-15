@@ -3399,9 +3399,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             int tenantId = APIUtil.getTenantId(username);
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
-                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
                 API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+                String serviceKey = apiProvider.retrieveServiceKeyByApiId(existingAPI.getId().getId(), tenantId);
+                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
                 if (existingAPI == null) {
                     throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
                             ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
@@ -4140,7 +4140,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         try {
             ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
@@ -4177,28 +4176,39 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantId(username);
         try {
-            String serviceKey = apiProvider.retrieveServiceKeyByApiId(apiId, tenantId);
+            API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String serviceKey = apiProvider.retrieveServiceKeyByApiId(originalAPI.getId().getId(), tenantId);
             ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+            String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
+            api.setEndpointConfig(endpointConfig);
+            JSONObject serviceInfo = new JSONObject();
+            serviceInfo.put("key", service.getKey());
+            serviceInfo.put("md5", service.getMd5());
+            api.setServiceInfo(serviceInfo);
+            API updatedApi = apiProvider.updateAPI(api, originalAPI);
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, true, true);
+                Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null,
+                        true, true);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-                // TODO: Needs to be updated - APIM specific vendor extensions should be preserved for old resources
-                PublisherCommonUtils.updateSwagger(apiId, validationResponse, true);
                 if (!validationResponse.isValid()) {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
+                PublisherCommonUtils.updateSwagger(apiId, validationResponse, true);
             } else {
-                RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to API" +
-                        " using the service type " + service.getDefinitionType(), log);
+                RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
+                        "API using the service type " + service.getDefinitionType(), log);
             }
+            return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service associated with " +
-                    "API with id " + apiId, log);
+            RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
+                    "associated with API with id " + apiId, log);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -4207,7 +4217,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
-                                                Attachment fileDetail, ServiceEntry service) {
+                                           Attachment fileDetail, ServiceEntry service) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {

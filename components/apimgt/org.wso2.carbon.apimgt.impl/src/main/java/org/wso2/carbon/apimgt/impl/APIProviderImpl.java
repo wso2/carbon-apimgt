@@ -999,9 +999,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
         String serviceKey = api.getServiceInfo("serviceKey");
-        if (StringUtils.isNotEmpty(serviceKey)) {
-            apiMgtDAO.addAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), tenantId);
-        }
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -3278,7 +3275,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return newAPI;
     }
 
-    public String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException {
+    public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
         return apiMgtDAO.retrieveServiceKeyByApiId(apiId, tenantId);
     }
 

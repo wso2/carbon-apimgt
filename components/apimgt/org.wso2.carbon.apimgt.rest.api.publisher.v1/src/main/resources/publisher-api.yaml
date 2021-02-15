@@ -7743,9 +7743,9 @@ components:
         serviceInfo:
           type: object
           properties:
-            id:
+            key:
               type: string
-              example: 36d4988b-f4ea-46d1-bfd8-38bc1fc5a118
+              example: PetStore-1.0.0
             outdated:
               type: boolean
               example: false

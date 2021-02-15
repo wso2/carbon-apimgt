@@ -180,38 +180,18 @@ public class SQLConstants {
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
-    public static final String GET_SERVICE_INFO_BY_SERVICE_KEY = "SELECT " +
-            "   UUID," +
-            "   SERVICE_KEY," +
-            "   MD5," +
-            "   ENTRY_NAME," +
-            "   DISPLAY_NAME," +
-            "   ENTRY_VERSION," +
-            "   SERVICE_URL," +
-            "   DEFINITION_TYPE," +
-            "   DEFINITION_URL," +
-            "   DESCRIPTION," +
-            "   SECURITY_TYPE," +
-            "   MUTUAL_SSL_ENABLED," +
-            "   CREATED_TIME," +
-            "   LAST_UPDATED_TIME," +
-            "   CREATED_BY," +
-            "   UPDATED_BY," +
-            "   ENDPOINT_DEFINITION," +
-            "   METADATA " +
-            "   FROM AM_SERVICE_CATALOG WHERE " +
-            "   SERVICE_KEY = ? AND TENANT_ID = ?";
-
-    public static final String ADD_API_SERVICE_MAPPING_SQL = "INSERT INTO AM_API_SERVICE_MAPPING (API_UUID, SERVICE_KEY, " +
-            "MD5, TENANT_ID) VALUES (?,?,?,?)";
+    public static final String ADD_API_SERVICE_MAPPING_SQL = "INSERT INTO AM_API_SERVICE_MAPPING (API_ID, SERVICE_KEY" +
+            ", MD5, TENANT_ID) VALUES (?,?,?,?)";
 
     public static final String GET_SERVICE_KEY_BY_API_ID_SQL = "SELECT SERVICE_KEY FROM AM_API_SERVICE_MAPPING WHERE " +
-            " API_UUID = ? AND TENANT_ID = ?";
+            " API_ID = ? AND TENANT_ID = ?";
 
-    public static final String DELETE_API_SERVICE_MAPPING_SQL = "DELETE FROM AM_API_SERVICE_MAPPING WHERE API_UUID = ? " +
-            "AND SERVICE_ID = ?";
+    public static final String UPDATE_API_SERVICE_MAPPING_SQL = "UPDATE AM_API_SERVICE_MAPPING SET " +
+            "   SERVICE_KEY = ?, " +
+            "   MD5 = ?, " +
+            "   WHERE API_UUID = ?";
 
-    public static final String GET_MD5_VALUE_OF_SERVICE_SQL = "SELECT " +
+    public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
             "   AM_API_SERVICE_MAPPING.MD5 AS API_SERVICE_MD5, " +
             "   AM_API_SERVICE_MAPPING.SERVICE_KEY " +
@@ -220,7 +200,7 @@ public class SQLConstants {
             "   ON " +
             "   AM_API_SERVICE_MAPPING.SERVICE_KEY = AM_SERVICE_CATALOG.SERVICE_KEY " +
             "   WHERE " +
-            "   AM_API_SERVICE_MAPPING.API_UUID = ?";
+            "   AM_API_SERVICE_MAPPING.API_ID = ?";
 
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +

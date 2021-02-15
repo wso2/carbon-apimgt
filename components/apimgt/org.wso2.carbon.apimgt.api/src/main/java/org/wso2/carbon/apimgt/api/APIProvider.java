@@ -398,7 +398,7 @@ public interface APIProvider extends APIManager {
      * @return Unique key of the service
      * @throws APIManagementException
      */
-    String retrieveServiceKeyByApiId(String apiId, int tenantId) throws APIManagementException;
+    String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException;
 
     /**
      * Removes a given documentation
@@ -1842,5 +1842,4 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to delete APIRevision
      */
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
-
 }

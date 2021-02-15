@@ -2516,7 +2516,7 @@ public final class APIConstants {
     // Constants related to Service Catalog
     public static final String METADATA_FILE_NAME = "metadata";
     public static final String METADATA_FILE = "metadata.yaml";
-    public static final String DEFINITION_FILE = "oas.yaml";
+    public static final String DEFINITION_FILE = "definition.yaml";
     public static final String KEY_SEPARATOR = "-";
     public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";

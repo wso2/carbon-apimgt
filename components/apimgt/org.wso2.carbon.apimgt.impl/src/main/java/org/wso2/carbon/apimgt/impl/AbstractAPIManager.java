@@ -3731,7 +3731,8 @@ public abstract class AbstractAPIManager implements APIManager {
         // Ratings
         int internalId = apiMgtDAO.getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
-        apiMgtDAO.setServiceStatusInfoToAPI(api);
+        apiId.setId(internalId);
+        apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
         // api level tier
         String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);
         api.setApiLevelPolicy(apiLevelTier);
