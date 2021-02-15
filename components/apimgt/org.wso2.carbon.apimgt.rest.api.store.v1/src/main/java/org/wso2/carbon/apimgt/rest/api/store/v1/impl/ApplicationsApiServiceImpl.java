@@ -1186,8 +1186,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String organizationId,
-                                                                      String keyMappingId, String groupId, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String keyMappingId, String organizationId, String groupId, MessageContext messageContext) throws APIManagementException {
 
         return Response.ok().entity(getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId)).build();
     }
