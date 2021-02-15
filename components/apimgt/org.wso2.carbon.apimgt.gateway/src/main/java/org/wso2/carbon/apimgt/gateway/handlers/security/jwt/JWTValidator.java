@@ -146,30 +146,12 @@ public class JWTValidator {
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
-        String thumbprint = null;
-        try {
-            thumbprint = signedJWTInfo.getSignedJWT().getJWTClaimsSet().getStringClaim("cnf");
-        } catch (ParseException e) {
-            log.error("Error while paring JWT claims. " + GatewayUtils.getMaskedToken(jwtHeader));
-        }
-        signedJWTInfo.setCertificateThumbprint(thumbprint);
-        try {
 
+        try {
             X509Certificate clientCertificate = Utils.getClientCertificate(axis2MsgContext);
-            if (clientCertificate != null) {
-                byte[] encoded = org.apache.commons.codec.binary.Base64.encodeBase64(clientCertificate.getEncoded());
-                String base64EncodedString =
-                        APIConstants.BEGIN_CERTIFICATE_STRING
-                                .concat(new String(encoded)).concat("\n")
-                                .concat(APIConstants.END_CERTIFICATE_STRING);
-                base64EncodedString = org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(base64EncodedString.getBytes());
-                signedJWTInfo.setEncodedClientCertificate(base64EncodedString);
-            }
+            signedJWTInfo.setX509ClientCertificate(clientCertificate);
         } catch (APIManagementException e) {
             log.error("Error while obtaining client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
-        } catch (CertificateEncodingException e) {
-            log.error("Error while encoding client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
-
         }
         if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
@@ -181,7 +163,6 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
-
         }
 
         JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);

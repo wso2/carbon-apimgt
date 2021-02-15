@@ -60,7 +60,7 @@ public class JWTValidatorImpl implements JWTValidator {
             state = validateSignature(signedJWTInfo.getSignedJWT());
             if (state) {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-                state = signedJWTInfo.isValidHoKToken();
+                state = signedJWTInfo.isValidCertificateBoundAccessToken();
                 if (state) {
                     state = validateTokenExpiry(jwtClaimsSet);
                     if (state) {

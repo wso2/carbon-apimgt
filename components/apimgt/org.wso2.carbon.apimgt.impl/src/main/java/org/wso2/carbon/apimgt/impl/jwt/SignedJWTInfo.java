@@ -26,12 +26,19 @@ import com.google.gson.JsonParser;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.Util;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 
 /**
  * JWT internal Representation
@@ -43,7 +50,9 @@ public class SignedJWTInfo implements Serializable {
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
     private String certificateThumbprint; //holder of key certificate bound access token
-    private String encodedClientCertificate; //holder of key certificate cnf
+    private X509Certificate X509ClientCertificate; //holder of key certificate cnf
+    private String x509ClientCertificateHash; //holder of key certificate cnf
+    private static final Log log = LogFactory.getLog(JWTValidator.class);
 
     public enum ValidationStatus {
         NOT_VALIDATED, INVALID, VALID
@@ -98,38 +107,50 @@ public class SignedJWTInfo implements Serializable {
         this.validationStatus = validationStatus;
     }
 
-    public void setEncodedClientCertificate(String encodedClientCertificate) {
+    public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
 
-        this.encodedClientCertificate = encodedClientCertificate;
+        X509ClientCertificate = x509ClientCertificate;
+        if (x509ClientCertificate != null) {
+            byte[] encoded = new byte[0];
+            try {
+                encoded = org.apache.commons.codec.binary.Base64.encodeBase64(x509ClientCertificate.getEncoded());
+            } catch (CertificateEncodingException e) {
+                log.error("Error while encoding client certificate. ");
+            }
+            x509ClientCertificateHash = GatewayUtils.hashString(encoded);
+        }
     }
+
 
     public String getCertificateThumbprint() {
 
-        return certificateThumbprint;
-    }
+        String thumbprint = null;
+        if (null != jwtClaimsSet) {
+            try {
+                thumbprint = jwtClaimsSet.getStringClaim(APIConstants.CNF);
+                JSONObject thumbprintJson = new JSONObject(thumbprint);
+                return thumbprintJson.getString(APIConstants.DIGEST);
 
-    public String getEncodedClientCertificate() {
-
-        return encodedClientCertificate;
-    }
-
-    public void setCertificateThumbprint(String certificateThumbprint) {
-
-        this.certificateThumbprint = certificateThumbprint;
-    }
-
-    public boolean isValidHoKToken() { //certificate bound access token
-
-        if (isCertificateBoundAccessTokenEnabled()) {
-            if (StringUtils.isNotEmpty(getEncodedClientCertificate()) && StringUtils.isNotEmpty(getCertificateThumbprint())) {
-                JsonObject jsonElem = new JsonParser().parse(getCertificateThumbprint()).getAsJsonObject();
-                if (null != jsonElem) {
-                    return jsonElem.get(APIConstants.DIGEST) != null && jsonElem.get(APIConstants.DIGEST).toString().
-                            equalsIgnoreCase(getEncodedClientCertificate());
-                }
-            } else {
-                return false;
+            } catch (ParseException e) {
+                log.error("Error while paring JWT claims. ");
             }
+        }
+        return null;
+    }
+
+    public String getX509ClientCertificateHash() {
+
+        return x509ClientCertificateHash;
+    }
+
+    public boolean isValidCertificateBoundAccessToken() { //Holder of Key token
+        if (X509ClientCertificate == null || StringUtils.isEmpty(getX509ClientCertificateHash()))
+            return false;
+        if (isCertificateBoundAccessTokenEnabled()) {
+            if (getX509ClientCertificateHash().equals(getCertificateThumbprint())) {
+                return true;
+            }
+            return false;
         }
         return true;
     }
