@@ -16461,9 +16461,10 @@ public class ApiMgtDAO {
                     apiRevision.setCreatedBy(rs.getString(6));
                     if (!StringUtils.isEmpty(rs.getString(7))) {
                         apiRevisionDeployment.setDeployment(rs.getString(7));
+                        apiRevisionDeployment.setVhost(rs.getString(8));
                         //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
-                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(9));
-                        apiRevisionDeployment.setDeployedTime(rs.getString(10));
+                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(10));
+                        apiRevisionDeployment.setDeployedTime(rs.getString(11));
                         apiRevisionDeploymentList.add(apiRevisionDeployment);
                     }
                     apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
@@ -16518,8 +16519,9 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION_DEPLOYMENT_MAPPING);
                 for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
                     statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, apiRevisionId);
-                    statement.setBoolean(3, apiRevisionDeployment.isDisplayOnDevportal());
+                    statement.setString(2, apiRevisionDeployment.getVhost());
+                    statement.setString(3, apiRevisionId);
+                    statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -16550,9 +16552,10 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(2));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(3));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(4));
+                    apiRevisionDeployment.setVhost(rs.getString(2));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
                 }
             }
         } catch (SQLException e) {
@@ -16578,9 +16581,10 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                     apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(2));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(3));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(4));
+                    apiRevisionDeployment.setVhost(rs.getString(2));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -16608,9 +16612,10 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                     apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(2));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(3));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(4));
+                    apiRevisionDeployment.setVhost(rs.getString(2));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }

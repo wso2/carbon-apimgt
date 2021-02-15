@@ -7767,7 +7767,10 @@ components:
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         name:
           type: string
-          example: production and sandbox
+          example: default
+        vhost:
+          type: string
+          example: https://mg.wso2.com
         displayOnDevportal:
           type: boolean
           example: true
