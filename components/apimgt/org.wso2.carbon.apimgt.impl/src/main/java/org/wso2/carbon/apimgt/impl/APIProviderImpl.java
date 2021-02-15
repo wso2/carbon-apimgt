@@ -9815,7 +9815,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Get the latest revision UUID from the revision list for a given API
      *
      * @param apiUUID API UUID
-     * @return Earliest revision's UUID
+     * @return Latest revision's UUID
      * @throws APIManagementException if failed to get the revision
      */
     @Override
