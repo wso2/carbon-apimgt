@@ -17,7 +17,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
@@ -99,7 +99,7 @@ return null;
   @ApiModelProperty(example = "CalculatorApp", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="^[a-zA-Z0-9 ._-]*$") @Size(min=1,max=70)  public String getName() {
+ @Size(min=1,max=70)  public String getName() {
     return name;
   }
   public void setName(String name) {

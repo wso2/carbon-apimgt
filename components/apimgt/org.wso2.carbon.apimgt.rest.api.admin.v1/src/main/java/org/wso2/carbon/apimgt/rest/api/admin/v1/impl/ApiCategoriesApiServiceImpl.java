@@ -28,13 +28,16 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.ApiCategoriesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.APICategoryListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APICategoryMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.Response;
 
 public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
@@ -44,7 +47,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     public Response apiCategoriesGet(MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             List<APICategory> categoryList = apiAdmin.getAPICategoriesOfTenant(tenantID);
             APICategoryListDTO categoryListDTO = APICategoryMappingUtil.fromCategoryListToCategoryListDTO(categoryList);
@@ -61,8 +64,24 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
         APICategory apiCategory = null;
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiCategory = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
+
+            if (!org.apache.commons.lang3.StringUtils.isEmpty(apiCategory.getName())) {
+                String regExSpecialChars = "!@#$%^&*(),?\"{}[\\]|<>";
+                String regExSpecialCharsReplaced = regExSpecialChars.replaceAll(".", "\\\\$0");
+                Pattern pattern = Pattern.compile("[" + regExSpecialCharsReplaced + "\\s" + "]");// include \n,\t, space
+                Matcher matcher = pattern.matcher(apiCategory.getName());
+                if (matcher.find()) {
+                    RestApiUtil.handleBadRequest("Name field contains special characters.", log);
+                }
+                if (apiCategory.getName().length() > 255) {
+                    RestApiUtil.handleBadRequest("API Category name is too long.", log);
+                }
+            } else {
+                RestApiUtil.handleBadRequest("API Category name is empty.", log);
+            }
+
             APICategoryDTO categoryDTO = APICategoryMappingUtil.
                     fromCategoryToCategoryDTO(apiAdmin.addCategory(apiCategory, userName));
             URI location = new URI(RestApiConstants.RESOURCE_PATH_CATEGORY + "/" + categoryDTO.getId());
@@ -79,14 +98,13 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                                                   MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(userName);
             int tenantID = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             APICategory apiCategoryToUpdate = APICategoryMappingUtil.fromCategoryDTOToCategory(body);
             APICategory apiCategoryOriginal = apiAdmin.getAPICategoryByID(apiCategoryId);
             if (apiCategoryOriginal == null) {
-                String errorMsg = "No api category with the given category ID exists :" + apiCategoryId;
-                log.error(errorMsg);
+                String errorMsg = "No API category with the given category ID exists: " + apiCategoryId;
                 throw new APIManagementException(errorMsg);
             }
 
@@ -100,7 +118,6 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
             String updatedName = apiCategoryToUpdate.getName();
             if (!oldName.equals(updatedName) && apiAdmin.isCategoryNameExists(updatedName, apiCategoryId, tenantID)) {
                 String errorMsg = "An API category already exists by the new API category name :" + updatedName;
-                log.error(errorMsg);
                 throw new APIManagementException(errorMsg);
             }
 
@@ -120,7 +137,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
                                                      MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
-            String userName = RestApiUtil.getLoggedInUsername();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             apiAdmin.deleteCategory(apiCategoryId, userName);
             return Response.ok().build();
         } catch (APIManagementException e) {

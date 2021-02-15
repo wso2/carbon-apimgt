@@ -46,7 +46,7 @@ KeyManagersApiService delegate = new KeyManagersApiServiceImpl();
     }, tags={ "Key Managers (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Categories returned ", response = KeyManagerListDTO.class) })
-    public Response keyManagersGet() throws APIManagementException{
-        return delegate.keyManagersGet(securityContext);
+    public Response getAllKeyManagers() throws APIManagementException{
+        return delegate.getAllKeyManagers(securityContext);
     }
 }

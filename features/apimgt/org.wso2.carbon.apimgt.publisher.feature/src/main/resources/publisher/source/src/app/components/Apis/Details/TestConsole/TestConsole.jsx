@@ -32,7 +32,7 @@ import { TryOutController, SwaggerUI } from 'developer_portal';
 import Button from '@material-ui/core/Button';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import uuid from 'uuid/v4';
+import Utils from 'AppData/Utils';
 import Alert from 'AppComponents/Shared/Alert';
 
 /**
@@ -173,8 +173,6 @@ class TestConsole extends React.Component {
         let sandboxAccessToken;
         let apiID;
         let urls;
-        let httpVal;
-        let httpsVal;
         let basePath;
         const user = AuthManager.getUser();
         const promisedAPI = API.getAPIById(apiObj.id);
@@ -232,20 +230,24 @@ class TestConsole extends React.Component {
                 this.setState({ serverError: `${error.statusCode} - ${error.response.body.description}` });
             });
         const settingPromise = API.getSettings();
-        const newServer = [];
         settingPromise
             .then((settingsNew) => {
                 if (settingsNew.environment) {
-                    urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
-                    httpVal = urls.map((val) => { return val.http; });
-                    httpsVal = urls.map((value) => { return value.https; });
+                    urls = settingsNew.environment.map((environment) => {
+                        const env = {
+                            name: environment.name,
+                            endpoints: {
+                                http: environment.endpoints.http + apiData.context + '/' + apiData.version,
+                                https: environment.endpoints.https + apiData.context + '/' + apiData.version,
+                            },
+                        };
+                        return env;
+                    });
                     basePath = apiData.context + '/' + apiData.version;
-                    newServer.push({ url: httpsVal + apiData.context + '/' + apiData.version });
-                    newServer.push({ url: httpVal + apiData.context + '/' + apiData.version });
                 }
                 this.setState({
-                    settings: newServer,
-                    host: httpsVal[0].split('//')[1],
+                    settings: urls,
+                    host: urls[0].endpoints.https.split('//')[1],
                     baseUrl: basePath,
                 });
             });
@@ -319,7 +321,6 @@ class TestConsole extends React.Component {
         this.setState({ keys });
     }
 
-
     handleClick = () => {
         const { apiObj } = this.props;
         this.setState({ loading: true });
@@ -330,12 +331,16 @@ class TestConsole extends React.Component {
             const getResponse = values[1];
             const apiData = getResponse;
             apiData.enableStore = false;
-            const token = uuid();
+            const token = Utils.generateUUID();
             apiData.testKey = token;
             this.context.updateAPI({ enableStore: false, testKey: token });
         }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
             console.error(error);
-        }).finally(() => {
             this.setState({ loading: false });
         });
     };
@@ -388,7 +393,6 @@ class TestConsole extends React.Component {
         }
     }
 
-
     /**
      * Load the access token for given key type
      * @memberof TryOutController
@@ -436,7 +440,17 @@ class TestConsole extends React.Component {
             swagger.basePath = baseUrl;
             swagger.schemes = ['https'];
         } else {
-            swagger.servers = settings;
+            let servers = [];
+            let httpUrls = [];
+            let httpsUrls = [];
+            for (let i = 0; i < settings.length; i++) {
+                if (environments.includes(settings[i].name)) {
+                    httpUrls = httpUrls.concat({ url: settings[i].endpoints.http });
+                    httpsUrls = httpsUrls.concat({ url: settings[i].endpoints.https });
+                }
+            }
+            servers = httpUrls.concat(httpsUrls);
+            swagger.servers = servers;
         }
         const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
         const enableForTest = api.enableStore === false;

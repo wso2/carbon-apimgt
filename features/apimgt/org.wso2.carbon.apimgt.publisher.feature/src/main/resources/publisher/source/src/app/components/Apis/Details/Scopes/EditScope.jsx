@@ -36,6 +36,7 @@ import Icon from '@material-ui/core/Icon';
 import base64url from 'base64url';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Error from '@material-ui/core/SvgIcon/SvgIcon';
+import Api from 'AppData/api';
 
 const styles = (theme) => ({
     root: {
@@ -134,7 +135,6 @@ class EditScope extends React.Component {
         this.validateScopeDisplayName = this.validateScopeDisplayName.bind(this);
     }
 
-
     handleRoleDeletion = (role) => {
         const { validRoles, invalidRoles } = this.state;
         if (invalidRoles.includes(role)) {
@@ -171,49 +171,6 @@ class EditScope extends React.Component {
     }
 
     /**
-     * Add new scope
-     * @memberof Scopes
-     */
-    updateScope() {
-        const { apiScope, validRoles } = this.state;
-        const {
-            intl, api, history, updateAPI,
-        } = this.props;
-        const originalScope = apiScope.scope;
-        apiScope.scope = {
-            id: originalScope.id,
-            name: originalScope.name,
-            displayName: originalScope.displayName,
-            description: originalScope.description,
-            bindings: validRoles,
-        };
-        const urlPrefix = api.apiType === 'APIProduct' ? 'api-products' : 'apis';
-        const scopes = api.scopes.map((scopeObj) => {
-            if (scopeObj.scope.name === apiScope.scope.name) {
-                return apiScope;
-            } else {
-                return scopeObj;
-            }
-        });
-        const updateProperties = { scopes };
-        const promisedApiUpdate = updateAPI(updateProperties);
-        promisedApiUpdate.then(() => {
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Details.Scopes.CreateScope.scope.updated.successfully',
-                defaultMessage: 'Scope updated successfully',
-            }));
-            const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
-            history.push(redirectURL);
-        }).catch((error) => {
-            const { response } = error;
-            if (response.body) {
-                const { description } = response.body;
-                Alert.error(description);
-            }
-        });
-    }
-
-    /**
      * Handle Role Addition.
      * @param {string} role The first number.
      */
@@ -238,6 +195,49 @@ class EditScope extends React.Component {
                     console.error('Error when validating role ' + error);
                 }
             });
+    }
+
+    /**
+     * Add new scope
+     * @memberof Scopes
+     */
+    updateScope() {
+        const { apiScope, validRoles } = this.state;
+        const {
+            intl, api, history, updateAPI,
+        } = this.props;
+        const originalScope = apiScope.scope;
+        apiScope.scope = {
+            id: originalScope.id,
+            name: originalScope.name,
+            displayName: originalScope.displayName,
+            description: originalScope.description,
+            bindings: validRoles,
+        };
+        const urlPrefix = api.apiType === Api.CONSTS.APIProduct ? 'api-products' : 'apis';
+        const scopes = api.scopes.map((scopeObj) => {
+            if (scopeObj.scope.name === apiScope.scope.name) {
+                return apiScope;
+            } else {
+                return scopeObj;
+            }
+        });
+        const updateProperties = { scopes };
+        const promisedApiUpdate = updateAPI(updateProperties);
+        promisedApiUpdate.then(() => {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.Scopes.CreateScope.scope.updated.successfully',
+                defaultMessage: 'Scope updated successfully',
+            }));
+            const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
+            history.push(redirectURL);
+        }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
+        });
     }
 
     /**
@@ -277,7 +277,6 @@ class EditScope extends React.Component {
             apiScope,
         });
     }
-
 
     /**
      * Render.
@@ -432,7 +431,7 @@ class EditScope extends React.Component {
                                         variant='contained'
                                         color='primary'
                                         onClick={this.updateScope}
-                                        disabled={invalidRoles.length !== 0}
+                                        disabled={invalidRoles.length !== 0 || api.isRevision}
                                         className={classes.saveButton}
                                     >
                                         <FormattedMessage
@@ -460,7 +459,7 @@ class EditScope extends React.Component {
 
 EditScope.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }),
     api: PropTypes.shape({
         id: PropTypes.string,

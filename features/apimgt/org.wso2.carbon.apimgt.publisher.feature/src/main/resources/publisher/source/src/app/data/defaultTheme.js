@@ -79,6 +79,7 @@ export default {
         secondary: {
             light: '#0066ff',
             main: '#a2ecf5',
+            highlight: '#e8fafd',
             // dark: will be calculated from palette.secondary.main,
             contrastText: '#ffcc00',
         },
@@ -155,6 +156,8 @@ export default {
             iconSize: 32,
         },
         thumbnail: {
+            width: 240,
+            height: 140,
             backgrounds: [ // These backgrounds are use to generate the thumbnails.
                 { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
                 { prime: 0xf47f16ff, sub: 0xcddc39ff },
@@ -181,11 +184,22 @@ export default {
             backgroundChip: '#5aebf9',
         },
         warningColor: '#ffc439',
+        landingPageIcons: {
+            graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
+            restApiIcon: '/site/public/images/landing-icons/restapi.svg',
+            soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
+            streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+            websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+        },
         title: {
             prefix: '[Publisher]',
             sufix: '- WSO2 APIM',
         },
-        buttonText: '#FF7300',
-        buttonBorder: '#FCA574',
+        serviceCatalog: {
+            onboarding: {
+                buttonText: '#FF7300',
+                buttonBorder: '#FCA574',
+            },
+        },
     },
 };

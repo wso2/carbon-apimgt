@@ -41,7 +41,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -97,8 +98,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIImportExportManager apiImportExportManager = new APIImportExportManager(apiProvider, userName);
             apiImportExportManager.importAPIArchive(fileInputStream, preserveProvider, overwrite);
             return Response.status(Response.Status.OK).entity("API imported successfully.").build();
@@ -176,8 +177,8 @@ public class ImportApiServiceImpl implements ImportApiService {
         }
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String userName = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String userName = RestApiCommonUtil.getLoggedInUsername();
             APIImportExportManager apiImportExportManager = new APIImportExportManager(apiProvider, userName);
             apiImportExportManager.importAPIProductArchive(fileInputStream, preserveProvider, overwriteAPIProduct, overwriteAPIs, isImportAPIs);
             return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
@@ -220,11 +221,11 @@ public class ImportApiServiceImpl implements ImportApiService {
         APIConsumer consumer;
         String ownerId;
         int appId;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String tempDirPath =
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + APPLICATION_IMPORT_DIR_PREFIX + UUID.randomUUID().toString();
         try {
-            consumer = RestApiUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager =
                     new FileBasedApplicationImportExportManager(consumer, tempDirPath);
             Application applicationDetails = importExportManager.importApplication(fileInputStream);

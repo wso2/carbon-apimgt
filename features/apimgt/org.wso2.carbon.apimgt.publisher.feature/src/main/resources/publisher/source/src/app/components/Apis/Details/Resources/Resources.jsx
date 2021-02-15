@@ -29,7 +29,7 @@ import Banner from 'AppComponents/Shared/Banner';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-import SwaggerParser from 'swagger-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 import { isRestricted } from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
 import Operation from './components/Operation';

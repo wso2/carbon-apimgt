@@ -97,6 +97,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYP
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
+    static final String OPENAPI_DEFAULT_AUTHORIZATION_URL = "https://test.com";
     private List<String> otherSchemes;
     private List<String> getOtherSchemes() {
         return otherSchemes;
@@ -421,25 +422,33 @@ public class OAS3Parser extends APIDefinition {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
                     }
-                    Map<String, Object> extensios = operation.getExtensions();
-                    if (extensios != null) {
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
-                            String scopeKey = (String) extensios.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                    Map<String, Object> extensions = operation.getExtensions();
+                    if (extensions != null) {
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
+                            String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             template.setAuthType(scopeKey);
                             template.setAuthTypes(scopeKey);
                         } else {
                             template.setAuthType("Any");
                             template.setAuthTypes("Any");
                         }
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
-                            String throttlingTier = (String) extensios.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
+                            String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                             template.setThrottlingTier(throttlingTier);
                             template.setThrottlingTiers(throttlingTier);
                         }
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                            String mediationScript = (String) extensios.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                            String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
                             template.setMediationScript(mediationScript);
                             template.setMediationScripts(template.getHTTPVerb(), mediationScript);
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            template.setAmznResourceName((String)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                            template.setAmznResourceTimeout(((Long)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                         }
                     }
                     urlTemplates.add(template);
@@ -541,7 +550,7 @@ public class OAS3Parser extends APIDefinition {
 
         info.setVersion(swaggerData.getVersion());
         openAPI.setInfo(info);
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL);
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             modifyGraphQLSwagger(openAPI);
@@ -621,7 +630,7 @@ public class OAS3Parser extends APIDefinition {
                 addOrUpdatePathToSwagger(openAPI, resource);
             }
         }
-        updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL);
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         
         if (StringUtils.isEmpty(openAPI.getInfo().getTitle())) {
@@ -841,7 +850,7 @@ public class OAS3Parser extends APIDefinition {
         if (oAuthFlow.getScopes() == null) {
             oAuthFlow.setScopes(new Scopes());
         }
-        oAuthFlow.setAuthorizationUrl("");
+        oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
 
         if (api.getAuthorizationHeader() != null) {
             openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
@@ -1518,7 +1527,7 @@ public class OAS3Parser extends APIDefinition {
                 oAuthFlow = new OAuthFlow();
                 securityScheme.getFlows().setImplicit(oAuthFlow);
             }
-            oAuthFlow.setAuthorizationUrl("");
+            oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
             Scopes oas3Scopes = oAuthFlow.getScopes() != null ? oAuthFlow.getScopes() : new Scopes();
 
             if (scopes != null && !scopes.isEmpty()) {
@@ -1567,7 +1576,7 @@ public class OAS3Parser extends APIDefinition {
                 //Populating the default security scheme with default values
                 OAuthFlows newDefaultFlows = new OAuthFlows();
                 OAuthFlow newDefaultFlow = new OAuthFlow();
-                newDefaultFlow.setAuthorizationUrl("https://test.com");
+                newDefaultFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
                 Scopes newDefaultScopes = new Scopes();
                 newDefaultFlow.setScopes(newDefaultScopes);
                 newDefaultFlows.setImplicit(newDefaultFlow);

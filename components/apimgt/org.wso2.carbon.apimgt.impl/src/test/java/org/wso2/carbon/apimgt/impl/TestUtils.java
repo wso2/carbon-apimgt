@@ -19,16 +19,26 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.policy.*;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImplTest;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -43,12 +53,14 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.xml.stream.XMLStreamException;
 
 public class TestUtils {
 
@@ -65,8 +77,8 @@ public class TestUtils {
                  .toString());
     }
     
-    public static ServiceReferenceHolder mockRegistryAndUserRealm(int tenantId) throws UserStoreException, 
-                                                                                                    RegistryException {
+    public static ServiceReferenceHolder mockRegistryAndUserRealm(int tenantId) throws UserStoreException,
+            RegistryException, XMLStreamException {
         ServiceReferenceHolder sh = getServiceReferenceHolder();
         
         RealmService realmService = Mockito.mock(RealmService.class);
@@ -102,8 +114,9 @@ public class TestUtils {
         return sh;
     }
 
-    public static ServiceReferenceHolder mockAPIMConfiguration(String propertyName, String value, int tenantId) throws RegistryException,
-                                                                                        UserStoreException{
+    public static ServiceReferenceHolder mockAPIMConfiguration(String propertyName, String value, int tenantId)
+            throws RegistryException,
+            UserStoreException, XMLStreamException {
         ServiceReferenceHolder sh = mockRegistryAndUserRealm(tenantId);
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
         APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
@@ -125,7 +138,7 @@ public class TestUtils {
     }
 
     public static void mockAPIMConfiguration() throws RegistryException,
-            UserStoreException {
+            UserStoreException, XMLStreamException {
         ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
         APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
@@ -149,7 +162,7 @@ public class TestUtils {
 
     }
     
-    public static ServiceReferenceHolder getServiceReferenceHolder() {
+    public static ServiceReferenceHolder getServiceReferenceHolder() throws XMLStreamException {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
@@ -206,7 +219,7 @@ public class TestUtils {
         return subscriptionPolicy;
     }
 
-    public static TenantManager getTenantManager() {
+    public static TenantManager getTenantManager() throws XMLStreamException {
         ServiceReferenceHolder serviceReferenceHolder = getServiceReferenceHolder();
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
@@ -220,13 +233,22 @@ public class TestUtils {
      *
      * @return initialized configuration context service.
      */
-    public static ConfigurationContextService initConfigurationContextService(boolean initAPIMConfigurationService) {
+    public static ConfigurationContextService initConfigurationContextService(boolean initAPIMConfigurationService)
+            throws XMLStreamException {
         ConfigurationContextService configurationContextService = Mockito.mock(ConfigurationContextService.class);
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
         Mockito.doReturn(axisConfiguration).when(configurationContext).getAxisConfiguration();
         TransportInDescription transportInDescription = Mockito.mock(TransportInDescription.class);
         Mockito.doReturn(transportInDescription).when(axisConfiguration).getTransportIn(Mockito.anyString());
+        Parameter dynamicSSLProfilesConfigParameter = Mockito.mock(Parameter.class);
+        Mockito.when(dynamicSSLProfilesConfigParameter.getParameterElement()).thenReturn(getDynamicSSLElement());
+        Mockito.when(transportInDescription.getParameter("dynamicSSLProfilesConfig"))
+                .thenReturn(dynamicSSLProfilesConfigParameter);
+        TransportOutDescription transportOutDescription = Mockito.mock(TransportOutDescription.class);
+        Mockito.doReturn(transportOutDescription).when(axisConfiguration).getTransportOut(Mockito.anyString());
+        Mockito.when(transportOutDescription.getParameter("dynamicSSLProfilesConfig"))
+                .thenReturn(dynamicSSLProfilesConfigParameter);
         Mockito.doReturn(configurationContext).when(configurationContextService).getServerConfigContext();
 
         if (initAPIMConfigurationService) {
@@ -241,5 +263,11 @@ public class TestUtils {
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
         System.setProperty("javax.net.ssl.trustStore", ".");
         return configurationContextService;
+    }
+    private static OMElement getDynamicSSLElement() throws XMLStreamException {
+        return AXIOMUtil.stringToOM("<parameter name=\"dynamicSSLProfilesConfig\">\n" +
+                "           <filePath>/target/test-classes//security/sslprofiles.xml</filePath>\n" +
+                "           <fileReadInterval>600000</fileReadInterval>\n" +
+                "       </parameter>");
     }
 }

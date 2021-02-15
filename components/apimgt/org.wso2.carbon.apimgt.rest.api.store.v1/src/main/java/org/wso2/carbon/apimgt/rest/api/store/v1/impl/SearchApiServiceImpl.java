@@ -30,12 +30,12 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SearchApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SearchResultMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -71,30 +71,17 @@ public class SearchApiServiceImpl implements SearchApiService {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
 
-            query = APIUtil.constructNewSearchQuery(query);
-
-            if (!(StringUtils.containsIgnoreCase(query, APIConstants.API_STATUS))) {
-                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-                String[] statusList = {APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(), "null"};
-                if (displayAPIsWithMultipleStatus) {
-                    statusList = new String[]{APIConstants.PUBLISHED.toLowerCase(), APIConstants.PROTOTYPED.toLowerCase(),
-                            APIConstants.DEPRECATED.toLowerCase(), "null"};
-                }
-                String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria(statusList);
-                query = query + APIConstants.SEARCH_AND_TAG + lcCriteria;
-            } else {
-                String searchString = APIConstants.API_STATUS + "=" ;
-                query = StringUtils.replaceIgnoreCase(query, searchString, APIConstants.LCSTATE_SEARCH_TYPE_KEY);
-            }
-
-            String username = RestApiUtil.getLoggedInUsername();
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            Map<String, Object> result = null;
             // Extracting search queries for the recommendation system
             apiConsumer.publishSearchQuery(query, username);
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = apiConsumer.searchPaginatedContent(query, requestedTenantDomain, offset, limit);
+            } else {
+                result = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset, limit);
+            }
 
-            Map<String, Object> result = apiConsumer
-                    .searchPaginatedAPIs(query, requestedTenantDomain, offset, limit, false);
             ArrayList<Object> apis;
             /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
             method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,
