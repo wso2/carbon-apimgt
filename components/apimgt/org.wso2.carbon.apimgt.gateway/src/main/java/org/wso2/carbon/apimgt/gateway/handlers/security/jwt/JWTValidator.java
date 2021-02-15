@@ -358,9 +358,7 @@ public class JWTValidator {
                         apiKeyValidationInfoDTO.isAuthorized());
             }
             if (apiKeyValidationInfoDTO.isAuthorized()) {
-                validateScopes(apiContext, apiVersion, matchingResource,
-                               WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
-                               signedJWTInfo);
+                validateScopes(apiContext, apiVersion, matchingResource, null, jwtValidationInfo, signedJWTInfo);
                 log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = null;
                 JWTInfoDto jwtInfoDto;
