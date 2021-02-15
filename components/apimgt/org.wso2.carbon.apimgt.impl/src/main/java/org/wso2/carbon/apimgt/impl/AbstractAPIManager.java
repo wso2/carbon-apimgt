@@ -3729,7 +3729,7 @@ public abstract class AbstractAPIManager implements APIManager {
         // TODO try to use a single query to get info from db
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         // Ratings
-        int internalId = apiMgtDAO.getAPIID(apiId, null);
+        int internalId = apiMgtDAO.getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
         apiMgtDAO.setServiceStatusInfoToAPI(api);
         // api level tier

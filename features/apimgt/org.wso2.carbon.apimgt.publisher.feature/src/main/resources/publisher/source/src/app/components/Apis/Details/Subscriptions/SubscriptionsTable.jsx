@@ -278,6 +278,24 @@ class SubscriptionsTable extends Component {
     }
 
     /**
+     * handleChangePage handle change in selected page
+     *
+     * @param page selected page
+     * */
+    handleChangePage(page) {
+        this.setState({ page }, this.fetchSubscriptionData);
+    }
+
+    /**
+     * handleChangeRowsPerPage handle change in rows per page
+     *
+     * @param event rows per page change event
+     * */
+    handleChangeRowsPerPage(event) {
+        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
+    }
+
+    /**
      * Returns the set of action buttons based on the current subscription state
      *
      * @param {*} state State of the subscription (PROD_ONLY_BLOCKED/BLOCKED/ACTIVE)
@@ -601,15 +619,6 @@ class SubscriptionsTable extends Component {
     }
 
     /**
-     * handleChangePage handle change in selected page
-     *
-     * @param page selected page
-     * */
-    handleChangePage(page) {
-        this.setState({ page }, this.fetchSubscriptionData);
-    }
-
-    /**
      * Checks whether the policy is a usage based monetization plan
      *
      * */
@@ -623,15 +632,6 @@ class SubscriptionsTable extends Component {
         } else {
             return false;
         }
-    }
-
-    /**
-     * handleChangeRowsPerPage handle change in rows per page
-     *
-     * @param event rows per page change event
-     * */
-    handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
     }
 
     /**
@@ -691,7 +691,6 @@ class SubscriptionsTable extends Component {
             </div>
         );
     }
-
 
     /**
      *

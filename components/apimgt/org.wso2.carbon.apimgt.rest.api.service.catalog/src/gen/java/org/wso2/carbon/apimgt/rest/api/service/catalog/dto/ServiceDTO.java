@@ -70,6 +70,8 @@ return null;
         BASIC("BASIC"),
         DIGEST("DIGEST"),
         OAUTH2("OAUTH2"),
+        X509("X509"),
+        API_KEY("API_KEY"),
         NONE("NONE");
         private String value;
 

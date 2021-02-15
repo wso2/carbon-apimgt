@@ -64,7 +64,7 @@ public class DBRetriever implements ArtifactRetriever {
     }
 
     @Override
-    public String retrieveArtifact(String apiId, String gatewayLabel, String gatewayInstruction)
+    public String retrieveArtifact(String apiId, String gatewayLabel)
             throws ArtifactSynchronizerException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();

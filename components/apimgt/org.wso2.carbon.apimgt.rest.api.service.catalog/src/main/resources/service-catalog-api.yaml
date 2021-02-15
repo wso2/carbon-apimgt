@@ -611,6 +611,8 @@ components:
             - BASIC
             - DIGEST
             - OAUTH2
+            - X509
+            - API_KEY
             - NONE
         mutualSSLEnabled:
           type: boolean
