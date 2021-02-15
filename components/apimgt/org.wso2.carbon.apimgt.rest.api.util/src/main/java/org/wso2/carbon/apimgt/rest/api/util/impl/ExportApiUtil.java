@@ -29,7 +29,8 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIProductExportUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -73,8 +74,8 @@ public class ExportApiUtil {
                     ExportFormat.YAML;
 
             // Get currently logged in user's username and the domain
-            userName = RestApiUtil.getLoggedInUsername();
-            apiRequesterDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            userName = RestApiCommonUtil.getLoggedInUsername();
+            apiRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             // If provider name is not given
             if (StringUtils.isBlank(providerName)) {
@@ -99,7 +100,7 @@ public class ExportApiUtil {
                         " name:" + name + " version:" + version + " provider:" + providerName, log);
             }
 
-            apiProvider = RestApiUtil.getLoggedInUserProvider();
+            apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (!StringUtils.equals(type, RestApiConstants.RESOURCE_API_PRODUCT)) {
                 APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), name, version);
                 // Checking whether the API exists
@@ -148,8 +149,8 @@ public class ExportApiUtil {
             //Default export format is YAML
             exportFormat = StringUtils.isNotEmpty(format) ? ExportFormat.valueOf(format.toUpperCase()) :
                     ExportFormat.YAML;
-            apiProvider = RestApiUtil.getLoggedInUserProvider();
-            userName = RestApiUtil.getLoggedInUsername();
+            apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            userName = RestApiCommonUtil.getLoggedInUsername();
             file = APIExportUtil.exportApi(apiProvider, apiIdentifier, userName, exportFormat, preserveStatus);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""

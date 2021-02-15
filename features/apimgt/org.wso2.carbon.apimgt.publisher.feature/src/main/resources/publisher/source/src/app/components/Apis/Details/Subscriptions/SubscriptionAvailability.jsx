@@ -29,7 +29,6 @@ import Select from '@material-ui/core/Select';
 import TenantAutocomplete from 'AppComponents/Apis/Details/Subscriptions/TenantAutocomplete';
 import { isRestricted } from 'AppData/AuthManager';
 
-
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -197,7 +196,7 @@ export default function SimpleSelect(props) {
 SimpleSelect.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-    api: PropTypes.shape({ policies: PropTypes.array }).isRequired,
+    api: PropTypes.shape({ policies: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
     setAvailability: PropTypes.func.isRequired,
     setTenantList: PropTypes.func.isRequired,
     tenantList: PropTypes.shape([]).isRequired,

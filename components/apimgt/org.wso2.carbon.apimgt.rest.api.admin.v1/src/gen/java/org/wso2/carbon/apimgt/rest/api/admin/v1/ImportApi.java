@@ -27,8 +27,8 @@ import javax.validation.constraints.*;
 @Path("/import")
 
 @Api(description = "the import API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ImportApi  {
@@ -64,8 +64,8 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an API Product", notes = "This operation can be used to import an API Product. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
     }, tags={ "API Product (Individual)",  })
     @ApiResponses(value = { 
@@ -84,8 +84,8 @@ ImportApiService delegate = new ImportApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an Application", notes = "This operation can be used to import an application. ", response = ApplicationInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:app_import_export", description = "Import and export applications related operations")
         })
     }, tags={ "Application (Individual)" })
     @ApiResponses(value = { 

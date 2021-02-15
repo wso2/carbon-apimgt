@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +14,10 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
-import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -23,8 +27,8 @@ public class MonetizationInfoDTO   {
     @XmlType(name="MonetizationPlanEnum")
     @XmlEnum(String.class)
     public enum MonetizationPlanEnum {
-        FIXEDRATE("FixedRate"),
-        DYNAMICRATE("DynamicRate");
+        FIXEDRATE("FIXEDRATE"),
+        DYNAMICRATE("DYNAMICRATE");
         private String value;
 
         MonetizationPlanEnum (String v) {

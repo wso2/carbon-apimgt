@@ -380,6 +380,14 @@ public class OAS2Parser extends APIDefinition {
                         template.setMediationScript(mediationScript);
                         template.setMediationScripts(template.getHTTPVerb(), mediationScript);
                     }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                        template.setAmznResourceName((String)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                    }
+                    if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                        template.setAmznResourceTimeout(((Long)
+                                extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
+                    }
                 }
                 urlTemplates.add(template);
             }
@@ -1532,18 +1540,22 @@ public class OAS2Parser extends APIDefinition {
         Boolean isOptional = OASParserUtil.getAppSecurityStateFromSwagger(extensions);
         if (!applicationSecurity.isEmpty()) {
             String securityList = api.getApiSecurity();
+            securityList = securityList == null ? "" : securityList;
             for (String securityType : applicationSecurity) {
-                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType)) {
+                if (APIConstants.DEFAULT_API_SECURITY_OAUTH2.equals(securityType) &&
+                        !securityList.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
                     securityList = securityList + "," + APIConstants.DEFAULT_API_SECURITY_OAUTH2;
                 }
-                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType)) {
+                if (APIConstants.API_SECURITY_BASIC_AUTH.equals(securityType) &&
+                        !securityList.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
                     securityList = securityList + "," + APIConstants.API_SECURITY_BASIC_AUTH;
                 }
-                if (APIConstants.API_SECURITY_API_KEY.equals(securityType)) {
+                if (APIConstants.API_SECURITY_API_KEY.equals(securityType) &&
+                        !securityList.contains(APIConstants.API_SECURITY_API_KEY)) {
                     securityList = securityList + "," + APIConstants.API_SECURITY_API_KEY;
                 }
             }
-            if (!isOptional) {
+            if (!(isOptional || securityList.contains(APIConstants.MANDATORY))) {
                 securityList = securityList + "," + APIConstants.MANDATORY;
             }
             api.setApiSecurity(securityList);
@@ -1555,9 +1567,11 @@ public class OAS2Parser extends APIDefinition {
             if (StringUtils.isBlank(securityList)) {
                 securityList = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
             }
-            if (APIConstants.OPTIONAL.equals(mutualSSL)) {
+            if (APIConstants.OPTIONAL.equals(mutualSSL) &&
+                    !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL;
-            } else if (APIConstants.MANDATORY.equals(mutualSSL)) {
+            } else if (APIConstants.MANDATORY.equals(mutualSSL) &&
+                    !securityList.contains(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)){
                 securityList = securityList + "," + APIConstants.API_SECURITY_MUTUAL_SSL + "," +
                         APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY;
             }
@@ -1588,7 +1602,6 @@ public class OAS2Parser extends APIDefinition {
         if (StringUtils.isNotBlank(throttleTier)) {
             api.setApiLevelPolicy(throttleTier);
         }
-
         return api;
     }
 
@@ -1625,9 +1638,11 @@ public class OAS2Parser extends APIDefinition {
                     if (extensionsAreEmpty) {
                         operation.setVendorExtensions(resourceExtensions);
                     }
-                } else if (resourceExtensions != null && resourceExtensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
+                } else if (resourceExtensions != null && resourceExtensions
+                        .containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
                     //Check Disable Security is enabled in resource level
-                    boolean resourceLevelDisableSecurity = Boolean.parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+                    boolean resourceLevelDisableSecurity = Boolean
+                            .parseBoolean(String.valueOf(resourceExtensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
                     if (resourceLevelDisableSecurity) {
                         resourceExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, "None");
                     }

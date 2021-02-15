@@ -18,14 +18,23 @@ package org.wso2.carbon.apimgt.gateway.handlers.common;
 import org.apache.axis2.Constants;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 import javax.ws.rs.core.MediaType;
 import java.util.Map;
+import java.util.TreeMap;
 
-public class SynapsePropertiesHandler extends AbstractHandler{
+public class SynapsePropertiesHandler extends AbstractHandler {
+
+    private static APIManagerConfiguration config = null;
+    private static boolean iskmReverseProxyEnabled = false;
 
     public boolean handleRequest(MessageContext messageContext) {
         String httpport = System.getProperty("http.nio.port");
@@ -33,9 +42,9 @@ public class SynapsePropertiesHandler extends AbstractHandler{
         messageContext.setProperty("http.nio.port", httpport);
         messageContext.setProperty("https.nio.port", httpsport);
         String mgtHttpsPort = System.getProperty(APIConstants.KEYMANAGER_PORT);
-        messageContext.setProperty("keyManager.port",mgtHttpsPort);
+        messageContext.setProperty("keyManager.port", mgtHttpsPort);
         String keyManagerHost = System.getProperty(APIConstants.KEYMANAGER_HOSTNAME);
-        messageContext.setProperty("keyManager.hostname",keyManagerHost);
+        messageContext.setProperty("keyManager.hostname", keyManagerHost);
 
         String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
@@ -46,6 +55,13 @@ public class SynapsePropertiesHandler extends AbstractHandler{
         boolean isContentTypeNotSet = false;
         if (headers != null) {
             isContentTypeNotSet = headers.get("Content-Type") == null || headers.get("Content-Type").equals("");
+            if (headers.get(APIMgtGatewayConstants.HOST) != null || !("")
+                    .equals(headers.get(APIMgtGatewayConstants.HOST))) {
+                // Derive the outward facing host and port from host header
+                String hostHeader = (String) headers.get(APIMgtGatewayConstants.HOST);
+                // Set it as a message context property to retrieve in HandleResponse method
+                messageContext.setProperty(APIMgtGatewayConstants.HOST_HEADER, hostHeader);
+            }
         }
         if (isContentTypeNotSet && (httpMethod.equals(Constants.Configuration.HTTP_METHOD_POST) ||
                 httpMethod.equals(Constants.Configuration.HTTP_METHOD_PUT))) {
@@ -61,6 +77,62 @@ public class SynapsePropertiesHandler extends AbstractHandler{
     }
 
     public boolean handleResponse(MessageContext messageContext) {
+        if (config == null) {
+            // Retrieve the ISKMReverseProxyEnabled property value from api manager configurations.
+            // This value indicates whether the IS Authentication endpoint has been reverse proxied through
+            // the Gateway.
+            config = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            iskmReverseProxyEnabled = Boolean.parseBoolean(
+                    config.getFirstProperty(APIConstants.AUTH_MANAGER + APIConstants.IS_KM_REVERSE_PROXY_ENABLED));
+        }
+        // Modify location header only if ISKMReverseProxyEnabled property is set to true
+        if (iskmReverseProxyEnabled) {
+            // The logic is related if the API context is "/authorize", "/commonauth" or "/oidc" while status code is 302
+            if (messageContext.getProperty(RESTConstants.REST_API_CONTEXT)
+                    .equals(APIMgtGatewayConstants.AUTHORIZE_CONTEXT) || messageContext
+                    .getProperty(RESTConstants.REST_API_CONTEXT).equals(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT)
+                    || messageContext.getProperty(RESTConstants.REST_API_CONTEXT)
+                    .equals(APIMgtGatewayConstants.OIDC_CONTEXT)) {
+                if (302 == (Integer) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                        .getProperty(SynapseConstants.HTTP_SC)) {
+                    // Retrieve the transport headers in the response and identify the location header
+                    TreeMap<String, String> headers = (TreeMap) ((Axis2MessageContext) messageContext)
+                            .getAxis2MessageContext().getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS);
+                    String locationURI = headers.get(APIMgtGatewayConstants.LOCATION);
+                    // KM host and port which is included in the location header value
+                    String kmHost = messageContext.getProperty("keyManager.hostname") + ":" + messageContext
+                            .getProperty("keyManager.port");
+                    String hostHeader = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_HEADER);
+
+                    // This check to change the location header is done to make sure that only location headers of the
+                    // appropriate endpoints which have been proxied are changed. Without this check condition to change
+                    // the location header, any endpoint which is having KM host as part of the URL will be redirected
+                    // which could lead to wrong endpoints.
+                    if (locationURI.contains(APIMgtGatewayConstants.AUTHENTICATION_ENDPOINT_CONTEXT) || locationURI
+                            .contains(APIMgtGatewayConstants.OAUTH2_CONTEXT + APIMgtGatewayConstants.AUTHORIZE_CONTEXT)
+                            || locationURI.contains(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT) || locationURI
+                            .contains(APIMgtGatewayConstants.LOGIN_CONTEXT) || locationURI
+                            .contains(APIMgtGatewayConstants.OIDC_CONTEXT)) {
+                        // Replacing KM host with Gateway host
+                        locationURI = locationURI.replaceFirst(kmHost, hostHeader);
+                    }
+
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                            .setProperty("PRE_LOCATION_HEADER", locationURI);
+                    if (messageContext.getProperty(RESTConstants.REST_API_CONTEXT)
+                            .equals(APIMgtGatewayConstants.COMMON_AUTH_CONTEXT)) {
+                        // Commonauth endpoints return location header /oauth2/authorize. Since GW has /authorize we have to
+                        // omit the /oauth2 portion from the location header value
+                        locationURI = locationURI.replaceFirst(APIMgtGatewayConstants.OAUTH2_CONTEXT, "");
+                    }
+                    // Inserting modified headers to the message context
+                    headers.put(APIMgtGatewayConstants.LOCATION, locationURI);
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                            setProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS, headers);
+                }
+            }
+        }
         return true;
     }
 }

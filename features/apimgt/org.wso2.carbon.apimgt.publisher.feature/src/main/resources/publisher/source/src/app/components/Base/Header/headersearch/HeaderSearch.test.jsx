@@ -42,7 +42,6 @@ jest.mock('history', () => {
     };
 });
 
-
 describe('Publisher <HeaderSearch> component tests', () => {
     beforeAll(async () => {
         AuthManager.hasScopes = mockedHasScopes.bind(AuthManager);

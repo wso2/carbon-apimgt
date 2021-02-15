@@ -151,7 +151,7 @@ class Resources extends React.Component {
                     const path = paths[key];
                     return (
                         <div className={classes.root} key={key}>
-                            <Typography className={classes.heading} variant='body1'>
+                            <Typography className={classes.heading} variant='body2'>
                                 {key}
                             </Typography>
                             {Object.keys(path).map((innerKey) => {

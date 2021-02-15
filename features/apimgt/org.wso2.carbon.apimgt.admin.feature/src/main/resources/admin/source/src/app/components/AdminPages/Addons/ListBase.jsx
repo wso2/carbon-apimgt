@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -36,9 +36,9 @@ import CardContent from '@material-ui/core/CardContent';
 import MUIDataTable from 'mui-datatables';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import InlineProgress from 'AppComponents/AdminPages/Addons/InlineProgress';
-import Alert from 'AppComponents/Shared/Alert';
 import { Link as RouterLink } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
+import Alert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme) => ({
     searchBar: {
@@ -84,9 +84,34 @@ function ListBase(props) {
     const classes = useStyles();
     const [searchText, setSearchText] = useState('');
     const [data, setData] = useState(null);
+    const [error, setError] = useState(null);
+    const intl = useIntl();
 
     const filterData = (event) => {
         setSearchText(event.target.value);
+    };
+
+    const sortBy = (field, reverse, primer) => {
+        const key = primer
+            ? (x) => {
+                return primer(x[field]);
+            }
+            : (x) => {
+                return x[field];
+            };
+
+        // eslint-disable-next-line no-param-reassign
+        reverse = !reverse ? 1 : -1;
+
+        return (a, b) => {
+            const aValue = key(a);
+            const bValue = key(b);
+            return reverse * ((aValue > bValue) - (bValue > aValue));
+        };
+    };
+    const onColumnSortChange = (changedColumn, direction) => {
+        const sorted = [...data].sort(sortBy(changedColumn, direction === 'descending'));
+        setData(sorted);
     };
 
     const fetchData = () => {
@@ -95,12 +120,21 @@ function ListBase(props) {
         if (apiCall) {
             const promiseAPICall = apiCall();
             promiseAPICall.then((LocalData) => {
-                setData(LocalData);
+                if (LocalData) {
+                    setData(LocalData);
+                    setError(null);
+                } else {
+                    setError(intl.formatMessage({
+                        id: 'AdminPages.Addons.ListBase.noDataError',
+                        defaultMessage: 'Error while retrieving data.',
+                    }));
+                }
             })
                 .catch((e) => {
-                    Alert.error(e);
+                    setError(e.message);
                 });
         }
+        setSearchText('');
     };
 
     useEffect(() => {
@@ -189,6 +223,7 @@ function ListBase(props) {
         customToolbar: null,
         responsive: 'stacked',
         searchText,
+        onColumnSortChange,
     };
 
     // If no apiCall is provided OR,
@@ -215,10 +250,18 @@ function ListBase(props) {
     }
 
     // If apiCall is provided and data is not retrieved yet, display progress component
-    if (apiCall && !data) {
+    if (!error && apiCall && !data) {
         return (
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
+            </ContentBase>
+
+        );
+    }
+    if (error) {
+        return (
+            <ContentBase {...pageProps}>
+                <Alert severity='error'>{error}</Alert>
             </ContentBase>
 
         );
@@ -244,6 +287,7 @@ function ListBase(props) {
                                                 className: classes.searchInput,
                                             }}
                                             onChange={filterData}
+                                            value={searchText}
                                         />
                                     )}
                                 </Grid>

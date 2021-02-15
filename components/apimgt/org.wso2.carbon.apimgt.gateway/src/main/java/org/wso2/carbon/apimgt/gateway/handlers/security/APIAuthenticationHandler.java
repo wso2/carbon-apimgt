@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLA
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -336,11 +337,17 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (authenticators.isEmpty()) {
                 initializeAuthenticators();
             }
-            if (isAuthenticate(messageContext)) {
-                setAPIParametersToMessageContext(messageContext);
-                return true;
+            try {
+                if (isAuthenticate(messageContext)) {
+                    setAPIParametersToMessageContext(messageContext);
+                    return true;
+                }
+            } catch (APIManagementException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Authentication of message context failed", e);
+                }
             }
-        } catch (APISecurityException e) {
+        } catch (APISecurityException  e) {
 
             if (Util.tracingEnabled() && keySpan != null) {
                 Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
@@ -400,7 +407,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @return true if the authentication is successful (never returns false)
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
+    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException, APIManagementException {
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
@@ -646,26 +653,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
         //if publisher is null,extract the publisher from the api_version
         if (apiPublisher == null) {
-            int ind = apiVersion.indexOf("--");
-            apiPublisher = apiVersion.substring(0, ind);
-            if (apiPublisher.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiPublisher = apiPublisher
-                        .replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT, APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-        }
-        int index = apiVersion.indexOf("--");
-
-        if (index != -1) {
-            apiVersion = apiVersion.substring(index + 2);
+            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(context, version,
+                    GatewayUtils.getTenantDomain());
         }
 
-        String api = apiVersion.split(":")[0];
-        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String api = GatewayUtils.getAPINameFromContextAndVersion(context,version,GatewayUtils.getTenantDomain());
         String resource = extractResource(messageContext);
         String method = (String) (axis2MsgContext.getProperty(
                 Constants.Configuration.HTTP_METHOD));
@@ -674,7 +671,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         messageContext.setProperty(APIMgtGatewayConstants.CONSUMER_KEY, consumerKey);
         messageContext.setProperty(APIMgtGatewayConstants.USER_ID, username);
         messageContext.setProperty(APIMgtGatewayConstants.CONTEXT, context);
-        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, apiVersion);
+        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, version);
         messageContext.setProperty(APIMgtGatewayConstants.API, api);
         messageContext.setProperty(APIMgtGatewayConstants.VERSION, version);
         messageContext.setProperty(APIMgtGatewayConstants.RESOURCE, resource);

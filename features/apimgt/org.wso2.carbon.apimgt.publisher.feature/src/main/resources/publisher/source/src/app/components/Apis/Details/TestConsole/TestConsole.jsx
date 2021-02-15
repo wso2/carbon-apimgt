@@ -22,6 +22,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Progress from 'AppComponents/Shared/Progress';
 import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { FormattedMessage } from 'react-intl';
 import Paper from '@material-ui/core/Paper';
 import 'swagger-ui-react/swagger-ui.css';
@@ -30,9 +31,9 @@ import AuthManager, { isRestricted } from 'AppData/AuthManager';
 import { TryOutController, SwaggerUI } from 'developer_portal';
 import Button from '@material-ui/core/Button';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Banner from 'AppComponents/Shared/Banner';
 import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import uuid from 'uuid/v4';
+import Utils from 'AppData/Utils';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  * @inheritdoc
@@ -139,6 +140,7 @@ class TestConsole extends React.Component {
             scopes: [],
             selectedKeyType: 'PRODUCTION',
             keys: [],
+            loading: false,
         };
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.updateSwagger = this.updateSwagger.bind(this);
@@ -171,8 +173,6 @@ class TestConsole extends React.Component {
         let sandboxAccessToken;
         let apiID;
         let urls;
-        let httpVal;
-        let httpsVal;
         let basePath;
         const user = AuthManager.getUser();
         const promisedAPI = API.getAPIById(apiObj.id);
@@ -224,25 +224,30 @@ class TestConsole extends React.Component {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
+                    Alert.error(error);
                     console.error(error);
                 }
                 this.setState({ serverError: `${error.statusCode} - ${error.response.body.description}` });
             });
         const settingPromise = API.getSettings();
-        const newServer = [];
         settingPromise
             .then((settingsNew) => {
                 if (settingsNew.environment) {
-                    urls = settingsNew.environment.map((endpoints) => { return endpoints.endpoints; });
-                    httpVal = urls.map((val) => { return val.http; });
-                    httpsVal = urls.map((value) => { return value.https; });
+                    urls = settingsNew.environment.map((environment) => {
+                        const env = {
+                            name: environment.name,
+                            endpoints: {
+                                http: environment.endpoints.http + apiData.context + '/' + apiData.version,
+                                https: environment.endpoints.https + apiData.context + '/' + apiData.version,
+                            },
+                        };
+                        return env;
+                    });
                     basePath = apiData.context + '/' + apiData.version;
-                    newServer.push({ url: httpsVal + apiData.context + '/' + apiData.version });
-                    newServer.push({ url: httpVal + apiData.context + '/' + apiData.version });
                 }
                 this.setState({
-                    settings: newServer,
-                    host: httpsVal[0].split('//')[1],
+                    settings: urls,
+                    host: urls[0].endpoints.https.split('//')[1],
                     baseUrl: basePath,
                 });
             });
@@ -316,33 +321,28 @@ class TestConsole extends React.Component {
         this.setState({ keys });
     }
 
-
     handleClick = () => {
         const { apiObj } = this.props;
+        this.setState({ loading: true });
         const action = 'Deploy as a Prototype';
         const promisedUpdate = API.updateLcState(apiObj.id, action);
-        promisedUpdate
-            .then((response) => {
-                const newState = response.body.lifecycleState.state;
-                console.log('new life cycle state' + newState);
-                this.context.updateAPI();
-                // disable store
-                const promisedApi = API.get(apiObj.id);
-                promisedApi
-                    .then((getResponse) => {
-                        const apiData = getResponse;
-                        apiData.enableStore = false;
-                        const token = uuid();
-                        apiData.testKey = token;
-                        this.context.updateAPI({ enableStore: false, testKey: token });
-                    })
-                    .catch((errorResponse) => {
-                        console.error(errorResponse);
-                    });
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+        const promisedApi = API.get(apiObj.id);
+        Promise.all([promisedUpdate, promisedApi]).then((values) => {
+            const getResponse = values[1];
+            const apiData = getResponse;
+            apiData.enableStore = false;
+            const token = Utils.generateUUID();
+            apiData.testKey = token;
+            this.context.updateAPI({ enableStore: false, testKey: token });
+        }).catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
+            console.error(error);
+            this.setState({ loading: false });
+        });
     };
 
     /**
@@ -393,7 +393,6 @@ class TestConsole extends React.Component {
         }
     }
 
-
     /**
      * Load the access token for given key type
      * @memberof TryOutController
@@ -422,6 +421,7 @@ class TestConsole extends React.Component {
         const {
             swagger, api, securitySchemeType, selectedEnvironment, productionAccessToken, sandboxAccessToken,
             labels, environments, scopes, username, password, selectedKeyType, serverError, settings, host, baseUrl,
+            loading,
         } = this.state;
         if (serverError) {
             return (
@@ -440,7 +440,17 @@ class TestConsole extends React.Component {
             swagger.basePath = baseUrl;
             swagger.schemes = ['https'];
         } else {
-            swagger.servers = settings;
+            let servers = [];
+            let httpUrls = [];
+            let httpsUrls = [];
+            for (let i = 0; i < settings.length; i++) {
+                if (environments.includes(settings[i].name)) {
+                    httpUrls = httpUrls.concat({ url: settings[i].endpoints.http });
+                    httpsUrls = httpsUrls.concat({ url: settings[i].endpoints.https });
+                }
+            }
+            servers = httpUrls.concat(httpsUrls);
+            swagger.servers = servers;
         }
         const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
         const enableForTest = api.enableStore === false;
@@ -480,13 +490,20 @@ class TestConsole extends React.Component {
                                             variant='contained'
                                             color='primary'
                                             className={classes.button}
-                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                            disabled={isRestricted([
+                                                'apim:api_create',
+                                                'apim:api_publish',
+                                            ], api)
+                                            || loading}
                                             onClick={this.handleClick}
                                         >
-                                            <FormattedMessage
-                                                id='Apis.Details.index.initTest'
-                                                defaultMessage='Initialize test'
-                                            />
+
+                                            {loading ? (<CircularProgress size={32} />) : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.index.initTest'
+                                                    defaultMessage='Initialize test'
+                                                />
+                                            )}
                                         </Button>
                                     </div>
                                 </div>
@@ -532,14 +549,44 @@ class TestConsole extends React.Component {
                     </Paper>
                 )}
                 {(isProtoTyped && !enableForTest) && (
-                    <Banner
-                        disableActions
-                        dense
-                        paperProps={{ elevation: 1 }}
-                        type='info'
-                        message='API should be in prototype(testing) state. Please demote to created state and click
-                        on the initialize Test button in the Test Console left menu item.'
-                    />
+                    <>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.index.Tryout'
+                                defaultMessage='Test Console'
+                            />
+                        </Typography>
+                        <Typography variant='caption' component='div' className={classes.helpText}>
+                            <FormattedMessage
+                                id='APis.Details.tryout.help.main'
+                                defaultMessage='Test APIs while in the Development stage.'
+                            />
+                        </Typography>
+                        <div className={classes.messageBox}>
+                            <InlineMessage type='info' height={120}>
+                                <div className={classes.contentWrapper}>
+                                    <Typography variant='h5' component='h3' className={classes.head}>
+                                        <FormattedMessage
+                                            id='Apis.Details.TestConsole.TestConsole.info.title'
+                                            defaultMessage='API should be in prototype(testing) state.'
+                                        />
+                                    </Typography>
+                                    <Typography component='p'>
+                                        <FormattedMessage
+                                            id='Apis.Details.TestConsole.TestConsole.info.message'
+                                            defaultMessage={
+                                                `API should be in prototype(testing) state. 
+                                            Please demote to created state and click
+                                            on the initialize Test button 
+                                            in the Test Console left menu item.`
+                                            }
+                                        />
+                                    </Typography>
+                                </div>
+                            </InlineMessage>
+                        </div>
+                    </>
+
                 )}
             </>
         );

@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/external-stores")
 
 @Api(description = "the external-stores API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class ExternalStoresApi  {
@@ -38,7 +38,7 @@ ExternalStoresApiService delegate = new ExternalStoresApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve External Stores List to Publish an API", notes = "Retrieve external stores list configured to publish an API ", response = ExternalStoreDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

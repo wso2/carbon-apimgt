@@ -27,8 +27,8 @@ import javax.validation.constraints.*;
 @Path("/system-scopes")
 
 @Api(description = "the system-scopes API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class SystemScopesApi  {
@@ -40,7 +40,7 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get Role Scope Mappings ", notes = "This operation is used to get the list of role scope mapping from tenant-conf for the apim admin dashboard ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -57,12 +57,12 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
 
     @GET
     @Path("/role-aliases")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Role Alias Mappings", notes = "This operation can be used to retreive role alias mapping ", response = RoleAliasListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
         })
     }, tags={ "System Scopes",  })
     @ApiResponses(value = { 
@@ -86,18 +86,18 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Role mapping alias returned ", response = RoleAliasListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response systemScopesRoleAliasesPut(@ApiParam(value = "role-alias mapping" ,required=true) RoleAliasListDTO body) throws APIManagementException{
-        return delegate.systemScopesRoleAliasesPut(body, securityContext);
+    public Response systemScopesRoleAliasesPut(@ApiParam(value = "role-alias mapping" ,required=true) RoleAliasListDTO roleAliasListDTO) throws APIManagementException{
+        return delegate.systemScopesRoleAliasesPut(roleAliasListDTO, securityContext);
     }
 
     @GET
     @Path("/{scopeName}")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieve Scopes for a Particular User", notes = "This operation will return the scope list of particular user In order to get it, we need to pass the userId as a query parameter ", response = ScopeSettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
         })
     }, tags={ "System Scopes",  })
     @ApiResponses(value = { 
@@ -114,15 +114,15 @@ SystemScopesApiService delegate = new SystemScopesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update Roles For Scope ", notes = "This operation is used to update the roles for all scopes ", response = ScopeListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:scope_manage", description = "Manage system scopes")
         })
     }, tags={ "System Scopes" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the newly added roles. ", response = ScopeListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateRolesForScope(@ApiParam(value = "Scope list object with updated scope to role mappings " ,required=true) ScopeListDTO body) throws APIManagementException{
-        return delegate.updateRolesForScope(body, securityContext);
+    public Response updateRolesForScope(@ApiParam(value = "Scope list object with updated scope to role mappings " ,required=true) ScopeListDTO scopeListDTO) throws APIManagementException{
+        return delegate.updateRolesForScope(scopeListDTO, securityContext);
     }
 }

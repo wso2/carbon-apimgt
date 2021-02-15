@@ -21,13 +21,13 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyPermissionInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,17 +82,17 @@ public class ThrottlingPolicyMappingUtil {
         String paginatedPrevious = "";
         String paginatedNext = "";
 
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
+            paginatedPrevious = RestApiCommonUtil
                     .getTiersPaginatedURL(tierLevel,
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
+            paginatedNext = RestApiCommonUtil
                     .getTiersPaginatedURL(tierLevel,
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
@@ -168,7 +168,7 @@ public class ThrottlingPolicyMappingUtil {
             tierPermission.setRoles(roles);
         } else {
             String permissionType = throttlingPolicy.getTierPermission().getPermissionType();
-            tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf(permissionType));
+            tierPermission.setType(ThrottlingPolicyPermissionInfoDTO.TypeEnum.valueOf(permissionType.toUpperCase()));
             tierPermission.setRoles(Arrays.asList(throttlingPolicy.getTierPermission().getRoles()));
         }
         throttlingPolicyDTO.setThrottlingPolicyPermissions(tierPermission);

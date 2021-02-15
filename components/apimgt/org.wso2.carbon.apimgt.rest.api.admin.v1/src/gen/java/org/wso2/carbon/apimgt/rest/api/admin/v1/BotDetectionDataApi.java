@@ -25,8 +25,8 @@ import javax.validation.constraints.*;
 @Path("/bot-detection-data")
 
 @Api(description = "the bot-detection-data API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class BotDetectionDataApi  {
@@ -38,12 +38,12 @@ BotDetectionDataApiService delegate = new BotDetectionDataApiServiceImpl();
 
     @GET
     
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all Bot Detected Data ", notes = "Get all bot detected data ", response = BotDetectionDataListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:bot_data", description = "Retrieve bot detection data"),
-            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:bot_data", description = "Retrieve bot detection data")
         })
     }, tags={ "Bot Detection Data" })
     @ApiResponses(value = { 

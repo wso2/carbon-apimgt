@@ -275,7 +275,8 @@ class LifeCycleUpdate extends Component {
                             this occurs in states where have allowed re-publishing in prototype and published sates */
                                     return (
                                         <Button
-                                            disabled={transitionState.disabled || this.state.isUpdating}
+                                            disabled={transitionState.disabled
+                                                || this.state.isUpdating || api.isRevision}
                                             variant='contained'
                                             color='primary'
                                             className={classes.stateButton}

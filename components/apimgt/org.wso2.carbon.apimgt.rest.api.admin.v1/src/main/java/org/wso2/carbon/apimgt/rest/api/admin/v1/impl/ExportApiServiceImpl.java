@@ -27,7 +27,8 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.FileBasedApplicationImportExportManager;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.impl.ExportApiUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -105,13 +106,13 @@ public class ExportApiServiceImpl implements ExportApiService {
         File exportedApplicationArchiveFile = null;
         String pathToExportDir =
                 System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + APPLICATION_EXPORT_DIR_PREFIX + UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String exportedFileName = null;
         if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
             RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
         }
         try {
-            consumer = RestApiUtil.getConsumer(username);
+            consumer = RestApiCommonUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager =
                     new FileBasedApplicationImportExportManager(consumer, pathToExportDir);
             if (importExportManager.isOwnerAvailable(appOwner)) {

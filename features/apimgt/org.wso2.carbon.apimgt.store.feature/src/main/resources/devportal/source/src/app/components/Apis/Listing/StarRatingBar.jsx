@@ -19,9 +19,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/core/styles';
 import Cancel from '@material-ui/icons/Cancel';
 import StarRate from '@material-ui/icons/StarRate';
+import StarIcon from '@material-ui/icons/Star';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
@@ -36,7 +39,7 @@ import { FormattedMessage } from 'react-intl';
  */
 const styles = theme => ({
     starRate: {
-        fontSize: 30,
+        fontSize: 25,
         color: theme.custom.infoBar.starColor,
     },
     noStarRate: {
@@ -58,6 +61,16 @@ const styles = theme => ({
         justifyContent: 'flex-start',
         alignItems: 'center',
         cursor: 'pointer',
+        padding: '5px',
+        background: '#efefef',
+        borderRadius: '3px',
+        position: 'absolute',
+        left: '62px',
+        top: '-5px',
+    },
+    rateThis: {
+        lineHeight: '15px',
+        width: 40,
     },
 });
 
@@ -75,10 +88,12 @@ class StarRatingBar extends React.Component {
             userRating: 0,
             count: 0,
             total: 0,
+            showEditing: false,
         };
         this.getApiRating = this.getApiRating.bind(this);
         this.removeUserRating = this.removeUserRating.bind(this);
         this.doRate = this.doRate.bind(this);
+        this.toggleEditRating = this.toggleEditRating.bind(this);
     }
     componentDidUpdate(prevProps) {
         // Typical usage (don't forget to compare props):
@@ -143,6 +158,9 @@ class StarRatingBar extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
+            })
+            .finally(() => {
+                this.toggleEditRating();
             });
     }
 
@@ -165,9 +183,15 @@ class StarRatingBar extends React.Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
+            })
+            .finally(() => {
+                this.toggleEditRating();
             });
     }
 
+    toggleEditRating() {
+        this.setState({ showEditing: !this.state.showEditing });
+    }
     /**
      *
      *
@@ -176,7 +200,7 @@ class StarRatingBar extends React.Component {
      */
     render() {
         const {
-            avgRating, userRating, count, total,
+            avgRating, userRating, count, total, showEditing
         } = this.state;
         const {
             classes, isEditable, showSummary, apiRating,
@@ -189,21 +213,35 @@ class StarRatingBar extends React.Component {
                 ) : (
                         <>
                             {isEditable ? (
-                                <>
-                                    <div className={classes.userRating}>
-                                        {[1, 2, 3, 4, 5].map(i => (
-                                            <StarRate
-                                                key={i}
-                                                className={userRating >= i ? classes.starRate : classes.noStarRate}
-                                                onClick={() => this.doRate(i)}
+                                <Box position='relative'>
+                                    <Box onClick={this.toggleEditRating} display='flex' style={{ cursor: 'pointer' }}>
+                                        {(userRating === 0) 
+                                        ? (<StarBorderIcon style={{ fontSize: 30 }} />) 
+                                        : (<StarIcon style={{ fontSize: 30, color: '#75d5fa'}} />)}
+                                        <Typography variant='body2' className={classes.rateThis}>
+                                            {(userRating === 0) ? (
+                                                <FormattedMessage defaultMessage='Rate This' id='Apis.Listing.StarRatingBar.rate.this' />
+                                            ) : (
+                                                    <><Box fontSize={22} ml={1}>{userRating}</Box>You</>
+                                                )}
+                                        </Typography>
+                                    </Box>
+                                    {showEditing && (<>
+                                        <div className={classes.userRating}>
+                                            {[1, 2, 3, 4, 5].map(i => (
+                                                <StarRate
+                                                    key={i}
+                                                    className={userRating >= i ? classes.starRate : classes.noStarRate}
+                                                    onClick={() => this.doRate(i)}
+                                                />
+                                            ))}
+                                            <Cancel
+                                                className={classes.removeRating}
+                                                onClick={() => this.removeUserRating()}
                                             />
-                                        ))}
-                                        <Cancel
-                                            className={classes.removeRating}
-                                            onClick={() => this.removeUserRating()}
-                                        />
-                                    </div>
-                                </>
+                                        </div>
+                                    </>)}
+                                </Box>
                             ) : (
                                     <>
                                         <Rating
@@ -217,11 +255,11 @@ class StarRatingBar extends React.Component {
                                             {`${avgRating}/5.0 (${total}`}
                                             {total === 1 ? (
                                                 <FormattedMessage defaultMessage='user' id='Apis.Listing.StarRatingBar.user' />
-                                                ) : (
-                                                <FormattedMessage defaultMessage='users' id='Apis.Listing.StarRatingBar.users' />
-                                            )}
+                                            ) : (
+                                                    <FormattedMessage defaultMessage='users' id='Apis.Listing.StarRatingBar.users' />
+                                                )}
                                             {')'}
-                                        </Typography>  
+                                        </Typography>
                                     </>
                                 )}
                         </>

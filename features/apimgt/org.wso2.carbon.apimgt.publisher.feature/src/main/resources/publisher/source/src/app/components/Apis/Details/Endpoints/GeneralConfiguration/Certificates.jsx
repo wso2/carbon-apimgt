@@ -116,7 +116,6 @@ function Certificates(props) {
     const classes = useStyles();
     const [apiFromContext] = useAPI();
 
-
     /**
      * Show the selected certificate details in a popover.
      *
@@ -223,7 +222,7 @@ function Certificates(props) {
                                                 ? classes.deleteIconDisable : classes.deleteIcon}
                                             >
                                                 {' '}
-delete
+                                                delete
                                             </Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>

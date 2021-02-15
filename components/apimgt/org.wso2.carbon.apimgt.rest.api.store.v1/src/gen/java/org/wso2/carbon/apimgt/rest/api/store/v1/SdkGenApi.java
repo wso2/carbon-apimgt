@@ -24,8 +24,8 @@ import javax.validation.constraints.*;
 @Path("/sdk-gen")
 
 @Api(description = "the sdk-gen API")
-@Consumes({ "application/json" })
-@Produces({ "application/json" })
+
+
 
 
 public class SdkGenApi  {
@@ -37,7 +37,7 @@ SdkGenApiService delegate = new SdkGenApiServiceImpl();
 
     @GET
     @Path("/languages")
-    @Consumes({ "application/json" })
+    
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a List of Supported SDK Languages ", notes = "This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Developer Portal ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

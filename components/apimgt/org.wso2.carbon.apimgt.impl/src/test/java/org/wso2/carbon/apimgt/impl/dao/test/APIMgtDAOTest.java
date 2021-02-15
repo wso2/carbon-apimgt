@@ -328,28 +328,6 @@ public class APIMgtDAOTest {
         this.checkSubscribersEqual(subscriber1, subscriber2);
     }
     @Test
-    public void testLifeCycleEvents() throws Exception {
-        APIIdentifier apiId = new APIIdentifier("hiranya", "WSO2Earth", "1.0.0");
-        API api = new API(apiId);
-        api.setContext("/wso2earth");
-        api.setContextTemplate("/wso2earth/{version}");
-
-        apiMgtDAO.addAPI(api, -1234);
-
-        List<LifeCycleEvent> events = apiMgtDAO.getLifeCycleEvents(apiId);
-        assertEquals(1, events.size());
-        LifeCycleEvent event = events.get(0);
-        assertEquals(apiId, event.getApi());
-        assertNull(event.getOldStatus());
-        assertEquals(APIConstants.CREATED, event.getNewStatus());
-        assertEquals("hiranya", event.getUserId());
-
-        apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.CREATED, APIStatus.PUBLISHED, "admin", -1234);
-        apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.PUBLISHED, APIStatus.DEPRECATED, "admin", -1234);
-        events = apiMgtDAO.getLifeCycleEvents(apiId);
-        assertEquals(3, events.size());
-    }
-    @Test
     public void testAddGetApplicationByNameGroupIdNull() throws Exception {
         Subscriber subscriber = new Subscriber("LA_F_GROUP_ID_NULL");
         subscriber.setEmail("laf@wso2.com");
@@ -425,6 +403,7 @@ public class APIMgtDAOTest {
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
         api.setContextTemplate("/context1/{version}");
+        api.setUUID(UUID.randomUUID().toString());
 
         apiMgtDAO.addAPI(api, -1234);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -773,12 +752,14 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/getAPIVersionsMatchingApiName");
         api.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "2.0.0");
         API api2 = new API(apiId2);
         api2.setContext("/getAPIVersionsMatchingApiName");
         api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
+        api2.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api2, -1234);
         List<String> versionList = apiMgtDAO.getAPIVersionsMatchingApiName("getAPIVersionsMatchingApiName",
                 "getAPIVersionsMatchingApiName");
@@ -825,12 +806,14 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
+        api1.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api1, -1234);
         apiMgtDAO.createApplicationRegistrationEntry(applicationRegistrationWorkflowDTO, false);
         ApplicationRegistrationWorkflowDTO retrievedApplicationRegistrationWorkflowDTO = new
@@ -897,6 +880,7 @@ public class APIMgtDAOTest {
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
@@ -912,14 +896,6 @@ public class APIMgtDAOTest {
                 .getName(), subscriber.getName(), clientIdProduction, "Default", UUID.randomUUID().toString());
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
                 .getName(), subscriber.getName(), clientIdSandbox, "Default", UUID.randomUUID().toString());
-        int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
-        int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
-        String tokenProduction = UUID.randomUUID().toString();
-        String tokenSandBox = UUID.randomUUID().toString();
-        String tokenIdProduction = insertAccessTokenForApp(appIdProduction, subscriber.getName(), tokenProduction);
-        String tokenIdSandbox = insertAccessTokenForApp(appIdSandBox, subscriber.getName(), tokenSandBox);
-        insertTokenScope(tokenIdProduction, "default");
-        insertTokenScope(tokenIdSandbox, "default");
         assertTrue(apiMgtDAO.getSubscriptionCount(subscriber, application.getName(), null) > 0);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);
@@ -932,9 +908,6 @@ public class APIMgtDAOTest {
         assertEquals(subscribedAPIFromUuid.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         assertEquals(subscribedAPIFromUuid.getApiId(), apiId);
         assertEquals(subscribedAPIFromUuid.getApplication().getId(), application.getId());
-        List<AccessTokenInfo> accessTokenInfoList = apiMgtDAO.getAccessTokenListForUser(subscriber.getName(),
-                application.getName(), subscriber.getName());
-        assertTrue(accessTokenInfoList.size()==2);
         apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry");
@@ -953,7 +926,7 @@ public class APIMgtDAOTest {
                 PolicyConstants.POLICY_LEVEL_APP));
         assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
                 PolicyConstants.POLICY_LEVEL_API));
-        assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId, null))));
+        assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiId, APIConstants.PUBLISHED, APIConstants.CREATED);
@@ -966,10 +939,6 @@ public class APIMgtDAOTest {
                 -1234);
         apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(clientIdProduction);
         apiMgtDAO.deleteApplicationMappingByConsumerKey(clientIdSandbox);
-        deleteAccessTokenForApp(appIdProduction);
-        deleteAccessTokenForApp(appIdSandBox);
-        deleteConsumerApp(clientIdProduction);
-        deleteConsumerApp(clientIdSandbox);
         deleteSubscriber(subscriber.getId());
     }
 
@@ -1085,6 +1054,7 @@ public class APIMgtDAOTest {
         API api = new API(apiId);
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
+        api.setUUID(UUID.randomUUID().toString());
         apiMgtDAO.addAPI(api, -1234);
         BlockConditionsDTO apiBlockConditionDto = new BlockConditionsDTO();
         apiBlockConditionDto.setConditionValue("/testAddUpdateDeleteBlockCondition");
@@ -1156,6 +1126,7 @@ public class APIMgtDAOTest {
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
         int apiID = apiMgtDAO.addAPI(api, -1234);
         apiMgtDAO.addURITemplates(apiID, api, -1234);
         apiMgtDAO.updateAPI(api);
@@ -1189,6 +1160,7 @@ public class APIMgtDAOTest {
         api.setScopes(getScopes());
         api.setStatus(APIConstants.PUBLISHED);
         api.setAsDefaultVersion(true);
+        api.setUUID(UUID.randomUUID().toString());
         int apiId = apiMgtDAO.addAPI(api, -1234);
         apiMgtDAO.addURITemplates(apiId, api, -1234);
         HashMap<String, String> result1 = apiMgtDAO.getURITemplatesPerAPIAsString(apiIdentifier);

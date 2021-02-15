@@ -36,6 +36,7 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.Handler;
+import org.apache.synapse.rest.RESTConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -226,6 +227,8 @@ public class TestSchemaValidator {
 
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when((String) messageContext.getProperty((APIMgtGatewayConstants.API_ELECTED_RESOURCE))).
+                thenReturn(resourcePath);
+        Mockito.when((String) messageContext.getProperty(RESTConstants.REST_SUB_REQUEST_PATH)).
                 thenReturn(resourcePath);
         Mockito.when(synapseConfiguration.getLocalRegistry()).thenReturn(map);
         Mockito.when(map.get(ApiId)).thenReturn(entry);

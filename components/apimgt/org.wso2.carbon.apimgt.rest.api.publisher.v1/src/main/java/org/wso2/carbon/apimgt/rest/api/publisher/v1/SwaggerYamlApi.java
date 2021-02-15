@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -72,7 +73,7 @@ public class SwaggerYamlApi {
                     if (openAPIDef == null) {
                         String definition = IOUtils
                                 .toString(this.getClass().getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-                        openAPIDef = new OAS2Parser().removeExamplesFromSwagger(definition);
+                        openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
                     }
                 }
             }
@@ -86,7 +87,7 @@ public class SwaggerYamlApi {
                 return Response.ok().entity(openAPIDef).build();
             }
         } catch (IOException e) { 
-            String errorMessage = "Error while retrieving the swagger definition of the Publisher API";
+            String errorMessage = "Error while retrieving the OAS of the Publisher API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
