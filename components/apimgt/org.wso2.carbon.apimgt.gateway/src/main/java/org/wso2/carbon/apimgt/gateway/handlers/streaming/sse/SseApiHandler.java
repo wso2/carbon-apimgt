@@ -70,20 +70,11 @@ public class SseApiHandler extends APIAuthenticationHandler {
         synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
                            true);
         if (isAuthenticated) {
-            AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(synCtx);
-            ThrottleInfo throttleInfo = getThrottlingInfo(authenticationContext, synCtx);
-            boolean isThrottled;
-            isThrottled = SseUtils.isRequestBlocked(authenticationContext, throttleInfo.getApiContext(),
-                                                    throttleInfo.getApiVersion(), throttleInfo.getAuthorizedUser(),
-                                                    throttleInfo.getRemoteIp(),
-                                                    throttleInfo.getSubscriberTenantDomain());
-            if (!isThrottled) {
-                // do throttling is request is not blocked
-                isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
-                                                   throttleInfo.getResourceLevelThrottleKey(),
-                                                   throttleInfo.getSubscriptionLevelThrottleKey(),
-                                                   throttleInfo.getApplicationLevelThrottleKey());
-            }
+            ThrottleInfo throttleInfo = getThrottlingInfo(synCtx);
+            boolean isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
+                                                       throttleInfo.getResourceLevelThrottleKey(),
+                                                       throttleInfo.getSubscriptionLevelThrottleKey(),
+                                                       throttleInfo.getApplicationLevelThrottleKey());
             if (isThrottled) {
                 handleThrottledOut(synCtx);
                 return false;
@@ -94,10 +85,11 @@ public class SseApiHandler extends APIAuthenticationHandler {
         return isAuthenticated;
     }
 
-    private ThrottleInfo getThrottlingInfo(AuthenticationContext authenticationContext, MessageContext synCtx) {
+    private ThrottleInfo getThrottlingInfo(MessageContext synCtx) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
                 getAxis2MessageContext();
+        AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(synCtx);
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         List<VerbInfoDTO> verbInfoList = (List<VerbInfoDTO>) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
