@@ -1455,8 +1455,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document DTO as response
      */
     @Override
-    public Response updateAPIDocument(String apiId, String documentId, DocumentDTO body,
-                                    String ifMatch, String organizationId, MessageContext messageContext) {
+    public Response updateAPIDocument(String apiId, String documentId, DocumentDTO body, String organizationId,
+                                    String ifMatch, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //this will fail if user does not have access to the API or the API does not exist
