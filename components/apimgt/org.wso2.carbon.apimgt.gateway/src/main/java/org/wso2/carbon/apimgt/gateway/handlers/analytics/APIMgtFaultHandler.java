@@ -107,8 +107,9 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             if (apiPublisher == null) {
                 String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
                 String tenantDomain = getTenantDomainFromRequestURL(fullRequestPath);
-                String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
+                String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+                apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(context,apiVersion, tenantDomain);
             }
             faultPublisherDTO.setApiCreator(apiPublisher);
             faultPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(apiPublisher));

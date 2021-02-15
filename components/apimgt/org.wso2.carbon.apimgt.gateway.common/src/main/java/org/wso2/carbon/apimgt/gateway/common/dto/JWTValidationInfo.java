@@ -28,6 +28,8 @@ import java.util.Map;
  * Holds jwt validation related information.
  */
 public class JWTValidationInfo implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String user;
     private String issuer;
     private long expiryTime;
