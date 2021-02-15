@@ -1485,7 +1485,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1504,7 +1503,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
-        - $ref: '#/components/parameters/revisionNum-Q'
       requestBody:
         description: Deployment object that needs to be added
         content:
@@ -1532,7 +1530,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1606,7 +1603,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
-        - $ref: '#/components/parameters/revisionNum-Q'
       responses:
         201:
           description: |
@@ -6094,6 +6090,11 @@ paths:
         - $ref: '#/components/parameters/apiProductId'
         - $ref: '#/components/parameters/revisionId-Q'
         - $ref: '#/components/parameters/revisionNum-Q'
+        - name: allEnvironments
+          in: query
+          schema:
+            type: boolean
+            default: false
       requestBody:
         description: Deployment object that needs to be added
         content:
