@@ -1,6 +1,8 @@
 {
   "APis.Details.tryout.help.main": "Test APIs while in the Development stage.",
   "Api.category.dropdown.tooltip": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API.",
+  "Apis.APIProductCreateWrapper.error.errorMessage.create.revision": "Something went wrong while creating the API Revision",
+  "Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision": "Something went wrong while deploying the API Revision",
   "Apis.Create.APIProduct.APIProductCreateWrapper.back": "Back",
   "Apis.Create.APIProduct.APIProductCreateWrapper.cancel": "Cancel",
   "Apis.Create.APIProduct.APIProductCreateWrapper.defineProvide": "Define API Product",
@@ -283,6 +285,7 @@
   "Apis.Details.Documents.CreateEditForm.invalid.document.name.helper.text": "Document name cannot contain spaces or special characters",
   "Apis.Details.Documents.CreateEditForm.source": "Source",
   "Apis.Details.Documents.CreateEditForm.source.file": "File",
+  "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": "Error when validating the document source file name",
   "Apis.Details.Documents.CreateEditForm.source.inline": "Inline",
   "Apis.Details.Documents.CreateEditForm.source.markdown": "Markdown",
   "Apis.Details.Documents.CreateEditForm.source.url": "URL",

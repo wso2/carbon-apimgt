@@ -420,7 +420,7 @@ public class TemplateBuilderUtil {
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
                                                       APIDTO apidto, String extractedFolderPath)
-            throws APIManagementException, XMLStreamException, APITemplateException, CertificateManagementException {
+            throws APIManagementException, XMLStreamException, APITemplateException {
 
         List<ClientCertificateDTO> clientCertificatesDTOList =
                 ImportUtils.retrieveClientCertificates(extractedFolderPath);
@@ -716,31 +716,6 @@ public class TemplateBuilderUtil {
 
         if (clientCertificatesDTOList != null) {
             for (ClientCertificateDTO clientCertificateDTO : clientCertificatesDTOList) {
-                GatewayContentDTO clientCertificate = new GatewayContentDTO();
-                clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
-                clientCertificate.setContent(clientCertificateDTO.getCertificate());
-                gatewayAPIDTO.setClientCertificatesToBeAdd(addGatewayContentToList(clientCertificate,
-                        gatewayAPIDTO.getClientCertificatesToBeAdd()));
-            }
-        }
-    }
-
-    /**
-     * To deploy client certificate in given API environment.
-     *
-     * @param identifier  Relevant API ID.
-     * @param tenantDomain Tenant domain.
-     * @throws CertificateManagementException Certificate Management Exception.
-     */
-    private static void setClientCertificatesToBeAdded(APIIdentifier identifier, String tenantDomain,
-                                                       GatewayAPIDTO gatewayAPIDTO)
-            throws CertificateManagementException {
-
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
-        List<ClientCertificateDTO> clientCertificateDTOList = CertificateMgtDAO.getInstance()
-                .getClientCertificates(tenantId, null, identifier);
-        if (clientCertificateDTOList != null) {
-            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOList) {
                 GatewayContentDTO clientCertificate = new GatewayContentDTO();
                 clientCertificate.setName(clientCertificateDTO.getAlias() + "_" + tenantId);
                 clientCertificate.setContent(clientCertificateDTO.getCertificate());

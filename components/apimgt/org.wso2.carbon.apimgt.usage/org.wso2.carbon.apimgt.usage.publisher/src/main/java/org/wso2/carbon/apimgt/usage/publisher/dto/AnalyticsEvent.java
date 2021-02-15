@@ -25,6 +25,7 @@ public class AnalyticsEvent {
     private String correlationId;
     private String keyType;
     private String apiId;
+    private String apiType;
     private String apiName;
     private String apiVersion;
     private String apiCreator;
@@ -38,7 +39,6 @@ public class AnalyticsEvent {
     private int targetResponseCode;
     private String deploymentId;
     private String eventType;
-    private String userAgent;
 
     public String getRequestTimestamp() {
         return requestTimestamp;
@@ -176,11 +176,11 @@ public class AnalyticsEvent {
         this.eventType = eventType;
     }
 
-    public String getUserAgent() {
-        return userAgent;
+    public String getApiType() {
+        return apiType;
     }
 
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
+    public void setApiType(String apiType) {
+        this.apiType = apiType;
     }
 }

@@ -106,6 +106,19 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
+    public File exportAPIProduct(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
+                                 boolean preserveDocs, boolean preserveCredentials) throws APIManagementException, APIImportExportException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiId);
+        APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, tenantDomain);
+        APIProductDTO apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(product);
+        return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName,
+                format, preserveStatus, preserveDocs, preserveCredentials);
+    }
+
+    @Override
     public File exportAPIProduct(String apiId, String name, String version, String providerName,
                                  ExportFormat format, boolean preserveStatus, boolean preserveDocs,
                                  boolean preserveCredentials)

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.gateway.common.util.JWTUtil;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -45,7 +46,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
     public static final String NONE = "NONE";
     public static final String SHA256_WITH_RSA = "SHA256withRSA";
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
-    public static JWTConfigurationDto jwtConfigurationDto;
+    public JWTConfigurationDto jwtConfigurationDto;
 
     private static volatile long ttl = -1L;
     public String dialectURI;
@@ -78,8 +79,10 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
             base64UrlEncodedHeader = encode(jwtHeader.getBytes(Charset.defaultCharset()));
         }
         String base64UrlEncodedBody = "";
-        if (jwtBody != null) {
-            base64UrlEncodedBody = encode(jwtBody.getBytes());
+        try {
+            base64UrlEncodedBody = encode(jwtBody.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            log.debug("Error in encoding jwt body", e);
         }
         if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;

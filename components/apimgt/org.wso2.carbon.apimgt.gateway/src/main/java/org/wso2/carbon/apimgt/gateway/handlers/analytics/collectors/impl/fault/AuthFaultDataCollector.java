@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultyEvent;
 import org.wso2.carbon.apimgt.usage.publisher.dto.enums.FAULT_EVENT_TYPE;
 import org.wso2.carbon.apimgt.usage.publisher.impl.FaultyRequestDataPublisher;
@@ -44,10 +43,7 @@ public class AuthFaultDataCollector extends AbstractFaultDataCollector {
     public void collectFaultData(MessageContext messageContext, FaultyEvent faultyEvent) {
         log.debug("handling auth failure analytics events");
 
-        faultyEvent.setApplicationId(Constants.UNKNOWN_VALUE);
-        faultyEvent.setApplicationName(Constants.UNKNOWN_VALUE);
-        faultyEvent.setKeyType(Constants.UNKNOWN_VALUE);
-        faultyEvent.setApplicationOwner(Constants.UNKNOWN_VALUE);
+        this.setUnknownApp(faultyEvent);
 
         this.processRequest(faultyEvent);
     }

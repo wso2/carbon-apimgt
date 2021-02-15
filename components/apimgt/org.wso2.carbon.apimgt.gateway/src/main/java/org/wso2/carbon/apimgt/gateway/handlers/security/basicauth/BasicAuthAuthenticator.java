@@ -203,6 +203,7 @@ public class BasicAuthAuthenticator implements Authenticator {
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
+            authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
 
@@ -274,8 +275,8 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setUsername(domainQualifiedUserName);
                     authContext.setCallerToken(null);
                     authContext.setApplicationName(APIConstants.BASIC_AUTH_APPLICATION_NAME);
-                    authContext.setApplicationId(
-                            domainQualifiedUserName); //Set username as application ID in basic auth scenario
+                    authContext.setApplicationId(domainQualifiedUserName); //Set username as application ID in basic auth scenario
+                    authContext.setApplicationUUID(domainQualifiedUserName); //Set username as application ID in basic auth scenario
                     authContext.setConsumerKey(null);
                     APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
                 }
