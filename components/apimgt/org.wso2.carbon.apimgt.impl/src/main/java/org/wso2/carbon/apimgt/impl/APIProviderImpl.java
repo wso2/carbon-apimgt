@@ -999,8 +999,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
-                api.getStatus());
+                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
@@ -1580,11 +1580,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getId(), null);
+        int apiId = apiMgtDAO.getAPIID(api.getId());
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
@@ -1690,12 +1691,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getId(), null);
+        int apiId = apiMgtDAO.getAPIID(api.getId());
 
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
-                api.getStatus());
+                api.getUuid(),api.getId().getVersion(), api.getType(), api.getContext(),
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         return api;
     }
@@ -2173,112 +2174,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return apiUUID;
-    }
-
-    /**
-     * @return true if the API was added successfully
-     * @throws APIManagementException
-     */
-    @Override
-    public boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean
-            deprecateOldVersions
-            , boolean makeKeysForwardCompatible)
-            throws APIManagementException, FaultGatewaysException {
-        boolean success = false;
-        String provider = identifier.getProviderName();
-        String providerTenantMode = identifier.getProviderName();
-        provider = APIUtil.replaceEmailDomain(provider);
-        String name = identifier.getApiName();
-        String version = identifier.getVersion();
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            APIIdentifier apiId = new APIIdentifier(provider, name, version);
-            API api = getAPI(apiId);
-            if (api != null) {
-                String oldStatus = api.getStatus();
-                String newStatus = status.toUpperCase();
-                String currentUser = this.username;
-                changeAPIStatus(api, newStatus, APIUtil.appendDomainWithUser(currentUser, tenantDomain), publishToGateway);
-
-                if ((APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus))
-                        && APIConstants.PUBLISHED.equals(newStatus)) {
-                    if (makeKeysForwardCompatible) {
-                        makeAPIKeysForwardCompatible(api);
-                    }
-                    if (deprecateOldVersions) {
-                        List<API> apiList = getAPIsByProvider(provider);
-                        APIVersionComparator versionComparator = new APIVersionComparator();
-                        for (API oldAPI : apiList) {
-                            if (oldAPI.getId().getApiName().equals(name) &&
-                                    versionComparator.compare(oldAPI, api) < 0 &&
-                                    (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                                changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
-                            }
-                        }
-                    }
-                }
-                success = true;
-                if (log.isDebugEnabled()) {
-                    log.debug("API status successfully updated to: " + newStatus + " in API Name: " + api.getId()
-                            .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
-                            .getContext());
-                }
-            } else {
-                handleException("Couldn't find an API with the name-" + name + "version-" + version);
-            }
-        } catch (FaultGatewaysException e) {
-            handleException("Error while publishing to/un-publishing from  API gateway", e);
-            return false;
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-        return success;
-    }
-
-    @Override
-    public void changeAPIStatus(API api, String status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException {
-        Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
-        String currentStatus = api.getStatus();
-        if (!currentStatus.equals(status)) {
-            api.setStatus(status);
-            try {
-                //If API status changed to publish we should add it to recently added APIs list
-                //this should happen in store-publisher cluster domain if deployment is distributed
-                //IF new API published we will add it to recently added APIs
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
-
-                APIManagerConfiguration config = getAPIManagerConfiguration();
-                String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-                api.setAsPublishedDefaultVersion(
-                        api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
-                updateApiArtifact(api, false, false);
-                apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId, this.tenantId);
-
-                if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { //published default version need to be changed
-                    apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, status);
-                }
-
-            } catch (APIManagementException e) {
-                handleException("Error occurred in the status change : " + api.getId().getApiName() + ". "
-                        + e.getMessage(), e);
-            }
-        }
-    }
-
-    @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException {
-        changeAPIStatus(api, status.getStatus(), userId, updateGatewayConfig);
     }
 
     @Override
@@ -4226,7 +4121,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
                 subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
-        int apiId = apiMgtDAO.getAPIID(identifier, null);
+        int apiId = apiMgtDAO.getAPIID(identifier);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -4239,7 +4134,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteAPI(API api) throws APIManagementException {
 
         try {
-            int apiId = apiMgtDAO.getAPIID(api.getId(), null);
+            int apiId = apiMgtDAO.getAPIID(api.getId());
 
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
@@ -4323,7 +4218,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPersistenceInstance.deleteAPI(new Organization(tenantDomain), api.getUuid());
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_DELETE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                    api.getId().getVersion(), api.getType(), api.getContext(), api.getId().getProviderName(),
+                    api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
+                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                     api.getStatus());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
@@ -5705,8 +5601,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
                 String currentStatus = apiArtifact.getLifecycleState();
 
-                int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
-
+                int apiId = apiMgtDAO.getAPIID(apiIdentifier);
+                String uuid = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                         WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -5738,6 +5634,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
                         apiStateWorkflow.setWorkflowReference(Integer.toString(apiId));
                         apiStateWorkflow.setInvoker(this.username);
+                        apiStateWorkflow.setApiUUID(uuid);
                         String workflowDescription = "Pending lifecycle state change action: " + action;
                         apiStateWorkflow.setWorkflowDescription(workflowDescription);
 
@@ -5766,7 +5663,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                     targetStatus = apiArtifact.getLifecycleState();
                     if (!currentStatus.equals(targetStatus)) {
-                        apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
+                        apiMgtDAO.recordAPILifeCycleEvent(apiId, currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
                     }
                     if (log.isDebugEnabled()) {
@@ -5776,7 +5673,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, tenantDomain, apiName, apiId,
-                            apiVersion, apiType, apiContext, providerName, targetStatus);
+                            uuid, apiVersion, apiType, apiContext, providerName, targetStatus);
                     APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
                     /**
@@ -5891,7 +5788,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiVersion = api.getId().getVersion();
                 String currentStatus = api.getStatus();
 
-                int apiId = apiMgtDAO.getAPIID(api.getId(), null);
+                int apiId = apiMgtDAO.getAPIID(api.getId());
 
                 WorkflowStatus apiWFState = null;
                 WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
@@ -5924,6 +5821,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiStateWorkflow.setCreatedTime(System.currentTimeMillis());
                         apiStateWorkflow.setWorkflowReference(Integer.toString(apiId));
                         apiStateWorkflow.setInvoker(this.username);
+                        apiStateWorkflow.setApiUUID(uuid);
                         String workflowDescription = "Pending lifecycle state change action: " + action;
                         apiStateWorkflow.setWorkflowDescription(workflowDescription);
 
@@ -5955,14 +5853,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     targetStatus = LCManagerFactory.getInstance().getLCManager().getStateForTransition(action);
                     apiPersistenceInstance.changeAPILifeCycle(new Organization(orgId), uuid, targetStatus);
                     changeLifeCycle(api, currentStatus, targetStatus, checklist);
-
                     //Sending Notifications to existing subscribers
                     if (APIConstants.PUBLISHED.equals(targetStatus)) {
                         sendEmailNotification(api);
                     }
-
+                    // if retired Delete Existing Gateway Deployments.
+                    if (APIConstants.RETIRED.equals(targetStatus)){
+                        deleteAPIRevisions(uuid,tenantDomain);
+                    }
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
-                        apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus.toUpperCase(),
+                        apiMgtDAO.recordAPILifeCycleEvent(apiId, currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
                     }
                     if (log.isDebugEnabled()) {
@@ -5972,7 +5872,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                             APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), tenantId, tenantDomain, apiName, apiId,
-                            apiVersion, apiType, apiContext, providerName, targetStatus);
+                            uuid,apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(providerName), targetStatus);
                     APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
                     /**
@@ -6115,8 +6015,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                         API otherApi = getAPI(new APIIdentifier(api.getId().getProviderName(), api.getId().getName(), version));//TODO extract
                         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, otherApi.getId().getApiName(),
-                                0, version, api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
+                                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain,
+                                otherApi.getId().getApiName(), otherApi.getId().getId(), otherApi.getUuid(), version,
+                                api.getType(), otherApi.getContext(), otherApi.getId().getProviderName(),
                                 otherApi.getStatus());
                         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
                     }
@@ -7529,7 +7430,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
         int apiId;
         try {
-            apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+            apiId = apiMgtDAO.getAPIID(apiIdentifier);
             cleanUpPendingAPIStateChangeTask(apiId);
         } catch (APIManagementException e) {
             handleException("Error while deleting the workflow task.", e);
@@ -9691,7 +9592,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (maxId < revisionIdStored) {
             revisionId = revisionIdStored + 1;
         } else {
-            revisionId = maxId +1 ;
+            revisionId = maxId + 1;
         }
         apiRevision.setId(revisionId);
         APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
@@ -9707,31 +9608,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiId.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
         }
         if (StringUtils.isEmpty(revisionUUID)) {
             String errorMessage = "Failed to retrieve revision uuid";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIRevision(apiRevision);
         idList.add(revisionId);
-        revisionIDList.put(apiRevision.getApiUUID(),idList);
-        try {
-            File artifact = importExportAPI
-                    .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
-            gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiId.getApiName(),
-                    apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL, artifact);
-            if (artifactSaver != null){
-                artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
-                        apiRevision.getRevisionUUID(),tenantDomain, artifact);
+        revisionIDList.put(apiRevision.getApiUUID(), idList);
+        if (importExportAPI != null) {
+            try {
+                File artifact = importExportAPI
+                        .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true);
+                gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
+                        apiId.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, APIConstants.HTTP_PROTOCOL,
+                         artifact);
+                if (artifactSaver != null) {
+                    artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiId.getApiName(), apiId.getVersion(),
+                            apiRevision.getRevisionUUID(), tenantDomain, artifact);
+                }
+            } catch (APIImportExportException | ArtifactSynchronizerException e) {
+                throw new APIManagementException("Error while Store the Revision Artifact",
+                        ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
             }
-        } catch (APIImportExportException|ArtifactSynchronizerException e) {
-            throw new APIManagementException("Error while Store the Revision Artifact",
-                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
-
         return revisionUUID;
     }
 

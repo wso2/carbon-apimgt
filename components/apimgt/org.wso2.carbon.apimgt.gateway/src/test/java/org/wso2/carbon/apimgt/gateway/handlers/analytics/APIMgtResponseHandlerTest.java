@@ -67,7 +67,6 @@ public class APIMgtResponseHandlerTest {
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME)).thenReturn("App1");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID)).thenReturn("1");
         Mockito.when(messageContext.getProperty(SynapseConstants.TRANSPORT_IN_NAME)).thenReturn("https");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--api1-1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_URL_PREFIX)).thenReturn("https://localhost");
         apiMgtResponseHandler.mediate(messageContext);
     }
@@ -106,7 +105,6 @@ public class APIMgtResponseHandlerTest {
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME)).thenReturn("App1");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID)).thenReturn("1");
         Mockito.when(messageContext.getProperty(SynapseConstants.TRANSPORT_IN_NAME)).thenReturn("https");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--api1-1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_URL_PREFIX)).thenReturn("https://localhost");
         apiMgtResponseHandler.mediate(messageContext);
     }
@@ -149,7 +147,6 @@ public class APIMgtResponseHandlerTest {
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME)).thenReturn("App1");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID)).thenReturn("1");
         Mockito.when(messageContext.getProperty(SynapseConstants.TRANSPORT_IN_NAME)).thenReturn("https");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--api1-1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_URL_PREFIX)).thenReturn("https://localhost");
         apiMgtResponseHandler.mediate(messageContext);
     }
@@ -182,7 +179,6 @@ public class APIMgtResponseHandlerTest {
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME)).thenReturn("App1");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID)).thenReturn("1");
         Mockito.when(messageContext.getProperty(SynapseConstants.TRANSPORT_IN_NAME)).thenReturn("https");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--api1-1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_URL_PREFIX)).thenReturn("https://localhost");
         apiMgtResponseHandler.mediate(messageContext);
     }
@@ -215,7 +211,6 @@ public class APIMgtResponseHandlerTest {
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME)).thenReturn("App1");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID)).thenReturn("1");
         Mockito.when(messageContext.getProperty(SynapseConstants.TRANSPORT_IN_NAME)).thenReturn("https");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--api1-1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_URL_PREFIX)).thenReturn("https://localhost");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.REQUEST_START_TIME)).thenReturn("10");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_START_TIME)).thenReturn("11");

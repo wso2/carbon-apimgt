@@ -223,8 +223,8 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
-import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -394,7 +394,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
 
             if (apiId == -1) {
                 return null;
@@ -624,7 +624,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
 
             if (apiId == -1) {
                 return null;
@@ -949,7 +949,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
             if (apiId == -1) {
                 return null;
             }
@@ -1080,7 +1080,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier);
             if (apiId == -1) {
                 return null;
             }
@@ -3437,7 +3437,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             api = new API(new APIIdentifier(providerName, apiName, apiVersion));
-            int apiId = ApiMgtDAO.getInstance().getAPIID(oldId, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(oldId);
             if (apiId == -1) {
                 return null;
             }
@@ -5899,7 +5899,7 @@ public final class APIUtil {
      */
     public static String getSequenceExtensionName(API api) {
 
-        return api.getId().getProviderName() + "--" + api.getId().getApiName() + ":v" + api.getId().getVersion();
+        return api.getId().getApiName() + ":v" + api.getId().getVersion();
     }
 
     /**
@@ -5908,9 +5908,9 @@ public final class APIUtil {
      *
      * @return
      */
-    public static String getSequenceExtensionName(String provider, String name, String version) {
+    public static String getSequenceExtensionName(String name, String version) {
 
-        return provider + "--" + name + ":v" + version;
+        return name + ":v" + version;
     }
 
     /**
@@ -7847,34 +7847,6 @@ public final class APIUtil {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getRESTAPICacheConfig();
-    }
-
-    /**
-     * Extract the provider of the API from name
-     *
-     * @param apiVersion   - API Name with version
-     * @param tenantDomain - tenant domain of the API
-     * @return API publisher name
-     */
-    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
-
-        int index = apiVersion.indexOf("--");
-        if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-        String apiProvider;
-        if (index != -1) {
-            apiProvider = apiVersion.substring(0, index);
-            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
-                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-            if (!apiProvider.endsWith(tenantDomain)) {
-                apiProvider = apiProvider + '@' + tenantDomain;
-            }
-            return apiProvider;
-        }
-        return null;
     }
 
     /**
@@ -10394,7 +10366,7 @@ public final class APIUtil {
             throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        int apiId = apiMgtDAO.getAPIID(apiIdentifier, null);
+        int apiId = apiMgtDAO.getAPIID(apiIdentifier);
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
         return wfDTO;

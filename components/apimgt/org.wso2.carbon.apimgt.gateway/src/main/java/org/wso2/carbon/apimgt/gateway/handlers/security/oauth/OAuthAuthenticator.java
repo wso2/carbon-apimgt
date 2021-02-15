@@ -39,11 +39,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -172,7 +173,6 @@ public class OAuthAuthenticator implements Authenticator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -291,7 +291,8 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
-            synCtx.setProperty("API_NAME", apiName.substring(apiName.indexOf("--") + 2, apiName.indexOf(":")));
+            synCtx.setProperty("API_NAME", GatewayUtils.getAPINameFromContextAndVersion(apiContext, apiVersion,
+                    GatewayUtils.getTenantDomain()));
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return new AuthenticationResponse(true, isMandatory, false, 0, null);
         } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {

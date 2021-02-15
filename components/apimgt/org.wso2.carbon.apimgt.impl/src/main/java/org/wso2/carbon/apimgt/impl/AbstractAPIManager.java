@@ -3728,7 +3728,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         // TODO try to use a single query to get info from db
         // Ratings
-        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId, null);
+        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
         // api level tier
         String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);

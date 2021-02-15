@@ -407,7 +407,7 @@ export default function Environments() {
             const lastRevInList = list[list.length - 1].displayName;
             splitList1 = lastRevInList.split(' ');
         }
-        if (parseInt(splitList[1], 0) === parseInt(splitList1[1], 0)) {
+        if (parseInt(splitList[1], 10) === parseInt(splitList1[1], 10)) {
             return splitList[1];
         }
         return null;
@@ -1049,7 +1049,6 @@ export default function Environments() {
         return item6;
     }
 
-
     const items = [];
     if (!api.isRevision) {
         if (allRevisions && allRevisions.length !== 0) {
@@ -1278,7 +1277,7 @@ export default function Environments() {
                             </b>
                             <span className={classes.labelSpace}>
                                 {'Revision '}
-                                {parseInt(lastRevisionCount, 0) + 1}
+                                {parseInt(lastRevisionCount, 10) + 1}
                             </span>
                         </Typography>
                         { allRevisions && allRevisions.length === revisionCount && (
@@ -1656,7 +1655,7 @@ export default function Environments() {
                             </b>
                             <span className={classes.labelSpace}>
                                 {'Revision '}
-                                {parseInt(lastRevisionCount, 0) + 1}
+                                {parseInt(lastRevisionCount, 10) + 1}
                             </span>
                         </Typography>
                         { allRevisions && allRevisions.length === revisionCount && (
