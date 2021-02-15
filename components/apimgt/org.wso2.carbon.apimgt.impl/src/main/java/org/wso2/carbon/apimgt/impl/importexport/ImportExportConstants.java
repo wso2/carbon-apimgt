@@ -41,6 +41,10 @@ public final class ImportExportConstants {
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "schema.graphql";
 
+    // Location of the graphql schema definition file
+    public static final String GRAPHQL_COMPLEXITY_INFO_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "graphql-complexity";
+
     // Location of the wsdl file
     public static final String WSDL_LOCATION = File.separator + "WSDL" + File.separator;
 
@@ -71,13 +75,7 @@ public final class ImportExportConstants {
 
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
-    public static final String UPLOAD_FILE_NAME = "APIArchive.zip";
-
-    // Location of the API YAML file
-    public static final String YAML_API_FILE_LOCATION = File.separator + "api.yaml";
-
-    // Location of the API JSON file
-    public static final String JSON_API_FILE_LOCATION = File.separator + "api.json";
+    public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
@@ -111,17 +109,29 @@ public final class ImportExportConstants {
     // Sequences resource
     public static final String SEQUENCES_RESOURCE = "Sequences";
 
+    // Sequence location post fix
+    public static final String SEQUENCE_LOCATION_POSTFIX = "-sequence";
+
+    // Location of the in sequence
+    public static final String IN_SEQUENCE_PREFIX = "in";
+
+    // Location of the out sequence
+    public static final String OUT_SEQUENCE_PREFIX = "out";
+
+    // Location of the fault sequence
+    public static final String FAULT_SEQUENCE_PREFIX = "fault";
+
     // Location of the in sequence
     public static final String IN_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
-            + File.separator + "in-sequence" + File.separator;
+            + File.separator + IN_SEQUENCE_PREFIX + SEQUENCE_LOCATION_POSTFIX + File.separator;
 
     // Location of the out sequence
     public static final String OUT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
-            + File.separator + "out-sequence" + File.separator;
+            + File.separator + OUT_SEQUENCE_PREFIX + SEQUENCE_LOCATION_POSTFIX + File.separator;
 
-    //Location of the fault sequence
+    // Location of the fault sequence
     public static final String FAULT_SEQUENCE_LOCATION = File.separator + SEQUENCES_RESOURCE
-            + File.separator + "fault-sequence" + File.separator;
+            + File.separator + FAULT_SEQUENCE_PREFIX + SEQUENCE_LOCATION_POSTFIX + File.separator;
 
     public static final String CERTIFICATE_CONTENT_JSON_KEY = "certificate";
 
@@ -150,6 +160,8 @@ public final class ImportExportConstants {
 
     public static final String TYPE_API_PRODUCT = "api_product";
 
+    public static final String TYPE_APPLICATION = "application";
+
     public static final String TYPE_DOCUMENTS = "document";
 
     public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
@@ -162,5 +174,115 @@ public final class ImportExportConstants {
 
     public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
 
+    public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
+
+    public static final String UPLOAD_APPLICATION_FILE_NAME = "ApplicationArchive.zip";
+
+    // Location of the Application YAML file
+    public static final String YAML_APPLICATION_FILE_LOCATION = File.separator + "application.yaml";
+
+    // Location of the Application JSON file
+    public static final String JSON_APPLICATION_FILE_LOCATION = File.separator + "application.json";
+
+    //Api controller Env Params related constants
+    public static final String YAML_API_PARAMS_FILE_LOCATION = File.separator + "api_params.yaml";
+    public static final String JSON_API_PARAMS_FILE_LOCATION = File.separator + "api_params.json";
+    //Env param fields
+    public static final String ENV_NAME_FIELD = "name";
+    public static final String ENDPOINT_TYPE_FIELD = "endpointType";
+    public static final String GATEWAY_ENVIRONMENTS_FIELD = "gatewayEnvironments";
+    public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "mutualSslCerts";
+    public static final String ENDPOINT_CERTIFICATES_FIELD = "certs";
+    public static final String ENDPOINT_SECURITY_FIELD = "security";
+    public static final String POLICIES_FIELD = "policies";
+    public static final String ROUTING_POLICY_FIELD = "endpointRoutingPolicy";
+    public static final String ENDPOINTS_FIELD = "endpoints";
+    public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
+    public static final String FAILOVER_ENDPOINTS_FIELD = "failoverEndpoints";
+
+    //Security config related constants
+    public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_UT_USERNAME = "username";
+    public static final String ENDPOINT_UT_PASSWORD = "password";
+    public static final String ENDPOINT_SECURITY_TYPE = "type";
+    public static final String ENDPOINT_DIGEST_SECURITY_TYPE = "digest";
+    public static final String ENDPOINT_BASIC_SECURITY_TYPE = "basic";
+
+    //Default values for Endpoints
+    public static final String ENDPOINT_URL = "url";
+    public static final String DEFAULT_PRODUCTION_ENDPOINT_URL = "localhost";
+    public static final String DEFAULT_SANDBOX_ENDPOINT_URL = "localhost";
+    public static final String DEFAULT_DYNAMIC_ENDPOINT_URL = "default";
+    public static final String DEFAULT_ALGORITHM_CLASS = "org.apache.synapse.endpoints.algorithms.RoundRobin";
+    public static final String SOAP_ENDPOINT_TYPE_FOR_JSON = "address";
+
+    //Endpoint types
+    public static final String HTTP_TYPE_ENDPOINT = "http";
+    public static final String REST_TYPE_ENDPOINT = "rest";
+    public static final String SOAP_TYPE_ENDPOINT = "soap";
+    public static final String DYNAMIC_TYPE_ENDPOINT = "dynamic";
+    public static final String AWS_TYPE_ENDPOINT = "aws";
+    public static final String AWS_LAMBDA_TYPE_ENDPOINT = "awslambda";
+    public static final String LOAD_BALANCE_TYPE_ENDPOINT = "load_balance";
+    public static final String FAILOVER_TYPE_ENDPOINT = "failOver";
+    public static final String ENDPOINT_TYPE_PROPERTY = "endpoint_type";
+
+    // AWS endpoint related constants
+    public static final String AWS_LAMBDA_ENDPOINT_JSON_PROPERTY = "awsLambdaEndpoints";
+    public static final String AWS_LAMBDA_ENDPOINT_PROPERTY = "AWSLambdaEndpoints";
+    public static final String AWS_ACCESS_METHOD_JSON_PROPERTY = "accessMethod";
+    public static final String AWS_ACCESS_METHOD_PROPERTY = "access_method";
+    public static final String AWS_AMZN_REGION_PROPERTY = "amznRegion";
+    public static final String AWS_AMZN_ACCESS_KEY_PROPERTY = "amznAccessKey";
+    public static final String AWS_AMZN_SECRET_KEY_PROPERTY = "amznSecretKey";
+    public static final String AWS_STORED_ACCESS_METHOD = "stored";
+    public static final String AWS_ROLE_SUPPLIED_ACCESS_METHOD = "role-supplied";
+
+    //REST/SOAP endpoint related constants
+    public static final String FAILOVER_ROUTING_POLICY = "failover";
+    public static final String LOAD_BALANCE_ROUTING_POLICY = "load_balanced";
+    public static final String LOAD_BALANCE_ALGORITHM_CLASS_PROPERTY = "algoClassName";
+    public static final String LOAD_BALANCE_SESSION_MANAGEMENT_PROPERTY = "sessionManagement";
+    public static final String LOAD_BALANCE_SESSION_TIME_OUT_PROPERTY = "sessionTimeOut";
+    public static final String PRODUCTION_FAILOVERS_ENDPOINTS_PROPERTY = "production_failovers";
+    public static final String SANDBOX_FAILOVERS_ENDPOINTS_PROPERTY = "sandbox_failovers";
+    public static final String PRODUCTION_ENDPOINTS_PROPERTY = "production_endpoints";
+    public static final String SANDBOX_ENDPOINTS_PROPERTY = "sandbox_endpoints";
+    public static final String LOAD_BALANCE_SESSION_MANAGEMENT_TRANSPORT_TYPE = "transport";
+    public static final String PRODUCTION_FAILOVERS_ENDPOINTS_JSON_PROPERTY = "productionFailovers";
+    public static final String SANDBOX_FAILOVERS_ENDPOINTS_JSON_PROPERTY = "sandboxFailovers";
+    public static final String PRODUCTION_ENDPOINTS_JSON_PROPERTY = "production";
+    public static final String SANDBOX_ENDPOINTS_JSON_PROPERTY = "sandbox";
+
+    //Certificate related constants
+    public static final String MUTUAL_SSL_ENABLED = "mutualssl";
+    public static final String CERTIFICATE_API_IDENTIFIER_PROPERTY = "apiIdentifier";
+    public static final String CERTIFICATE_PATH_PROPERTY = "path";
+    public static final String CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY = "file";
+    public static final String CERTIFICATE_HOST_NAME_PROPERTY = "hostName";
+    public static final String CERTIFICATE_TIER_NAME_PROPERTY = "tierName";
+    public static final String DATA_PROPERTY = "data";
+
+
+    public static final String CERTIFICATE_FILE_EXTENSION = ".crt";
+    public static final String CERTIFICATE_DIRECTORY = File.separator + "certificates";
+    public static final String ENDPOINT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Endpoint-certificates";
+    public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Client-certificates";
+    public static final String ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH =
+            ENDPOINT_CERTIFICATES_DIRECTORY_PATH + File.separator + "endpoint_certificates";
+    public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
+            CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "client_certificates";
+
+    //Deployment directory related constants
+    public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";
+    public static final String DEPLOYMENT_DIRECTORY= File.separator + DEPLOYMENT_DIRECTORY_NAME;
+    public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
+    public static final String API_PARAMS_FILE_NAME = "api_params.yaml";
+
+    // Location of the deployments file
+    public static final String DEPLOYMENT_INFO_LOCATION = File.separator + "deployment_environments";
+    public static final String DEPLOYMENT_ENVIRONMENTS = "deploymentEnvironments";
+    public static final String DEPLOYMENT_NAME = "deploymentEnvironment";
+    public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
 }

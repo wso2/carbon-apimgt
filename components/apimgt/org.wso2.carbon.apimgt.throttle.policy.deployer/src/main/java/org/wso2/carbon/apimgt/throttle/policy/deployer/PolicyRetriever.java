@@ -196,6 +196,12 @@ public class PolicyRetriever {
 
         String endpoint = baseURL + path;
         try (CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain)) {
+            if (httpResponse.getStatusLine().getStatusCode() != 200) {
+                String errorMessage = EntityUtils.toString(httpResponse.getEntity(),
+                        APIConstants.DigestAuthConstants.CHARSET);
+                throw new ThrottlePolicyDeployerException(errorMessage + "Event-Hub status code is : "
+                        + httpResponse.getStatusLine().getStatusCode());
+            }
             if (httpResponse.getEntity() != null) {
                 String responseString = EntityUtils.toString(httpResponse.getEntity(),
                         APIConstants.DigestAuthConstants.CHARSET);

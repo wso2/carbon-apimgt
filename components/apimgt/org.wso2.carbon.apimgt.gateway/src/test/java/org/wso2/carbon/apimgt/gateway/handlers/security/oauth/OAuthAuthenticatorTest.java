@@ -27,8 +27,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class OAuthAuthenticatorTest {
         OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
                 .thenReturn("true");
-        Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(new JWTConfigurationDto());
+        Mockito.when(apiManagerConfiguration.getJwtConfigurationDto()).thenReturn(new ExtendedJWTConfigurationDto());
     }
 
 

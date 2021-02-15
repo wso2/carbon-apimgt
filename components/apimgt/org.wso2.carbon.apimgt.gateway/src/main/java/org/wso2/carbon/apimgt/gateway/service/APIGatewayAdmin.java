@@ -46,11 +46,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.stream.XMLStreamException;
 
 public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     private static Log log = LogFactory.getLog(APIGatewayAdmin.class);
+
+    public APIGatewayAdmin() {
+
+    }
 
     /**
      * Add the API to the gateway
@@ -125,40 +130,40 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @return
      * @throws AxisFault
      */
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getApiForTenant(String apiProviderName, String apiName,
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getApiForTenant(String apiName,
                                                                       String version, String tenantDomain)
             throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         APIData apiData = restClient.getApi(qualifiedName);
         return convert(apiData);
     }
 
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getApi(String apiProviderName, String apiName, String version)
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getApi(String apiName, String version)
             throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         APIData apiData = restClient.getApi(qualifiedName);
         return convert(apiData);
     }
 
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApiForTenant(String apiProviderName, String apiName,
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApiForTenant(String apiName,
                                                                              String version, String tenantDomain)
             throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiProviderName, apiName);
+        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         APIData apiData = restClient.getApi(qualifiedName);
         return convert(apiData);
     }
 
-    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApi(String apiProviderName, String apiName,
+    public org.wso2.carbon.apimgt.gateway.dto.APIData getDefaultApi(String apiName,
                                                                     String version) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiProviderName, apiName);
+        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         APIData apiData = restClient.getApi(qualifiedName);
         return convert(apiData);
     }
@@ -166,61 +171,59 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * Update the API in the Gateway
      *
-     * @param apiProviderName
      * @param tenantDomain
      * @throws AxisFault
      */
-    public boolean updateApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
+    public boolean updateApiForTenant(String apiName, String version, String apiConfig,
                                       String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateApi(String apiProviderName, String apiName, String version, String apiConfig) throws AxisFault {
+    public boolean updateApi(String apiName, String version, String apiConfig) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
     /**
      * Update the API in the Gateway
      *
-     * @param apiProviderName
      * @param tenantDomain
      * @throws AxisFault
      */
-    public boolean updateApiForInlineScriptForTenant(String apiProviderName, String apiName, String version,
+    public boolean updateApiForInlineScriptForTenant(String apiName, String version,
                                                      String apiConfig, String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateApiForInlineScript(String apiProviderName, String apiName, String version, String apiConfig)
+    public boolean updateApiForInlineScript(String apiName, String version, String apiConfig)
             throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateDefaultApiForTenant(String apiProviderName, String apiName, String version, String apiConfig,
+    public boolean updateDefaultApiForTenant(String apiName, String version, String apiConfig,
                                              String tenantDomain) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiProviderName, apiName);
+        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
-    public boolean updateDefaultApi(String apiProviderName, String apiName, String version, String apiConfig)
+    public boolean updateDefaultApi(String apiName, String version, String apiConfig)
             throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiProviderName, apiName);
+        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.updateApi(qualifiedName, apiConfig);
     }
 
@@ -236,7 +239,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
         // Delete secure vault alias properties if exists
         deleteRegistryProperty(apiProviderName, apiName, version, tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.deleteApi(qualifiedName);
     }
 
@@ -253,23 +256,23 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         // Delete secure vault alias properties if exists
         deleteRegistryProperty(apiProviderName, apiName, version, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedApiName(apiProviderName, apiName, version);
+        String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
         return restClient.deleteApi(qualifiedName);
     }
 
-    public boolean deleteDefaultApiForTenant(String apiProviderName, String apiName, String version,
+    public boolean deleteDefaultApiForTenant(String apiName, String version,
                                              String tenantDomain)
             throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(tenantDomain);
-        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiProviderName, apiName);
+        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.deleteApi(qualifiedName);
     }
 
-    public boolean deleteDefaultApi(String apiProviderName, String apiName, String version) throws AxisFault {
+    public boolean deleteDefaultApi(String apiName, String version) throws AxisFault {
 
         RESTAPIAdminServiceProxy restClient = getRestapiAdminClient(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiProviderName, apiName);
+        String qualifiedName = GatewayUtils.getQualifiedDefaultApiName(apiName);
         return restClient.deleteApi(qualifiedName);
     }
 
@@ -671,7 +674,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
             for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                 if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                    if (!APIConstants.GA_CONF_KEY.equals(localEntry.getName()) && gatewayAPIDTO.isOverride()) {
+                    if (gatewayAPIDTO.isOverride()) {
                         localEntryServiceProxy.deleteEntry(localEntry.getName());
                         localEntryServiceProxy.addLocalEntry(localEntry.getContent());
                     }
@@ -796,7 +799,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             log.debug("Start to undeploy default api " + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
         // Delete Default API
-        String qualifiedDefaultApiName = GatewayUtils.getQualifiedDefaultApiName(gatewayAPIDTO.getProvider(),
+        String qualifiedDefaultApiName = GatewayUtils.getQualifiedDefaultApiName(
                 gatewayAPIDTO.getName());
         if (restapiAdminServiceProxy.getApi(qualifiedDefaultApiName) != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedDefaultApiName);
@@ -808,7 +811,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         }
 
         // Delete API
-        String qualifiedName = GatewayUtils.getQualifiedApiName(gatewayAPIDTO.getProvider(),
+        String qualifiedName = GatewayUtils.getQualifiedApiName(
                 gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
         if (restapiAdminServiceProxy.getApi(qualifiedName) != null) {
             restapiAdminServiceProxy.deleteApi(qualifiedName);

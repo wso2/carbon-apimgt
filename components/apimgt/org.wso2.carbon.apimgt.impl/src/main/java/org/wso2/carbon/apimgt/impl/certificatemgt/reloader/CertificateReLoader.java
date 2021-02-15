@@ -17,9 +17,9 @@
  */
 package org.wso2.carbon.apimgt.impl.certificatemgt.reloader;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.dto.TrustStoreDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.File;
@@ -36,14 +36,13 @@ import java.security.cert.CertificateException;
 public class CertificateReLoader implements Runnable {
 
     private static final Log log = LogFactory.getLog(CertificateReLoader.class);
-    private static String TRUST_STORE_PASSWORD = System.getProperty("javax.net.ssl.trustStorePassword");
-    private static String TRUST_STORE = System.getProperty("javax.net.ssl.trustStore");
 
     @Override
     public void run() {
 
-        if (StringUtils.isNotEmpty(TRUST_STORE_PASSWORD)) {
-            File trustStoreFile = new File(TRUST_STORE);
+        TrustStoreDTO trustStoreDTO = CertificateReLoaderUtil.getTrustStore();
+        if (trustStoreDTO != null) {
+            File trustStoreFile = new File(trustStoreDTO.getLocation());
             FileInputStream localTrustStoreStream;
             try {
                 long lastUpdatedTimeStamp = CertificateReLoaderUtil.getLastUpdatedTimeStamp();
@@ -52,7 +51,7 @@ public class CertificateReLoader implements Runnable {
                     CertificateReLoaderUtil.setLastUpdatedTimeStamp(lastModified);
                     localTrustStoreStream = new FileInputStream(trustStoreFile);
                     KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD.toCharArray());
+                    trustStore.load(localTrustStoreStream, trustStoreDTO.getPassword());
                     ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
                 }
             } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {

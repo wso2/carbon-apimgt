@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, useTheme } from '@material-ui/core/styles';
 import { useIntl } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
@@ -33,12 +33,6 @@ const styles = (theme) => ({
         '&:hover,&:focus': {
             backgroundColor: 'rgba(255, 255, 255, 0.08)',
         },
-    },
-    itemCategory: {
-        backgroundColor: '#232f3e',
-        boxShadow: '0 -1px 0 #404854 inset',
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
     },
     firebase: {
         fontSize: 24,
@@ -73,6 +67,7 @@ function Navigator(props) {
     const {
         classes, history, ...other
     } = props;
+    const theme = useTheme();
     const intl = useIntl();
     const { settings, user: { _scopes } } = useAppContext();
     const isAnalyticsEnabled = settings.analyticsEnabled;
@@ -127,16 +122,31 @@ function Navigator(props) {
     const { location: { pathname: currentPath } } = history;
     updateAllRoutePaths(currentPath);
 
+    let logoUrl = '/site/public/images/logo.svg';
+    let logoWidth = 180;
+    let logoHeight = '';
+    if (theme.custom && theme.custom.logo) {
+        logoUrl = theme.custom.logo;
+    }
+    if (theme.custom && theme.custom.logoWidth) {
+        logoWidth = theme.custom.logoWidth;
+    }
+    if (theme.custom && theme.custom.logoHeight) {
+        logoHeight = theme.custom.logoHeight;
+    }
+
     return (
         // eslint-disable-next-line react/jsx-props-no-spreading
         <Drawer variant='permanent' {...other}>
             <List disablePadding>
-                <ListItem className={clsx(classes.firebase, classes.item, classes.itemCategory, classes.logoWrapper)}>
+                <ListItem className={clsx(classes.firebase, classes.item, 'itemCategory', classes.logoWrapper)}>
                     <Link component={RouterLink} to='/'>
                         <img
                             alt='logo'
-                            src={Configurations.app.context + '/site/public/images/logo.svg'}
-                            width='180'
+                            src={Configurations.app.context
+                                + logoUrl}
+                            width={logoWidth}
+                            height={logoHeight}
                         />
                     </Link>
                 </ListItem>
@@ -150,7 +160,7 @@ function Navigator(props) {
                                 <ListItem
                                     className={clsx(
                                         classes.item,
-                                        classes.itemCategory,
+                                        'itemCategory',
                                         parentActive && classes.itemActiveItem,
                                     )}
                                 >

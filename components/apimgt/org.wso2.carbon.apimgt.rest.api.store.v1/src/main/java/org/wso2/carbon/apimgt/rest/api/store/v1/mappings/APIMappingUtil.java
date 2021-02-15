@@ -109,13 +109,19 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         }
 
-        //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = null;
-
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
-            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+        String apiDefinition = null;
+        if (model.isAsync()) {
+            // for asyncAPI retrieve asyncapi.yml specification
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
+        } else {
+            // retrieve open API definition
+            if (model.getSwaggerDefinition() != null) {
+                apiDefinition = model.getSwaggerDefinition();
+            } else {
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+            }
         }
-        dto.setApiDefinition(apiSwaggerDefinition);
+        dto.setApiDefinition(apiDefinition);
 
         if (APIConstants.APITransportType.GRAPHQL.toString().equals(model.getType())) {
             List<APIOperationsDTO> operationList = new ArrayList<>();
@@ -273,13 +279,19 @@ public class APIMappingUtil {
             dto.setCreatedTime(dateFormatted);
         } */
 
-        //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition = null;
-
-        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
-            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+        String apiDefinition = null;
+        if (model.isAsync()) {
+            // for asyncAPI retrieve asyncapi.yml specification
+            apiDefinition = apiConsumer.getAsyncAPIDefinition(model.getUuid(), tenantDomain);
+        } else {
+            // retrieve open API definition
+            if (model.getDefinition() != null) {
+                apiDefinition = model.getDefinition();
+            } else {
+                apiDefinition = apiConsumer.getOpenAPIDefinition(model.getUuid(), tenantDomain);
+            }
         }
-        dto.setApiDefinition(apiSwaggerDefinition);
+        dto.setApiDefinition(apiDefinition);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -679,9 +691,9 @@ public class APIMappingUtil {
                 subscriptionAllowedTenants));
         int free = 0, commercial = 0;
         for (Tier tier : throttlingPolicies) {
-            if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.FREE)) {
+            if (RestApiConstants.FREE.equalsIgnoreCase(tier.getTierPlan())) {
                 free = free + 1;
-            } else if (tier.getTierPlan().equalsIgnoreCase(RestApiConstants.COMMERCIAL)) {
+            } else if (RestApiConstants.COMMERCIAL.equalsIgnoreCase(tier.getTierPlan())) {
                 commercial = commercial + 1;
             }
         }
@@ -1023,7 +1035,7 @@ public class APIMappingUtil {
     public static AdvertiseInfoDTO extractAdvertiseInfo(API api) {
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
-        advertiseInfoDTO.setOriginalStoreUrl(api.getRedirectURL());
+        advertiseInfoDTO.setOriginalDevPortalUrl(api.getRedirectURL());
         advertiseInfoDTO.setApiOwner(api.getApiOwner());
         return advertiseInfoDTO;
     }
@@ -1063,5 +1075,4 @@ public class APIMappingUtil {
         }
         return subscriptionAllowed;
     }
-
 }

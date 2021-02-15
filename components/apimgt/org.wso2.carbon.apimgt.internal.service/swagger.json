@@ -206,6 +206,12 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
           "name" : "context",
           "in" : "query",
           "description" : "**Search condition**.\n context of the api\n",
@@ -215,6 +221,12 @@
           "name" : "version",
           "in" : "query",
           "description" : "**Search condition**.\n versio  of the api\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
           "required" : false,
           "type" : "string"
         }, {
@@ -468,6 +480,12 @@
           "description" : "**Search condition**.\n Consumer Key of the application\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "keymanager",
+          "in" : "query",
+          "description" : "**Search condition**.\n KeyManager associated to consumer_key of the application\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -519,12 +537,18 @@
         }
       }
     },
-    "/synapse-artifacts" : {
+    "/runtime-artifacts" : {
       "get" : {
-        "tags" : [ "Retrieving Synapse artifacts" ],
-        "summary" : "Get all the synapse artifacts for a given API UUID and gateway label",
-        "description" : "This will provide access to synapse artifacts in database.\n",
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get all the runtime artifacts for a given API UUID and gateway label",
+        "description" : "This will provide access to runtime artifacts in database.\n",
         "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
           "name" : "apiId",
           "in" : "query",
           "description" : "**Search condition**.\n  Api ID\n",
@@ -533,22 +557,31 @@
         }, {
           "name" : "gatewayLabel",
           "in" : "query",
-          "description" : "**Search condition**.\n label associated with the API\n",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "gatewayInstruction",
+          "name" : "type",
           "in" : "query",
-          "description" : "**Search condition**.\n Publish/Remove\n",
+          "description" : "**Search condition**.\n type of gateway\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "name",
+          "in" : "query",
+          "description" : "**Search condition**.\n name of API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "**Search condition**.\n version of API\n",
           "required" : false,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "String of gatewayRuntimeArtifacts",
-            "schema" : {
-              "type" : "string"
-            }
+            "description" : "List of runtime Artifacts"
           },
           "default" : {
             "description" : "Unexpected error",
@@ -559,24 +592,58 @@
         }
       }
     },
-    "/gateway-synapse-artifacts" : {
+    "/endpoint-certificates" : {
       "get" : {
-        "tags" : [ "Retrieving All Synapse artifacts" ],
-        "summary" : "Get all synapse artifacts for a given gateway label",
-        "description" : "This will provide access to the synapse artifacts in database.\n",
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get all the endpoint certificates for given alias.",
+        "description" : "This will provide access to\n",
         "parameters" : [ {
-          "name" : "gatewayLabel",
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "alias",
           "in" : "query",
-          "description" : "**Search condition**.\n label associated with the API\n",
+          "description" : "**Search condition**.\n  Alias\n",
           "required" : false,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "An array of gatewayRuntimeArtifacts",
+            "description" : "List of endpoint certificates"
+          },
+          "default" : {
+            "description" : "Unexpected error",
             "schema" : {
-              "$ref" : "#/definitions/SynapseArtifactList"
+              "$ref" : "#/definitions/Error"
             }
+          }
+        }
+      }
+    },
+    "/ga-config" : {
+      "get" : {
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get Google analytics config related to tenant.",
+        "description" : "This will provide access to runtime artifacts in database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "google analytics configuration"
           },
           "default" : {
             "description" : "Unexpected error",
@@ -833,6 +900,10 @@
     },
     "API" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string",
+          "description" : "UUID of API"
+        },
         "apiId" : {
           "type" : "integer"
         },

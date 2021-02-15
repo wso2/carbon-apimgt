@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -30,9 +29,6 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,14 +60,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -270,11 +262,6 @@ public class PublisherCommonUtils {
 
         // Validate API Security
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
-                .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-            throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                    ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-        }
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
         String originalStatus = originalAPI.getStatus();
@@ -337,16 +324,17 @@ public class PublisherCommonUtils {
 
         //attach micro-geteway labels
         assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         //preserve monetization status in the update flow
-        apiProvider.configureMonetizationInAPIArtifact(originalAPI);
-
+        //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
+        apiIdentifier.setUuid(apiToUpdate.getUuid());
         if (!isWSAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, tenantDomain);
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
@@ -362,9 +350,10 @@ public class PublisherCommonUtils {
             }
         }
 
-        apiProvider.manageAPI(apiToUpdate);
-
-        return apiProvider.getAPI(apiIdentifier);
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
+        
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
     }
 
     /**
@@ -707,8 +696,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        //adding the api
-        apiProvider.addAPI(apiToAdd);
+        
 
         if (!isWSAPI) {
             APIDefinition oasParser;
@@ -719,8 +707,10 @@ public class PublisherCommonUtils {
             }
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+            apiToAdd.setSwaggerDefinition(apiDefinition);
         }
+        //adding the api
+        apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
 
@@ -766,14 +756,6 @@ public class PublisherCommonUtils {
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
 
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
-            for (String apiSecurityScheme : apiSecuritySchemes) {
-                if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                            ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-                }
-            }
-        }
         if (body.getAccessControlRoles() != null) {
             String errorMessage = PublisherCommonUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -960,10 +942,13 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-        apiProvider.updateAPI(existingAPI);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
+        existingAPI.setSwaggerDefinition(updatedApiDefinition);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        existingAPI.setStatus(unModifiedAPI.getStatus());
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
@@ -1104,17 +1089,14 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid document sourceUrl Format",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
-        //this will fail if user does not have access to the API or the API does not exist
-        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
+
+        if (apiProvider.isDocumentationExist(apiId, documentName, tenantDomain)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        apiProvider.addDocumentation(apiIdentifier, documentation);
+        documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
 
-        //retrieve the newly added document
-        String newDocumentId = documentation.getId();
-        return apiProvider.getDocumentation(newDocumentId, tenantDomain);
+        return documentation;
     }
 
     /**
@@ -1288,7 +1270,7 @@ public class PublisherCommonUtils {
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
-        apiProvider.saveToGateway(createdProduct);
+        //apiProvider.saveToGateway(createdProduct);
         return createdProduct;
     }
 }

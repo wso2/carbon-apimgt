@@ -44,7 +44,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add AbnormalRequestsPerMin Alert Configurations. ", notes = "This operation is used to add configuration for the AbnormalRequestsPerMin alert type. ", response = AlertConfigDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure Developer Portal alert types")
         })
     }, tags={ "Alert Configuration",  })
     @ApiResponses(value = { 
@@ -61,7 +61,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete the Selected Configuration from AbnormalRequestsPerMin Alert Type. ", notes = "This operation is used to delete configuration from the AbnormalRequestsPerMin alert type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure Developer Portal alert types")
         })
     }, tags={ "Alert Configuration",  })
     @ApiResponses(value = { 
@@ -79,11 +79,11 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get All AbnormalRequestsPerMin Alert Configurations ", notes = "This operation is used to get all configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure Developer Portal alert types")
         })
     }, tags={ "Alert Configuration" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The store alert configuration. ", response = AlertConfigListDTO.class),
+        @ApiResponse(code = 200, message = "OK. The Developer Portal alert configuration. ", response = AlertConfigListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getAllAlertConfigs(@ApiParam(value = "The alert type. ",required=true) @PathParam("alertType") String alertType) throws APIManagementException{
         return delegate.getAllAlertConfigs(alertType, securityContext);

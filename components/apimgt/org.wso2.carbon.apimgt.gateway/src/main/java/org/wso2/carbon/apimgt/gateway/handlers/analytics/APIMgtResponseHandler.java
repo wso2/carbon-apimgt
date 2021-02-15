@@ -151,10 +151,11 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             String metaClientType = obj.toJSONString();
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
-            String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
+            String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+            String context = (String) mc.getProperty(RESTConstants.REST_API_CONTEXT);
             String creator = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
             if (creator == null) {
-                creator = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
+                creator = GatewayUtils.getApiProviderFromContextAndVersion(context, apiVersion, tenantDomain);
             }
             //get the version
             apiVersion = apiVersion.split(":v")[1];

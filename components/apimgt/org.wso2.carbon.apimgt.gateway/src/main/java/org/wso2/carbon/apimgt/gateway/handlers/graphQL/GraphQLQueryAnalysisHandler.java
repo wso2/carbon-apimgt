@@ -24,7 +24,6 @@ import graphql.analysis.FieldComplexityCalculator;
 import graphql.analysis.MaxQueryComplexityInstrumentation;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -35,12 +34,9 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
-import org.bouncycastle.eac.EACException;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +93,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return true, if the query is not blocked or false, if the query is blocked
      */
     private boolean analyseQuery(MessageContext messageContext, String payload) {
+
         try {
             if (analyseQueryDepth(messageContext, payload) &&
                     analyseQueryComplexity(messageContext, payload)) {
@@ -106,9 +103,14 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             }
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            log.error(errorMessage, e);
+            OMElement errorPayLoad = getFaultPayload(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+            Utils.setFaultPayload(messageContext, errorPayLoad);
+            Utils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            return false;
         }
-        return false;
     }
 
     /**

@@ -34,9 +34,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -47,7 +50,7 @@ import java.util.TreeMap;
 * Test class for APIAuthenticationhandler
 * */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class})
+@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class, GatewayUtils.class})
 public class APIAuthenticationHandlerTestCase {
     private Timer.Context context;
     private SynapseEnvironment synapseEnvironment;
@@ -58,6 +61,7 @@ public class APIAuthenticationHandlerTestCase {
 
     @Before
     public void setup(){
+        PowerMockito.mockStatic(GatewayUtils.class);
         synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
@@ -142,7 +146,8 @@ public class APIAuthenticationHandlerTestCase {
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-
+        PowerMockito.when(GatewayUtils.getApiProviderFromContextAndVersion(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString())).thenReturn(Mockito.anyString());
         APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler() {
             @Override
             protected AuthenticationContext getAuthenticationContext(MessageContext messageContext) {
@@ -157,7 +162,6 @@ public class APIAuthenticationHandlerTestCase {
         authContext.setApplicationId("123");
 
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin-AT-wso2.com--PizzaShackAPI");
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)).thenReturn(null);
 
         Mockito.when(messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH)).thenReturn("");

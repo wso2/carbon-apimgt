@@ -21,8 +21,13 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.sequences.common.SequenceEditorException;
+import org.wso2.carbon.sequences.common.to.SequenceInfo;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * SequenceAdmin service client to deploy the custom sequences to multiple gateway environemnets.
@@ -117,5 +122,21 @@ public class SequenceAdminServiceProxy {
     protected void setSequenceAdmin(SequenceAdmin sequenceAdmin) {
 
         this.sequenceAdmin = sequenceAdmin;
+    }
+
+    public Set<String> getSequences() throws AxisFault {
+
+        Set<String> sequenceNames = new HashSet<>();
+        try {
+            int sequencesCount = sequenceAdmin.getSequencesCount();
+            SequenceInfo[] sequences = sequenceAdmin.getSequences(0, sequencesCount);
+            for (SequenceInfo sequence : sequences) {
+                sequenceNames.add(sequence.getName());
+            }
+        } catch (SequenceEditorException e) {
+            throw new AxisFault("Error while retireving sequences list", e);
+
+        }
+        return sequenceNames;
     }
 }

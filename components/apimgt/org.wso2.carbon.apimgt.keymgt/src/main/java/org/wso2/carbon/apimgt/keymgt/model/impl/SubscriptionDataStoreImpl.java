@@ -17,10 +17,16 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
@@ -57,17 +63,20 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         APPLICATION,
         API
     }
+
     public static final String DELEM_PERIOD = ":";
 
     // Maps for keeping Subscription related details.
     private Map<ApplicationKeyMappingCacheKey, ApplicationKeyMapping> applicationKeyMappingMap;
     private Map<Integer, Application> applicationMap;
     private Map<String, API> apiMap;
+    private Map<String,API> apiNameVersionMap;
+    private Map<String, API> apiByUUIDMap;
     private Map<String, ApiPolicy> apiPolicyMap;
     private Map<String, SubscriptionPolicy> subscriptionPolicyMap;
     private Map<String, ApplicationPolicy> appPolicyMap;
     private Map<String, Subscription> subscriptionMap;
-    private Map<String,Scope> scopesMap;
+    private Map<String, Scope> scopesMap;
     private boolean apisInitialized;
     private boolean applicationsInitialized;
     private boolean subscriptionsInitialized;
@@ -95,31 +104,136 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         this.applicationKeyMappingMap = new ConcurrentHashMap<>();
         this.applicationMap = new ConcurrentHashMap<>();
         this.apiMap = new ConcurrentHashMap<>();
+        this.apiByUUIDMap = new ConcurrentHashMap<>();
         this.subscriptionPolicyMap = new ConcurrentHashMap<>();
         this.appPolicyMap = new ConcurrentHashMap<>();
         this.apiPolicyMap = new ConcurrentHashMap<>();
         this.subscriptionMap = new ConcurrentHashMap<>();
         this.scopesMap = new ConcurrentHashMap<>();
+        this.apiNameVersionMap = new ConcurrentHashMap<>();
         initializeLoadingTasks();
     }
 
     @Override
     public Application getApplicationById(int appId) {
+        String synchronizeKey = "SubscriptionDataStoreImpl-Application-" + appId;
+        Application application = applicationMap.get(appId);
+        if (application == null) {
+            synchronized (synchronizeKey.intern()) {
+                application = applicationMap.get(appId);
+                if (application != null) {
+                    return application;
+                }
+            }
+            try {
+                application = new SubscriptionDataLoaderImpl().getApplicationById(appId);
+            } catch (DataLoadingException e) {
+                log.error("Error while Retrieving Application Metadata From Internal API.", e);
+            }
+            if (application != null && application.getId() != null && application.getId() != 0) {
+                // load to the memory
+                log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
+                addOrUpdateApplication(application);
+            } else {
+                log.debug("Application not found. applicationId = " + application.getId());
+            }
+        }
 
-        return applicationMap.get(appId);
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving Application information with Application Id : " + appId);
+            if (application != null) {
+                log.debug("Retrieved Application :" + application.toString());
+            } else {
+                log.debug("Retrieved Application information with Application Id : " + appId + " is empty");
+            }
+        }
+        return application;
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
+    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager)  {
+        ApplicationKeyMappingCacheKey applicationKeyMappingCacheKey = new ApplicationKeyMappingCacheKey(key,
+                keyManager);
+        String synchronizeKey = "SubscriptionDataStoreImpl-KeyMapping-" + applicationKeyMappingCacheKey;
 
-        return applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
+        ApplicationKeyMapping applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+        if (applicationKeyMapping == null) {
+            synchronized (synchronizeKey.intern()) {
+                applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
+                if (applicationKeyMapping != null) {
+                    return applicationKeyMapping;
+                }
+                try {
+                    applicationKeyMapping = new SubscriptionDataLoaderImpl().getKeyMapping(key, keyManager);
+                } catch (DataLoadingException e) {
+                    log.error("Error while Loading KeyMapping Information from Internal API.", e);
+                }
+                if (applicationKeyMapping != null && !StringUtils.isEmpty(applicationKeyMapping.getConsumerKey())) {
+                    // load to the memory
+                    log.debug("Loading Keymapping to the in-memory datastore.");
+                    addOrUpdateApplicationKeyMapping(applicationKeyMapping);
+                }
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager);
+            if (applicationKeyMapping != null) {
+                log.debug("Retrieved Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is " + applicationKeyMapping.toString());
+            } else {
+                log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : " + keyManager + " is empty");
+            }
+        }
+        return applicationKeyMapping;
     }
 
     @Override
     public API getApiByContextAndVersion(String context, String version) {
 
         String key = context + DELEM_PERIOD + version;
-        return apiMap.get(key);
+        String synchronizeKey = "SubscriptionDataStoreImpl-API-" + key;
+        API api = apiMap.get(key);
+        if (api == null) {
+            synchronized (synchronizeKey.intern()) {
+                api = apiMap.get(key);
+                if (api != null) {
+                    return api;
+                }
+                try {
+                    api = new SubscriptionDataLoaderImpl().getApi(context, version);
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Data From Internal Rest API", e);
+                }
+                if (api != null && api.getApiId() != 0) {
+                    // load to the memory
+                    log.debug("Loading API to the in-memory datastore.");
+                    addOrUpdateAPI(api);
+                }
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API information with Context " + context + " and Version : " + version);
+            if (api != null) {
+                log.debug("Retrieved API information with Context  : " + context + " and Version : " + version + " is" +
+                        " " + api.toString());
+            } else {
+                log.debug("Retrieved API information with Context  : " + context + " and Version : " + version + " is" +
+                        " empty");
+            }
+        }
+        return api;
+    }
+
+    @Override
+    public API getApiByNameAndVersion(String name, String version) {
+        String key = name + DELEM_PERIOD + version;
+        return apiNameVersionMap.get(key);
+    }
+
+    @Override
+    public API getAPIByUUID(String apiUUID) {
+
+        return apiByUUIDMap.get(apiUUID);
     }
 
     @Override
@@ -133,21 +247,52 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public ApplicationPolicy getApplicationPolicyByName(String policyName, int tenantId) {
 
-        String key = POLICY_TYPE.APPLICATION + DELEM_PERIOD + 
+        String key = POLICY_TYPE.APPLICATION + DELEM_PERIOD +
                 SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
         return appPolicyMap.get(key);
     }
 
     @Override
     public Subscription getSubscriptionById(int appId, int apiId) {
+        String subscriptionCacheKey = SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId);
+        String synchronizeKey = "SubscriptionDataStoreImpl-Subscription-" + subscriptionCacheKey;
+        Subscription subscription = subscriptionMap.get(subscriptionCacheKey);
+        if (subscription == null) {
+            synchronized (synchronizeKey.intern()) {
+                subscription = subscriptionMap.get(subscriptionCacheKey);
+                if (subscription != null) {
+                    return subscription;
+                }
+                try {
+                    subscription = new SubscriptionDataLoaderImpl().getSubscriptionById(Integer.toString(apiId),
+                            Integer.toString(appId));
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Subscription Data From Internal API", e);
+                }
+                if (subscription != null && !StringUtils.isEmpty(subscription.getSubscriptionId())) {
+                    // load to the memory
+                    log.debug("Loading Subscription to the in-memory datastore.");
+                    subscriptionMap.put(subscription.getCacheKey(), subscription);
+                }
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving API Subscription with Application " + appId + " and APIId : " + apiId);
+            if (subscription != null) {
+                log.debug("Retrieved API Subscription with Application " + appId + " and APIId : " + apiId + " is " + subscription.toString());
+            } else {
+                log.debug("Retrieved API Subscription with Application " + appId + " and APIId : " + apiId + " is " +
+                        "empty.");
+            }
+        }
 
-        return subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId));
+        return subscription;
     }
 
     @Override
     public ApiPolicy getApiPolicyByName(String policyName, int tenantId) {
 
-        String key = POLICY_TYPE.API + DELEM_PERIOD + 
+        String key = POLICY_TYPE.API + DELEM_PERIOD +
                 SubscriptionDataStoreUtil.getPolicyCacheKey(policyName, tenantId);
         return apiPolicyMap.get(key);
     }
@@ -159,6 +304,12 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     try {
                         log.debug("Calling loadAllApis. ");
                         List<API> apiList = new SubscriptionDataLoaderImpl().loadAllApis(tenantDomain);
+                        apiByUUIDMap.clear();
+                        for (API api : apiList) {
+                            apiByUUIDMap.put(api.getUuid(), api);
+                            String key = api.getApiName().concat(":").concat(api.getApiVersion());
+                            apiNameVersionMap.put(key, api);
+                        }
                         apisInitialized = true;
                         return apiList;
                     } catch (APIManagementException e) {
@@ -358,7 +509,7 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         return subscriptionPoliciesInitialized;
     }
-    
+
     public boolean isApiPoliciesInitialized() {
 
         return apiPoliciesInitialized;
@@ -383,38 +534,68 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
             if (retrievedSubscription == null) {
                 subscriptionMap.put(subscription.getCacheKey(), subscription);
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Retrieved Subscription from Map :" + retrievedSubscription.toString());
+                }
                 if (subscription.getTimeStamp() < retrievedSubscription.getTimeStamp()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Drop the Event " + subscription.toString() + " since the event timestamp was old");
                     }
                 } else {
-                    subscriptionMap.put(subscription.getCacheKey(), subscription);
+                    if (!APIConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getSubscriptionState())) {
+                        subscriptionMap.put(subscription.getCacheKey(), subscription);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Drop the Event " + subscription.toString() + " since the event was marked as " +
+                                    "ON_HOLD");
+                        }
+                    }
                 }
             }
+            if (log.isDebugEnabled()) {
+                Subscription updatedSubscription = subscriptionMap.get(subscription.getCacheKey());
+                log.debug("Updated Subscription From map :" + updatedSubscription.toString());
+            }
+
         }
     }
+
     @Override
     public void removeSubscription(Subscription subscription) {
+
         subscriptionMap.remove(subscription.getCacheKey());
     }
 
     @Override
     public void addOrUpdateAPI(API api) {
+        String key = api.getApiName().concat(":").concat(api.getApiVersion());
+        apiByUUIDMap.put(api.getUuid(),api);
+        apiNameVersionMap.put(key, api);
         apiMap.put(api.getCacheKey(), api);
     }
 
     @Override
     public void addOrUpdateAPIWithUrlTemplates(API api) {
+
         try {
             API newAPI = new SubscriptionDataLoaderImpl().getApi(api.getContext(), api.getApiVersion());
-            apiMap.put(api.getCacheKey(), newAPI);
+            if (newAPI != null) {
+                apiMap.put(api.getCacheKey(), newAPI);
+                String key = newAPI.getApiName().concat(":").concat(newAPI.getApiVersion());
+                apiNameVersionMap.put(key, newAPI);
+                apiByUUIDMap.put(newAPI.getUuid(), newAPI);
+            }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + api.getContext() + " " + api.getApiVersion(), e);
         }
 
     }
+
     @Override
     public void removeAPI(API api) {
+        String key = api.getApiName().concat(":").concat(api.getApiVersion());
+        apiByUUIDMap.remove(api.getUuid());
+        apiNameVersionMap.remove(key);
         apiMap.remove(api.getCacheKey());
     }
 
@@ -424,47 +605,55 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         applicationKeyMappingMap.remove(applicationKeyMapping.getCacheKey());
         applicationKeyMappingMap.put(applicationKeyMapping.getCacheKey(), applicationKeyMapping);
     }
-    
+
     @Override
     public void removeApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping) {
+
         applicationKeyMappingMap.remove(applicationKeyMapping.getCacheKey());
     }
-    
+
     @Override
     public void addOrUpdateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+
         subscriptionPolicyMap.remove(subscriptionPolicy.getCacheKey());
         subscriptionPolicyMap.put(subscriptionPolicy.getCacheKey(), subscriptionPolicy);
     }
-    
+
     @Override
     public void addOrUpdateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+
         appPolicyMap.remove(applicationPolicy.getCacheKey());
         appPolicyMap.put(applicationPolicy.getCacheKey(), applicationPolicy);
     }
-    
+
     @Override
     public void removeApplicationPolicy(ApplicationPolicy applicationPolicy) {
+
         appPolicyMap.remove(applicationPolicy.getCacheKey());
     }
-    
+
     @Override
     public void removeSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+
         subscriptionPolicyMap.remove(subscriptionPolicy.getCacheKey());
     }
-    
+
     @Override
     public void addOrUpdateApplication(Application application) {
+
         applicationMap.remove(application.getId());
         applicationMap.put(application.getId(), application);
     }
-    
+
     @Override
     public void removeApplication(Application application) {
+
         applicationMap.remove(application.getId());
     }
 
     @Override
     public void addOrUpdateApiPolicy(ApiPolicy apiPolicy) {
+
         try {
             ApiPolicy policy = new SubscriptionDataLoaderImpl().getAPIPolicy(apiPolicy.getName(), tenantDomain);
             apiPolicyMap.remove(apiPolicy.getCacheKey());
@@ -477,11 +666,13 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void removeApiPolicy(ApiPolicy apiPolicy) {
+
         apiPolicyMap.remove(apiPolicy.getCacheKey());
     }
 
     @Override
     public API getDefaultApiByContext(String context) {
+
         Set<String> set = apiMap.keySet()
                 .stream()
                 .filter(s -> s.startsWith(context))
@@ -514,6 +705,45 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public Map<String, Scope> getScopesByTenant(String tenantDomain) {
+
         return scopesMap;
+    }
+
+    @Override
+    public void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event) {
+
+        try {
+            API api = apiMap.get(event.getContext() + ":" + event.getVersion());
+            if (api != null) {
+                clearResourceCache(api, event.getTenantDomain());
+            }
+            if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
+                removeAPI(api);
+            } else {
+                API newAPI = new SubscriptionDataLoaderImpl().getApi(event.getContext(), event.getVersion());
+                addOrUpdateAPI(newAPI);
+            }
+        } catch (DataLoadingException e) {
+            log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
+        }
+    }
+
+    private void clearResourceCache(API api, String tenantDomain) {
+
+        if (isAPIResourceValidationEnabled()) {
+            new CacheInvalidationServiceImpl().invalidateResourceCache(api.getContext(), api.getApiVersion(),
+                    tenantDomain, api.getResources());
+        }
+    }
+
+    public boolean isAPIResourceValidationEnabled() {
+
+        APIManagerConfiguration config =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String serviceURL = config.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_ENABLED);
+        if (StringUtils.isNotEmpty(serviceURL)) {
+            return Boolean.parseBoolean(serviceURL);
+        }
+        return true;
     }
 }
