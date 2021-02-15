@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;

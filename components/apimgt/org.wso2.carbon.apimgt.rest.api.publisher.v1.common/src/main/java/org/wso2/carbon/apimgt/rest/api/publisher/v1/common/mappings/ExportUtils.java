@@ -165,7 +165,7 @@ public class ExportUtils {
             }
             addSOAPToRESTMediationToArchive(archivePath, apiIdentifier, registry);
             if (preserveDocs) {
-                addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider);
+                addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider, APIConstants.API_IDENTIFIER_TYPE);
             }
 
             if (StringUtils.isNotEmpty(apiDtoToReturn.getWsdlUrl()) && preserveDocs) {
@@ -230,7 +230,8 @@ public class ExportUtils {
         if (preserveDocs) {
             addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
-            addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider);
+            addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
+                    APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
 
         }
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
@@ -261,10 +262,11 @@ public class ExportUtils {
     public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
             String type) throws APIImportExportException, APIManagementException {
 
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
             ResourceFile thumbnailResource = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
-                    apiProvider.getIcon((APIIdentifier) identifier) :
+                    apiProvider.getIcon(identifier.getUUID(), tenantDomain) :
                     apiProvider.getProductIcon((APIProductIdentifier) identifier);
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
@@ -361,16 +363,19 @@ public class ExportUtils {
      * @param identifier   ID of the requesting API or API Product
      * @param exportFormat Format for export
      * @param apiProvider  API Provider
+     * @param type         Type of the Project (whether an API or an API Product)
      * @throws APIImportExportException If an error occurs while retrieving documents from the
      *                                  registry or storing in the archive directory
      * @throws APIManagementException   If an error occurs while retrieving document details
      */
     public static void addDocumentationToArchive(String archivePath, Identifier identifier,
-                                                 ExportFormat exportFormat, APIProvider apiProvider)
+                                                 ExportFormat exportFormat, APIProvider apiProvider, String type)
             throws APIImportExportException, APIManagementException {
 
-        List<Documentation> docList = apiProvider.getAllDocumentation(identifier);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        List<Documentation> docList = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
+                apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain) :
+                apiProvider.getAllDocumentation(identifier);
         if (!docList.isEmpty()) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String docDirectoryPath = archivePath + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY;
