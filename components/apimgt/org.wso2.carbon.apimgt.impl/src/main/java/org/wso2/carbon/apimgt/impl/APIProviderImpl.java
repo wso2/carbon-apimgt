@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -90,6 +91,7 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -115,6 +117,7 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -272,6 +275,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     private static Map<String,List<Integer>> revisionIDList = new HashMap<>();
+    private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
@@ -994,6 +998,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
+        String serviceKey = api.getServiceInfo("serviceKey");
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -3177,7 +3182,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
         if (existingAPI == null) {
-            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId);
+            throw new APIMgtResourceNotFoundException("API not found for id " + existingApiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, existingApiId));
         }
         if (newVersion.equals(existingAPI.getId().getVersion())) {
             throw new APIMgtResourceAlreadyExistsException(
@@ -9677,6 +9683,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String getEarliestRevisionUUID(String apiUUID) throws APIManagementException {
         return apiMgtDAO.getEarliestRevision(apiUUID);
+    }
+
+    /**
+     * Get the latest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID API UUID
+     * @return Latest revision's UUID
+     * @throws APIManagementException if failed to get the revision
+     */
+    @Override
+    public String getLatestRevisionUUID(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getLatestRevisionUUID(apiUUID);
     }
 
     /**
