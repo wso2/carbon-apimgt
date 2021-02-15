@@ -7942,6 +7942,48 @@ public class ApiMgtDAO {
     /**
      * Delete a comment
      *
+     * @param ApiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @throws APIManagementException
+     */
+    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        int id = -1;
+        String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
+        Identifier identifier;
+        try {
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(deleteCommentQuery);
+            prepStmt.setInt(1, id);
+            prepStmt.setString(2, commentId);
+            prepStmt.execute();
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            handleException("Error while deleting comment " + commentId + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+        return false;
+    }
+
+    /**
+     * Delete a comment
+     *
      * @param identifier API Identifier
      * @param commentId Comment ID
      * @throws APIManagementException
