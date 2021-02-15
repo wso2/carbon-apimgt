@@ -608,6 +608,7 @@
   "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.error": "Error while deleting task",
   "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.pending": "Pending lifecycle state change.",
   "Apis.Details.LifeCycle.LifeCycleUpdate.LifecyclePending.success": "Lifecycle task deleted successfully",
+  "Apis.Details.LifeCycle.LifeCycleUpdate.error.certs": "Error while retrieving certificates",
   "Apis.Details.LifeCycle.LifeCycleUpdate.success.createStatus": "Lifecycle state change request has been sent",
   "Apis.Details.LifeCycle.LifeCycleUpdate.success.otherStatus": "Lifecycle state updated successfully",
   "Apis.Details.LifeCycle.Policies.business.plans": "Business Plans",

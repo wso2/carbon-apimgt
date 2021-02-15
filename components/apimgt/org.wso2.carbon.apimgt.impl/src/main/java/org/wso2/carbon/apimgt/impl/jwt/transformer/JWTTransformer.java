@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.impl.jwt.transformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 
 import java.util.List;
 

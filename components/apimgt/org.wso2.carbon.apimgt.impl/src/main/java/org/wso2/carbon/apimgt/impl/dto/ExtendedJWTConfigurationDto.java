@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 
 public class ExtendedJWTConfigurationDto extends JWTConfigurationDto {
     private String jwtGeneratorImplClass = "org.wso2.carbon.apimgt.keymgt.token.JWTGenerator";

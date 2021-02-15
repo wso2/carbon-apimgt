@@ -52,7 +52,6 @@ public class SubscribersPersistMediator extends AbstractMediator {
     private String secret;
     private String mode;
     private String leaseSeconds;
-    private final RequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean mediate(MessageContext messageContext) {

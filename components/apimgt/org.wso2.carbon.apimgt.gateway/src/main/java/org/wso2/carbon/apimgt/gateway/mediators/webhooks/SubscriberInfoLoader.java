@@ -20,13 +20,10 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.List;
 
@@ -35,8 +32,7 @@ import java.util.List;
  */
 public class SubscriberInfoLoader extends AbstractMediator {
 
-    private final GenericRequestDataCollector dataCollector =
-        new GenericRequestDataCollector(new SynapseAnalyticsDataProvider(null));
+    //private final GenericRequestDataCollector dataCollector = null;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -61,7 +57,7 @@ public class SubscriberInfoLoader extends AbstractMediator {
                 null);
         if (isThrottled) {
             if (APIUtil.isAnalyticsEnabled()) {
-               dataCollector.collectData();
+               //dataCollector.collectData();
             }
             return false;
         }
@@ -76,7 +72,7 @@ public class SubscriberInfoLoader extends AbstractMediator {
             return true;
         }
         ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
-        dataCollector.collectData();
+        //dataCollector.collectData();
         return true;
     }
 }

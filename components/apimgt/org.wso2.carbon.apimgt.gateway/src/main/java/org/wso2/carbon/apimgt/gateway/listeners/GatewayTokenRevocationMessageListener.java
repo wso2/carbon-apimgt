@@ -83,7 +83,12 @@ public class GatewayTokenRevocationMessageListener implements MessageListener {
             // Add revoked token to revoked JWT map
             isJwtToken = true;
         }
-        ServiceReferenceHolder.getInstance().getRevokedTokenService()
-                .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+        if (APIConstants.API_KEY_AUTH_TYPE.equals(tokenType)) {
+            ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                    .removeApiKeyFromGatewayCache(revokedToken);
+        } else {
+            ServiceReferenceHolder.getInstance().getRevokedTokenService()
+                    .removeTokenFromGatewayCache(revokedToken, isJwtToken);
+        }
     }
 }
