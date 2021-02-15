@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.handlers.security.model;
 
 import com.atlassian.oai.validator.model.Request;
@@ -8,37 +24,35 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Request Model class for OpenAPI
+ */
 public class OpenAPIRequest implements Request {
 
-    public static final String ACCEPT = "Accept";
     private static final Log logger = LogFactory.getLog(OpenAPIRequest.class);
+    private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private Request.Method method;
     private String path;
     private Multimap<String, String> headers = ArrayListMultimap.create();
     private Map<String, Collection<String>> queryParams;
     private Optional<String> requestBody;
 
-    private OpenAPIRequest() {
-
-    }
-
     /**
-     * Build OAI Request from RequestValidation model.
+     * Build OAI Request from Message Context.
      *
-     * @param messageContext request validation model.
+     * @param messageContext Synapse message context.
      * @return OAI Request.
      */
     public static OpenAPIRequest from(MessageContext messageContext) {
@@ -46,12 +60,16 @@ public class OpenAPIRequest implements Request {
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
         OpenAPIRequest openAPIRequest = new OpenAPIRequest();
-        openAPIRequest.method = Request.Method.valueOf((String) messageContext.getProperty("api.ut.HTTP_METHOD"));
-
+        //set HTTP Method
+        openAPIRequest.method = Request.Method.valueOf((String)
+                messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
+        //Set Request path
         openAPIRequest.path = SchemaValidationUtils.getRestSubRequestPath(
-                messageContext.getProperty("REST_SUB_REQUEST_PATH").toString());
+                messageContext.getProperty(REST_SUB_REQUEST_PATH).toString());
+        //extract transport headers
         Map<String, String> transportHeaders = (Map<String, String>)
-                (axis2MessageContext.getProperty("TRANSPORT_HEADERS"));
+                (axis2MessageContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS));
+        //Set Request body
         try {
             openAPIRequest.requestBody =
                     SchemaValidationUtils.buildMessagePayload(axis2MessageContext, transportHeaders);
@@ -60,43 +78,21 @@ public class OpenAPIRequest implements Request {
         }
         Map<String, Collection<String>> headerMap = transportHeaders.entrySet()
                 .stream()
-                .collect(Collectors.toMap(
-                        entry -> ((String) (entry.getKey())),
-                        entry -> Collections.singleton((String) (entry.getValue()))
-                                         ));
-
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
+        //Set transport headers
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
             openAPIRequest.headers.put(header.getKey(), header.getValue().iterator().next());
         }
-        String apiResource = messageContext.getProperty("api.ut.resource").toString();
+        String apiResource = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString();
+        //Extracting query params
         try {
-            openAPIRequest.queryParams = getQueryParams(apiResource, (String)
-                    messageContext.getProperty("API_ELECTED_RESOURCE"));
+            openAPIRequest.queryParams = SchemaValidationUtils.getQueryParams(apiResource, (String)
+                    messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
         } catch (UnsupportedEncodingException e) {
             logger.error("Failed to decode query string");
         }
         return openAPIRequest;
 
-    }
-
-    private static Map<String, Collection<String>> getQueryParams(String apiResource, String path)
-            throws UnsupportedEncodingException {
-
-        Map<String, String> queryParams = new HashMap<>();
-        if (!apiResource.equals(path) && apiResource.contains("?")) {
-            String queryString = apiResource.replace(path + "?", "");
-            String[] query = queryString.split("&");
-            for (String keyValue : query) {
-                int idx = keyValue.indexOf("=");
-                queryParams.put(
-                        URLDecoder.decode(keyValue.substring(0, idx), "UTF-8"),
-                        URLDecoder.decode(keyValue.substring(idx + 1), "UTF-8"));
-            }
-        }
-        return queryParams.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
     }
 
     @Nonnull

@@ -22,13 +22,13 @@ import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.report.ValidationReport;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.model.OpenAPIRequest;
 import org.wso2.carbon.apimgt.gateway.handlers.security.model.OpenAPIResponse;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -43,21 +43,20 @@ public class SchemaValidator extends AbstractHandler {
     private static final String INTERNAL_ERROR_CODE = "500";
     private static final Log logger = LogFactory.getLog(SchemaValidator.class);
     private static final String HTTP_SC_CODE = "400";
-    private String swagger;
 
-    @Override
-    public boolean handleRequest(MessageContext messageContext) {
+    /**
+     * Method to generate OpenApiInteractionValidator when the swagger is provided.
+     *
+     * @param swagger Swagger definition.
+     * @return OpenApiInteractionValidator object for the provided swagger.
+     */
+    private static OpenApiInteractionValidator getOpenAPIValidator(String swagger) {
 
-        logger.debug("Validating the API request Body content..");
-        swagger = messageContext.getProperty("OPEN_API_STRING").toString();
-        if (swagger == null) {
-            return true;
-        }
         OpenAPIParser openAPIParser = new OpenAPIParser();
         SwaggerParseResult swaggerParseResult =
                 openAPIParser.readContents(swagger, new ArrayList<>(), new ParseOptions());
         OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-        OpenApiInteractionValidator validator = OpenApiInteractionValidator
+        return OpenApiInteractionValidator
                 .createFor(openAPI)
                 .withLevelResolver(
                         LevelResolver.create()
@@ -65,7 +64,18 @@ public class SchemaValidator extends AbstractHandler {
                                 .withLevel("validation.response.body.missing", ValidationReport.Level.INFO)
                                 .build())
                 .build();
-        Request request = null;
+    }
+
+    @Override
+    public boolean handleRequest(MessageContext messageContext) {
+
+        logger.debug("Validating the API request Body content..");
+        String swagger = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING).toString();
+        if (swagger == null) {
+            return true;
+        }
+        OpenApiInteractionValidator validator = getOpenAPIValidator(swagger);
+        Request request;
         request = OpenAPIRequest.from(messageContext);
 
         ValidationReport validationReport = validator.validateRequest(request);
@@ -76,8 +86,7 @@ public class SchemaValidator extends AbstractHandler {
             }
             String errMessage = "Schema validation failed in the Request: ";
             logger.error(errMessage);
-            GatewayUtils.handleThreat(messageContext, HTTP_SC_CODE,
-                    errMessage + finalMessage);
+            GatewayUtils.handleThreat(messageContext, HTTP_SC_CODE, errMessage + finalMessage);
         }
         return true;
     }
@@ -86,19 +95,8 @@ public class SchemaValidator extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
 
         String swagger = messageContext.getProperty("OPEN_API_STRING").toString();
-        OpenAPIParser openAPIParser = new OpenAPIParser();
-        SwaggerParseResult swaggerParseResult =
-                openAPIParser.readContents(swagger, new ArrayList<AuthorizationValue>(), new ParseOptions());
-        OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-        OpenApiInteractionValidator validator = OpenApiInteractionValidator
-                .createFor(openAPI)
-                .withLevelResolver(
-                        LevelResolver.create()
-                                .withLevel("validation.schema.required", ValidationReport.Level.INFO)
-                                .withLevel("validation.response.body.missing", ValidationReport.Level.INFO)
-                                .build())
-                .build();
-        OpenAPIResponse response = null;
+        OpenApiInteractionValidator validator = getOpenAPIValidator(swagger);
+        OpenAPIResponse response;
         response = OpenAPIResponse.from(messageContext);
 
         ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
@@ -110,8 +108,7 @@ public class SchemaValidator extends AbstractHandler {
             }
             String errMessage = "Schema validation failed in the Response: ";
             logger.error(errMessage);
-            GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE,
-                    errMessage + finalMessage);
+            GatewayUtils.handleThreat(messageContext, INTERNAL_ERROR_CODE, errMessage + finalMessage);
         }
         return true;
     }
