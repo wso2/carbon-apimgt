@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 import org.apache.axis2.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,7 +34,7 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConsta
  */
 public class SseApiHandler extends APIAuthenticationHandler {
 
-    private GenericRequestDataCollector dataCollector = new GenericRequestDataCollector();
+    //private GenericRequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean handleRequest(MessageContext synCtx) {
