@@ -17061,49 +17061,6 @@ public class ApiMgtDAO {
         }
     }
 
-
-    public ServiceEntry retrieveServiceById(String serviceId, int tenantId) throws APIManagementException {
-    /**
-     * Retrieve Service Information from Service Catalog
-     * @param servicKey Unique Key of the Service
-     * @param tenantId Logged in user tenant domain
-     * @return
-     * @throws APIManagementException
-     */
-    public ServiceEntry retrieveServiceByKey(String servicKey, int tenantId) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_SERVICE_INFO_BY_SERVICE_KEY)) {
-            statement.setString(1, servicKey);
-            statement.setInt(2, tenantId);
-            try(ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    ServiceEntry serviceEntry = new ServiceEntry();
-                    serviceEntry.setUuid(resultSet.getString("UUID"));
-                    serviceEntry.setKey(resultSet.getString("SERVICE_KEY"));
-                    serviceEntry.setMd5(resultSet.getString("MD5"));
-                    serviceEntry.setDisplayName(resultSet.getString("DISPLAY_NAME"));
-                    serviceEntry.setVersion(resultSet.getString("ENTRY_VERSION"));
-                    serviceEntry.setServiceUrl(resultSet.getString("SERVICE_URL"));
-                    serviceEntry.setDefType(resultSet.getString("DEFINITION_TYPE"));
-                    serviceEntry.setDefUrl(resultSet.getString("DEFINITION_URL"));
-                    serviceEntry.setSecurityType(resultSet.getString("SECURITY_TYPE"));
-                    serviceEntry.setMutualSSLEnabled(Boolean.parseBoolean(resultSet.getString("MUTUAL_SSL_ENABLED")));
-                    serviceEntry.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
-                    serviceEntry.setLastUpdatedTime(resultSet.getTimestamp("LAST_UPDATED_TIME"));
-                    serviceEntry.setCreatedBy("CREATED_BY");
-                    serviceEntry.setUpdatedBy("UPDATED_BY");
-                    serviceEntry.setEndpointDef(resultSet.getBinaryStream("ENDPOINT_DEFINITION"));
-                    serviceEntry.setMetadata(resultSet.getBinaryStream("METADATA"));
-                    return serviceEntry;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving the Service Entry with ID " + servicKey + " - " + tenantId,
-                    e);
-        }
-        return null;
-    }
-
     /**
      * Retrieve Service Info and Set it to API
      *

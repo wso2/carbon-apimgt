@@ -1833,13 +1833,4 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to delete APIRevision
      */
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
-
-
-    /**
-     * Get Service Info from Service Catalog using ID of the service
-     * @param serviceKey Service Key of the Service from Service Catalog
-     * @return
-     * @throws APIManagementException
-     */
-    ServiceEntry retrieveServiceByKey(String serviceKey, int tenantId) throws APIManagementException;
 }
