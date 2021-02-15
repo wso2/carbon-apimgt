@@ -15858,6 +15858,30 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get the latest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getLatestRevisionUUID(String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the latest revision for api ID: " + apiUUID, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
      * Adds an API revision record to the database
      *
      * @param apiRevision content of the revision
