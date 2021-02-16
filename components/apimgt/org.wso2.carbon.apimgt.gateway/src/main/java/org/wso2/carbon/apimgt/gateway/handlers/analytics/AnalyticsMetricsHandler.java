@@ -23,15 +23,17 @@ import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
+import java.util.Map;
 
 /**
  * Global synapse handler to publish analytics data to analytics cloud.
  */
 public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     private static final Log log = LogFactory.getLog(AnalyticsMetricsHandler.class);
-    private final RequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean handleError(MessageContext messageContext) {
@@ -43,7 +45,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     public boolean handleRequestInFlow(MessageContext messageContext) {
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
-        String userAgent = AnalyticsUtils.getUserAgent(messageContext);
+        String userAgent = getUserAgent(messageContext);
         messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
         return true;
     }
@@ -56,8 +58,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseInFlow(MessageContext messageContext) {
-        long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
-        messageContext.setProperty(Constants.BACKEND_LATENCY_PROPERTY, (System.currentTimeMillis() - backendStartTime));
+        messageContext.setProperty(Constants.BACKEND_END_TIME_PROPERTY, System.currentTimeMillis());
         Object responseCode = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
         messageContext.setProperty(Constants.BACKEND_RESPONSE_CODE, responseCode);
@@ -66,7 +67,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
-        dataCollector.collectData(messageContext);
+        AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        dataCollector.collectData();
         return true;
     }
 
@@ -92,6 +95,12 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     public boolean handleArtifactUnDeployment(String s, String s1, String s2) {
         // Nothing to implement
         return true;
+    }
+
+    private String getUserAgent(MessageContext messageContext) {
+        Map<?, ?> headers = (Map<?, ?>) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        return (String) headers.get(APIConstants.USER_AGENT);
     }
 
 }

@@ -67,6 +67,7 @@ function AddEditMGLabel(props) {
         updateList, dataRow, icon, triggerButtonText, title,
     } = props;
     const classes = useStyles();
+
     const [initialState, setInitialState] = useState({
         description: '',
         hosts: [],

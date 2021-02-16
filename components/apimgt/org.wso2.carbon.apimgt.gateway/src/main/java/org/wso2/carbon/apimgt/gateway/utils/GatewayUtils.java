@@ -26,10 +26,13 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -44,10 +47,11 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -55,9 +59,11 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
@@ -79,8 +85,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -522,14 +528,14 @@ public class GatewayUtils {
         return hostname;
     }
 
-    public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+    public static String getQualifiedApiName(String apiName, String version) {
 
-        return apiProviderName + "--" + apiName + ":v" + version;
+        return apiName + ":v" + version;
     }
 
-    public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+    public static String getQualifiedDefaultApiName(String apiName) {
 
-        return apiProviderName + "--" + apiName;
+        return apiName;
     }
 
     /**
@@ -565,6 +571,7 @@ public class GatewayUtils {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
@@ -646,6 +653,8 @@ public class GatewayUtils {
             authContext
                     .setApplicationId(
                             String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+            authContext.setApplicationUUID(
+                    String.valueOf(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID)));
             authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
             authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
             authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
@@ -706,9 +715,9 @@ public class GatewayUtils {
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
      * the API information.
      *
-     * @param apiContext API context
-     * @param apiVersion API version
-     * @param jwtValidationInfo    The payload of the JWT token
+     * @param apiContext        API context
+     * @param apiVersion        API version
+     * @param jwtValidationInfo The payload of the JWT token
      * @return an JSON object containing subscribed API information retrieved from token payload.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
@@ -731,7 +740,7 @@ public class GatewayUtils {
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                       )) {
+                                )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -791,7 +800,7 @@ public class GatewayUtils {
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                       )) {
+                                )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -826,8 +835,8 @@ public class GatewayUtils {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwt SignedJwt Token
-     * @param alias      public certificate keystore alias
+     * @param jwt   SignedJwt Token
+     * @param alias public certificate keystore alias
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -862,8 +871,8 @@ public class GatewayUtils {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwt SignedJwt Token
-     * @param publicKey      public certificate
+     * @param jwt       SignedJwt Token
+     * @param publicKey public certificate
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -1055,4 +1064,167 @@ public class GatewayUtils {
         }
     }
 
+    public static List<String> retrieveDeployedSequences(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        try {
+            List<String> deployedSequences = new ArrayList<>();
+            String inSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+            String outSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+            String faultSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+            SequenceAdminServiceProxy sequenceAdminServiceProxy = new SequenceAdminServiceProxy(tenantDomain);
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            if (sequenceAdminServiceProxy.isExistingSequence(inSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(inSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            if (sequenceAdminServiceProxy.isExistingSequence(outSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(outSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            if (sequenceAdminServiceProxy.isExistingSequence(faultSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(faultSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            return deployedSequences;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving Deployed Sequences", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+    }
+
+    public static List<String> retrieveDeployedLocalEntries(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        try {
+            SubscriptionDataStore tenantSubscriptionStore =
+                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+            List<String> deployedLocalEntries = new ArrayList<>();
+            if (tenantSubscriptionStore != null) {
+                API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+                if (retrievedAPI != null) {
+                    MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+                    LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
+                    String localEntryKey = retrievedAPI.getUuid();
+                    if (APIConstants.GRAPHQL_API.equals(retrievedAPI.getApiType())) {
+                        localEntryKey = retrievedAPI.getUuid().concat(APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION);
+                    }
+                    if (localEntryServiceProxy.isEntryExists(localEntryKey)) {
+                        OMElement entry = localEntryServiceProxy.getEntry(localEntryKey);
+                        deployedLocalEntries.add(entry.toString());
+                    }
+                }
+            }
+            return deployedLocalEntries;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving LocalEntries", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+    }
+
+    public static List<String> retrieveDeployedEndpoints(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        List<String> deployedEndpoints = new ArrayList<>();
+        try {
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+            String productionEndpointKey = apiName.concat("--v").concat(version).concat("_APIproductionEndpoint");
+            String sandboxEndpointKey = apiName.concat("--v").concat(version).concat("_APIsandboxEndpoint");
+            if (endpointAdminServiceProxy.isEndpointExist(productionEndpointKey)) {
+                String entry = endpointAdminServiceProxy.getEndpoint(productionEndpointKey);
+                deployedEndpoints.add(entry);
+            }
+            if (endpointAdminServiceProxy.isEndpointExist(sandboxEndpointKey)) {
+                String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
+                deployedEndpoints.add(entry);
+            }
+        } catch (AxisFault e) {
+            throw new APIManagementException("Error in fetching deployed endpoints from Synapse Configuration", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+
+        return deployedEndpoints;
+    }
+
+    public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        try {
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
+            String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
+            if (api != null) {
+                return api.toString();
+            }
+            return null;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving API Artifacts", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+    }
+
+    public static org.apache.axis2.context.MessageContext createAxis2MessageContext() throws AxisFault {
+
+        AxisService axisService = new AxisService();
+        axisService.addParameter("adminService", true);
+        org.apache.axis2.context.MessageContext axis2MsgCtx = new org.apache.axis2.context.MessageContext();
+        axis2MsgCtx.setMessageID(UIDGenerator.generateURNString());
+        axis2MsgCtx.setConfigurationContext(ServiceReferenceHolder.getInstance()
+                .getConfigurationContextService().getServerConfigContext());
+        axis2MsgCtx.setProperty(org.apache.axis2.context.MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
+        axis2MsgCtx.setServerSide(true);
+        axis2MsgCtx.setAxisService(axisService);
+        return axis2MsgCtx;
+    }
+
+    public static String getAPINameFromContextAndVersion(String apiContext, String apiVersion, String tenantDomain) {
+
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
+            if (api != null) {
+                return api.getApiName();
+            }
+        }
+        return null;
+    }
+
+    public static String getApiProviderFromContextAndVersion(String context, String apiVersion, String tenantDomain) {
+
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            API api = tenantSubscriptionStore.getApiByContextAndVersion(context, apiVersion);
+            if (api != null) {
+                return api.getApiProvider();
+            }
+        }
+        return null;
+    }
+
+    public static API getAPI(org.apache.synapse.MessageContext messageContext) {
+
+        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+        if (tenantSubscriptionStore != null) {
+            return tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+        }
+        return null;
+    }
 }

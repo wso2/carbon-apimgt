@@ -96,7 +96,9 @@ public enum ExceptionCodes implements ErrorHandler {
     API_REVISION_UUID_NOT_FOUND(900350, "Can not create API Revision ", 400, "Failed to retrieve revision uuid from revision registry artifact"),
     MAXIMUM_REVISIONS_REACHED(900351, "Can not create API Revision ", 400, "Maximum number of revisions per API has reached." +
             "Need to remove any revision to create a new Revision for API with API UUID: %s"),
-    ERROR_CREATING_API_REVISION(900349, "Can not create API Revision ", 400, "Failed to create API revision registry artifacts: %s "),
+    ERROR_CREATING_API_REVISION(900352, "Can not create API Revision ", 400, "Failed to create API revision registry artifacts: %s "),
+    ERROR_DELETING_API_REVISION(900353, "Can not delete API Revision ", 400, "Failed to delete API revision registry artifacts: %s "),
+    ERROR_RESTORING_API_REVISION(900354, "Can not restore API Revision ", 400, "Failed to restore API revision registry artifacts: %s "),
 
 
     // Generic codes
@@ -227,6 +229,13 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot be blank"),
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
+    POSITIVE_INTEGER_VALUE(900707, "contain invalid values. It should be positive Integer",
+            400,
+            "%s property value of payload cannot contain invalid values. It should be positive Integer"),
+    POLICY_ATTACHED_TO_RESOURCE(900708, "Policy already attached to API/Resource", 400,
+            " %s already attached to API/Resource"),
+    LENGTH_EXCEEDED(900708, "length exceeded", 400,
+            " %s length exceeded"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -416,8 +425,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
             "Error while reading meta information from the api_params.yaml file"),
     NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
-            "No Api artifacts found for given criteria");
-
+            "No Api artifacts found for given criteria"),
+    GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
+            "Gateway type not found available Gateway types : " + "%s");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

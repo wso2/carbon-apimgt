@@ -116,5 +116,4 @@ const ErrorList = (props) => {
     return errorCode;
 };
 
-
 export default ErrorList;

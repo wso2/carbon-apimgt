@@ -3727,9 +3727,12 @@ public abstract class AbstractAPIManager implements APIManager {
             api.setWorkflowStatus(status.toString());
         }
         // TODO try to use a single query to get info from db
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         // Ratings
-        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId, null);
+        int internalId = apiMgtDAO.getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
+        apiId.setId(internalId);
+        apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
         // api level tier
         String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);
         api.setApiLevelPolicy(apiLevelTier);

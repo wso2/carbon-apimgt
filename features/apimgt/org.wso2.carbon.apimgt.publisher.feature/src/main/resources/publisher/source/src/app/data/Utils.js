@@ -185,6 +185,20 @@ class Utils {
     }
 
     /**
+     * Generate UUID V4 Source https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
+     */
+    static generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            // Disable the no bitwise rule as this is a `very rare` usage of bitwise logic operators
+            // eslint-disable-next-line no-bitwise
+            const r = Math.random() * 16 | 0; const
+            // eslint-disable-next-line no-bitwise
+                v = c === 'x' ? r : (r & (0x3 | 0x8));
+            return v.toString(16);
+        });
+    }
+
+    /**
      *
      * Get service catalog swagger definition URL
      * @static
@@ -192,8 +206,8 @@ class Utils {
      * @memberof Utils
      */
     static getServiceCatalogSwaggerURL() {
-        // return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
-        return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        // return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
     }
 
     /**
@@ -295,7 +309,6 @@ class Utils {
         }
     }
 
-
     /**
      * Force file download in browser
      *
@@ -351,7 +364,7 @@ Utils.CONST = {
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
     // SERVICE_CATALOG_SWAGGER_YAML: '/api/service-catalog/v1/swagger.yaml',
-    SERVICE_CATALOG_SWAGGER_YAML: '../../../../../publisher/site/public/serviceCatalog.yaml',
+    SERVICE_CATALOG_SWAGGER_YAML: '/api/am/service-catalog/v0/oas.yaml',
     SWAGGER_YAML: '/api/am/publisher/v2/swagger.yaml',
     PROTOCOL: 'https://',
     API_CLIENT: 'apiClient',

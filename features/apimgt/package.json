@@ -6,8 +6,8 @@
     "bootstrap": "lerna bootstrap"
   },
   "dependencies": {
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
@@ -27,7 +27,7 @@
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.16.0",
-    "lerna": "^3.22.0",
+    "lerna": "^3.22.1",
     "style-loader": "^0.18.1",
     "webpack": "v4.28.4",
     "webpack-cli": "^3.3.2"

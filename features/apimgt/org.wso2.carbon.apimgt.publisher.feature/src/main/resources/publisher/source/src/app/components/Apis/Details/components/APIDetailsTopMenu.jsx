@@ -35,9 +35,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
-
 
 const styles = (theme) => ({
     root: {
@@ -112,7 +112,6 @@ const styles = (theme) => ({
     },
 });
 
-
 const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct, imageUpdate, intl,
@@ -147,14 +146,27 @@ const APIDetailsTopMenu = (props) => {
 
     React.useEffect(() => {
         const restApi = new API();
-        const apiId = api.isRevision ? api.revisionedApiId : api.id;
-        restApi.getRevisions(apiId).then((response) => {
-            setRevision(response.body.list);
-        })
-            .catch((errorMessage) => {
-                console.error(errorMessage);
-                Alert.error(JSON.stringify(errorMessage));
-            });
+        const restApiProduct = new APIProduct();
+        let apiId = null;
+        if (!isAPIProduct) {
+            apiId = api.isRevision ? api.revisionedApiId : api.id;
+            restApi.getRevisions(apiId).then((response) => {
+                setRevision(response.body.list);
+            })
+                .catch((errorMessage) => {
+                    console.error(errorMessage);
+                    Alert.error(JSON.stringify(errorMessage));
+                });
+        } else {
+            apiId = api.isRevision ? api.revisionedApiProductId : api.id;
+            restApiProduct.getProductRevisions(apiId).then((response) => {
+                setRevision(response.body.list);
+            })
+                .catch((errorMessage) => {
+                    console.error(errorMessage);
+                    Alert.error(JSON.stringify(errorMessage));
+                });
+        }
     }, []);
 
     const handleChange = (event) => {
@@ -237,19 +249,38 @@ const APIDetailsTopMenu = (props) => {
                     margin='dense'
                     variant='outlined'
                 >
-                    <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
-                        <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
-                            <FormattedMessage
-                                id='Apis.Details.components.APIDetailsTopMenu.current.api'
-                                defaultMessage='Current API'
-                            />
-                        </Link>
-                    </MenuItem>
+                    {!isAPIProduct ? (
+                        <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
+                            <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
+                                <FormattedMessage
+                                    id='Apis.Details.components.APIDetailsTopMenu.current.api'
+                                    defaultMessage='Current API'
+                                />
+                            </Link>
+                        </MenuItem>
+                    ) : (
+                        <MenuItem value={api.isRevision ? api.revisionedApiProductId : api.id}>
+                            <Link to={'/api-products/' + (api.isRevision
+                                ? api.revisionedApiProductId : api.id) + '/overview'}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.components.APIDetailsTopMenu.current.api'
+                                    defaultMessage='Current API'
+                                />
+                            </Link>
+                        </MenuItem>
+                    )}
                     {revision && revision.map((item) => (
                         <MenuItem value={item.id}>
-                            <Link to={'/apis/' + item.id + '/overview'}>
-                                {item.displayName}
-                            </Link>
+                            {!isAPIProduct ? (
+                                <Link to={'/apis/' + item.id + '/overview'}>
+                                    {item.displayName}
+                                </Link>
+                            ) : (
+                                <Link to={'/api-products/' + item.id + '/overview'}>
+                                    {item.displayName}
+                                </Link>
+                            )}
                         </MenuItem>
                     ))}
                 </TextField>
@@ -315,7 +346,6 @@ APIDetailsTopMenu.propTypes = {
     isAPIProduct: PropTypes.bool.isRequired,
     imageUpdate: PropTypes.number.isRequired,
 };
-
 
 // export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
 

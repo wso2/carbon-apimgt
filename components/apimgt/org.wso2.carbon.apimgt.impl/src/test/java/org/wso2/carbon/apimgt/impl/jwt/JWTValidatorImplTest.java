@@ -35,9 +35,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWKSConfigurationDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
-import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -101,7 +101,6 @@ public class JWTValidatorImplTest {
         }
 
         // test when certificate is found in the trust store but cnf thumbprint is not matching with the certificate
-        //
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt =
                 Mockito.mock(org.apache.axis2.context.MessageContext.class);

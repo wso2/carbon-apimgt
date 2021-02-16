@@ -134,6 +134,7 @@ function ListBase(props) {
                     setError(e.message);
                 });
         }
+        setSearchText('');
     };
 
     useEffect(() => {
