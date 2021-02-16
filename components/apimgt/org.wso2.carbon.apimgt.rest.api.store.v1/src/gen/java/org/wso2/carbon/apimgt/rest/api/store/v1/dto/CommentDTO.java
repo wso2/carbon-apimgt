@@ -23,7 +23,7 @@ public class CommentDTO   {
   
     private String id = null;
     private String content = null;
-    private java.util.Date createdTime = null;
+    private String createdTime = null;
     private String createdBy = null;
     private CommenterInfoDTO commenterInfo = null;
 
@@ -64,7 +64,7 @@ public class CommentDTO   {
 
   /**
    **/
-  public CommentDTO createdTime(java.util.Date createdTime) {
+  public CommentDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -72,10 +72,10 @@ public class CommentDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("createdTime")
-  public java.util.Date getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
-  public void setCreatedTime(java.util.Date createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 

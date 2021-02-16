@@ -24,7 +24,7 @@ public class {{classname}}ServiceImpl implements {{classname}}Service {
     public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status  = Response.Status.NOT_IMPLEMENTED;
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
         errorObject.setCode((long) status.getStatusCode());
         errorObject.setMessage(status.toString());
         errorObject.setDescription("The requested resource has not been implemented");

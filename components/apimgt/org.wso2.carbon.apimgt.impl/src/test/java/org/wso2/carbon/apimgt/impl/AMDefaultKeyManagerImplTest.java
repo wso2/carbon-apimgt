@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.model.ClientInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.DCRClient;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectInfo;
 import org.wso2.carbon.apimgt.impl.kmclient.model.IntrospectionClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -49,7 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PrivilegedCarbonContext.class, Base64.class})
+@PrepareForTest({PrivilegedCarbonContext.class, Base64.class, APIUtil.class})
 public class AMDefaultKeyManagerImplTest {
 
     @Mock
@@ -62,14 +64,19 @@ public class AMDefaultKeyManagerImplTest {
 
     private final String APP_OWNER = "lakmali";
     private final String APP_NAME = "app1";
-    
+    private final String APP_UUID = "XXXXX";
+
     //Same client_id client_secret are used in AMDefaultKeyManagerImplWrapper mock class
     private final String CLIENT_SECRET = "GGGGGGG";
     private final String CLIENT_ID = "XXXXXXXXXX";
     private final String KEY_TYPE = "PRODUCTION";
     private final String[] REDIRECT_URIS = new String[]{"http://locahost, https://client.example.org/callback"};
     private final String[] GRANT_TYPES = new String[]{"client_credentials", "password"};
-    
+
+    @Before
+    public void init() {
+        PowerMockito.mockStatic(APIUtil.class);
+    }
         
     @Test
     public void testCreateApplication() throws APIManagementException, KeyManagerClientException {
@@ -91,7 +98,7 @@ public class AMDefaultKeyManagerImplTest {
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         ClientInfo response = new ClientInfo();
         response.setClientId(CLIENT_ID);
-        response.setClientName(APP_NAME);
+        response.setClientName(APP_UUID);
         response.setClientSecret(CLIENT_SECRET);
         response.setRedirectUris(Arrays.asList(REDIRECT_URIS));
         response.setGrantTypes(Arrays.asList(GRANT_TYPES));
@@ -100,20 +107,24 @@ public class AMDefaultKeyManagerImplTest {
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         Mockito.when(privilegedCarbonContext.getTenantDomain()).
                 thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        
+        Mockito.when(APIUtil.getApplicationUUID(Mockito.anyString(), Mockito.anyString())).thenReturn(APP_UUID);
+
         OAuthApplicationInfo oauthApplicationResponse = keyManager.createApplication(oauthRequest);
         Assert.assertEquals(StringUtils.join(REDIRECT_URIS, ","), oauthApplicationResponse.getCallBackURL());
-        Assert.assertEquals(APP_NAME, oauthApplicationResponse.getClientName());
+        Assert.assertEquals(APP_UUID, oauthApplicationResponse.getClientName());
     }
     
     @Test(expected = APIManagementException.class)
     public void testCreateApplicationWithException() throws APIManagementException {
+        Mockito.when(APIUtil.getApplicationUUID(Mockito.anyString(), Mockito.anyString())).thenReturn(APP_UUID);
+
         OAuthAppRequest oauthRequest = new OAuthAppRequest();
         OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
         oauthRequest.setOAuthApplicationInfo(oauthApplication);
 
         keyManager.createApplication(oauthRequest);
     }
+
     @Test
     public void testTokenUnlimitedExpirationTime() throws KeyManagerClientException, APIManagementException {
         String accessToken = "155ddde3-68db-35b1-82dc-1247616b2da9";
@@ -127,6 +138,45 @@ public class AMDefaultKeyManagerImplTest {
         Assert.assertEquals(Long.MAX_VALUE, info.getValidityPeriod());
         
     }
+
+    @Test
+    public void testCreateApplicationAppNameWithSpecialChars()
+            throws APIManagementException, KeyManagerClientException {
+        String applicationName = "ÅÄÖÅÄÖ";
+
+        System.setProperty("carbon.home", "jhkjn");
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        OAuthAppRequest oauthRequest = new OAuthAppRequest();
+
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setAppOwner(APP_OWNER);
+        oauthApplication.setCallBackURL(StringUtils.join(REDIRECT_URIS, ","));
+        oauthApplication.setClientName(applicationName);
+        oauthApplication.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, APP_OWNER);
+        oauthApplication.addParameter(ApplicationConstants.APP_KEY_TYPE, KEY_TYPE);
+        oauthApplication.setJsonString(getJSONString());
+        oauthRequest.setMappingId("123");
+        oauthRequest.setOAuthApplicationInfo(oauthApplication);
+
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        ClientInfo response = new ClientInfo();
+        response.setClientId(CLIENT_ID);
+        response.setClientName(APP_UUID);
+        response.setClientSecret(CLIENT_SECRET);
+        response.setRedirectUris(Arrays.asList(REDIRECT_URIS));
+        response.setGrantTypes(Arrays.asList(GRANT_TYPES));
+
+        Mockito.when(dcrClient.createApplication(Mockito.any(ClientInfo.class))).thenReturn(response);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).
+                thenReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.when(APIUtil.getApplicationUUID(Mockito.anyString(), Mockito.anyString())).thenReturn(APP_UUID);
+
+        OAuthApplicationInfo oauthApplicationResponse = keyManager.createApplication(oauthRequest);
+        Assert.assertEquals(StringUtils.join(REDIRECT_URIS, ","), oauthApplicationResponse.getCallBackURL());
+        Assert.assertEquals(APP_UUID, oauthApplicationResponse.getClientName());
+    }
+
 //
 //    @Test
 //    public void testUpdateApplication() throws APIManagementException {

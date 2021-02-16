@@ -46,7 +46,7 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     }, tags={ "Label Collection" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Labels returned ", response = LabelListDTO.class) })
-    public Response labelsGet() throws APIManagementException{
-        return delegate.labelsGet(securityContext);
+    public Response getLabels() throws APIManagementException{
+        return delegate.getLabels(securityContext);
     }
 }

@@ -51,7 +51,7 @@ export default function SaveOperations(props) {
         <>
             <Box>
                 <Button
-                    disabled={isSaving || isRestricted(['apim:api_create'], api)}
+                    disabled={isSaving || isRestricted(['apim:api_create'], api) || api.isRevision}
                     onClick={saveChanges}
                     variant='contained'
                     color='primary'
@@ -85,7 +85,7 @@ export default function SaveOperations(props) {
                             }}
                             color='error'
                         >
-                        RESET
+                            RESET
                         </Button>
                     </Box>
                 </DialogActions>

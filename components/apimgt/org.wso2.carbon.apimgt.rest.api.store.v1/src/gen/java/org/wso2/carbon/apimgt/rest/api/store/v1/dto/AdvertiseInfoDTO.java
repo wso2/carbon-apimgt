@@ -21,7 +21,7 @@ import javax.validation.Valid;
 public class AdvertiseInfoDTO   {
   
     private Boolean advertised = null;
-    private String originalStoreUrl = null;
+    private String originalDevPortalUrl = null;
     private String apiOwner = null;
 
   /**
@@ -43,19 +43,19 @@ public class AdvertiseInfoDTO   {
 
   /**
    **/
-  public AdvertiseInfoDTO originalStoreUrl(String originalStoreUrl) {
-    this.originalStoreUrl = originalStoreUrl;
+  public AdvertiseInfoDTO originalDevPortalUrl(String originalDevPortalUrl) {
+    this.originalDevPortalUrl = originalDevPortalUrl;
     return this;
   }
 
   
-  @ApiModelProperty(example = "https://localhost:9443/store", value = "")
-  @JsonProperty("originalStoreUrl")
-  public String getOriginalStoreUrl() {
-    return originalStoreUrl;
+  @ApiModelProperty(example = "https://localhost:9443/devportal", value = "")
+  @JsonProperty("originalDevPortalUrl")
+  public String getOriginalDevPortalUrl() {
+    return originalDevPortalUrl;
   }
-  public void setOriginalStoreUrl(String originalStoreUrl) {
-    this.originalStoreUrl = originalStoreUrl;
+  public void setOriginalDevPortalUrl(String originalDevPortalUrl) {
+    this.originalDevPortalUrl = originalDevPortalUrl;
   }
 
   /**
@@ -86,13 +86,13 @@ public class AdvertiseInfoDTO   {
     }
     AdvertiseInfoDTO advertiseInfo = (AdvertiseInfoDTO) o;
     return Objects.equals(advertised, advertiseInfo.advertised) &&
-        Objects.equals(originalStoreUrl, advertiseInfo.originalStoreUrl) &&
+        Objects.equals(originalDevPortalUrl, advertiseInfo.originalDevPortalUrl) &&
         Objects.equals(apiOwner, advertiseInfo.apiOwner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(advertised, originalStoreUrl, apiOwner);
+    return Objects.hash(advertised, originalDevPortalUrl, apiOwner);
   }
 
   @Override
@@ -101,7 +101,7 @@ public class AdvertiseInfoDTO   {
     sb.append("class AdvertiseInfoDTO {\n");
     
     sb.append("    advertised: ").append(toIndentedString(advertised)).append("\n");
-    sb.append("    originalStoreUrl: ").append(toIndentedString(originalStoreUrl)).append("\n");
+    sb.append("    originalDevPortalUrl: ").append(toIndentedString(originalDevPortalUrl)).append("\n");
     sb.append("    apiOwner: ").append(toIndentedString(apiOwner)).append("\n");
     sb.append("}");
     return sb.toString();

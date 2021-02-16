@@ -22,6 +22,7 @@ public class ResourceFile {
     
     private InputStream content;
     private String contentType;
+    private String name;
 
     public ResourceFile(InputStream content, String contentType) {
         this.content = content;
@@ -34,5 +35,13 @@ public class ResourceFile {
 
     public String getContentType() {
         return contentType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

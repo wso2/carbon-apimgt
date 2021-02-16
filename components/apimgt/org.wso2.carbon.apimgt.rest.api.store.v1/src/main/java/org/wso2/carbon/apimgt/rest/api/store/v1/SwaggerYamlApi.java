@@ -47,14 +47,15 @@ public class SwaggerYamlApi {
     private String openAPIDef = null;
 
     /**
-     * Retrieves OAS of Store REST API and returns
+     * Retrieves OAS of Developer Portal REST API and returns
      * 
-     * @return OAS of Store REST API in yaml format
+     * @return OAS of Developer Portal REST API in yaml format
      */
     @GET
     @Consumes({ "text/yaml" })
     @Produces({ "text/yaml" })
-    @io.swagger.annotations.ApiOperation(value = "Get OAS Definition", notes = "Get OAS of Store REST API.", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "Get OAS Definition", notes = "Get OAS of Developer Portal REST API.",
+            response = Void.class)
     @io.swagger.annotations.ApiResponses(value = {
             @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nOAS Definition is returned."),
 
@@ -68,7 +69,7 @@ public class SwaggerYamlApi {
                 synchronized (LOCK_STORE_OPENAPI_DEF) {
                     if (openAPIDef == null) {
                         String definition = IOUtils
-                                .toString(this.getClass().getResourceAsStream("/store-api.yaml"), "UTF-8");
+                                .toString(this.getClass().getResourceAsStream("/devportal-api.yaml"), "UTF-8");
                         openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
                     }
                 }
@@ -83,7 +84,7 @@ public class SwaggerYamlApi {
                 return Response.ok().entity(openAPIDef).build();
             }
         } catch (IOException e) {
-            String errorMessage = "Error while retrieving the OAS of the Store API";
+            String errorMessage = "Error while retrieving the OAS of the Developer Portal API";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;

@@ -130,22 +130,6 @@ class CreateNewVersion extends React.Component {
         });
     };
 
-    hasSpecialChars(value) {
-        if (/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/.test(value)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    isMaxLengthExceeds(value) {
-        if (value.length > 30) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     /**
      * Handles the submit action for new version creation
      *
@@ -181,6 +165,27 @@ class CreateNewVersion extends React.Component {
                     }) + error.status);
                 }
             });
+    }
+
+    /**
+     *
+     * @param {String} value String to be checked for special characters
+     * @returns {Boolean} Has special character or not
+     */
+    hasSpecialChars(value) {
+        if (/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/.test(value)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    isMaxLengthExceeds(value) {
+        if (value.length > 30) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -318,6 +323,7 @@ class CreateNewVersion extends React.Component {
                                                         || valid.version.alreadyExists
                                                         || valid.version.hasSpecialChars
                                                         || valid.version.MaxLengthExceeds
+                                                        || api.isRevision
                                                     }
                                                 >
                                                     <FormattedMessage
