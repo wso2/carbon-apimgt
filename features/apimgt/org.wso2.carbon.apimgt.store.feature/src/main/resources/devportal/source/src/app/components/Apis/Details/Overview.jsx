@@ -459,7 +459,7 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id={'Apis.Details.Overview' +
                                                         '.subscribe.available'}
-                                                    defaultMessage='Subscription tiers available '
+                                                    defaultMessage='Business plans available '
                                                 />
                                                 {api.tiers.map((tier, index) => (<>
                                                     {tier.tierName}{index !== (api.tiers.length - 1)
