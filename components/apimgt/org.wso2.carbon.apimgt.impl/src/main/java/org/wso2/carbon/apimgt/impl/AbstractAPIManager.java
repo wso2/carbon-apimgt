@@ -4012,7 +4012,7 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
             throw new APIManagementException(msg, e);
         } finally {
-            if (tenantFlowStarted){
+            if (tenantFlowStarted) {
                 endTenantFlow();
             }
         }
