@@ -4797,10 +4797,10 @@ components:
           example: 443
         wsPort:
           type: integer
-          example: 80
+          example: 9099
         wssPort:
           type: integer
-          example: 443
+          example: 8099
     PublishStatus:
       title: Usage publish status
       type: object

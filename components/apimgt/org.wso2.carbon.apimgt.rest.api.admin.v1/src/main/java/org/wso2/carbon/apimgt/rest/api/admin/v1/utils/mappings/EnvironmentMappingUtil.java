@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class manage Environment mapping to EnvironmentDTO
@@ -40,12 +41,7 @@ public class EnvironmentMappingUtil {
     public static EnvironmentListDTO fromEnvListToEnvListDTO(List<Environment> envList) {
         EnvironmentListDTO envListDTO = new EnvironmentListDTO();
         envListDTO.setCount(envList.size());
-
-        List<EnvironmentDTO> envDTOs = new ArrayList<>(envList.size());
-        for (Environment env : envList) {
-            envDTOs.add(fromEnvToEnvDTO(env));
-        }
-        envListDTO.setList(envDTOs);
+        envListDTO.setList(envList.stream().map(EnvironmentMappingUtil::fromEnvToEnvDTO).collect(Collectors.toList()));
         return envListDTO;
     }
 
@@ -62,22 +58,9 @@ public class EnvironmentMappingUtil {
         envDTO.setDisplayName(env.getDisplayName());
         envDTO.setDescription(env.getDescription());
         envDTO.setIsReadOnly(env.isReadOnly());
-        envDTO.setVhosts(fromVHostListToVHostDtoList(env.getVhosts()));
+        envDTO.setVhosts(env.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
+                .collect(Collectors.toList()));
         return envDTO;
-    }
-
-    /**
-     * Convert list of VHost to VHostListDTO
-     *
-     * @param vHostList List of VHosts
-     * @return List of VhostDTO
-     */
-    public static List<VHostDTO> fromVHostListToVHostDtoList(List<VHost> vHostList) {
-        List<VHostDTO> vHostDTOList = new ArrayList<>(vHostList.size());
-        for (VHost vHost : vHostList) {
-            vHostDTOList.add(fromVHostToVHostDTO(vHost));
-        }
-        return vHostDTOList;
     }
 
     /**
@@ -124,22 +107,9 @@ public class EnvironmentMappingUtil {
         env.setDisplayName(envDTO.getDisplayName());
         env.setDescription(envDTO.getDescription());
         env.setReadOnly(false);
-        env.setVhosts(fromVHostListToVHostListDTO(envDTO.getVhosts()));
+        env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
+                .collect(Collectors.toList()));
         return env;
-    }
-
-    /**
-     * Convert list of VHostListDTO to VHost
-     *
-     * @param vhostDtoList List of VHost DTOs
-     * @return List of VHosts
-     */
-    public static List<VHost> fromVHostListToVHostListDTO(List<VHostDTO> vhostDtoList) {
-        List<VHost> vhostList = new ArrayList<>(vhostDtoList.size());
-        for (VHostDTO vhostDto : vhostDtoList) {
-            vhostList.add(fromVHostDtoToVHost(vhostDto));
-        }
-        return vhostList;
     }
 
     /**

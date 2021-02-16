@@ -8676,6 +8676,10 @@ components:
           example: true
         endpoints:
           $ref: '#/components/schemas/EnvironmentEndpoints'
+        vhosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/VHost'
     EnvironmentList:
       title: Environment List
       type: object
@@ -8709,6 +8713,28 @@ components:
           type: string
           description: WSS environment URL
           example: https://localhost:8099
+    VHost:
+      title: Virtual Host
+      type: object
+      properties:
+        host:
+          type: string
+          example: mg.wso2.com
+        httpContext:
+          type: string
+          example: pets
+        httpPort:
+          type: integer
+          example: 80
+        httpsPort:
+          type: integer
+          example: 443
+        wsPort:
+          type: integer
+          example: 9099
+        wssPort:
+          type: integer
+          example: 8099
     FileInfo:
       title: File Information including meta data
       type: object

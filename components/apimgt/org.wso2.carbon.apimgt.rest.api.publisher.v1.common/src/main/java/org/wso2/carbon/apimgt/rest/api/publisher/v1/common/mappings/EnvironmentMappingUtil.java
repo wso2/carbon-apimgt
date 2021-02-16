@@ -20,16 +20,17 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EnvironmentMappingUtil {
 
@@ -63,6 +64,8 @@ public class EnvironmentMappingUtil {
             }
         }
         environmentDTO.setEndpoints(environmentEndpointsDTO);
+        environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
+                .collect(Collectors.toList()));
         return environmentDTO;
     }
 
@@ -85,6 +88,23 @@ public class EnvironmentMappingUtil {
         }
         environmentListDTO.setCount(environmentDTOs.size());
         return environmentListDTO;
+    }
+
+    /**
+     * Converts VHost into a VHostDTO
+     *
+     * @param vHost VHost object
+     * @return VHostDTO
+     */
+    public static VHostDTO fromVHostToVHostDTO(VHost vHost){
+        VHostDTO vHostDTO = new VHostDTO();
+        vHostDTO.setHost(vHost.getHost());
+        vHostDTO.setHttpContext(vHost.getHttpContext());
+        vHostDTO.setHttpPort(vHost.getHttpPort());
+        vHostDTO.setHttpsPort(vHost.getHttpsPort());
+        vHostDTO.setWsPort(vHost.getWsPort());
+        vHostDTO.setWssPort(vHost.getWssPort());
+        return vHostDTO;
     }
 
     /**
