@@ -68,7 +68,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
         verbInfoDTO.setContentAware(false);
         ArrayList<VerbInfoDTO> list = new ArrayList<VerbInfoDTO>();
@@ -76,7 +75,6 @@ public class DataProcessAndPublishingAgentTest {
         Mockito.when(messageContext.getProperty(APIConstants.VERB_INFO_DTO)).thenReturn(list);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(new TreeMap<>());
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, apiLevelTier, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -91,7 +89,6 @@ public class DataProcessAndPublishingAgentTest {
                 (throttleProperties);
         AuthenticationContext authenticationContext = new AuthenticationContext();
         MessageContext messageContext = Mockito.mock(MessageContext.class);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         dataProcessAndPublishingAgent.setDataReference(applicationLevelThrottleKey, applicationLevelTier,
                 apiLevelThrottleKey, null, subscriptionLevelThrottleKey, subscriptionLevelTier,
                 resourceLevelThrottleKey, resourceLevelTier, authorizedUser, apiContext, apiVersion, appTenant,
@@ -109,7 +106,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn
                 (null);
         VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
@@ -135,7 +131,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(new TreeMap<>());
         VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
@@ -160,7 +155,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
@@ -189,7 +183,6 @@ public class DataProcessAndPublishingAgentTest {
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(axis2MsgCntxt.getProperty(NhttpConstants.REST_URL_POSTFIX)).thenReturn("?a=1&b=2");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
@@ -220,7 +213,6 @@ public class DataProcessAndPublishingAgentTest {
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(axis2MsgCntxt.getProperty(NhttpConstants.REST_URL_POSTFIX)).thenReturn("");
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
@@ -255,7 +247,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
@@ -282,7 +273,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         headers.put(APIThrottleConstants.CONTENT_LENGTH,123);
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
@@ -314,7 +304,6 @@ public class DataProcessAndPublishingAgentTest {
                 .class);
         Mockito.when(messageContext.getEnvelope()).thenReturn(env);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
@@ -339,7 +328,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "192.168.1.1:80");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
@@ -366,7 +354,6 @@ public class DataProcessAndPublishingAgentTest {
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin--PizzaShackAPI");
         TreeMap headers = new TreeMap();
         headers.put(APIMgtGatewayConstants.X_FORWARDED_FOR, "0:0:0:0:0:0:0:1");
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))

@@ -57,9 +57,9 @@ function renderInput(inputProps) {
 
 renderInput.propTypes = {
     // eslint-disable-next-line react/forbid-prop-types
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
     // eslint-disable-next-line react/forbid-prop-types, react/require-default-props
-    InputProps: PropTypes.object,
+    InputProps: PropTypes.shape({}),
 };
 
 /**
@@ -93,7 +93,7 @@ renderSuggestion.propTypes = {
     highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
     index: PropTypes.number.isRequired,
     // eslint-disable-next-line react/forbid-prop-types
-    itemProps: PropTypes.object.isRequired,
+    itemProps: PropTypes.shape({}).isRequired,
     selectedItem: PropTypes.string.isRequired,
     suggestion: PropTypes.shape('').isRequired,
 };
@@ -145,7 +145,6 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
     },
 }));
-
 
 /**
  * The autocomplete component. This component lists the ARNs of a specific user role.

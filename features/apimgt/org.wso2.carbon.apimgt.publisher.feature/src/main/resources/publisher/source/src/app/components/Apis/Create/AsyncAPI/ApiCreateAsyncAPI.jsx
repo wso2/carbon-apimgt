@@ -33,11 +33,12 @@ import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm'
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+
 import ProvideAsyncAPI from './Steps/ProvideAsyncAPI';
-import MenuItem from "@material-ui/core/MenuItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import TextField from "@material-ui/core/TextField";
-import {makeStyles} from "@material-ui/core/styles";
 
 /**
  * Handle API creation from OpenAPI Definition.
@@ -50,6 +51,7 @@ export default function ApiCreateAsyncAPI(props) {
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
     const { settings } = useAppContext();
+    // eslint-disable-next-line no-use-before-define
     const classes = useStyles();
     const [hideEndpoint, setHideEndpoint] = useState(false);
 
@@ -68,7 +70,7 @@ export default function ApiCreateAsyncAPI(props) {
             case 'name':
             case 'version':
             case 'endpoint':
-            case 'protocol' :
+            case 'protocol':
             case 'context':
             case 'policies':
             case 'isFormValid':
@@ -104,13 +106,13 @@ export default function ApiCreateAsyncAPI(props) {
         {
             name: 'ws',
             displayName: 'WebSocket',
-            description: 'WebSocket'
+            description: 'WebSocket',
         },
         {
             name: 'sse',
             displayName: 'SSE',
-            description: 'Server Sent Events'
-        }
+            description: 'Server Sent Events',
+        },
     ];
 
     /**
@@ -120,7 +122,7 @@ export default function ApiCreateAsyncAPI(props) {
      */
     function handleOnChange(event) {
         const { name: action, value } = event.target;
-        if (value === "WebSub") {
+        if (value === 'WebSub') {
             setHideEndpoint(true);
         } else {
             setHideEndpoint(false);
@@ -157,7 +159,7 @@ export default function ApiCreateAsyncAPI(props) {
             version,
             context,
             policies,
-            type: protocol.toUpperCase() === "WEBSOCKET" ? "WS" : protocol.toUpperCase(),
+            type: protocol.toUpperCase() === 'WEBSOCKET' ? 'WS' : protocol.toUpperCase(),
         };
         if (endpoint) {
             additionalProperties.endpointConfig = {
@@ -249,7 +251,7 @@ export default function ApiCreateAsyncAPI(props) {
                             onChange={handleOnChange}
                             api={apiInputs}
                             isAPIProduct={false}
-                            hideEndpoint = {hideEndpoint}
+                            hideEndpoint={hideEndpoint}
                             endpointPlaceholderText='Streaming Provider'
                             appendChildrenBeforeEndpoint
                         >

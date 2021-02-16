@@ -19,8 +19,11 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 
@@ -28,6 +31,8 @@ import java.util.List;
  * This mediator would load the subscriber's information from the subscribers list according to the index of the list.
  */
 public class SubscriberInfoLoader extends AbstractMediator {
+
+    //private final GenericRequestDataCollector dataCollector = null;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -40,6 +45,31 @@ public class SubscriberInfoLoader extends AbstractMediator {
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_SECRET_PROPERTY, subscriber.getSecret());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_APPLICATION_ID_PROPERTY, subscriber.getAppID());
         }
+        return true;
+    }
+
+    private boolean doThrottle(WebhooksDTO subscriber, MessageContext messageContext) {
+        //todo get authenticationContext from WebhooksDTO
+        boolean isThrottled = WebsocketUtil.isThrottled(null, null,
+                null);
+        if (isThrottled) {
+            if (APIUtil.isAnalyticsEnabled()) {
+               //dataCollector.collectData();
+            }
+            return false;
+        }
+        Object[] objects =
+                new Object[] { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                        null, null, null};
+        org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(
+                "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null, null, objects);
+        if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
+            log.error("Cannot publish events to traffic manager because ThrottleDataPublisher "
+                    + "has not been initialised");
+            return true;
+        }
+        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
+        //dataCollector.collectData();
         return true;
     }
 }

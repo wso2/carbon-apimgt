@@ -37,7 +37,6 @@ const styles = {
     },
 };
 
-
 /**
  *
  * Handle routing for all types of API create creations, If you want to add new API type create page,
@@ -57,7 +56,7 @@ function APICreateRoutes(props) {
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
                 <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
                 <Route path='/apis/create/streamingapi' component={APICreateStreamingAPI} />
-                <Route path='/apis/create/asyncapi' component={APICreateAsyncAPI}/>
+                <Route path='/apis/create/asyncapi' component={APICreateAsyncAPI} />
                 <Route component={ResourceNotFound} />
             </Switch>
         </main>

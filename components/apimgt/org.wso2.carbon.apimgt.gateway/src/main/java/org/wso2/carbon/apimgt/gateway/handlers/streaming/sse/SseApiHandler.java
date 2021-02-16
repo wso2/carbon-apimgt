@@ -23,14 +23,18 @@ import org.apache.axis2.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
 
 /**
- * Wraps the authentication handler and for the purpose of changing the http method before calling it.
+ * Wraps the authentication handler for the purpose of changing the http method before calling it.
  */
 public class SseApiHandler extends APIAuthenticationHandler {
+
+    //private GenericRequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean handleRequest(MessageContext synCtx) {
@@ -38,9 +42,24 @@ public class SseApiHandler extends APIAuthenticationHandler {
         org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
         axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-        boolean authenticate = super.handleRequest(synCtx);
+        boolean isAuthenticated = super.handleRequest(synCtx);
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
-        return authenticate;
+        synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
+                           true);
+        prepareThrottleData(synCtx);
+        publishSubscriptionEvent(synCtx);
+        return isAuthenticated;
+    }
+
+    private void prepareThrottleData(MessageContext synCtx) {
+
+        AuthenticationContext authenticationContext = (AuthenticationContext) synCtx.getProperty("xxxxx");
+        ThrottleDTO throttleDTO = new ThrottleDTO(authenticationContext);
+        synCtx.setProperty(SSE_THROTTLE_DTO, throttleDTO);
+    }
+
+    private void publishSubscriptionEvent(MessageContext synCtx) {
+     //   dataCollector.collectData(synCtx);
     }
 
 }

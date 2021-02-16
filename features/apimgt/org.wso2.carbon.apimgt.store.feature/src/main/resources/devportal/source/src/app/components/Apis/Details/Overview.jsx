@@ -246,8 +246,6 @@ function Overview(props) {
             switch (apiType) {
                 case 'GRAPHQL':
                     return <Operations api={apiObject}/>;
-                case 'WS':
-                    return '';
                 default:
                     return <Resources api={apiObject}/>;
             }
@@ -310,7 +308,7 @@ function Overview(props) {
                                 {getResourcesForAPIs(api.type, api)}
                             </Box>
                             <Box>
-                                {!api.advertiseInfo.advertised && api.type !== 'WS' && api.type !== 'WEBSUB' && api.type !== 'SSE' && (
+                                {!api.advertiseInfo.advertised && (!isAsyncApi(api.type)) ? (
                                     <>
                                         <Divider />
                                         <Link to={'/apis/' + api.id + '/test'} className={classes.button}>
@@ -323,6 +321,23 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.resources.show.more'
                                                     defaultMessage='Try Out'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </>
+                                ):(
+                                    <>
+                                        <Divider />
+                                        <Link to={'/apis/' + api.id + '/definition'} className={classes.button}>
+                                            <Button
+                                                id='test'
+                                                size='small'
+                                                color='primary'
+                                                aria-labelledby='test APIOperationTitle'
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.topics.show.more'
+                                                    defaultMessage='View Definition'
                                                 />
                                             </Button>
                                         </Link>
@@ -383,7 +398,7 @@ function Overview(props) {
                         </Box>
                     </Paper>
                 </Grid>)}
-                {api.type !== 'WS' && showSdks && (<Grid item lg={4} md={6} xs={12}>
+                {!isAsyncApi(api.type) && showSdks && (<Grid item lg={4} md={6} xs={12}>
                     <Paper elevation={0} className={classes.overviewPaper}>
                         <Typography variant='subtitle2' className={classes.sectionTitle}>
                             <FormattedMessage
@@ -444,7 +459,7 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id={'Apis.Details.Overview' +
                                                         '.subscribe.available'}
-                                                    defaultMessage='Subscription tiers available '
+                                                    defaultMessage='Business plans available '
                                                 />
                                                 {api.tiers.map((tier, index) => (<>
                                                     {tier.tierName}{index !== (api.tiers.length - 1)

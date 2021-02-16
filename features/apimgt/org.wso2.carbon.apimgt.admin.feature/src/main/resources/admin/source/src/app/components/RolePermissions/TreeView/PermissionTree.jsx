@@ -134,7 +134,7 @@ export default function PermissionTreeView(props) {
             defaultExpandIcon={<PlusSquare />}
         >
 
-            <StyledTreeItem nodeId={0} label={`Permissions (${totalPermissions})`}>
+            <StyledTreeItem nodeId={0} label={`Scope Assignments (${totalPermissions})`}>
                 {
                     Object.entries(appMappings).map(([app, scopes], APIIndex) => {
                         const nodeId = APIIndex + 1; // this is to give unique id for each nodes in the tree

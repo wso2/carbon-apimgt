@@ -227,9 +227,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   UUID," +
             "   SERVICE_KEY," +
             "   MD5," +
-            "   ENTRY_NAME," +
+            "   SERVICE_NAME," +
             "   DISPLAY_NAME," +
-            "   ENTRY_VERSION," +
+            "   SERVICE_VERSION," +
             "   SERVICE_URL," +
             "   DEFINITION_TYPE," +
             "   DEFINITION_URL," +
@@ -240,11 +240,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   LAST_UPDATED_TIME," +
             "   CREATED_BY," +
             "   UPDATED_BY," +
-            "   ENDPOINT_DEFINITION," +
+            "   SERVICE_DEFINITION," +
             "   METADATA FROM AM_SERVICE_CATALOG" +
             "   WHERE TENANT_ID = ? " +
-            "   AND ENTRY_NAME LIKE ? " +
-            "   AND ENTRY_VERSION LIKE ? " +
+            "   AND SERVICE_NAME LIKE ? " +
+            "   AND SERVICE_VERSION LIKE ? " +
             "   AND DEFINITION_TYPE LIKE ?" +
             "   AND DISPLAY_NAME LIKE ?" +
             "   AND SERVICE_KEY LIKE ?" +

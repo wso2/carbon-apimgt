@@ -131,6 +131,7 @@ public final class APIConstants {
 
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
+    public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
 
     public static class Monetization {
         public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";

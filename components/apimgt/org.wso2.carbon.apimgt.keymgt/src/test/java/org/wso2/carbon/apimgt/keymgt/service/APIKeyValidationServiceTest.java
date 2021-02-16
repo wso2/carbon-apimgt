@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
@@ -142,8 +143,7 @@ public class APIKeyValidationServiceTest {
 
         String cacheKey = APIUtil.getAccessTokenCacheKey(ACCESS_TOKEN, API_CONTEXT, API_VERSION, "/*", "GET",
                 REQUIRED_AUTHENTICATION_LEVEL);
-        org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO infoDTO =
-                new org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO();
+        APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
         infoDTO.setApiPublisher(USER_NAME);
         infoDTO.setEndUserName(USER_NAME);
         PowerMockito.when(APIKeyMgtUtil.getFromKeyManagerCache(cacheKey)).thenReturn(infoDTO);

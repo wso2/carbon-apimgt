@@ -1295,7 +1295,7 @@ public class PublisherCommonUtils {
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
-        apiProvider.saveToGateway(createdProduct);
+        //apiProvider.saveToGateway(createdProduct);
         return createdProduct;
     }
 

@@ -25,8 +25,6 @@ import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.synapse.rest.RESTConstants.SYNAPSE_REST_API;
-
 
 public class APIMgtCommonExecutionPublisherTest {
     @Test
@@ -49,7 +47,6 @@ public class APIMgtCommonExecutionPublisherTest {
                 (TimeUnit.NANOSECONDS.toMillis(10000000));
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY)).thenReturn
                 (TimeUnit.NANOSECONDS.toMillis(10000000));
-        Mockito.when(messageContext.getProperty(SYNAPSE_REST_API)).thenReturn("admin--api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
@@ -78,7 +75,6 @@ public class APIMgtCommonExecutionPublisherTest {
                 (TimeUnit.NANOSECONDS.toMillis(10000000));
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY)).thenReturn
                 (TimeUnit.NANOSECONDS.toMillis(10000000));
-        Mockito.when(messageContext.getProperty(SYNAPSE_REST_API)).thenReturn("admin--api1");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/api1");

@@ -33,7 +33,6 @@ const styles = (theme) => ({
     },
 });
 
-
 /**
  *
  *
@@ -44,7 +43,6 @@ class InlineMessage extends React.Component {
     handleExpandClick = () => {
         this.setState((state) => ({ expanded: !state.expanded }));
     };
-
 
     /**
      *
