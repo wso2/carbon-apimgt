@@ -629,6 +629,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     margin='normal'
                                                     variant='outlined'
+                                                    id='username'
                                                     label={(
                                                         <FormattedMessage
                                                             id='username'
@@ -643,6 +644,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     margin='normal'
                                                     variant='outlined'
+                                                    id='input-password'
                                                     label={(
                                                         <FormattedMessage
                                                             id='password'
@@ -768,6 +770,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     fullWidth
                                                     select
+                                                    id='environment'
                                                     label={(
                                                         <FormattedMessage
                                                             defaultMessage='Environment'

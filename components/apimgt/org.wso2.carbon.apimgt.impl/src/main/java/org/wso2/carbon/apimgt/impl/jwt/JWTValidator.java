@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.impl.jwt;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
-import org.wso2.carbon.apimgt.gateway.common.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 
 /**
  * This interface used to validate JWT In Self Contain Manner
