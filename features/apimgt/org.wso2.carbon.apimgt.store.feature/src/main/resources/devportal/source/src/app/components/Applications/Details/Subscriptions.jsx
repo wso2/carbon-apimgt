@@ -295,7 +295,7 @@ class Subscriptions extends React.Component {
                     Alert.info('Something went wrong while updating the Subscription!');
                     return;
                 }
-                Alert.info('Subscription Tier updated successfully!');
+                Alert.info('Business Plan updated successfully!');
                 this.updateSubscriptions(applicationId);
             })
             .catch((error) => {
@@ -464,8 +464,8 @@ class Subscriptions extends React.Component {
                                                                 <TableCell>
                                                                     <FormattedMessage
                                                                         id={`Applications.Details.Subscriptions
-                                                                        .subscription.tier`}
-                                                                        defaultMessage='Subscription Tier'
+                                                                        .business.plan`}
+                                                                        defaultMessage='Business Plan'
                                                                     />
                                                                 </TableCell>
                                                                 <TableCell>
