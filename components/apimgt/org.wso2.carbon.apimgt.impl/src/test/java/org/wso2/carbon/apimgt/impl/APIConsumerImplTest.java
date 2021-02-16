@@ -179,8 +179,6 @@ public class APIConsumerImplTest {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
-
-        PowerMockito.when(keyManagerConfigurationDTO.getTenantDomain()).thenReturn("carbon.super");
     }
 
     @Test
@@ -1052,7 +1050,7 @@ public class APIConsumerImplTest {
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default", null);
+                            "api_view", "2", null, "default");
             Assert.fail("User store exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Unable to retrieve the tenant information of the current user"));
@@ -1071,7 +1069,7 @@ public class APIConsumerImplTest {
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default", null);
+                            "api_view", "2", null, "default");
             Assert.fail("API management exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Token Type"));
@@ -1091,13 +1089,13 @@ public class APIConsumerImplTest {
                 .thenReturn(application);
         Map<String, Object> result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
-                        "identity.com/auth", null, "3600", "api_view", "2", null, "default", null);
+                        "identity.com/auth", null, "3600", "api_view", "2", null, "default");
         Assert.assertEquals(result.size(), 9);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
-                        "3600", "api_view", "2", null, "default", null);
+                        "3600", "api_view", "2", null, "default");
         Assert.assertEquals(result.size(), 9);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
@@ -1477,9 +1475,9 @@ public class APIConsumerImplTest {
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
 
-        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1));
         assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
+        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
     }
 }
