@@ -4019,16 +4019,10 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response deployAPIRevision(String apiId, String revisionId, String revisionNum,
+    public Response deployAPIRevision(String apiId, String revisionId,
                                       List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        if (revisionId == null && revisionNum != null) {
-            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
-            if (revisionId == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
-            }
-        }
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
@@ -4037,7 +4031,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.addAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
+        apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
@@ -4116,16 +4110,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response restoreAPIRevision(String apiId, String revisionId, String revisionNum,
-                                       MessageContext messageContext)
+    public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        if (revisionId == null && revisionNum != null) {
-            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
-            if (revisionId == null) {
-                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
-            }
-        }
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         apiProvider.restoreAPIRevision(apiId, revisionId, tenantDomain);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider);
