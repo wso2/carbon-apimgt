@@ -51,8 +51,6 @@ public interface AnalyticsDataProvider {
 
     Application getApplication();
 
-    Latencies getLatency();
-
     Operation getOperation();
 
     Target getTarget();

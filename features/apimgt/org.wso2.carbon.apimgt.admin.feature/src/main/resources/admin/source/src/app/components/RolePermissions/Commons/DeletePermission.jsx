@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
+import { useIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -40,6 +41,7 @@ export default function DeletePermission(props) {
     } = props;
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const intl = useIntl();
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -55,7 +57,7 @@ export default function DeletePermission(props) {
             .then(() => {
                 Alert.info(
                     <span>
-                        Permissions for
+                        Scope Assignments
                         {' '}
                         <b>{role}</b>
                         {' '}
@@ -65,7 +67,12 @@ export default function DeletePermission(props) {
                 handleClose();
             })
             .catch((error) => {
-                Alert.error('Something went wrong while deleting the permissions');
+                Alert.error(
+                    intl.formatMessage({
+                        id: 'RolePermissions.Common.DeletePermission.delete.scope.error',
+                        defaultMessage: 'Something went wrong while deleting the scope assignments',
+                    }),
+                );
                 console.error(error);
             })
             .finally(() => setIsDeleting(false));
@@ -88,7 +95,7 @@ export default function DeletePermission(props) {
                 aria-labelledby='delete-confirmation'
             >
                 <DialogTitle id='delete-confirmation'>
-                    Delete role permissions of
+                    Delete scope assignments of
                     {' '}
                     <Typography display='inline' variant='subtitle2'>{role}</Typography>
                     {' '}
@@ -96,7 +103,7 @@ export default function DeletePermission(props) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <Box pl={5} mt={2} mb={2}>
-                        Are you sure you want to delete permissions for
+                        Are you sure you want to delete scope assignments for
                         {' '}
                         <b>{role}</b>
                         {' '}
