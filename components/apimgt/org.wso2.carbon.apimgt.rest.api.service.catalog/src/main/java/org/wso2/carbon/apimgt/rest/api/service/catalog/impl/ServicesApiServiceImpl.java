@@ -61,7 +61,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private static final Log log = LogFactory.getLog(ServicesApiServiceImpl.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
-    public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream,
+    public Response addService(ServiceDTO catalogEntry, InputStream definitionFileInputStream,
                                   Attachment definitionFileDetail, MessageContext messageContext) {
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;

@@ -422,20 +422,26 @@ public class ServiceCatalogDAO {
         String query = SQLConstantManagerFactory.getSQlString("GET_ALL_SERVICES_BY_TENANT_ID");
         query = query.replace("$1", filterParams.getSortBy());
         query = query.replace("$2", filterParams.getSortOrder());
+        String[] keyArray = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setInt(1, tenantId);
-            ps.setString(2, "%" + filterParams.getName() + "%");
-            ps.setString(3, "%" + filterParams.getVersion() + "%");
-            ps.setString(4, "%" + filterParams.getDefinitionType() + "%");
-            ps.setString(5, "%" + filterParams.getDisplayName() + "%");
-            ps.setString(6, "%" + filterParams.getKey() + "%");
-            ps.setInt(7, filterParams.getOffset());
-            ps.setInt(8, filterParams.getLimit());
-            try(ResultSet resultSet = ps.executeQuery()) {
-                while(resultSet.next()) {
-                    ServiceEntry service = getServiceParams(resultSet, shrink);
-                    serviceEntryList.add(service);
+            if (filterParams.getKey().contains(",")) {
+                keyArray = filterParams.getKey().split(",");
+                for (String key: keyArray) {
+                    ps.setInt(1, tenantId);
+                    ps.setString(2, "%" + filterParams.getName() + "%");
+                    ps.setString(3, "%" + filterParams.getVersion() + "%");
+                    ps.setString(4, "%" + filterParams.getDefinitionType() + "%");
+                    ps.setString(5, "%" + filterParams.getDisplayName() + "%");
+                    ps.setString(6, "%" + key + "%");
+                    ps.setInt(7, filterParams.getOffset());
+                    ps.setInt(8, filterParams.getLimit());
+                    try (ResultSet resultSet = ps.executeQuery()) {
+                        while (resultSet.next()) {
+                            ServiceEntry service = getServiceParams(resultSet, shrink);
+                            serviceEntryList.add(service);
+                        }
+                    }
                 }
             }
         } catch (SQLException e) {

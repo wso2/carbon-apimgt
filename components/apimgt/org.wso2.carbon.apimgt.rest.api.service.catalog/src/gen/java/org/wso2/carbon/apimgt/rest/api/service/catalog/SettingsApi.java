@@ -43,7 +43,8 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @ApiOperation(value = "Retrieve service catalog API settings", notes = "Retrieve Service Catalog API settings ", response = SettingsDTO.class, tags={ "Settings" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getSettings() throws APIManagementException{
         return delegate.getSettings(securityContext);
     }

@@ -20,8 +20,8 @@ info:
     This specifies a **RESTful API** for Service Catalog.
   version: '0.9'
 servers:
-  - url: 'https://apis.wso2.com/api/service-catalog/v1'
-  - url: 'http://apis.wso2.com/api/service-catalog/v1'
+  - url: 'https://apis.wso2.com/api/service-catalog/v0'
+  - url: 'http://apis.wso2.com/api/service-catalog/v0'
 
 paths:
   ######################################################
@@ -98,28 +98,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServiceList'
-        "400":
-          description: |
-            Bad Request. Due to an invalid search parameter
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
     #-----------------------------------------------------
-    # Create new service and add to the service catalog 
+    # Adds new service to the service catalog
     #-----------------------------------------------------
     post:
-      summary: Create a new service
+      summary: Add a new service to Service Catalog
       description: |
-        Create a new service and add it to the service catalog of the user's organization (or tenant) 
+        Add a new service to the service catalog of the user's organization (or tenant)
         by specifying the details of the service along with its definition. 
       security:
         - OAuth2Security:
             - service_catalog:service_write
       tags:
         - Services
-      operationId: createService
+      operationId: addService
       requestBody:
         content:
           multipart/form-data:
@@ -129,27 +126,17 @@ paths:
         201:
           description: |
             Created.
-            Successful response with the newly created service entry as the response payload
+            Successful response with the newly created service as the response payload
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Service'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         415:
-          description: |
-            Unsupported Media Type.
-            The entity of the request was in a not supported format.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
   /services/{serviceId}:
     #-----------------------------------------------------
@@ -168,28 +155,19 @@ paths:
       parameters:
         - $ref: '#/components/parameters/serviceId'
       responses:
-        "200":
+        200:
           description: |
             Requested service in the service catalog is returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Service'
-        "400":
-          description: |
-            Invalid Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: |
-            Not Found.
-            Requested service does not exist in the service catalog.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
     #-----------------------------------------------------
     # Update a service in the service catalog
@@ -212,7 +190,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ServiceSchema'
       responses:
-        "200":
+        200:
           description: |
             Updated.
             Successful response with the newly updated service as entity in the body.
@@ -220,21 +198,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Service'
-        "400":
-          description: |
-            Invalid Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: |
-            Not Found.
-            Requested Service does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
     #-----------------------------------------------------
     # Delete a service in the service catalog
@@ -255,21 +224,12 @@ paths:
         "204":
           description: |
             Successfully deleted the catalog entry.
-        "400":
-          description: |
-            Invalid Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: |
-            Not Found.
-            Requested Service does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
   #-----------------------------------------------------
   # Retrieve definition of a service in the service catalog
@@ -298,22 +258,12 @@ paths:
             application/yaml:
               schema:
                 type: string
-        "400":
-          description: |
-            Invalid Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: |
-            Not Found.
-            Requested Service does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
   #-------------------------------------------------------------------
   # Import a service into the service catalog from a zipped archive
@@ -356,7 +306,7 @@ paths:
                   type: string
               
       responses:
-        "200":
+        200:
           description: |
             Successful response with the imported service metadata.
           content:
@@ -366,13 +316,10 @@ paths:
           headers:
             ETag:
               $ref: '#/components/headers/ETag'
-        "400":
-          description: |
-            Invalid Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
                 
   #----------------------------------------------------------
   # Exporting a service as a zipped archive
@@ -408,7 +355,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        200:
           description: |
             Successful response as the exported service as a zipped archive.
           content:
@@ -419,14 +366,10 @@ paths:
           headers:
             ETag:
               $ref: '#/components/headers/ETag'
-        "404":
-          description: |
-            Not Found.
-            Requested Service does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
   ######################################################
   # The Service Catalog API settings
@@ -443,7 +386,7 @@ paths:
       tags:
         - Settings
       responses:
-        "200":
+        200:
           description: |
             OK.
             Settings returned
@@ -451,14 +394,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Settings'
-        "404":
-          description: |
-            Not Found.
-            Requested Settings does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   #-------------------------------------------------------
@@ -803,6 +742,61 @@ components:
           description: |
             Link to the previous subset of resources qualified.
             Empty if current subset is the first subset returned.
+
+  responses:
+    BadRequest:
+      description: Bad Request. Invalid request or validation error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Bad Request
+            description: Invalid request or validation error
+            moreInfo: ""
+            error: []
+
+    InternalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Internal Server Error
+            description: The server encountered an internal error. Please contact
+              administrator.
+            moreInfo: ""
+            error: []
+
+    NotFound:
+      description: Not Found. The specified resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Not Found
+            description: The specified resource does not exist
+            moreInfo: ""
+            error: []
+
+    UnsupportedMediaType:
+      description: Unsupported Media Type. The entity of the request was not in a
+        supported format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 415
+            message: Unsupported media type
+            description: The entity of the request was not in a supported format
+            moreInfo: ""
+            error: []
 
   ######################################################
   # Parameters - required by some of the APIs above
