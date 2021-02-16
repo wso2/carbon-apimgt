@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 
@@ -161,27 +162,17 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Latencies getLatency() {
-
-        long backendLatency = getBackendLatency();
-        long responseLatency = getResponseLatency();
-        long requestMediationLatency = getRequestMediationLatency();
-        long responseMediationLatency = getResponseMediationLatency();
-        Latencies latencies = new Latencies();
-        latencies.setBackendLatency(backendLatency);
-        latencies.setResponseLatency(responseLatency);
-        latencies.setRequestMediationLatency(requestMediationLatency);
-        latencies.setResponseMediationLatency(responseMediationLatency);
-        return latencies;
-    }
-
-    @Override
     public Operation getOperation() {
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
         Operation operation = new Operation();
         operation.setApiMethod(httpMethod);
-        operation.setApiResourceTemplate(apiResourceTemplate);
+        if (APIConstants.GRAPHQL_API.equalsIgnoreCase(getApi().getApiType())) {
+            String orderedOperations = sortGraphQLOperations(apiResourceTemplate);
+            operation.setApiResourceTemplate(orderedOperations);
+        } else {
+            operation.setApiResourceTemplate(apiResourceTemplate);
+        }
         return operation;
     }
 
@@ -284,6 +275,16 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     public long getResponseMediationLatency() {
         long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
         return System.currentTimeMillis() - backendEndTime;
+    }
+
+    public static String sortGraphQLOperations(String apiResourceTemplates) {
+        if (apiResourceTemplates == null || !apiResourceTemplates.contains(",")) {
+            return apiResourceTemplates;
+        }
+        String[] list = apiResourceTemplates.split(",");
+        // sorting alphabetical order
+        Arrays.sort(list);
+        return String.join(",", list);
     }
 
 }
