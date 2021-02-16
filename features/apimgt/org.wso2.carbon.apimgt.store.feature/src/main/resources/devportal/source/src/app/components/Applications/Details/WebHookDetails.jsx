@@ -144,6 +144,17 @@ export default function WebHookDetails(props) {
         setValue(event.target.value);
     };
 
+    const getLogoForDeliveryStatus = (subscription) => {
+        switch (subscription.deliveryStatus) {
+            case 1:
+                return <CheckCircleIcon style={{color: 'green', fontSize: '14px', paddingTop: '3px'}}/>;
+            case 2:
+                return <CancelIcon style={{color: 'red', fontSize: '14px', paddingTop: '3px'}}/>;
+            default:
+                return <RemoveCircleIcon style={{color: 'black', fontSize: '14px', paddingTop: '3px'}}/>;
+        }
+    };
+
     function generateGenericWHSubscriptionUrl(topicName) {
         const apiEndpointUrl = api.endpointURLs[0].URLs.https;
         return `${apiEndpointUrl}?hub.topic=${topicName}&hub.callback=https://placeholder.com&hub.mode=subscribe&hub.secret=some_secret&hub.lease_seconds=50000000`;
@@ -174,7 +185,7 @@ export default function WebHookDetails(props) {
             setAllTopics(response.body);
         }).catch((error) => {
             console.log(error);
-            Alert.error('Error while retrieving api data');
+            Alert.error('Error while retrieving topics for API');
         });
 
         const promisedSubscriptions = apiClient.getWebhookubScriptions(apiId, applicationId);
@@ -183,7 +194,7 @@ export default function WebHookDetails(props) {
             setSubscribedTopics(sortedSubscriptions);
         }).catch((error) => {
             console.log(error);
-            Alert.error('Error while retrieving api data');
+            Alert.error('Error while retrieving webhook subscriptions');
         });
     }, []);
 
@@ -220,15 +231,7 @@ export default function WebHookDetails(props) {
                         {subscribedTopics[key].map((subscription, index) => (
                             <Grid container direction="row">
                                 <Grid item xs={1}>
-                                    {subscription.deliveryStatus && subscription.deliveryStatus === 1 && (
-                                        <RemoveCircleIcon style={{color: 'black', fontSize: '14px', paddingTop: '3px'}}/>
-                                    )}
-                                    {subscription.deliveryStatus && subscription.deliveryStatus ===3 && (
-                                        <CheckCircleIcon style={{color: 'green', fontSize: '14px', paddingTop: '3px'}}/>
-                                    )}
-                                    {subscription.deliveryStatus && subscription.deliveryStatus === 2 && (
-                                        <CancelIcon style={{color: 'red', fontSize: '14px', paddingTop: '3px'}}/>
-                                    )}
+                                    {getLogoForDeliveryStatus(subscription)}
                                 </Grid>
                                 <Grid item xs={8}>
                                     <Typography
