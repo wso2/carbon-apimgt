@@ -61,6 +61,7 @@ return null;
     private PolicyLevelEnum policyLevel = null;
     private Map<String, String> attributes = new HashMap<String, String>();
     private Long requestCount = null;
+    private String dataUnit = null;
     private Long unitTime = null;
     private String timeUnit = null;
     private Integer rateLimitCount = 0;
@@ -220,6 +221,24 @@ return null;
   }
   public void setRequestCount(Long requestCount) {
     this.requestCount = requestCount;
+  }
+
+  /**
+   * Unit of data allowed to be transfered. Allowed values are \&quot;KB\&quot;, \&quot;MB\&quot; and \&quot;GB\&quot; 
+   **/
+  public ThrottlingPolicyDTO dataUnit(String dataUnit) {
+    this.dataUnit = dataUnit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "KB", value = "Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\" ")
+  @JsonProperty("dataUnit")
+  public String getDataUnit() {
+    return dataUnit;
+  }
+  public void setDataUnit(String dataUnit) {
+    this.dataUnit = dataUnit;
   }
 
   /**
@@ -400,6 +419,7 @@ return null;
         Objects.equals(policyLevel, throttlingPolicy.policyLevel) &&
         Objects.equals(attributes, throttlingPolicy.attributes) &&
         Objects.equals(requestCount, throttlingPolicy.requestCount) &&
+        Objects.equals(dataUnit, throttlingPolicy.dataUnit) &&
         Objects.equals(unitTime, throttlingPolicy.unitTime) &&
         Objects.equals(timeUnit, throttlingPolicy.timeUnit) &&
         Objects.equals(rateLimitCount, throttlingPolicy.rateLimitCount) &&
@@ -413,7 +433,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, policyLevel, attributes, requestCount, unitTime, timeUnit, rateLimitCount, rateLimitTimeUnit, quotaPolicyType, tierPlan, stopOnQuotaReach, monetizationAttributes, throttlingPolicyPermissions);
+    return Objects.hash(name, description, policyLevel, attributes, requestCount, dataUnit, unitTime, timeUnit, rateLimitCount, rateLimitTimeUnit, quotaPolicyType, tierPlan, stopOnQuotaReach, monetizationAttributes, throttlingPolicyPermissions);
   }
 
   @Override
@@ -426,6 +446,7 @@ return null;
     sb.append("    policyLevel: ").append(toIndentedString(policyLevel)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
+    sb.append("    dataUnit: ").append(toIndentedString(dataUnit)).append("\n");
     sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
     sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");

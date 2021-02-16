@@ -46,6 +46,7 @@ public class Tier implements Serializable, Comparable<Tier>{
     private String quotaPolicyType;
     private int rateLimitCount;
     private String rateLimitTimeUnit;
+    private String bandwidthDataUnit;
 
     public Map<String, String> getMonetizationAttributes() {
         return monetizationAttributes;
@@ -172,6 +173,14 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
+    public void setBandwidthDataUnit(String bandwidthDataUnit) {
+        this.bandwidthDataUnit = bandwidthDataUnit;
+    }
+
+    public String getBandwidthDataUnit() {
+        return bandwidthDataUnit;
     }
 
     @Override
