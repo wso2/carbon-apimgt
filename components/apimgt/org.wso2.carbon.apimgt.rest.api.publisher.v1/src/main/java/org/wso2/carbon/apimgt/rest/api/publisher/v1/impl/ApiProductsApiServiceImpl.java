@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -79,9 +78,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA;
-import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME;
 import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
@@ -833,7 +829,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.addAPIProductRevisionDeployment(apiProductId, revisionId, apiRevisionDeployments);
+        apiProvider.deployAPIProductRevision(apiProductId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {

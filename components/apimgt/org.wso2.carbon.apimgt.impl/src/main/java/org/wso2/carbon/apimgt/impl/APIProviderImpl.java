@@ -9709,8 +9709,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
-    public void addAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                         List<APIRevisionDeployment> apiRevisionDeployments)
+    public void deployAPIRevision(String apiId, String apiRevisionId,
+                                  List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9953,8 +9953,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
-                                                List<APIRevisionDeployment> apiRevisionDeployments)
+    public void deployAPIProductRevision(String apiProductId, String apiRevisionId,
+                                         List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
         if (apiProductIdentifier == null) {

@@ -313,7 +313,7 @@ public class ImportUtils {
                                     .getBoolean(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION));
                     apiRevisionDeployments.add(apiRevisionDeployment);
                 }
-                apiProvider.addAPIRevisionDeployment(importedAPIUuid, revisionId, apiRevisionDeployments);
+                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments);
             }
             return importedApi;
         } catch (CryptoException | IOException e) {
@@ -1745,8 +1745,8 @@ public class ImportUtils {
                 try {
                     revisionId = apiProvider.addAPIProductRevision(apiProductRevision);
                 } catch (APIManagementException e) {
-                    //if the revision count is more than 5, addAPIRevision will throw an exception. If rotateRevision
-                    //enabled, earliest revision will be deleted before creating a revision again
+                    //if the revision count is more than 5, addAPIProductRevision will throw an exception. If
+                    // rotateRevision enabled, earliest revision will be deleted before creating a revision again
                     if (e.getErrorHandler().getErrorCode() ==
                             ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED).getErrorCode() &&
                             rotateRevision) {
@@ -1776,7 +1776,7 @@ public class ImportUtils {
                                     .getBoolean(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION));
                     apiProductRevisionDeployments.add(apiProductRevisionDeployment);
                 }
-                apiProvider.addAPIProductRevisionDeployment(importedAPIUuid, revisionId, apiProductRevisionDeployments);
+                apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             }
 
             return importedApiProduct;
