@@ -68,6 +68,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -137,6 +139,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1297,6 +1300,124 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, result);
         }
         return subscriber;
+    }
+
+    /**
+     * Retrieves the Topic for a specified async API.
+     *
+     * @param apiId API UUID
+     * @return Set of Topic objects
+     * @throws APIManagementException if failed to retrieve topics of the web hook API
+     */
+    public Set<Topic> getAPITopics(String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicsQuery = SQLConstants.GET_ALL_TOPICS_BY_API_ID;
+        Set<Topic> topicSet = new HashSet();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicsQuery);
+            ps.setString(1, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Topic topic = new Topic();
+                topic.setName(resultSet.getString("URL_PATTERN"));
+                topic.setApiId(resultSet.getString("API_ID"));
+                topic.setType(resultSet.getString("HTTP_METHOD"));
+                topicSet.add(topic);
+            }
+            return topicSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topics available in api " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves set of web hook topic subscriptions for a application.
+     *
+     * @param applicationId application UUID
+     * @return set of web hook subscriptions.
+     * @throws APIManagementException if failed to retrieve web hook topc subscriptions
+     */
+    public Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsQuery);
+            ps.setString(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the web hook topc subscriptions from an application to a given api.
+     *
+     * @param applicationId application uuid
+     * @param apiId         api uuid
+     * @return set of web hook topic subscriptions
+     * @throws APIManagementException
+     */
+    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsByApiIdQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsByApiIdQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+            return subscriptionSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {

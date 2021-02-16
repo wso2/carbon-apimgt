@@ -395,7 +395,7 @@
           "type" : "string",
           "example" : "DEPLOYED",
           "description" : "This attribute declares whether deployment task is successfull or failed.\n",
-          "enum" : [ "DEPLOYED", "ERROR" ]
+          "enum" : [ "DEPLOYED", "UNDEPLOYED", "ERROR" ]
         },
         "jsonPayload" : {
           "type" : "string",

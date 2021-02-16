@@ -54,6 +54,7 @@ public class API implements Serializable {
     private String wadlUrl;
     private String swaggerDefinition;
     private String graphQLSchema;
+    private String asyncApiDefinition;
     private String type;
     private String context;
     private String contextTemplate;
@@ -116,6 +117,10 @@ public class API implements Serializable {
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
+
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -356,6 +361,14 @@ public class API implements Serializable {
 
     public String getGraphQLSchema() {
         return graphQLSchema;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 
     public Set<String> getEnvironments() {
@@ -951,6 +964,30 @@ public class API implements Serializable {
         this.monetizationCategory = monetizationCategory;
     }
 
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
+    }
+
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
+    }
+
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
@@ -1222,9 +1259,6 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
-            return true;
-        }
-        return false;
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
 }

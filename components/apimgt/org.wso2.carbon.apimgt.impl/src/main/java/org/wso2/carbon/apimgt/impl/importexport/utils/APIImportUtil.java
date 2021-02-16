@@ -254,14 +254,12 @@ public final class APIImportUtil {
                 }
             }
 
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
-                // Either only API level throttling policy or resource level throttling policies can be defined at once
-                if (importedApi.getApiLevelPolicy() != null) {
-                    apiProvider.validateAPIThrottlingTier(importedApi, currentTenantDomain);
-                } else {
-                    apiProvider.validateResourceThrottlingTiers(APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive),
-                            currentTenantDomain);
-                }
+            // Either only API level throttling policy or resource level throttling policies can be defined at once
+            if (importedApi.getApiLevelPolicy() != null) {
+                apiProvider.validateAPIThrottlingTier(importedApi, currentTenantDomain);
+            } else {
+                apiProvider.validateResourceThrottlingTiers(APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive),
+                        currentTenantDomain);
             }
 
             if (Boolean.FALSE.equals(overwrite)) {
@@ -274,8 +272,8 @@ public final class APIImportUtil {
                 importedApi.setUuid(uuid);
             }
 
-            //Swagger definition will only be available of API type HTTP. Web socket API does not have it.
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
+            //Swagger definition will only be available of API type HTTP. Streaming APIs do not have it.
+            if (!APIUtil.isStreamingApi(importedApi)) {
                 String swaggerContent = APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive);
 
                 // Check whether any of the resources should be removed from the API when updating,
@@ -353,7 +351,7 @@ public final class APIImportUtil {
                             APIImportExportConstants.REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM, true);//TODO remove
                             checklistMap.put(APIImportExportConstants.REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM_DESC, true);
                 }
-                
+
                 apiProvider.changeLifeCycleStatus(currentTenantDomain, uuid, lifecycleAction, checklistMap);
                 //Change the status of the imported API to targetStatus
                 importedApi.setStatus(targetStatus);
@@ -424,8 +422,8 @@ public final class APIImportUtil {
      *
      * @param pathToArchive location of the extracted folder of the API
      * @param importedApi   the imported API object
-     * @param apiProvider 
-     * @throws APIManagementException 
+     * @param apiProvider
+     * @throws APIManagementException
      */
     private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider,
             String orgId) throws APIManagementException {
@@ -494,14 +492,14 @@ public final class APIImportUtil {
             log.error("I/O error while writing sequence data to the registry : " + regResourcePath, e);
         }
     }
-    
+
     /**
      * This method adds the sequence files to the registry. This updates the API specific sequences if already exists.
      *
      * @param isAPISpecific        whether the adding sequence is API specific
      * @param registry             the registry instance
      * @param sequenceFileLocation location of the sequence file
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
     private static void addSequenceToAPI(APIProvider provider, String apiId, String type, String fileName,
             String sequenceFileLocation, String orgId) throws APIManagementException {
@@ -513,7 +511,7 @@ public final class APIImportUtil {
             File sequenceFile = new File(sequenceFileLocation);
             try (InputStream seqStream = new FileInputStream(sequenceFile);) {
                 Mediation mediation = new Mediation();
-                mediation.setType(type);    
+                mediation.setType(type);
                 mediation.setGlobal(false);
                 mediation.setName(fileName);
                 mediation.setConfig(IOUtils.toString(seqStream));
@@ -577,7 +575,7 @@ public final class APIImportUtil {
      * @param api              API to import
      * @param schemaDefinition Content of schema definition
      * @param apiProvider      API Provider
-     * @param orgId 
+     * @param orgId
      * @throws APIManagementException if there is an error occurs when adding schema definition
      */
     private static void addGraphqlSchemaDefinition(API api, String schemaDefinition, APIProvider apiProvider,
@@ -740,7 +738,7 @@ public final class APIImportUtil {
             IOUtils.closeQuietly(inputFlowStream);
         }
     }
-    
+
     /**
      * Method created to add inflow and outflow mediation logic
      * @param flowDirectory

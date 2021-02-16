@@ -206,7 +206,7 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
-  
+
     /**
      * Returns the async-api v2.0 definition as a string
      *
@@ -919,4 +919,13 @@ public interface APIManager {
      */
     Map<String, Object> searchPaginatedContent(String searchQuery, String orgId, int start, int end)
             throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return AsyncAPI string
+     * @throws APIManagementException
+     */
+    String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
 }

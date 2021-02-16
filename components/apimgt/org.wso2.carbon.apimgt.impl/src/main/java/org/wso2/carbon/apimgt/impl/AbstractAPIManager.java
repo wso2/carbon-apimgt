@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -452,7 +453,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            if (api.isAsync()) {
+                api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
+            } else {
+                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            }
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             }
@@ -1211,7 +1216,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return definition;
     }
-    
+
     @Override
     public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
         String definition = null;
@@ -1281,7 +1286,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
     }
-    
+
     public List<Documentation> getAllDocumentation(String uuid, String tenantDomain) throws APIManagementException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
 
@@ -1534,7 +1539,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return documentation;
     }
-    
+
     @Override
     public DocumentationContent getDocumentationContent(String apiId, String docId, String requestedTenantDomain)
             throws APIManagementException {
@@ -3718,7 +3723,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiDocContent;
 
     }
-    
+
     public String extractQuery(String searchQuery) {
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
@@ -3768,7 +3773,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return filteredQuery.toString();
     }
-    
+
     protected void populateAPIInformation(String uuid, String requestedTenantDomain, Organization org, API api)
             throws APIManagementException, OASPersistenceException, ParseException {
         //UUID
@@ -3812,8 +3817,8 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
         api.setAvailableTiers(availableTier);
-        
-        //Scopes 
+
+        //Scopes
         Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
@@ -3880,7 +3885,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if(api.getCorsConfiguration() == null) {
             api.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
         }
-        
+
         // set category
         List<APICategory> categories = api.getApiCategories();
         if (categories != null) {
@@ -3909,12 +3914,12 @@ public abstract class AbstractAPIManager implements APIManager {
             api.setApiCategories(categoryList);
         }
     }
-    
+
     protected void populateAPIProductInformation(String uuid, String requestedTenantDomain, Organization org,
             APIProduct apiProduct) throws APIManagementException, OASPersistenceException, ParseException {
         ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
         apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
-        
+
         List<APIProductResource> resources = ApiMgtDAO.getInstance().
                 getAPIProductResourceMappings(apiProduct.getId());
 
@@ -3975,8 +3980,8 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
         apiProduct.setAvailableTiers(availableTier);
-        
-        //Scopes 
+
+        //Scopes
         /*
         Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
         apiProduct.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
@@ -3993,7 +3998,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (apiProduct.getCorsConfiguration() == null) {
             apiProduct.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
         }
-        
+
         // set category
         List<APICategory> categories = apiProduct.getApiCategories();
         if (categories != null) {
@@ -4022,7 +4027,7 @@ public abstract class AbstractAPIManager implements APIManager {
             apiProduct.setApiCategories(categoryList);
         }
     }
-    
+
     @Override
     public ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException {
         try {
@@ -4035,5 +4040,47 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException("Error while accessing thumbnail resource ", e);
         }
         return null;
+    }
+
+    /**
+     * Returns the AsyncAPI definition of the given API
+     *
+     * @param apiId id of the APIIdentifier
+     * @return A String containing the AsyncAPI definition
+     * @throws APIManagementException
+     */
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+        String apiTenantDomain = getTenantDomain(apiId);
+        String asyncApiDoc = null;
+        boolean tenantFlowStarted = false;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                if (apiTenantDomain != null) {
+                    startTenantFlow(apiTenantDomain);
+                    tenantFlowStarted = true;
+                }
+                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
+                registryType = getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId
+                );
+            } else {
+                registryType = registry;
+            }
+            asyncApiDoc = AsyncApiParserUtil.getAPIDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
+            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get AsyncAPI documentation of API : " + apiId;
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
+        }
+        return asyncApiDoc;
     }
 }
