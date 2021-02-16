@@ -25,6 +25,8 @@ import {
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import Box from '@material-ui/core/Box';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import { app } from 'Settings';
@@ -135,6 +137,21 @@ const styles = (theme) => {
         keyTitle: {
             textTransform: 'capitalize',
         },
+        errorBox: {
+            background: 'rgb(253, 236, 234)',
+            color: 'rgb(97, 26, 21)',
+            padding: '6px 16px',
+            display: 'flex',
+            flexDirection: 'row',
+            height: 50,
+            width: '100%',
+            margin: 20,
+            alignItems: 'center',
+            '& svg': {
+                color: '#f44336',
+                marginRight: 5,
+            }
+        },
     };
 };
 /**
@@ -154,6 +171,7 @@ class Details extends Component {
             application: null,
             active: 'overview',
             open: true,
+            error: '',
         };
     }
 
@@ -174,9 +192,11 @@ class Details extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const { status } = error;
+                const { status, response } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
+                } else {
+                    this.setState({ error: response.body.description });
                 }
             });
     }
@@ -252,7 +272,7 @@ class Details extends Component {
      */
     render() {
         const { classes, match, theme } = this.props;
-        const { notFound, application } = this.state;
+        const { notFound, application, error } = this.state;
         const pathPrefix = '/applications/' + match.params.application_uuid;
         const redirectUrl = pathPrefix + '/overview';
         const {
@@ -267,6 +287,10 @@ class Details extends Component {
         } = theme;
         if (notFound) {
             return <ResourceNotFound />;
+        } else if (error !== '') {
+            return <Box className={classes.errorBox}>
+                <ErrorOutlineIcon />{ error }
+            </Box>;
         } else if (!application) {
             return <Loading />;
         }
