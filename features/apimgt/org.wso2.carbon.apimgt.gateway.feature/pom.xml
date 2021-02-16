@@ -304,6 +304,7 @@
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
                                 <bundleDef>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jedis:${servicemix.bundles.jedis.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.atlassian.oai:swagger-request-validator-core:${org.wso2.orbit.atlassian.oai.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>
