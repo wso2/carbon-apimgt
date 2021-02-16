@@ -443,7 +443,7 @@ class InfoBar extends React.Component {
                         <Box display='flex' flexDirection='row' alignItems='center' pt={1}>
                             <Box ml={1} mr={2}>
                                 <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
-                                    <Typography variant='h4'>{api.name}</Typography>
+                                    <Typography variant='h4' component='div'>{api.name}</Typography>
                                 </Link>
                             </Box>
                             {!api.advertiseInfo.advertised && user && showRating && (
