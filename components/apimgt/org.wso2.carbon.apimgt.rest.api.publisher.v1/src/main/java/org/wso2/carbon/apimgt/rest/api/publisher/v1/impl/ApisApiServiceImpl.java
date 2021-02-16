@@ -104,6 +104,7 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
@@ -4195,7 +4196,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private Map validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
                                               Boolean returnContent) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url);
+        handleInvalidParams(fileInputStream, fileDetail, url, false);
 
         AsyncAPISpecificationValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();

@@ -82,6 +82,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;

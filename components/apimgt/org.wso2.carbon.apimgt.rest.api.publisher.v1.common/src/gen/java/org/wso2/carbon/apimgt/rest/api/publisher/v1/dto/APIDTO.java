@@ -1054,7 +1054,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("websubSubscriptionConfiguration")
@@ -1250,7 +1250,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("serviceInfo")
