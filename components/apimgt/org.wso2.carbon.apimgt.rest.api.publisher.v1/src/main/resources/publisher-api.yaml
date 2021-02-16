@@ -1534,7 +1534,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1553,7 +1552,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
-        - $ref: '#/components/parameters/revisionNum-Q'
       requestBody:
         description: Deployment object that needs to be added
         content:
@@ -1581,7 +1579,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1655,7 +1652,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/revisionId-Q'
-        - $ref: '#/components/parameters/revisionNum-Q'
       responses:
         201:
           description: |
@@ -3812,7 +3808,7 @@ paths:
         - name: rotateRevision
           in: query
           description: |
-            Rotate the revisions with each update
+            Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision
           required: false
           schema:
             type: boolean
@@ -5932,6 +5928,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6142,6 +6139,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiProductId'
         - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/revisionNum-Q'
+        - name: allEnvironments
+          in: query
+          schema:
+            type: boolean
+            default: false
       requestBody:
         description: Deployment object that needs to be added
         content:
@@ -6169,6 +6172,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
+            - apim:api_product_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -6234,6 +6238,12 @@ paths:
             Provider name of the API Product
           schema:
             type: string
+        - name: revisionNumber
+          in: query
+          description: |
+            Revision number of the API Product
+          schema:
+            type: string
         - name: format
           in: query
           description: |
@@ -6249,6 +6259,13 @@ paths:
             Preserve API Product Status on export
           schema:
             type: boolean
+        - name: latestRevision
+          in: query
+          description: |
+            Export the latest revision of the API Product
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: |
@@ -6275,7 +6292,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/export?name=LeasingAPIProduct&version=1.0.0&provider=admin&format=YAML"
+          "https://127.0.0.1:9443/api/am/publisher/v2/api-products/export?name=LeasingAPIProduct&version=1.0.0&revisionNumber=2&provider=admin&format=YAML"
           > exportAPIProduct.zip'
       operationId: exportAPIProduct
 
@@ -6291,6 +6308,13 @@ paths:
           in: query
           description: |
             Preserve Original Provider of the API Product. This is the user choice to keep or replace the API Product provider
+          required: false
+          schema:
+            type: boolean
+        - name: rotateRevision
+          in: query
+          description: |
+            Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision
           required: false
           schema:
             type: boolean

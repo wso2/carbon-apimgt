@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -79,9 +78,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA;
-import static org.wso2.carbon.apimgt.impl.APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME;
 import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
@@ -621,9 +617,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response exportAPIProduct(String name, String version, String providerName, String format,
-                                         Boolean preserveStatus, MessageContext messageContext)
-            throws APIManagementException {
+    public Response exportAPIProduct(String name, String version, String providerName, String revisionNumber,
+                                     String format, Boolean preserveStatus, Boolean exportLatestRevision,
+                                     MessageContext messageContext) throws APIManagementException {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -634,8 +630,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
         try {
             File file =
-                    importExportAPI.exportAPIProduct(null, name, version, providerName, exportFormat, preserveStatus,
-                            true, true);
+                    importExportAPI.exportAPIProduct(null, name, version, providerName, revisionNumber, exportFormat,
+                            preserveStatus, true, true, exportLatestRevision);
             return Response.ok(file)
                     .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
                             + file.getName() + "\"")
@@ -696,6 +692,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @param fileInputStream     UploadedInputStream input stream from the REST request
      * @param fileDetail          File details as Attachment
      * @param preserveProvider    User choice to keep or replace the API Product provider
+     * @param rotateRevision      If the maximum revision number reached, undeploy the earliest revision and create a
+     *                            new revision
      * @param importAPIs          Whether to import the dependent APIs or not.
      * @param overwriteAPIProduct Whether to update the API Product or not. This is used when updating already existing API Products.
      * @param overwriteAPIs       Whether to update the dependent APIs or not. This is used when updating already existing dependent APIs of an API Product.
@@ -704,8 +702,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @throws APIManagementException
      */
     @Override public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
-            Boolean preserveProvider, Boolean importAPIs, Boolean overwriteAPIProduct, Boolean overwriteAPIs,
-            MessageContext messageContext) throws APIManagementException {
+            Boolean preserveProvider, Boolean rotateRevision, Boolean importAPIs, Boolean overwriteAPIProduct,
+            Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException {
         // If importAPIs flag is not set, the default value is false
         importAPIs = importAPIs == null ? false : importAPIs;
 
@@ -740,8 +738,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         // Check if the URL parameter value is specified, otherwise the default value is true.
         preserveProvider = preserveProvider == null || preserveProvider;
 
-        importExportAPI.importAPIProduct(fileInputStream, preserveProvider, overwriteAPIProduct, overwriteAPIs, importAPIs,
-                        tokenScopes);
+        importExportAPI.importAPIProduct(fileInputStream, preserveProvider, rotateRevision, overwriteAPIProduct,
+                overwriteAPIs, importAPIs, tokenScopes);
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
     }
 
@@ -831,7 +829,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        apiProvider.addAPIProductRevisionDeployment(apiProductId, revisionId, apiRevisionDeployments);
+        apiProvider.deployAPIProductRevision(apiProductId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
@@ -911,17 +909,28 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response undeployAPIProductRevision(String apiProductId, String revisionId,
+    public Response undeployAPIProductRevision(String apiProductId, String revisionId, String revisionNumber,
+                                               Boolean allEnvironments,
                                                List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                                MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId == null && revisionNumber != null) {
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiProductId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
+        }
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
-            APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-            apiRevisionDeployment.setRevisionUUID(revisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
-            apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
-            apiRevisionDeployments.add(apiRevisionDeployment);
+        if (allEnvironments) {
+            apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        } else {
+            for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
+                APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                apiRevisionDeployment.setRevisionUUID(revisionId);
+                apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
+                apiRevisionDeployments.add(apiRevisionDeployment);
+            }
         }
         apiProvider.undeployAPIProductRevisionDeployment(apiProductId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);

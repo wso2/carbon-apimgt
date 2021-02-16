@@ -5991,7 +5991,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiSecurity = api.getApiSecurity();
                 boolean isOauthProtected = apiSecurity == null
                         || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                if (api.getType().equals(APIConstants.API_TYPE_WEBSUB) || endPoint != null && endPoint.trim().length() > 0) {
+                if (APIConstants.API_TYPE_WEBSUB.equals(api.getType()) || endPoint != null && endPoint.trim().length() > 0) {
                     if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
                         throw new APIManagementException("Failed to publish service to API store while executing "
                                 + "APIExecutor. No Tiers selected");
@@ -9721,8 +9721,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
-    public void addAPIRevisionDeployment(String apiId, String apiRevisionId,
-                                         List<APIRevisionDeployment> apiRevisionDeployments)
+    public void deployAPIRevision(String apiId, String apiRevisionId,
+                                  List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -9965,8 +9965,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
-                                                List<APIRevisionDeployment> apiRevisionDeployments)
+    public void deployAPIProductRevision(String apiProductId, String apiRevisionId,
+                                         List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
         if (apiProductIdentifier == null) {

@@ -43,9 +43,9 @@ public class AsyncApiParserUtil {
         APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated, returnJSONContent);
         final String asyncAPIKeyNotFound = "#: required key [asyncapi] not found";
 
-        if (!validationResponse.isValid()){
-            for (ErrorHandler errorItem : validationResponse.getErrorItems()){
-                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())){    //change it other way
+        if (!validationResponse.isValid()) {
+            for (ErrorHandler errorItem : validationResponse.getErrorItems()) {
+                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())) {    //change it other way
                     addErrorToValidationResponse(validationResponse, "#: attribute [asyncapi] should be present");
                     return validationResponse;
                 }
@@ -67,7 +67,7 @@ public class AsyncApiParserUtil {
 
             HttpResponse response = httpClient.execute(httpGet);
 
-            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()){
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
                 Object obj = yamlReader.readValue(urlObj, Object.class);
                 ObjectMapper jsonWriter = new ObjectMapper();
@@ -98,7 +98,7 @@ public class AsyncApiParserUtil {
             String context,
             String description,
             List<String> endpoints
-    ){
+    ) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -112,8 +112,7 @@ public class AsyncApiParserUtil {
     }
 
     public static ErrorItem addErrorToValidationResponse(
-            APIDefinitionValidationResponse validationResponse, String errMessage
-    ){
+            APIDefinitionValidationResponse validationResponse, String errMessage) {
         ErrorItem errorItem = new ErrorItem();
         errorItem.setMessage(errMessage);
         validationResponse.getErrorItems().add(errorItem);
@@ -138,7 +137,7 @@ public class AsyncApiParserUtil {
             String resourcePath = APIUtil.getAsyncAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
             resourcePath = resourcePath + APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME;
             Resource resource;
-            if (!registry.resourceExists(resourcePath)){
+            if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
             } else {
                 resource = registry.get(resourcePath);
@@ -148,14 +147,14 @@ public class AsyncApiParserUtil {
             registry.put(resourcePath, resource);
 
             String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null){
+            if (api.getVisibleRoles() != null) {
                 visibleRoles = api.getVisibleRoles().split(",");
             }
 
             APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
             APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
 
-        } catch (RegistryException e){
+        } catch (RegistryException e) {
             handleException("Error while adding AsyncApi Definition for " + apiName + "-" + apiVersion, e);
         }
     }
@@ -168,7 +167,7 @@ public class AsyncApiParserUtil {
      * @return api definition json as json string
      * @throws APIManagementException
      */
-    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException{
+    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
         String resourcePath = "";
 
         if (apiIdentifier instanceof APIIdentifier) {
@@ -192,7 +191,7 @@ public class AsyncApiParserUtil {
             handleException(
                     "Error while retrieving AsyncAPI Definition for " + apiIdentifier.getName() + "-"
                             + apiIdentifier.getVersion(), e);
-        } catch (ParseException e){
+        } catch (ParseException e) {
             handleException(
                     "Error while parsing AsyncAPI Definition for " + apiIdentifier.getName() + "-"
                             + apiIdentifier.getVersion() + " in " + resourcePath, e);
