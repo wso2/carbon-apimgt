@@ -1244,9 +1244,6 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
-            return true;
-        }
-        return false;
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
 }
