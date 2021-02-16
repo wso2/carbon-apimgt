@@ -121,19 +121,19 @@ public class SubscribersPersistMediator extends AbstractMediator {
         List<NameValuePair> queryParameter = URLEncodedUtils.parse(new URI(urlQueryParams),
                 StandardCharsets.UTF_8.name());
         for (NameValuePair nvPair : queryParameter) {
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
                 topicName = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM.equals(nvPair.getName())) {
                 callback = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM.equals(nvPair.getName())) {
                 secret = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_MODE_QUERY_PARAM.equals(nvPair.getName())) {
                 mode = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM.equals(nvPair.getName())) {
                 leaseSeconds = nvPair.getValue();
             }
         }
