@@ -29,8 +29,11 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -53,11 +56,16 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
+import java.text.ParseException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.cache.Cache;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -130,11 +138,20 @@ public class JWTValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
-        String httpMethod = (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
-                getProperty(Constants.Configuration.HTTP_METHOD);
+
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        String httpMethod = (String) axis2MsgContext.getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
+
+        try {
+            X509Certificate clientCertificate = Utils.getClientCertificate(axis2MsgContext);
+            signedJWTInfo.setX509ClientCertificate(clientCertificate);
+        } catch (APIManagementException e) {
+            log.error("Error while obtaining client certificate. " + GatewayUtils.getMaskedToken(jwtHeader));
+        }
         if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
                 if (log.isDebugEnabled()) {
@@ -145,7 +162,6 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
-
         }
 
         JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo, jwtTokenIdentifier);

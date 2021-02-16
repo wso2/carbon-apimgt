@@ -335,6 +335,8 @@
         org.wso2.carbon.identity.oauth.tokenprocessor.HashingPersistenceProcessor and change the value of
         <EnableClientSecretHash> to true in the identity.xml -->
         <EnableTokenHashMode>{{apim.oauth_config.enable_token_hashing}}</EnableTokenHashMode>
+        <!-- Whether to validate certificate bound access tokens-->
+        <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
     </OAuthConfigurations>
 
@@ -648,7 +650,7 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/service-catalog/{service-catalog-version}/oas.yaml</URI>
+                <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>

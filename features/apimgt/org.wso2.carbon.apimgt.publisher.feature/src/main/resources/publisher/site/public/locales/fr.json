@@ -1258,5 +1258,8 @@
   "save": "",
   "the.icon.is.not.modified": "",
   "unblock": "",
-  "upload.image": ""
+  "upload.image": "",
+  "upload.image.size.error": "",
+  "upload.image.size.info": "",
+  "welcome.to.wso2.api.manager": ""
 }
