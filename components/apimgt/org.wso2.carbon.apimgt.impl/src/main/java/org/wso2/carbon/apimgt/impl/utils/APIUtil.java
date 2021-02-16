@@ -8454,10 +8454,13 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
+                tier.setQuotaPolicyType(policy.getDefaultQuotaPolicy().getType());
 
                 //If the policy is a subscription policy
                 if (policy instanceof SubscriptionPolicy) {
                     SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
+                    tier.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
+                    tier.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
                     setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
                     if (StringUtils.equals(subscriptionPolicy.getBillingPlan(), APIConstants.COMMERCIAL_TIER_PLAN)) {
                         tier.setMonetizationAttributes(subscriptionPolicy.getMonetizationPlanProperties());
@@ -8473,6 +8476,7 @@ public final class APIUtil {
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
+                    tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
                 }
                 if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
                     tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
@@ -11656,13 +11660,11 @@ public final class APIUtil {
                     break;
                 }
             }
-
             if (!isOriginalRoleAlreadyInRoles) {
                 String newRoles = entry.getKey() + "," + entry.getValue();
                 newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
             }
         }
-
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);

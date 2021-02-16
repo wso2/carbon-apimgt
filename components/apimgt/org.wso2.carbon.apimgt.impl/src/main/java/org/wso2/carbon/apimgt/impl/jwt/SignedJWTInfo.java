@@ -18,10 +18,27 @@
 
 package org.wso2.carbon.apimgt.impl.jwt;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.clients.Util;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 
 /**
  * JWT internal Representation
@@ -32,6 +49,10 @@ public class SignedJWTInfo implements Serializable {
     private SignedJWT signedJWT;
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
+    private String certificateThumbprint; //holder of key certificate bound access token
+    private X509Certificate X509ClientCertificate; //holder of key certificate cnf
+    private String x509ClientCertificateHash; //holder of key certificate cnf
+    private static final Log log = LogFactory.getLog(JWTValidator.class);
 
     public enum ValidationStatus {
         NOT_VALIDATED, INVALID, VALID
@@ -84,5 +105,65 @@ public class SignedJWTInfo implements Serializable {
 
     public void setValidationStatus(ValidationStatus validationStatus) {
         this.validationStatus = validationStatus;
+    }
+
+    public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
+
+        X509ClientCertificate = x509ClientCertificate;
+        if (x509ClientCertificate != null) {
+            byte[] encoded = new byte[0];
+            try {
+                encoded = org.apache.commons.codec.binary.Base64.encodeBase64(x509ClientCertificate.getEncoded());
+            } catch (CertificateEncodingException e) {
+                log.error("Error while encoding client certificate. ");
+            }
+            x509ClientCertificateHash = GatewayUtils.hashString(encoded);
+        }
+    }
+
+
+    public String getCertificateThumbprint() {
+
+        String thumbprint = null;
+        if (null != jwtClaimsSet) {
+            try {
+                thumbprint = jwtClaimsSet.getStringClaim(APIConstants.CNF);
+                JSONObject thumbprintJson = new JSONObject(thumbprint);
+                return thumbprintJson.getString(APIConstants.DIGEST);
+
+            } catch (ParseException e) {
+                log.error("Error while paring JWT claims. ");
+            }
+        }
+        return null;
+    }
+
+    public String getX509ClientCertificateHash() {
+
+        return x509ClientCertificateHash;
+    }
+
+    public boolean isValidCertificateBoundAccessToken() { //Holder of Key token
+        if (X509ClientCertificate == null || StringUtils.isEmpty(getX509ClientCertificateHash()))
+            return false;
+        if (isCertificateBoundAccessTokenEnabled()) {
+            if (getX509ClientCertificateHash().equals(getCertificateThumbprint())) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isCertificateBoundAccessTokenEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            String firstProperty = config
+                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
+            return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
     }
 }

@@ -1258,5 +1258,8 @@
   "save": "Save",
   "the.icon.is.not.modified": "The icon is not modified",
   "unblock": "Unblock",
-  "upload.image": "Click or drag the image to upload."
+  "upload.image": "Click or drag the image to upload.",
+  "upload.image.size.error": "Uploaded File is too large.\n                                                                Maximum file size limit to 1MB",
+  "upload.image.size.info": "Maximum file size limit to 1MB",
+  "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager"
 }

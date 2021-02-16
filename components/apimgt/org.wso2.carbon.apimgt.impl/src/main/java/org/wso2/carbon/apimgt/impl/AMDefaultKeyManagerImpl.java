@@ -178,14 +178,21 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String[] callbackURLs = callBackURL.trim().split("\\s*,\\s*");
             clientInfo.setRedirectUris(Arrays.asList(callbackURLs));
         }
-        clientInfo.setClientName(applicationName);
+
+        String overrideSpName = System.getProperty(APIConstants.APPLICATION.OVERRIDE_SP_NAME);
+        if (StringUtils.isNotEmpty(overrideSpName) && !Boolean.parseBoolean(overrideSpName)) {
+            clientInfo.setClientName(info.getClientName());
+        } else {
+            clientInfo.setClientName(applicationName);
+        }
+        
         //todo: run tests by commenting the type
         if (StringUtils.isEmpty(info.getTokenType())) {
             clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         } else {
             clientInfo.setTokenType(info.getTokenType());
         }
-        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+        clientInfo.setApplication_owner(APIConstants.DEFAULT_RESERVED_USERNAME);
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());

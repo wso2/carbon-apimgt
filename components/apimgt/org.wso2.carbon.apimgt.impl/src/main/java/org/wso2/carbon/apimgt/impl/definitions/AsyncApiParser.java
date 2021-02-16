@@ -1590,6 +1590,11 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException{
         return null;
     }
