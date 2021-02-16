@@ -192,7 +192,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } else {
             clientInfo.setTokenType(info.getTokenType());
         }
-        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+        clientInfo.setApplication_owner(APIConstants.DEFAULT_RESERVED_USERNAME);
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
