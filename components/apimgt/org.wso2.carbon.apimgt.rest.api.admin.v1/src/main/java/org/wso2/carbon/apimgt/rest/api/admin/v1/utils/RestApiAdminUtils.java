@@ -29,10 +29,15 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -41,9 +46,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.Map;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -117,16 +124,88 @@ public class RestApiAdminUtils {
     }
 
     /**
-     * Validate the policy name property of Throttle Policy
+     * Validate the Subscription Policy Properties
      *
-     * @param policyName policy name value of throttle policy
+     * @param body SubscriptionThrottlePolicyDTO
      */
-    public static void validateThrottlePolicyNameProperty(String policyName)
+    public static void validateSubscriptionPolicy(SubscriptionThrottlePolicyDTO body) throws
+            APIManagementException  {
+        if (body.getGraphQLMaxComplexity() != 0) {
+            validateThrottlePolicyCountProperties(String.valueOf(body.getGraphQLMaxComplexity()),
+                    "GraphQL Max Complexity");
+        }
+        if (body.getGraphQLMaxDepth() != 0) {
+            validateThrottlePolicyCountProperties(String.valueOf(body.getGraphQLMaxDepth()),
+                    "GraphQL Max depth" );
+        }
+        if (body.getRateLimitCount() != 0) {
+            validateThrottlePolicyCountProperties(String.valueOf(body.getRateLimitCount()),
+                    "Burst Control Rate");
+        }
+        if (body.getCustomAttributes() != null) {
+            for (CustomAttributeDTO customAttributeDTO : body.getCustomAttributes()) {
+                validateThrottlePolicyNameProperty(customAttributeDTO.getName(), "Custom Attribute Name");
+            }
+        }
+
+        if ("COMMERCIAL".equals(body.getBillingPlan())) {
+            Map<String, String> monetizationProps =  body.getMonetization().getProperties();
+            String fixedPrice = monetizationProps.get(APIConstants.Monetization.FIXED_PRICE);
+            validateThrottlePolicyCountProperties(fixedPrice, APIConstants.Monetization.FIXED_PRICE);
+        }
+    }
+
+    /**
+     * Validate the Conditional Groups of Advanced Throttle Policy
+     *
+     * @param conditionalGroupDTOList ConditionalGroupDTO List which contains all conditional Groups
+     */
+    public static void  validateConditionalGroups(List<ConditionalGroupDTO> conditionalGroupDTOList) throws
+            APIManagementException  {
+        for (ConditionalGroupDTO conditionalGroup : conditionalGroupDTOList) {
+            if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(conditionalGroup.getLimit().getType())) {
+                validateThrottlePolicyProperties(null,
+                        String.valueOf(conditionalGroup.getLimit().getRequestCount().getUnitTime()),
+                        String.valueOf(conditionalGroup.getLimit().getRequestCount().getRequestCount()),
+                        null);
+            } else {
+                validateThrottlePolicyProperties(null,
+                        String.valueOf(conditionalGroup.getLimit().getBandwidth().getUnitTime()), null,
+                        String.valueOf(conditionalGroup.getLimit().getBandwidth().getDataAmount()));
+            }
+            if (conditionalGroup.getConditions() != null) {
+                List<ThrottleConditionDTO> throttleConditionDTOList = conditionalGroup.getConditions();
+                for (ThrottleConditionDTO throttleConditionDTO : throttleConditionDTOList) {
+                    if (ThrottleConditionDTO.TypeEnum.HEADERCONDITION.equals(throttleConditionDTO.getType())) {
+                        validateThrottlePolicyNameProperty(throttleConditionDTO.getHeaderCondition().getHeaderName(),
+                                ThrottleConditionDTO.TypeEnum.HEADERCONDITION.toString());
+                    } else if(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION.equals(throttleConditionDTO.getType())) {
+                        validateThrottlePolicyNameProperty(throttleConditionDTO.getJwtClaimsCondition().getClaimUrl(),
+                                ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION.toString());
+                    } else if (ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION
+                            .equals(throttleConditionDTO.getType())) {
+                        validateThrottlePolicyNameProperty(throttleConditionDTO.getQueryParameterCondition()
+                                        .getParameterName(),
+                                ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION.toString());
+                    } else {
+                       //DO NOTHING
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate the Conditional policy name property of Throttle Policy
+     *
+     * @param conditionPolicyName      policy name value of throttle policy
+     * @param propertyName             policy name Identifier
+     */
+    public static void validateThrottlePolicyNameProperty(String conditionPolicyName, String propertyName)
             throws APIManagementException {
-        String propertyName = "policyName";
         Pattern pattern = Pattern.compile("[^A-Za-z0-9]");//. represents single character
-        Matcher matcher = pattern.matcher(policyName);
-        if (StringUtils.isBlank(policyName)) {
+        Matcher matcher = pattern.matcher(conditionPolicyName);
+        if (StringUtils.isBlank(conditionPolicyName)) {
             throw new APIManagementException(propertyName + " property value of payload cannot be blank",
                     ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
         }
@@ -136,8 +215,77 @@ public class RestApiAdminUtils {
                     " property value of payload cannot contain invalid characters",
                     ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, propertyName));
         }
+
+        if (conditionPolicyName.length() > 60) {
+            throw new APIManagementException(propertyName +
+                    " property value length exceeded",
+                    ExceptionCodes.from(ExceptionCodes.LENGTH_EXCEEDED, propertyName));
+
+        }
     }
 
+    /**
+     * Check whether the policy is associated with any resources
+     *
+     * @param username                 Logged in Username
+     * @param existingPolicy           policy which need to be deleted
+     * @param policyId                 UUID of the policy
+     * @param policyLevel              Identifier for the policies
+     */
+    public static void isPolicyAttachedtoResource(String username, Policy existingPolicy, String policyId,
+                                                  String policyLevel) throws APIManagementException {
+        if (RestApiCommonUtil.getLoggedInUserProvider().hasAttachments(username, existingPolicy.getPolicyName(),
+                policyLevel)) {
+            throw new APIManagementException(policyId  + " already attached to a Resource",
+                    ExceptionCodes.from(ExceptionCodes.POLICY_ATTACHED_TO_RESOURCE, policyId));
+        }
+    }
+
+    /**
+     * Validate the Conditional policy name property of Throttle Policy
+     *
+     * @param count count value of throttle policy
+     */
+    public static void validateThrottlePolicyCountProperties(String count, String propertyName)
+            throws APIManagementException {
+        Pattern patternCount = Pattern.compile("^[1-9][0-9]*$");
+        Matcher matcherCount = patternCount.matcher(count);
+        if (StringUtils.isBlank(count)) {
+            throw new APIManagementException(propertyName + " property value of payload cannot be blank",
+                    ExceptionCodes.from(ExceptionCodes.BLANK_PROPERTY_VALUE, propertyName));
+        }
+        if (!matcherCount.find()) {
+            throw new APIManagementException(propertyName + " property value of payload  should be an Integer greater "
+                    + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, propertyName));
+        }
+    }
+
+    /**
+     * Validate the properties of Throttle Policy
+     *
+     * @param  policyName         policyName property of Throttle Policy
+     * @param  unitTime           unitTime  property of Throttle Policy
+     * @param  requestCount       requestCount property of Throttle Policy
+     * @param  dataAmount         dataAmount property of Throttle Policy
+     */
+    public static void  validateThrottlePolicyProperties(String policyName, String unitTime,  String requestCount,
+                                                         String dataAmount) throws APIManagementException {
+        if (policyName != null) {
+          validateThrottlePolicyNameProperty(policyName, "Policy Name");
+        }
+        if (requestCount != null) {
+            validateThrottlePolicyCountProperties(requestCount, "Request Count");
+        } else {
+            validateThrottlePolicyCountProperties(dataAmount, "Data Bandwidth");
+        }
+        validateThrottlePolicyCountProperties(unitTime, "Unit Time");
+    }
+
+    /**
+     * Validate the IP Address of Conditional Groups
+     *
+     * @param ipAddress IP Address
+     */
     public static void validateIPAddress(String ipAddress) throws APIManagementException {
         String ip4 = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}" +
                 "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";

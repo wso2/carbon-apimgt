@@ -179,7 +179,7 @@ public class ExportUtils {
                 apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
             }
 
-            addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider);
+            addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
             addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
 
@@ -232,6 +232,7 @@ public class ExportUtils {
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
 
         }
+        addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
         addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
         addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
                 preserveStatus, preserveDocs, preserveCredentials);
@@ -654,17 +655,17 @@ public class ExportUtils {
      * Retrieve the deployed gateway environments and store those in the archive directory.
      *
      * @param archivePath  File path to export the endpoint certificates
-     * @param apiDto       API DTO to be exported
+     * @param apiID        UUID of the API/ API Product
      * @param exportFormat Export format of file
      * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting gateway environments
      */
-    public static void addGatewayEnvironmentsToArchive(String archivePath, APIDTO apiDto,
+    public static void addGatewayEnvironmentsToArchive(String archivePath, String apiID,
                                                        ExportFormat exportFormat, APIProvider apiProvider)
             throws APIManagementException {
 
         try {
-            List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiDto.getId());
+            List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiID);
             JSONArray deploymentsArray = new JSONArray();
             for (APIRevisionDeployment deployment : deploymentsList) {
                 JSONObject deploymentObject = new JSONObject();
@@ -673,14 +674,16 @@ public class ExportUtils {
                         .put(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION, deployment.isDisplayOnDevportal());
                 deploymentsArray.put(deploymentObject);
             }
-            CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
-                    deploymentsArray.toString());
+            if (deploymentsArray.length() > 0) {
+                CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
+                        deploymentsArray.toString());
+            }
         } catch (APIImportExportException e) {
             throw new APIManagementException(
-                    "Error in converting deployment environment details to JSON object in API: " + apiDto.getName(), e);
+                    "Error in converting deployment environment details to JSON object in API: " + apiID, e);
         } catch (IOException e) {
             throw new APIManagementException(
-                    "Error while saving deployment environment details for API: " + apiDto.getName() + " as YAML", e);
+                    "Error while saving deployment environment details for API: " + apiID + " as YAML", e);
         }
     }
 

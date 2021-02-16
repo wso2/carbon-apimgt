@@ -291,7 +291,7 @@ class Details extends Component {
                     )}
                 >
                     {rootIconVisible && (
-                        <Link to='/applications' className={classes.leftLInkMain}>
+                        <Link to='/applications' className={classes.leftLInkMain} aria-label='All applications'>
                             <CustomIcon width={rootIconSize} height={rootIconSize} icon='applications' />
                             {rootIconTextVisible && (
                                 <Typography className={classes.leftLInkMainText}>

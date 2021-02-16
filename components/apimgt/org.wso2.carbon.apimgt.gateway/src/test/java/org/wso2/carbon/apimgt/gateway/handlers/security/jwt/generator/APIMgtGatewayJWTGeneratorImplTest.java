@@ -24,13 +24,12 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 
 @RunWith(PowerMockRunner.class)
