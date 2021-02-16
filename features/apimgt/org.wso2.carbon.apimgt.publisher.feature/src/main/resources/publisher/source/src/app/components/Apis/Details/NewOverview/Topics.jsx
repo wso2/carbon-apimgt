@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -85,8 +84,7 @@ class Topics extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            paths: null,
-            topics: []
+            topics: [],
         };
         this.restApi = new Api();
     }
@@ -96,12 +94,12 @@ class Topics extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
-        const { id, operations } = api;
+        const { operations } = api;
 
-        let topics = operations.map((op) => {
+        const topics = operations.map((op) => {
             return {
                 name: op.target,
-                type: op.verb.toUpperCase()
+                type: op.verb.toUpperCase(),
             };
         });
         this.setState({ topics });

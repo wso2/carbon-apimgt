@@ -65,7 +65,7 @@ const APICreateStreamingAPI = (props) => {
     const protocolKeys = {
         WebSocket: 'WS',
         SSE: 'SSE',
-        WebSub: 'WEBSUB'
+        WebSub: 'WEBSUB',
     };
 
     /**
@@ -83,9 +83,8 @@ const APICreateStreamingAPI = (props) => {
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'protocol':
-                const key = protocolKeys[value];
-                setHideEndpoint(key === protocolKeys.WebSub);
-                return { ...currentState, [action]: key, };
+                setHideEndpoint(protocolKeys[value] === protocolKeys.WebSub);
+                return { ...currentState, [action]: protocolKeys[value] };
             default:
                 return currentState;
         }
@@ -134,7 +133,7 @@ const APICreateStreamingAPI = (props) => {
 
         if (endpoint) {
             apiData.endpointConfig = {
-                endpoint_type: 'http',
+                endpoint_type: protocol === 'WS' ? 'ws' : 'http',
                 sandbox_endpoints: {
                     url: endpoint,
                 },
@@ -147,7 +146,7 @@ const APICreateStreamingAPI = (props) => {
         apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
 
         const newAPI = new API(apiData);
-        const promisedCreatedAPI = newAPI
+        newAPI
             .saveStreamingAPI()
             .then((api) => {
                 Alert.info('API created successfully');

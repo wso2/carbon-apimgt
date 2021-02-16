@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.transport.passthru.DefaultStreamInterceptor;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.collectors.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -42,7 +41,6 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConsta
 public class SseStreamInterceptor extends DefaultStreamInterceptor {
 
     private static final Log log = LogFactory.getLog(SseStreamInterceptor.class);
-    private GenericRequestDataCollector dataCollector = new GenericRequestDataCollector();
 
     @Override
     public boolean interceptTargetResponse(MessageContext axisCtx) {

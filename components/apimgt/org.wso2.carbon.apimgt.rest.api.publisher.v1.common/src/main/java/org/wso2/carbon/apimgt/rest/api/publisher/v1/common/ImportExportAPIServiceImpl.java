@@ -54,9 +54,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
                           boolean preserveStatus,
-                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials)
-            throws APIManagementException,
-            APIImportExportException {
+                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
+                          boolean exportLatestRevision)
+            throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
         APIDTO apiDtoToReturn;
@@ -64,7 +64,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api;
-        String revisionUUID;
+        String exportAPIUUID;
 
         // apiId == null means the path from the API Controller
         if (apiId == null) {
@@ -72,18 +72,28 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
             apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+            if (apiId == null) {
+                throw new APIImportExportException("API Id not found for the provided details");
+            }
         } else {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         }
 
-        if (revisionNum != null) {
-            revisionUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+        if (exportLatestRevision) {
+            //if a latest revision flag used, latest revision's api object is used
+            exportAPIUUID = apiProvider.getLatestRevisionUUID(apiId);
+        } else if (revisionNum != null) {
             //if a revision number provided, revision api object is used
-            api = apiProvider.getAPIbyUUID(revisionUUID, tenantDomain);
+            exportAPIUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
         } else {
-            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            //if a revision number is not provided, working copy's id is used
+            exportAPIUUID = apiId;
         }
+        //If an incorrect revision num provided or revision does not exists, working copy will be exported
+        exportAPIUUID = (exportAPIUUID == null) ? apiId : exportAPIUUID;
+        api = apiProvider.getAPIbyUUID(exportAPIUUID, tenantDomain);
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
+        apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
                 preserveDocs);
     }

@@ -117,6 +117,7 @@ public class API implements Serializable {
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
 
     private Map<String, String> wsUriMapping;
 
@@ -954,6 +955,14 @@ public class API implements Serializable {
 
     public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
         this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
     }
 
     public Map<String, String> getWsUriMapping() {

@@ -327,7 +327,7 @@ class APIThumb extends Component {
                             className={classes.thumbRightBy}
                             label='SSE'
                             color='primary'
-                            style={{width: '100%'}}
+                            style={{ width: '100%' }}
                         />
                     )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />

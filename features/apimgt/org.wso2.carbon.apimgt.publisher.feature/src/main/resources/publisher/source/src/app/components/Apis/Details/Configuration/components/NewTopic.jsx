@@ -135,18 +135,22 @@ const styles = (theme) => ({
  */
 function Topics(props) {
     function configReducer(currentState, configAction) {
-        const { action, value, } = configAction;
-        switch(action) {
+        const { action, value } = configAction;
+        switch (action) {
             case 'name':
             case 'isSubscribe':
             case 'isPublish':
+                // eslint-disable-next-line no-param-reassign
                 currentState[action] = value;
+                break;
+            default:
                 break;
         }
         return currentState;
     }
 
     const { classes, handleAddTopic, handleCancelAddTopic } = props;
+    // eslint-disable-next-line no-unused-vars
     const { api, updateAPI } = useContext(APIContext);
     const [topic, inputsDispatcher] = useReducer(configReducer, {
         name: '',
@@ -156,7 +160,7 @@ function Topics(props) {
 
     function handleOnChange(event) {
         const { name: action, value } = event;
-        inputsDispatcher({ action, value, });
+        inputsDispatcher({ action, value });
     }
 
     return (
@@ -183,12 +187,6 @@ function Topics(props) {
                         )}
                         helperText='Provide a name for the topic'
                         name='name'
-                        InputProps={{
-                            id: 'itest-id-apitopic-createtopic-name',
-                            onBlur: ({ target: { value } }) => {
-                                // TODO: validate
-                            },
-                        }}
                         margin='normal'
                         variant='outlined'
                         onChange={(e) => handleOnChange({

@@ -59,7 +59,6 @@ const APICreateMenu = (props) => {
         soapApiIcon,
         // eslint-disable-next-line no-unused-vars
         streamingApiIcon,
-        websocketApiIcon,
     } = theme.custom.landingPageIcons;
     const classes = useStyles();
     const { handleDeploySample, deploying } = props;

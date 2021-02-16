@@ -446,7 +446,7 @@ public class RestApiCommonUtil {
             throws APIManagementException {
         return apiProvider.getAsyncAPIDefinition(api.getId());
     }
-  
+
     public static String getValidateTenantDomain(String xWSO2Tenant) {
 
         String tenantDomain = getLoggedInUserTenantDomain();
@@ -461,4 +461,5 @@ public class RestApiCommonUtil {
         }
 
     }
+
 }

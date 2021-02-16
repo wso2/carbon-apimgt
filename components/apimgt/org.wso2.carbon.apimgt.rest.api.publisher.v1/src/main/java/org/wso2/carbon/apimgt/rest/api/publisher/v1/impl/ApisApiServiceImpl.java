@@ -3531,8 +3531,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return
      */
     @Override public Response exportAPI(String apiId, String name, String version, String revisionNum,
-                                        String providerName,
-            String format, Boolean preserveStatus, MessageContext messageContext) {
+                                        String providerName, String format, Boolean preserveStatus,
+                                        Boolean exportLatestRevision, MessageContext messageContext) {
 
         //If not specified status is preserved by default
         preserveStatus = preserveStatus == null || preserveStatus;
@@ -3544,7 +3544,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             File file = importExportAPI.exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus,
-                    exportFormat, true, true);
+                    exportFormat, true, true, exportLatestRevision);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
@@ -3997,28 +3997,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Retrieve available revisions of an API from the identifier info provided.
-     *
-     * @param name              API Name
-     * @param version           API version
-     * @param provider          provider
-     * @param query             query for filtering based on deployed or not
-     * @param messageContext    message context object
-     * @return response containing list of API revisions
-     */
-    @Override
-    public Response getAPIRevisionsWithAPIName(String name, String version, String provider, String query,
-                                               MessageContext messageContext) throws APIManagementException {
-
-        if (provider == null) {
-            provider = RestApiCommonUtil.getLoggedInUsername();
-        }
-        APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-        String apiUuid = APIUtil.getUUIDFromIdentifier(apiIdentifier);
-        return getAPIRevisions(apiUuid, query, messageContext);
-    }
-
-    /**
      * Create a new API revision
      *
      * @param apiId             UUID of the API
@@ -4103,9 +4081,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response deployAPIRevision(String apiId, String revisionId, String revisionNum,
+                                      List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId == null && revisionNum != null) {
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
+        }
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
@@ -4151,16 +4136,28 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response undeployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response undeployAPIRevision(String apiId, String revisionId, String revisionNum, Boolean allEnvironments,
+                                        List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId == null && revisionNum != null) {
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
+        }
+
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-        for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
-            APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-            apiRevisionDeployment.setRevisionUUID(revisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
-            apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
-            apiRevisionDeployments.add(apiRevisionDeployment);
+        if (allEnvironments) {
+            apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
+        } else {
+            for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
+                APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                apiRevisionDeployment.setRevisionUUID(revisionId);
+                apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
+                apiRevisionDeployments.add(apiRevisionDeployment);
+            }
         }
         apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -4181,9 +4178,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return response with 200 status code
      */
     @Override
-    public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext)
+    public Response restoreAPIRevision(String apiId, String revisionId, String revisionNum,
+                                       MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        if (revisionId == null && revisionNum != null) {
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+            if (revisionId == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
+            }
+        }
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         apiProvider.restoreAPIRevision(apiId, revisionId, tenantDomain);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider);

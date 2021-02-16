@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {Component, lazy} from 'react';
+import React, { Component, lazy } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
@@ -40,14 +40,14 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTopic'
+import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTopic';
 
-import $RefParser from "@apidevtools/json-schema-ref-parser";
+import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { parse } from '@asyncapi/parser';
-import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
 
 const styles = (theme) => ({
@@ -144,22 +144,20 @@ const styles = (theme) => ({
         textOverflow: 'ellipsis',
     },
 });
- /**
+
+/**
   * API Topics page
   */
 class Topics extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
-            schema: {},
             tabValue: 0,
             asyncAPI: null,
+            // eslint-disable-next-line react/no-unused-state
             definition: this.getAsyncAPIDefinition(),
-            resolvedDefinition: null,
             topics: this.loadTopics(this.getSortedOperations()),
             showAddTopic: false,
-            isSaving: false,
         };
 
         this.updateOperations = this.updateOperations.bind(this);
@@ -179,22 +177,72 @@ class Topics extends Component {
         this.renderSchemaForTopic = this.renderSchemaForTopic.bind(this);
     }
 
+    handleCancelSave() {
+        this.setState({ topics: this.loadTopics(this.getSortedOperations()) });
+    }
+
+    handleAddTopic(topic) {
+        const modes = [];
+        if (topic.isPublish) {
+            modes.push('publish');
+        }
+        if (topic.isSubscribe) {
+            modes.push('subscribe');
+        }
+
+        // eslint-disable-next-line react/no-access-state-in-setstate
+        const topicsCopy = [...this.state.topics];
+        modes.forEach((mode) => {
+            topicsCopy.push({
+                name: topic.name,
+                mode,
+                description: '',
+                scopes: [],
+                payload: {
+                    type: 'object',
+                    properties: [],
+                },
+            });
+        });
+        this.setState({ topics: topicsCopy, showAddTopic: false });
+    }
+
+    handleDeleteTopic(i) {
+        // eslint-disable-next-line react/no-access-state-in-setstate
+        const topicsCopy = [...this.state.topics];
+        topicsCopy.splice(i, 1);
+        this.setState({ topics: topicsCopy });
+    }
+
+    handleAddProperty(i) {
+        // eslint-disable-next-line react/no-access-state-in-setstate
+        const topicsCopy = [...this.state.topics];
+        topicsCopy[i].payload.properties.push({
+            name: '',
+            type: '',
+            advanced: '',
+            description: '',
+            editable: true,
+            new: true,
+        });
+        this.setState({ topics: topicsCopy });
+    }
+
     getAsyncAPIDefinition() {
         const result = this.props.api.getAsyncAPIDefinition();
         result.then(async (response) => {
-            $RefParser.dereference(response.body, (err, schema) => {
+            $RefParser.dereference(response.body, (err) => {
                 if (err) {
                     console.error(err);
-                }
-                else {
+                } else {
                     this.setState({
-                        resolvedDefinition: schema,
-                        definition: response.body
+                        // eslint-disable-next-line react/no-unused-state
+                        definition: response.body,
                     });
                 }
-            })
+            });
             const doc = await parse(response.body);
-            this.setState({asyncAPI: doc}, this.loadTopicMetaData);
+            this.setState({ asyncAPI: doc }, this.loadTopicMetaData);
         });
     }
 
@@ -221,244 +269,169 @@ class Topics extends Component {
         });
     }
 
-    componentDidMount() {
-
-    }
-
     loadTopicMetaData() {
-        const {asyncAPI, topics} = this.state;
-        console.log(asyncAPI);
-        topics.map((topic) => {
-            asyncAPI.channelNames().map((name) => {
-                let channel = asyncAPI.channel(name)
+        const { asyncAPI, topics } = this.state;
+        topics.forEach((topic) => {
+            asyncAPI.channelNames().forEach((name) => {
+                const channel = asyncAPI.channel(name);
                 if (topic.name === name) {
-                    if (channel.hasPublish() && topic.mode === "PUBLISH") {
+                    if (channel.hasPublish() && topic.mode === 'PUBLISH') {
                         let pubMessage = null;
                         if (!channel.publish().hasMultipleMessages()) {
-                            pubMessage = channel.publish().message()
-                            topic.description = pubMessage.uid()
-                            for (let i in pubMessage.payload().properties()) {
+                            pubMessage = channel.publish().message();
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = pubMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in pubMessage.payload().properties()) {
                                 topic.payload.properties.push({
                                     name: i,
                                     type: pubMessage.payload().properties()[i].type(),
                                     advanced: '',
                                     description: '',
                                     editable: false,
-                                    new: false
-                                })
-                                if (pubMessage.payload().properties()[i].type() === "object") {
-                                    for (let j in pubMessage.payload().properties()[i].properties()) {
+                                    new: false,
+                                });
+                                if (pubMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in pubMessage.payload().properties()[i].properties()) {
                                         topic.payload.properties.push({
-                                            name: i + " / " + j,
+                                            name: i + ' / ' + j,
                                             type: pubMessage.payload().properties()[i].properties()[j].type(),
                                             advanced: '',
                                             description: '',
                                             editable: false,
-                                            new: false
-                                        })
+                                            new: false,
+                                        });
                                     }
                                 }
                             }
                         } else {
-                            console.log("pub")
-                            console.log(channel.publish().messages()[0])
-                            pubMessage = channel.publish().messages()[0]
-                            topic.description = pubMessage.uid()
-                            for (let i in pubMessage.payload().properties()) {
+                            // eslint-disable-next-line prefer-destructuring
+                            pubMessage = channel.publish().messages()[0];
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = pubMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in pubMessage.payload().properties()) {
                                 topic.payload.properties.push({
                                     name: i,
                                     type: pubMessage.payload().properties()[i].type(),
                                     advanced: '',
                                     description: '',
                                     editable: false,
-                                    new: false
-                                })
-                                if (pubMessage.payload().properties()[i].type() === "object") {
-                                    for (let j in pubMessage.payload().properties()[i].properties()) {
+                                    new: false,
+                                });
+                                if (pubMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in pubMessage.payload().properties()[i].properties()) {
                                         topic.payload.properties.push({
-                                            name: i + " / " + j,
+                                            name: i + ' / ' + j,
                                             type: pubMessage.payload().properties()[i].properties()[j].type(),
                                             advanced: '',
                                             description: '',
                                             editable: false,
-                                            new: false
-                                        })
+                                            new: false,
+                                        });
                                     }
                                 }
                             }
                         }
                     }
-                    if (channel.hasSubscribe() && topic.mode === "SUBSCRIBE") {
+                    if (channel.hasSubscribe() && topic.mode === 'SUBSCRIBE') {
                         let subMessage = null;
                         if (!channel.subscribe().hasMultipleMessages()) {
-                            subMessage = channel.subscribe().message()
-                            topic.description = subMessage.uid()
-                            for (let i in subMessage.payload().properties()) {
+                            subMessage = channel.subscribe().message();
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = subMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in subMessage.payload().properties()) {
                                 topic.payload.properties.push({
                                     name: i,
                                     type: subMessage.payload().properties()[i].type(),
                                     advanced: '',
                                     description: '',
                                     editable: false,
-                                    new: false
-                                })
-                                if (subMessage.payload().properties()[i].type() === "object") {
-                                    for (let j in subMessage.payload().properties()[i].properties()) {
+                                    new: false,
+                                });
+                                if (subMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in subMessage.payload().properties()[i].properties()) {
                                         topic.payload.properties.push({
-                                            name: i + " / " + j,
+                                            name: i + ' / ' + j,
                                             type: subMessage.payload().properties()[i].properties()[j].type(),
                                             advanced: '',
                                             description: '',
                                             editable: false,
-                                            new: false
-                                        })
+                                            new: false,
+                                        });
                                     }
                                 }
                             }
                         } else {
-                            console.log("sub")
-                            console.log(channel.subscribe().messages()[0])
-                            subMessage = channel.subscribe().messages()[0]
-                            topic.description = subMessage.uid()
-                            for (let i in subMessage.payload().properties()) {
+                            // eslint-disable-next-line prefer-destructuring
+                            subMessage = channel.subscribe().messages()[0];
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = subMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in subMessage.payload().properties()) {
                                 topic.payload.properties.push({
                                     name: i,
                                     type: subMessage.payload().properties()[i].type(),
                                     advanced: '',
                                     description: '',
                                     editable: false,
-                                    new: false
-                                })
-                                if (subMessage.payload().properties()[i].type() === "object") {
-                                    for (let j in subMessage.payload().properties()[i].properties()) {
+                                    new: false,
+                                });
+                                if (subMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in subMessage.payload().properties()[i].properties()) {
                                         topic.payload.properties.push({
-                                            name: i + " / " + j,
+                                            name: i + ' / ' + j,
                                             type: subMessage.payload().properties()[i].properties()[j].type(),
                                             advanced: '',
                                             description: '',
                                             editable: false,
-                                            new: false
-                                        })
+                                            new: false,
+                                        });
                                     }
                                 }
                             }
                         }
                     }
                 }
-            })
-        })
+            });
+        });
     }
 
     extractProperties(payloadSchema) {
-        payloadSchema = payloadSchema || JSON.stringify({ properties: [] });
-        let obj = JSON.parse(payloadSchema);
+        const obj = JSON.parse(payloadSchema || JSON.stringify({ properties: [] }));
         return obj.properties || [];
     }
 
     updateOperations() {
-        this.setState({ isSaving: true });
-        const operations = this.state.topics.map(topic => {
+        const operations = this.state.topics.map((topic) => {
             return {
                 id: '',
                 target: topic.name,
                 verb: topic.mode,
                 authType: 'Application & Application User',
-                throttlingPolicy: "Unlimited",
+                throttlingPolicy: 'Unlimited',
                 amznResourceName: null,
                 amznResourceTimeout: null,
                 scopes: [],
                 usedProductIds: [],
                 payloadSchema: JSON.stringify({
-                    properties: topic.payload.properties
+                    properties: topic.payload.properties,
                 }),
                 uriMapping: topic.uriMapping,
             };
         });
-        this.props.updateAPI({ operations }).finally(() => this.setState({ isSaving: false }));
-    }
-
-    handleCancelSave() {
-        this.setState({ topics: this.loadTopics(this.getSortedOperations()) });
+        this.props.updateAPI({ operations });
     }
 
     buildCallbackURL(topic) {
         const { api } = this.props;
-            return `https://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
-                + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
-    }
-
-    handleAddTopic(topic) {
-        const modes = [];
-        if (topic.isPublish) {
-            modes.push('publish');
-        }
-        if (topic.isSubscribe) {
-            modes.push('subscribe');
-        }
-
-        const topics = [...this.state.topics];
-        modes.forEach((mode) => {
-            topics.push({
-                name: topic.name,
-                mode,
-                description: '',
-                scopes: [],
-                payload: {
-                    type: 'object',
-                    properties: [],
-                },
-            });
-        });
-        this.setState({ topics, showAddTopic: false });
-    }
-
-    handleDeleteTopic(i) {
-        let topics = [...this.state.topics];
-        topics.splice(i, 1);
-        this.setState({ topics });
-    }
-
-    handleAddProperty(i) {
-        let topics = [...this.state.topics];
-        topics[i].payload.properties.push({
-            name: '',
-            type: '',
-            advanced: '',
-            description: '',
-            editable: true,
-            new: true
-        });
-        this.setState({ topics });
-    }
-
-    handleSaveProperty(i, pi) {
-        let topics = [...this.state.topics];
-        topics[i].payload.properties[pi].editable = false;
-        topics[i].payload.properties[pi].new = false;
-        this.setState({ topics });
-    }
-
-    handleCancelSaveProperty(i, pi) {
-        let topics = [...this.state.topics];
-        if (!!topics[i].payload.properties[pi].new) {
-            topics[i].payload.properties.splice(pi, 1);
-            this.setState({ topics });
-        } else {
-            topics[i].payload.properties.splice(pi, 1);
-            // TODO: Restore the previous values
-        }
-    }
-
-    handleEditProperty(i, pi) {
-        let topics = [...this.state.topics];
-        topics[i].payload.properties[pi].editable = true;
-        this.setState({ topics });
-    }
-
-    handleDeleteProperty(i, pi) {
-        let topics = [...this.state.topics];
-        topics[i].payload.properties.splice(pi, 1);
-        this.setState({ topics });
+        return `https://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
+            + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
     }
 
     renderProperty(property, i, pi) {
@@ -479,9 +452,9 @@ class Topics extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                    {/*<Typography>
+                    {/* <Typography>
                         {property.advanced}
-                    </Typography>*/}
+                    </Typography> */}
                 </Grid>
                 <Grid item xs={2} align='right'>
                     <IconButton
@@ -535,15 +508,10 @@ class Topics extends Component {
                         value={property.name}
                         helperText='Provide a name for the property'
                         name='prop-description'
-                        InputProps={{
-                            id: 'itest-id-apitopic-createtopic-description',
-                            onBlur: ({ target: { value } }) => {
-                                // TODO: validate
-                            },
-                        }}
                         margin='normal'
                         variant='outlined'
                         onChange={(e) => {
+                            // eslint-disable-next-line react/no-access-state-in-setstate
                             const topics = [...this.state.topics];
                             topics[i].payload.properties[pi].name = e.target.value;
                             this.setState({ topics });
@@ -566,15 +534,10 @@ class Topics extends Component {
                         value={property.type}
                         helperText='Provide a type for the property'
                         name='prop-description'
-                        InputProps={{
-                            id: 'itest-id-apitopic-createtopic-description',
-                            onBlur: ({ target: { value } }) => {
-                                // TODO: validate
-                            },
-                        }}
                         margin='normal'
                         variant='outlined'
                         onChange={(e) => {
+                            // eslint-disable-next-line react/no-access-state-in-setstate
                             const topics = [...this.state.topics];
                             topics[i].payload.properties[pi].type = e.target.value;
                             this.setState({ topics });
@@ -582,7 +545,7 @@ class Topics extends Component {
                     />
                 </Grid>
                 <Grid item xs={6}>
-                    {/*<TextField
+                    {/* <TextField
                         autoFocus
                         fullWidth
                         id='topic-description'
@@ -610,7 +573,7 @@ class Topics extends Component {
                             topics[i].payload.properties[pi].advanced = e.target.value;
                             this.setState({ topics });
                         }}
-                    />*/}
+                    /> */}
                 </Grid>
                 <Grid item xs={2} align='right'>
                     <IconButton
@@ -642,15 +605,10 @@ class Topics extends Component {
                         value={property.description}
                         helperText='Provide a description for the property'
                         name='prop-description'
-                        InputProps={{
-                            id: 'itest-id-apitopic-createtopic-description',
-                            onBlur: ({ target: { value } }) => {
-                                // TODO: validate
-                            },
-                        }}
                         margin='normal'
                         variant='outlined'
                         onChange={(e) => {
+                            // eslint-disable-next-line react/no-access-state-in-setstate
                             const topics = [...this.state.topics];
                             topics[i].payload.properties[pi].description = e.target.value;
                             this.setState({ topics });
@@ -665,31 +623,33 @@ class Topics extends Component {
     }
 
     renderSchemaForTopic(topic) {
-        const {asyncAPI} = this.state;
-        let schema = {}
-        asyncAPI.channelNames().map((name) => {
-            let channel = asyncAPI.channel(name)
+        const { asyncAPI } = this.state;
+        let schema = {};
+        asyncAPI.channelNames().forEach((name) => {
+            const channel = asyncAPI.channel(name);
             if (name === topic.name) {
-                if (topic.mode === "SUBSCRIBE") {
-                    if (channel.hasSubscribe()){
-                        if (!channel.subscribe().hasMultipleMessages()){
+                if (topic.mode === 'SUBSCRIBE') {
+                    if (channel.hasSubscribe()) {
+                        if (!channel.subscribe().hasMultipleMessages()) {
                             if (channel.subscribe().message() !== null) {
                                 schema = channel.subscribe().message().payload();
                             }
                         } else {
+                            // eslint-disable-next-line no-lonely-if
                             if (channel.subscribe().messages()[0] !== null) {
                                 schema = channel.subscribe().messages()[0].payload();
                             }
                         }
                     }
                 }
-                if (topic.mode === "PUBLISH") {
-                    if (channel.hasPublish()){
-                        if (!channel.publish().hasMultipleMessages()){
+                if (topic.mode === 'PUBLISH') {
+                    if (channel.hasPublish()) {
+                        if (!channel.publish().hasMultipleMessages()) {
                             if (channel.publish().message() !== null) {
                                 schema = channel.publish().message().payload();
                             }
                         } else {
+                            // eslint-disable-next-line no-lonely-if
                             if (channel.publish().messages()[0] !== null) {
                                 schema = channel.publish().messages()[0].payload();
                             }
@@ -697,13 +657,13 @@ class Topics extends Component {
                     }
                 }
             }
-        })
+        });
         return JSON.stringify(schema, null, '\t');
     }
 
     renderTopics() {
         const { classes, api } = this.props;
-        const { topics, tabValue, definition } = this.state;
+        const { topics, tabValue } = this.state;
         return (
             <div className={classes.root}>
                 {topics.map((topic, i) => {
@@ -781,9 +741,10 @@ class Topics extends Component {
                                                 margin='normal'
                                                 variant='outlined'
                                                 onChange={(e) => {
-                                                    const topics = [...this.state.topics];
-                                                    topics[i].uriMapping = e.target.value;
-                                                    this.setState({ topics });
+                                                    // eslint-disable-next-line react/no-access-state-in-setstate
+                                                    const topicsCopy = [...this.state.topics];
+                                                    topicsCopy[i].uriMapping = e.target.value;
+                                                    this.setState({ topics: topicsCopy });
                                                 }}
                                             />
                                         </Grid>
@@ -804,16 +765,11 @@ class Topics extends Component {
                                             value={topic.description}
                                             helperText='Provide a description for the topic'
                                             name='description'
-                                            InputProps={{
-                                                id: 'itest-id-apitopic-createtopic-description',
-                                                onBlur: ({ target: { value } }) => {
-                                                    // TODO: validate
-                                                },
-                                            }}
                                             onChange={(e) => {
-                                                const topics = [...this.state.topics];
-                                                topics[i].description = e.target.value;
-                                                this.setState({ topics });
+                                                // eslint-disable-next-line react/no-access-state-in-setstate
+                                                const topicsCopy = [...this.state.topics];
+                                                topicsCopy[i].description = e.target.value;
+                                                this.setState({ topics: topicsCopy });
                                             }}
                                             margin='normal'
                                             variant='outlined'
@@ -824,74 +780,76 @@ class Topics extends Component {
                                             Payload
                                         </Typography>
                                     </Grid>
-                                    <Grid item style={{paddingBottom: "2%"}}>
+                                    <Grid item style={{ paddingBottom: '2%' }}>
                                         <Tabs
-                                            indicatorColor="primary"
-                                            textColor="primary"
+                                            indicatorColor='primary'
+                                            textColor='primary'
                                             value={tabValue}
-                                            onChange={(event, value) => {this.setState({tabValue: value})}}
+                                            onChange={(event, value) => this.setState({ tabValue: value })}
                                         >
-                                            <Tab label="Properties"/>
-                                            <Tab label="Schema"/>
+                                            <Tab label='Properties' />
+                                            <Tab label='Schema' />
                                         </Tabs>
                                     </Grid>
-                                    {tabValue === 0 ?
-                                        <Grid item style={{ paddingLeft: 0 }}>
-                                            <Grid container direction='column'>
-                                                <Grid container direction='row'>
-                                                    <Grid item xs={2}>
-                                                        <Typography style={{ fontWeight: 'bold' }}>
-                                                            Name
-                                                        </Typography>
+                                    {
+                                        tabValue === 0 ? (
+                                            <Grid item style={{ paddingLeft: 0 }}>
+                                                <Grid container direction='column'>
+                                                    <Grid container direction='row'>
+                                                        <Grid item xs={2}>
+                                                            <Typography style={{ fontWeight: 'bold' }}>
+                                                                Name
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={2}>
+                                                            <Typography style={{ fontWeight: 'bold' }}>
+                                                                Type
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs={6}>
+                                                            {/* <Typography style={{ fontWeight: 'bold' }}>
+                                                                Advanced
+                                                            </Typography> */}
+                                                        </Grid>
+                                                        <Grid item xs={2} align='right'>
+                                                            <Button
+                                                                color='primary'
+                                                                variant='contained'
+                                                                onClick={() => this.handleAddProperty(i)}
+                                                            >
+                                                                Add New Property
+                                                            </Button>
+                                                        </Grid>
                                                     </Grid>
-                                                    <Grid item xs={2}>
-                                                        <Typography style={{ fontWeight: 'bold' }}>
-                                                            Type
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        {/*<Typography style={{ fontWeight: 'bold' }}>
-                                                            Advanced
-                                                        </Typography>*/}
-                                                    </Grid>
-                                                    <Grid item xs={2} align='right'>
-                                                        <Button
-                                                            color='primary'
-                                                            variant='contained'
-                                                            onClick={() => this.handleAddProperty(i)}
-                                                        >
-                                                            Add New Property
-                                                        </Button>
-                                                    </Grid>
+                                                    {
+                                                        topic.payload.properties.map((property, pi) => {
+                                                            return (property && !!property.editable)
+                                                                ? this.renderEditableProperty(property, i, pi)
+                                                                : this.renderProperty(property, i, pi);
+                                                        })
+                                                    }
                                                 </Grid>
-                                                {
-                                                    topic.payload.properties.map((property, pi) => {
-                                                        return (property && !!property.editable)
-                                                            ? this.renderEditableProperty(property, i, pi)
-                                                            : this.renderProperty(property, i, pi);
-                                                    })
-                                                }
                                             </Grid>
-                                        </Grid>
-                                    :
-                                        <Grid item style={{ paddingLeft: 0 }}>
-                                            <Grid container direction='column'>
-                                                <MonacoEditor
-                                                    //value={JSON.stringify(this.state.definition, null, '\t')}
-                                                    value={this.renderSchemaForTopic(topic)}
-                                                    language="json"
-                                                    width='100%'
-                                                    height='500px'
-                                                    theme='vs-dark'
-                                                    options={{
-                                                        selectOnLineNumbers: true,
-                                                        readOnly: true,
-                                                        smoothScrolling: true,
-                                                        wordWrap: 'on',
-                                                    }}
-                                                />
+                                        ) : (
+                                            <Grid item style={{ paddingLeft: 0 }}>
+                                                <Grid container direction='column'>
+                                                    <MonacoEditor
+                                                        // value={JSON.stringify(this.state.definition, null, '\t')}
+                                                        value={this.renderSchemaForTopic(topic)}
+                                                        language='json'
+                                                        width='100%'
+                                                        height='500px'
+                                                        theme='vs-dark'
+                                                        options={{
+                                                            selectOnLineNumbers: true,
+                                                            readOnly: true,
+                                                            smoothScrolling: true,
+                                                            wordWrap: 'on',
+                                                        }}
+                                                    />
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
+                                        )
                                     }
                                 </Grid>
                             </AccordionDetails>
@@ -972,8 +930,8 @@ class Topics extends Component {
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Typography component='p' align='left'>
-                                            API needs to have at least one topic. Channels (topics) that will allow client
-                                            applications to publish or subscribe to messages (events).
+                                            API needs to have at least one topic. Channels (topics) that will allow
+                                            client applications to publish or subscribe to messages (events).
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
@@ -1008,8 +966,8 @@ class Topics extends Component {
 Topics.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
-        operations: PropTypes.array,
-        scopes: PropTypes.array,
+        operations: PropTypes.arrayOf(PropTypes.shape({})),
+        scopes: PropTypes.arrayOf(PropTypes.shape({})),
         updateOperations: PropTypes.func,
         policies: PropTypes.func,
         id: PropTypes.string,

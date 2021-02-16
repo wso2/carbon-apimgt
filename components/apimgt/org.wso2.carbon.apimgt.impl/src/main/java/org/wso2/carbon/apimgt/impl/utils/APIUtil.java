@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -224,8 +224,8 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
-import org.wso2.carbon.apimgt.gateway.common.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.JWTSignatureAlg;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -10385,6 +10385,30 @@ public final class APIUtil {
             return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         }
         return alias;
+    }
+
+    public static String getApiKeyGeneratorImpl() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String keyGeneratorClassName = config.getFirstProperty(APIConstants.API_STORE_API_KEY_GENERATOR_IMPL);
+        if (keyGeneratorClassName == null) {
+            log.warn("The configurations related to Api Key Generator Impl class in APIStore " +
+                    "is missing in api-manager.xml. Hence returning the default value.");
+            return APIConstants.DEFAULT_API_KEY_GENERATOR_IMPL;
+        }
+        return keyGeneratorClassName;
+    }
+
+    public static String getApiKeySignKeyStoreName() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String apiKeySignKeyStoreName = config.getFirstProperty(APIConstants.API_STORE_API_KEY_SIGN_KEY_STORE);
+        if (apiKeySignKeyStoreName == null) {
+            log.warn("The configurations related to APIKey sign keystore in APIStore " +
+                    "is missing in api-manager.xml. Hence returning the default value.");
+            return APIConstants.DEFAULT_API_KEY_SIGN_KEY_STORE;
+        }
+        return apiKeySignKeyStoreName;
     }
 
     /**
