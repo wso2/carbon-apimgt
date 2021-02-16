@@ -107,15 +107,15 @@ public class Utils {
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
         Set<String> supportedMimes = new HashSet<String>(Arrays.asList("application/x-www-form-urlencoded",
-                "multipart/form-data",
-                "text/html",
-                "application/xml",
-                "text/xml",
-                "application/soap+xml",
-                "text/plain",
-                "application/json",
-                "application/json/badgerfish",
-                "text/javascript"));
+                                                                       "multipart/form-data",
+                                                                       "text/html",
+                                                                       "application/xml",
+                                                                       "text/xml",
+                                                                       "application/soap+xml",
+                                                                       "text/plain",
+                                                                       "application/json",
+                                                                       "application/json/badgerfish",
+                                                                       "text/javascript"));
 
         // If an Accept header has been provided and is supported by the Gateway
         if(!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)){
@@ -125,7 +125,7 @@ public class Utils {
             // from _auth_failure_handler_.xml file
             if (messageContext.getProperty("error_message_type") != null) {
                 axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                        messageContext.getProperty("error_message_type"));
+                                    messageContext.getProperty("error_message_type"));
             }
         }
     }
@@ -249,7 +249,7 @@ public class Utils {
         if(VersionStrategyFactory.TYPE_URL.equals(versionStrategy)){
             // most used strategy. server:port/context/version/resource
             requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
-        }else{
+         }else{
             // default version. assume there is no version is used
             requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
         }
@@ -532,7 +532,7 @@ public class Utils {
     }
 
     private static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext,
-                                                                    String propertyPathKey) {
+            String propertyPathKey) {
         Set<String> keys = messageContext.getPropertyKeySet();
         String properties = (String) messageContext.getProperty(propertyPathKey);
         if (StringUtils.isBlank(properties)) {
