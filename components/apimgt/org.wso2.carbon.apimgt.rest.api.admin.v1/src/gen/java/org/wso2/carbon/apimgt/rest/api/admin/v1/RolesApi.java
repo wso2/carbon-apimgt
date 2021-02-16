@@ -47,7 +47,8 @@ RolesApiService delegate = new RolesApiServiceImpl();
     }, tags={ "Roles" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested role name exists.", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response validateSystemRole(@ApiParam(value = "The Base 64 URL encoded role name with domain. If the given role is in PRIMARY user-store, role ID should be derived as Base64URLEncode(role-name). If the given role is in secondary user-store, role ID should be derived as Base64URLEncode({user-store-name}/{role-name}). ",required=true) @PathParam("roleId") String roleId) throws APIManagementException{
         return delegate.validateSystemRole(roleId, securityContext);
     }
